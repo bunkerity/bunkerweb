@@ -25,8 +25,8 @@
 
     === "Linux"
 
-        !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
-            If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+        !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
+            If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
             === "MySQL/MariaDB"
 
@@ -416,8 +416,8 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
         === "Linux"
 
-            !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
-                If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+            !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
+                If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
                 === "MySQL/MariaDB"
 

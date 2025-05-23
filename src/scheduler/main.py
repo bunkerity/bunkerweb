@@ -380,7 +380,7 @@ def generate_caches():
             LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
 
     if job_path.is_dir():
-        for resource_path in job_path.rglob("*"):
+        for resource_path in list(job_path.rglob("*")):
             if resource_path.as_posix().startswith(tuple(ignored_dirs)):
                 continue
 
@@ -705,7 +705,7 @@ if __name__ == "__main__":
             custom_configs = []
             db_configs = SCHEDULER.db.get_custom_configs()
             changes = False
-            for file in CUSTOM_CONFIGS_PATH.rglob("*.conf"):
+            for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
                 if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
                     LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
 

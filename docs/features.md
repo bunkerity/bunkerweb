@@ -716,7 +716,7 @@ Attackers often generate "suspicious" HTTP status codes when probing for or expl
 2. When a visitor receives a "bad" HTTP status code (like 400, 401, 403, 404, etc.), the counter for that IP address is incremented.
 3. If an IP address exceeds the configured threshold of bad status codes within the specified time period, the IP is automatically banned.
 4. Banned IPs can be blocked either at the service level (just for the specific site) or globally (across all sites), depending on your configuration.
-5. Bans automatically expire after the configured ban duration.
+5. Bans automatically expire after the configured ban duration, or remain permanent if configured with `-1`.
 
 !!! success "Key benefits"
 
@@ -724,7 +724,7 @@ Attackers often generate "suspicious" HTTP status codes when probing for or expl
       2. **Customizable Rules:** Fine-tune what constitutes "bad behavior" based on your specific needs.
       3. **Resource Conservation:** Prevents malicious actors from consuming server resources with repeated invalid requests.
       4. **Flexible Scope:** Choose whether bans should apply just to the current service or globally across all services.
-      5. **Temporary Bans:** All bans automatically expire after the configured duration, preventing permanent lockouts.
+      5. **Ban Duration Control:** Set temporary bans that automatically expire after the configured duration, or permanent bans that remain until manually removed.
 
 ### How to Use
 
@@ -741,14 +741,14 @@ Follow these steps to configure and use the Bad Behavior feature:
 
 ### Configuration Settings
 
-| Setting                     | Default                       | Context   | Multiple | Description                                                                                                                          |
-| --------------------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | no       | **Enable Bad Behavior:** Set to `yes` to enable the bad behavior detection and banning feature.                                      |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | no       | **Bad Status Codes:** List of HTTP status codes that will be counted as "bad" behavior when returned to a client.                    |
-| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Threshold:** The number of "bad" status codes an IP can generate within the counting period before being banned.                   |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Count Period:** The time window (in seconds) during which bad status codes are counted toward the threshold.                       |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Ban Duration:** How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | multisite | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                  |
+| Setting                     | Default                       | Context   | Multiple | Description                                                                                                                                                                            |
+| --------------------------- | ----------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | no       | **Enable Bad Behavior:** Set to `yes` to enable the bad behavior detection and banning feature.                                                                                        |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | no       | **Bad Status Codes:** List of HTTP status codes that will be counted as "bad" behavior when returned to a client.                                                                      |
+| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Threshold:** The number of "bad" status codes an IP can generate within the counting period before being banned.                                                                     |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Count Period:** The time window (in seconds) during which bad status codes are counted toward the threshold.                                                                         |
+| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Ban Duration:** How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). Set to `-1` for permanent bans that never expire. |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | multisite | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                                                                    |
 
 !!! warning "False Positives"
     Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.
@@ -795,6 +795,19 @@ Follow these steps to configure and use the Bad Behavior feature:
     BAD_BEHAVIOR_COUNT_TIME: "30"
     BAD_BEHAVIOR_BAN_TIME: "3600"  # 1 hour
     BAD_BEHAVIOR_BAN_SCOPE: "service"
+    ```
+
+=== "Permanent Ban Configuration"
+
+    For scenarios where you want detected attackers permanently banned until manually unbanned:
+
+    ```yaml
+    USE_BAD_BEHAVIOR: "yes"
+    BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"
+    BAD_BEHAVIOR_THRESHOLD: "10"
+    BAD_BEHAVIOR_COUNT_TIME: "60"
+    BAD_BEHAVIOR_BAN_TIME: "-1"  # Permanent ban (never expires)
+    BAD_BEHAVIOR_BAN_SCOPE: "global" # Ban across all services
     ```
 
 ## Blacklist
@@ -1126,7 +1139,7 @@ cat /var/cache/bunkerweb/bunkernet/instance.id
 
 **Step #3: Enroll your instance using the Panel**
 
-Once you have your BunkerNet ID and CrowdSec Console enroll key, [order the free product "BunkerNet / CrowdSec" on the Panel](https://panel.bunkerweb.io/order/bunkernet/11?utm_campaign=self&utm_source=doc). You may be prompted to create an account if you haven’t already.
+Once you have your BunkerNet ID and CrowdSec Console enroll key, [order the free product "BunkerNet / CrowdSec" on the Panel](https://panel.bunkerweb.io/store/bunkernet?utm_campaign=self&utm_source=doc). You may be prompted to create an account if you haven’t already.
 
 You can now select the "BunkerNet / CrowdSec" service and fill out the form by pasting your BunkerNet ID and CrowdSec Console enroll key:
 
@@ -1694,6 +1707,12 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     ```shell
     sudo systemctl reload bunkerweb
     ```
+
+=== "All-in-one"
+
+    The BunkerWeb All-In-One (AIO) Docker image comes with CrowdSec fully integrated. You don't need to set up a separate CrowdSec instance or manually configure acquisition files for BunkerWeb logs when using the internal CrowdSec agent.
+
+    Refer to the [All-In-One (AIO) Image integration documentation](integrations.md#crowdsec-integration).
 
 ### Configuration Settings
 
@@ -2545,6 +2564,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
     - **classic**: General-purpose certificates with 90-day validity (default)
     - **tlsserver**: Optimized for TLS server authentication with 90-day validity and smaller payload
     - **shortlived**: Enhanced security with 7-day validity for automated environments
+    - **custom**: If your ACME server supports a different profile, set it using `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Profile Availability"
     Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile.
@@ -2563,6 +2583,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | no       | **Use Staging:** When set to `yes`, uses Let's Encrypt's staging environment for testing. Staging has higher rate limits but produces certificates that are not trusted by browsers. |
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                    |
 | `LETS_ENCRYPT_PROFILE`             | `classic`                | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates). |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`      |                          | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                 |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
@@ -2853,21 +2874,20 @@ STREAM support :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
 
-| Setting                                   | Default             | Context | Multiple | Description                                                                         |
-| ----------------------------------------- | ------------------- | ------- | -------- | ----------------------------------------------------------------------------------- |
-| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`               | global  | no       | Shared dict size (datastore for all healthchecks).                                  |
-| `LOADBALANCER_UPSTREAM_NAME`              |                     | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                                  |
-| `LOADBALANCER_UPSTREAM_SERVERS`           |                     | global  | yes      | List of servers/IPs in the server group.                                            |
-| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin`       | global  | yes      | Load balancing mode (round-robin or sticky).                                        |
-| `LOADBALANCER_UPSTREAM_STICKY`            | `srv_id expires=4h` | global  | yes      | Settings when load balancing mode is set to sticky (see sticky directive of nginx). |
-| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`                | global  | yes      | Dynamically resolve upstream hostnames.                                             |
-| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`           | global  | yes      | The healthcheck URL.                                                                |
-| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`              | global  | yes      | Healthcheck interval in milliseconds.                                               |
-| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`              | global  | yes      | Healthcheck timeout in milliseconds.                                                |
-| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`                 | global  | yes      | Number of failed healthchecks before marking the server as down.                    |
-| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`                 | global  | yes      | Number of successful healthchecks before marking the server as up.                  |
-| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`               | global  | yes      | HTTP status considered valid in healthchecks.                                       |
-| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`                | global  | yes      | Maximum number of concurrent healthchecks.                                          |
+| Setting                                   | Default       | Context | Multiple | Description                                                        |
+| ----------------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------ |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`         | global  | no       | Shared dict size (datastore for all healthchecks).                 |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | yes      | List of servers/IPs in the server group.                           |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | yes      | Load balancing mode (round-robin or sticky).                       |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | yes      | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global  | yes      | The healthcheck URL.                                               |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`        | global  | yes      | Healthcheck interval in milliseconds.                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`        | global  | yes      | Healthcheck timeout in milliseconds.                               |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`           | global  | yes      | Number of failed healthchecks before marking the server as down.   |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`           | global  | yes      | Number of successful healthchecks before marking the server as up. |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`         | global  | yes      | HTTP status considered valid in healthchecks.                      |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`          | global  | yes      | Maximum number of concurrent healthchecks.                         |
 
 ## Metrics
 
@@ -3671,7 +3691,7 @@ The Pro plugin bundles advanced features and enhancements for enterprise deploym
 
 Follow these steps to configure and use the Pro features:
 
-1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&utm_source=doc).
+1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
 2. **Configure your license key:** Use the `PRO_LICENSE_KEY` setting to configure your license.
 3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins are automatically downloaded and activated.
 4. **Monitor your Pro status:** Check the health indicators in the [web UI](web-ui.md) to confirm your Pro subscription status.

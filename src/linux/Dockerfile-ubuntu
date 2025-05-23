@@ -57,6 +57,11 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
+# Minify JS files
+RUN apt-get install -y nodejs npm && \
+    npm install -g uglify-js && \
+    for file in $(find ui/app/static -type f -name "*.js"); do uglifyjs "$file" --compress --mangle --verbose --output "$file"; done
+
 FROM ubuntu:noble@sha256:6015f66923d7afbc53558d7ccffd325d43b4e249f41a6e93eef074c9505d2233
 
 # Set default umask to prevent huge recursive chmod increasing the final image size

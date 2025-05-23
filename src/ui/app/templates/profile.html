@@ -1,4 +1,9 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/profile.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     {% set profile_url = url_for('profile') %}
     {% set total_pages = (total_sessions // 3) + (1 if total_sessions % 3 > 0 else 0) %}
@@ -710,4 +715,10 @@
         </script>
     {% endif %}
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/profile.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

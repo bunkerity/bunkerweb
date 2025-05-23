@@ -98,7 +98,7 @@ BunkerWeb offers an optional [user interface](web-ui.md) to manage your instance
 
 Don't want to self-host and manage your own BunkerWeb instance(s)? You might be interested in BunkerWeb Cloud, our fully managed SaaS offer for BunkerWeb.
 
-Try our [BunkerWeb Cloud beta offer for free](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_source=doc&utm_campaign=self) and get access to:
+Try our [BunkerWeb Cloud beta offer for free](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_source=doc&utm_campaign=self) and get access to:
 
 - Fully managed BunkerWeb instance hosted in our cloud
 - All BunkerWeb features, including PRO ones
@@ -244,7 +244,7 @@ In other words, the scheduler is the brain of BunkerWeb.
 
 BunkerWeb Cloud is the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of it like a BunkerWeb-as-a-Service!
 
-You will find more information about BunkerWeb Cloud beta [here](https://www.bunkerweb.io/cloud?utm_campaign=self&utm_source=docs) and you can apply for free [in the BunkerWeb panel](https://panel.bunkerweb.io/order/bunkerweb-cloud/14?utm_campaign=self&utm_source=docs).
+You will find more information about BunkerWeb Cloud beta [here](https://www.bunkerweb.io/cloud?utm_campaign=self&utm_source=docs) and you can apply for free [in the BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=docs).
 
 ## Linux
 
@@ -260,8 +260,8 @@ List of supported Linux distros:
 - Fedora 40
 - Fedora 41
 - Fedora 42
-- RHEL 8.9
-- RHEL 9.4
+- RHEL 8.10
+- RHEL 9.6
 
 You will find more information in the [Linux section](https://docs.bunkerweb.io/1.5.10/integrations/?utm_campaign=self&utm_source=github#linux) of the documentation.
 

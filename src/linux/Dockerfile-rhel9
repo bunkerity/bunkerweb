@@ -1,4 +1,4 @@
-FROM redhat/ubi9:9.5@sha256:f4ebd46d3ba96feb016d798009e1cc2404c3a4ebdac8b2479a2ac053e59f41b4 AS builder
+FROM redhat/ubi9:9.6@sha256:304b50df1ea4db9706d8a30f4bbf26f582936ebc80c7e075c72ff2af99292a54 AS builder
 
 ENV OS=rhel
 ENV NGINX_VERSION=1.26.3
@@ -65,7 +65,12 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM redhat/ubi9:9.5@sha256:f4ebd46d3ba96feb016d798009e1cc2404c3a4ebdac8b2479a2ac053e59f41b4
+# Minify JS files
+RUN dnf install -y nodejs npm && \
+    npm install -g uglify-js && \
+    for file in $(find ui/app/static -type f -name "*.js"); do uglifyjs "$file" --compress --mangle --verbose --output "$file"; done
+
+FROM redhat/ubi9:9.6@sha256:304b50df1ea4db9706d8a30f4bbf26f582936ebc80c7e075c72ff2af99292a54
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

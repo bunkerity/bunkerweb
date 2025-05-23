@@ -213,6 +213,15 @@
                                                                             <span class="bx bx-globe bx-xs"></span>
                                                                         </span>
                                                                     {% endif %}
+                                                                    {% if setting_value != template_data["settings"].get(setting, setting_default) %}
+                                                                        <span class="badge badge-center rounded-pill bg-warning-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              title="Value differs from template default"
+                                                                              data-i18n="tooltip.different_from_template">
+                                                                            <i class="bx bx-edit-alt bw-xs"></i>
+                                                                        </span>
+                                                                    {% endif %}
                                                                     <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                           data-bs-toggle="tooltip"
                                                                           data-bs-placement="top"

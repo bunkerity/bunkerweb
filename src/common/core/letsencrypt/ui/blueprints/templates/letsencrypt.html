@@ -1,12 +1,18 @@
 {% extends "dashboard.html" %}
-{% block content %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
     <link rel="stylesheet"
           href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
           nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block content %}
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         <textarea type="hidden"
                   id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['letsencrypt']|tojson }}</textarea>
+                  class="visually-hidden">{{ columns_preferences_defaults_letsencrypt|tojson }}</textarea>
         <textarea type="hidden" id="columns_preferences" class="visually-hidden">{}</textarea>
         <input type="hidden"
                id="csrf_token"
@@ -58,25 +64,32 @@
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="errorModalLabel">Error</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div id="errorModalContent"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
+{% endblock %}
+{% block scripts %}
     <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
-            defer
-            nonce="{{ script_nonce }}"></script>
-    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
-            defer
-            nonce="{{ script_nonce }}"></script>
-    <script src="{{ url_for('letsencrypt') }}/js/main.js"
-            defer
             nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('letsencrypt') }}/js/main.js"
+            nonce="{{ script_nonce }}"
+            defer
             type="module"></script>
 {% endblock %}

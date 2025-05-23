@@ -104,7 +104,7 @@ try:
 
     if not any(url for urls in services_greylist_urls.values() for url in urls.values()):
         LOGGER.warning("No greylist URL is configured, nothing to do...")
-        for file in JOB.job_path.rglob("*.list"):
+        for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
                 deleted, err = JOB.del_cache(file)

@@ -18,7 +18,7 @@ SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@endsWith /logs" \
-    "id:1007774,ctl:ruleRemoveById=953100,nolog,chain"
+    "id:1007774,ctl:ruleRemoveById=953100,ctl:ruleRemoveByTag=attack-disclosure,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
 

@@ -13,7 +13,7 @@ function applyTranslations() {
     const optionsAttr = element.attr("data-i18n-options");
     if (optionsAttr) {
       try {
-        options = JSON.parse(optionsAttr.replace(/'/g, '"'));
+        options = JSON.parse(optionsAttr);
       } catch (e) {
         console.error(
           `Error parsing data-i18n-options for key "${key}":`,
@@ -22,7 +22,11 @@ function applyTranslations() {
         );
       }
     }
-    const translation = i18next.t(key, options);
+    // Prevent i18next from escaping single quotes to HTML entities
+    const translation = i18next.t(key, {
+      ...options,
+      interpolation: { escapeValue: false },
+    });
     if (element.is("[placeholder]")) {
       element.attr("placeholder", translation);
     } else if (element.is("[title]")) {
@@ -81,10 +85,14 @@ const langEnglishNames = Object.fromEntries(
 function updateLanguageSelector(lang) {
   const alpha2 = getAlpha2(lang);
   const flagCode = flagCodeMap[alpha2] || flagCodeMap["en"] || "us";
-  const flagSrc = $("#current-lang-flag")
+  const $flagSelector = $("#current-lang-flag");
+  if (!$flagSelector.length) {
+    return;
+  }
+  const flagSrc = $flagSelector
     .attr("src")
     .replace(/\/[a-z]{2}\.svg$/, `/${flagCode}.svg`);
-  $("#current-lang-flag").attr("src", flagSrc);
+  $flagSelector.attr("src", flagSrc);
   $("#current-lang-text").text(
     langNames[alpha2] || langNames["en"] || "English",
   );
@@ -97,8 +105,8 @@ function updateLanguageSelector(lang) {
 // Function to save language preference to the server
 function saveLanguage(rootUrl, language) {
   // Don't send request if we're in setup mode or readonly
-  const isReadOnly = $("#is-read-only").val().trim() === "True";
-  if (isSetup || isReadOnly) {
+  const dbReadOnly = $("#db-read-only").val().trim() === "True";
+  if (isSetup || dbReadOnly) {
     return;
   }
 
@@ -151,53 +159,25 @@ const localesPath = isSetup
       .trim()
       .replace(/\/home$/, "/locales");
 
-i18next
-  .use(i18nextHttpBackend)
-  .use(i18nextBrowserLanguageDetector)
-  .init(
-    {
-      fallbackLng: "en",
-      debug: false,
-      ns: ["messages"],
-      defaultNS: "messages",
-      backend: {
-        loadPath: `${localesPath}/{{lng}}.json`,
-      },
-      detection: {
-        order: ["localStorage", "navigator", "htmlTag"],
-        lookupLocalStorage: "language",
-        caches: ["localStorage"],
-        convertDetectedLanguage: getAlpha2,
-      },
-      lng: savedLang || getAlpha2(i18next.language),
-      supportedLngs: supportedLngs,
-    },
-    function (err) {
-      if (err) return console.error("Error initializing i18next:", err);
+function loadPluginTranslations(lang) {
+  const path = window.BunkerWebExtraI18nPath;
+  if (!path) return Promise.resolve();
 
-      // Apply translation after i18next is initialized
-      applyTranslations();
-      updateLanguageSelector(i18next.language);
-      $("[name='language']").val(i18next.language);
-      $("#newsletter-locale").val(i18next.language);
-
-      i18next.on("languageChanged", function (lng) {
-        i18next.language = getAlpha2(lng);
-        applyTranslations();
-        updateLanguageSelector(lng);
-        $("#newsletter-locale").val(i18next.language);
-      });
-
-      // Handle language selection clicks
-      $(document).on("click", ".lang-option", function (e) {
-        e.preventDefault();
-        const lang = $(this).data("lang");
-        changeLanguage(lang);
-      });
-
-      window.i18nextReady = true;
-    },
-  );
+  const url = path.replace("{{lng}}", lang);
+  return fetch(url)
+    .then((resp) => (resp.ok ? resp.json() : null))
+    .then((extra) => {
+      if (extra) {
+        const ns = "messages";
+        const existing = i18next.getResourceBundle(lang, ns) || {};
+        const merged = { ...existing, ...extra };
+        i18next.addResourceBundle(lang, ns, merged, true, true);
+      }
+    })
+    .catch((err) => {
+      console.error("Error loading plugin translations:", err);
+    });
+}
 
 // Language switch helper
 function changeLanguage(lang) {
@@ -215,35 +195,6 @@ function changeLanguage(lang) {
   // Save language preference to server
   debouncedSaveLanguage(rootUrl, alpha2);
 }
-
-// Handle DataTables collection button translations
-$(document).on("click", ".buttons-collection", function () {
-  const collection = $(this)
-    .closest(".btn-group")
-    .find(".dt-button-collection");
-
-  collection.find("[data-i18n]").each(function () {
-    const element = $(this);
-    const key = element.attr("data-i18n");
-    let options = {};
-    const optionsAttr = element.attr("data-i18n-options");
-
-    if (optionsAttr) {
-      try {
-        options = JSON.parse(optionsAttr.replace(/'/g, '"'));
-      } catch (e) {
-        console.error(
-          `Error parsing data-i18n-options for key "${key}":`,
-          e,
-          optionsAttr,
-        );
-        return;
-      }
-    }
-
-    element.text(i18next.t(key, options));
-  });
-});
 
 // Helper to update DataTable language and translations for a given table
 function updateTableLanguageAndTranslations(table) {
@@ -297,47 +248,134 @@ function updateFilterTranslations() {
   );
 }
 
-// Handle all relevant DataTables events to ensure language is applied and translations are updated
-$(document).on(
-  ["draw.dt", "init.dt", "processing.dt"].join(" "),
-  function (e, settings) {
-    if (settings && settings.oInstance && window.configureI18n) {
-      const table = new $.fn.dataTable.Api(settings);
-      updateTableLanguageAndTranslations(table);
-    }
-    updateFilterTranslations();
-  },
-);
+$(document).ready(function () {
+  i18next
+    .use(i18nextHttpBackend)
+    .use(i18nextBrowserLanguageDetector)
+    .init(
+      {
+        fallbackLng: "en",
+        debug: false,
+        ns: ["messages"],
+        defaultNS: "messages",
+        backend: {
+          loadPath: `${localesPath}/{{lng}}.json`,
+        },
+        detection: {
+          order: ["localStorage", "navigator", "htmlTag"],
+          lookupLocalStorage: "language",
+          caches: ["localStorage"],
+          convertDetectedLanguage: getAlpha2,
+        },
+        lng: savedLang || getAlpha2(i18next.language),
+        supportedLngs: supportedLngs,
+      },
+      function (err) {
+        if (err) return console.error("Error initializing i18next:", err);
 
-$(document).on("click", ".toggle-filters", updateFilterTranslations);
+        loadPluginTranslations(i18next.language).then(function () {
+          applyTranslations();
+          updateLanguageSelector(i18next.language);
+          $("[name='language']").val(i18next.language);
+          $("#newsletter-locale").val(i18next.language);
+        });
 
-// Language selector search logic
-$(document).on("input", "#language-search", function () {
-  const searchValue = $(this).val().toLowerCase().trim();
-  let visibleItems = 0;
-  $("#language-dropdown-menu li.nav-item").each(function () {
-    const $item = $(this);
-    const langCode = $item.data("lang");
-    const englishName = langEnglishNames[langCode]
-      ? langEnglishNames[langCode].toLowerCase()
-      : "";
-    const localizedName = langNames[langCode]
-      ? langNames[langCode].toLowerCase()
-      : "";
-    const matches =
-      englishName.includes(searchValue) || localizedName.includes(searchValue);
-    $item.toggle(matches);
-    if (matches) visibleItems++;
+        i18next.on("languageChanged", function (lng) {
+          i18next.language = getAlpha2(lng);
+          loadPluginTranslations(i18next.language).then(function () {
+            applyTranslations();
+            updateLanguageSelector(lng);
+            $("#newsletter-locale").val(i18next.language);
+          });
+        });
+
+        // Handle language selection clicks
+        $(document).on("click", ".lang-option", function (e) {
+          e.preventDefault();
+          const lang = $(this).data("lang");
+          changeLanguage(lang);
+        });
+
+        window.i18nextReady = true;
+      },
+    );
+
+  // Handle DataTables collection button translations
+  $(document).on("click", ".buttons-collection", function () {
+    const collection = $(this)
+      .closest(".btn-group")
+      .find(".dt-button-collection");
+
+    collection.find("[data-i18n]").each(function () {
+      const element = $(this);
+      const key = element.attr("data-i18n");
+      let options = {};
+      const optionsAttr = element.attr("data-i18n-options");
+
+      if (optionsAttr) {
+        try {
+          options = JSON.parse(optionsAttr.replace(/'/g, '"'));
+        } catch (e) {
+          console.error(
+            `Error parsing data-i18n-options for key "${key}":`,
+            e,
+            optionsAttr,
+          );
+          return;
+        }
+      }
+
+      element.text(i18next.t(key, options));
+    });
   });
-  if (visibleItems === 0) {
-    if ($("#language-dropdown-menu .no-language-items").length === 0) {
-      $("#language-dropdown-menu").append(
-        `<li class="no-language-items dropdown-item text-muted">${i18next.t(
-          "status.no_item",
-        )}</li>`,
-      );
-    }
-  } else {
-    $("#language-dropdown-menu .no-language-items").remove();
-  }
+
+  // Handle all relevant DataTables events to ensure language is applied and translations are updated
+  $(document).on(
+    ["draw.dt", "init.dt", "processing.dt"].join(" "),
+    function (e, settings) {
+      if (settings && settings.oInstance && window.configureI18n) {
+        const table = new $.fn.dataTable.Api(settings);
+        updateTableLanguageAndTranslations(table);
+      }
+      updateFilterTranslations();
+    },
+  );
+
+  $(document).on("click", ".toggle-filters", updateFilterTranslations);
+
+  // Language selector search logic
+  $(document).on(
+    "input",
+    "#language-search",
+    throttle(function () {
+      const searchValue = $(this).val().toLowerCase().trim();
+      let visibleItems = 0;
+      $("#language-dropdown-menu li.nav-item").each(function () {
+        const $item = $(this);
+        const langCode = $item.data("lang");
+        const englishName = langEnglishNames[langCode]
+          ? langEnglishNames[langCode].toLowerCase()
+          : "";
+        const localizedName = langNames[langCode]
+          ? langNames[langCode].toLowerCase()
+          : "";
+        const matches =
+          englishName.includes(searchValue) ||
+          localizedName.includes(searchValue);
+        $item.toggle(matches);
+        if (matches) visibleItems++;
+      });
+      if (visibleItems === 0) {
+        if ($("#language-dropdown-menu .no-language-items").length === 0) {
+          $("#language-dropdown-menu").append(
+            `<li class="no-language-items dropdown-item text-muted">${i18next.t(
+              "status.no_item",
+            )}</li>`,
+          );
+        }
+      } else {
+        $("#language-dropdown-menu .no-language-items").remove();
+      }
+    }, 150),
+  );
 });

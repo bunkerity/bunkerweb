@@ -53,6 +53,11 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
+# Minify JS files
+RUN dnf install -y nodejs npm && \
+    npm install -g uglify-js && \
+    for file in $(find ui/app/static -type f -name "*.js"); do uglifyjs "$file" --compress --mangle --verbose --output "$file"; done
+
 FROM fedora:42@sha256:ee88ab8a5c8bf78687ddcecadf824767e845adc19d8cdedb56f48521eb162b43
 
 # Set default umask to prevent huge recursive chmod increasing the final image size

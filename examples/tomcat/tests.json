@@ -1,7 +1,7 @@
 {
   "name": "tomcat",
   "kinds": ["docker", "autoconf", "swarm"],
-  "timeout": 60,
+  "timeout": 90,
   "delay": 60,
   "tests": [
     {

@@ -452,7 +452,7 @@ class CLI(ApiCaller):
 
         return True, plugins_str
 
-    def custom(self, plugin_id: str, command: str, *args: str, debug: bool = False) -> Tuple[bool, str]:
+    def custom(self, plugin_id: str, command: str, debug: bool = False, extra_args: Optional[list] = None) -> Tuple[bool, str]:
         if not self.__db:
             return False, self.__format_error("This command can only be executed on the scheduler")
 
@@ -484,8 +484,8 @@ class CLI(ApiCaller):
             )
 
         cmd = [command_path.as_posix()]
-        if args:
-            cmd.extend(args)
+        if extra_args:
+            cmd.extend(extra_args)
 
         self.__logger.debug(f"Executing command {' '.join(cmd)}")
 

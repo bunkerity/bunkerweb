@@ -22,6 +22,29 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
 
 ## Basic setup
 
+=== "All-in-one"
+
+    To deploy the all-in-one container, run the following command:
+
+    ```shell
+    docker run -d \
+      --name bunkerweb-aio \
+      -v bw-storage:/data \
+      -p 80:8080/tcp \
+      -p 443:8443/tcp \
+      -p 443:8443/udp \
+      bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+    ```
+
+    By default, the container exposes:
+
+    * 8080/tcp for HTTP
+    * 8443/tcp for HTTPS
+    * 8443/udp for QUIC
+    * 7000/tcp for the web UI access without BunkerWeb in front (not recommended for production)
+
+    The All-In-One image comes with several built-in services, which can be controlled using environment variables. See the [All-In-One (AIO) Image section](integrations.md#all-in-one-aio-image) of the integrations page for more details.
+
 === "Linux"
 
     Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
@@ -653,6 +676,58 @@ You can now log in with the administrator account you created during the setup w
     </figure>
 
     If you wish to edit the service, you can click on the service name or the `📝 Edit` button.
+
+=== "All-in-one"
+
+    When using the All-in-One image, new services are configured by adding environment variables to the `docker run` command for the `bunkerweb-aio` container. If the container is already running, you must stop and remove it, then re-run it with the updated environment variables.
+
+    Suppose you want to protect an application `myapp` (running in another container and accessible as `http://myapp:8080` from BunkerWeb) and make it available at `www.example.com`. You would add or modify the following environment variables in your `docker run` command:
+
+    ```shell
+    # First, stop and remove the existing container if it's running:
+    # docker stop bunkerweb-aio
+    # docker rm bunkerweb-aio
+
+    # Then, re-run the bunkerweb-aio container with additional/updated environment variables:
+    docker run -d \
+      --name bunkerweb-aio \
+      -v bw-storage:/data \
+      -p 80:8080/tcp \
+      -p 443:8443/tcp \
+      -p 443:8443/udp \
+      # --- Add/modify these environment variables for your new service ---
+      -e MULTISITE=yes \
+      -e SERVER_NAME="www.example.com" \
+      -e "www.example.com_USE_REVERSE_PROXY=yes" \
+      -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
+      -e "www.example.com_REVERSE_PROXY_URL=/" \
+      # --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---
+      bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+    ```
+
+    Your application container (`myapp`) and the `bunkerweb-aio` container must be on the same Docker network for BunkerWeb to reach it using the hostname `myapp`.
+
+    **Network Setup Example:**
+    ```shell
+    # 1. Create a custom Docker network (if you haven't already):
+    docker network create my-app-network
+
+    # 2. Run your application container on this network:
+    docker run -d --name myapp --network my-app-network your-app-image
+
+    # 3. Add --network my-app-network to the bunkerweb-aio docker run command:
+    docker run -d \
+      --name bunkerweb-aio \
+      --network my-app-network \
+      -v bw-storage:/data \
+      -p 80:8080/tcp \
+      -p 443:8443/tcp \
+      -p 443:8443/udp \
+    #   ... (all other relevant environment variables as shown in the main example above) ...
+      bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+    ```
+
+    Make sure to replace `myapp` with the actual name or IP of your application container and `http://myapp:8080` with its correct address and port.
 
 === "Linux variables.env file"
 

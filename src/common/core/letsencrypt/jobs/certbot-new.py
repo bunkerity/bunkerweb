@@ -382,7 +382,7 @@ try:
                     break
 
             if not certificate_block:
-                domains_to_ask[first_server] = True
+                domains_to_ask[first_server] = 1
                 LOGGER.warning(f"[{original_first_server}] Certificate block for {first_server} not found, asking new certificate...")
                 continue
 
@@ -399,17 +399,20 @@ try:
 
             cert_domains_list = cert_domains.group("domains").strip().split()
             cert_domains_set = set(cert_domains_list)
+            desired_domains_set = set(domains) if isinstance(domains, (list, set)) else set(domains.split())
 
-            if cert_domains_set != domains:
-                domains_to_ask[first_server] = True
-                LOGGER.warning(f"[{original_first_server}] Domains for {first_server} are not the same as in the certificate, asking new certificate...")
+            if cert_domains_set != desired_domains_set:
+                domains_to_ask[first_server] = 2
+                LOGGER.warning(
+                    f"[{original_first_server}] Domains for {first_server} differ from desired set (existing: {sorted(cert_domains_set)}, desired: {sorted(desired_domains_set)}), asking new certificate..."
+                )
                 continue
 
             use_letsencrypt_staging = getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes"
             is_test_cert = "TEST_CERT" in cert_domains.group("expiry_date")
 
             if (is_test_cert and not use_letsencrypt_staging) or (not is_test_cert and use_letsencrypt_staging):
-                domains_to_ask[first_server] = True
+                domains_to_ask[first_server] = 2
                 LOGGER.warning(f"[{original_first_server}] Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
                 continue
 
@@ -418,7 +421,7 @@ try:
             renewal_file = DATA_PATH.joinpath("renewal", f"{first_server}.conf")
             if not renewal_file.is_file():
                 LOGGER.error(f"[{original_first_server}] Renewal file for {first_server} not found, asking new certificate...")
-                domains_to_ask[first_server] = True
+                domains_to_ask[first_server] = 1
                 continue
 
             current_provider = None
@@ -431,15 +434,15 @@ try:
 
             if letsencrypt_challenge == "dns":
                 if letsencrypt_provider and current_provider != letsencrypt_provider:
-                    domains_to_ask[first_server] = True
+                    domains_to_ask[first_server] = 2
                     LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
                     continue
             elif current_provider != "manual" and letsencrypt_challenge == "http":
-                domains_to_ask[first_server] = True
+                domains_to_ask[first_server] = 2
                 LOGGER.warning(f"[{original_first_server}] {first_server} is no longer using DNS challenge, asking new certificate...")
                 continue
 
-            domains_to_ask[first_server] = False
+            domains_to_ask[first_server] = 0
             LOGGER.info(f"[{original_first_server}] Certificates already exist for domain(s) {domains}, expiry date: {cert_domains.group('expiry_date')}")
 
     psl_lines = None
@@ -581,7 +584,6 @@ try:
                     psl_lines = load_public_suffix_list(JOB)
                 if psl_rules is None:
                     psl_rules = parse_psl(psl_lines)
-                    LOGGER.debug(psl_rules)
 
                 wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains(domains.split(" "))
 
@@ -657,8 +659,9 @@ try:
                 data["provider"],
                 credentials_path,
                 data["propagation"],
+                data["profile"],
                 data["staging"],
-                domains_to_ask[first_server],
+                domains_to_ask[first_server] == 2,
                 cmd_env=env.copy(),
             )
             != 0
@@ -681,6 +684,7 @@ try:
             group_parts = group.split("_")
             provider = group_parts[0]
             profile = group_parts[2]
+            base_domain = group_parts[3]
 
             email = data.pop("email")
             credentials_file = CACHE_PATH.joinpath(f"{group}.{provider_classes[provider].get_file_type() if provider in provider_classes else 'txt'}")
@@ -697,22 +701,26 @@ try:
                     f"using {profile!r} profile..."
                 )
 
+                domains_split = domains.split(",")
+
                 # Add wildcard certificate names to active set
-                for domain in domains.split(","):
+                for domain in domains_split:
                     # Extract the base domain from the wildcard domain
                     base_domain = WILDCARD_GENERATOR.get_base_domain(domain)
                     active_cert_names.add(base_domain)
 
                 if (
                     certbot_new(
-                        "dns" if provider in provider_classes else "http",
+                        "dns",
                         domains,
                         email,
                         provider,
                         credentials_file,
-                        staging=staging,
-                        profile=profile,
-                        cmd_env=env.copy(),
+                        "default",
+                        profile,
+                        staging,
+                        domains_to_ask[base_domain] == 2,
+                        env.copy(),
                     )
                     != 0
                 ):
@@ -722,18 +730,20 @@ try:
                     status = 1 if status == 0 else status
                     LOGGER.info(f"Certificate generation succeeded for domain(s): {domains}")
 
-                generated_domains.update(domains.split(","))
+                generated_domains.update(domains_split)
     else:
         LOGGER.info("No wildcard domains found, skipping wildcard certificate(s) generation...")
 
-    # * Clearing all missing credentials files
-    for file in CACHE_PATH.rglob("*"):
-        if "etc" in file.parts or not file.is_file() or file.suffix not in (".ini", ".env", ".json"):
-            continue
-        # ? If the file is not in the wildcard groups, remove it
-        if file not in credential_paths:
-            LOGGER.debug(f"Removing old credentials file {file}")
-            JOB.del_cache(file.name, job_name="certbot-renew", service_id=file.parent.name if file.parent.name != "letsencrypt" else "")
+    if CACHE_PATH.is_dir():
+        # * Clearing all missing credentials files
+        for ext in ("*.ini", "*.env", "*.json"):
+            for file in list(CACHE_PATH.rglob(ext)):
+                if "etc" in file.parts or not file.is_file():
+                    continue
+                # ? If the file is not in the wildcard groups, remove it
+                if file not in credential_paths:
+                    LOGGER.debug(f"Removing old credentials file {file}")
+                    JOB.del_cache(file.name, job_name="certbot-renew", service_id=file.parent.name if file.parent.name != "letsencrypt" else "")
 
     # * Clearing all no longer needed certificates
     if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":

@@ -44,6 +44,7 @@ from app.utils import (
     get_multiples,
     handle_stop,
     human_readable_number,
+    is_plugin_active,
     stop,
 )
 from app.lang_config import SUPPORTED_LANGUAGES
@@ -176,6 +177,7 @@ with app.app_context():
 
     # Session management
     app.config["SESSION_TYPE"] = "cachelib"
+    app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_ID_LENGTH"] = 64
     app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, cache_dir=LIB_DIR.joinpath("ui_sessions_cache"))
     sess = Session()
@@ -215,6 +217,7 @@ with app.app_context():
         get_plugins_settings=BW_CONFIG.get_plugins_settings,
         human_readable_number=human_readable_number,
         url_for=custom_url_for,
+        is_plugin_active=is_plugin_active,
     )
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
@@ -228,15 +231,18 @@ with app.app_context():
 
 @app.context_processor
 def inject_variables():
+    app_env = app.config["ENV"].copy()
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
         try:
             resp = hook()
             if resp:
-                app.config["ENV"] = {**app.config["ENV"], **resp}
+                app_env = {**app_env, **resp}
         except Exception:
             LOGGER.exception("Error in context_processor hook")
 
-    return app.config["ENV"]
+    app.config["ENV"] = app_env
+
+    return app_env
 
 
 @login_manager.user_loader
@@ -417,6 +423,9 @@ def refresh_app_context():
                     hook_function = getattr(hook_module, hook_type)
                     app.config.setdefault(hook_info["key"], []).append(hook_function)
                     LOGGER.info(f"{hook_info['log_prefix']} hook '{hook_type}' from {py_file} loaded")
+
+            if hook_dir in sys_path:
+                sys_path.remove(hook_dir)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
 
@@ -436,6 +445,7 @@ def refresh_app_context():
         active_plugin_paths.add(bp_dir.parent.parent.parent)
         blueprint_dir = str(bp_dir)
         is_pro = bp_dir in (p.parent for p in pro_bp_dirs)
+        is_external = bp_dir in (p.parent for p in external_bp_dirs)
 
         # Add directory to sys_path
         if blueprint_dir not in sys_path:
@@ -476,7 +486,7 @@ def refresh_app_context():
                         plugin_blueprints.add(bp_name)
 
                         # Set plugin priority and path
-                        bp.plugin_priority = 2 if is_pro else 1
+                        bp.plugin_priority = 2 if is_pro else (1 if is_external else 0)
                         bp.import_path = blueprint_dir
                         app.plugin_sys_paths[bp_name] = blueprint_dir
 
@@ -732,12 +742,14 @@ def before_request():
             plugins=BW_CONFIG.get_plugins(),
             flash_messages=session.get("flash_messages", []),
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
+            db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
             theme=current_user.theme if current_user.is_authenticated else "dark",
             language=current_user.language if current_user.is_authenticated else "en",
             supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],
+            config=DB.get_config(global_only=True, methods=True),
         )
 
         if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
@@ -966,6 +978,14 @@ def set_columns_preferences():
         LOGGER.error(f"Couldn't update the user {current_user.get_id()}'s columns preferences: {ret}")
         return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
 
+    return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
+
+
+@app.route("/clear_notifications", methods=["POST"])
+@login_required
+def clear_notifications():
+    session["flash_messages"] = []
+    session.modified = True
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 

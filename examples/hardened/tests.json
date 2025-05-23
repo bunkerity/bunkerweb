@@ -1,7 +1,7 @@
 {
   "name": "hardened",
   "kinds": ["docker"],
-  "timeout": 60,
+  "timeout": 90,
   "tests": [
     {
       "type": "string",

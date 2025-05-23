@@ -199,7 +199,7 @@ try:
 
         # Install plugins
         try:
-            for plugin_path in temp_dir.rglob("**/plugin.json"):
+            for plugin_path in list(temp_dir.rglob("**/plugin.json")):
                 try:
                     if install_plugin(plugin_path.parent, db):
                         plugin_nbr += 1

@@ -49,6 +49,16 @@ Here is how you can access the logs, depending on your integration :
     docker-compose logs myautoconf
     ```
 
+=== "All-in-one"
+
+    !!! tip "Container name"
+        The default container name for the All-in-one image is `bunkerweb-aio`. If you've used a different name, please adjust the command accordingly.
+
+    You can use the `docker logs` command:
+    ```shell
+    docker logs bunkerweb-aio
+    ```
+
 === "Swarm"
 
     !!! warning "Deprecated"
@@ -124,6 +134,16 @@ You can manually unban an IP, which is useful when performing tests so that you 
     Here is the docker-compose equivalent (replace `myautoconf` with the name of the services declared in the docker-compose.yml file) :
     ```shell
     docker-compose exec myautoconf bwcli unban 1.2.3.4
+    ```
+
+=== "All-in-one"
+
+    !!! tip "Container name"
+        The default container name for the All-in-one image is `bunkerweb-aio`. If you've used a different name, please adjust the command accordingly.
+
+    You can use the `docker exec` command:
+    ```shell
+    docker exec bunkerweb-aio bwcli unban 1.2.3.4
     ```
 
 === "Swarm"
@@ -320,10 +340,24 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
         apk add sqlite
         ```
 
+    === "All-in-one"
+
+        Get a shell into your All-in-one container:
+
+        !!! note "Docker arguments"
+            - the `-u 0` option is to run the command as root (mandatory).
+            - the `-it` options are to run the command interactively (mandatory).
+            - `bunkerweb-aio` is the default container name; adjust if you used a custom name.
+
+        ```shell
+        docker exec -u 0 -it bunkerweb-aio bash
+        ```
+
     Access your database :
 
     !!! note "Database path"
         We assume that you are using the default database path. If you are using a custom path, you will need to adapt the command.
+        For All-in-one, we assume the database is `db.sqlite3` located in the persistent `/data` volume (`/data/db.sqlite3`).
 
     ```bash
     sqlite3 /var/lib/bunkerweb/db.sqlite3
@@ -371,6 +405,12 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
         ```
 
         Then enter the database user’s password and you should be able to access your database.
+
+    === "All-in-one"
+
+        The All-in-One image does not include a MariaDB/MySQL server. If you have configured the AIO to use an external MariaDB/MySQL database (by setting the `DATABASE_URI` environment variable), you should connect to that database directly using standard MySQL client tools.
+
+        The connection method would be similar to the "Linux" tab (if connecting from the host where AIO runs or another machine) or by running a MySQL client in a separate Docker container if preferred, targeting your external database's host and credentials.
 
 **Troubleshooting actions**
 

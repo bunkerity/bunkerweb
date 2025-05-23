@@ -1,12 +1,25 @@
 # Changelog
 
-## v1.6.2-rc2 - ????/??/??
+## v1.6.2-rc3 - ????/??/??
+
+- [BUGFIX] Refactor CLI command handling to support additional arguments
+- [DOCS] Update the documentation about the `all-in-one` image to include the new features and improvements, also move it to its own section
+- [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
+- [ALL-IN-ONE] Fully integrate Redis in the all-in-one image (activated by default)
+- [UI] Add clear notifications feature to both UI and backend for improved notification management
+- [UI] Improve plugin navigation by displaying plugins as a vertical list on the left side of the card, replacing the dropdown combobox
+- [UI] Display a small "enabled/disabled" icon next to each plugin name in the plugin sidebar and menu to indicate whether the plugin is active (e.g., show if Reverse Proxy is enabled)
+- [MISC] Refactor template rendering for improved performance and efficiency
+- [DEPS] Update ModSecurity-nginx version to v1.0.4
+
+## v1.6.2-rc2 - 2025/05/19
 
 - [BUGFIX] Fix draft services deletion when editing the global config in the web UI
 - [BUGFIX] Enhance the `Let's Encrypt` plugin's Cloudflare Provider with default values and validation for credentials to avoid having to set all of them all the time (`api_token` or `email` and `api_key`)
 - [BUGFIX] Remove settings form input sanitization as it was creating issues when saving settings in the web UI
 - [BUGFIX] Exclude the RFC2136 DNS provider from the base64 encoding validation for credential items in the `letsencrypt` plugin to prevent issues with the `secret` field being detected as base64 encoded
 - [BUGFIX] Avoid redirecting clients when they match an ignore list item in `antibot` plugin
+- [BUGFIX] Avoid always trying to regenerate a Let's Encrypt certificate that was using the staging production over and over at every restart
 - [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
 - [FEATURE] Add the possibility to declare custom certificates and keys data as plaintext as well as base64-encoded data in the `customcert` plugin using the `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings
 - [FEATURE] Add `IONOS` as a DNS provider in the `letsencrypt` plugin

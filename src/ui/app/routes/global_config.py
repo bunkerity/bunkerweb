@@ -103,4 +103,4 @@ def global_config_page():
 
     mode = request.args.get("mode", "advanced")
     search_type = request.args.get("type", "all")
-    return render_template("global_config.html", config=global_config, mode=mode, type=search_type)
+    return render_template("global_config.html", mode=mode, type=search_type)
