@@ -5,7 +5,7 @@ from os import getenv
 from re import compile as re_compile
 from time import sleep
 from traceback import format_exc
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from threading import Thread, Lock
 
 from kubernetes import client, config, watch
@@ -448,7 +448,7 @@ class IngressController(Controller):
                     self._logger.warning("Got exception, retrying in 10 seconds ...")
                     sleep(10)
 
-    def __get_loadbalancer_ip(self, name: str, namespace: str) -> str:
+    def __get_loadbalancer_ip(self, name: str, namespace: str) -> Optional[str]:
         try:
             if not name or not namespace:
                 self._logger.warning("Service name or namespace is empty, cannot retrieve LoadBalancer IP")
