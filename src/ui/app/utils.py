@@ -74,15 +74,15 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "8": True,
     },
     "reports": {
-        "3": True,
-        "4": False,
+        "4": True,
         "5": False,
         "6": False,
         "7": False,
-        "8": True,
+        "8": False,
         "9": True,
         "10": True,
         "11": True,
+        "12": True,
     },
     "services": {
         "3": True,

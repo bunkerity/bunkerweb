@@ -74,15 +74,50 @@
         -ms-flex: 1;
         flex-grow: 1;
       }
-      header {
-        margin-left: 1em;
+      .error-header {
+        display: flex;
+        flex-direction: column;
+        margin: 1em;
       }
-      header .error-code {
+      .request-info {
+        display: flex;
+        flex-wrap: wrap;
+        color: var(--color-text-secondary);
+        font-size: 0.6em;
+        min-width: 200px;
+        margin-top: 7px;
+        margin-left: calc(1% + 10px);
+      }
+      .request-info span + span::before {
+        content: "|";
+        margin: 0 0.5em;
+        color: var(--color-text-secondary);
+      }
+      .request-info code {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.1em 0.4em;
+        border-radius: 3px;
+      }
+      @media (max-width: 600px) {
+        .request-info {
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: flex-start;
+          gap: 0.5em;
+          margin-top: 0.5em;
+          min-width: auto;
+        }
+        .request-info span + span::before {
+          content: "";
+          margin: 0;
+        }
+      }
+      .error-code {
         font-size: 3.2em;
         font-weight: 400;
         margin: 0 0 0 10px;
       }
-      header .error-description {
+      .error-description {
         font-size: 1.4em;
         color: var(--color-text-secondary);
         margin: 0 0 0 10px;
@@ -309,13 +344,20 @@
         </defs>
       </svg>
       {-raw-}
-      <header>
-        <h1 class="error-code">{{ error_code }}</h1>
-        <p class="error-description">
-          <span>{{ error_title }}</span> (<span
-            >{{ error_type }}-side error</span
-          >)
-        </p>
+      <header class="error-header">
+        <div class="error-summary">
+          <h1 class="error-code">{{ error_code }}</h1>
+          <p class="error-description">
+            <span>{{ error_title }}</span>
+            (<span>{{ error_type }}-side error</span>)
+          </p>
+        </div>
+
+        <div class="request-info">
+          <span>Request ID: <code>{{ request_id }}</code></span>
+          <span><code>{{ client_ip }}</code></span>
+          <span><code>{{ request_time }}</code></span>
+        </div>
       </header>
       <div class="status">
         <div
