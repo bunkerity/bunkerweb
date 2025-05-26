@@ -4,7 +4,7 @@ from concurrent.futures import ProcessPoolExecutor
 from importlib import import_module
 from glob import glob
 from os import cpu_count, getenv
-from os.path import basename, join
+from os.path import basename, join, sep
 from pathlib import Path
 from random import choice
 from string import ascii_letters, digits
@@ -18,7 +18,7 @@ if deps_path not in sys_path:
 
 from logger import setup_logger  # type: ignore
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader
 
 # Configure logging
 logger = setup_logger("Templator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
@@ -63,6 +63,8 @@ class Templator:
         if not isinstance(config, dict):
             raise TypeError("config must be a dictionary")
 
+        self._jinja_cache_dir = Path(sep, "var", "cache", "bunkerweb", "jinja_cache")
+        self._jinja_cache_dir.mkdir(parents=True, exist_ok=True)
         self._templates = templates
         self._global_templates = {template.name for template in Path(self._templates).rglob("*.conf")}
         self._core = Path(core)
@@ -101,7 +103,9 @@ class Templator:
             lstrip_blocks=True,
             trim_blocks=True,
             keep_trailing_newline=True,
+            bytecode_cache=FileSystemBytecodeCache(directory=self._jinja_cache_dir.as_posix()),
             auto_reload=False,
+            cache_size=-1,
         )
 
     def _find_templates(self, contexts: List[str]) -> List[str]:
@@ -111,24 +115,31 @@ class Templator:
             contexts (List[str]): List of context names.
 
         Returns:
-            List[str]: List of template names.
+            List[str]: List of template names in the same order as contexts.
         """
         cache_key = frozenset(contexts)
         if cache_key in self._template_path_cache:
             return self._template_path_cache[cache_key]
 
-        templates = set()
+        templates = []
 
-        # Handle global context specially for better performance
-        if "global" in contexts:
-            templates.update(t for t in self.__all_templates if "/" not in t)
-            contexts = [c for c in contexts if c != "global"]
+        # Process contexts in order to maintain consistent template ordering
+        for context in contexts:
+            if context == "global":
+                # Handle global context specially for better performance
+                templates.extend(t for t in self.__all_templates if "/" not in t)
+            else:
+                # Process other contexts
+                templates.extend(t for t in self.__all_templates if t.startswith(f"{context}/"))
 
-        # Process remaining contexts
-        if contexts:
-            templates.update(t for t in self.__all_templates if any(t.startswith(f"{context}/") for context in contexts))
+        # Remove duplicates while preserving order
+        seen = set()
+        result = []
+        for template in templates:
+            if template not in seen:
+                seen.add(template)
+                result.append(template)
 
-        result = list(templates)
         self._template_path_cache[cache_key] = result
         return result
 
