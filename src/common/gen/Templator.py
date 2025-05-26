@@ -4,7 +4,7 @@ from concurrent.futures import ProcessPoolExecutor
 from importlib import import_module
 from glob import glob
 from os import cpu_count, getenv
-from os.path import basename, join, sep
+from os.path import basename, join
 from pathlib import Path
 from random import choice
 from string import ascii_letters, digits
@@ -18,7 +18,7 @@ if deps_path not in sys_path:
 
 from logger import setup_logger  # type: ignore
 
-from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 
 # Configure logging
 logger = setup_logger("Templator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
@@ -63,8 +63,6 @@ class Templator:
         if not isinstance(config, dict):
             raise TypeError("config must be a dictionary")
 
-        self._jinja_cache_dir = Path(sep, "var", "cache", "bunkerweb", "jinja_cache")
-        self._jinja_cache_dir.mkdir(parents=True, exist_ok=True)
         self._templates = templates
         self._global_templates = {template.name for template in Path(self._templates).rglob("*.conf")}
         self._core = Path(core)
@@ -103,9 +101,7 @@ class Templator:
             lstrip_blocks=True,
             trim_blocks=True,
             keep_trailing_newline=True,
-            bytecode_cache=FileSystemBytecodeCache(directory=self._jinja_cache_dir.as_posix()),
             auto_reload=False,
-            cache_size=-1,
         )
 
     def _find_templates(self, contexts: List[str]) -> List[str]:
