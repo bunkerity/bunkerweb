@@ -1752,6 +1752,27 @@ $(document).ready(() => {
     // Mark this navigation item as active
     $(this).addClass("active show").attr("aria-selected", "true");
 
+    // Smooth scroll the selected plugin into view in the sidebar only
+    const sidebarContainer = $(".step-navigation-list")[0];
+    const elementRect = this.getBoundingClientRect();
+    const containerRect = sidebarContainer.getBoundingClientRect();
+
+    if (
+      elementRect.top < containerRect.top ||
+      elementRect.bottom > containerRect.bottom
+    ) {
+      const scrollTop =
+        sidebarContainer.scrollTop +
+        (elementRect.top - containerRect.top) -
+        containerRect.height / 2 +
+        elementRect.height / 2;
+
+      sidebarContainer.scrollTo({
+        top: scrollTop,
+        behavior: "smooth",
+      });
+    }
+
     // Reference all plugin panes and the target pane
     const $allPanes = $("div[id^='navs-plugins-']");
     const $currentPane = $allPanes.filter(".show.active");
@@ -1814,6 +1835,27 @@ $(document).ready(() => {
       $targetPlugin.trigger("click");
       currentPlugin = hash.replace("#", "");
       window.location.hash = hash;
+
+      // Smooth scroll to the plugin in the sidebar only
+      const sidebarContainer = $(".step-navigation-list")[0];
+      const elementRect = $targetPlugin[0].getBoundingClientRect();
+      const containerRect = sidebarContainer.getBoundingClientRect();
+
+      if (
+        elementRect.top < containerRect.top ||
+        elementRect.bottom > containerRect.bottom
+      ) {
+        const scrollTop =
+          sidebarContainer.scrollTop +
+          (elementRect.top - containerRect.top) -
+          containerRect.height / 2 +
+          elementRect.height / 2;
+
+        sidebarContainer.scrollTo({
+          top: scrollTop,
+          behavior: "smooth",
+        });
+      }
     }
   }
 
