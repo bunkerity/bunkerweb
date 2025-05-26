@@ -8,6 +8,7 @@
     "version": "Versão: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Por favor, selecione uma data final personalizada.",
     "important": "Importante",
     "no_changes_detected": "Nenhuma alteração detectada.",
     "notice": "Aviso",
@@ -115,12 +116,17 @@
     "select_file": "Selecionar Arquivo",
     "select_page": "Selecionar Página",
     "service": "Serviço",
+    "set_1h": "Definir 1 Hora",
+    "set_24h": "Definir 24 Horas",
+    "set_1w": "Definir 1 Semana",
+    "set_permanent": "Definir Permanente",
     "setup": "Configurar",
     "show": "Mostrar",
     "stop": "Parar",
     "submit": "Enviar",
     "subscribe": "Inscrever-se",
     "unban": "Desbloquear",
+    "update_duration": "Atualizar Duração do Bloqueio",
     "update_key": "Atualizar Chave",
     "upload_photo": "Carregar Nova Foto",
     "wipe_other_sessions": "Limpar Outras Sessões"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "Falha ao buscar notícias:",
     "skipping_malformed_line": "Ignorando linha mal formada: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Hora",
+    "24_hours": "24 Horas",
+    "1_week": "1 Semana",
+    "permanent": "Permanente",
+    "custom": "Personalizado"
+  },
   "error": {
     "401": {
       "help": "Você deve estar logado para acessar este recurso.",
@@ -589,6 +602,7 @@
       "configuration_name": "Nome da Configuração",
       "confirm_password": "Confirmar Senha",
       "current_password": "Senha Atual",
+      "custom_end_date": "Data Final Personalizada",
       "custom_ssl_certificate": "Certificado SSL Personalizado",
       "custom_ssl_certificate_data": "Dados Certif. SSL Personalizado (Base64/PEM)",
       "custom_ssl_key": "Chave SSL Personalizada",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Itens Credenciais DNS Let's Encrypt",
       "lets_encrypt_profile": "Perfil Let's Encrypt",
       "license_key": "Chave de Licença",
+      "make_permanent": "Tornar Permanente",
       "name": "Nome",
+      "new_duration": "Nova Duração",
       "new_password": "Nova Senha",
       "optional": "(Opcional)",
       "password": "Senha",
@@ -696,7 +712,8 @@
       "reset_template_alert": "Tem certeza de que deseja redefinir as configurações do modelo atual e as configurações personalizadas?",
       "services_deletion_confirmation": "Tem certeza de que deseja excluir os serviços selecionados?",
       "unban_confirmation_alert": "Tem certeza de que deseja desbloquear o endereço IP selecionado?",
-      "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?"
+      "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?",
+      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:"
     },
     "button": {
       "reset_template_confirm": "Redefinir Configuração do Modelo"
@@ -720,7 +737,8 @@
       "job_history_count": "Últimas {{count}} execuções da Tarefa",
       "recovery_codes": "Códigos de Recuperação",
       "reset_template_config": "Redefinir Configuração do Modelo?",
-      "server_name_not_unique": "Nome do Servidor não é Único"
+      "server_name_not_unique": "Nome do Servidor não é Único",
+      "update_duration": "Atualizar Duração do Bloqueio"
     }
   },
   "mode": {
@@ -893,6 +911,7 @@
     "country": "País",
     "created": "Criado",
     "data": "Dados",
+    "date": "Data",
     "empty": "Nenhum painel de pesquisa disponível",
     "end_date": "Data Final",
     "first_seen": "Visto pela Primeira Vez",
@@ -978,6 +997,7 @@
     "default_server": "servidor padrão",
     "down": "Inativo",
     "draft": "Rascunho",
+    "error_loading_bans": "Erro ao carregar bloqueios. Por favor, tente atualizar a página.",
     "failed": "Falhou",
     "loading": "Carregando...",
     "loading_bans": "Carregando bloqueios...",
@@ -1050,6 +1070,7 @@
       "checksum": "Checksum",
       "country": "País",
       "created": "Criado",
+      "current_time_left": "Tempo Restante Atual",
       "data": "Dados",
       "date": "Data",
       "description": "Descrição",

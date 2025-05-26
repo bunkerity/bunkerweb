@@ -8,6 +8,7 @@
     "version": "Version : {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Veuillez sélectionner une date de fin personnalisée.",
     "important": "Important",
     "no_changes_detected": "Aucun changement détecté.",
     "notice": "Avis",
@@ -115,12 +116,17 @@
     "select_file": "Choisir Fichier",
     "select_page": "Choisir Page",
     "service": "Service",
+    "set_1h": "Définir 1 Heure",
+    "set_24h": "Définir 24 Heures",
+    "set_1w": "Définir 1 Semaine",
+    "set_permanent": "Définir Permanent",
     "setup": "Configuration",
     "show": "Afficher",
     "stop": "Arrêter",
     "submit": "Envoyer",
     "subscribe": "S'abonner",
     "unban": "Débannir",
+    "update_duration": "Mettre à Jour la Durée du Bannissement",
     "update_key": "Mettre à Jour la Clé",
     "upload_photo": "Télécharger Nouvelle Photo",
     "wipe_other_sessions": "Effacer les Autres Sessions"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "Échec de la récupération des actualités :",
     "skipping_malformed_line": "Ligne malformée ignorée : {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Heure",
+    "24_hours": "24 Heures",
+    "1_week": "1 Semaine",
+    "permanent": "Permanent",
+    "custom": "Personnalisé"
+  },
   "error": {
     "401": {
       "help": "Vous devez être connecté pour accéder à cette ressource.",
@@ -589,6 +602,7 @@
       "configuration_name": "Nom de la Configuration",
       "confirm_password": "Confirmer le Mot de Passe",
       "current_password": "Mot de Passe Actuel",
+      "custom_end_date": "Date de Fin Personnalisée",
       "custom_ssl_certificate": "Certificat SSL Personnalisé",
       "custom_ssl_certificate_data": "Données Certificat SSL Perso (Base64/PEM)",
       "custom_ssl_key": "Clé SSL Personnalisée",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Identifiants DNS Let's Encrypt",
       "lets_encrypt_profile": "Profil Let's Encrypt",
       "license_key": "Clé de Licence",
+      "make_permanent": "Rendre Permanent",
       "name": "Nom",
+      "new_duration": "Nouvelle Durée",
       "new_password": "Nouveau Mot de Passe",
       "optional": "(Optionnel)",
       "password": "Mot de Passe",
@@ -696,7 +712,8 @@
       "reset_template_alert": "Êtes-vous sûr de vouloir réinitialiser les paramètres du modèle actuel et les configurations personnalisées ?",
       "services_deletion_confirmation": "Êtes-vous sûr de vouloir supprimer les services sélectionnés ?",
       "unban_confirmation_alert": "Êtes-vous sûr de vouloir débannir l'adresse IP sélectionnée ?",
-      "unban_confirmation_alert_plural": "Êtes-vous sûr de vouloir débannir les adresses IP sélectionnées ?"
+      "unban_confirmation_alert_plural": "Êtes-vous sûr de vouloir débannir les adresses IP sélectionnées ?",
+      "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :"
     },
     "button": {
       "reset_template_confirm": "Réinitialiser la Configuration du Modèle"
@@ -720,7 +737,8 @@
       "job_history_count": "{{count}} dernières exécutions de la Tâche",
       "recovery_codes": "Codes de Récupération",
       "reset_template_config": "Réinitialiser la Configuration du Modèle ?",
-      "server_name_not_unique": "Le Nom du Serveur n'est pas Unique"
+      "server_name_not_unique": "Le Nom du Serveur n'est pas Unique",
+      "update_duration": "Mettre à Jour la Durée du Bannissement"
     }
   },
   "mode": {
@@ -893,6 +911,7 @@
     "country": "Pays",
     "created": "Créé le",
     "data": "Données",
+    "date": "Date",
     "empty": "Aucun volet de recherche disponible",
     "end_date": "Date de Fin",
     "first_seen": "Vu la Première Fois",
@@ -978,6 +997,7 @@
     "default_server": "serveur par défaut",
     "down": "Inactif",
     "draft": "Brouillon",
+    "error_loading_bans": "Erreur lors du chargement des bannissements. Veuillez essayer de rafraîchir la page.",
     "failed": "Échoué",
     "loading": "Chargement...",
     "loading_bans": "Chargement des bannissements...",
@@ -1050,6 +1070,7 @@
       "checksum": "Checksum",
       "country": "Pays",
       "created": "Créé le",
+      "current_time_left": "Temps Restant Actuel",
       "data": "Données",
       "date": "Date",
       "description": "Description",

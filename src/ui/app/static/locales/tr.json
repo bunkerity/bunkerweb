@@ -8,6 +8,7 @@
     "version": "Versiyon: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Lütfen özel bir bitiş tarihi seçin.",
     "important": "Önemli",
     "no_changes_detected": "Değişiklik tespit edilmedi.",
     "notice": "Bildirim",
@@ -115,12 +116,17 @@
     "select_file": "Dosya Seç",
     "select_page": "Sayfa Seç",
     "service": "Servis",
+    "set_1h": "1 Saat Ayarla",
+    "set_24h": "24 Saat Ayarla",
+    "set_1w": "1 Hafta Ayarla",
+    "set_permanent": "Kalıcı Ayarla",
     "setup": "Kurulum",
     "show": "Göster",
     "stop": "Durdur",
     "submit": "Gönder",
     "subscribe": "Abone Ol",
     "unban": "Yasağı Kaldır",
+    "update_duration": "Yasaklama Süresini Güncelle",
     "update_key": "Anahtarı Güncelle",
     "upload_photo": "Yeni Fotoğraf Yükle",
     "wipe_other_sessions": "Diğer Oturumları Sonlandır"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "Haberler alınamadı:",
     "skipping_malformed_line": "Bozuk satır atlanıyor: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Saat",
+    "24_hours": "24 Saat",
+    "1_week": "1 Hafta",
+    "permanent": "Kalıcı",
+    "custom": "Özel"
+  },
   "error": {
     "401": {
       "help": "Bu kaynağa erişmek için giriş yapmalısınız.",
@@ -589,6 +602,7 @@
       "configuration_name": "Konfigürasyon Adı",
       "confirm_password": "Şifreyi Onayla",
       "current_password": "Mevcut Şifre",
+      "custom_end_date": "Özel Bitiş Tarihi",
       "custom_ssl_certificate": "Özel SSL Sertifikası",
       "custom_ssl_certificate_data": "Özel SSL Sertifikası Verisi (Base64/PEM)",
       "custom_ssl_key": "Özel SSL Anahtarı",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS Kimlik Bilgileri",
       "lets_encrypt_profile": "Let's Encrypt Profili",
       "license_key": "Lisans Anahtarı",
+      "make_permanent": "Kalıcı Yap",
       "name": "Ad",
+      "new_duration": "Yeni Süre",
       "new_password": "Yeni Şifre",
       "optional": "(Opsiyonel)",
       "password": "Şifre",
@@ -696,7 +712,8 @@
       "reset_template_alert": "Mevcut şablon ayarlarını ve özel yapılandırmaları sıfırlamak istediğinizden emin misiniz?",
       "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
-      "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?"
+      "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
+      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:"
     },
     "button": {
       "reset_template_confirm": "Şablon Yapılandırmasını Sıfırla"
@@ -720,7 +737,8 @@
       "job_history_count": "İşin Son {{count}} Çalıştırması",
       "recovery_codes": "Kurtarma Kodları",
       "reset_template_config": "Şablon Yapılandırması Sıfırlansın mı?",
-      "server_name_not_unique": "Sunucu Adı Benzersiz Değil"
+      "server_name_not_unique": "Sunucu Adı Benzersiz Değil",
+      "update_duration": "Yasaklama Süresini Güncelle"
     }
   },
   "mode": {
@@ -893,6 +911,7 @@
     "country": "Ülke",
     "created": "Oluşturulma",
     "data": "Veri",
+    "date": "Tarih",
     "empty": "Kullanılabilir arama paneli yok",
     "end_date": "Bitiş Tarihi",
     "first_seen": "İlk Görülme",
@@ -978,6 +997,7 @@
     "default_server": "varsayılan sunucu",
     "down": "Kapalı",
     "draft": "Taslak",
+    "error_loading_bans": "Yasaklamalar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin.",
     "failed": "Başarısız",
     "loading": "Yükleniyor...",
     "loading_bans": "Yasaklamalar yükleniyor...",
@@ -1050,6 +1070,7 @@
       "checksum": "Sağlama",
       "country": "Ülke",
       "created": "Oluşturulma",
+      "current_time_left": "Mevcut Kalan Süre",
       "data": "Veri",
       "date": "Tarih",
       "description": "Açıklama",

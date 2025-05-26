@@ -8,6 +8,7 @@
     "version": "Versione: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Seleziona una data di fine personalizzata.",
     "important": "Importante",
     "no_changes_detected": "Nessuna modifica rilevata.",
     "notice": "Avviso",
@@ -115,12 +116,17 @@
     "select_file": "Seleziona File",
     "select_page": "Seleziona Pagina",
     "service": "Servizio",
+    "set_1h": "Imposta 1 Ora",
+    "set_24h": "Imposta 24 Ore",
+    "set_1w": "Imposta 1 Settimana",
+    "set_permanent": "Imposta Permanente",
     "setup": "Configura",
     "show": "Mostra",
     "stop": "Ferma",
     "submit": "Invia",
     "subscribe": "Iscriviti",
     "unban": "Sblocca",
+    "update_duration": "Aggiorna Durata Blocco",
     "update_key": "Aggiorna Chiave",
     "upload_photo": "Carica Nuova Foto",
     "wipe_other_sessions": "Pulisci Altre Sessioni"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "Recupero notizie fallito:",
     "skipping_malformed_line": "Ignorando riga malformata: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Ora",
+    "24_hours": "24 Ore",
+    "1_week": "1 Settimana",
+    "permanent": "Permanente",
+    "custom": "Personalizzato"
+  },
   "error": {
     "401": {
       "help": "Devi essere loggato per accedere a questa risorsa.",
@@ -589,6 +602,7 @@
       "configuration_name": "Nome Configurazione",
       "confirm_password": "Conferma Password",
       "current_password": "Password Attuale",
+      "custom_end_date": "Data Fine Personalizzata",
       "custom_ssl_certificate": "Certificato SSL Personalizzato",
       "custom_ssl_certificate_data": "Dati Certificato SSL Pers. (Base64/PEM)",
       "custom_ssl_key": "Chiave SSL Personalizzata",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Elementi Credenziali DNS Let's Encrypt",
       "lets_encrypt_profile": "Profilo Let's Encrypt",
       "license_key": "Chiave di Licenza",
+      "make_permanent": "Rendi Permanente",
       "name": "Nome",
+      "new_duration": "Nuova Durata",
       "new_password": "Nuova Password",
       "optional": "(Opzionale)",
       "password": "Password",
@@ -696,7 +712,8 @@
       "reset_template_alert": "Sei sicuro di voler ripristinare le impostazioni del modello corrente e le configurazioni personalizzate?",
       "services_deletion_confirmation": "Sei sicuro di voler eliminare i servizi selezionati?",
       "unban_confirmation_alert": "Sei sicuro di voler sbloccare l'indirizzo IP selezionato?",
-      "unban_confirmation_alert_plural": "Sei sicuro di voler sbloccare gli indirizzi IP selezionati?"
+      "unban_confirmation_alert_plural": "Sei sicuro di voler sbloccare gli indirizzi IP selezionati?",
+      "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:"
     },
     "button": {
       "reset_template_confirm": "Ripristina Configurazione Modello"
@@ -720,7 +737,8 @@
       "job_history_count": "Ultime {{count}} esecuzioni della Tarefa",
       "recovery_codes": "Codici di Recupero",
       "reset_template_config": "Ripristinare Configurazione Modello?",
-      "server_name_not_unique": "Nome Server non è Unico"
+      "server_name_not_unique": "Nome Server non è Unico",
+      "update_duration": "Aggiorna Durata Blocco"
     }
   },
   "mode": {
@@ -893,6 +911,7 @@
     "country": "Paese",
     "created": "Creato",
     "data": "Dati",
+    "date": "Data",
     "empty": "Nessun pannello di ricerca disponibile",
     "end_date": "Data Fine",
     "first_seen": "Visto per la Prima Volta",
@@ -978,6 +997,7 @@
     "default_server": "server predefinito",
     "down": "Inattivo",
     "draft": "Bozza",
+    "error_loading_bans": "Errore durante il caricamento dei divieti. Riprova aggiornando la pagina.",
     "failed": "Fallito",
     "loading": "Caricamento...",
     "loading_bans": "Caricamento divieti...",
@@ -1050,6 +1070,7 @@
       "checksum": "Checksum",
       "country": "Paese",
       "created": "Creato",
+      "current_time_left": "Tempo Rimanente Attuale",
       "data": "Dati",
       "date": "Data",
       "description": "Descrizione",

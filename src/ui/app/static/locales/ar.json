@@ -8,6 +8,7 @@
     "version": "الإصدار: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "يرجى تحديد تاريخ انتهاء مخصص.",
     "important": "هام",
     "no_changes_detected": "لم يتم اكتشاف أي تغييرات.",
     "notice": "تنويه",
@@ -115,12 +116,17 @@
     "select_file": "اختيار ملف",
     "select_page": "اختيار صفحة",
     "service": "خدمة",
+    "set_1h": "تعيين ساعة واحدة",
+    "set_24h": "تعيين 24 ساعة",
+    "set_1w": "تعيين أسبوع واحد",
+    "set_permanent": "تعيين دائم",
     "setup": "إعداد",
     "show": "إظهار",
     "stop": "إيقاف",
     "submit": "إرسال",
     "subscribe": "اشتراك",
     "unban": "رفع الحظر",
+    "update_duration": "تحديث مدة الحظر",
     "update_key": "تحديث المفتاح",
     "upload_photo": "تحميل صورة جديدة",
     "wipe_other_sessions": "مسح الجلسات الأخرى"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "فشل جلب الأخبار:",
     "skipping_malformed_line": "تجاهل السطر غير المنسق: {{line}}"
   },
+  "duration": {
+    "1_hour": "ساعة واحدة",
+    "24_hours": "24 ساعة",
+    "1_week": "أسبوع واحد",
+    "permanent": "دائم",
+    "custom": "مخصص"
+  },
   "error": {
     "401": {
       "help": "يجب عليك تسجيل الدخول للوصول إلى هذا المورد.",
@@ -589,6 +602,7 @@
       "configuration_name": "اسم التكوين",
       "confirm_password": "تأكيد كلمة المرور",
       "current_password": "كلمة المرور الحالية",
+      "custom_end_date": "تاريخ انتهاء مخصص",
       "custom_ssl_certificate": "شهادة SSL مخصصة",
       "custom_ssl_certificate_data": "بيانات شهادة SSL المخصصة (Base64/PEM)",
       "custom_ssl_key": "مفتاح SSL مخصص",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "عناصر بيانات اعتماد DNS لـ Let's Encrypt",
       "lets_encrypt_profile": "ملف تعريف Let's Encrypt",
       "license_key": "مفتاح الترخيص",
+      "make_permanent": "جعله دائمًا",
       "name": "الاسم",
+      "new_duration": "مدة جديدة",
       "new_password": "كلمة مرور جديدة",
       "optional": "(اختياري)",
       "password": "كلمة المرور",
@@ -696,7 +712,8 @@
       "reset_template_alert": "هل أنت متأكد أنك تريد إعادة تعيين إعدادات القالب الحالية والتكوينات المخصصة؟",
       "services_deletion_confirmation": "هل أنت متأكد أنك تريد حذف الخدمات المحددة؟",
       "unban_confirmation_alert": "هل أنت متأكد أنك تريد رفع الحظر عن عنوان IP المحدد؟",
-      "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟"
+      "unban_confirmation_alert_plural": "هل أنت متأكد أنك تريد رفع الحظر عن عناوين IP المحددة؟",
+      "update_duration_alert": "حدد مدة جديدة للحظر (الحظر) المحدد:"
     },
     "button": {
       "reset_template_confirm": "إعادة تعيين تكوين القالب"
@@ -720,7 +737,8 @@
       "job_history_count": "آخر {{count}} عمليات تنفيذ للمهمة",
       "recovery_codes": "رموز الاسترداد",
       "reset_template_config": "إعادة تعيين تكوين القالب؟",
-      "server_name_not_unique": "اسم الخادم ليس فريدًا"
+      "server_name_not_unique": "اسم الخادم ليس فريدًا",
+      "update_duration": "تحديث مدة الحظر"
     }
   },
   "mode": {
@@ -893,6 +911,7 @@
     "country": "البلد",
     "created": "تم الإنشاء",
     "data": "البيانات",
+    "date": "التاريخ",
     "empty": "لا توجد لوحات بحث متاحة",
     "end_date": "تاريخ الانتهاء",
     "first_seen": "شوهد لأول مرة",
@@ -978,6 +997,7 @@
     "default_server": "الخادم الافتراضي",
     "down": "متوقف",
     "draft": "مسودة",
+    "error_loading_bans": "خطأ في تحميل الحظر. يرجى محاولة تحديث الصفحة.",
     "failed": "فشل",
     "loading": "جار التحميل...",
     "loading_bans": "جار تحميل الحظر...",
@@ -1050,6 +1070,7 @@
       "checksum": "Checksum",
       "country": "البلد",
       "created": "تاريخ الإنشاء",
+      "current_time_left": "الوقت المتبقي الحالي",
       "data": "البيانات",
       "date": "التاريخ",
       "description": "الوصف",

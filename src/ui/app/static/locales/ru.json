@@ -8,6 +8,7 @@
     "version": "Версия: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Пожалуйста, выберите пользовательскую дату окончания.",
     "important": "Важно",
     "no_changes_detected": "Изменения не обнаружены.",
     "notice": "Уведомление",
@@ -115,12 +116,17 @@
     "select_file": "Выбрать файл",
     "select_page": "Выбрать страницу",
     "service": "Сервис",
+    "set_1h": "Установить 1 час",
+    "set_24h": "Установить 24 часа",
+    "set_1w": "Установить 1 неделю",
+    "set_permanent": "Установить бессрочно",
     "setup": "Настройка",
     "show": "Показать",
     "stop": "Остановить",
     "submit": "Отправить",
     "subscribe": "Подписаться",
     "unban": "Разбанить",
+    "update_duration": "Обновить срок бана",
     "update_key": "Обновить ключ",
     "upload_photo": "Загрузить новое фото",
     "wipe_other_sessions": "Очистить другие сессии"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "Не удалось получить новости:",
     "skipping_malformed_line": "Пропуск некорректной строки: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 час",
+    "24_hours": "24 часа",
+    "1_week": "1 неделя",
+    "permanent": "Бессрочно",
+    "custom": "Пользовательский"
+  },
   "error": {
     "401": {
       "help": "Для доступа к этому ресурсу необходимо войти в систему.",
@@ -589,6 +602,7 @@
       "configuration_name": "Имя конфигурации",
       "confirm_password": "Подтвердите пароль",
       "current_password": "Текущий пароль",
+      "custom_end_date": "Пользовательская дата окончания",
       "custom_ssl_certificate": "Пользовательский SSL-сертификат",
       "custom_ssl_certificate_data": "Данные пользовательского SSL-сертификата (Base64/PEM)",
       "custom_ssl_key": "Пользовательский SSL-ключ",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Элементы учетных данных DNS Let's Encrypt",
       "lets_encrypt_profile": "Профиль Let's Encrypt",
       "license_key": "Лицензионный ключ",
+      "make_permanent": "Сделать бессрочным",
       "name": "Имя",
+      "new_duration": "Новая продолжительность",
       "new_password": "Новый пароль",
       "optional": "(Необязательно)",
       "password": "Пароль",
@@ -696,7 +712,8 @@
       "reset_template_alert": "Вы уверены, что хотите сбросить текущие настройки шаблона и пользовательские конфигурации?",
       "services_deletion_confirmation": "Вы уверены, что хотите удалить выбранные сервисы?",
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
-      "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?"
+      "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
+      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:"
     },
     "button": {
       "reset_template_confirm": "Сбросить конфигурацию шаблона"
@@ -720,7 +737,8 @@
       "job_history_count": "Последние {{count}} выполнений задачи",
       "recovery_codes": "Коды восстановления",
       "reset_template_config": "Сбросить конфигурацию шаблона?",
-      "server_name_not_unique": "Имя сервера не уникально"
+      "server_name_not_unique": "Имя сервера не уникально",
+      "update_duration": "Обновить срок бана"
     }
   },
   "mode": {
@@ -893,6 +911,7 @@
     "country": "Страна",
     "created": "Создано",
     "data": "Данные",
+    "date": "Дата",
     "empty": "Нет доступных панелей поиска",
     "end_date": "Дата окончания",
     "first_seen": "Впервые замечен",
@@ -978,6 +997,7 @@
     "default_server": "сервер по умолчанию",
     "down": "Не в сети",
     "draft": "Черновик",
+    "error_loading_bans": "Ошибка загрузки банов. Пожалуйста, попробуйте обновить страницу.",
     "failed": "Неудачно",
     "loading": "Загрузка...",
     "loading_bans": "Загрузка банов...",
@@ -1050,6 +1070,7 @@
       "checksum": "Контрольная сумма",
       "country": "Страна",
       "created": "Создано",
+      "current_time_left": "Текущее оставшееся время",
       "data": "Данные",
       "date": "Дата",
       "description": "Описание",

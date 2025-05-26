@@ -8,6 +8,7 @@
     "version": "Version: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Bitte wählen Sie ein benutzerdefiniertes Enddatum.",
     "important": "Wichtig",
     "no_changes_detected": "Keine Änderungen festgestellt.",
     "notice": "Hinweis",
@@ -115,12 +116,17 @@
     "select_file": "Datei auswählen",
     "select_page": "Seite auswählen",
     "service": "Dienst",
+    "set_1h": "1 Stunde einstellen",
+    "set_24h": "24 Stunden einstellen",
+    "set_1w": "1 Woche einstellen",
+    "set_permanent": "Permanent einstellen",
     "setup": "Einrichten",
     "show": "Anzeigen",
     "stop": "Stoppen",
     "submit": "Senden",
     "subscribe": "Abonnieren",
     "unban": "Entsperren",
+    "update_duration": "Sperrdauer aktualisieren",
     "update_key": "Schlüssel aktualisieren",
     "upload_photo": "Neues Foto hochladen",
     "wipe_other_sessions": "Andere Sitzungen löschen"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "Fehler beim Abrufen der Nachrichten:",
     "skipping_malformed_line": "Überspringe fehlerhafte Zeile: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Stunde",
+    "24_hours": "24 Stunden",
+    "1_week": "1 Woche",
+    "permanent": "Permanent",
+    "custom": "Benutzerdefiniert"
+  },
   "error": {
     "401": {
       "help": "Sie müssen angemeldet sein, um auf diese Ressource zuzugreifen.",
@@ -589,6 +602,7 @@
       "configuration_name": "Konfigurationsname",
       "confirm_password": "Passwort bestätigen",
       "current_password": "Aktuelles Passwort",
+      "custom_end_date": "Benutzerdefiniertes Enddatum",
       "custom_ssl_certificate": "Benutzerdefiniertes SSL-Zertifikat",
       "custom_ssl_certificate_data": "Benutzerdefinierte SSL-Zertifikatsdaten (Base64/PEM)",
       "custom_ssl_key": "Benutzerdefinierter SSL-Schlüssel",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS-Anmeldeinformationen",
       "lets_encrypt_profile": "Let's Encrypt-Profil",
       "license_key": "Lizenzschlüssel",
+      "make_permanent": "Dauerhaft machen",
       "name": "Name",
+      "new_duration": "Neue Dauer",
       "new_password": "Neues Passwort",
       "optional": "(Optional)",
       "password": "Passwort",
@@ -696,7 +712,8 @@
       "reset_template_alert": "Sind Sie sicher, dass Sie die aktuellen Vorlageneinstellungen und benutzerdefinierten Konfigurationen zurücksetzen möchten?",
       "services_deletion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste löschen möchten?",
       "unban_confirmation_alert": "Sind Sie sicher, dass Sie die Sperre für die ausgewählte IP-Adresse aufheben möchten?",
-      "unban_confirmation_alert_plural": "Sind Sie sicher, dass Sie die Sperre für die ausgewählten IP-Adressen aufheben möchten?"
+      "unban_confirmation_alert_plural": "Sind Sie sicher, dass Sie die Sperre für die ausgewählten IP-Adressen aufheben möchten?",
+      "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:"
     },
     "button": {
       "reset_template_confirm": "Vorlagenkonfiguration zurücksetzen"
@@ -720,7 +737,8 @@
       "job_history_count": "Letzte {{count}} Ausführungen von Auftrag",
       "recovery_codes": "Wiederherstellungscodes",
       "reset_template_config": "Vorlagenkonfiguration zurücksetzen?",
-      "server_name_not_unique": "Servername ist nicht eindeutig"
+      "server_name_not_unique": "Servername ist nicht eindeutig",
+      "update_duration": "Sperrdauer aktualisieren"
     }
   },
   "mode": {
@@ -893,6 +911,7 @@
     "country": "Land",
     "created": "Erstellt",
     "data": "Daten",
+    "date": "Datum",
     "empty": "Keine Suchbereiche verfügbar",
     "end_date": "Enddatum",
     "first_seen": "Zuerst gesehen",
@@ -978,6 +997,7 @@
     "default_server": "Standardserver",
     "down": "Inaktiv",
     "draft": "Entwurf",
+    "error_loading_bans": "Fehler beim Laden der Sperren. Bitte versuchen Sie, die Seite neu zu laden.",
     "failed": "Fehlgeschlagen",
     "loading": "Laden...",
     "loading_bans": "Sperren werden geladen...",
@@ -1050,6 +1070,7 @@
       "checksum": "Prüfsumme",
       "country": "Land",
       "created": "Erstellt",
+      "current_time_left": "Aktuelle verbleibende Zeit",
       "data": "Daten",
       "date": "Datum",
       "description": "Beschreibung",

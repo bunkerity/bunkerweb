@@ -11,6 +11,7 @@
 - [UI] Improve plugin navigation by displaying plugins as a vertical list on the left side of the card, replacing the dropdown combobox
 - [UI] Display a small "enabled/disabled" icon next to each plugin name in the plugin sidebar and menu to indicate whether the plugin is active (e.g., show if Reverse Proxy is enabled)
 - [UI] Update QR code generation to use PilImage and output JPEG format for improved compatibility
+- [UI] Add a modal to update ban durations, with support for localization
 - [MISC] Refactor template rendering for improved performance and efficiency
 - [DEPS] Update ModSecurity-nginx version to v1.0.4
 

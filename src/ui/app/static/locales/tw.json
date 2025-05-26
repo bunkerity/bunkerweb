@@ -8,6 +8,7 @@
     "version": "版本：{{version}}"
   },
   "alert": {
+    "custom_end_date_required": "請選擇一個自訂結束日期。",
     "important": "重要",
     "no_changes_detected": "未偵測到任何變更。",
     "notice": "注意",
@@ -115,12 +116,17 @@
     "select_file": "選取檔案",
     "select_page": "選取頁面",
     "service": "服務",
+    "set_1h": "設定 1 小時",
+    "set_24h": "設定 24 小時",
+    "set_1w": "設定 1 週",
+    "set_permanent": "設定永久",
     "setup": "設定",
     "show": "顯示",
     "stop": "停止",
     "submit": "提交",
     "subscribe": "訂閱",
     "unban": "解除封鎖",
+    "update_duration": "更新封鎖期限",
     "update_key": "更新金鑰",
     "upload_photo": "上傳新相片",
     "wipe_other_sessions": "清除其他工作階段"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "取得新聞失敗：",
     "skipping_malformed_line": "跳過格式錯誤的行：{{line}}"
   },
+  "duration": {
+    "1_hour": "1 小時",
+    "24_hours": "24 小時",
+    "1_week": "1 週",
+    "permanent": "永久",
+    "custom": "自訂"
+  },
   "error": {
     "401": {
       "help": "您必須登入才能存取此資源。",
@@ -589,6 +602,7 @@
       "configuration_name": "設定名稱",
       "confirm_password": "確認密碼",
       "current_password": "目前密碼",
+      "custom_end_date": "自訂結束日期",
       "custom_ssl_certificate": "自訂 SSL 憑證",
       "custom_ssl_certificate_data": "自訂 SSL 憑證資料 (Base64/PEM)",
       "custom_ssl_key": "自訂 SSL 金鑰",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS 憑證項目",
       "lets_encrypt_profile": "Let's Encrypt 設定檔",
       "license_key": "授權金鑰",
+      "make_permanent": "設為永久",
       "name": "名稱",
+      "new_duration": "新期限",
       "new_password": "新密碼",
       "optional": "（選填）",
       "password": "密碼",
@@ -696,7 +712,8 @@
       "reset_template_alert": "您確定要重設目前的範本設定和自訂設定嗎？",
       "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
-      "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？"
+      "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
+      "update_duration_alert": "請為選定的封鎖選擇新的期限："
     },
     "button": {
       "reset_template_confirm": "重設範本設定"
@@ -720,7 +737,8 @@
       "job_history_count": "任務 {{count}} 次執行",
       "recovery_codes": "恢復碼",
       "reset_template_config": "重設範本設定？",
-      "server_name_not_unique": "伺服器名稱不是唯一的"
+      "server_name_not_unique": "伺服器名稱不是唯一的",
+      "update_duration": "更新封鎖期限"
     }
   },
   "mode": {
@@ -893,6 +911,7 @@
     "country": "國家/地區",
     "created": "建立時間",
     "data": "資料",
+    "date": "日期",
     "empty": "無可用搜尋窗格",
     "end_date": "結束日期",
     "first_seen": "首次出現",
@@ -978,6 +997,7 @@
     "default_server": "預設伺服器",
     "down": "已停止",
     "draft": "草稿",
+    "error_loading_bans": "載入封鎖時發生錯誤。請嘗試重新整理頁面。",
     "failed": "失敗",
     "loading": "載入中...",
     "loading_bans": "正在載入封鎖...",
@@ -1050,6 +1070,7 @@
       "checksum": "校驗和",
       "country": "國家/地區",
       "created": "建立時間",
+      "current_time_left": "目前剩餘時間",
       "data": "資料",
       "date": "日期",
       "description": "描述",
