@@ -32,6 +32,7 @@ class BiscuitMiddleware:
             app: Flask application instance.
         """
         self.root_public_key = None
+        app.biscuit_middleware = self  # Register middleware instance in the app
 
         if app is not None:
             self.init_app(app)
