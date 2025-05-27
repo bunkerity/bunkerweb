@@ -13,6 +13,11 @@ $(document).ready(function () {
       i18n: "tooltip.table.reports.date",
     },
     {
+      title: "Request ID",
+      tooltip: "The unique identifier for the request",
+      i18n: "tooltip.table.reports.request_id",
+    },
+    {
       title: "IP Address",
       tooltip: "The reported IP address",
       i18n: "tooltip.table.reports.ip_address",
@@ -90,7 +95,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [2, 3, 4, 5, 6, 8, 9, 11],
+        columns: [3, 4, 5, 6, 7, 9, 10, 12],
       },
     },
     topStart: {},
@@ -230,11 +235,11 @@ $(document).ready(function () {
   const reports_config = {
     tableSelector: "#reports",
     tableName: "reports",
-    columnVisibilityCondition: (column) => column > 2 && column < 12,
+    columnVisibilityCondition: (column) => column > 3 && column < 13,
     dataTableOptions: {
       columnDefs: [
         { orderable: false, targets: -1 },
-        { visible: false, targets: [4, 5, 6, 7, 10] },
+        { visible: false, targets: [5, 6, 7, 8, 11] },
         {
           searchPanes: {
             show: true,
@@ -242,7 +247,7 @@ $(document).ready(function () {
             combiner: "or",
           },
           type: "ip-address",
-          targets: 2,
+          targets: 3,
         },
         {
           render: function (data, type, row) {
@@ -262,7 +267,7 @@ $(document).ready(function () {
             header: t("searchpane.country", "Country"),
             combiner: "or",
           },
-          targets: 3,
+          targets: 4,
           render: function (data) {
             const countryCode = data.toLowerCase();
             const tooltipContent = "N/A";
@@ -290,7 +295,7 @@ $(document).ready(function () {
             header: t("searchpane.url", "URL"),
             combiner: "or",
           },
-          targets: 5,
+          targets: 6,
           render: function (data, type, row) {
             if (type !== "display") {
               return data;
@@ -322,7 +327,7 @@ $(document).ready(function () {
             header: t("searchpane.server_name", "Server name"),
             combiner: "or",
           },
-          targets: 9,
+          targets: 10,
           render: function (data) {
             return data === "_" ? "default server" : data;
           },
@@ -333,7 +338,7 @@ $(document).ready(function () {
             header: t("searchpane.ip_address", "IP Address"),
             combiner: "or",
           },
-          targets: 2,
+          targets: 3,
         },
         {
           searchPanes: {
@@ -341,7 +346,7 @@ $(document).ready(function () {
             header: t("searchpane.method", "Method"),
             combiner: "or",
           },
-          targets: 4,
+          targets: 5,
         },
         {
           searchPanes: {
@@ -349,7 +354,7 @@ $(document).ready(function () {
             header: t("searchpane.url", "URL"),
             combiner: "or",
           },
-          targets: 5,
+          targets: 6,
         },
         {
           searchPanes: {
@@ -357,7 +362,7 @@ $(document).ready(function () {
             header: t("searchpane.status_code", "Status Code"),
             combiner: "or",
           },
-          targets: 6,
+          targets: 7,
         },
         {
           searchPanes: {
@@ -365,7 +370,7 @@ $(document).ready(function () {
             header: t("searchpane.reason", "Reason"),
             combiner: "or",
           },
-          targets: 8,
+          targets: 9,
         },
         {
           searchPanes: {
@@ -373,7 +378,7 @@ $(document).ready(function () {
             header: t("searchpane.server_name", "Server name"),
             combiner: "or",
           },
-          targets: 9,
+          targets: 10,
         },
         {
           searchPanes: {
@@ -381,7 +386,7 @@ $(document).ready(function () {
             header: t("searchpane.data", "Data"),
             combiner: "or",
           },
-          targets: 10,
+          targets: 11,
         },
         {
           searchPanes: {
@@ -389,7 +394,7 @@ $(document).ready(function () {
             header: t("searchpane.security_mode", "Security mode"),
             combiner: "or",
           },
-          targets: 11,
+          targets: 12,
         },
       ],
       order: [[1, "desc"]],
@@ -410,9 +415,14 @@ $(document).ready(function () {
           console.error("DataTables AJAX error:", textStatus, errorThrown);
           $("#reports").addClass("d-none");
           $("#reports-waiting")
-            .removeClass("d-none")
-            .text("Error loading reports. Please try refreshing the page.")
-            .addClass("text-danger");
+            .removeClass("visually-hidden")
+            .addClass("text-danger")
+            .text(
+              t(
+                "status.error_loading_reports",
+                "Error loading reports. Please try refreshing the page.",
+              ),
+            );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
         },
@@ -427,6 +437,10 @@ $(document).ready(function () {
         {
           data: "date",
           title: "<span data-i18n='table.header.date'>Date</span>",
+        },
+        {
+          data: "id",
+          title: "<span data-i18n='table.header.request_id'>Request ID</span>",
         },
         {
           data: "ip",
@@ -490,6 +504,22 @@ $(document).ready(function () {
       },
     },
   };
+
+  // Add a fallback timeout to prevent infinite loading
+  setTimeout(function () {
+    if ($("#reports").hasClass("d-none")) {
+      $("#reports-waiting")
+        .removeClass("visually-hidden")
+        .addClass("text-danger")
+        .text(
+          t(
+            "status.error_loading_reports",
+            "Error loading reports. Please try refreshing the page.",
+          ),
+        );
+      $("#reports").addClass("d-none");
+    }
+  }, 5000); // 5 seconds fallback
 
   // Create the modal for displaying full URLs once at document ready
   $("body").append(`
@@ -560,13 +590,38 @@ $(document).ready(function () {
         updateHeaderTooltips(dt.table().header(), headers);
         // Clean up any existing tooltips to prevent memory leaks
         $(".tooltip").remove();
+        // Hide waiting message and show table
+        $("#reports-waiting").addClass("visually-hidden");
+        $("#reports").removeClass("d-none");
       });
       // Ensure tooltips are set after initialization
       updateHeaderTooltips(dt.table().header(), headers);
       $("#reports_wrapper").find(".btn-secondary").removeClass("btn-secondary");
+      // Hide waiting message and show table
+      $("#reports-waiting").addClass("visually-hidden");
+      $("#reports").removeClass("d-none");
       return dt;
     });
   }
+
+  if (sessionAutoRefresh === "true") {
+    toggleAutoRefresh();
+  }
+
+  const hashValue = location.hash;
+  if (hashValue) {
+    $("#dt-length-0").val(hashValue.replace("#", ""));
+    $("#dt-length-0").trigger("change");
+  }
+
+  $("#dt-length-0").on("change", function () {
+    const value = $(this).val();
+    history.replaceState(
+      null,
+      "",
+      value === "10" ? location.pathname : `#${value}`,
+    );
+  });
 
   // Utility function to manage header tooltips
   function updateHeaderTooltips(selector, headers) {
@@ -596,23 +651,4 @@ $(document).ready(function () {
     applyTranslations();
     $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   }
-
-  if (sessionAutoRefresh === "true") {
-    toggleAutoRefresh();
-  }
-
-  const hashValue = location.hash;
-  if (hashValue) {
-    $("#dt-length-0").val(hashValue.replace("#", ""));
-    $("#dt-length-0").trigger("change");
-  }
-
-  $("#dt-length-0").on("change", function () {
-    const value = $(this).val();
-    history.replaceState(
-      null,
-      "",
-      value === "10" ? location.pathname : `#${value}`,
-    );
-  });
 });

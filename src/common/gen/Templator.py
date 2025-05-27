@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from importlib import import_module
 from glob import glob
-from os import getenv
+from os import cpu_count, getenv
 from os.path import basename, join, sep
 from pathlib import Path
 from random import choice
@@ -66,7 +66,7 @@ class Templator:
         self._jinja_cache_dir = Path(sep, "var", "cache", "bunkerweb", "jinja_cache")
         self._jinja_cache_dir.mkdir(parents=True, exist_ok=True)
         self._templates = templates
-        self._global_templates = [template.name for template in Path(self._templates).rglob("*.conf")]
+        self._global_templates = {template.name for template in Path(self._templates).rglob("*.conf")}
         self._core = Path(core)
         self._plugins = Path(plugins)
         self._pro_plugins = Path(pro_plugins)
@@ -74,6 +74,8 @@ class Templator:
         self._target = target
         self._config = config
         self._jinja_env = self._load_jinja_env()
+        self.__all_templates = frozenset(self._jinja_env.list_templates())
+        self._template_path_cache = {}
 
     def render(self) -> None:
         """Render the templates based on the provided configuration."""
@@ -81,8 +83,12 @@ class Templator:
         servers = [self._config.get("SERVER_NAME", "").strip()]
         if self._config.get("MULTISITE", "no") == "yes":
             servers = self._config.get("SERVER_NAME", "").strip().split(" ")
-        for server in servers:
-            self._render_server(server)
+
+        num_workers = min(max(1, (cpu_count() or 1) // 2), len(servers))
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            futures = [executor.submit(self._render_server, server) for server in servers]
+            for future in futures:
+                future.result()
 
     def _load_jinja_env(self) -> Environment:
         """Load the Jinja2 environment with the appropriate search paths.
@@ -98,6 +104,8 @@ class Templator:
             trim_blocks=True,
             keep_trailing_newline=True,
             bytecode_cache=FileSystemBytecodeCache(directory=self._jinja_cache_dir.as_posix()),
+            auto_reload=False,
+            cache_size=-1,
         )
 
     def _find_templates(self, contexts: List[str]) -> List[str]:
@@ -107,22 +115,33 @@ class Templator:
             contexts (List[str]): List of context names.
 
         Returns:
-            List[str]: List of template names.
+            List[str]: List of template names in the same order as contexts.
         """
-        templates = set()
-        all_templates = frozenset(self._jinja_env.list_templates())
+        cache_key = frozenset(contexts)
+        if cache_key in self._template_path_cache:
+            return self._template_path_cache[cache_key]
 
-        # Handle global context specially for better performance
-        if "global" in contexts:
-            templates.update(t for t in all_templates if "/" not in t)
-            contexts.remove("global")
+        templates = []
 
-        # Process remaining contexts
-        if contexts:
-            prefix_set = tuple(context + "/" for context in contexts)
-            templates.update(t for t in all_templates if any(t.startswith(prefix) for prefix in prefix_set))
+        # Process contexts in order to maintain consistent template ordering
+        for context in contexts:
+            if context == "global":
+                # Handle global context specially for better performance
+                templates.extend(t for t in self.__all_templates if "/" not in t)
+            else:
+                # Process other contexts
+                templates.extend(t for t in self.__all_templates if t.startswith(f"{context}/"))
 
-        return list(templates)
+        # Remove duplicates while preserving order
+        seen = set()
+        result = []
+        for template in templates:
+            if template not in seen:
+                seen.add(template)
+                result.append(template)
+
+        self._template_path_cache[cache_key] = result
+        return result
 
     def _write_config(self, subpath: Optional[str] = None, config: Optional[Dict[str, Any]] = None) -> None:
         """Write the configuration to a variables.env file.
@@ -148,20 +167,24 @@ class Templator:
         Returns:
             Dict[str, Any]: Configuration dictionary for the server.
         """
-        config = {}
         prefix = f"{server}_"
         prefix_len = len(prefix)
+        config = {}
 
-        # Pre-populate with base config and handle NGINX_PREFIX
-        config.update(self._config)
-        config["NGINX_PREFIX"] = join(self._target, server) + "/"
+        # Add non-prefixed values first (only if they won't be overridden)
+        server_specific_keys = {k[prefix_len:] for k in self._config if k.startswith(prefix)}
+        for k, v in self._config.items():
+            if not k.startswith(prefix) and k not in server_specific_keys:
+                config[k] = v
 
-        # Efficient single-pass override of server-specific values
-        for key, value in ((k, v) for k, v in self._config.items() if k.startswith(prefix)):
-            config[key[prefix_len:]] = value
+        config["NGINX_PREFIX"] = f"{join(self._target, server)}/"
 
-        # Set default SERVER_NAME if not explicitly defined
-        if f"{prefix}SERVER_NAME" not in self._config:
+        # Add server-specific overrides
+        for k, v in self._config.items():
+            if k.startswith(prefix):
+                config[k[prefix_len:]] = v
+
+        if "SERVER_NAME" not in config:
             config["SERVER_NAME"] = server
 
         return config
@@ -169,9 +192,30 @@ class Templator:
     def _render_global(self) -> None:
         """Render global templates."""
         self._write_config()
-        templates = self._find_templates(["global", "http", "stream", "default-server-http"])
-        with ThreadPoolExecutor(max_workers=min(32, len(templates))) as executor:
-            executor.map(self._render_template, templates)
+        templates = self._find_templates(
+            [
+                "global",
+                "http",
+                "stream",
+                "default-server-http",
+            ]
+        )
+
+        template_vars = {
+            "all": self._config,
+            "is_custom_conf": Templator.is_custom_conf,
+            "has_variable": Templator.has_variable,
+            "random": Templator.random,
+            "read_lines": Templator.read_lines,
+            "import": import_module,
+        }
+        template_vars.update(self._config)
+
+        max_workers = min(max(1, (cpu_count() or 1) // 2), len(templates))
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(self._render_template, template, template_vars) for template in templates]
+            for future in futures:
+                future.result()
 
     def _render_server(self, server: str) -> None:
         """Render templates for a specific server.
@@ -180,48 +224,43 @@ class Templator:
             server (str): Server name.
         """
         # Step 1: Find all relevant templates
-        templates = self._find_templates(["modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after", "server-http", "server-stream"])
+        templates = self._find_templates(
+            [
+                "modsec",
+                "modsec-crs",
+                "crs-plugins-before",
+                "crs-plugins-after",
+                "server-http",
+                "server-stream",
+            ]
+        )
 
         # Step 2: Handle multisite configuration if applicable
         subpath = None
-        config = None
+        config = self._config
         if self._config.get("MULTISITE", "no") == "yes":
             subpath = server
             config = self._get_server_config(server)
-            self._write_config(subpath=subpath, config=config)
 
-        # Step 3: Precompute 'name' for each template
-        global_templates_set = set(self._global_templates)  # Faster lookups
-        template_info = []
+        template_vars = {
+            "all": config,
+            "is_custom_conf": Templator.is_custom_conf,
+            "has_variable": Templator.has_variable,
+            "random": Templator.random,
+            "read_lines": Templator.read_lines,
+            "import": import_module,
+        }
+        template_vars.update(config)
+
         for template in templates:
-            # Check if the template ends with any of the global configurations
-            name = basename(template) if any(template.endswith(root_conf) for root_conf in global_templates_set) else None
-            template_info.append((template, name))
-
-        # Separate templates into two groups
-        priority_templates = [
-            info for info in template_info if any(info[0].startswith(prefix) for prefix in ("modsec", "modsec-crs", "crs-plugins-before", "crs-plugins-after"))
-        ]
-        other_templates = [info for info in template_info if info not in priority_templates]
-
-        # Step 4: Define the rendering function
-        def render_template(info):
-            template, name = info
-            self._render_template(template, subpath=subpath, config=config, name=name)
-
-        # Step 5: Use ThreadPoolExecutor with optimized settings
-        max_workers = min(32, len(template_info))  # Example: Limit to 32 or number of templates
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # First, render priority templates
-            executor.map(render_template, priority_templates)
-            # Then, render other templates
-            executor.map(render_template, other_templates)
+            name = basename(template) if any(template.endswith(root_conf) for root_conf in self._global_templates) else None
+            self._render_template(template, template_vars, subpath=subpath, name=name)
 
     def _render_template(
         self,
         template: str,
+        template_vars: Optional[Dict[str, Any]] = None,
         subpath: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
         name: Optional[str] = None,
     ) -> None:
         """Render a single template.
@@ -232,24 +271,12 @@ class Templator:
             config (Optional[Dict[str, Any]], optional): Configuration dictionary. Defaults to None.
             name (Optional[str], optional): Output file name. Defaults to None.
         """
-        real_config = config.copy() if config else self._config.copy()
-        real_config["all"] = real_config.copy()
-        real_config.update(
-            {
-                "is_custom_conf": Templator.is_custom_conf,
-                "has_variable": Templator.has_variable,
-                "random": Templator.random,
-                "read_lines": Templator.read_lines,
-                # TODO: Remove 'import' to avoid security risks
-                "import": import_module,
-            }
-        )
         real_path = Path(self._output, subpath or "", name or template)
         try:
             jinja_template = self._jinja_env.get_template(template)
             real_path.parent.mkdir(parents=True, exist_ok=True)
             with real_path.open("w") as f:
-                f.write(jinja_template.render(real_config))
+                f.write(jinja_template.render(template_vars))
         except Exception as e:
             logger.error(f"Error rendering template {template}: {e}")
 

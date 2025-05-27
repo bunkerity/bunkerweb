@@ -7,7 +7,6 @@ $(document).ready(function () {
 
   var actionLock = false;
   let addBanNumber = 1;
-  const banNumber = parseInt($("#bans_number").val());
   const baseFlagsUrl = $("#base_flags_url").val().trim();
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
@@ -238,6 +237,167 @@ $(document).ready(function () {
     $("#selected-ips-input-unban").val(JSON.stringify(bans));
   };
 
+  // Function to set up the update duration modal
+  const setupUpdateDurationModal = (bans) => {
+    const $modalBody = $("#selected-ips-update-duration");
+    $modalBody.empty(); // Clear previous content
+
+    // Create and append the header row
+    const $header = $(`
+      <ul class="list-group list-group-horizontal w-100">
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
+          <div class="ms-2 me-auto">
+            <div class="fw-bold" data-i18n="table.header.ip_address">${t(
+              "table.header.ip_address",
+            )}</div>
+          </div>
+        </li>
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
+          <div class="fw-bold" data-i18n="table.header.scope">${t(
+            "table.header.scope",
+          )}</div>
+        </li>
+        <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
+          <div class="fw-bold" data-i18n="table.header.current_time_left">${t(
+            "table.header.current_time_left",
+          )}</div>
+        </li>
+      </ul>
+    `);
+    $modalBody.append($header);
+
+    // Iterate over bans and append list items
+    bans.forEach((ban) => {
+      const scopeText =
+        ban.ban_scope === "global"
+          ? t("scope.global", "Global")
+          : t("scope.service_specific", "Service-specific");
+      const serviceText =
+        ban.service && ban.ban_scope === "service" ? ` (${ban.service})` : "";
+
+      const $row = $(`
+        <ul class="list-group list-group-horizontal w-100">
+          <li class="list-group-item" style="flex: 1 0;">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">${ban.ip}</div>
+            </div>
+          </li>
+          <li class="list-group-item" style="flex: 1 0;">
+            <div class="ms-2 me-auto">
+              ${scopeText}${serviceText}
+            </div>
+          </li>
+          <li class="list-group-item" style="flex: 1 0;">
+            <div class="ms-2 me-auto">
+              ${ban.time_remaining}
+            </div>
+          </li>
+        </ul>
+      `);
+      $modalBody.append($row);
+    });
+
+    // Show the modal
+    const $updateDurationModal = $("#modal-update-duration");
+    const modalInstance = new bootstrap.Modal($updateDurationModal[0]);
+    modalInstance.show();
+
+    // Set the hidden input value
+    $("#selected-ips-input-update-duration").val(JSON.stringify(bans));
+
+    // Initialize flatpickr for custom duration after modal is shown
+    const customEndDateInput = $("#custom-end-date");
+    if (!customEndDateInput[0]._flatpickr) {
+      customEndDateInput.flatpickr({
+        enableTime: true,
+        dateFormat: "Y-m-d\\TH:i:S",
+        altInput: true,
+        altFormat: "F j, Y h:i K",
+        time_24hr: true,
+        defaultDate: defaultDatetime,
+        minDate: minDatetime,
+        plugins: [new minMaxTimePlugin({ table: minMaxTable })],
+      });
+    }
+  };
+
+  // Handle duration select change to show/hide custom fields
+  $(document).on("change", "#duration-select", function () {
+    const $customFields = $("#custom-duration-fields");
+    const $customEndDate = $("#custom-end-date");
+
+    if ($(this).val() === "custom") {
+      $customFields.show();
+      $customEndDate.prop("required", true);
+    } else {
+      $customFields.hide();
+      $customEndDate.prop("required", false);
+    }
+  });
+
+  // Handle update duration form submission
+  $(document).on("submit", "#modal-update-duration form", function (e) {
+    e.preventDefault();
+
+    const duration = $("#duration-select").val();
+    const bansData = JSON.parse($("#selected-ips-input-update-duration").val());
+
+    // Prepare updates array
+    const updates = bansData
+      .map((ban) => {
+        const update = {
+          ip: ban.ip,
+          duration: duration,
+          ban_scope: ban.ban_scope,
+          service: ban.service,
+        };
+
+        // Add custom duration data if applicable
+        if (duration === "custom") {
+          const customEndDate = $("#custom-end-date").val();
+          if (!customEndDate) {
+            alert(
+              t(
+                "alert.custom_end_date_required",
+                "Please select a custom end date.",
+              ),
+            );
+            return null;
+          }
+          update.end_date = customEndDate;
+        }
+
+        return update;
+      })
+      .filter((update) => update !== null);
+
+    if (updates.length === 0) {
+      return;
+    }
+
+    // Create and submit the form
+    const form = $("<form>", {
+      method: "POST",
+      action: `${window.location.pathname}/update_duration`,
+      class: "visually-hidden",
+    });
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "csrf_token",
+        value: $("#csrf_token").val(),
+      }),
+    );
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "updates",
+        value: JSON.stringify(updates),
+      }),
+    );
+    form.appendTo("body").submit();
+  });
+
   // DataTable Layout and Buttons
   const layout = {
     top1: {
@@ -350,7 +510,76 @@ $(document).ready(function () {
         "Actions",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary action-button disabled",
-      buttons: [{ extend: "unban_ips", className: "text-danger" }],
+      buttons: [
+        { extend: "unban_ips", className: "text-danger" },
+        {
+          text: `<span class="tf-icons bx bx-timer bx-18px me-2"></span><span data-i18n="button.update_duration">${t(
+            "button.update_duration",
+            "Update Duration",
+          )}</span>`,
+          className: "text-warning",
+          action: function (e, dt, node, config) {
+            if (isReadOnly) {
+              alert(
+                t(
+                  "alert.readonly_mode",
+                  "This action is not allowed in read-only mode.",
+                ),
+              );
+              return;
+            }
+            if (actionLock) return;
+            actionLock = true;
+            $(".dt-button-background").click();
+
+            const bans = getSelectedBans();
+            if (bans.length === 0) {
+              actionLock = false;
+              return;
+            }
+            setupUpdateDurationModal(bans);
+            actionLock = false;
+          },
+        },
+        "separator",
+        {
+          text: `<span class="tf-icons bx bx-time-five bx-18px me-2"></span><span data-i18n="button.set_1h">${t(
+            "button.set_1h",
+            "Set 1 Hour",
+          )}</span>`,
+          action: (e, dt, node, config) => {
+            updateSelectedBansDuration("1h");
+          },
+        },
+        {
+          text: `<span class="tf-icons bx bx-time bx-18px me-2"></span><span data-i18n="button.set_24h">${t(
+            "button.set_24h",
+            "Set 24 Hours",
+          )}</span>`,
+          action: (e, dt, node, config) => {
+            updateSelectedBansDuration("24h");
+          },
+        },
+        {
+          text: `<span class="tf-icons bx bx-calendar-week bx-18px me-2"></span><span data-i18n="button.set_1w">${t(
+            "button.set_1w",
+            "Set 1 Week",
+          )}</span>`,
+          action: (e, dt, node, config) => {
+            updateSelectedBansDuration("1w");
+          },
+        },
+        {
+          text: `<span class="tf-icons bx bx-infinite bx-18px me-2"></span><span data-i18n="button.set_permanent">${t(
+            "button.set_permanent",
+            "Set Permanent",
+          )}</span>`,
+          className: "text-danger",
+          action: (e, dt, node, config) => {
+            updateSelectedBansDuration("permanent");
+          },
+        },
+      ],
     },
   ];
 
@@ -397,6 +626,68 @@ $(document).ready(function () {
     $("#selected-ips-unban").empty();
     $("#selected-ips-input-unban").val("");
   });
+
+  $("#modal-update-duration").on("hidden.bs.modal", function () {
+    $("#selected-ips-update-duration").empty();
+    $("#selected-ips-input-update-duration").val("");
+    // Reset form
+    $("#duration-select").val("1h");
+    $("#custom-duration-fields").hide();
+    $("#custom-end-date").val("");
+  });
+
+  // Function to update selected bans duration
+  const updateSelectedBansDuration = (duration) => {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    if (actionLock) return;
+    actionLock = true;
+    $(".dt-button-background").click();
+
+    const bans = getSelectedBans();
+    if (bans.length === 0) {
+      actionLock = false;
+      return;
+    }
+
+    // Map ban data to update format
+    const updates = bans.map((ban) => ({
+      ip: ban.ip,
+      duration: duration,
+      ban_scope: ban.ban_scope,
+      service: ban.service,
+    }));
+
+    // Create and submit the form
+    const form = $("<form>", {
+      method: "POST",
+      action: `${window.location.pathname}/update_duration`,
+      class: "visually-hidden",
+    });
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "csrf_token",
+        value: $("#csrf_token").val(),
+      }),
+    );
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "updates",
+        value: JSON.stringify(updates),
+      }),
+    );
+    form.appendTo("body").submit();
+    actionLock = false;
+  };
 
   const getSelectedBans = () => {
     const bans = [];
@@ -627,6 +918,10 @@ $(document).ready(function () {
                 )}</span>
               </span>`;
             }
+            const date = new Date(data);
+            if (!isNaN(date.getTime())) {
+              return date.toLocaleString();
+            }
             return data;
           },
         },
@@ -673,9 +968,14 @@ $(document).ready(function () {
           console.error("DataTables AJAX error:", textStatus, errorThrown);
           $("#bans").addClass("d-none");
           $("#bans-waiting")
-            .removeClass("d-none")
-            .text("Error loading bans. Please try refreshing the page.")
-            .addClass("text-danger");
+            .removeClass("visually-hidden")
+            .addClass("text-danger")
+            .text(
+              t(
+                "status.error_loading_bans",
+                "Error loading bans. Please try refreshing the page.",
+              ),
+            );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
         },
@@ -740,13 +1040,29 @@ $(document).ready(function () {
             .attr("data-bs-placement", "right")
             .tooltip();
         }
-        updateCountryTooltips();
+        throttle(updateCountryTooltips, 200);
       },
       headerCallback: function (thead) {
-        updateHeaderTooltips(thead, headers);
+        throttle(updateHeaderTooltips, 200, thead, headers);
       },
     },
   };
+
+  // Add a fallback timeout to prevent infinite loading
+  setTimeout(function () {
+    if ($("#bans").hasClass("d-none")) {
+      $("#bans-waiting")
+        .removeClass("visually-hidden")
+        .addClass("text-danger")
+        .text(
+          t(
+            "status.error_loading_bans",
+            "Error loading bans. Please try refreshing the page.",
+          ),
+        );
+      $("#bans").addClass("d-none");
+    }
+  }, 5000); // 5 seconds fallback
 
   // Wait for window.i18nextReady = true before continuing
   if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
@@ -762,16 +1078,22 @@ $(document).ready(function () {
     }).then(() => {
       const dt = initializeDataTable(bans_config);
       dt.on("draw.dt", function () {
-        updateCountryTooltips();
-        updateHeaderTooltips(dt.table().header(), headers);
+        throttle(updateCountryTooltips, 200);
+        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
         $(".tooltip").remove();
+        // Hide waiting message and show table
+        $("#bans-waiting").addClass("visually-hidden");
+        $("#bans").removeClass("d-none");
       });
       dt.on("column-visibility.dt", function (e, settings, column, state) {
-        updateHeaderTooltips(dt.table().header(), headers);
+        throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
         $(".tooltip").remove();
       });
       // Ensure tooltips are set after initialization
-      updateHeaderTooltips(dt.table().header(), headers);
+      throttle(updateHeaderTooltips, 200, dt.table().header(), headers);
+      // Hide waiting message and show table
+      $("#bans-waiting").addClass("visually-hidden");
+      $("#bans").removeClass("d-none");
       return dt;
     });
   }
@@ -1004,7 +1326,7 @@ $(document).ready(function () {
           }
         });
       validateBan($input, ipServiceMap);
-    }, 100)();
+    }, 200)();
   });
 
   // Handle the permanent ban checkbox change

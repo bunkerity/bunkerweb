@@ -84,7 +84,7 @@
   },
   "LOG_FORMAT": {
     "context": "global",
-    "default": "$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
+    "default": "$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
     "help": "The format to use for access logs.",
     "id": "log-format",
     "label": "Log format",

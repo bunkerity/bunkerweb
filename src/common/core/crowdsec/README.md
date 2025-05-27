@@ -259,6 +259,12 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     sudo systemctl reload bunkerweb
     ```
 
+=== "All-in-one"
+
+    The BunkerWeb All-In-One (AIO) Docker image comes with CrowdSec fully integrated. You don't need to set up a separate CrowdSec instance or manually configure acquisition files for BunkerWeb logs when using the internal CrowdSec agent.
+
+    Refer to the [All-In-One (AIO) Image integration documentation](integrations.md#crowdsec-integration).
+
 ### Configuration Settings
 
 | Setting                     | Default                | Context   | Multiple | Description                                                                                                      |

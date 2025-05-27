@@ -14,6 +14,173 @@ BunkerWeb Cloud will be the easiest way to get started with BunkerWeb. It offers
 
 If you are interested in the BunkerWeb Cloud offering, don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=docs) so we can discuss your needs.
 
+## All-In-One (AIO) Image
+
+<figure markdown>
+  <!-- TODO: Replace with actual AIO architecture graph -->
+  ![AIO Architecture Graph Placeholder](assets/img/aio-graph-placeholder.svg){ align=center, width="600" }
+  <figcaption>BunkerWeb All-In-One Architecture (AIO)</figcaption>
+</figure>
+
+### Deployment
+
+To deploy the all-in-one container, all you have to do is run the following command:
+
+```shell
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+```
+
+By default, the container exposes:
+
+- 8080/tcp for HTTP
+- 8443/tcp for HTTPS
+- 8443/udp for QUIC
+- 7000/tcp for the web UI access without BunkerWeb in front (not recommended for production)
+
+The All-In-One image comes with several built-in services, which can be controlled using environment variables:
+
+- `SERVICE_UI=yes` (default) - Enables the web UI service
+- `SERVICE_SCHEDULER=yes` (default) - Enables the Scheduler service
+- `SERVICE_AUTOCONF=no` (default) - Enables the autoconf service
+- `USE_REDIS=yes` (default) - Enables the built-in [Redis](#redis-integration) instance
+- `USE_CROWDSEC=no` (default) - [CrowdSec](#crowdsec-integration) integration is disabled by default
+
+### Accessing the Setup wizard
+
+By default, the setup wizard is automagically launched when you run the AIO container for the first time. To access it, follow these steps:
+
+1. **Start the AIO container** as [above](#deployment), ensuring `SERVICE_UI=yes` (default).
+2. **Access the UI** via your main BunkerWeb endpoint, e.g. `https://your-domain`.
+
+> Follow the next steps in the [Quickstart guide](quickstart-guide.md#complete-the-setup-wizard) to set up the Web UI.
+
+### Redis Integration
+
+The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](advanced.md#persistence-of-bans-and-reports). To manage Redis:
+
+- To disable Redis, set `USE_REDIS=no` or point `REDIS_HOST` to an external host.
+- Redis logs appear with `[REDIS]` prefix in Docker logs and `/var/log/bunkerweb/redis.log`.
+
+### CrowdSec Integration
+
+The BunkerWeb **All-In-One** Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.
+
+By default, CrowdSec is **disabled**. To turn it on, simply add the `USE_CROWDSEC` environment variable:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+```
+
+* When `USE_CROWDSEC=yes`, the entrypoint will:
+
+    1. **Register** and **start** the local CrowdSec agent (via `cscli`).
+    2. **Install or upgrade** default collections & parsers.
+    3. **Configure** the `crowdsec-bunkerweb-bouncer/v1.6` bouncer.
+
+---
+
+#### Default Collections & Parsers
+
+On first startup (or after upgrading), these assets are automatically installed and kept up to date:
+
+| Type           | Name                                    | Purpose                                                                                                                                                                                                                            |
+| -------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Collection** | `crowdsecurity/nginx`                   | Defend Nginx servers against a broad array of HTTP-based attacks, from brute-force to injection attempts.                                                                                                                          |
+| **Collection** | `crowdsecurity/appsec-virtual-patching` | Delivers a dynamically updated WAF-style rule set targeting known CVEs, automatically patched daily to shield web applications from newly discovered vulnerabilities.                                                              |
+| **Collection** | `crowdsecurity/appsec-generic-rules`    | Complements `crowdsecurity/appsec-virtual-patching` with heuristics for generic application-layer attack patterns—such as enumeration, path traversal, and automated probes—filling gaps where CVE-specific rules don’t yet exist. |
+| **Parser**     | `crowdsecurity/geoip-enrich`            | Enriches events with GeoIP context                                                                                                                                                                                                 |
+
+<details>
+<summary><strong>How it works internally</strong></summary>
+
+The entrypoint script invokes:
+
+```bash
+cscli install collection crowdsecurity/nginx
+cscli install collection crowdsecurity/appsec-virtual-patching
+cscli install collection crowdsecurity/appsec-generic-rules
+cscli install parser     crowdsecurity/geoip-enrich
+```
+
+</details>
+
+---
+
+#### Adding Extra Collections
+
+Need more coverage? Define `CROWDSEC_EXTRA_COLLECTIONS` with a space-separated list of Hubb collections:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_EXTRA_COLLECTIONS="crowdsecurity/apache2 crowdsecurity/mysql" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+```
+
+!!! info "How it works internally"
+
+    The script loops through each name and installs or upgrades as needed—no manual steps required.
+
+---
+
+#### AppSec Toggle
+
+CrowdSec [AppSec](https://docs.crowdsec.net/docs/appsec/intro/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) features—powered by the `appsec-virtual-patching` and `appsec-generic-rules` collections—are **enabled by default**.
+
+To **disable** all AppSec (WAF/virtual-patching) functionality, set:
+
+```bash
+-e CROWDSEC_APPSEC_URL=""
+```
+
+This effectively turns off the AppSec endpoint so no rules are applied.
+
+---
+
+#### External CrowdSec API
+
+If you operate a remote CrowdSec instance, point the container to your API:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_API="https://crowdsec.example.com:8000" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+```
+
+* **Local registration** is skipped when `CROWDSEC_API` is not `127.0.0.1` or `localhost`.
+* **AppSec** is disabled by default when using an external API. To enable it, set `CROWDSEC_APPSEC_URL` to your desired endpoint.
+* Bouncer registration still occurs against the remote API.
+* To reuse an existing bouncer key, supply `CROWDSEC_API_KEY` with your pre-generated token.
+
+---
+
+!!! tip "More options"
+    For full coverage of all CrowdSec options (custom scenarios, logs, troubleshooting, and more), see the [BunkerWeb CrowdSec plugin docs](features.md#crowdsec) or visit the [official CrowdSec website](https://www.crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs).
+
 ## Docker
 
 <figure markdown>
@@ -306,38 +473,6 @@ docker build -t bw-autoconf -f src/autoconf/Dockerfile . && \
 docker build -t bw-ui -f src/ui/Dockerfile .
 ```
 
-### All-In-One Image
-
-!!! warning "Do not use in production"
-    The All-In-One Image is ideal for testing and small-scale deployments. In production environments, consider using a multi-container setup to improve scalability, isolation, and monitoring.
-
-The All-In-One Image simplifies deployment by combining all BunkerWeb components (core, scheduler, autoconf, and web UI) into a single container. It uses Supervisor to manage processes and directs logs to Docker’s logging system.
-
-To deploy the all-in-one container, run:
-
-```shell
-docker run -d --name bunkerweb-aio -v bw-storage:/data -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp bunkerity/bunkerweb-all-in-one:1.6.2-rc2
-```
-
-By default, the container exposes:
-
-- 8080/tcp for HTTP
-- 8443/tcp for HTTPS
-- 8443/udp for QUIC
-- 7000/tcp for the web UI access without BunkerWeb in front
-
-You can control the services with the following environment variables:
-
-- `SERVICE_SCHEDULER` (default: `yes`)
-- `SERVICE_UI` (default: `yes`)
-- `AUTOCONF_MODE` (default: `no`)
-
-For example, to disable the Web UI:
-
-```shell
-docker run -d --name bunkerweb-aio -v bw-storage:/data -e SERVICE_UI=no -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp bunkerity/bunkerweb-all-in-one:1.6.2-rc2
-```
-
 ## Linux
 
 <figure markdown>
@@ -353,8 +488,8 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Fedora 40
 - Fedora 41
 - Fedora 42
-- Red Hat Enterprise Linux (RHEL) 8.9
-- Red Hat Enterprise Linux (RHEL) 9.4
+- Red Hat Enterprise Linux (RHEL) 8.10
+- Red Hat Enterprise Linux (RHEL) 9.6
 
 ### Installation using package manager
 

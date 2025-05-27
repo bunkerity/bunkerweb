@@ -8,6 +8,7 @@
     "version": "ورژن: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "براہ کرم ایک حسب ضرورت اختتامی تاریخ منتخب کریں۔",
     "important": "اہم",
     "no_changes_detected": "کوئی تبدیلی نہیں ملی۔",
     "notice": "نوٹس",
@@ -115,12 +116,17 @@
     "select_file": "فائل منتخب کریں",
     "select_page": "صفحہ منتخب کریں",
     "service": "سروس",
+    "set_1h": "1 گھنٹہ سیٹ کریں",
+    "set_24h": "24 گھنٹے سیٹ کریں",
+    "set_1w": "1 ہفتہ سیٹ کریں",
+    "set_permanent": "مستقل سیٹ کریں",
     "setup": "سیٹ اپ",
     "show": "دکھائیں",
     "stop": "روکیں",
     "submit": "جمع کرائیں",
     "subscribe": "سبسکرائب کریں",
     "unban": "پابندی ہٹائیں",
+    "update_duration": "پابندی کی مدت اپ ڈیٹ کریں",
     "update_key": "کلید اپ ڈیٹ کریں",
     "upload_photo": "نئی تصویر اپ لوڈ کریں",
     "wipe_other_sessions": "دیگر سیشنز صاف کریں"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "خبریں حاصل کرنے میں ناکام:",
     "skipping_malformed_line": "خراب فارمیٹ والی لائن کو نظر انداز کیا جا رہا ہے: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 گھنٹہ",
+    "24_hours": "24 گھنٹے",
+    "1_week": "1 ہفتہ",
+    "permanent": "مستقل",
+    "custom": "حسب ضرورت"
+  },
   "error": {
     "401": {
       "help": "اس وسیلہ تک رسائی کے لیے آپ کو لاگ ان ہونا ضروری ہے۔",
@@ -589,6 +602,7 @@
       "configuration_name": "کنفیگریشن کا نام",
       "confirm_password": "پاس ورڈ کی تصدیق کریں",
       "current_password": "موجودہ پاس ورڈ",
+      "custom_end_date": "حسب ضرورت اختتامی تاریخ",
       "custom_ssl_certificate": "کسٹم SSL سرٹیفکیٹ",
       "custom_ssl_certificate_data": "کسٹم SSL سرٹیفکیٹ ڈیٹا (Base64/PEM)",
       "custom_ssl_key": "کسٹم SSL کلید",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS کریڈینشل آئٹمز",
       "lets_encrypt_profile": "Let's Encrypt پروفائل",
       "license_key": "لائسنس کلید",
+      "make_permanent": "مستقل بنائیں",
       "name": "نام",
+      "new_duration": "نئی مدت",
       "new_password": "نیا پاس ورڈ",
       "optional": "(اختیاری)",
       "password": "پاس ورڈ",
@@ -632,6 +648,7 @@
       "config_name": "میری-کسٹم-کنفیگ",
       "enter_username": "اپنا صارف نام درج کریں",
       "keywords": "کلیدی الفاظ...",
+      "plugin_search": "پلگ ان تلاش کریں...",
       "search": "تلاش کریں...",
       "select_service": "سروس منتخب کریں",
       "secret_token": "خفیہ ٹوکن",
@@ -695,7 +712,8 @@
       "reset_template_alert": "کیا آپ واقعی موجودہ ٹیمپلیٹ سیٹنگز اور کسٹم کنفیگریشنز ری سیٹ کرنا چاہتے ہیں؟",
       "services_deletion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات حذف کرنا چاہتے ہیں؟",
       "unban_confirmation_alert": "کیا آپ واقعی منتخب کردہ IP ایڈریس سے پابندی ہٹانا چاہتے ہیں؟",
-      "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں?"
+      "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں؟",
+      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:"
     },
     "button": {
       "reset_template_confirm": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں"
@@ -719,7 +737,8 @@
       "job_history_count": "ٹاسک کی آخری {{count}} ایگزیکیوشنز",
       "recovery_codes": "ریکوری کوڈز",
       "reset_template_config": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں؟",
-      "server_name_not_unique": "سرور کا نام منفرد نہیں ہے"
+      "server_name_not_unique": "سرور کا نام منفرد نہیں ہے",
+      "update_duration": "پابندی کی مدت اپ ڈیٹ کریں"
     }
   },
   "mode": {
@@ -753,6 +772,10 @@
     "misc": "متفرق",
     "mode_selection": "موڈ کا انتخاب",
     "more": "مزید...",
+    "plugin_activated": "پلگ ان فعال ہو گیا",
+    "plugin_deactivated": "پلگ ان غیر فعال ہو گیا",
+    "plugin_activated_global": "پلگ ان عالمی طور پر فعال ہو گیا",
+    "plugin_deactivated_global": "پلگ ان عالمی طور پر غیر فعال ہو گیا",
     "plugins": "پلگ انز",
     "plugins_pages": "پلگ ان صفحات",
     "pro": "پرو",
@@ -888,6 +911,7 @@
     "country": "ملک",
     "created": "بنایا گیا",
     "data": "ڈیٹا",
+    "date": "تاریخ",
     "empty": "کوئی تلاش پینل دستیاب نہیں",
     "end_date": "اختتامی تاریخ",
     "first_seen": "پہلی بار دیکھا گیا",
@@ -973,6 +997,7 @@
     "default_server": "ڈیفالٹ سرور",
     "down": "غیر فعال",
     "draft": "ڈرافٹ",
+    "error_loading_bans": "پابندیاں لوڈ کرتے وقت خرابی پیش آئی۔ براہ کرم صفحہ ریفریش کرنے کی کوشش کریں۔",
     "failed": "ناکام",
     "loading": "لوڈ ہو رہا ہے...",
     "loading_bans": "پابندیاں لوڈ ہو رہی ہیں...",
@@ -1045,6 +1070,7 @@
       "checksum": "چیک سم",
       "country": "ملک",
       "created": "بنایا گیا",
+      "current_time_left": "موجودہ باقی وقت",
       "data": "ڈیٹا",
       "date": "تاریخ",
       "description": "تفصیل",
@@ -1064,6 +1090,7 @@
       "plugin": "پلگ ان",
       "reason": "وجہ",
       "reload": "دوبارہ لوڈ کریں",
+      "request_id": "ریکویسٹ آئی ڈی",
       "scope": "دائرہ کار",
       "security_mode": "سیکیورٹی موڈ",
       "server_name": "سرور کا نام",
@@ -1138,6 +1165,7 @@
     "custom_ssl_cert_path": "کسٹم SSL سرٹیفکیٹ فائل کا پاتھ۔",
     "custom_ssl_key_data": "کسٹم SSL نجی کلید ڈیٹا (PEM فارمیٹ یا Base64 انکوڈ شدہ)۔",
     "custom_ssl_key_path": "کسٹم SSL نجی کلید فائل کا پاتھ۔",
+    "different_from_template": "قدر ٹیمپلیٹ ڈیفالٹ سے مختلف ہے",
     "disabled_by_method": "غیر فعال: طریقہ '{{method}}' کے ذریعے منظم۔",
     "disabled_db_readonly": "غیر فعال: ڈیٹا بیس صرف پڑھنے کے موڈ میں ہے۔",
     "disabled_draft": "غیر فعال: سروس ڈرافٹ موڈ میں ہے۔",
@@ -1274,6 +1302,7 @@
         "ip_address": "رپورٹ کو متحرک کرنے والا IP ایڈریس",
         "method": "رپورٹ کردہ درخواست کا HTTP طریقہ",
         "reason": "رپورٹ بنانے کی وجہ",
+        "request_id": "درخواست کا منفرد شناخت کنندہ",
         "security_mode": "رپورٹ بناتے وقت فعال سیکیورٹی موڈ",
         "select_all": "تمام رپورٹس منتخب کریں",
         "server_name": "رپورٹ بنانے والے سرور کا نام (vhost)",

@@ -11,7 +11,7 @@
       "help": "Secret used to encrypt sessions variables for storing data related to challenges.",
       "id": "session-secret",
       "label": "Sessions secret",
-      "regex": "^\\w+$",
+      "regex": "^.+$",
       "type": "password"
     },
     "SESSIONS_NAME": {
@@ -20,7 +20,7 @@
       "help": "Name of the cookie given to clients.",
       "id": "sessions-name",
       "label": "Sessions name",
-      "regex": "^\\w+$",
+      "regex": "^[a-zA-Z0-9_-]+$",
       "type": "text"
     },
     "SESSIONS_IDLING_TIMEOUT": {

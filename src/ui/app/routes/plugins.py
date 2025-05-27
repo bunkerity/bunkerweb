@@ -22,20 +22,11 @@ from werkzeug.utils import secure_filename
 from common_utils import bytes_hash  # type: ignore
 
 from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
-from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR
+from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
 
 from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
 
 plugins = Blueprint("plugins", __name__)
-
-ALWAYS_USED_PLUGINS = ("errors", "headers", "misc", "php", "pro", "sessions")
-PLUGINS_SPECIFICS = {
-    "COUNTRY": {"BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": ""},
-    "CUSTOMCERT": {"USE_CUSTOM_SSL": "no"},
-    "LETSENCRYPT": {"AUTO_LETS_ENCRYPT": "no"},
-    "LIMIT": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
-    "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
-}
 
 
 @plugins.route("/plugins", methods=["GET"])

@@ -1,3 +1,15 @@
+function throttle(func, limit, ...throttleArgs) {
+  let inThrottle;
+  return function (...args) {
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, [...throttleArgs, ...args]);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
+
 class News {
   constructor(t) {
     this.BASE_URL = "https://www.bunkerweb.io/";
@@ -332,9 +344,7 @@ $(document).ready(() => {
   calculateMinHeight();
 
   // Recalculate the min-height on window resize
-  $(window).on("resize", function () {
-    calculateMinHeight();
-  });
+  $(window).on("resize", throttle(calculateMinHeight, 200));
 
   const news = new News(t);
   news.init();
@@ -462,6 +472,47 @@ $(document).ready(() => {
     notificationsRead = readNotifications;
     sessionStorage.setItem("notificationsRead", notificationsRead);
     updateNotificationsBadge();
+  });
+
+  // Debounced clear notifications logic
+  const clearNotifications = debounce((rootUrl) => {
+    const csrfToken = $("#csrf_token").val();
+    const data = new FormData();
+    data.append("csrf_token", csrfToken);
+
+    if (!rootUrl) {
+      return;
+    }
+
+    fetch(rootUrl.replace(/\/profile$/, "/clear_notifications"), {
+      method: "POST",
+      credentials: "same-origin",
+      body: data,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        $("#notifications-toast-container").empty();
+        sessionStorage.setItem("notificationsRead", 0);
+        updateNotificationsBadge();
+        $("#clear-notifications-btn").closest(".d-flex").hide();
+        $(
+          "#data-notifications-container p[data-i18n='status.no_notifications']",
+        )
+          .removeClass("d-none")
+          .show();
+      })
+      .catch((error) => {
+        console.error(
+          "There was a problem with the clear notifications operation:",
+          error,
+        );
+      });
+  }, 300);
+
+  $(document).on("click", "#clear-notifications-btn", function () {
+    clearNotifications($(this).data("root-url"));
   });
 
   const saveTheme = debounce((rootUrl, theme) => {

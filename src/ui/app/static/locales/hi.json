@@ -8,6 +8,7 @@
     "version": "संस्करण: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "कृपया एक कस्टम अंतिम तिथि चुनें।",
     "important": "महत्वपूर्ण",
     "no_changes_detected": "कोई परिवर्तन नहीं पाया गया।",
     "notice": "सूचना",
@@ -115,12 +116,17 @@
     "select_file": "फ़ाइल चुनें",
     "select_page": "पृष्ठ चुनें",
     "service": "सेवा",
+    "set_1h": "1 घंटा सेट करें",
+    "set_24h": "24 घंटे सेट करें",
+    "set_1w": "1 सप्ताह सेट करें",
+    "set_permanent": "स्थायी सेट करें",
     "setup": "सेटअप",
     "show": "दिखाएं",
     "stop": "रोकें",
     "submit": "जमा करें",
     "subscribe": "सदस्यता लें",
     "unban": "प्रतिबंध हटाएं",
+    "update_duration": "प्रतिबंध अवधि अपडेट करें",
     "update_key": "कुंजी अपडेट करें",
     "upload_photo": "नई फ़ोटो अपलोड करें",
     "wipe_other_sessions": "अन्य सत्र साफ़ करें"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "समाचार प्राप्त करने में विफल:",
     "skipping_malformed_line": "त्रुटिपूर्ण पंक्ति को छोड़ना: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 घंटा",
+    "24_hours": "24 घंटे",
+    "1_week": "1 सप्ताह",
+    "permanent": "स्थायी",
+    "custom": "कस्टम"
+  },
   "error": {
     "401": {
       "help": "इस संसाधन तक पहुँचने के लिए आपको लॉग इन होना चाहिए।",
@@ -589,6 +602,7 @@
       "configuration_name": "कॉन्फ़िगरेशन नाम",
       "confirm_password": "पासवर्ड की पुष्टि करें",
       "current_password": "वर्तमान पासवर्ड",
+      "custom_end_date": "कस्टम अंतिम तिथि",
       "custom_ssl_certificate": "कस्टम SSL प्रमाणपत्र",
       "custom_ssl_certificate_data": "कस्टम SSL प्रमाणपत्र डेटा (Base64/PEM)",
       "custom_ssl_key": "कस्टम SSL कुंजी",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS क्रेडेंशियल आइटम",
       "lets_encrypt_profile": "Let's Encrypt प्रोफ़ाइल",
       "license_key": "लाइसेंस कुंजी",
+      "make_permanent": "स्थायी बनाएं",
       "name": "नाम",
+      "new_duration": "नई अवधि",
       "new_password": "नया पासवर्ड",
       "optional": "(वैकल्पिक)",
       "password": "पासवर्ड",
@@ -632,6 +648,7 @@
       "config_name": "मेरा-कस्टम-कॉन्फिग",
       "enter_username": "अपना उपयोगकर्ता नाम दर्ज करें",
       "keywords": "कीवर्ड...",
+      "plugin_search": "प्लगइन्स खोजें...",
       "search": "खोजें...",
       "select_service": "सेवा चुनें",
       "secret_token": "गुप्त टोकन",
@@ -695,7 +712,8 @@
       "reset_template_alert": "क्या आप वाकई वर्तमान टेम्पलेट सेटिंग्स और कस्टम कॉन्फ़िगरेशन रीसेट करना चाहते हैं?",
       "services_deletion_confirmation": "क्या आप वाकई चयनित सेवाओं को हटाना चाहते हैं?",
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
-      "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?"
+      "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
+      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:"
     },
     "button": {
       "reset_template_confirm": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें"
@@ -719,7 +737,8 @@
       "job_history_count": "कार्य {{count}} निष्पादन",
       "recovery_codes": "पुनर्प्राप्ति कोड",
       "reset_template_config": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें?",
-      "server_name_not_unique": "सर्वर का नाम अद्वितीय नहीं है"
+      "server_name_not_unique": "सर्वर का नाम अद्वितीय नहीं है",
+      "update_duration": "प्रतिबंध अवधि अपडेट करें"
     }
   },
   "mode": {
@@ -753,6 +772,10 @@
     "misc": "विविध",
     "mode_selection": "मोड चयन",
     "more": "और...",
+    "plugin_activated": "प्लगइन सक्रिय किया गया",
+    "plugin_deactivated": "प्लगइन निष्क्रिय किया गया",
+    "plugin_activated_global": "प्लगइन वैश्विक रूप से सक्रिय किया गया",
+    "plugin_deactivated_global": "प्लगइन वैश्विक रूप से निष्क्रिय किया गया",
     "plugins": "प्लगइन्स",
     "plugins_pages": "प्लगइन पृष्ठ",
     "pro": "प्रो",
@@ -888,6 +911,7 @@
     "country": "देश",
     "created": "बनाया गया",
     "data": "डेटा",
+    "date": "दिनांक",
     "empty": "कोई खोज पैन उपलब्ध नहीं",
     "end_date": "अंतिम तिथि",
     "first_seen": "पहली बार देखा गया",
@@ -973,6 +997,7 @@
     "default_server": "डिफ़ॉल्ट सर्वर",
     "down": "बंद",
     "draft": "ड्राफ्ट",
+    "error_loading_bans": "प्रतिबंध लोड करने में त्रुटि। कृपया पृष्ठ को ताज़ा करने का प्रयास करें।",
     "failed": "विफल",
     "loading": "लोड हो रहा है...",
     "loading_bans": "प्रतिबंध लोड हो रहे हैं...",
@@ -1045,6 +1070,7 @@
       "checksum": "चेकसम",
       "country": "देश",
       "created": "बनाया गया",
+      "current_time_left": "वर्तमान शेष समय",
       "data": "डेटा",
       "date": "दिनांक",
       "description": "विवरण",
@@ -1064,6 +1090,7 @@
       "plugin": "प्लगइन",
       "reason": "कारण",
       "reload": "पुनः लोड करें",
+      "request_id": "अनुरोध आईडी",
       "scope": "दायरा",
       "security_mode": "सुरक्षा मोड",
       "server_name": "सर्वर का नाम",
@@ -1138,6 +1165,7 @@
     "custom_ssl_cert_path": "कस्टम SSL प्रमाणपत्र फ़ाइल का पथ।",
     "custom_ssl_key_data": "कस्टम SSL निजी कुंजी डेटा (PEM प्रारूप या Base64 एन्कोडेड)।",
     "custom_ssl_key_path": "कस्टम SSL निजी कुंजी फ़ाइल का पथ।",
+    "different_from_template": "मान टेम्पलेट डिफ़ॉल्ट से भिन्न है",
     "disabled_by_method": "अक्षम: विधि '{{method}}' के माध्यम से प्रबंधित।",
     "disabled_db_readonly": "अक्षम: डेटाबेस रीड-ओनली मोड में है।",
     "disabled_draft": "अक्षम: सेवा ड्राफ्ट मोड में है।",
@@ -1274,6 +1302,7 @@
         "ip_address": "रिपोर्ट को ट्रिगर करने वाला आईपी पता",
         "method": "रिपोर्ट किए गए अनुरोध की HTTP विधि",
         "reason": "रिपोर्ट उत्पन्न होने का कारण",
+        "request_id": "अनुरोध के लिए अद्वितीय पहचानकर्ता",
         "security_mode": "रिपोर्ट उत्पन्न होने पर सक्रिय सुरक्षा मोड",
         "select_all": "सभी रिपोर्ट चुनें",
         "server_name": "रिपोर्ट उत्पन्न करने वाला सर्वर नाम (vhost)",

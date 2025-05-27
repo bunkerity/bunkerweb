@@ -8,6 +8,7 @@
     "version": "সংস্করণ: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "অনুগ্রহ করে একটি কাস্টম শেষ তারিখ নির্বাচন করুন।",
     "important": "গুরুত্বপূর্ণ",
     "no_changes_detected": "কোনো পরিবর্তন সনাক্ত করা হয়নি।",
     "notice": "বিজ্ঞপ্তি",
@@ -115,12 +116,17 @@
     "select_file": "ফাইল নির্বাচন করুন",
     "select_page": "পৃষ্ঠা নির্বাচন করুন",
     "service": "পরিষেবা",
+    "set_1h": "১ ঘণ্টা সেট করুন",
+    "set_24h": "২৪ ঘণ্টা সেট করুন",
+    "set_1w": "১ সপ্তাহ সেট করুন",
+    "set_permanent": "স্থায়ী সেট করুন",
     "setup": "সেটআপ",
     "show": "দেখানো",
     "stop": "বন্ধ করুন",
     "submit": "জমা দিন",
     "subscribe": "সাবস্ক্রাইব করুন",
     "unban": "নিষেধাজ্ঞা हटाएं",
+    "update_duration": "নিষেধাজ্ঞার সময়কাল আপডেট করুন",
     "update_key": "কী আপডেট করুন",
     "upload_photo": "নতুন ছবি আপলোড করুন",
     "wipe_other_sessions": "অন্যান্য সেশন মুছুন"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "সংবাদ আনতে ব্যর্থ:",
     "skipping_malformed_line": "ত্রুটিপূর্ণ লাইন উপেক্ষা করা হচ্ছে: {{line}}"
   },
+  "duration": {
+    "1_hour": "১ ঘণ্টা",
+    "24_hours": "২৪ ঘণ্টা",
+    "1_week": "১ সপ্তাহ",
+    "permanent": "স্থায়ী",
+    "custom": "কাস্টম"
+  },
   "error": {
     "401": {
       "help": "এই রিসোর্সে অ্যাক্সেস করার জন্য আপনাকে অবশ্যই লগইন করতে হবে।",
@@ -589,6 +602,7 @@
       "configuration_name": "কনফিগারেশনের নাম",
       "confirm_password": "পাসওয়ার্ড নিশ্চিত করুন",
       "current_password": "বর্তমান পাসওয়ার্ড",
+      "custom_end_date": "কাস্টম শেষ তারিখ",
       "custom_ssl_certificate": "কাস্টম SSL শংসাপত্র",
       "custom_ssl_certificate_data": "কাস্টম SSL শংসাপত্রের ডেটা (Base64/PEM)",
       "custom_ssl_key": "কাস্টম SSL কী",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS ক্রেডেনশিয়াল আইটেম",
       "lets_encrypt_profile": "Let's Encrypt প্রোফাইল",
       "license_key": "লাইসেন্স কী",
+      "make_permanent": "স্থায়ী করুন",
       "name": "নাম",
+      "new_duration": "নতুন সময়কাল",
       "new_password": "নতুন পাসওয়ার্ড",
       "optional": "(ঐচ্ছিক)",
       "password": "পাসওয়ার্ড",
@@ -632,6 +648,7 @@
       "config_name": "আমার-কাস্টম-কনফিগ",
       "enter_username": "আপনার ব্যবহারকারীর নাম লিখুন",
       "keywords": "কীওয়ার্ড...",
+      "plugin_search": "প্লাগইন অনুসন্ধান করুন...",
       "search": "অনুসন্ধান করুন...",
       "select_service": "পরিষেবা নির্বাচন করুন",
       "secret_token": "গোপন টোকেন",
@@ -695,7 +712,8 @@
       "reset_template_alert": "আপনি কি নিশ্চিত যে আপনি বর্তমান টেমপ্লেট সেটিংস এবং কাস্টম কনফিগারেশন রিসেট করতে চান?",
       "services_deletion_confirmation": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি মুছতে চান?",
       "unban_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানা থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
-      "unban_confirmation_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানাগুলি থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?"
+      "unban_confirmation_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানাগুলি থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
+      "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:"
     },
     "button": {
       "reset_template_confirm": "টেমপ্লেট কনফিগারেশন রিসেট করুন"
@@ -719,7 +737,8 @@
       "job_history_count": "কার্যের শেষ {{count}}টি সম্পাদন",
       "recovery_codes": "পুনরুদ্ধার কোড",
       "reset_template_config": "টেমপ্লেট কনফিগারেশন রিসেট করবেন?",
-      "server_name_not_unique": "সার্ভারের নাম অনন্য নয়"
+      "server_name_not_unique": "সার্ভারের নাম অনন্য নয়",
+      "update_duration": "নিষেধাজ্ঞার সময়কাল আপডেট করুন"
     }
   },
   "mode": {
@@ -753,6 +772,10 @@
     "misc": "বিবিধ",
     "mode_selection": "মোড নির্বাচন",
     "more": "আরও...",
+    "plugin_activated": "প্লাগইন সক্রিয় হয়েছে",
+    "plugin_deactivated": "প্লাগইন নিষ্ক্রিয় হয়েছে",
+    "plugin_activated_global": "প্লাগইন গ্লোবালি সক্রিয় হয়েছে",
+    "plugin_deactivated_global": "প্লাগইন গ্লোবালি নিষ্ক্রিয় হয়েছে",
     "plugins": "প্লাগইন",
     "plugins_pages": "প্লাগইন পৃষ্ঠা",
     "pro": "প্রো",
@@ -888,6 +911,7 @@
     "country": "দেশ",
     "created": "তৈরি করা হয়েছে",
     "data": "ডেটা",
+    "date": "তারিখ",
     "empty": "কোনো অনুসন্ধান প্যান উপলব্ধ নেই",
     "end_date": "শেষ তারিখ",
     "first_seen": "প্রথম দেখা হয়েছে",
@@ -973,6 +997,7 @@
     "default_server": "ডিফল্ট সার্ভার",
     "down": "বন্ধ",
     "draft": "খসড়া",
+    "error_loading_bans": "নিষেধাজ্ঞা লোড করতে ত্রুটি। অনুগ্রহ করে পৃষ্ঠাটি রিফ্রেশ করার চেষ্টা করুন।",
     "failed": "ব্যর্থ",
     "loading": "লোড হচ্ছে...",
     "loading_bans": "নিষেধাজ্ঞা লোড হচ্ছে...",
@@ -1045,6 +1070,7 @@
       "checksum": "চেকসাম",
       "country": "দেশ",
       "created": "তৈরি করা হয়েছে",
+      "current_time_left": "বর্তমান অবশিষ্ট সময়",
       "data": "ডেটা",
       "date": "তারিখ",
       "description": "বিবরণ",
@@ -1064,6 +1090,7 @@
       "plugin": "প্লাগইন",
       "reason": "কারণ",
       "reload": "পুনরায় লোড",
+      "request_id": "অনুরোধ আইডি",
       "scope": "পরিধি",
       "security_mode": "নিরাপত্তা মোড",
       "server_name": "সার্ভারের নাম",
@@ -1138,6 +1165,7 @@
     "custom_ssl_cert_path": "কাস্টম SSL শংসাপত্র ফাইলের পাথ।",
     "custom_ssl_key_data": "কাস্টম SSL ব্যক্তিগত কী ডেটা (PEM ফর্ম্যাট বা Base64 এনকোডেড)।",
     "custom_ssl_key_path": "কাস্টম SSL ব্যক্তিগত কী ফাইলের পাথ।",
+    "different_from_template": "মান টেমপ্লেটের ডিফল্ট থেকে ভিন্ন",
     "disabled_by_method": "নিষ্ক্রিয়: পদ্ধতি '{{method}}' এর মাধ্যমে পরিচালিত।",
     "disabled_db_readonly": "নিষ্ক্রিয়: ডাটাবেস শুধুমাত্র পঠন মোডে আছে।",
     "disabled_draft": "নিষ্ক্রিয়: পরিষেবাটি খসড়া মোডে আছে।",
@@ -1274,6 +1302,7 @@
         "ip_address": "রিপোর্ট ট্রিগার করা আইপি ঠিকানা",
         "method": "রিপোর্ট করা অনুরোধের HTTP পদ্ধতি",
         "reason": "রিপোর্ট তৈরির কারণ",
+        "request_id": "অনুরোধের জন্য অনন্য শনাক্তকারী",
         "security_mode": "রিপোর্ট তৈরির সময় সক্রিয় নিরাপত্তা মোড",
         "select_all": "সব রিপোর্ট নির্বাচন করুন",
         "server_name": "রিপোর্ট তৈরি করা সার্ভারের নাম (vhost)",

@@ -1,5 +1,10 @@
 {% set starting = True %}
 {% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block page %}
     <div class="bg-{% if theme == 'light' %}light{% else %}dark{% endif %}-subtle">
         <div class="login-background d-flex justify-content-center">
@@ -46,4 +51,13 @@
         </div>
     </div>
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/starting.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

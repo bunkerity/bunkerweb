@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column("bw_ui_users", sa.Column("language", sa.String(length=2), nullable=False))
+    op.add_column("bw_ui_users", sa.Column("language", sa.String(length=2), nullable=False, server_default="en"))
 
     # Update the version in bw_metadata
     op.execute("UPDATE bw_metadata SET version = '1.6.2-rc2' WHERE id = 1")

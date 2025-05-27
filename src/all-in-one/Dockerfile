@@ -17,7 +17,58 @@ COPY --chmod=644 src/deps/install.sh install.sh
 # Compile and install dependencies
 RUN bash install.sh
 
+WORKDIR /tmp/crowdsec/deps
+
+RUN apk add --no-cache cmake g++ jq git libc-dev
+
+COPY src/all-in-one/deps/go.json go.json
+COPY --chmod=644 src/all-in-one/scripts/install-go.sh install-go.sh
+COPY --chmod=644 src/all-in-one/scripts/utils.sh utils.sh
+
+# Compile and install Go
+RUN export PLATFORM="$(case "$TARGETPLATFORM" in \
+    linux/amd64) echo "amd64" ;; \
+    linux/arm64) echo "arm64" ;; \
+    linux/arm/v6) echo "armv6l" ;; \
+    linux/386) echo "386" ;; \
+    *) echo "amd64" ;; \
+    esac)" && \
+    export VERSION="$(jq -r .version go.json)" && \
+    export URL="$(jq -r .url go.json | sed "s/{VERSION}/$VERSION/" | sed "s/{PLATFORM}/$PLATFORM/")" && \
+    export SHA256="$(jq -r ".checksums.$PLATFORM" go.json)" && \
+    bash install-go.sh
+
+COPY src/all-in-one/deps/abseil-cpp.json abseil-cpp.json
+COPY --chmod=644 src/all-in-one/scripts/install-abseil-cpp.sh install-abseil-cpp.sh
+
+# Compile and install abseil-cpp
+RUN export VERSION="$(jq -r .version abseil-cpp.json)" && \
+    export URL="$(jq -r .url abseil-cpp.json)" && \
+    export COMMIT="$(jq -r .commit abseil-cpp.json)" && \
+    bash install-abseil-cpp.sh
+
+COPY src/all-in-one/deps/re2.json re2.json
+COPY --chmod=644 src/all-in-one/scripts/install-re2.sh install-re2.sh
+
+# Compile and install re2
+RUN export VERSION="$(jq -r .version re2.json)" && \
+    export URL="$(jq -r .url re2.json)" && \
+    export COMMIT="$(jq -r .commit re2.json)" && \
+    bash install-re2.sh
+
+COPY src/all-in-one/deps/crowdsec.json crowdsec.json
+COPY --chmod=644 src/all-in-one/scripts/install-crowdsec.sh install-crowdsec.sh
+
+# Compile and install crowdsec
+RUN export PATH="/usr/local/go/bin:$PATH" && \
+    export VERSION="$(jq -r .version crowdsec.json)" && \
+    export URL="$(jq -r .url crowdsec.json)" && \
+    export COMMIT="$(jq -r .commit crowdsec.json)" && \
+    bash install-crowdsec.sh
+
 WORKDIR /usr/share/bunkerweb
+
+RUN mv /tmp/crowdsec/deps/crowdsec/crowdsec-release.tgz .
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -55,17 +106,37 @@ COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
+# Minify JS files (can be skipped with SKIP_MINIFY=yes)
+ARG SKIP_MINIFY=no
+RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+    apk add --no-cache nodejs npm && \
+    npm install -g uglify-js && \
+    for file in $(find ui/app/static -type f -name "*.js") ; do \
+        uglifyjs "$file" --compress --mangle --verbose --output "$file" ; \
+    done ; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
+
 FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
 
 # Install runtime dependencies including supervisord
-RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 sed sqlite tzdata unzip yajl supervisor
+RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
 RUN apk add --no-cache "libpq>=16.9-r0" "postgresql16-client>=16.9-r0" # CVE-2025-4207
 RUN apk add --no-cache "libxml2>=2.12.7-r3" # CVE-2025-32414 CVE-2025-32415
+RUN apk add --no-cache "pyc>=3.12.10-r1" "python3>=3.12.10-r1" "python3-pyc>=3.12.10-r1" "python3-pycache-pyc0>=3.12.10-r1" # CVE-2025-4516
+
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+
+# Install updated python requirements to fix CVEs
+RUN export MAKEFLAGS="-j$(nproc)" && \
+    pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
+    rm -f /tmp/requirements-deps.txt
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -97,6 +168,32 @@ RUN cp helpers/bwcli /usr/bin/ && \
 COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
+# Setup CrowdSec
+RUN tar -xzf crowdsec-release.tgz && \
+    mkdir /data/crowdsec && ln -s /data/crowdsec /var/lib/crowdsec && \
+    # mkdir /data/crowdsec/config && ln -s /data/crowdsec/config /etc/crowdsec && \
+    cd crowdsec-v* && \
+    ./wizard.sh --docker-mode && \
+    cd .. && \
+    mv all-in-one/conf/config.yaml /etc/crowdsec/config.yaml && \
+    mv all-in-one/conf/acquis.yaml /etc/crowdsec/acquis.yaml && \
+    mv all-in-one/conf/appsec.yaml /etc/crowdsec/acquis.d/appsec.yaml && \
+    rm -rf crowdsec* all-in-one/deps all-in-one/scripts && \
+    chown -R root:nginx /data /var/lib/crowdsec /etc/crowdsec /usr/local/lib/crowdsec && \
+	chmod -R 770 /data /var/lib/bunkerweb /etc/crowdsec /usr/local/lib/crowdsec && \
+    find /etc/crowdsec/ -type f -name "*.yaml" -print0 | xargs -0 chmod 660 && \
+    mv /etc/crowdsec/online_api_credentials.yaml /var/lib/crowdsec/online_api_credentials.yaml && \
+    mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml
+
+# Setup Redis
+RUN mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
+    apk add --no-cache redis && \
+    mv all-in-one/conf/redis.conf /etc/redis.conf && \
+    rm -rf all-in-one/conf && \
+    chown -R root:nginx /data /var/lib/redis /etc/redis.conf && \
+    chmod -R 770 /data /var/lib/redis && \
+    chmod 660 /etc/redis.conf
+
 # Set up supervisor configuration
 RUN mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
     mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d
@@ -116,6 +213,7 @@ HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr
 ENV PYTHONPATH="/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db"
 ENV SERVICE_UI="yes"
 ENV SERVICE_SCHEDULER="yes"
+ENV USE_REDIS="yes"
 
 USER nginx:nginx
 

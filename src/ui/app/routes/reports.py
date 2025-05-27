@@ -66,7 +66,7 @@ def reports_fetch():
             field = key.split("[")[1].split("]")[0]
             search_panes[field].append(value)
 
-    columns = ["date", "ip", "country", "method", "url", "status", "user_agent", "reason", "server_name", "data", "security_mode"]
+    columns = ["date", "id", "ip", "country", "method", "url", "status", "user_agent", "reason", "server_name", "data", "security_mode"]
 
     # Apply searchPanes filters
     def filter_by_search_panes(reports):
@@ -110,6 +110,7 @@ def reports_fetch():
 
             return {
                 "date": datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                "id": report.get("id", "N/A"),
                 "ip": report.get("ip", "N/A"),
                 "country": report.get("country", "N/A"),
                 "method": report.get("method", "N/A"),
@@ -145,7 +146,7 @@ def reports_fetch():
     filtered_ids = {report["id"] for report in filtered_reports}
 
     for report in all_reports:
-        for field in columns[1:]:  # Skip date field
+        for field in columns[2:]:  # Skip date and id fields for panes
             value = report.get(field, "N/A")
 
             # Ensure value is hashable (convert dicts or lists to strings if necessary)

@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from json import JSONDecodeError, dumps, loads
 from math import floor
 from time import time
@@ -158,7 +158,7 @@ def bans_fetch():
             "country": ban.get("country", "N/A"),
             "reason": ban.get("reason", "N/A"),
             "scope": ban.get("ban_scope", "global"),
-            "service": ban.get("service", None) or "_",
+            "service": ban.get("service") or "_",
             "end_date": "permanent" if ban.get("permanent", False) else ban.get("end_date", "N/A"),
             "time_left": "permanent" if ban.get("permanent", False) else ban.get("remain", "N/A"),
             "permanent": ban.get("permanent", False),
@@ -226,6 +226,16 @@ def bans_fetch():
                     return False
 
                 filtered = list(filter(end_date_filter, filtered))
+            elif field == "service":
+                # Special handling for service searchpane
+                def service_filter(ban):
+                    ban_service = ban.get("service")
+                    # Normalize global bans to "_"
+                    if ban.get("ban_scope") == "global" or ban_service in (None, ""):
+                        ban_service = "_"
+                    return str(ban_service) in selected_values
+
+                filtered = list(filter(service_filter, filtered))
             else:
                 filtered = [ban for ban in filtered if str(ban.get(field, "N/A")) in selected_values]
         return filtered
@@ -268,12 +278,20 @@ def bans_fetch():
 
     # Use IP+scope+service as unique ID for bans
     def ban_id(ban):
-        return f"{ban.get('ip','')}|{ban.get('ban_scope','')}|{ban.get('service','_')}"
+        service = ban.get("service")
+        # Normalize service to "_" for global bans or when service is None
+        if ban.get("ban_scope") == "global" or service is None:
+            service = "_"
+        return f"{ban.get('ip','')}|{ban.get('ban_scope','')}|{service}"
 
     filtered_ids = {ban_id(ban) for ban in filtered_bans}
     for ban in bans:
         for field in columns[1:]:  # skip date
             value = ban.get(field, "N/A")
+            # Special handling for service field to normalize global bans
+            if field == "service":
+                if ban.get("ban_scope") == "global" or value in (None, ""):
+                    value = "_"
             if isinstance(value, (dict, list)):
                 value = str(value)
             pane_counts[field][value]["total"] += 1
@@ -344,7 +362,7 @@ def bans_fetch():
     # Special handling for service searchpane options
     search_panes_options["service"] = []
     for name, counts in pane_counts["service"].items():
-        display_name = "default server" if name == "_" else name
+        display_name = "default server" if (not name or name == "_") else name
         search_panes_options["service"].append(
             {
                 "label": display_name,
@@ -463,7 +481,7 @@ def bans_ban():
                 ban_end = datetime.fromisoformat(ban_end_str.replace("Z", "+00:00"))
                 # Ensure timezone awareness
                 if ban_end.tzinfo is None:
-                    ban_end = ban_end.replace(tzinfo=datetime.timezone.utc)
+                    ban_end = ban_end.replace(tzinfo=timezone.utc)
 
                 # Calculate seconds from now until ban end
                 current_time = datetime.now().astimezone()
@@ -599,3 +617,193 @@ def bans_unban():
             flash(f"Successfully unbanned {ip}{service_text}")
 
     return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Unbanning {len(unbans)} IP{'s' if len(unbans) > 1 else ''}"))
+
+
+@bans.route("/bans/update_duration", methods=["POST"])
+@login_required
+def bans_update_duration():
+    # Check database state
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "bans")
+
+    # Validate input parameters
+    verify_data_in_form(
+        data={"updates": None},
+        err_message="Missing updates parameter on /bans/update_duration.",
+        redirect_url="bans",
+        next=True,
+    )
+    updates = request.form["updates"]
+    if not updates:
+        return handle_error("No updates.", "bans", True)
+    try:
+        updates = loads(updates)
+    except JSONDecodeError:
+        return handle_error("Invalid updates parameter on /bans/update_duration.", "bans", True)
+
+    redis_client = get_redis_client()
+
+    # Fetch existing bans from instances to get original reasons
+    instance_bans = BW_INSTANCES_UTILS.get_bans()
+    instance_bans_dict = {}
+    for ban in instance_bans:
+        # Normalize ban scope if missing
+        if "ban_scope" not in ban:
+            if ban.get("service", "_") == "_":
+                ban["ban_scope"] = "global"
+            else:
+                ban["ban_scope"] = "service"
+
+        ban_key = f"{ban.get('ip')}|{ban.get('ban_scope', 'global')}|{ban.get('service', '_') if ban['ban_scope'] == 'service' else '_'}"
+        instance_bans_dict[ban_key] = ban
+
+    for update in updates:
+        # Validate update structure
+        if not isinstance(update, dict) or "ip" not in update or "duration" not in update:
+            flask_flash("Invalid update structure for one of the bans, skipping", "error")
+            continue
+
+        # Extract and normalize update parameters
+        ip = update.get("ip", "")
+        duration = update.get("duration", "")
+        ban_scope = update.get("ban_scope", "global")
+        service = update.get("service", "")
+
+        # Calculate new expiration time based on duration
+        if duration == "permanent":
+            is_permanent = True
+            new_exp = -1
+        elif duration == "1h":
+            is_permanent = False
+            new_exp = 3600  # 1 hour in seconds
+        elif duration == "24h":
+            is_permanent = False
+            new_exp = 86400  # 24 hours in seconds
+        elif duration == "1w":
+            is_permanent = False
+            new_exp = 604800  # 1 week in seconds
+        elif duration == "custom":
+            # Handle custom duration from end_date
+            custom_end_date = update.get("end_date")
+
+            if custom_end_date:
+                try:
+                    # Parse and normalize the custom end date from ISO format
+                    end_date_str = custom_end_date
+                    if "." in end_date_str and "Z" in end_date_str:
+                        end_date_str = end_date_str.split(".")[0] + "Z"
+
+                    end_date = datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
+                    # Ensure timezone awareness
+                    if end_date.tzinfo is None:
+                        end_date = end_date.replace(tzinfo=timezone.utc)
+
+                    # Calculate seconds from now until ban end
+                    current_datetime = datetime.now().astimezone()
+                    new_exp = (end_date - current_datetime).total_seconds()
+
+                    # Ensure ban duration is positive
+                    if new_exp <= 0:
+                        flask_flash(f"Invalid custom ban duration for IP {ip}, must be in the future", "error")
+                        continue
+
+                    is_permanent = False
+                except ValueError as e:
+                    flask_flash(f"Invalid custom end date format for IP {ip}: {e}", "error")
+                    continue
+            else:
+                flask_flash(f"Custom duration selected but no end date provided for IP {ip}, skipping", "error")
+                continue
+        else:
+            flask_flash(f"Invalid duration '{duration}' for IP {ip}, skipping", "error")
+            continue
+
+        # Validate service name for service-specific bans
+        if ban_scope == "service":
+            services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"]
+            if isinstance(services, str):
+                services = services.split()
+
+            # Force global ban if service is invalid
+            if not service or service == "Web UI" or service not in services:
+                flask_flash(f"Invalid service '{service}' for IP {ip}, defaulting to global ban", "warning")
+                ban_scope = "global"
+                service = "Web UI"
+
+        # Generate the appropriate Redis key based on ban scope
+        if ban_scope == "service" and service != "Web UI":
+            ban_key = f"bans_service_{service}_ip_{ip}"
+        else:
+            ban_key = f"bans_ip_{ip}"
+            ban_scope = "global"
+
+        # Fetch existing ban data first to preserve original reason
+        original_reason = "ui"  # Default fallback
+
+        # Try to get original reason from Redis first
+        redis_ban_found = False
+        if redis_client:
+            try:
+                existing_data = redis_client.get(ban_key)
+                if existing_data:
+                    redis_ban_found = True
+                    # Parse existing ban data to get original reason
+                    try:
+                        existing_ban_data = loads(existing_data.decode("utf-8", "replace"))
+                        original_reason = existing_ban_data.get("reason", "ui")
+                    except Exception:
+                        LOGGER.warning(f"Could not parse existing ban data for {ip}, using default reason")
+            except Exception as e:
+                LOGGER.error(f"Error fetching ban from Redis for {ip}: {e}")
+
+        # If not found in Redis, try to get from instances
+        if not redis_ban_found:
+            # Create lookup key for instances dict
+            instance_lookup_key = f"{ip}|{ban_scope}|{service or '_'}"
+            if instance_lookup_key in instance_bans_dict:
+                original_reason = instance_bans_dict[instance_lookup_key].get("reason", "ui")
+            else:
+                # Try alternative lookup for global bans
+                if ban_scope == "global":
+                    alt_lookup_key = f"{ip}|global|_"
+                    if alt_lookup_key in instance_bans_dict:
+                        original_reason = instance_bans_dict[alt_lookup_key].get("reason", "ui")
+                    else:
+                        flask_flash(f"Ban for IP {ip} not found in Redis or instances, skipping", "warning")
+                        continue
+                else:
+                    flask_flash(f"Ban for IP {ip} not found in Redis or instances, skipping", "warning")
+                    continue
+
+        # Update Redis ban if it exists there
+        if redis_client and redis_ban_found:
+            try:
+                ban_data = existing_ban_data.copy()  # Preserve all original data
+                ban_data["permanent"] = is_permanent
+                # Keep original reason and date intact
+
+                ok = redis_client.set(ban_key, dumps(ban_data))
+                if not ok:
+                    flash(f"Couldn't update ban duration for {ip} on redis", "error")
+                    continue
+
+                # Set expiration for non-permanent bans or remove expiration for permanent bans
+                if is_permanent:
+                    redis_client.persist(ban_key)  # Remove expiration
+                else:
+                    redis_client.expire(ban_key, int(new_exp))
+            except BaseException as e:
+                LOGGER.error(f"Couldn't update ban duration for {ip} on redis: {e}")
+                flash(f"Failed to update ban duration for {ip} on redis, see logs for more information.", "error")
+                continue
+
+        # Update ban on BunkerWeb instances using original reason
+        ban_resp = BW_INSTANCES_UTILS.ban(ip, new_exp, original_reason, service, ban_scope)
+        if ban_resp:
+            flask_flash(f"Couldn't update ban duration for {ip} on the following instances: {', '.join(ban_resp)}", "error")
+        else:
+            duration_text = "permanently" if is_permanent else f"for {duration}"
+            service_text = f" for service {service}" if ban_scope == "service" else ""
+            flash(f"Successfully updated ban duration for {ip}{service_text} to {duration_text}")
+
+    return redirect(url_for("loading", next=url_for("bans.bans_page"), message=f"Updating duration for {len(updates)} ban{'s' if len(updates) > 1 else ''}"))

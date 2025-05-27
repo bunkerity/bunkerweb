@@ -8,6 +8,7 @@
     "version": "Versión: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Por favor, selecciona una fecha de fin personalizada.",
     "important": "Importante",
     "no_changes_detected": "No se detectaron cambios.",
     "notice": "Aviso",
@@ -115,12 +116,17 @@
     "select_file": "Seleccionar Archivo",
     "select_page": "Seleccionar Página",
     "service": "Servicio",
+    "set_1h": "Establecer 1 Hora",
+    "set_24h": "Establecer 24 Horas",
+    "set_1w": "Establecer 1 Semana",
+    "set_permanent": "Establecer Permanente",
     "setup": "Configurar",
     "show": "Mostrar",
     "stop": "Detener",
     "submit": "Enviar",
     "subscribe": "Suscribirse",
     "unban": "Desbloquear",
+    "update_duration": "Actualizar Duración del Bloqueo",
     "update_key": "Actualizar Clave",
     "upload_photo": "Subir Nueva Foto",
     "wipe_other_sessions": "Limpiar Otras Sesiones"
@@ -524,6 +530,13 @@
     "news_fetch_fail": "Error al obtener noticias:",
     "skipping_malformed_line": "Omitiendo línea mal formada: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Hora",
+    "24_hours": "24 Horas",
+    "1_week": "1 Semana",
+    "permanent": "Permanente",
+    "custom": "Personalizado"
+  },
   "error": {
     "401": {
       "help": "Debes iniciar sesión para acceder a este recurso.",
@@ -589,6 +602,7 @@
       "configuration_name": "Nombre de Configuración",
       "confirm_password": "Confirmar Contraseña",
       "current_password": "Contraseña Actual",
+      "custom_end_date": "Fecha de Fin Personalizada",
       "custom_ssl_certificate": "Certificado SSL Personalizado",
       "custom_ssl_certificate_data": "Datos Certificado SSL Pers. (Base64/PEM)",
       "custom_ssl_key": "Clave SSL Personalizada",
@@ -607,7 +621,9 @@
       "lets_encrypt_dns_credential_items": "Credenciales DNS para Let's Encrypt",
       "lets_encrypt_profile": "Perfil de Let's Encrypt",
       "license_key": "Clave de Licencia",
+      "make_permanent": "Hacer Permanente",
       "name": "Nombre",
+      "new_duration": "Nueva Duración",
       "new_password": "Nueva Contraseña",
       "optional": "(Opcional)",
       "password": "Contraseña",
@@ -632,6 +648,7 @@
       "config_name": "mi-config-personalizada",
       "enter_username": "Introduce tu nombre de usuario",
       "keywords": "Palabras clave...",
+      "plugin_search": "Buscar plugins...",
       "search": "Buscar...",
       "select_service": "Seleccionar Servicio",
       "secret_token": "Token Secreto",
@@ -695,7 +712,8 @@
       "reset_template_alert": "¿Estás seguro de que quieres restablecer la configuración de la plantilla actual y las configuraciones personalizadas?",
       "services_deletion_confirmation": "¿Estás seguro de que quieres eliminar los servicios seleccionados?",
       "unban_confirmation_alert": "¿Estás seguro de que quieres desbloquear la dirección IP seleccionada?",
-      "unban_confirmation_alert_plural": "¿Estás seguro de que quieres desbloquear las direcciones IP seleccionadas?"
+      "unban_confirmation_alert_plural": "¿Estás seguro de que quieres desbloquear las direcciones IP seleccionadas?",
+      "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:"
     },
     "button": {
       "reset_template_confirm": "Restablecer Configuración de Plantilla"
@@ -719,7 +737,8 @@
       "job_history_count": "Últimas {{count}} ejecuciones de la Tarea",
       "recovery_codes": "Códigos de Recuperación",
       "reset_template_config": "¿Restablecer Configuración de Plantilla?",
-      "server_name_not_unique": "El Nombre del Servidor no es Único"
+      "server_name_not_unique": "El Nombre del Servidor no es Único",
+      "update_duration": "Actualizar Duración del Bloqueo"
     }
   },
   "mode": {
@@ -753,6 +772,10 @@
     "misc": "Varios",
     "mode_selection": "Selección de Modo",
     "more": "Más...",
+    "plugin_activated": "Plugin Activado",
+    "plugin_deactivated": "Plugin Desactivado",
+    "plugin_activated_global": "Plugin Activado Globalmente",
+    "plugin_deactivated_global": "Plugin Desactivado Globalmente",
     "plugins": "Plugins",
     "plugins_pages": "Páginas de Plugins",
     "pro": "Pro",
@@ -888,6 +911,7 @@
     "country": "País",
     "created": "Creado",
     "data": "Datos",
+    "date": "Fecha",
     "empty": "No hay paneles de búsqueda disponibles",
     "end_date": "Fecha de Fin",
     "first_seen": "Visto por Primera Vez",
@@ -973,6 +997,7 @@
     "default_server": "servidor predeterminado",
     "down": "Inactivo",
     "draft": "Borrador",
+    "error_loading_bans": "Error al cargar los bloqueos. Por favor, intenta refrescar la página.",
     "failed": "Fallido",
     "loading": "Cargando...",
     "loading_bans": "Cargando bloqueos...",
@@ -1045,6 +1070,7 @@
       "checksum": "Checksum",
       "country": "País",
       "created": "Creado",
+      "current_time_left": "Tiempo Restante Actual",
       "data": "Datos",
       "date": "Fecha",
       "description": "Descripción",
@@ -1064,6 +1090,7 @@
       "plugin": "Plugin",
       "reason": "Motivo",
       "reload": "Recargar",
+      "request_id": "ID de Solicitud",
       "scope": "Alcance",
       "security_mode": "Modo Seguridad",
       "server_name": "Nombre Servidor",
@@ -1138,6 +1165,7 @@
     "custom_ssl_cert_path": "Ruta al archivo del certificado SSL personalizado.",
     "custom_ssl_key_data": "Los datos de la clave privada SSL personalizada (formato PEM o codificado en Base64).",
     "custom_ssl_key_path": "Ruta al archivo de la clave privada SSL personalizada.",
+    "different_from_template": "El valor difiere del predeterminado de la plantilla",
     "disabled_by_method": "Deshabilitado: Gestionado mediante el método '{{method}}'.",
     "disabled_db_readonly": "Deshabilitado: La base de datos está en modo de solo lectura.",
     "disabled_draft": "Deshabilitado: El servicio está en modo Borrador.",
@@ -1274,6 +1302,7 @@
         "ip_address": "Dirección IP que activó el informe",
         "method": "Método HTTP de la solicitud reportada",
         "reason": "Motivo por el que se generó el informe",
+        "request_id": "El identificador único de la solicitud",
         "security_mode": "Modo de seguridad activo cuando se generó el informe",
         "select_all": "Seleccionar todos los Informes",
         "server_name": "Nombre del servidor (vhost) que generó el informe",

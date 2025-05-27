@@ -81,7 +81,7 @@ try:
 
     if not any(services_realip_urls.values()):
         LOGGER.warning("No URL configured, nothing to do...")
-        for file in JOB.job_path.rglob("*.list"):
+        for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
                 deleted, err = JOB.del_cache(file)

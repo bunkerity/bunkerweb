@@ -39,7 +39,7 @@
       "default": "no",
       "help": "Enable websocket on the proxied resource.",
       "id": "reverse-proxy-ws",
-      "label": "Reverse proxy WS",
+      "label": "Reverse proxy WebSocket",
       "regex": "^(yes|no)$",
       "type": "check",
       "multiple": "reverse-proxy"
