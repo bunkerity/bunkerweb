@@ -1156,6 +1156,8 @@ if __name__ == "__main__":
                     ):
                         LOGGER.info("Instances changed, generating ...")
                         INSTANCES_NEED_GENERATION = True
+                        PRO_PLUGINS_NEED_GENERATION = True
+                        PLUGINS_NEED_GENERATION = True
                         CONFIGS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True
