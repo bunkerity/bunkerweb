@@ -129,6 +129,7 @@ RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc+
 # Fix CVEs
 RUN apk add --no-cache "libpq>=16.9-r0" "postgresql16-client>=16.9-r0" # CVE-2025-4207
 RUN apk add --no-cache "libxml2>=2.12.7-r3" # CVE-2025-32414 CVE-2025-32415
+RUN apk add --no-cache "pyc>=3.12.10-r1" "python3>=3.12.10-r1" "python3-pyc>=3.12.10-r1" "python3-pycache-pyc0>=3.12.10-r1" # CVE-2025-4516
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
