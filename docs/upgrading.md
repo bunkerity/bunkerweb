@@ -118,6 +118,7 @@
                     Then, you can update the BunkerWeb package :
 
                     ```shell
+                    sudo apt update && \
                     sudo apt install -y bunkerweb=1.6.2-rc3
                     ```
 
@@ -143,6 +144,7 @@
                     Then, you can update the BunkerWeb package :
 
                     ```shell
+                    sudo dnf makecache && \
                     sudo dnf install -y bunkerweb-1.6.2-rc3
                     ```
 
@@ -574,6 +576,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     Then, you can update the BunkerWeb package :
 
                     ```shell
+                    sudo apt update && \
                     sudo apt install -y bunkerweb=1.6.2-rc3
                     ```
 
@@ -599,6 +602,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     Then, you can update the BunkerWeb package :
 
                     ```shell
+                    sudo dnf makecache && \
                     sudo dnf install -y bunkerweb-1.6.2-rc3
                     ```
 

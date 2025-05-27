@@ -2162,7 +2162,11 @@ class Database:
                 query = session.query(Settings).with_entities(Settings.id, Settings.default).filter(Settings.multiple.in_(multiple.keys()))
 
                 for setting in query:
-                    for window, suffixes in multiple[multiple_groups[setting.id]].items():
+                    group_key = multiple_groups.get(setting.id)
+                    if group_key is None or group_key not in multiple:
+                        continue
+
+                    for window, suffixes in multiple[group_key].items():
                         template = templates.get(window, "") or templates.get("global", "")
                         for suffix in suffixes:
                             if window == "global" or service:

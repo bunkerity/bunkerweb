@@ -14,6 +14,7 @@
 - [UI] Add a modal to update ban durations, with support for localization
 - [MISC] Refactor template rendering for improved performance and efficiency
 - [DEPS] Update ModSecurity-nginx version to v1.0.4
+- [DEPS] Updated NGINX version to 1.28.0 (except for Fedora as it is not yet available)
 
 ## v1.6.2-rc2 - 2025/05/19
 

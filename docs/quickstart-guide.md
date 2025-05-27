@@ -8,7 +8,7 @@
 
     **System requirements**
 
-    The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.
+    The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 8 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.
 
     For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.
 
@@ -47,7 +47,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc3
 
 === "Linux"
 
-    Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+    Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). For Fedora, as NGINX 1.28.0 is not yet available, we will use NGINX 1.26.3. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
     === "Debian"
 
@@ -62,11 +62,11 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc3
         | sudo tee /etc/apt/sources.list.d/nginx.list
         ```
 
-        You should now be able to install NGINX 1.26.3:
+        You should now be able to install NGINX 1.28.0:
 
         ```shell
         sudo apt update && \
-        sudo apt install -y nginx=1.26.3-1~$(lsb_release -cs)
+        sudo apt install -y nginx=1.28.0-1~$(lsb_release -cs)
         ```
 
         !!! warning "Testing/dev version"
@@ -103,11 +103,11 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc3
         | sudo tee /etc/apt/sources.list.d/nginx.list
         ```
 
-        You should now be able to install NGINX 1.26.3:
+        You should now be able to install NGINX 1.28.0:
 
         ```shell
         sudo apt update && \
-        sudo apt install -y nginx=1.26.3-1~$(lsb_release -cs)
+        sudo apt install -y nginx=1.28.0-1~$(lsb_release -cs)
         ```
 
         !!! warning "Testing/dev version"
@@ -145,7 +145,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc3
                 sudo dnf config-manager --set-enabled updates-testing
                 ```
 
-        Fedora already provides NGINX 1.26.3 that we support:
+        Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):
 
         ```shell
         sudo dnf install -y nginx-1.26.3
@@ -188,10 +188,10 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc3
         module_hotfixes=true
         ```
 
-        You should now be able to install NGINX 1.26.3:
+        You should now be able to install NGINX 1.28.0:
 
         ```shell
-        sudo dnf install nginx-1.26.3
+        sudo dnf install nginx-1.28.0
         ```
 
         And finally install BunkerWeb 1.6.2-rc3:

@@ -1,7 +1,7 @@
 FROM debian:bookworm-slim@sha256:90522eeb7e5923ee2b871c639059537b30521272f10ca86fdbbbb2b75a8c40cd AS builder
 
 ENV OS=debian
-ENV NGINX_VERSION=1.26.3
+ENV NGINX_VERSION=1.28.0
 
 # Install Nginx and dependencies
 RUN apt update && \

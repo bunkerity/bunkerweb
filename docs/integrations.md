@@ -493,7 +493,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 
 ### Installation using package manager
 
-Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). For Fedora, as NGINX 1.28.0 is not yet available, we will use NGINX 1.26.3. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 === "Debian"
 
@@ -508,11 +508,11 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.26.3:
+    You should now be able to install NGINX 1.28.0:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.26.3-1~$(lsb_release -cs)
+    sudo apt install -y nginx=1.28.0-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -556,11 +556,11 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     | sudo tee /etc/apt/sources.list.d/nginx.list
     ```
 
-    You should now be able to install NGINX 1.26.3:
+    You should now be able to install NGINX 1.28.0:
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.26.3-1~$(lsb_release -cs)
+    sudo apt install -y nginx=1.28.0-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -605,7 +605,7 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
             sudo dnf config-manager --set-enabled updates-testing
             ```
 
-    Fedora already provides NGINX 1.26.3 that we support:
+    Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):
 
     ```shell
     sudo dnf install -y nginx-1.26.3
@@ -655,10 +655,10 @@ Please ensure that you have **NGINX 1.26.3 installed before installing BunkerWeb
     module_hotfixes=true
     ```
 
-    You should now be able to install NGINX 1.26.3:
+    You should now be able to install NGINX 1.28.0:
 
     ```shell
-    sudo dnf install nginx-1.26.3
+    sudo dnf install nginx-1.28.0
     ```
 
     !!! example "Disable the setup wizard"
