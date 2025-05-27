@@ -18,7 +18,7 @@ This quickstart guide will help you to quickly install BunkerWeb and secure a we
 
 Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb: it will act as a classical [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) with extra security features.
 
-See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2/examples) of the repository to get real-world examples.
+See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc3/examples) of the repository to get real-world examples.
 
 ## Basic setup
 
@@ -33,7 +33,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.2-rc3
     ```
 
     By default, the container exposes:
@@ -76,12 +76,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
             echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
             ```
 
-        And finally install BunkerWeb 1.6.2-rc2:
+        And finally install BunkerWeb 1.6.2-rc3:
 
         ```shell
         curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
         sudo apt update && \
-        sudo -E apt install -y bunkerweb=1.6.2-rc2
+        sudo -E apt install -y bunkerweb=1.6.2-rc3
         ```
 
         To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -117,12 +117,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
             echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
             ```
 
-        And finally install BunkerWeb 1.6.2-rc2:
+        And finally install BunkerWeb 1.6.2-rc3:
 
         ```shell
         curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
         sudo apt update && \
-        sudo -E apt install -y bunkerweb=1.6.2-rc2
+        sudo -E apt install -y bunkerweb=1.6.2-rc3
         ```
 
         To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -151,12 +151,12 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
         sudo dnf install -y nginx-1.26.3
         ```
 
-        And finally install BunkerWeb 1.6.2-rc2:
+        And finally install BunkerWeb 1.6.2-rc3:
 
         ```shell
         curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
         sudo dnf makecache && \
-        sudo -E dnf install -y bunkerweb-1.6.2-rc2
+        sudo -E dnf install -y bunkerweb-1.6.2-rc3
         ```
 
         To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -194,13 +194,13 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
         sudo dnf install nginx-1.26.3
         ```
 
-        And finally install BunkerWeb 1.6.2-rc2:
+        And finally install BunkerWeb 1.6.2-rc3:
 
         ```shell
         sudo dnf install -y epel-release && \
         curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
         sudo dnf check-update && \
-        sudo -E dnf install -y bunkerweb-1.6.2-rc2
+        sudo -E dnf install -y bunkerweb-1.6.2-rc3
         ```
 
         To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -223,7 +223,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.2-rc2
+        image: bunkerity/bunkerweb:1.6.2-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -236,7 +236,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -251,7 +251,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.2-rc2
+        image: bunkerity/bunkerweb-ui:1.6.2-rc3
         environment:
           <<: *bw-env
         restart: "unless-stopped"
@@ -301,7 +301,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc2
+        image: bunkerity/bunkerweb:1.6.2-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -317,7 +317,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc3
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -333,7 +333,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.2-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.2-rc3
         depends_on:
           - bw-docker
         environment:
@@ -356,7 +356,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.2-rc2
+        image: bunkerity/bunkerweb-ui:1.6.2-rc3
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -434,7 +434,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc2
+        image: bunkerity/bunkerweb:1.6.2-rc3
         ports:
           - published: 80
             target: 8080
@@ -464,7 +464,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc3
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -482,7 +482,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.2-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.2-rc3
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -511,7 +511,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc2
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.2-rc2
+        image: bunkerity/bunkerweb-ui:1.6.2-rc3
         environment:
           <<: *bw-ui-env
           TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -702,7 +702,7 @@ You can now log in with the administrator account you created during the setup w
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---
-      bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.2-rc3
     ```
 
     Your application container (`myapp`) and the `bunkerweb-aio` container must be on the same Docker network for BunkerWeb to reach it using the hostname `myapp`.
@@ -724,7 +724,7 @@ You can now log in with the administrator account you created during the setup w
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (all other relevant environment variables as shown in the main example above) ...
-      bunkerity/bunkerweb-all-in-one:1.6.2-rc2
+      bunkerity/bunkerweb-all-in-one:1.6.2-rc3
     ```
 
     Make sure to replace `myapp` with the actual name or IP of your application container and `http://myapp:8080` with its correct address and port.
