@@ -17,8 +17,7 @@ If you are interested in the BunkerWeb Cloud offering, don't hesitate to [contac
 ## All-In-One (AIO) Image
 
 <figure markdown>
-  <!-- TODO: Replace with actual AIO architecture graph -->
-  ![AIO Architecture Graph Placeholder](assets/img/aio-graph-placeholder.svg){ align=center, width="600" }
+  ![AIO Architecture Graph Placeholder](assets/img/aio-graph-placeholder.png){ align=center, width="600" }
   <figcaption>BunkerWeb All-In-One Architecture (AIO)</figcaption>
 </figure>
 
