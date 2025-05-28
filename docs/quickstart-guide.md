@@ -197,7 +197,6 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc3
         And finally install BunkerWeb 1.6.2-rc3:
 
         ```shell
-        sudo dnf install -y epel-release && \
         curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
         sudo dnf check-update && \
         sudo -E dnf install -y bunkerweb-1.6.2-rc3

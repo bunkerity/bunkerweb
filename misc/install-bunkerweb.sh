@@ -38,6 +38,7 @@ print_step() {
 
 # Function to run command with error checking
 run_cmd() {
+    echo -e "${BLUE}[CMD]${NC} $*"
     if ! "$@"; then
         print_error "Command failed: $*"
         exit 1
@@ -231,6 +232,9 @@ install_nginx_debian() {
 install_nginx_fedora() {
     print_step "Installing NGINX on Fedora"
 
+    # Install versionlock plugin
+    run_cmd dnf install -y 'dnf-command(versionlock)'
+
     # Enable testing repository if needed
     if ! dnf info "nginx-$NGINX_VERSION" >/dev/null 2>&1; then
         print_status "Enabling updates-testing repository"
@@ -254,6 +258,9 @@ install_nginx_fedora() {
 install_nginx_rhel() {
     print_step "Installing NGINX on RHEL"
 
+    # Install versionlock plugin
+    run_cmd dnf install -y 'dnf-command(versionlock)'
+
     # Create NGINX repository file
     cat > /etc/yum.repos.d/nginx.repo << EOF
 [nginx-stable]
@@ -276,9 +283,6 @@ EOF
     # Install NGINX
     run_cmd dnf install -y "nginx-$NGINX_VERSION"
 
-    # Install EPEL repository
-    run_cmd dnf install -y epel-release
-
     # Lock NGINX version
     run_cmd dnf versionlock add nginx
 
@@ -300,8 +304,11 @@ install_bunkerweb_debian() {
         export UI_WIZARD=no
     fi
 
-    # Add BunkerWeb repository and install
-    run_cmd bash -c "$(curl -fsSL https://repo.bunkerweb.io/install/script.deb.sh)"
+    # Download and add BunkerWeb repository
+    run_cmd curl -fsSL https://repo.bunkerweb.io/install/script.deb.sh -o /tmp/bunkerweb-repo.sh
+    run_cmd bash /tmp/bunkerweb-repo.sh
+    run_cmd rm -f /tmp/bunkerweb-repo.sh
+
     run_cmd apt update
     run_cmd apt install -y "bunkerweb=$BUNKERWEB_VERSION"
 
@@ -321,13 +328,15 @@ install_bunkerweb_rpm() {
     fi
 
     # Add BunkerWeb repository and install
-    run_cmd bash -c "$(curl -fsSL https://repo.bunkerweb.io/install/script.rpm.sh)"
+    run_cmd curl -fsSL https://repo.bunkerweb.io/install/script.rpm.sh -o /tmp/bunkerweb-repo.sh
+    run_cmd bash /tmp/bunkerweb-repo.sh
+    run_cmd rm -f /tmp/bunkerweb-repo.sh
 
     if [ "$DISTRO_ID" = "fedora" ]; then
         run_cmd dnf makecache
         run_cmd dnf install -y "bunkerweb-$BUNKERWEB_VERSION"
     else
-        run_cmd dnf check-update || true  # Don't fail if no updates available
+        dnf check-update || true  # Don't fail if no updates available
         run_cmd dnf install -y "bunkerweb-$BUNKERWEB_VERSION"
     fi
 
@@ -429,7 +438,7 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--version)
-            BUNKERWEB_VERSION="dev"
+            BUNKERWEB_VERSION="1.6.2-rc3"
             shift 2
             ;;
         -w|--enable-wizard)

@@ -771,7 +771,6 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
     And finally install BunkerWeb 1.6.2-rc3:
 
     ```shell
-	  sudo dnf install -y epel-release && \
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
     sudo -E dnf install -y bunkerweb-1.6.2-rc3
