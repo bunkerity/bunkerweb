@@ -80,68 +80,81 @@ class BiscuitMiddleware:
         current_app.logger.debug(str(token))
 
         # First we check if the biscuit is up to date
-        try:
-            authorizer = Authorizer()
-            authorizer.add_token(token)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                authorizer = Authorizer()
+                authorizer.add_token(token)
 
-            authorizer.add_check(Check(f'check if version("{get_version()}")'))
-            if current_app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private:
-                authorizer.add_check(Check(f'check if client_ip("{request.remote_addr}")'))
+                authorizer.add_check(Check(f'check if version("{get_version()}")'))
+                if current_app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private:
+                    authorizer.add_check(Check(f'check if client_ip("{request.remote_addr}")'))
 
-            authorizer.add_policy(Policy("allow if true"))
+                authorizer.add_policy(Policy("allow if true"))
 
-            current_app.logger.debug(str(authorizer))
-            authorizer.authorize()
-        except AuthorizationError as e:
-            current_app.logger.warning(f"Version check error: {e}")
-            return redirect(url_for("logout.logout_page"))
-        except Exception as e:
-            current_app.logger.debug(format_exc())
-            current_app.logger.error(f"Unexpected error during version check: {e}")
-            return redirect(url_for("logout.logout_page"))
+                current_app.logger.debug(str(authorizer))
+                authorizer.authorize()
+                break  # Success, exit retry loop
+            except AuthorizationError as e:
+                current_app.logger.warning(f"Version check error: {e}")
+                return redirect(url_for("logout.logout_page"))
+            except Exception as e:
+                if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
+                    current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
+                    continue
+
+                current_app.logger.debug(format_exc())
+                current_app.logger.error(f"Unexpected error during version check: {e}")
+                return redirect(url_for("logout.logout_page"))
 
         operation = OPERATIONS.get(request.method, "read")
 
-        try:
-            authorizer = Authorizer()
-            authorizer.add_token(token)
+        for attempt in range(max_retries):
+            try:
+                authorizer = Authorizer()
+                authorizer.add_token(token)
 
-            authorizer.add_fact(Fact(f'resource("{request.path}")'))
-            authorizer.add_fact(Fact(f'operation("{operation}")'))
+                authorizer.add_fact(Fact(f'resource("{request.path}")'))
+                authorizer.add_fact(Fact(f'operation("{operation}")'))
 
-            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/profile")'))
-            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_theme"'))
-            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_language"'))
-            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_columns_preferences"'))
-            authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/clear_notifications"'))
-            authorizer.add_policy(Policy("allow if role($role_name, $permissions), operation($operation_name), $permissions.contains($operation_name)"))
+                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path.starts_with("/profile")'))
+                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_theme"'))
+                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_language"'))
+                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/set_columns_preferences"'))
+                authorizer.add_policy(Policy('allow if resource($resource_path), $resource_path == "/clear_notifications"'))
+                authorizer.add_policy(Policy("allow if role($role_name, $permissions), operation($operation_name), $permissions.contains($operation_name)"))
 
-            current_app.logger.debug(str(authorizer))
-            authorizer.authorize()
-        except AuthorizationError as e:
-            current_app.logger.warning(f"Biscuit authorization error: {e}")
-            return (
-                render_template(
-                    "unauthorized.html",
-                    message="You are not authorized to access this resource." if operation == "read" else "You are not authorized to perform this action.",
-                    next=url_for("home.home_page"),
-                    error_code=403,
-                    auto_redirect=False,
-                ),
-                403,
-            )
-        except Exception as e:
-            current_app.logger.error(f"Unexpected error during Biscuit authorization: {e}")
-            return (
-                render_template(
-                    "unauthorized.html",
-                    message="An unexpected error occurred during authorization.",
-                    next=url_for("home.home_page"),
-                    error_code=500,
-                    auto_redirect=False,
-                ),
-                500,
-            )
+                current_app.logger.debug(str(authorizer))
+                authorizer.authorize()
+                break  # Success, exit retry loop
+            except AuthorizationError as e:
+                current_app.logger.warning(f"Biscuit authorization error: {e}")
+                return (
+                    render_template(
+                        "unauthorized.html",
+                        message="You are not authorized to access this resource." if operation == "read" else "You are not authorized to perform this action.",
+                        next=url_for("home.home_page"),
+                        error_code=403,
+                        auto_redirect=False,
+                    ),
+                    403,
+                )
+            except Exception as e:
+                if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
+                    current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
+                    continue
+
+                current_app.logger.error(f"Unexpected error during Biscuit authorization: {e}")
+                return (
+                    render_template(
+                        "unauthorized.html",
+                        message="An unexpected error occurred during authorization.",
+                        next=url_for("home.home_page"),
+                        error_code=500,
+                        auto_redirect=False,
+                    ),
+                    500,
+                )
 
 
 class BiscuitTokenFactory:
