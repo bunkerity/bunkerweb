@@ -238,7 +238,10 @@
                     <form action="{{ url_for("bans") }}/update_duration" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                            <input type="hidden" id="selected-ips-input-update-duration" name="updates" value="" />
+                            <input type="hidden"
+                                   id="selected-ips-input-update-duration"
+                                   name="updates"
+                                   value="" />
                             <div class="alert alert-info text-center"
                                  role="alert"
                                  data-i18n="modal.body.update_duration_alert">
@@ -248,7 +251,9 @@
                             </ul>
                             <div class="row g-3">
                                 <div class="col-12">
-                                    <label for="duration-select" class="form-label" data-i18n="form.label.new_duration">New Duration</label>
+                                    <label for="duration-select"
+                                           class="form-label"
+                                           data-i18n="form.label.new_duration">New Duration</label>
                                     <select id="duration-select" name="duration" class="form-select" required>
                                         <option value="1h" data-i18n="duration.1_hour">1 Hour</option>
                                         <option value="24h" data-i18n="duration.24_hours">24 Hours</option>
@@ -258,9 +263,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <div id="custom-duration-fields" class="row g-3 mt-2" style="display: none;">
+                            <div id="custom-duration-fields"
+                                 class="row g-3 mt-2"
+                                 style="display: none">
                                 <div class="col-12">
-                                    <label for="custom-end-date" class="form-label" data-i18n="form.label.custom_end_date">Custom End Date</label>
+                                    <label for="custom-end-date"
+                                           class="form-label"
+                                           data-i18n="form.label.custom_end_date">Custom End Date</label>
                                     <input type="flatpickr-datetime-update"
                                            id="custom-end-date"
                                            name="custom_end_date"
@@ -270,7 +279,9 @@
                             </div>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-warning me-2" data-i18n="button.update_duration">Update Duration</button>
+                            <button type="submit"
+                                    class="btn btn-warning me-2"
+                                    data-i18n="button.update_duration">Update Duration</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"

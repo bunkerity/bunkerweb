@@ -407,6 +407,14 @@
         "status": "{{core}} 核心 / {{pro}} PRO / {{external}} 外部",
         "title": "插件"
       },
+      "ram": {
+        "critical_high": "严重：系统内存即将耗尽！",
+        "good_high": "内存充足，适合生产环境",
+        "info_medium": "建议升级到 16GB+ 以用于生产环境",
+        "title": "系统内存",
+        "usage": "{{percent}}% 已使用",
+        "warning_low": "警告：内存不足可能影响性能"
+      },
       "services": {
         "status": "{{online}} 在线 / {{draft}} 草稿",
         "title": "服务"

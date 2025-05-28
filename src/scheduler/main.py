@@ -28,7 +28,7 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
@@ -621,6 +621,13 @@ def backup_failover():
 
 if __name__ == "__main__":
     try:
+        # Handle Docker secrets first
+        docker_secrets = handle_docker_secrets()
+        if docker_secrets:
+            LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
+            # Update environment with secrets
+            environ.update(docker_secrets)
+
         # Don't execute if pid file exists
         pid_path = Path(sep, "var", "run", "bunkerweb", "scheduler.pid")
         if pid_path.is_file():
@@ -1156,6 +1163,8 @@ if __name__ == "__main__":
                     ):
                         LOGGER.info("Instances changed, generating ...")
                         INSTANCES_NEED_GENERATION = True
+                        PRO_PLUGINS_NEED_GENERATION = True
+                        PLUGINS_NEED_GENERATION = True
                         CONFIGS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True

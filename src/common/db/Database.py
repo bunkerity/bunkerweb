@@ -459,7 +459,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.2-rc2"
+                return "1.6.2-rc3"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -491,7 +491,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.2-rc2",
+            "version": "1.6.2-rc3",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -2162,7 +2162,11 @@ class Database:
                 query = session.query(Settings).with_entities(Settings.id, Settings.default).filter(Settings.multiple.in_(multiple.keys()))
 
                 for setting in query:
-                    for window, suffixes in multiple[multiple_groups[setting.id]].items():
+                    group_key = multiple_groups.get(setting.id)
+                    if group_key is None or group_key not in multiple:
+                        continue
+
+                    for window, suffixes in multiple[group_key].items():
                         template = templates.get(window, "") or templates.get("global", "")
                         for suffix in suffixes:
                             if window == "global" or service:

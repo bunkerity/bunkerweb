@@ -1,0 +1,13 @@
+
+make -f misc/GNUmakefile release
+
+the required tools:
+*) xsltproc to build CHANGES,
+*) xslscript.pl ( http://hg.nginx.org/xslscript ) to build XSLTs
+   from XSLScript sources.
+
+
+make -f misc/GNUmakefile icons
+
+the required tool:
+*) netpbm to create Win32 icons from xpm sources.

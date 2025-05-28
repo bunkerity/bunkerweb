@@ -189,7 +189,7 @@
       "name": "lua-upstream-nginx-module v0.07",
       "url": "https://github.com/openresty/lua-upstream-nginx-module.git",
       "commit": "a84fbbb3d3b07684c232f642eccbc5334bafcbfe",
-      "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t"
+      "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t/t"
     },
     {
       "id": "luajit",
@@ -241,17 +241,24 @@
     },
     {
       "id": "modsecurity-nginx",
-      "name": "ModSecurity-nginx v1.0.4",
+      "name": "ModSecurity-nginx v1.0.3",
       "url": "https://github.com/owasp-modsecurity/ModSecurity-nginx.git",
-      "commit": "3f4b57df10ce43b1f1c722141f7621dc64838be8",
+      "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
       "post_install": "rm -r src/deps/src/modsecurity-nginx/tests && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.rej && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch || rm src/deps/src/modsecurity-nginx/config.orig src/deps/src/modsecurity-nginx/config.rej"
     },
     {
-      "id": "nginx",
+      "id": "nginx-1.26",
       "name": "Nginx v1.26.3",
       "url": "https://github.com/nginx/nginx.git",
       "commit": "1be0fb0c9f9bc3489c7b40576efd6afe6b2eccd5",
-      "post_install": "rm -r src/deps/src/nginx/docs"
+      "post_install": "rm -r src/deps/src/nginx-1.26/docs"
+    },
+    {
+      "id": "nginx-1.28",
+      "name": "Nginx v1.28.0",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "481d28cb4e04c8096b9b6134856891dc52ecc68f",
+      "post_install": "rm -r src/deps/src/nginx-1.28/docs"
     },
     {
       "id": "nginx_cookie_flag_module",

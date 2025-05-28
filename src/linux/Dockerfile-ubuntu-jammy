@@ -1,7 +1,7 @@
 FROM ubuntu:jammy@sha256:67cadaff1dca187079fce41360d5a7eb6f7dcd3745e53c79ad5efd8563118240 AS builder
 
 ENV OS=ubuntu
-ENV NGINX_VERSION=1.26.3
+ENV NGINX_VERSION=1.28.0
 
 # Install Nginx and dependencies
 RUN apt update && \

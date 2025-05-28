@@ -407,6 +407,14 @@
         "status": "{{core}} 核心 / {{pro}} PRO / {{external}} 外部",
         "title": "外掛程式"
       },
+      "ram": {
+        "critical_high": "危急：系統記憶體即將耗盡！",
+        "good_high": "適合生產環境的優質記憶體",
+        "info_medium": "建議升級至 16GB 以上以用於生產環境",
+        "title": "系統 RAM",
+        "usage": "{{percent}}% 已使用",
+        "warning_low": "警告：記憶體不足可能影響效能"
+      },
       "services": {
         "status": "{{online}} 線上 / {{draft}} 草稿",
         "title": "服務"

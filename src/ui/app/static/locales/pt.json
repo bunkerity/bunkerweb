@@ -407,6 +407,14 @@
         "status": "{{core}} core / {{pro}} PRO / {{external}} externo",
         "title": "Plugins"
       },
+      "ram": {
+        "critical_high": "Crítico: o sistema está ficando sem memória!",
+        "good_high": "Memória excelente para ambientes de produção",
+        "info_medium": "Considere atualizar para 16GB+ para uso em produção",
+        "title": "RAM do Sistema",
+        "usage": "{{percent}}% em uso",
+        "warning_low": "Aviso: pouca memória pode afetar o desempenho"
+      },
       "services": {
         "status": "{{online}} online / {{draft}} rascunho",
         "title": "Serviços"

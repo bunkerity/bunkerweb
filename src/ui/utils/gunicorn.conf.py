@@ -1,7 +1,7 @@
 from datetime import datetime
 from hashlib import sha256
 from json import JSONDecodeError, dump, dumps, loads
-from os import cpu_count, getenv, sep
+from os import cpu_count, environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from secrets import token_hex
@@ -18,6 +18,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 from passlib.totp import generate_secret
 
+from common_utils import handle_docker_secrets  # type: ignore
 from logger import setup_logger  # type: ignore
 
 from app.models.ui_database import UIDatabase
@@ -100,7 +101,15 @@ def on_starting(server):
 
     ERROR_FILE.unlink(missing_ok=True)
 
+    # Handle Docker secrets first
+    docker_secrets = handle_docker_secrets()
+    if docker_secrets:
+        environ.update(docker_secrets)
+
     LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+
+    if docker_secrets:
+        LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
 
     def set_secure_permissions(file_path: Path):
         """Set file permissions to 600 (owner read/write only)."""

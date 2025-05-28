@@ -5,6 +5,7 @@
 - [BUGFIX] Refactor CLI command handling to support additional arguments
 - [DOCS] Update the documentation about the `all-in-one` image to include the new features and improvements, also move it to its own section
 - [FEATURE] Add request ID to error pages, logs and display it in UI reports for easier tracking of issues
+- [FEATURE] Add support for Docker secrets in all services
 - [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
 - [ALL-IN-ONE] Fully integrate Redis in the all-in-one image (activated by default)
 - [UI] Add clear notifications feature to both UI and backend for improved notification management
@@ -12,8 +13,13 @@
 - [UI] Display a small "enabled/disabled" icon next to each plugin name in the plugin sidebar and menu to indicate whether the plugin is active (e.g., show if Reverse Proxy is enabled)
 - [UI] Update QR code generation to use PilImage and output JPEG format for improved compatibility
 - [UI] Add a modal to update ban durations, with support for localization
+- [UI] Add system memory usage monitoring to the home page dashboard for real-time insights
 - [MISC] Refactor template rendering for improved performance and efficiency
-- [DEPS] Update ModSecurity-nginx version to v1.0.4
+- [LINUX] Provide an interactive installer script for BunkerWeb that guides users through setup options
+- [DEPS] Updated NGINX version to 1.28.0 (except for Fedora as it is not yet available)
+- [CONTRIBUTION] Thank you @lenglet-k for your contribution to the Ingress controller
+- [CONTRIBUTION] Thank you @kovacs-andras for your contribution to the PRO urls in the documentation
+- [CONTRIBUTION] Thank you @mevenG for your contribution to the README file
 
 ## v1.6.2-rc2 - 2025/05/19
 

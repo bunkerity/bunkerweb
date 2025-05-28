@@ -1,4 +1,4 @@
-FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e AS builder
+FROM nginx:1.28-alpine-slim@sha256:39a9a15e0a81914a96fa9ffa980cdfe08e2e5e73ae3424f341ad1f470147c413 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -118,7 +118,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
     echo "Skipping JS minification"; \
     fi
 
-FROM nginx:1.26-alpine-slim@sha256:6d4f5fb02763f731c06f3e246d4edf89c3a2bbc5dd72eab2b02bc55ef4b8600e
+FROM nginx:1.28-alpine-slim@sha256:39a9a15e0a81914a96fa9ffa980cdfe08e2e5e73ae3424f341ad1f470147c413
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -127,9 +127,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
-RUN apk add --no-cache "libpq>=16.9-r0" "postgresql16-client>=16.9-r0" # CVE-2025-4207
-RUN apk add --no-cache "libxml2>=2.12.7-r3" # CVE-2025-32414 CVE-2025-32415
-RUN apk add --no-cache "pyc>=3.12.10-r1" "python3>=3.12.10-r1" "python3-pyc>=3.12.10-r1" "python3-pycache-pyc0>=3.12.10-r1" # CVE-2025-4516
+# There are no CVEs for the following packages
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

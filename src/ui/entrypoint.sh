@@ -66,6 +66,8 @@ log "ENTRYPOINT" "ℹ️" "Starting the web UI v$(cat /usr/share/bunkerweb/VERSI
 # Set up and validate the /data folder, ensuring required configurations are present.
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
+handle_docker_secrets
+
 # Determine the deployment mode (Swarm, Kubernetes, Autoconf, or Docker) and record it.
 if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]]; then
 	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
