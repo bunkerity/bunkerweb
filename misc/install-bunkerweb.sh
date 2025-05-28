@@ -254,9 +254,6 @@ install_nginx_fedora() {
 install_nginx_rhel() {
     print_step "Installing NGINX on RHEL"
 
-    # Install EPEL repository
-    run_cmd dnf install -y epel-release
-
     # Create NGINX repository file
     cat > /etc/yum.repos.d/nginx.repo << EOF
 [nginx-stable]
@@ -278,6 +275,9 @@ EOF
 
     # Install NGINX
     run_cmd dnf install -y "nginx-$NGINX_VERSION"
+
+    # Install EPEL repository
+    run_cmd dnf install -y epel-release
 
     # Lock NGINX version
     run_cmd dnf versionlock add nginx
