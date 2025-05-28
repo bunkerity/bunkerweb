@@ -407,6 +407,14 @@
         "status": "{{core}} core / {{pro}} PRO / {{external}} esterni",
         "title": "Plugin"
       },
+      "ram": {
+        "critical_high": "Critico: la memoria di sistema sta esaurendosi!",
+        "good_high": "Memoria eccellente per ambienti di produzione",
+        "info_medium": "Considera l'aggiornamento a 16GB o più per l'uso in produzione",
+        "title": "RAM di sistema",
+        "usage": "{{percent}}% utilizzata",
+        "warning_low": "Avviso: memoria insufficiente potrebbe influire sulle prestazioni"
+      },
       "services": {
         "status": "{{online}} online / {{draft}} bozza",
         "title": "Servizi"

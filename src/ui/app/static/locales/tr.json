@@ -407,6 +407,14 @@
         "status": "{{core}} çekirdek / {{pro}} PRO / {{external}} harici",
         "title": "Eklentiler"
       },
+      "ram": {
+        "critical_high": "Kritik: Sistem belleği tükenmek üzere!",
+        "good_high": "Üretim ortamları için mükemmel bellek",
+        "info_medium": "Üretim ortamlarında kullanım için 16 GB veya daha fazlasına yükseltmeyi düşünün",
+        "title": "Sistem RAM'i",
+        "usage": "{{percent}}% kullanıldı",
+        "warning_low": "Uyarı: Düşük bellek performansı etkileyebilir"
+      },
       "services": {
         "status": "{{online}} çevrimiçi / {{draft}} taslak",
         "title": "Servisler"

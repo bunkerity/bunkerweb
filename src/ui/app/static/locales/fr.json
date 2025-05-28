@@ -407,6 +407,14 @@
         "status": "{{core}} core / {{pro}} PRO / {{external}} externe",
         "title": "Plugins"
       },
+      "ram": {
+        "critical_high": "Critique : le système manque de mémoire !",
+        "good_high": "Mémoire excellente pour les environnements de production",
+        "info_medium": "Envisagez de passer à 16 Go+ pour un usage en production",
+        "title": "RAM Système",
+        "usage": "{{percent}} % utilisée",
+        "warning_low": "Attention : une faible mémoire peut affecter les performances"
+      },
       "services": {
         "status": "{{online}} en ligne / {{draft}} brouillon",
         "title": "Services"

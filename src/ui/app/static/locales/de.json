@@ -407,6 +407,14 @@
         "status": "{{core}} Core / {{pro}} PRO / {{external}} Extern",
         "title": "Plugins"
       },
+      "ram": {
+        "critical_high": "Kritisch: Das System hat fast keinen Speicher mehr!",
+        "good_high": "Ausgezeichneter Speicher für Produktionsumgebungen",
+        "info_medium": "Für den Produktionseinsatz wird ein Upgrade auf 16GB+ empfohlen",
+        "title": "System-RAM",
+        "usage": "{{percent}}% verwendet",
+        "warning_low": "Warnung: Wenig Speicher kann die Leistung beeinträchtigen"
+      },
       "services": {
         "status": "{{online}} online / {{draft}} Entwurf",
         "title": "Dienste"

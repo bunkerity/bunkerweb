@@ -407,6 +407,14 @@
         "status": "{{core}} core / {{pro}} PRO / {{external}} external",
         "title": "Plugins"
       },
+      "ram": {
+        "critical_high": "Critical: System is running out of memory!",
+        "good_high": "Excellent memory for production environments",
+        "info_medium": "Consider upgrading to 16GB+ for production use",
+        "title": "System RAM",
+        "usage": "{{percent}}% used",
+        "warning_low": "Warning: Low memory may affect performance"
+      },
       "services": {
         "status": "{{online}} online / {{draft}} draft",
         "title": "Services"
