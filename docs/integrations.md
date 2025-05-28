@@ -490,6 +490,107 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Red Hat Enterprise Linux (RHEL) 8.10
 - Red Hat Enterprise Linux (RHEL) 9.6
 
+### Easy installation script
+
+For a simplified installation experience, BunkerWeb provides an easy install script that automatically handles the entire setup process, including NGINX installation, repository configuration, and service setup.
+
+#### Quick start
+
+Download and run the installation script:
+
+```bash
+curl -fsSL https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc3/misc/install-bunkerweb.sh | sudo bash
+```
+
+Or download first and then execute:
+
+```bash
+wget https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc3/misc/install-bunkerweb.sh
+chmod +x install-bunkerweb.sh
+sudo ./install-bunkerweb.sh
+```
+
+#### Interactive installation
+
+By default, the script runs in interactive mode and will:
+
+1. **Detect your operating system** and verify compatibility
+2. **Ask about the setup wizard** - choose whether to enable the web-based configuration interface
+3. **Show RHEL database recommendations** (if applicable) for external database support
+4. **Install NGINX** with the correct version for your distribution
+5. **Install BunkerWeb** and configure all services
+6. **Provide next steps** based on your configuration choices
+
+#### Command line options
+
+The script supports various options for different installation scenarios:
+
+```bash
+# Interactive installation (default)
+sudo ./install-bunkerweb.sh
+
+# Non-interactive with defaults (wizard enabled)
+sudo ./install-bunkerweb.sh --yes
+
+# Install without the setup wizard
+sudo ./install-bunkerweb.sh --no-wizard
+
+# Install a specific version
+sudo ./install-bunkerweb.sh --version 1.6.0
+
+# Force installation on unsupported OS versions
+sudo ./install-bunkerweb.sh --force
+
+# Show help
+./install-bunkerweb.sh --help
+```
+
+#### What the script does
+
+The easy install script automatically:
+
+- **Validates OS compatibility** and warns about unsupported versions
+- **Installs NGINX** from official repositories with the correct version
+- **Adds BunkerWeb repositories** for your distribution
+- **Installs BunkerWeb packages** and locks versions to prevent accidental upgrades
+- **Configures systemd services** (bunkerweb, bunkerweb-scheduler, bunkerweb-ui)
+- **Sets up the setup wizard** (if enabled) for easy web-based configuration
+- **Provides comprehensive next steps** and resource links
+
+#### RHEL/CentOS considerations
+
+!!! warning "External database support on RHEL-based systems"
+    If you plan to use an external database (recommended for production), you must install the appropriate database client package:
+
+    ```bash
+    # For MariaDB
+    sudo dnf install mariadb
+
+    # For MySQL
+    sudo dnf install mysql
+
+    # For PostgreSQL
+    sudo dnf install postgresql
+    ```
+
+    This is required for the BunkerWeb Scheduler to connect to your external database.
+
+#### After installation
+
+Depending on your choices during installation:
+
+**With setup wizard enabled:**
+
+1. Access the setup wizard at: `https://your-server-ip/setup`
+2. Follow the guided configuration to set up your first protected service
+3. Configure SSL/TLS certificates and other security settings
+
+**Without setup wizard:**
+
+1. Edit `/etc/bunkerweb/variables.env` to configure BunkerWeb manually
+2. Add your server settings and protected services
+3. Restart the scheduler: `sudo systemctl restart bunkerweb-scheduler`
+
 ### Installation using package manager
 
 Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). For Fedora, as NGINX 1.28.0 is not yet available, we will use NGINX 1.26.3. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.

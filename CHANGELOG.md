@@ -14,6 +14,7 @@
 - [UI] Add a modal to update ban durations, with support for localization
 - [UI] Add system memory usage monitoring to the home page dashboard for real-time insights
 - [MISC] Refactor template rendering for improved performance and efficiency
+- [LINUX] Provide an interactive installer script for BunkerWeb that guides users through setup options
 - [DEPS] Update ModSecurity-nginx version to v1.0.4
 - [DEPS] Updated NGINX version to 1.28.0 (except for Fedora as it is not yet available)
 
