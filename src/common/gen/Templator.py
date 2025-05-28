@@ -169,22 +169,15 @@ class Templator:
         """
         prefix = f"{server}_"
         prefix_len = len(prefix)
-        config = {}
-
-        # Add non-prefixed values first (only if they won't be overridden)
-        server_specific_keys = {k[prefix_len:] for k in self._config if k.startswith(prefix)}
-        for k, v in self._config.items():
-            if not k.startswith(prefix) and k not in server_specific_keys:
-                config[k] = v
-
+        config = self._config.copy()
         config["NGINX_PREFIX"] = f"{join(self._target, server)}/"
 
-        # Add server-specific overrides
-        for k, v in self._config.items():
-            if k.startswith(prefix):
-                config[k[prefix_len:]] = v
+        # Efficient single-pass override of server-specific values
+        for key, value in ((k, v) for k, v in self._config.items() if k.startswith(prefix)):
+            config[key[prefix_len:]] = value
 
-        if "SERVER_NAME" not in config:
+        # Set default SERVER_NAME if not explicitly defined
+        if f"{prefix}SERVER_NAME" not in self._config:
             config["SERVER_NAME"] = server
 
         return config
