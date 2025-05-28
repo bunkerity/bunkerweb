@@ -10,8 +10,7 @@
 
 ngx_feature_name=
 ngx_feature_run=no
-ngx_feature_incs="#include <modsecurity/modsecurity.h>
-#include <stdio.h>"
+ngx_feature_incs="#include <modsecurity/modsecurity.h>"
 ngx_feature_libs="-lmodsecurity"
 ngx_feature_test='msc_init();'
 ngx_modsecurity_opt_I=
@@ -32,18 +31,12 @@ if [ -n "$MODSECURITY_INC" -o -n "$MODSECURITY_LIB" ]; then
     ngx_modsecurity_opt_I="-I$MODSECURITY_INC"
     ngx_modsecurity_opt_L="-L$MODSECURITY_LIB $YAJL_EXTRA"
 
-    if [ "$NGX_CC_NAME" != msvc ]; then
-        if [ $NGX_RPATH = YES ]; then
-            ngx_feature_libs="-R$MODSECURITY_LIB -L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
-        elif [ "$NGX_IGNORE_RPATH" != "YES" -a $NGX_SYSTEM = "Linux" ]; then
-            ngx_feature_libs="-Wl,-rpath,$MODSECURITY_LIB -L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
-        else
-            ngx_feature_libs="-L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
-        fi
+    if [ $NGX_RPATH = YES ]; then
+        ngx_feature_libs="-R$MODSECURITY_LIB -L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
+    elif [ "$NGX_IGNORE_RPATH" != "YES" -a $NGX_SYSTEM = "Linux" ]; then
+        ngx_feature_libs="-Wl,-rpath,$MODSECURITY_LIB -L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
     else
-        # Adjust link library arguments to work with MSVC C++ compiler and
-        # output of the Windows port of libModSecurity v3
-        ngx_feature_libs="$MODSECURITY_LIB/libModSecurity.lib $YAJL_EXTRA"
+        ngx_feature_libs="-L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
     fi
 
     . auto/feature
@@ -133,6 +126,7 @@ if test -n "$ngx_module_link"; then
                           ngx_http_v2_filter_module \
                           ngx_http_range_header_filter_module \
                           ngx_http_gzip_filter_module \
+                          ngx_http_brotli_filter_module \
                           $ngx_module_name \
                           $modsecurity_dependency";
 

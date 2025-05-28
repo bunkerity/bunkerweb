@@ -13,8 +13,6 @@
  *
  */
 
-#include <ngx_config.h>
-
 #ifndef MODSECURITY_DDEBUG
 #define MODSECURITY_DDEBUG 0
 #endif
@@ -22,12 +20,9 @@
 
 #include "ngx_http_modsecurity_common.h"
 #include "stdio.h"
+#include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
-
-#ifdef _MSC_VER
-#define strdup _strdup
-#endif
 
 static ngx_int_t ngx_http_modsecurity_init(ngx_conf_t *cf);
 static void *ngx_http_modsecurity_create_main_conf(ngx_conf_t *cf);
@@ -136,7 +131,7 @@ ngx_inline char *ngx_str_to_char(ngx_str_t a, ngx_pool_t *p)
 }
 
 
-int
+ngx_inline int
 ngx_http_modsecurity_process_intervention (Transaction *transaction, ngx_http_request_t *r, ngx_int_t early_log)
 {
     char *log = NULL;
@@ -149,7 +144,7 @@ ngx_http_modsecurity_process_intervention (Transaction *transaction, ngx_http_re
 
     dd("processing intervention");
 
-    ctx = ngx_http_modsecurity_get_module_ctx(r);
+    ctx = ngx_http_get_module_ctx(r, ngx_http_modsecurity_module);
     if (ctx == NULL)
     {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -259,7 +254,7 @@ ngx_http_modsecurity_cleanup(void *data)
 }
 
 
-ngx_http_modsecurity_ctx_t *
+ngx_inline ngx_http_modsecurity_ctx_t *
 ngx_http_modsecurity_create_ctx(ngx_http_request_t *r)
 {
     ngx_str_t                          s;
@@ -313,27 +308,6 @@ ngx_http_modsecurity_create_ctx(ngx_http_request_t *r)
     return ctx;
 }
 
-ngx_inline ngx_http_modsecurity_ctx_t *
-ngx_http_modsecurity_get_module_ctx(ngx_http_request_t *r)
-{
-    ngx_http_modsecurity_ctx_t *ctx;
-    ctx = ngx_http_get_module_ctx(r, ngx_http_modsecurity_module);
-    if (ctx == NULL) {
-        /*
-         * refer <nginx>/src/http/modules/ngx_http_realip_module.c
-         * if module context was reset, the original address
-         * can still be found in the cleanup handler
-         */
-        ngx_pool_cleanup_t *cln;
-        for (cln = r->pool->cleanup; cln; cln = cln->next) {
-            if (cln->handler == ngx_http_modsecurity_cleanup) {
-                ctx = cln->data;
-                break;
-            }
-        }
-    }
-    return ctx;
-}
 
 char *
 ngx_conf_set_rules(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
@@ -687,9 +661,6 @@ ngx_http_modsecurity_init_main_conf(ngx_conf_t *cf, void *conf)
                   "%s (rules loaded inline/local/remote: %ui/%ui/%ui)",
                   MODSECURITY_NGINX_WHOAMI, mmcf->rules_inline,
                   mmcf->rules_file, mmcf->rules_remote);
-    ngx_log_error(NGX_LOG_NOTICE, cf->log, 0,
-                  "libmodsecurity3 version %s.%s.%s",
-                  MODSECURITY_MAJOR, MODSECURITY_MINOR, MODSECURITY_PATCHLEVEL);
 
     return NGX_CONF_OK;
 }

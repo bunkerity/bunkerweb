@@ -56,11 +56,8 @@ do
     rm -rf "src/deps/src/$id"
   fi
 
-  do_and_check_cmd mkdir -p "src/deps/src/$id"
-  do_and_check_cmd git -C "src/deps/src/$id" init
-  do_and_check_cmd git -C "src/deps/src/$id" remote add origin "$url"
-  do_and_check_cmd git -C "src/deps/src/$id" fetch origin "$commit"
-  do_and_check_cmd git -C "src/deps/src/$id" checkout FETCH_HEAD
+  do_and_check_cmd git clone "$url" "src/deps/src/$id"
+  do_and_check_cmd git -C "src/deps/src/$id" checkout "$commit"
 
   if [ -d "src/deps/src/$id/.git" ] ; then
     do_and_check_cmd rm -rf "src/deps/src/$id/.git"

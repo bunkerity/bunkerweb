@@ -1,7 +1,11 @@
-@@ -167,4 +167,4 @@
+@@ -163,8 +163,8 @@
+ void ngx_http_modsecurity_log(void *log, const void* data);
+ ngx_int_t ngx_http_modsecurity_log_handler(ngx_http_request_t *r);
  
 -/* ngx_http_modsecurity_pre_access.c */
 -ngx_int_t ngx_http_modsecurity_pre_access_handler(ngx_http_request_t *r);
 +/* ngx_http_modsecurity_access.c */
 +ngx_int_t ngx_http_modsecurity_access_handler(ngx_http_request_t *r);
  
+ /* ngx_http_modsecurity_rewrite.c */
+ ngx_int_t ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r);
