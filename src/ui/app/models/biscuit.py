@@ -57,7 +57,10 @@ class BiscuitMiddleware:
         Flask's `before_request` hook to intercept requests and perform Biscuit authorization.
         Enhanced to handle dynamic permissions per route.
         """
-        if request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")) or request.endpoint == "logout.logout_page":
+        if (
+            request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/", "/cache/"))
+            or request.endpoint == "logout.logout_page"
+        ):
             return
 
         token_str: Optional[str] = session.get("biscuit_token")  # Retrieve token from session
