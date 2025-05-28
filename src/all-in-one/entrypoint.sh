@@ -6,6 +6,8 @@
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
+handle_docker_secrets
+
 # trap SIGTERM and SIGINT
 function trap_exit() {
 	# shellcheck disable=SC2317

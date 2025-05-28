@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import _exit, getenv, sep
+from os import _exit, environ, getenv, sep
 from os.path import join
 from signal import SIGINT, SIGTERM, signal
 from sys import exit as sys_exit, path as sys_path
@@ -11,13 +11,24 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import handle_docker_secrets  # type: ignore
 from logger import setup_logger  # type: ignore
 from SwarmController import SwarmController
 from IngressController import IngressController
 from DockerController import DockerController
 
 # Get variables
+# Handle Docker secrets first
+docker_secrets = handle_docker_secrets()
+if docker_secrets:
+    # Update environment with secrets
+    environ.update(docker_secrets)
+
 LOGGER = setup_logger("Autoconf", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+
+if docker_secrets:
+    LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
+
 swarm = getenv("SWARM_MODE", "no").lower() == "yes"
 kubernetes = getenv("KUBERNETES_MODE", "no").lower() == "yes"
 docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")

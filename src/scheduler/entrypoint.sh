@@ -26,6 +26,8 @@ log "ENTRYPOINT" "ℹ️" "Starting the job scheduler v$(cat /usr/share/bunkerwe
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
+handle_docker_secrets
+
 if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
 	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
 elif [[ $(echo "$KUBERNETES_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then

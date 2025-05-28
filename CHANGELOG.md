@@ -5,6 +5,7 @@
 - [BUGFIX] Refactor CLI command handling to support additional arguments
 - [DOCS] Update the documentation about the `all-in-one` image to include the new features and improvements, also move it to its own section
 - [FEATURE] Add request ID to error pages, logs and display it in UI reports for easier tracking of issues
+- [FEATURE] Add support for Docker secrets in all services
 - [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
 - [ALL-IN-ONE] Fully integrate Redis in the all-in-one image (activated by default)
 - [UI] Add clear notifications feature to both UI and backend for improved notification management

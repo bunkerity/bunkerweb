@@ -239,6 +239,30 @@ services:
 !!! info "Full list"
     For the complete list of environment variables, see the [settings section](features.md) of the documentation.
 
+### Using Docker secrets
+
+Instead of passing sensitive settings via environment variables, you can store them as Docker secrets. For each setting you want to secure, create a Docker secret with the name matching the setting key (in uppercase). BunkerWeb's entrypoint scripts automatically load secrets from `/run/secrets` and export them as environment variables.
+
+Example:
+```bash
+# Create a Docker secret for ADMIN_PASSWORD
+echo "S3cr3tP@ssw0rd" | docker secret create ADMIN_PASSWORD -
+```
+
+Mount the secrets when deploying:
+```yaml
+services:
+  bw-ui:
+    secrets:
+      - ADMIN_PASSWORD
+...
+secrets:
+  ADMIN_PASSWORD:
+    external: true
+```
+
+This ensures sensitive settings are kept out of the environment and logs.
+
 ### Scheduler
 
 The [scheduler](concepts.md#scheduler) runs in its own container, which is also available on Docker Hub:
