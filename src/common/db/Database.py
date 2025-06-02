@@ -2463,8 +2463,10 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+
             try:
-                session.query(Jobs_cache).filter_by(**filters).delete()
+                session.commit()
             except BaseException as e:
                 return str(e)
 
