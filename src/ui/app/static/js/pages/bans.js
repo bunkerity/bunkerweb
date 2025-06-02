@@ -52,6 +52,11 @@ $(document).ready(function () {
       tooltip: "The time left until the Ban expires",
       i18n: "tooltip.table.bans.time_left",
     },
+    {
+      title: "Actions",
+      tooltip: "Actions that can be performed on the ban",
+      i18n: "tooltip.table.bans.actions",
+    },
   ];
 
   // Batch update tooltips
@@ -944,6 +949,56 @@ $(document).ready(function () {
             return data;
           },
         },
+        {
+          targets: 10, // Actions column
+          render: function (data, type, row) {
+            if (type === "display") {
+              const readOnlyClass = isReadOnly ? " disabled" : "";
+              const unbanTooltip = isReadOnly
+                ? t(
+                    "tooltip.readonly_mode",
+                    "This action is not allowed in read-only mode.",
+                  )
+                : t("tooltip.button.unban_ip", "Unban this IP address");
+              const updateTooltip = isReadOnly
+                ? t(
+                    "tooltip.readonly_mode",
+                    "This action is not allowed in read-only mode.",
+                  )
+                : t(
+                    "tooltip.button.update_ban_duration",
+                    "Update ban duration",
+                  );
+
+              return `
+                <div class="d-flex justify-content-evenly">
+                  <button type="button"
+                          class="btn btn-outline-danger btn-sm me-1 unban-single${readOnlyClass}"
+                          data-ip="${row.ip}"
+                          data-scope="${row.scope}"
+                          data-service="${row.service}"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          data-bs-original-title="${unbanTooltip}">
+                    <i class="bx bxs-buoy bx-xs"></i>
+                  </button>
+                  <button type="button"
+                          class="btn btn-outline-warning btn-sm me-1 update-duration-single${readOnlyClass}"
+                          data-ip="${row.ip}"
+                          data-scope="${row.scope}"
+                          data-service="${row.service}"
+                          data-permanent="${row.permanent}"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          data-bs-original-title="${updateTooltip}">
+                    <i class="bx bx-timer bx-xs"></i>
+                  </button>
+                </div>
+              `;
+            }
+            return "";
+          },
+        },
       ],
       order: [[2, "desc"]],
       autoFill: false,
@@ -1019,6 +1074,11 @@ $(document).ready(function () {
         {
           data: "time_left",
           title: "<span data-i18n='table.header.time_left'>Time Left</span>",
+        },
+        {
+          data: "actions",
+          title: "<span data-i18n='table.header.actions'>Actions</span>",
+          orderable: false,
         },
       ],
       initComplete: function (settings, json) {
@@ -1479,4 +1539,62 @@ $(document).ready(function () {
       if ($serviceFeedback.length) $serviceFeedback.remove();
     }
   }
+
+  // Event handlers for individual row actions
+  $(document).on("click", ".unban-single", function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    if (actionLock) return;
+    actionLock = true;
+
+    const ip = $(this).data("ip");
+    const scope = $(this).data("scope");
+    const service = $(this).data("service");
+
+    const ban = {
+      ip: ip,
+      ban_scope: scope,
+      service: service === "_" ? null : service,
+      time_remaining: "N/A", // Not needed for unban
+    };
+
+    setupUnbanModal([ban]);
+    actionLock = false;
+  });
+
+  $(document).on("click", ".update-duration-single", function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    if (actionLock) return;
+    actionLock = true;
+
+    const ip = $(this).data("ip");
+    const scope = $(this).data("scope");
+    const service = $(this).data("service");
+    const isPermanent = $(this).data("permanent");
+
+    const ban = {
+      ip: ip,
+      ban_scope: scope,
+      service: service === "_" ? null : service,
+      time_remaining: isPermanent ? "permanent" : "N/A",
+    };
+
+    setupUpdateDurationModal([ban]);
+    actionLock = false;
+  });
 });

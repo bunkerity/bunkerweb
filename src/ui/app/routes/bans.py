@@ -148,6 +148,7 @@ def bans_fetch():
         "service",  # 5
         "end_date",  # 6
         "time_left",  # 7
+        "actions",  # 8
     ]
 
     # Helper: format a ban for DataTable row
@@ -163,6 +164,7 @@ def bans_fetch():
             "end_date": "permanent" if ban.get("permanent", False) else escape(str(ban.get("end_date", "N/A"))),
             "time_left": "permanent" if ban.get("permanent", False) else escape(str(ban.get("remain", "N/A"))),
             "permanent": bool(ban.get("permanent", False)),
+            "actions": "",  # Actions column for buttons
         }
 
     # Apply searchPanes filters

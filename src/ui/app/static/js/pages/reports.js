@@ -79,7 +79,7 @@ $(document).ready(function () {
         countryCode === "unknown"
           ? "country.not_applicable"
           : `country.${countryCode}`,
-        "Unknown"
+        "Unknown",
       );
       if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
@@ -127,7 +127,7 @@ $(document).ready(function () {
       columns: "th:not(:nth-child(-n+3))",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
         "button.columns",
-        "Columns"
+        "Columns",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
@@ -150,7 +150,7 @@ $(document).ready(function () {
       extend: "colvisRestore",
       text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
         "button.reset_columns",
-        "Reset columns"
+        "Reset columns",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
@@ -158,7 +158,7 @@ $(document).ready(function () {
       extend: "collection",
       text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
         "button.export",
-        "Export"
+        "Export",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
@@ -166,7 +166,7 @@ $(document).ready(function () {
           extend: "copy",
           text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
             "button.copy_visible",
-            "Copy visible"
+            "Copy visible",
           )}</span>`,
           exportOptions: {
             columns: ":visible:not(:first-child)",
@@ -272,15 +272,15 @@ $(document).ready(function () {
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-              countryCode === "local"
-                ? "not_applicable"
-                : countryCode.toUpperCase()
-            }" data-country="${
-              countryCode === "local" ? "unknown" : countryCode.toUpperCase()
-            }">
+                countryCode === "local"
+                  ? "not_applicable"
+                  : countryCode.toUpperCase()
+              }" data-country="${
+                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+              }">
                 <img src="${escapeHtml(baseFlagsUrl)}/${
-              countryCode === "local" ? "zz" : escapeHtml(countryCode)
-            }.svg"
+                  countryCode === "local" ? "zz" : escapeHtml(countryCode)
+                }.svg"
                      class="border border-1 p-0 me-1"
                      height="17"
                      loading="lazy" />
@@ -405,8 +405,8 @@ $(document).ready(function () {
             .text(
               t(
                 "status.error_loading_reports",
-                "Error loading reports. Please try refreshing the page."
-              )
+                "Error loading reports. Please try refreshing the page.",
+              ),
             );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
@@ -477,7 +477,7 @@ $(document).ready(function () {
                   } catch (encodeError) {
                     console.warn(
                       "Failed to encode data for modal, using fallback:",
-                      encodeError
+                      encodeError,
                     );
                     // Store raw data as base64 as ultimate fallback
                     encodedData = btoa(JSON.stringify(jsonData || {}));
@@ -489,7 +489,7 @@ $(document).ready(function () {
                             data-bs-target="#dataModal"
                             data-report-data="${escapeHtml(encodedData)}"
                             data-raw-data="${escapeHtml(
-                              JSON.stringify(jsonData)
+                              JSON.stringify(jsonData),
                             )}"
                             style="cursor: pointer;">
                             View Details
@@ -511,7 +511,7 @@ $(document).ready(function () {
                           data-bs-toggle="modal"
                           data-bs-target="#dataModal"
                           data-report-data="${escapeHtml(
-                            encodeURIComponent(fallbackData)
+                            encodeURIComponent(fallbackData),
                           )}"
                           data-raw-data="${escapeHtml(safeData)}"
                           style="cursor: pointer;">
@@ -551,8 +551,8 @@ $(document).ready(function () {
         .text(
           t(
             "status.error_loading_reports",
-            "Error loading reports. Please try refreshing the page."
-          )
+            "Error loading reports. Please try refreshing the page.",
+          ),
         );
       $("#reports").addClass("d-none");
     }
@@ -585,7 +585,7 @@ $(document).ready(function () {
           } catch (jsonError) {
             console.warn(
               "Failed to stringify raw data, using string conversion:",
-              jsonError
+              jsonError,
             );
             textToCopy = String(rawData);
           }
@@ -611,13 +611,13 @@ $(document).ready(function () {
           console.error("Failed to copy to clipboard:", clipboardError);
           // Fallback: show an alert or try alternative method
           alert(
-            "Failed to copy to clipboard. Please try using the raw data copy button below."
+            "Failed to copy to clipboard. Please try using the raw data copy button below.",
           );
         });
     } catch (e) {
       console.error("Critical error in copy data functionality:", e);
       alert(
-        "Error accessing data for copying. Please try refreshing the page."
+        "Error accessing data for copying. Please try refreshing the page.",
       );
     }
   });
@@ -654,7 +654,7 @@ $(document).ready(function () {
         } catch (parseError) {
           console.warn(
             "Failed to parse report data string, trying direct parsing:",
-            parseError
+            parseError,
           );
           try {
             // Try to parse without decoding
@@ -662,7 +662,7 @@ $(document).ready(function () {
           } catch (directParseError) {
             console.warn(
               "Failed direct parsing, trying base64 decode:",
-              directParseError
+              directParseError,
             );
             try {
               // Try base64 decode as last resort for encoded data
@@ -671,7 +671,7 @@ $(document).ready(function () {
             } catch (base64Error) {
               console.warn(
                 "All parsing methods failed, using fallback:",
-                base64Error
+                base64Error,
               );
               // Create a fallback object with the original data
               reportData = {
@@ -706,7 +706,7 @@ $(document).ready(function () {
       // Update modal title with reason
       $("#dataModalLabel").html(`
         <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
-          reason
+          reason,
         )}
       `);
 
@@ -759,7 +759,7 @@ $(document).ready(function () {
 
       $("#dataModalLabel").html(`
         <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
-          reason
+          reason,
         )}
       `);
 
@@ -796,7 +796,7 @@ $(document).ready(function () {
             </button>
           </div>
           <pre class="p-3 bg-light border rounded small" style="max-height: 300px; overflow-y: auto;"><code>${escapeHtml(
-            jsonString
+            jsonString,
           )}</code></pre>
         </div>
       `;
@@ -812,7 +812,7 @@ $(document).ready(function () {
             </button>
           </div>
           <pre class="p-3 bg-light border rounded small" style="max-height: 300px; overflow-y: auto;"><code>${escapeHtml(
-            String(fallbackContent)
+            String(fallbackContent),
           )}</code></pre>
         </div>
       `;
@@ -897,7 +897,7 @@ $(document).ready(function () {
       ids.length,
       msgs.length,
       varNames.length,
-      varValues.length
+      varValues.length,
     );
 
     if (maxLength === 0) {
@@ -962,7 +962,7 @@ $(document).ready(function () {
       "signature",
     ];
     const hasSecurityContext = Object.keys(data).some((key) =>
-      securityKeys.some((secKey) => key.toLowerCase().includes(secKey))
+      securityKeys.some((secKey) => key.toLowerCase().includes(secKey)),
     );
 
     if (hasSecurityContext) {
@@ -984,7 +984,7 @@ $(document).ready(function () {
         displayKey.charAt(0).toUpperCase() + displayKey.slice(1);
 
       html += `<strong class="text-muted">${escapeHtml(
-        capitalizedKey
+        capitalizedKey,
       )}:</strong>`;
 
       if (Array.isArray(value)) {
@@ -995,11 +995,11 @@ $(document).ready(function () {
           value.forEach((item, index) => {
             if (typeof item === "object") {
               html += `<li><pre class="mb-1 p-1 bg-light border rounded small"><code>${escapeHtml(
-                JSON.stringify(item, null, 2)
+                JSON.stringify(item, null, 2),
               )}</code></pre></li>`;
             } else {
               html += `<li><code class="text-break">${escapeHtml(
-                String(item)
+                String(item),
               )}</code></li>`;
             }
           });
@@ -1007,25 +1007,25 @@ $(document).ready(function () {
         }
       } else if (typeof value === "object" && value !== null) {
         html += `<pre class="mt-1 p-2 bg-light border rounded small"><code>${escapeHtml(
-          JSON.stringify(value, null, 2)
+          JSON.stringify(value, null, 2),
         )}</code></pre>`;
       } else {
         // Handle different value types with appropriate styling
         const stringValue = String(value);
         if (stringValue.length > 100) {
           html += `<div class="mt-1"><code class="text-break">${escapeHtml(
-            stringValue
+            stringValue,
           )}</code></div>`;
         } else if (
           key.toLowerCase().includes("id") ||
           key.toLowerCase().includes("code")
         ) {
           html += `<span class="ms-1"><span class="badge bg-secondary">${escapeHtml(
-            stringValue
+            stringValue,
           )}</span></span>`;
         } else {
           html += `<span class="ms-1"><code>${escapeHtml(
-            stringValue
+            stringValue,
           )}</code></span>`;
         }
       }
@@ -1089,7 +1089,7 @@ $(document).ready(function () {
     history.replaceState(
       null,
       "",
-      value === "10" ? location.pathname : `#${value}`
+      value === "10" ? location.pathname : `#${value}`,
     );
   });
 
@@ -1106,7 +1106,7 @@ $(document).ready(function () {
           const header = headers.find(
             (h) =>
               h.i18n ===
-              i18nKey.replace("table.header.", "tooltip.table.reports.")
+              i18nKey.replace("table.header.", "tooltip.table.reports."),
           );
           if (header) {
             $th.attr({
