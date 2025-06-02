@@ -76,7 +76,7 @@ COLUMNS_PREFERENCES_DEFAULTS = {
     "reports": {
         "4": True,
         "5": False,
-        "6": False,
+        "6": True,
         "7": False,
         "8": False,
         "9": True,
