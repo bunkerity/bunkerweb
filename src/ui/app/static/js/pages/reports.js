@@ -79,7 +79,7 @@ $(document).ready(function () {
         countryCode === "unknown"
           ? "country.not_applicable"
           : `country.${countryCode}`,
-        "Unknown",
+        "Unknown"
       );
       if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
@@ -127,7 +127,7 @@ $(document).ready(function () {
       columns: "th:not(:nth-child(-n+3))",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
         "button.columns",
-        "Columns",
+        "Columns"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
@@ -150,7 +150,7 @@ $(document).ready(function () {
       extend: "colvisRestore",
       text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
         "button.reset_columns",
-        "Reset columns",
+        "Reset columns"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
@@ -158,7 +158,7 @@ $(document).ready(function () {
       extend: "collection",
       text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
         "button.export",
-        "Export",
+        "Export"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
@@ -166,7 +166,7 @@ $(document).ready(function () {
           extend: "copy",
           text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
             "button.copy_visible",
-            "Copy visible",
+            "Copy visible"
           )}</span>`,
           exportOptions: {
             columns: ":visible:not(:first-child)",
@@ -239,7 +239,7 @@ $(document).ready(function () {
     dataTableOptions: {
       columnDefs: [
         { orderable: false, targets: -1 },
-        { visible: false, targets: [5, 6, 7, 8, 11] },
+        { visible: false, targets: [5, 6, 7, 8] },
         {
           searchPanes: {
             show: true,
@@ -273,21 +273,37 @@ $(document).ready(function () {
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                countryCode === "local"
-                  ? "not_applicable"
-                  : countryCode.toUpperCase()
-              }" data-country="${
-                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
-              }">
+              countryCode === "local"
+                ? "not_applicable"
+                : countryCode.toUpperCase()
+            }" data-country="${
+              countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+            }">
                 <img src="${baseFlagsUrl}/${
-                  countryCode === "local" ? "zz" : countryCode
-                }.svg"
+              countryCode === "local" ? "zz" : countryCode
+            }.svg"
                      class="border border-1 p-0 me-1"
                      height="17"
                      loading="lazy" />
                 &nbsp;－&nbsp;${countryCode === "local" ? "N/A" : data}
               </span>`;
           },
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.ip_address", "IP Address"),
+            combiner: "or",
+          },
+          targets: 3,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.method", "Method"),
+            combiner: "or",
+          },
+          targets: 5,
         },
         {
           searchPanes: {
@@ -324,41 +340,6 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.server_name", "Server name"),
-            combiner: "or",
-          },
-          targets: 10,
-          render: function (data) {
-            return data === "_" ? "default server" : data;
-          },
-        },
-        {
-          searchPanes: {
-            show: true,
-            header: t("searchpane.ip_address", "IP Address"),
-            combiner: "or",
-          },
-          targets: 3,
-        },
-        {
-          searchPanes: {
-            show: true,
-            header: t("searchpane.method", "Method"),
-            combiner: "or",
-          },
-          targets: 5,
-        },
-        {
-          searchPanes: {
-            show: true,
-            header: t("searchpane.url", "URL"),
-            combiner: "or",
-          },
-          targets: 6,
-        },
-        {
-          searchPanes: {
-            show: true,
             header: t("searchpane.status_code", "Status Code"),
             combiner: "or",
           },
@@ -379,6 +360,9 @@ $(document).ready(function () {
             combiner: "or",
           },
           targets: 10,
+          render: function (data) {
+            return data === "_" ? "default server" : data;
+          },
         },
         {
           searchPanes: {
@@ -420,8 +404,8 @@ $(document).ready(function () {
             .text(
               t(
                 "status.error_loading_reports",
-                "Error loading reports. Please try refreshing the page.",
-              ),
+                "Error loading reports. Please try refreshing the page."
+              )
             );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
@@ -477,16 +461,37 @@ $(document).ready(function () {
           data: "data",
           title: "<span data-i18n='table.header.data'>Data</span>",
           render: function (data, type, row) {
-            if (type === "display" || type === "filter") {
+            if (type === "display") {
               try {
                 // Try to parse the data as JSON if it's a string
                 const jsonData =
                   typeof data === "string" ? JSON.parse(data) : data;
-                // Format it for display
-                return JSON.stringify(jsonData, null, 2);
+
+                // Check if there's meaningful data to display
+                if (jsonData && Object.keys(jsonData).length > 0) {
+                  return `<a href="#" 
+                            class="text-decoration-underline" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#dataModal" 
+                            data-report-data="${encodeURIComponent(
+                              JSON.stringify(jsonData)
+                            )}"
+                            style="cursor: pointer;">
+                            View Details
+                          </a>`;
+                } else {
+                  return "No data";
+                }
               } catch (e) {
                 console.warn("Error parsing data JSON:", e);
-                // Return a safe fallback if parsing fails
+                return "Invalid data";
+              }
+            } else if (type === "filter") {
+              try {
+                const jsonData =
+                  typeof data === "string" ? JSON.parse(data) : data;
+                return JSON.stringify(jsonData);
+              } catch (e) {
                 return "{}";
               }
             }
@@ -514,37 +519,12 @@ $(document).ready(function () {
         .text(
           t(
             "status.error_loading_reports",
-            "Error loading reports. Please try refreshing the page.",
-          ),
+            "Error loading reports. Please try refreshing the page."
+          )
         );
       $("#reports").addClass("d-none");
     }
   }, 5000); // 5 seconds fallback
-
-  // Create the modal for displaying full URLs once at document ready
-  $("body").append(`
-    <div class="modal fade" id="fullUrlModal" tabindex="-1" aria-labelledby="fullUrlModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="fullUrlModalLabel">Full URL</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <span id="fullUrlContent" class="text-break"></span>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" id="copyUrlBtn" class="btn btn-sm btn-outline-primary me-1">
-              <span class="tf-icons bx bx-copy me-1"></span>Copy
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `);
 
   // Add copy functionality to the copy button
   $(document).on("click", "#copyUrlBtn", function () {
@@ -560,12 +540,248 @@ $(document).ready(function () {
     });
   });
 
+  // Add copy functionality for data modal
+  $(document).on("click", "#copyDataBtn", function () {
+    const rawData = $("#dataModal").data("raw-data");
+    if (rawData) {
+      navigator.clipboard
+        .writeText(JSON.stringify(rawData, null, 2))
+        .then(() => {
+          const $btn = $(this);
+          const originalHtml = $btn.html();
+          $btn.html('<span class="tf-icons bx bx-check me-1"></span>Copied!');
+          setTimeout(() => {
+            $btn.html(originalHtml);
+          }, 2000);
+        });
+    }
+  });
+
   // Update the handler for the modal to display the full URL
   $("#fullUrlModal").on("show.bs.modal", function (event) {
     const button = $(event.relatedTarget); // Button that triggered the modal
     const url = button.data("url"); // Extract URL from data-url attribute
     $("#fullUrlContent").text(url);
   });
+
+  // Handler for the data modal to display formatted security report data
+  $("#dataModal").on("show.bs.modal", function (event) {
+    const button = $(event.relatedTarget);
+    const reportDataString = button.data("report-data");
+
+    try {
+      const reportData = JSON.parse(decodeURIComponent(reportDataString));
+      $("#dataModal").data("raw-data", reportData);
+
+      // Get the reason from the row data to show in modal title
+      const $row = button.closest("tr");
+      const table = $("#reports").DataTable();
+      const rowData = table.row($row).data();
+      const reason = rowData ? rowData.reason : "Unknown";
+
+      // Update modal title with reason
+      $("#dataModalLabel").html(`
+        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
+          reason
+        )}
+      `);
+
+      // Generate formatted content
+      const formattedContent = formatSecurityReportData(reportData);
+      $("#dataContent").html(formattedContent);
+    } catch (e) {
+      console.error("Error parsing report data:", e);
+      $("#dataModalLabel").html(`
+        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details
+      `);
+      $("#dataContent").html(
+        '<div class="alert alert-danger">Error parsing report data</div>'
+      );
+    }
+  });
+
+  // Function to safely escape HTML content
+  function escapeHtml(text) {
+    if (typeof text !== "string") {
+      text = String(text);
+    }
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Function to format security report data
+  function formatSecurityReportData(data) {
+    if (!data || typeof data !== "object") {
+      return '<div class="alert alert-warning">No data available</div>';
+    }
+
+    let html = "";
+
+    // Check if this looks like a ModSecurity-style report
+    const hasSecurityFields =
+      data.ids || data.msgs || data.matched_var_names || data.matched_vars;
+
+    if (hasSecurityFields) {
+      html += formatModSecurityData(data);
+    } else {
+      html += formatGenericData(data);
+    }
+
+    return html;
+  }
+
+  // Function to format ModSecurity-style data
+  function formatModSecurityData(data) {
+    const ids = data.ids || [];
+    const msgs = data.msgs || [];
+    const varNames = data.matched_var_names || [];
+    const varValues = data.matched_vars || [];
+
+    // Group related items by index
+    const maxLength = Math.max(
+      ids.length,
+      msgs.length,
+      varNames.length,
+      varValues.length
+    );
+
+    if (maxLength === 0) {
+      return '<div class="alert alert-info">No security data available</div>';
+    }
+
+    let html = '<div class="security-report-data">';
+
+    for (let i = 0; i < maxLength; i++) {
+      html += `<div class="security-incident mb-4 p-3 border rounded">`;
+      html += `<h6 class="text-primary mb-3"><span class="tf-icons bx bx-error-circle me-1"></span>Security Incident ${
+        i + 1
+      }</h6>`;
+
+      if (ids[i]) {
+        html += `<div class="mb-2">
+          <strong class="text-muted">Rule ID:</strong>
+          <span class="badge bg-secondary ms-1">${escapeHtml(ids[i])}</span>
+        </div>`;
+      }
+
+      if (msgs[i]) {
+        html += `<div class="mb-2">
+          <strong class="text-muted">Message:</strong>
+          <span class="ms-1">${escapeHtml(msgs[i])}</span>
+        </div>`;
+      }
+
+      if (varNames[i]) {
+        html += `<div class="mb-2">
+          <strong class="text-muted">Variable:</strong>
+          <code class="ms-1">${escapeHtml(varNames[i])}</code>
+        </div>`;
+      }
+
+      if (varValues[i]) {
+        html += `<div class="mb-2">
+          <strong class="text-muted">Value:</strong>
+          <code class="ms-1 text-break">${escapeHtml(varValues[i])}</code>
+        </div>`;
+      }
+
+      html += "</div>";
+    }
+
+    html += "</div>";
+    return html;
+  }
+
+  // Function to format generic data
+  function formatGenericData(data) {
+    let html = '<div class="generic-report-data">';
+
+    // Check if this might be a structured security report
+    const securityKeys = [
+      "rule",
+      "reason",
+      "matched",
+      "blocked",
+      "detected",
+      "pattern",
+      "signature",
+    ];
+    const hasSecurityContext = Object.keys(data).some((key) =>
+      securityKeys.some((secKey) => key.toLowerCase().includes(secKey))
+    );
+
+    if (hasSecurityContext) {
+      html +=
+        '<div class="alert alert-info mb-3"><span class="tf-icons bx bx-info-circle me-1"></span>Security Report Data</div>';
+    }
+
+    for (const [key, value] of Object.entries(data)) {
+      html += `<div class="mb-3 ${
+        hasSecurityContext ? "security-field" : ""
+      }">`;
+
+      // Make key more readable
+      const displayKey = key
+        .replace(/_/g, " ")
+        .replace(/([A-Z])/g, " $1")
+        .trim();
+      const capitalizedKey =
+        displayKey.charAt(0).toUpperCase() + displayKey.slice(1);
+
+      html += `<strong class="text-muted">${escapeHtml(
+        capitalizedKey
+      )}:</strong>`;
+
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          html += `<span class="ms-1 text-muted">No items</span>`;
+        } else {
+          html += `<ul class="mt-1 mb-0">`;
+          value.forEach((item, index) => {
+            if (typeof item === "object") {
+              html += `<li><pre class="mb-1 p-1 bg-light border rounded small"><code>${escapeHtml(
+                JSON.stringify(item, null, 2)
+              )}</code></pre></li>`;
+            } else {
+              html += `<li><code class="text-break">${escapeHtml(
+                String(item)
+              )}</code></li>`;
+            }
+          });
+          html += `</ul>`;
+        }
+      } else if (typeof value === "object" && value !== null) {
+        html += `<pre class="mt-1 p-2 bg-light border rounded small"><code>${escapeHtml(
+          JSON.stringify(value, null, 2)
+        )}</code></pre>`;
+      } else {
+        // Handle different value types with appropriate styling
+        const stringValue = String(value);
+        if (stringValue.length > 100) {
+          html += `<div class="mt-1"><code class="text-break">${escapeHtml(
+            stringValue
+          )}</code></div>`;
+        } else if (
+          key.toLowerCase().includes("id") ||
+          key.toLowerCase().includes("code")
+        ) {
+          html += `<span class="ms-1"><span class="badge bg-secondary">${escapeHtml(
+            stringValue
+          )}</span></span>`;
+        } else {
+          html += `<span class="ms-1"><code>${escapeHtml(
+            stringValue
+          )}</code></span>`;
+        }
+      }
+
+      html += `</div>`;
+    }
+
+    html += "</div>";
+    return html;
+  }
 
   // Wait for window.i18nextReady = true before continuing
   if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
@@ -619,7 +835,7 @@ $(document).ready(function () {
     history.replaceState(
       null,
       "",
-      value === "10" ? location.pathname : `#${value}`,
+      value === "10" ? location.pathname : `#${value}`
     );
   });
 
@@ -636,7 +852,7 @@ $(document).ready(function () {
           const header = headers.find(
             (h) =>
               h.i18n ===
-              i18nKey.replace("table.header.", "tooltip.table.reports."),
+              i18nKey.replace("table.header.", "tooltip.table.reports.")
           );
           if (header) {
             $th.attr({

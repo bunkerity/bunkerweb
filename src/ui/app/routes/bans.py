@@ -4,6 +4,7 @@ from json import JSONDecodeError, dumps, loads
 from math import floor
 from time import time
 from traceback import format_exc
+from html import escape
 
 from flask import Blueprint, flash as flask_flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
@@ -154,14 +155,14 @@ def bans_fetch():
         # Defensive: some bans may lack some fields
         return {
             "date": datetime.fromtimestamp(floor(ban.get("date", 0))).isoformat() if ban.get("date") else "N/A",
-            "ip": ban.get("ip", "N/A"),
-            "country": ban.get("country", "N/A"),
-            "reason": ban.get("reason", "N/A"),
-            "scope": ban.get("ban_scope", "global"),
-            "service": ban.get("service") or "_",
-            "end_date": "permanent" if ban.get("permanent", False) else ban.get("end_date", "N/A"),
-            "time_left": "permanent" if ban.get("permanent", False) else ban.get("remain", "N/A"),
-            "permanent": ban.get("permanent", False),
+            "ip": escape(str(ban.get("ip", "N/A"))),
+            "country": escape(str(ban.get("country", "N/A"))),
+            "reason": escape(str(ban.get("reason", "N/A"))),
+            "scope": escape(str(ban.get("ban_scope", "global"))),
+            "service": escape(str(ban.get("service") or "_")),
+            "end_date": "permanent" if ban.get("permanent", False) else escape(str(ban.get("end_date", "N/A"))),
+            "time_left": "permanent" if ban.get("permanent", False) else escape(str(ban.get("remain", "N/A"))),
+            "permanent": bool(ban.get("permanent", False)),
         }
 
     # Apply searchPanes filters
@@ -362,11 +363,11 @@ def bans_fetch():
     # Special handling for service searchpane options
     search_panes_options["service"] = []
     for name, counts in pane_counts["service"].items():
-        display_name = "default server" if (not name or name == "_") else name
+        display_name = "default server" if (not name or name == "_") else escape(str(name))
         search_panes_options["service"].append(
             {
                 "label": display_name,
-                "value": name,
+                "value": escape(str(name)),
                 "total": counts["total"],
                 "count": counts["count"],
             }
@@ -411,8 +412,8 @@ def bans_fetch():
         if field not in search_panes_options:
             search_panes_options[field] = [
                 {
-                    "label": value,
-                    "value": value,
+                    "label": escape(str(value)),
+                    "value": escape(str(value)),
                     "total": counts["total"],
                     "count": counts["count"],
                 }

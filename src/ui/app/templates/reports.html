@@ -32,6 +32,72 @@
         </span>
     </div>
     <!-- / Content -->
+    <!-- Full URL Modal -->
+    <div class="modal fade"
+         id="fullUrlModal"
+         tabindex="-1"
+         aria-labelledby="fullUrlModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fullUrlModalLabel">Full URL</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <span id="fullUrlContent" class="text-break"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            id="copyUrlBtn"
+                            class="btn btn-sm btn-outline-primary me-1">
+                        <span class="tf-icons bx bx-copy me-1"></span>Copy
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Security Report Data Modal -->
+    <div class="modal fade"
+         id="dataModal"
+         tabindex="-1"
+         aria-labelledby="dataModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">
+                        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="dataContent" class="report-data-content"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            id="copyDataBtn"
+                            class="btn btn-sm btn-outline-primary me-1">
+                        <span class="tf-icons bx bx-copy me-1"></span>Copy Raw Data
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"

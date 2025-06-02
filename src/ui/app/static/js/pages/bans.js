@@ -64,7 +64,7 @@ $(document).ready(function () {
         countryCode === "unknown" || countryCode === "local"
           ? "country.not_applicable"
           : `country.${countryCode}`,
-        "Unknown",
+        "Unknown"
       );
       if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
@@ -164,18 +164,18 @@ $(document).ready(function () {
         <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="ms-2 me-auto">
             <div class="fw-bold" data-i18n="table.header.ip_address">${t(
-              "table.header.ip_address",
+              "table.header.ip_address"
             )}</div>
           </div>
         </li>
         <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="fw-bold" data-i18n="table.header.scope">${t(
-            "table.header.scope",
+            "table.header.scope"
           )}</div>
         </li>
         <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="fw-bold" data-i18n="table.header.time_left">${t(
-            "table.header.time_left",
+            "table.header.time_left"
           )}</div>
         </li>
       </ul>
@@ -227,8 +227,8 @@ $(document).ready(function () {
       .text(
         t(
           alertTextKey,
-          "Are you sure you want to unban the selected IP address(es)?",
-        ),
+          "Are you sure you want to unban the selected IP address(es)?"
+        )
       );
 
     modalInstance.show();
@@ -248,18 +248,18 @@ $(document).ready(function () {
         <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="ms-2 me-auto">
             <div class="fw-bold" data-i18n="table.header.ip_address">${t(
-              "table.header.ip_address",
+              "table.header.ip_address"
             )}</div>
           </div>
         </li>
         <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="fw-bold" data-i18n="table.header.scope">${t(
-            "table.header.scope",
+            "table.header.scope"
           )}</div>
         </li>
         <li class="list-group-item bg-secondary text-white" style="flex: 1 0;">
           <div class="fw-bold" data-i18n="table.header.current_time_left">${t(
-            "table.header.current_time_left",
+            "table.header.current_time_left"
           )}</div>
         </li>
       </ul>
@@ -359,8 +359,8 @@ $(document).ready(function () {
             alert(
               t(
                 "alert.custom_end_date_required",
-                "Please select a custom end date.",
-              ),
+                "Please select a custom end date."
+              )
             );
             return null;
           }
@@ -386,14 +386,14 @@ $(document).ready(function () {
         type: "hidden",
         name: "csrf_token",
         value: $("#csrf_token").val(),
-      }),
+      })
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "updates",
         value: JSON.stringify(updates),
-      }),
+      })
     );
     form.appendTo("body").submit();
   });
@@ -437,7 +437,7 @@ $(document).ready(function () {
       columns: "th:not(:nth-child(-n+3))",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
         "button.columns",
-        "Columns",
+        "Columns"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
@@ -460,7 +460,7 @@ $(document).ready(function () {
       extend: "colvisRestore",
       text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
         "button.reset_columns",
-        "Reset columns",
+        "Reset columns"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
@@ -468,7 +468,7 @@ $(document).ready(function () {
       extend: "collection",
       text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
         "button.export",
-        "Export",
+        "Export"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
@@ -476,7 +476,7 @@ $(document).ready(function () {
           extend: "copy",
           text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
             "button.copy_visible",
-            "Copy visible",
+            "Copy visible"
           )}</span>`,
           exportOptions: {
             columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
@@ -507,7 +507,7 @@ $(document).ready(function () {
       extend: "collection",
       text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
         "button.actions",
-        "Actions",
+        "Actions"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary action-button disabled",
       buttons: [
@@ -515,7 +515,7 @@ $(document).ready(function () {
         {
           text: `<span class="tf-icons bx bx-timer bx-18px me-2"></span><span data-i18n="button.update_duration">${t(
             "button.update_duration",
-            "Update Duration",
+            "Update Duration"
           )}</span>`,
           className: "text-warning",
           action: function (e, dt, node, config) {
@@ -523,8 +523,8 @@ $(document).ready(function () {
               alert(
                 t(
                   "alert.readonly_mode",
-                  "This action is not allowed in read-only mode.",
-                ),
+                  "This action is not allowed in read-only mode."
+                )
               );
               return;
             }
@@ -545,7 +545,7 @@ $(document).ready(function () {
         {
           text: `<span class="tf-icons bx bx-time-five bx-18px me-2"></span><span data-i18n="button.set_1h">${t(
             "button.set_1h",
-            "Set 1 Hour",
+            "Set 1 Hour"
           )}</span>`,
           action: (e, dt, node, config) => {
             updateSelectedBansDuration("1h");
@@ -554,7 +554,7 @@ $(document).ready(function () {
         {
           text: `<span class="tf-icons bx bx-time bx-18px me-2"></span><span data-i18n="button.set_24h">${t(
             "button.set_24h",
-            "Set 24 Hours",
+            "Set 24 Hours"
           )}</span>`,
           action: (e, dt, node, config) => {
             updateSelectedBansDuration("24h");
@@ -563,7 +563,7 @@ $(document).ready(function () {
         {
           text: `<span class="tf-icons bx bx-calendar-week bx-18px me-2"></span><span data-i18n="button.set_1w">${t(
             "button.set_1w",
-            "Set 1 Week",
+            "Set 1 Week"
           )}</span>`,
           action: (e, dt, node, config) => {
             updateSelectedBansDuration("1w");
@@ -572,7 +572,7 @@ $(document).ready(function () {
         {
           text: `<span class="tf-icons bx bx-infinite bx-18px me-2"></span><span data-i18n="button.set_permanent">${t(
             "button.set_permanent",
-            "Set Permanent",
+            "Set Permanent"
           )}</span>`,
           className: "text-danger",
           action: (e, dt, node, config) => {
@@ -642,8 +642,8 @@ $(document).ready(function () {
       alert(
         t(
           "alert.readonly_mode",
-          "This action is not allowed in read-only mode.",
-        ),
+          "This action is not allowed in read-only mode."
+        )
       );
       return;
     }
@@ -676,14 +676,14 @@ $(document).ready(function () {
         type: "hidden",
         name: "csrf_token",
         value: $("#csrf_token").val(),
-      }),
+      })
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "updates",
         value: JSON.stringify(updates),
-      }),
+      })
     );
     form.appendTo("body").submit();
     actionLock = false;
@@ -707,8 +707,8 @@ $(document).ready(function () {
       const serviceText = $(serviceHtml).find("strong").length
         ? $(serviceHtml).find("strong").text().trim()
         : $(serviceHtml).find("span[data-i18n]").length
-          ? $(serviceHtml).find("span[data-i18n]").text().trim()
-          : $(serviceHtml).text().trim();
+        ? $(serviceHtml).find("span[data-i18n]").text().trim()
+        : $(serviceHtml).text().trim();
 
       const ban_scope =
         scopeText === t("scope.global", "Global") ? "global" : "service";
@@ -738,7 +738,7 @@ $(document).ready(function () {
   $.fn.dataTable.ext.buttons.add_ban = {
     text: `<span class="tf-icons bx bx-plus"></span><span class="d-none d-md-inline" data-i18n="button.add_ban_plural"> ${t(
       "button.add_ban_plural",
-      "Add ban(s)",
+      "Add ban(s)"
     )}</span>`,
     className: `btn btn-sm rounded me-4 btn-bw-green${
       isReadOnly ? " disabled" : ""
@@ -748,8 +748,8 @@ $(document).ready(function () {
         alert(
           t(
             "alert.readonly_mode",
-            "This action is not allowed in read-only mode.",
-          ),
+            "This action is not allowed in read-only mode."
+          )
         );
         return;
       }
@@ -762,15 +762,15 @@ $(document).ready(function () {
   $.fn.dataTable.ext.buttons.unban_ips = {
     text: `<span class="tf-icons bx bxs-buoy bx-18px me-2"></span><span data-i18n="button.unban">${t(
       "button.unban",
-      "Unban",
+      "Unban"
     )}</span>`,
     action: function (e, dt, node, config) {
       if (isReadOnly) {
         alert(
           t(
             "alert.readonly_mode",
-            "This action is not allowed in read-only mode.",
-          ),
+            "This action is not allowed in read-only mode."
+          )
         );
         return;
       }
@@ -796,9 +796,14 @@ $(document).ready(function () {
       columnDefs: [
         { orderable: false, className: "dtr-control", targets: 0 },
         { orderable: false, render: DataTable.render.select(), targets: 1 },
-        { type: "ip-address", targets: 3 },
         { orderable: false, targets: -1 },
         {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.date", "Date"),
+            combiner: "or",
+            orderable: false,
+          },
           targets: 2,
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
@@ -809,6 +814,10 @@ $(document).ready(function () {
             }
             return data;
           },
+        },
+        {
+          type: "ip-address",
+          targets: 3,
         },
         {
           searchPanes: {
@@ -826,28 +835,19 @@ $(document).ready(function () {
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                isNotApplicable ? "not_applicable" : countryCode.toUpperCase()
-              }" data-country="${
-                isNotApplicable ? "unknown" : countryCode.toUpperCase()
-              }">
+              isNotApplicable ? "not_applicable" : countryCode.toUpperCase()
+            }" data-country="${
+              isNotApplicable ? "unknown" : countryCode.toUpperCase()
+            }">
               <img src="${baseFlagsUrl}/${
-                isNotApplicable ? "zz" : countryCode
-              }.svg"
+              isNotApplicable ? "zz" : countryCode
+            }.svg"
                  class="border border-1 p-0 me-1"
                  height="17"
                  loading="lazy" />
               &nbsp;－&nbsp;${isNotApplicable ? "N/A" : data}
               </span>`;
           },
-        },
-        {
-          searchPanes: {
-            show: true,
-            header: t("searchpane.date", "Date"),
-            combiner: "or",
-            orderable: false,
-          },
-          targets: 2,
         },
         {
           searchPanes: {
@@ -863,7 +863,7 @@ $(document).ready(function () {
                 <i class="bx bx-server me-1"></i>
                 <span data-i18n="scope.service_specific">${t(
                   "scope.service_specific",
-                  "Service",
+                  "Service"
                 )}</span>
               </span>`;
             } else {
@@ -871,7 +871,7 @@ $(document).ready(function () {
                 <i class="bx bx-globe me-1"></i>
                 <span data-i18n="scope.global">${t(
                   "scope.global",
-                  "Global",
+                  "Global"
                 )}</span>
               </span>`;
             }
@@ -895,7 +895,7 @@ $(document).ready(function () {
             } else {
               return `<span class="text-muted fst-italic" data-i18n="scope.all_services">${t(
                 "scope.all_services",
-                "All services",
+                "All services"
               )}</span>`;
             }
           },
@@ -914,7 +914,7 @@ $(document).ready(function () {
                 <i class="bx bx-time-five me-1"></i>
                 <span data-i18n="scope.permanent">${t(
                   "scope.permanent",
-                  "Permanent",
+                  "Permanent"
                 )}</span>
               </span>`;
             }
@@ -933,7 +933,7 @@ $(document).ready(function () {
               <i class="bx bx-infinite me-1"></i>
               <span data-i18n="scope.permanent">${t(
                 "scope.permanent",
-                "Permanent",
+                "Permanent"
               )}</span>
               </span>`;
             }
@@ -973,8 +973,8 @@ $(document).ready(function () {
             .text(
               t(
                 "status.error_loading_bans",
-                "Error loading bans. Please try refreshing the page.",
-              ),
+                "Error loading bans. Please try refreshing the page."
+              )
             );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
@@ -1035,7 +1035,7 @@ $(document).ready(function () {
               "data-bs-original-title",
               t(titleKey, defaultTitle, {
                 action: t("button.add_ban_plural"),
-              }),
+              })
             )
             .attr("data-bs-placement", "right")
             .tooltip();
@@ -1057,8 +1057,8 @@ $(document).ready(function () {
         .text(
           t(
             "status.error_loading_bans",
-            "Error loading bans. Please try refreshing the page.",
-          ),
+            "Error loading bans. Please try refreshing the page."
+          )
         );
       $("#bans").addClass("d-none");
     }
@@ -1110,8 +1110,7 @@ $(document).ready(function () {
         if (i18nKey) {
           const header = headers.find(
             (h) =>
-              h.i18n ===
-              i18nKey.replace("table.header.", "tooltip.table.bans."),
+              h.i18n === i18nKey.replace("table.header.", "tooltip.table.bans.")
           );
           if (header) {
             $th.attr({
@@ -1218,8 +1217,8 @@ $(document).ready(function () {
       alert(
         t(
           "alert.readonly_mode",
-          "This action is not allowed in read-only mode.",
-        ),
+          "This action is not allowed in read-only mode."
+        )
       );
       return;
     }
@@ -1248,7 +1247,7 @@ $(document).ready(function () {
   });
 
   const ipRegex = new RegExp(
-    /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?!$)|$)){4}$|^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|::)$/i,
+    /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?!$)|$)){4}$|^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|::)$/i
   );
 
   const validateBan = (banIpInput, ipServiceMap) => {
@@ -1290,7 +1289,7 @@ $(document).ready(function () {
     let $feedback = banIpInput.next(".invalid-feedback");
     if (!$feedback.length && !isValid) {
       $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
-        banIpInput,
+        banIpInput
       );
     }
 
@@ -1425,14 +1424,14 @@ $(document).ready(function () {
         type: "hidden",
         name: "csrf_token",
         value: $("#csrf_token").val(),
-      }),
+      })
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "bans",
         value: JSON.stringify(bans),
-      }),
+      })
     );
     form.appendTo("body").submit();
   });
