@@ -96,13 +96,13 @@ class BiscuitMiddleware:
                 authorizer.authorize()
                 break  # Success, exit retry loop
             except AuthorizationError as e:
-                current_app.logger.warning(f"Version check error: {e}")
-                return redirect(url_for("logout.logout_page"))
-            except Exception as e:
                 if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
                     current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
                     continue
 
+                current_app.logger.warning(f"Version check error: {e}")
+                return redirect(url_for("logout.logout_page"))
+            except Exception as e:
                 current_app.logger.debug(format_exc())
                 current_app.logger.error(f"Unexpected error during version check: {e}")
                 return redirect(url_for("logout.logout_page"))
@@ -128,6 +128,10 @@ class BiscuitMiddleware:
                 authorizer.authorize()
                 break  # Success, exit retry loop
             except AuthorizationError as e:
+                if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
+                    current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
+                    continue
+
                 current_app.logger.warning(f"Biscuit authorization error: {e}")
                 return (
                     render_template(
@@ -140,10 +144,6 @@ class BiscuitMiddleware:
                     403,
                 )
             except Exception as e:
-                if "Reached Datalog execution limits" in str(e) and attempt < max_retries - 1:
-                    current_app.logger.warning(f"Datalog execution limits reached, retrying... (attempt {attempt + 1}/{max_retries})")
-                    continue
-
                 current_app.logger.error(f"Unexpected error during Biscuit authorization: {e}")
                 return (
                     render_template(

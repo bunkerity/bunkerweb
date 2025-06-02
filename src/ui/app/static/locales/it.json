@@ -76,6 +76,7 @@
     "convert_services": "Converti Servizi",
     "copy": "Copia",
     "copy_codes": "Copia Codici",
+    "copy_raw": "Copia Dati Grezzi",
     "copy_visible": "Copia Visibili",
     "create_config": "Crea Configurazione Personalizzata",
     "create_instance": "Crea Istanza",
@@ -129,6 +130,8 @@
     "update_duration": "Aggiorna Durata Blocco",
     "update_key": "Aggiorna Chiave",
     "upload_photo": "Carica Nuova Foto",
+    "view_details": "Visualizza Dettagli",
+    "view_raw_data": "Visualizza Dati Grezzi",
     "wipe_other_sessions": "Pulisci Altre Sessioni"
   },
   "country": {
@@ -566,7 +569,9 @@
       "message": "Si è verificato un errore imprevisto del server.",
       "title": "Errore del Server"
     },
-    "reports_load_error": "Errore durante il caricamento dei report. Riprova aggiornando la pagina."
+    "ban_update_failed": "Impossibile aggiornare la durata del blocco. Riprova.",
+    "reports_load_error": "Errore durante il caricamento dei report. Riprova aggiornando la pagina.",
+    "unban_failed": "Impossibile sbloccare l'indirizzo IP. Riprova."
   },
   "flash": {
     "easter_egg": "Se stai leggendo questo, significa che sei curioso 👀",
@@ -704,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Trascina e rilascia il tuo archivio plugin qui o clicca per selezionare i file.",
+      "confirm_cache_deletion_alert": "Sei sicuro di voler eliminare il file cache selezionato?",
+      "confirm_cache_deletion_alert_plural": "Sei sicuro di voler eliminare i file cache selezionati?",
       "confirm_configs_deletion_alert": "Sei sicuro di voler eliminare la configurazione personalizzata selezionata?",
       "confirm_configs_deletion_alert_plural": "Sei sicuro di voler eliminare le configurazioni personalizzate selezionate?",
       "confirm_conversion_confirmation": "Sei sicuro di voler convertire i servizi selezionati?",
@@ -900,6 +907,10 @@
       "sessions": "Sessioni"
     }
   },
+  "reports": {
+    "security_incident": "Incidente di Sicurezza",
+    "security_report_data": "Dati del Report di Sicurezza"
+  },
   "scope": {
     "all_services": "Tutti i Servizi",
     "global": "Globale",
@@ -1022,7 +1033,7 @@
     "loading_services": "Caricamento servizi...",
     "news_connection_error": "Impossibile connettersi al blog per le notizie.",
     "no": "No",
-    "no_data": "Nessun dato da mostrare.",
+    "no_data": "Nessun dato",
     "no_history": "Nessuna cronologia disponibile.",
     "no_item": "Nessun Elemento",
     "no_notifications": "Nessuna notifica da mostrare.",
@@ -1124,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Se il servizio viene rimosso o riavviato, la configurazione della UI andrà persa.",
     "autoconf_disclaimer_detail": "Questo perché il metodo del servizio è 'autoconf', progettato per prevenire conflitti di configurazione.",
+    "ban_updated": "Durata del blocco aggiornata con successo!",
     "body": {
       "ping_succeed": "Istanze: {{instances}}"
     },
@@ -1132,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping fallito",
       "ping_succeed": "Ping riuscito"
-    }
+    },
+    "ip_unbanned": "Indirizzo IP sbloccato con successo!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Se richiedere automaticamente un certificato Let's Encrypt.",
@@ -1140,6 +1153,7 @@
       "convert_service_to_draft": "Converti Servizio {{name}} in Bozza",
       "convert_service_to_online": "Converti Servizio {{name}} in Online",
       "delete_config": "Elimina Configurazione Personalizzata {{name}}",
+      "delete_file": "Elimina file cache: {{filename}}",
       "delete_instance": "Elimina Istanza {{hostname}}",
       "delete_plugin": "Elimina Plugin {{name}}",
       "delete_service": "Elimina Servizio {{name}}",

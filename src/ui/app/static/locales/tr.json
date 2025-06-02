@@ -76,6 +76,7 @@
     "convert_services": "Servisleri Dönüştür",
     "copy": "Kopyala",
     "copy_codes": "Kodları Kopyala",
+    "copy_raw": "Ham Veriyi Kopyala",
     "copy_visible": "Görüneni Kopyala",
     "create_config": "Özel Yapılandırma Oluştur",
     "create_instance": "Instance Oluştur",
@@ -129,6 +130,8 @@
     "update_duration": "Yasaklama Süresini Güncelle",
     "update_key": "Anahtarı Güncelle",
     "upload_photo": "Yeni Fotoğraf Yükle",
+    "view_details": "Detayları Görüntüle",
+    "view_raw_data": "Ham Veriyi Görüntüle",
     "wipe_other_sessions": "Diğer Oturumları Sonlandır"
   },
   "country": {
@@ -566,7 +569,9 @@
       "message": "Beklenmeyen bir sunucu hatası oluştu.",
       "title": "Sunucu Hatası"
     },
-    "reports_load_error": "Raporlar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin."
+    "ban_update_failed": "Yasaklama süresi güncellenemedi. Lütfen tekrar deneyin.",
+    "reports_load_error": "Raporlar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin.",
+    "unban_failed": "IP adresinin yasağı kaldırılamadı. Lütfen tekrar deneyin."
   },
   "flash": {
     "easter_egg": "Bunu okuyorsan meraklısın demektir 👀",
@@ -704,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
+      "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
+      "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
       "confirm_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
@@ -900,6 +907,10 @@
       "sessions": "Oturumlar"
     }
   },
+  "reports": {
+    "security_incident": "Güvenlik Olayı",
+    "security_report_data": "Güvenlik Raporu Verisi"
+  },
   "scope": {
     "all_services": "Tüm Servisler",
     "global": "Global",
@@ -1022,7 +1033,7 @@
     "loading_services": "Servisler yükleniyor...",
     "news_connection_error": "Haber güncellemeleri için bloga bağlanılamadı.",
     "no": "Hayır",
-    "no_data": "Gösterilecek veri yok.",
+    "no_data": "Veri yok",
     "no_history": "Geçmiş yok.",
     "no_item": "Öğe Yok",
     "no_notifications": "Gösterilecek bildirim yok.",
@@ -1124,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Servis kaldırılır veya yeniden başlatılırsa, UI yapılandırmanız kaybolacaktır.",
     "autoconf_disclaimer_detail": "Bunun nedeni, servisin yönteminin 'autoconf' olmasıdır ve bu, yapılandırma çakışmalarını önlemek için tasarlanmıştır.",
+    "ban_updated": "Yasaklama süresi başarıyla güncellendi!",
     "body": {
       "ping_succeed": "Instances: {{instances}}"
     },
@@ -1132,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping başarısız",
       "ping_succeed": "Ping başarılı"
-    }
+    },
+    "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği.",
@@ -1140,6 +1153,7 @@
       "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
       "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
       "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
+      "delete_file": "Önbellek Dosyasını Sil: {{filename}}",
       "delete_instance": "Instance Sil: {{hostname}}",
       "delete_plugin": "Eklentiyi Sil: {{name}}",
       "delete_service": "Servisi Sil: {{name}}",

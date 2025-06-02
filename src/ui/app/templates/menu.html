@@ -173,15 +173,6 @@
                                     <div class="text-truncate pe-2{% if plugin_data['type'] == 'pro' %} text-primary shine shine-sm ps-3{% else %} ps-2{% endif %}">
                                         {{ plugin_data['name'] }}
                                     </div>
-                                    {% with plugin_used = (plugin_data['type'] != 'pro' or is_pro_version) and is_plugin_active(plugin, plugin_data['name'], config) %}
-                                        <div class="ms-auto"
-                                             data-bs-toggle="tooltip"
-                                             data-bs-placement="right"
-                                             data-bs-original-title="..."
-                                             data-i18n="navigation.{% if plugin_used %}plugin_activated_global{% else %}plugin_deactivated_global{% endif %}">
-                                            <i class="bx bx-xs align-middle {% if plugin_used %}bx-check-circle text-success{% else %}bx-x-circle text-danger{% endif %}"></i>
-                                        </div>
-                                    {% endwith %}
                                 </a>
                             </li>
                         {% endif %}

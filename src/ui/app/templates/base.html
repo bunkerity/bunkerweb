@@ -115,8 +115,7 @@
                 nonce="{{ script_nonce }}"
                 defer></script>
         <script src="{{ url_for('static', filename='libs/jquery/jquery.min.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/popper/popper.min.js') }}"
                 nonce="{{ script_nonce }}"
                 defer></script>
@@ -143,17 +142,13 @@
                 nonce="{{ script_nonce }}"
                 defer></script>
         <script src="{{ url_for('static', filename='libs/i18next/i18next.min.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/i18next/i18nextHttpBackend.min.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/i18next/i18nextBrowserLanguageDetector.min.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/i18n.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <!-- Page Specific JS -->
         {% block scripts %}{% endblock %}
         <!-- Buttons plugin -->

@@ -1400,7 +1400,7 @@ class Database:
                                 changed_plugins.add(plugin_id)
 
                         # Handle special SERVER_NAME case
-                        if key == "SERVER_NAME":
+                        if key in ("SERVER_NAME", f"{db_service_config.service_id}_SERVER_NAME"):
                             changed_services = True
                 except Exception as e:
                     self.logger.warning(f"Error processing service config {db_service_config.setting_id}: {e}")
@@ -1557,6 +1557,8 @@ class Database:
                                 local_to_update.append(
                                     {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
                                 )
+                                if key == "SERVER_NAME":
+                                    local_changed_services = True
                             elif (service_setting["value"] != value and method in (service_setting["method"], "autoconf")) or (
                                 method == "autoconf" and service_setting["method"] != "autoconf"
                             ):
@@ -1580,6 +1582,8 @@ class Database:
                                         {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}},
                                     ]
                                 )
+                                if key == "SERVER_NAME":
+                                    local_changed_services = True
 
                         return local_to_put, local_to_update, local_to_delete, local_changed_plugins, local_changed_services
 
@@ -2459,8 +2463,10 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+
             try:
-                session.query(Jobs_cache).filter_by(**filters).delete()
+                session.commit()
             except BaseException as e:
                 return str(e)
 

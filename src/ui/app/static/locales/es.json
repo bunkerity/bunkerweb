@@ -76,6 +76,7 @@
     "convert_services": "Convertir Servicios",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
+    "copy_raw": "Copiar Datos sin Procesar",
     "copy_visible": "Copiar Visibles",
     "create_config": "Crear Configuración Personalizada",
     "create_instance": "Crear Instancia",
@@ -129,6 +130,8 @@
     "update_duration": "Actualizar Duración del Bloqueo",
     "update_key": "Actualizar Clave",
     "upload_photo": "Subir Nueva Foto",
+    "view_details": "Ver Detalles",
+    "view_raw_data": "Ver Datos sin Procesar",
     "wipe_other_sessions": "Limpiar Otras Sesiones"
   },
   "country": {
@@ -566,7 +569,9 @@
       "message": "Ocurrió un error inesperado en el servidor.",
       "title": "Error del Servidor"
     },
-    "reports_load_error": "Error al cargar los informes. Por favor, intenta refrescar la página."
+    "ban_update_failed": "Error al actualizar la duración del bloqueo. Por favor, inténtalo de nuevo.",
+    "reports_load_error": "Error al cargar los informes. Por favor, intenta refrescar la página.",
+    "unban_failed": "Error al desbloquear la dirección IP. Por favor, inténtalo de nuevo."
   },
   "flash": {
     "easter_egg": "Si lees esto, significa que eres curioso 👀",
@@ -704,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Arrastra y suelta tu archivo de plugin aquí o haz clic para seleccionar archivos.",
+      "confirm_cache_deletion_alert": "¿Estás seguro de que quieres eliminar el archivo de caché seleccionado?",
+      "confirm_cache_deletion_alert_plural": "¿Estás seguro de que quieres eliminar los archivos de caché seleccionados?",
       "confirm_configs_deletion_alert": "¿Estás seguro de que quieres eliminar la configuración personalizada seleccionada?",
       "confirm_configs_deletion_alert_plural": "¿Estás seguro de que quieres eliminar las configuraciones personalizadas seleccionadas?",
       "confirm_conversion_confirmation": "¿Estás seguro de que quieres convertir los servicios seleccionados?",
@@ -900,6 +907,10 @@
       "sessions": "Sesiones"
     }
   },
+  "reports": {
+    "security_incident": "Incidente de Seguridad",
+    "security_report_data": "Datos del Informe de Seguridad"
+  },
   "scope": {
     "all_services": "Todos los Servicios",
     "global": "Global",
@@ -1002,7 +1013,7 @@
   "status": {
     "admin_user_exists": "🧑‍🚀 Ya existe un usuario administrador. Por favor, continúa al siguiente paso.",
     "blog_connection_fail": "No se pudo conectar al blog para las noticias.",
-    "default_server": "servidor predeterminado",
+    "default_server": "Servidor Predeterminado",
     "down": "Inactivo",
     "draft": "Borrador",
     "error_loading_bans": "Error al cargar los bloqueos. Por favor, intenta refrescar la página.",
@@ -1022,7 +1033,7 @@
     "loading_services": "Cargando servicios...",
     "news_connection_error": "No se pudo conectar al blog para las noticias.",
     "no": "No",
-    "no_data": "No hay datos para mostrar.",
+    "no_data": "Sin datos",
     "no_history": "No hay historial disponible.",
     "no_item": "Ningún elemento",
     "no_notifications": "No hay notificaciones para mostrar.",
@@ -1124,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Si el servicio se elimina o reinicia, tu configuración de UI se perderá.",
     "autoconf_disclaimer_detail": "Esto se debe a que el método del servicio es 'autoconf', diseñado para prevenir conflictos de configuración.",
+    "ban_updated": "¡Duración del bloqueo actualizada con éxito!",
     "body": {
       "ping_succeed": "Instancias: {{instances}}"
     },
@@ -1132,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping fallido",
       "ping_succeed": "Ping exitoso"
-    }
+    },
+    "ip_unbanned": "¡Dirección IP desbloqueada con éxito!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Si se debe solicitar automáticamente un certificado Let's Encrypt.",
@@ -1140,6 +1153,7 @@
       "convert_service_to_draft": "Convertir Servicio {{name}} a Borrador",
       "convert_service_to_online": "Convertir Servicio {{name}} a En Línea",
       "delete_config": "Eliminar Configuración Personalizada {{name}}",
+      "delete_file": "Eliminar archivo de caché: {{filename}}",
       "delete_instance": "Eliminar Instancia {{hostname}}",
       "delete_plugin": "Eliminar Plugin {{name}}",
       "delete_service": "Eliminar Servicio {{name}}",

@@ -41,6 +41,10 @@
                         data-i18n="tooltip.table.cache.details"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
+                        data-bs-original-title="Select all Cache files"
+                        data-i18n="tooltip.table.cache.select_all"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
                         data-bs-original-title="The Cache file's name"
                         data-i18n="tooltip.table.cache.file_name">
                         <span data-i18n="table.header.file_name">File name</span>
@@ -88,6 +92,7 @@
                     {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
                     <tr>
                         <td></td>
+                        <td></td>
                         <td>
                             <a href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
                                class="d-flex align-items-center"
@@ -130,7 +135,7 @@
                                     <i class="bx bx-show bx-xs"></i>
                                 </a>
                                 <a role="button"
-                                   class="btn btn-outline-secondary btn-sm"
+                                   class="btn btn-outline-secondary btn-sm me-1"
                                    href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
@@ -141,6 +146,21 @@
                                    rel="noreferrer">
                                     <i class="bx bx-download bx-xs"></i>
                                 </a>
+                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm cache-delete-btn{% if is_readonly %} disabled{% endif %}"
+                                            data-service="{{ service_id }}"
+                                            data-plugin="{{ cache['plugin_id'] }}"
+                                            data-job="{{ cache['job_name'] }}"
+                                            data-file="{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom"
+                                            data-bs-original-title="Delete Cache File: {{ cache['file_name'] }}"
+                                            data-i18n="tooltip.button.delete_file"
+                                            data-i18n-options='{"filename": "{{ cache['file_name'] }}"}'>
+                                        <i class="bx bx-trash bx-xs"></i>
+                                    </button>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -151,6 +171,51 @@
             </span>
         </table>
     </div>
+    {% if not is_readonly %}
+        <div class="modal modal-xl fade"
+             id="modal-delete-cache"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <form action="{{ url_for("cache") }}/delete" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden"
+                                   id="selected-cache-input-delete"
+                                   name="cache_files"
+                                   value="" />
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.delete_cache_confirmation_alert">
+                                Are you sure you want to delete the selected cache files?
+                            </div>
+                            <div id="selected-cache-delete" class="mb-3"></div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit"
+                                    class="btn btn-outline-danger me-2"
+                                    data-i18n="button.delete">Delete</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     <!-- / Content -->
 {% endblock %}
 {% block scripts %}

@@ -3,6 +3,7 @@ from datetime import datetime
 from itertools import chain
 from json import dumps, loads
 from traceback import format_exc
+from html import escape
 
 from flask import Blueprint, flash, jsonify, render_template, request, url_for
 from flask_login import login_required
@@ -110,24 +111,25 @@ def reports_fetch():
 
             return {
                 "date": datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
-                "id": report.get("id", "N/A"),
-                "ip": report.get("ip", "N/A"),
-                "country": report.get("country", "N/A"),
-                "method": report.get("method", "N/A"),
-                "url": report.get("url", "N/A"),
-                "status": report.get("status", "N/A"),
-                "user_agent": report.get("user_agent", "N/A"),
-                "reason": report.get("reason", "N/A"),
-                "server_name": report.get("server_name", "N/A"),
+                "id": escape(str(report.get("id", "N/A"))),
+                "ip": escape(str(report.get("ip", "N/A"))),
+                "country": escape(str(report.get("country", "N/A"))),
+                "method": escape(str(report.get("method", "N/A"))),
+                "url": escape(str(report.get("url", "N/A"))),
+                "status": escape(str(report.get("status", "N/A"))),
+                "user_agent": escape(str(report.get("user_agent", "N/A"))),
+                "reason": escape(str(report.get("reason", "N/A"))),
+                "server_name": escape(str(report.get("server_name", "N/A"))),
                 "data": data_output,
-                "security_mode": report.get("security_mode", "N/A"),
+                "security_mode": escape(str(report.get("security_mode", "N/A"))),
             }
         except Exception as e:
             LOGGER.error(f"Error formatting report: {e}")
             # Return a safe fallback if formatting fails
             return {
                 "date": "N/A",
-                "ip": report.get("ip", "N/A"),
+                "id": "N/A",
+                "ip": escape(str(report.get("ip", "N/A"))),
                 "country": "N/A",
                 "method": "N/A",
                 "url": "N/A",
@@ -189,8 +191,8 @@ def reports_fetch():
         else:
             search_panes_options[field] = [
                 {
-                    "label": value,
-                    "value": value,
+                    "label": escape(str(value)),
+                    "value": escape(str(value)),
                     "total": counts["total"],
                     "count": counts["count"],
                 }
