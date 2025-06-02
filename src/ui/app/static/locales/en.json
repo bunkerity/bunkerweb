@@ -76,6 +76,7 @@
     "convert_services": "Convert Services",
     "copy": "Copy",
     "copy_codes": "Copy Codes",
+    "copy_raw": "Copy Raw Data",
     "copy_visible": "Copy Visible",
     "create_config": "Create Custom Config",
     "create_instance": "Create Instance",
@@ -129,6 +130,8 @@
     "update_duration": "Update Ban Duration",
     "update_key": "Update Key",
     "upload_photo": "Upload New Photo",
+    "view_details": "View Details",
+    "view_raw_data": "View Raw Data",
     "wipe_other_sessions": "Wipe Other Sessions"
   },
   "country": {
@@ -566,7 +569,9 @@
       "message": "An unexpected server error occurred.",
       "title": "Server Error"
     },
-    "reports_load_error": "Error loading reports. Please try refreshing the page."
+    "ban_update_failed": "Failed to update ban duration. Please try again.",
+    "reports_load_error": "Error loading reports. Please try refreshing the page.",
+    "unban_failed": "Failed to unban IP address. Please try again."
   },
   "flash": {
     "easter_egg": "If you read this, it means that you're curious 👀",
@@ -900,6 +905,10 @@
       "sessions": "Sessions"
     }
   },
+  "reports": {
+    "security_incident": "Security Incident",
+    "security_report_data": "Security Report Data"
+  },
   "scope": {
     "all_services": "All Services",
     "global": "Global",
@@ -1001,7 +1010,7 @@
   "status": {
     "admin_user_exists": "🧑‍🚀 An admin user already exists. Please proceed to the next step.",
     "blog_connection_fail": "Could not connect to the blog for news updates.",
-    "default_server": "default server",
+    "default_server": "Default Server",
     "down": "Down",
     "draft": "Draft",
     "error_loading_bans": "Error loading bans. Please try refreshing the page.",
@@ -1021,7 +1030,7 @@
     "loading_services": "Loading services...",
     "news_connection_error": "Could not connect to the blog for news updates.",
     "no": "No",
-    "no_data": "No data to show.",
+    "no_data": "No data",
     "no_history": "No history available.",
     "no_item": "No Item",
     "no_notifications": "No notifications to show.",
@@ -1123,6 +1132,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "If the service is removed or restarted, your UI configuration will be lost.",
     "autoconf_disclaimer_detail": "This is because the service's method is 'autoconf', which is designed to prevent configuration conflicts.",
+    "ban_updated": "Ban duration updated successfully!",
     "body": {
       "ping_succeed": "Instances: {{instances}}"
     },
@@ -1131,7 +1141,8 @@
     "header": {
       "ping_failed": "Ping failed",
       "ping_succeed": "Ping successful"
-    }
+    },
+    "ip_unbanned": "IP address unbanned successfully!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Whether to automatically request a Let's Encrypt certificate.",

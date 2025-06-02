@@ -229,6 +229,7 @@ $(document).ready(function () {
         : "modal.body.unban_confirmation_alert";
     $unbanModal
       .find(".alert")
+      .attr("data-i18n", alertTextKey)
       .text(
         t(
           alertTextKey,
@@ -894,7 +895,7 @@ $(document).ready(function () {
             if (scope === "service") {
               const serviceLabel =
                 service === "_" || !service
-                  ? t("service.default_server", "default server")
+                  ? t("status.default_server", "default server")
                   : service;
               return `<strong>${serviceLabel}</strong>`;
             } else {
@@ -1249,6 +1250,7 @@ $(document).ready(function () {
               class="btn btn-outline-danger btn-sm delete-ban"
               data-bs-toggle="tooltip"
               data-bs-placement="right"
+              data-i18n="tooltip.remove_ban_entry"
               title="${t("tooltip.remove_ban_entry", "Remove this ban entry")}">
         <i class="bx bx-trash bx-xs"></i>
       </button>

@@ -22,7 +22,7 @@
     }
   },
   "badge": {
-    "from_template": "Depuis modèle",
+    "from_template": "Depuis un modèle",
     "new_version": "Nouvelle version",
     "no_template": "Pas de Modèle",
     "unread_notifications": "Notifications non lues",
@@ -76,6 +76,7 @@
     "convert_services": "Convertir les Services",
     "copy": "Copier",
     "copy_codes": "Copier les Codes",
+    "copy_raw": "Copier les données brutes",
     "copy_visible": "Copier Visible",
     "create_config": "Créer Config Perso",
     "create_instance": "Créer Instance",
@@ -129,6 +130,8 @@
     "update_duration": "Mettre à Jour la Durée du Bannissement",
     "update_key": "Mettre à Jour la Clé",
     "upload_photo": "Télécharger Nouvelle Photo",
+    "view_details": "Voir les détails",
+    "view_raw_data": "Voir les données brutes",
     "wipe_other_sessions": "Effacer les Autres Sessions"
   },
   "country": {
@@ -566,7 +569,9 @@
       "message": "Une erreur serveur inattendue s'est produite.",
       "title": "Erreur Serveur"
     },
-    "reports_load_error": "Erreur lors du chargement des rapports. Veuillez essayer de rafraîchir la page."
+    "ban_update_failed": "Échec de la mise à jour de la durée du bannissement. Veuillez réessayer.",
+    "reports_load_error": "Erreur lors du chargement des rapports. Veuillez essayer de rafraîchir la page.",
+    "unban_failed": "Échec du débannissement de l'adresse IP. Veuillez réessayer."
   },
   "flash": {
     "easter_egg": "Si vous lisez ceci, c'est que vous êtes curieux 👀",
@@ -900,6 +905,10 @@
       "sessions": "Sessions"
     }
   },
+  "reports": {
+    "security_incident": "Incident de sécurité",
+    "security_report_data": "Données du rapport de sécurité"
+  },
   "scope": {
     "all_services": "Tous les Services",
     "global": "Global",
@@ -1022,7 +1031,7 @@
     "loading_services": "Chargement des services...",
     "news_connection_error": "Impossible de se connecter au blog pour les actualités.",
     "no": "Non",
-    "no_data": "Aucune donnée à afficher.",
+    "no_data": "Aucune donnée",
     "no_history": "Aucun historique disponible.",
     "no_item": "Aucun élément",
     "no_notifications": "Aucune notification à afficher.",
@@ -1124,6 +1133,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Si le service est supprimé ou redémarré, votre configuration UI sera perdue.",
     "autoconf_disclaimer_detail": "Ceci est dû au fait que la méthode du service est 'autoconf', conçue pour éviter les conflits de configuration.",
+    "ban_updated": "Durée du bannissement mise à jour avec succès !",
     "body": {
       "ping_succeed": "Instances : {{instances}}"
     },
@@ -1132,7 +1142,8 @@
     "header": {
       "ping_failed": "Échec du Ping",
       "ping_succeed": "Ping réussi"
-    }
+    },
+    "ip_unbanned": "Adresse IP débannie avec succès !"
   },
   "tooltip": {
     "auto_lets_encrypt": "Indique s'il faut demander automatiquement un certificat Let's Encrypt.",

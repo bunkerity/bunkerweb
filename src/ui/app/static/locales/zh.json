@@ -76,6 +76,7 @@
     "convert_services": "转换服务",
     "copy": "复制",
     "copy_codes": "复制代码",
+    "copy_raw": "复制原始数据",
     "copy_visible": "复制可见",
     "create_config": "创建自定义配置",
     "create_instance": "创建实例",
@@ -129,6 +130,8 @@
     "update_duration": "更新封禁期限",
     "update_key": "更新密钥",
     "upload_photo": "上传新照片",
+    "view_details": "查看详情",
+    "view_raw_data": "查看原始数据",
     "wipe_other_sessions": "清除其他会话"
   },
   "country": {
@@ -566,7 +569,9 @@
       "message": "发生意外的服务器错误。",
       "title": "服务器错误"
     },
-    "reports_load_error": "加载报告时出错。请尝试刷新页面。"
+    "ban_update_failed": "更新封禁期限失败。请重试。",
+    "reports_load_error": "加载报告时出错。请尝试刷新页面。",
+    "unban_failed": "解禁 IP 地址失败。请重试。"
   },
   "flash": {
     "easter_egg": "如果你读到了这条信息，说明你很好奇 👀",
@@ -900,6 +905,10 @@
       "sessions": "会话"
     }
   },
+  "reports": {
+    "security_incident": "安全事件",
+    "security_report_data": "安全报告数据"
+  },
   "scope": {
     "all_services": "所有服务",
     "global": "全局",
@@ -1022,7 +1031,7 @@
     "loading_services": "正在加载服务...",
     "news_connection_error": "无法连接到博客获取新闻更新。",
     "no": "否",
-    "no_data": "无数据显示。",
+    "no_data": "无数据",
     "no_history": "无可用历史记录。",
     "no_item": "无项目",
     "no_notifications": "无通知显示。",
@@ -1124,6 +1133,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "如果服务被移除或重启，您的 UI 配置将会丢失。",
     "autoconf_disclaimer_detail": "这是因为服务的创建方法是 'autoconf'，旨在防止配置冲突。",
+    "ban_updated": "封禁期限已成功更新！",
     "body": {
       "ping_succeed": "实例：{{instances}}"
     },
@@ -1132,7 +1142,8 @@
     "header": {
       "ping_failed": "Ping 失败",
       "ping_succeed": "Ping 成功"
-    }
+    },
+    "ip_unbanned": "IP 地址已成功解禁！"
   },
   "tooltip": {
     "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",

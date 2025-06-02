@@ -324,15 +324,16 @@ $(document).ready(function () {
               // Create shortened version with ellipsis
               const shortUrl = data.substring(0, maxUrlLength - 3) + "...";
               return `<div data-bs-toggle="tooltip"
-                        title="Click to view full URL"
-                        data-bs-placement="top"><a href="#"
-                        class="text-truncate url-truncated text-decoration-underline"
-                        data-bs-toggle="modal"
-                        data-bs-target="#fullUrlModal"
-                        data-url="${escapeHtml(data)}"
-                        style="cursor: pointer;">
-                        ${escapeHtml(shortUrl)}
-                      </a></div>`;
+                          title="Click to view full URL"
+                          data-bs-placement="top"
+                          data-i18n="tooltip.view_full_url"><a href="#"
+                          class="text-truncate url-truncated text-decoration-underline"
+                          data-bs-toggle="modal"
+                          data-bs-target="#fullUrlModal"
+                          data-url="${data}"
+                          style="cursor: pointer;">
+                          ${shortUrl}
+                        </a></div>`;
             }
 
             return data;
@@ -362,7 +363,9 @@ $(document).ready(function () {
           },
           targets: 10,
           render: function (data) {
-            return data === "_" ? "default server" : data;
+            return data === "_"
+              ? `<span data-i18n="status.default_server">default server</span>`
+              : data;
           },
         },
         {
@@ -404,7 +407,7 @@ $(document).ready(function () {
             .addClass("text-danger")
             .text(
               t(
-                "status.error_loading_reports",
+                "error.reports_load_error",
                 "Error loading reports. Please try refreshing the page.",
               ),
             );
@@ -487,15 +490,18 @@ $(document).ready(function () {
                             class="text-decoration-underline"
                             data-bs-toggle="modal"
                             data-bs-target="#dataModal"
-                            data-report-data="${escapeHtml(encodedData)}"
-                            data-raw-data="${escapeHtml(
+                            data-report-data="${escapeHtmlAttribute(
+                              encodedData,
+                            )}"
+                            data-raw-data="${escapeHtmlAttribute(
                               JSON.stringify(jsonData),
                             )}"
-                            style="cursor: pointer;">
-                            View Details
+                            style="cursor: pointer;"
+                            data-i18n="button.view_details">
+                            ${t("button.view_details", "View Details")}
                           </a>`;
                 } else {
-                  return "No data";
+                  return `<span data-i18n="status.no_data">No data</span>`;
                 }
               } catch (e) {
                 console.warn("Error parsing data JSON:", e);
@@ -510,12 +516,13 @@ $(document).ready(function () {
                           class="text-decoration-underline"
                           data-bs-toggle="modal"
                           data-bs-target="#dataModal"
-                          data-report-data="${escapeHtml(
+                          data-report-data="${escapeHtmlAttribute(
                             encodeURIComponent(fallbackData),
                           )}"
-                          data-raw-data="${escapeHtml(safeData)}"
-                          style="cursor: pointer;">
-                          View Raw Data
+                          data-raw-data="${escapeHtmlAttribute(safeData)}"
+                          style="cursor: pointer;"
+                          data-i18n="button.view_raw_data">
+                          ${t("button.view_raw_data", "View Raw Data")}
                         </a>`;
               }
             } else if (type === "filter") {
@@ -550,7 +557,7 @@ $(document).ready(function () {
         .addClass("text-danger")
         .text(
           t(
-            "status.error_loading_reports",
+            "error.reports_load_error",
             "Error loading reports. Please try refreshing the page.",
           ),
         );
@@ -565,7 +572,9 @@ $(document).ready(function () {
       // Change button text temporarily to indicate success
       const $btn = $(this);
       const originalHtml = $btn.html();
-      $btn.html('<span class="tf-icons bx bx-check me-1"></span>Copied!');
+      $btn.html(
+        '<span class="tf-icons bx bx-check me-1"></span><span data-i18n="toast.copied">Copied!</span>',
+      );
       setTimeout(() => {
         $btn.html(originalHtml);
       }, 2000);
@@ -602,7 +611,9 @@ $(document).ready(function () {
         .then(() => {
           const $btn = $(this);
           const originalHtml = $btn.html();
-          $btn.html('<span class="tf-icons bx bx-check me-1"></span>Copied!');
+          $btn.html(
+            '<span class="tf-icons bx bx-check me-1"></span><span data-i18n="toast.copied">Copied!</span>',
+          );
           setTimeout(() => {
             $btn.html(originalHtml);
           }, 2000);
@@ -775,12 +786,28 @@ $(document).ready(function () {
     }
   });
 
-  // Function to safely escape HTML content using DOMPurify
+  // Function to safely escape HTML content
   function escapeHtml(text) {
     if (typeof text !== "string") {
       text = String(text);
     }
-    return DOMPurify.sanitize(text, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Function to safely escape HTML attributes (more restrictive)
+  function escapeHtmlAttribute(text) {
+    if (typeof text !== "string") {
+      text = String(text);
+    }
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\//g, "&#x2F;");
   }
 
   // Function to create raw data fallback display
@@ -792,7 +819,7 @@ $(document).ready(function () {
           <div class="d-flex justify-content-between align-items-center mb-2">
             <small class="text-muted">Raw Data (JSON format):</small>
             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyRawDataToClipboard(this)">
-              <span class="tf-icons bx bx-copy me-1"></span>Copy Raw Data
+              <span class="tf-icons bx bx-copy me-1"></span><span data-i18n="button.copy_raw">Copy Raw Data</span>
             </button>
           </div>
           <pre class="p-3 bg-light border rounded small" style="max-height: 300px; overflow-y: auto;"><code>${escapeHtml(
@@ -808,7 +835,7 @@ $(document).ready(function () {
           <div class="d-flex justify-content-between align-items-center mb-2">
             <small class="text-muted">Raw Data (string format):</small>
             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyRawDataToClipboard(this)">
-              <span class="tf-icons bx bx-copy me-1"></span>Copy Raw Data
+              <span class="tf-icons bx bx-copy me-1"></span><span data-i18n="button.copy_raw">Copy Raw Data</span>
             </button>
           </div>
           <pre class="p-3 bg-light border rounded small" style="max-height: 300px; overflow-y: auto;"><code>${escapeHtml(
@@ -840,7 +867,9 @@ $(document).ready(function () {
         .then(() => {
           const $btn = $(button);
           const originalHtml = $btn.html();
-          $btn.html('<span class="tf-icons bx bx-check me-1"></span>Copied!');
+          $btn.html(
+            '<span class="tf-icons bx bx-check me-1"></span><span data-i18n="toast.copied">Copied!</span>',
+          );
           setTimeout(() => {
             $btn.html(originalHtml);
           }, 2000);
@@ -867,7 +896,7 @@ $(document).ready(function () {
   // Function to format security report data
   function formatSecurityReportData(data) {
     if (!data || typeof data !== "object") {
-      return '<div class="alert alert-warning">No data available</div>';
+      return '<div class="alert alert-warning" data-i18n="status.no_data">No data available</div>';
     }
 
     let html = "";
@@ -901,14 +930,14 @@ $(document).ready(function () {
     );
 
     if (maxLength === 0) {
-      return '<div class="alert alert-info">No security data available</div>';
+      return '<div class="alert alert-info" data-i18n="status.no_data">No security data available</div>';
     }
 
     let html = '<div class="security-report-data">';
 
     for (let i = 0; i < maxLength; i++) {
       html += `<div class="security-incident mb-4 p-3 border rounded">`;
-      html += `<h6 class="text-primary mb-3"><span class="tf-icons bx bx-error-circle me-1"></span>Security Incident ${
+      html += `<h6 class="text-primary mb-3"><span class="tf-icons bx bx-error-circle me-1"></span><span data-i18n="reports.security_incident">Security Incident</span> ${
         i + 1
       }</h6>`;
 
@@ -967,7 +996,7 @@ $(document).ready(function () {
 
     if (hasSecurityContext) {
       html +=
-        '<div class="alert alert-info mb-3"><span class="tf-icons bx bx-info-circle me-1"></span>Security Report Data</div>';
+        '<div class="alert alert-info mb-3"><span class="tf-icons bx bx-info-circle me-1"></span><span data-i18n="reports.security_report_data">Security Report Data</span></div>';
     }
 
     for (const [key, value] of Object.entries(data)) {
@@ -989,7 +1018,7 @@ $(document).ready(function () {
 
       if (Array.isArray(value)) {
         if (value.length === 0) {
-          html += `<span class="ms-1 text-muted">No items</span>`;
+          html += `<span class="ms-1 text-muted" data-i18n="status.no_data">No items</span>`;
         } else {
           html += `<ul class="mt-1 mb-0">`;
           value.forEach((item, index) => {

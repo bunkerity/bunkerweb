@@ -76,6 +76,7 @@
     "convert_services": "Converter Serviços",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
+    "copy_raw": "Copiar Dados Brutos",
     "copy_visible": "Copiar Visíveis",
     "create_config": "Criar Configuração Personalizada",
     "create_instance": "Criar Instância",
@@ -129,6 +130,8 @@
     "update_duration": "Atualizar Duração do Bloqueio",
     "update_key": "Atualizar Chave",
     "upload_photo": "Carregar Nova Foto",
+    "view_details": "Ver Detalhes",
+    "view_raw_data": "Ver Dados Brutos",
     "wipe_other_sessions": "Limpar Outras Sessões"
   },
   "country": {
@@ -566,7 +569,9 @@
       "message": "Ocorreu um erro inesperado no servidor.",
       "title": "Erro do Servidor"
     },
-    "reports_load_error": "Erro ao carregar relatórios. Por favor, tente atualizar a página."
+    "ban_update_failed": "Falha ao atualizar a duração do bloqueio. Por favor, tente novamente.",
+    "reports_load_error": "Erro ao carregar relatórios. Por favor, tente atualizar a página.",
+    "unban_failed": "Falha ao desbloquear o endereço IP. Por favor, tente novamente."
   },
   "flash": {
     "easter_egg": "Se você está lendo isto, significa que você é curioso 👀",
@@ -900,6 +905,10 @@
       "sessions": "Sessões"
     }
   },
+  "reports": {
+    "security_incident": "Incidente de Segurança",
+    "security_report_data": "Dados do Relatório de Segurança"
+  },
   "scope": {
     "all_services": "Todos os Serviços",
     "global": "Global",
@@ -1022,7 +1031,7 @@
     "loading_services": "Carregando serviços...",
     "news_connection_error": "Não foi possível conectar ao blog para notícias.",
     "no": "Não",
-    "no_data": "Nenhum dado para mostrar.",
+    "no_data": "Sem dados",
     "no_history": "Nenhum histórico disponível.",
     "no_item": "Nenhum Item",
     "no_notifications": "Nenhuma notificação para mostrar.",
@@ -1124,6 +1133,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Se o serviço for removido ou reiniciado, sua configuração da UI será perdida.",
     "autoconf_disclaimer_detail": "Isso ocorre porque o método do serviço é 'autoconf', projetado para prevenir conflitos de configuração.",
+    "ban_updated": "Duração do bloqueio atualizada com sucesso!",
     "body": {
       "ping_succeed": "Instâncias: {{instances}}"
     },
@@ -1132,7 +1142,8 @@
     "header": {
       "ping_failed": "Ping falhou",
       "ping_succeed": "Ping bem-sucedido"
-    }
+    },
+    "ip_unbanned": "Endereço IP desbloqueado com sucesso!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Se deve solicitar automaticamente um certificado Let's Encrypt.",
