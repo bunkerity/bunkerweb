@@ -211,6 +211,8 @@ HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr
 ENV PYTHONPATH="/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db"
 ENV SERVICE_UI="yes"
 ENV SERVICE_SCHEDULER="yes"
+ENV AUTOCONF_MODE="no"
+ENV USE_CROWDSEC="no"
 ENV USE_REDIS="yes"
 
 USER nginx:nginx

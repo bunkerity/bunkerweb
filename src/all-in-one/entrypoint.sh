@@ -154,9 +154,28 @@ function install_or_upgrade_parser() {
 }
 
 export MULTISITE="${MULTISITE:-yes}"
+
+# Configure autorestart for enabled services
+log "ENTRYPOINT" "ℹ️" "Configuring autorestart for enabled services..."
+
+# Enable autorestart for UI service if enabled
 if [ "${SERVICE_UI}" = "yes" ]; then
 	export SERVER_NAME="${SERVER_NAME:-}"
 	export UI_HOST="${UI_HOST:-http://127.0.0.1:7000}"
+	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/ui.ini
+	log "ENTRYPOINT" "✅" "Enabled autorestart for UI service"
+fi
+
+# Enable autorestart for scheduler service if enabled
+if [ "${SERVICE_SCHEDULER}" = "yes" ]; then
+	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/scheduler.ini
+	log "ENTRYPOINT" "✅" "Enabled autorestart for scheduler service"
+fi
+
+# Enable autorestart for autoconf service if enabled
+if [ "${AUTOCONF_MODE}" = "yes" ]; then
+	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/autoconf.ini
+	log "ENTRYPOINT" "✅" "Enabled autorestart for autoconf service"
 fi
 
 if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" == http://127.0.0.1* || "${CROWDSEC_API:-http://127.0.0.1:8000}" == http://localhost* ]]; then
@@ -164,6 +183,10 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 		export CROWDSEC_APPSEC_URL="http://127.0.0.1:7422"
 	fi
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] The CrowdSec service is enabled. Starting configuration..."
+
+	# Enable autorestart for CrowdSec service
+	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/crowdsec.ini
+	log "ENTRYPOINT" "✅" "Enabled autorestart for CrowdSec service"
 
 	cscli hub update
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Updated CrowdSec hub."
@@ -242,6 +265,9 @@ fi
 
 if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] || [ "${REDIS_HOST:-127.0.0.1}" = "localhost" ]; }; then
 	export REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
+	# Enable autorestart for Redis service
+	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/redis.ini
+	log "ENTRYPOINT" "✅" "Enabled autorestart for Redis service"
 fi
 
 # start supervisord in foreground
