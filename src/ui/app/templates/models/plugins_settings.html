@@ -120,14 +120,16 @@
      loading="lazy">') |safe }}</span>
                         </div>
                         <div class="step-details text-truncate">
-                            <div class="fw-bold{% if loop.index == 1 %} text-primary{% else %} text-muted{% endif %}">
+                            <div class="fw-bold text-muted">
                                 {{ plugin_data["name"] }}
                                 {% with plugin_used = (plugin_data['type'] != 'pro' or is_pro_version) and is_plugin_active(plugin, plugin_data['name'], config) %}
-                                    <i class="bx bx-xs align-middle ms-1 {% if plugin_used %}bx-check-circle text-success{% else %}bx-x-circle text-danger{% endif %}"
-                                       data-bs-toggle="tooltip"
-                                       data-bs-placement="top"
-                                       data-bs-original-title="..."
-                                       data-i18n="navigation.{% if plugin_used %}plugin_activated{% else %}plugin_deactivated{% endif %}"></i>
+                                    {% if plugin_used %}
+                                        <i class="bx bx-xs align-middle ms-1 bx-check-circle text-success"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="top"
+                                           data-bs-original-title="..."
+                                           data-i18n="navigation.plugin_activated"></i>
+                                    {% endif %}
                                 {% endwith %}
                             </div>
                             <small class="text-muted d-none d-sm-inline me-2">v{{ plugin_data["version"] }}</small>
