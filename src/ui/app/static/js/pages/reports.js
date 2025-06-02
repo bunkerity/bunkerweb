@@ -79,7 +79,7 @@ $(document).ready(function () {
         countryCode === "unknown"
           ? "country.not_applicable"
           : `country.${countryCode}`,
-        "Unknown",
+        "Unknown"
       );
       if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
@@ -127,7 +127,7 @@ $(document).ready(function () {
       columns: "th:not(:nth-child(-n+3))",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
         "button.columns",
-        "Columns",
+        "Columns"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
@@ -150,7 +150,7 @@ $(document).ready(function () {
       extend: "colvisRestore",
       text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
         "button.reset_columns",
-        "Reset columns",
+        "Reset columns"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
@@ -158,7 +158,7 @@ $(document).ready(function () {
       extend: "collection",
       text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
         "button.export",
-        "Export",
+        "Export"
       )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
@@ -166,7 +166,7 @@ $(document).ready(function () {
           extend: "copy",
           text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
             "button.copy_visible",
-            "Copy visible",
+            "Copy visible"
           )}</span>`,
           exportOptions: {
             columns: ":visible:not(:first-child)",
@@ -239,7 +239,6 @@ $(document).ready(function () {
     dataTableOptions: {
       columnDefs: [
         { orderable: false, targets: -1 },
-        { visible: false, targets: [5, 6, 7, 8] },
         {
           searchPanes: {
             show: true,
@@ -273,19 +272,21 @@ $(document).ready(function () {
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-                countryCode === "local"
-                  ? "not_applicable"
-                  : countryCode.toUpperCase()
-              }" data-country="${
-                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
-              }">
-                <img src="${baseFlagsUrl}/${
-                  countryCode === "local" ? "zz" : countryCode
-                }.svg"
+              countryCode === "local"
+                ? "not_applicable"
+                : countryCode.toUpperCase()
+            }" data-country="${
+              countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+            }">
+                <img src="${escapeHtml(baseFlagsUrl)}/${
+              countryCode === "local" ? "zz" : escapeHtml(countryCode)
+            }.svg"
                      class="border border-1 p-0 me-1"
                      height="17"
                      loading="lazy" />
-                &nbsp;－&nbsp;${countryCode === "local" ? "N/A" : data}
+                &nbsp;－&nbsp;${
+                  countryCode === "local" ? "N/A" : escapeHtml(data)
+                }
               </span>`;
           },
         },
@@ -328,9 +329,9 @@ $(document).ready(function () {
                         class="text-truncate url-truncated text-decoration-underline"
                         data-bs-toggle="modal"
                         data-bs-target="#fullUrlModal"
-                        data-url="${data.replace(/"/g, "&quot;")}"
+                        data-url="${escapeHtml(data)}"
                         style="cursor: pointer;">
-                        ${shortUrl}
+                        ${escapeHtml(shortUrl)}
                       </a></div>`;
             }
 
@@ -404,8 +405,8 @@ $(document).ready(function () {
             .text(
               t(
                 "status.error_loading_reports",
-                "Error loading reports. Please try refreshing the page.",
-              ),
+                "Error loading reports. Please try refreshing the page."
+              )
             );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
@@ -469,12 +470,26 @@ $(document).ready(function () {
 
                 // Check if there's meaningful data to display
                 if (jsonData && Object.keys(jsonData).length > 0) {
+                  // Safely encode the data, with fallback for encoding issues
+                  let encodedData;
+                  try {
+                    encodedData = encodeURIComponent(JSON.stringify(jsonData));
+                  } catch (encodeError) {
+                    console.warn(
+                      "Failed to encode data for modal, using fallback:",
+                      encodeError
+                    );
+                    // Store raw data as base64 as ultimate fallback
+                    encodedData = btoa(JSON.stringify(jsonData || {}));
+                  }
+
                   return `<a href="#"
                             class="text-decoration-underline"
                             data-bs-toggle="modal"
                             data-bs-target="#dataModal"
-                            data-report-data="${encodeURIComponent(
-                              JSON.stringify(jsonData),
+                            data-report-data="${escapeHtml(encodedData)}"
+                            data-raw-data="${escapeHtml(
+                              JSON.stringify(jsonData)
                             )}"
                             style="cursor: pointer;">
                             View Details
@@ -484,7 +499,24 @@ $(document).ready(function () {
                 }
               } catch (e) {
                 console.warn("Error parsing data JSON:", e);
-                return "Invalid data";
+                // Even if parsing fails, provide a way to access the raw data
+                const safeData =
+                  typeof data === "string" ? data : String(data || "No data");
+                const fallbackData = JSON.stringify({
+                  error: "Parse error",
+                  raw: safeData,
+                });
+                return `<a href="#"
+                          class="text-decoration-underline"
+                          data-bs-toggle="modal"
+                          data-bs-target="#dataModal"
+                          data-report-data="${escapeHtml(
+                            encodeURIComponent(fallbackData)
+                          )}"
+                          data-raw-data="${escapeHtml(safeData)}"
+                          style="cursor: pointer;">
+                          View Raw Data
+                        </a>`;
               }
             } else if (type === "filter") {
               try {
@@ -492,7 +524,7 @@ $(document).ready(function () {
                   typeof data === "string" ? JSON.parse(data) : data;
                 return JSON.stringify(jsonData);
               } catch (e) {
-                return "{}";
+                return typeof data === "string" ? data : String(data || "");
               }
             }
             return data;
@@ -519,8 +551,8 @@ $(document).ready(function () {
         .text(
           t(
             "status.error_loading_reports",
-            "Error loading reports. Please try refreshing the page.",
-          ),
+            "Error loading reports. Please try refreshing the page."
+          )
         );
       $("#reports").addClass("d-none");
     }
@@ -542,10 +574,31 @@ $(document).ready(function () {
 
   // Add copy functionality for data modal
   $(document).on("click", "#copyDataBtn", function () {
-    const rawData = $("#dataModal").data("raw-data");
-    if (rawData) {
+    try {
+      const rawData = $("#dataModal").data("raw-data");
+      let textToCopy;
+
+      if (rawData !== null && rawData !== undefined) {
+        if (typeof rawData === "object") {
+          try {
+            textToCopy = JSON.stringify(rawData, null, 2);
+          } catch (jsonError) {
+            console.warn(
+              "Failed to stringify raw data, using string conversion:",
+              jsonError
+            );
+            textToCopy = String(rawData);
+          }
+        } else {
+          textToCopy = String(rawData);
+        }
+      } else {
+        console.warn("No raw data available in modal");
+        textToCopy = "No data available";
+      }
+
       navigator.clipboard
-        .writeText(JSON.stringify(rawData, null, 2))
+        .writeText(textToCopy)
         .then(() => {
           const $btn = $(this);
           const originalHtml = $btn.html();
@@ -553,7 +606,19 @@ $(document).ready(function () {
           setTimeout(() => {
             $btn.html(originalHtml);
           }, 2000);
+        })
+        .catch((clipboardError) => {
+          console.error("Failed to copy to clipboard:", clipboardError);
+          // Fallback: show an alert or try alternative method
+          alert(
+            "Failed to copy to clipboard. Please try using the raw data copy button below."
+          );
         });
+    } catch (e) {
+      console.error("Critical error in copy data functionality:", e);
+      alert(
+        "Error accessing data for copying. Please try refreshing the page."
+      );
     }
   });
 
@@ -561,54 +626,243 @@ $(document).ready(function () {
   $("#fullUrlModal").on("show.bs.modal", function (event) {
     const button = $(event.relatedTarget); // Button that triggered the modal
     const url = button.data("url"); // Extract URL from data-url attribute
-    $("#fullUrlContent").text(url);
+    // Use text() to safely set content without XSS risk
+    $("#fullUrlContent").text(url || "No URL available");
   });
 
   // Handler for the data modal to display formatted security report data
   $("#dataModal").on("show.bs.modal", function (event) {
     const button = $(event.relatedTarget);
     const reportDataString = button.data("report-data");
+    let rawDataForFallback = null;
+    let reason = "Unknown";
 
     try {
-      const reportData = JSON.parse(decodeURIComponent(reportDataString));
-      $("#dataModal").data("raw-data", reportData);
-
-      // Get the reason from the row data to show in modal title
+      // First, try to get the reason from row data
       const $row = button.closest("tr");
       const table = $("#reports").DataTable();
       const rowData = table.row($row).data();
-      const reason = rowData ? rowData.reason : "Unknown";
+      if (rowData && rowData.reason) {
+        reason = rowData.reason;
+      }
+
+      // Try to parse the report data
+      let reportData;
+      if (reportDataString) {
+        try {
+          reportData = JSON.parse(decodeURIComponent(reportDataString));
+        } catch (parseError) {
+          console.warn(
+            "Failed to parse report data string, trying direct parsing:",
+            parseError
+          );
+          try {
+            // Try to parse without decoding
+            reportData = JSON.parse(reportDataString);
+          } catch (directParseError) {
+            console.warn(
+              "Failed direct parsing, trying base64 decode:",
+              directParseError
+            );
+            try {
+              // Try base64 decode as last resort for encoded data
+              const base64Decoded = atob(reportDataString);
+              reportData = JSON.parse(base64Decoded);
+            } catch (base64Error) {
+              console.warn(
+                "All parsing methods failed, using fallback:",
+                base64Error
+              );
+              // Create a fallback object with the original data
+              reportData = {
+                error: "Parsing failed",
+                raw: reportDataString,
+                note: "Raw data preserved for access",
+              };
+            }
+          }
+        }
+      } else {
+        // If no report data string, try to get raw data from row
+        reportData = rowData ? rowData.data : {};
+        if (typeof reportData === "string") {
+          try {
+            reportData = JSON.parse(reportData);
+          } catch (rowParseError) {
+            console.warn("Failed to parse row data:", rowParseError);
+            reportData = {
+              error: "Row data parsing failed",
+              raw: reportData,
+              note: "Raw data preserved for access",
+            };
+          }
+        }
+      }
+
+      // Store raw data for copy functionality - ensure it's always available
+      rawDataForFallback = reportData || {};
+      $("#dataModal").data("raw-data", rawDataForFallback);
 
       // Update modal title with reason
       $("#dataModalLabel").html(`
         <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
-          reason,
+          reason
         )}
       `);
 
-      // Generate formatted content
-      const formattedContent = formatSecurityReportData(reportData);
-      $("#dataContent").html(formattedContent);
+      // Generate formatted content with error handling
+      try {
+        const formattedContent = formatSecurityReportData(reportData);
+        $("#dataContent").html(formattedContent);
+      } catch (formatError) {
+        console.error("Error formatting report data:", formatError);
+        // Show raw data as fallback when formatting fails
+        const rawDataDisplay = createRawDataFallback(rawDataForFallback);
+        $("#dataContent").html(`
+          <div class="alert alert-warning mb-3">
+            <span class="tf-icons bx bx-error-circle me-1"></span>
+            Unable to format data properly. Showing raw data below:
+          </div>
+          ${rawDataDisplay}
+        `);
+      }
     } catch (e) {
-      console.error("Error parsing report data:", e);
+      console.error("Critical error in data modal:", e);
+
+      // Try to get raw data from the original row as ultimate fallback
+      try {
+        const $row = button.closest("tr");
+        const table = $("#reports").DataTable();
+        const rowData = table.row($row).data();
+        if (rowData && rowData.data) {
+          rawDataForFallback =
+            typeof rowData.data === "string"
+              ? JSON.parse(rowData.data)
+              : rowData.data;
+        } else {
+          rawDataForFallback = {
+            error: "No data available",
+            original: reportDataString || "undefined",
+          };
+        }
+      } catch (fallbackError) {
+        console.error("Even fallback failed:", fallbackError);
+        rawDataForFallback = {
+          error: "Data parsing failed completely",
+          original: reportDataString || "undefined",
+          errorMessage: e.message,
+        };
+      }
+
+      // Ensure raw data is always available for copy
+      $("#dataModal").data("raw-data", rawDataForFallback);
+
       $("#dataModalLabel").html(`
-        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details
+        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
+          reason
+        )}
       `);
-      $("#dataContent").html(
-        '<div class="alert alert-danger">Error parsing report data</div>',
-      );
+
+      // Show error message with raw data access
+      const rawDataDisplay = createRawDataFallback(rawDataForFallback);
+      $("#dataContent").html(`
+        <div class="alert alert-danger mb-3">
+          <span class="tf-icons bx bx-error-circle me-1"></span>
+          Error processing report data. Raw data is available below for copying:
+        </div>
+        ${rawDataDisplay}
+      `);
     }
   });
 
-  // Function to safely escape HTML content
+  // Function to safely escape HTML content using DOMPurify
   function escapeHtml(text) {
     if (typeof text !== "string") {
       text = String(text);
     }
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+    return DOMPurify.sanitize(text, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
   }
+
+  // Function to create raw data fallback display
+  function createRawDataFallback(data) {
+    try {
+      const jsonString = JSON.stringify(data, null, 2);
+      return `
+        <div class="raw-data-container">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted">Raw Data (JSON format):</small>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyRawDataToClipboard(this)">
+              <span class="tf-icons bx bx-copy me-1"></span>Copy Raw Data
+            </button>
+          </div>
+          <pre class="p-3 bg-light border rounded small" style="max-height: 300px; overflow-y: auto;"><code>${escapeHtml(
+            jsonString
+          )}</code></pre>
+        </div>
+      `;
+    } catch (e) {
+      // Even JSON.stringify failed, show the raw object/string as is
+      const fallbackContent = typeof data === "object" ? String(data) : data;
+      return `
+        <div class="raw-data-container">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted">Raw Data (string format):</small>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyRawDataToClipboard(this)">
+              <span class="tf-icons bx bx-copy me-1"></span>Copy Raw Data
+            </button>
+          </div>
+          <pre class="p-3 bg-light border rounded small" style="max-height: 300px; overflow-y: auto;"><code>${escapeHtml(
+            String(fallbackContent)
+          )}</code></pre>
+        </div>
+      `;
+    }
+  }
+
+  // Global function to copy raw data to clipboard from fallback display
+  window.copyRawDataToClipboard = function (button) {
+    try {
+      const rawData = $("#dataModal").data("raw-data");
+      let textToCopy;
+
+      if (rawData !== null && rawData !== undefined) {
+        if (typeof rawData === "object") {
+          textToCopy = JSON.stringify(rawData, null, 2);
+        } else {
+          textToCopy = String(rawData);
+        }
+      } else {
+        textToCopy = "No data available";
+      }
+
+      navigator.clipboard
+        .writeText(textToCopy)
+        .then(() => {
+          const $btn = $(button);
+          const originalHtml = $btn.html();
+          $btn.html('<span class="tf-icons bx bx-check me-1"></span>Copied!');
+          setTimeout(() => {
+            $btn.html(originalHtml);
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy to clipboard:", err);
+          // Fallback: select the text for manual copying
+          const preElement = $(button)
+            .closest(".raw-data-container")
+            .find("pre")[0];
+          if (preElement) {
+            const range = document.createRange();
+            range.selectNodeContents(preElement);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+    } catch (e) {
+      console.error("Error copying raw data:", e);
+    }
+  };
 
   // Function to format security report data
   function formatSecurityReportData(data) {
@@ -643,7 +897,7 @@ $(document).ready(function () {
       ids.length,
       msgs.length,
       varNames.length,
-      varValues.length,
+      varValues.length
     );
 
     if (maxLength === 0) {
@@ -708,7 +962,7 @@ $(document).ready(function () {
       "signature",
     ];
     const hasSecurityContext = Object.keys(data).some((key) =>
-      securityKeys.some((secKey) => key.toLowerCase().includes(secKey)),
+      securityKeys.some((secKey) => key.toLowerCase().includes(secKey))
     );
 
     if (hasSecurityContext) {
@@ -730,7 +984,7 @@ $(document).ready(function () {
         displayKey.charAt(0).toUpperCase() + displayKey.slice(1);
 
       html += `<strong class="text-muted">${escapeHtml(
-        capitalizedKey,
+        capitalizedKey
       )}:</strong>`;
 
       if (Array.isArray(value)) {
@@ -741,11 +995,11 @@ $(document).ready(function () {
           value.forEach((item, index) => {
             if (typeof item === "object") {
               html += `<li><pre class="mb-1 p-1 bg-light border rounded small"><code>${escapeHtml(
-                JSON.stringify(item, null, 2),
+                JSON.stringify(item, null, 2)
               )}</code></pre></li>`;
             } else {
               html += `<li><code class="text-break">${escapeHtml(
-                String(item),
+                String(item)
               )}</code></li>`;
             }
           });
@@ -753,25 +1007,25 @@ $(document).ready(function () {
         }
       } else if (typeof value === "object" && value !== null) {
         html += `<pre class="mt-1 p-2 bg-light border rounded small"><code>${escapeHtml(
-          JSON.stringify(value, null, 2),
+          JSON.stringify(value, null, 2)
         )}</code></pre>`;
       } else {
         // Handle different value types with appropriate styling
         const stringValue = String(value);
         if (stringValue.length > 100) {
           html += `<div class="mt-1"><code class="text-break">${escapeHtml(
-            stringValue,
+            stringValue
           )}</code></div>`;
         } else if (
           key.toLowerCase().includes("id") ||
           key.toLowerCase().includes("code")
         ) {
           html += `<span class="ms-1"><span class="badge bg-secondary">${escapeHtml(
-            stringValue,
+            stringValue
           )}</span></span>`;
         } else {
           html += `<span class="ms-1"><code>${escapeHtml(
-            stringValue,
+            stringValue
           )}</code></span>`;
         }
       }
@@ -835,7 +1089,7 @@ $(document).ready(function () {
     history.replaceState(
       null,
       "",
-      value === "10" ? location.pathname : `#${value}`,
+      value === "10" ? location.pathname : `#${value}`
     );
   });
 
@@ -852,7 +1106,7 @@ $(document).ready(function () {
           const header = headers.find(
             (h) =>
               h.i18n ===
-              i18nKey.replace("table.header.", "tooltip.table.reports."),
+              i18nKey.replace("table.header.", "tooltip.table.reports.")
           );
           if (header) {
             $th.attr({
