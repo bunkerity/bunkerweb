@@ -79,7 +79,7 @@ $(document).ready(function () {
         countryCode === "unknown"
           ? "country.not_applicable"
           : `country.${countryCode}`,
-        "Unknown"
+        "Unknown",
       );
       if (countryName && countryName !== "country.not_applicable") {
         $elem.attr("data-bs-original-title", countryName);
@@ -127,7 +127,7 @@ $(document).ready(function () {
       columns: "th:not(:nth-child(-n+3))",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
         "button.columns",
-        "Columns"
+        "Columns",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary rounded-start",
       columnText: function (dt, idx, title) {
@@ -150,7 +150,7 @@ $(document).ready(function () {
       extend: "colvisRestore",
       text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
         "button.reset_columns",
-        "Reset columns"
+        "Reset columns",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary d-none d-md-inline",
     },
@@ -158,7 +158,7 @@ $(document).ready(function () {
       extend: "collection",
       text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
         "button.export",
-        "Export"
+        "Export",
       )}</span>`,
       className: "btn btn-sm btn-outline-primary",
       buttons: [
@@ -166,7 +166,7 @@ $(document).ready(function () {
           extend: "copy",
           text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
             "button.copy_visible",
-            "Copy visible"
+            "Copy visible",
           )}</span>`,
           exportOptions: {
             columns: ":visible:not(:first-child)",
@@ -273,15 +273,15 @@ $(document).ready(function () {
             const tooltipContent = "N/A";
             return `
               <span data-bs-toggle="tooltip" data-bs-original-title="${tooltipContent}" data-i18n="country.${
-              countryCode === "local"
-                ? "not_applicable"
-                : countryCode.toUpperCase()
-            }" data-country="${
-              countryCode === "local" ? "unknown" : countryCode.toUpperCase()
-            }">
+                countryCode === "local"
+                  ? "not_applicable"
+                  : countryCode.toUpperCase()
+              }" data-country="${
+                countryCode === "local" ? "unknown" : countryCode.toUpperCase()
+              }">
                 <img src="${baseFlagsUrl}/${
-              countryCode === "local" ? "zz" : countryCode
-            }.svg"
+                  countryCode === "local" ? "zz" : countryCode
+                }.svg"
                      class="border border-1 p-0 me-1"
                      height="17"
                      loading="lazy" />
@@ -404,8 +404,8 @@ $(document).ready(function () {
             .text(
               t(
                 "status.error_loading_reports",
-                "Error loading reports. Please try refreshing the page."
-              )
+                "Error loading reports. Please try refreshing the page.",
+              ),
             );
           // Remove any loading indicators
           $(".dataTables_processing").hide();
@@ -469,12 +469,12 @@ $(document).ready(function () {
 
                 // Check if there's meaningful data to display
                 if (jsonData && Object.keys(jsonData).length > 0) {
-                  return `<a href="#" 
-                            class="text-decoration-underline" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#dataModal" 
+                  return `<a href="#"
+                            class="text-decoration-underline"
+                            data-bs-toggle="modal"
+                            data-bs-target="#dataModal"
                             data-report-data="${encodeURIComponent(
-                              JSON.stringify(jsonData)
+                              JSON.stringify(jsonData),
                             )}"
                             style="cursor: pointer;">
                             View Details
@@ -519,8 +519,8 @@ $(document).ready(function () {
         .text(
           t(
             "status.error_loading_reports",
-            "Error loading reports. Please try refreshing the page."
-          )
+            "Error loading reports. Please try refreshing the page.",
+          ),
         );
       $("#reports").addClass("d-none");
     }
@@ -582,7 +582,7 @@ $(document).ready(function () {
       // Update modal title with reason
       $("#dataModalLabel").html(`
         <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
-          reason
+          reason,
         )}
       `);
 
@@ -595,7 +595,7 @@ $(document).ready(function () {
         <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details
       `);
       $("#dataContent").html(
-        '<div class="alert alert-danger">Error parsing report data</div>'
+        '<div class="alert alert-danger">Error parsing report data</div>',
       );
     }
   });
@@ -643,7 +643,7 @@ $(document).ready(function () {
       ids.length,
       msgs.length,
       varNames.length,
-      varValues.length
+      varValues.length,
     );
 
     if (maxLength === 0) {
@@ -708,7 +708,7 @@ $(document).ready(function () {
       "signature",
     ];
     const hasSecurityContext = Object.keys(data).some((key) =>
-      securityKeys.some((secKey) => key.toLowerCase().includes(secKey))
+      securityKeys.some((secKey) => key.toLowerCase().includes(secKey)),
     );
 
     if (hasSecurityContext) {
@@ -730,7 +730,7 @@ $(document).ready(function () {
         displayKey.charAt(0).toUpperCase() + displayKey.slice(1);
 
       html += `<strong class="text-muted">${escapeHtml(
-        capitalizedKey
+        capitalizedKey,
       )}:</strong>`;
 
       if (Array.isArray(value)) {
@@ -741,11 +741,11 @@ $(document).ready(function () {
           value.forEach((item, index) => {
             if (typeof item === "object") {
               html += `<li><pre class="mb-1 p-1 bg-light border rounded small"><code>${escapeHtml(
-                JSON.stringify(item, null, 2)
+                JSON.stringify(item, null, 2),
               )}</code></pre></li>`;
             } else {
               html += `<li><code class="text-break">${escapeHtml(
-                String(item)
+                String(item),
               )}</code></li>`;
             }
           });
@@ -753,25 +753,25 @@ $(document).ready(function () {
         }
       } else if (typeof value === "object" && value !== null) {
         html += `<pre class="mt-1 p-2 bg-light border rounded small"><code>${escapeHtml(
-          JSON.stringify(value, null, 2)
+          JSON.stringify(value, null, 2),
         )}</code></pre>`;
       } else {
         // Handle different value types with appropriate styling
         const stringValue = String(value);
         if (stringValue.length > 100) {
           html += `<div class="mt-1"><code class="text-break">${escapeHtml(
-            stringValue
+            stringValue,
           )}</code></div>`;
         } else if (
           key.toLowerCase().includes("id") ||
           key.toLowerCase().includes("code")
         ) {
           html += `<span class="ms-1"><span class="badge bg-secondary">${escapeHtml(
-            stringValue
+            stringValue,
           )}</span></span>`;
         } else {
           html += `<span class="ms-1"><code>${escapeHtml(
-            stringValue
+            stringValue,
           )}</code></span>`;
         }
       }
@@ -835,7 +835,7 @@ $(document).ready(function () {
     history.replaceState(
       null,
       "",
-      value === "10" ? location.pathname : `#${value}`
+      value === "10" ? location.pathname : `#${value}`,
     );
   });
 
@@ -852,7 +852,7 @@ $(document).ready(function () {
           const header = headers.find(
             (h) =>
               h.i18n ===
-              i18nKey.replace("table.header.", "tooltip.table.reports.")
+              i18nKey.replace("table.header.", "tooltip.table.reports."),
           );
           if (header) {
             $th.attr({

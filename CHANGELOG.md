@@ -14,6 +14,8 @@
 - [UI] Update QR code generation to use PilImage and output JPEG format for improved compatibility
 - [UI] Add a modal to update ban durations, with support for localization
 - [UI] Add system memory usage monitoring to the home page dashboard for real-time insights
+- [UI] Add a more robust system when showing reports and bans data to avoid potential XSS vulnerabilities
+- [UI] Refactor the data display on the report page for a more user-friendly experience
 - [MISC] Refactor template rendering for improved performance and efficiency
 - [LINUX] Provide an interactive installer script for BunkerWeb that guides users through setup options
 - [DEPS] Updated NGINX version to 1.28.0 (except for Fedora as it is not yet available)
