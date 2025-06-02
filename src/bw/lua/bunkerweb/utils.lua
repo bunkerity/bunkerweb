@@ -310,7 +310,7 @@ utils.get_reason = function(ctx)
 	-- os.getenv / modsecurity
 	if getenv("REASON") == "modsecurity" then
 		local reason_data = {}
-		
+
 		-- Handle IDs
 		local env_reason_data_ids = getenv("REASON_DATA_RULES")
 		if env_reason_data_ids and env_reason_data_ids ~= "" and env_reason_data_ids ~= "none" then
@@ -322,46 +322,46 @@ utils.get_reason = function(ctx)
 				table.insert(reason_data["ids"], rule_id)
 			end
 		end
-		
+
 		-- Handle messages, matched_vars, and matched_var_names
 		local env_unique_id_separator = getenv("REASON_DATA_UNIQUE_ID")
 		local data_types = {
-			{key = "msgs", env_var = "REASON_DATA_MSGS"},
-			{key = "matched_vars", env_var = "REASON_DATA_MATCHED_VARS"},
-			{key = "matched_var_names", env_var = "REASON_DATA_MATCHED_VAR_NAMES"}
-        }
-        
-        for _, data_type in ipairs(data_types) do
-            local env_data = getenv(data_type.env_var)
-            if env_data and env_data ~= "" and env_data ~= "none" and env_unique_id_separator then
-                -- Remove leading |separator| if present
-                local separator_pattern = "|" .. env_unique_id_separator .. "|"
-                if env_data:sub(1, #separator_pattern) == separator_pattern then
-                    env_data = env_data:sub(#separator_pattern + 1)
-                end
-                reason_data[data_type.key] = {}
-                -- Split by |separator| pattern
-                local remaining = env_data
-                while remaining and remaining ~= "" do
-                    local separator_pos = remaining:find("|" .. env_unique_id_separator .. "|", 1, true)
-                    if separator_pos then
-                        local item = remaining:sub(1, separator_pos - 1)
-                        if item and item ~= "" then
-                            table.insert(reason_data[data_type.key], item)
-                        end
-                        remaining = remaining:sub(separator_pos + #separator_pattern)
-                    else
-                        -- Last item (no separator after)
-                        if remaining and remaining ~= "" then
-                            table.insert(reason_data[data_type.key], remaining)
-                        end
-                        break
-                    end
-                end
-            end
-        end
-        
-        return "modsecurity", reason_data, security_mode
+			{ key = "msgs", env_var = "REASON_DATA_MSGS" },
+			{ key = "matched_vars", env_var = "REASON_DATA_MATCHED_VARS" },
+			{ key = "matched_var_names", env_var = "REASON_DATA_MATCHED_VAR_NAMES" },
+		}
+
+		for _, data_type in ipairs(data_types) do
+			local env_data = getenv(data_type.env_var)
+			if env_data and env_data ~= "" and env_data ~= "none" and env_unique_id_separator then
+				-- Remove leading |separator| if present
+				local separator_pattern = "|" .. env_unique_id_separator .. "|"
+				if env_data:sub(1, #separator_pattern) == separator_pattern then
+					env_data = env_data:sub(#separator_pattern + 1)
+				end
+				reason_data[data_type.key] = {}
+				-- Split by |separator| pattern
+				local remaining = env_data
+				while remaining and remaining ~= "" do
+					local separator_pos = remaining:find("|" .. env_unique_id_separator .. "|", 1, true)
+					if separator_pos then
+						local item = remaining:sub(1, separator_pos - 1)
+						if item and item ~= "" then
+							table.insert(reason_data[data_type.key], item)
+						end
+						remaining = remaining:sub(separator_pos + #separator_pattern)
+					else
+						-- Last item (no separator after)
+						if remaining and remaining ~= "" then
+							table.insert(reason_data[data_type.key], remaining)
+						end
+						break
+					end
+				end
+			end
+		end
+
+		return "modsecurity", reason_data, security_mode
 	end
 	-- datastore ban
 	local ip
