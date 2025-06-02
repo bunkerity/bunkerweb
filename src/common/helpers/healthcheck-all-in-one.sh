@@ -25,7 +25,7 @@ if [ $? -ne 0 ] || [ "$check" != "ok" ]; then
 fi
 
 # Check UI service status only if enabled
-if [ "${USE_UI:-yes}" = "yes" ]; then
+if [ "${SERVICE_UI:-yes}" = "yes" ]; then
   status=$(supervisorctl status "ui" 2>/dev/null)
   if ! echo "$status" | grep -q "RUNNING"; then
     echo "Service ui is not running: $status"
@@ -44,11 +44,11 @@ if [ "${USE_UI:-yes}" = "yes" ]; then
     exit 1
   fi
 else
-  echo "UI service check skipped (disabled by USE_UI setting)"
+  echo "UI service check skipped (disabled by SERVICE_UI setting)"
 fi
 
 # Check scheduler service status only if enabled
-if [ "${USE_SCHEDULER:-yes}" = "yes" ]; then
+if [ "${SERVICE_SCHEDULER:-yes}" = "yes" ]; then
   status=$(supervisorctl status "scheduler" 2>/dev/null)
   if ! echo "$status" | grep -q "RUNNING"; then
     echo "Service scheduler is not running: $status"
@@ -67,7 +67,24 @@ if [ "${USE_SCHEDULER:-yes}" = "yes" ]; then
     exit 1
   fi
 else
-  echo "Scheduler service check skipped (disabled by USE_SCHEDULER setting)"
+  echo "Scheduler service check skipped (disabled by SERVICE_SCHEDULER setting)"
+fi
+
+# Check autoconf service status only if enabled
+if [ "${AUTOCONF_MODE:-no}" = "yes" ]; then
+  status=$(supervisorctl status "autoconf" 2>/dev/null)
+  if ! echo "$status" | grep -q "RUNNING"; then
+    echo "Service autoconf is not running: $status"
+    exit 1
+  fi
+
+  # Check autoconf health marker file
+  if [ ! -f /var/tmp/bunkerweb/autoconf.healthy ]; then
+    echo "Autoconf health marker file not found"
+    exit 1
+  fi
+else
+  echo "Autoconf service check skipped (disabled by AUTOCONF_MODE setting)"
 fi
 
 # Everything is fine
