@@ -1753,7 +1753,7 @@ $(document).ready(() => {
     $(this).addClass("active show").attr("aria-selected", "true");
 
     // Smooth scroll the selected plugin into view in the sidebar only
-    const sidebarContainer = $(".step-navigation-list")[0];
+    const sidebarContainer = $("#navs-modes-advanced .step-navigation-list")[0];
     const elementRect = this.getBoundingClientRect();
     const containerRect = sidebarContainer.getBoundingClientRect();
 
@@ -1837,7 +1837,9 @@ $(document).ready(() => {
       window.location.hash = hash;
 
       // Smooth scroll to the plugin in the sidebar only
-      const sidebarContainer = $(".step-navigation-list")[0];
+      const sidebarContainer = $(
+        "#navs-modes-advanced .step-navigation-list",
+      )[0];
       const elementRect = $targetPlugin[0].getBoundingClientRect();
       const containerRect = sidebarContainer.getBoundingClientRect();
 
