@@ -18,6 +18,7 @@
 - [UI] Refactor the data display on the report page for a more user-friendly experience
 - [UI] Add quick actions for bans back
 - [UI] Enhance reset button visibility and tooltip handling across various settings templates
+- [UI] Add the possibility to delete cache files
 - [MISC] Refactor template rendering for improved performance and efficiency
 - [LINUX] Provide an interactive installer script for BunkerWeb that guides users through setup options
 - [DEPS] Updated NGINX version to 1.28.0 (except for Fedora as it is not yet available)

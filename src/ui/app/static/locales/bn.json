@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "আপনার প্লাগইন আর্কাইভটি এখানে টেনে আনুন অথবা ফাইল নির্বাচন করতে ক্লিক করুন।",
+      "confirm_cache_deletion_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ক্যাশ ফাইল মুছতে চান?",
+      "confirm_cache_deletion_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত ক্যাশ ফাইলগুলি মুছতে চান?",
       "confirm_configs_deletion_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত কাস্টম কনফিগারেশন মুছতে চান?",
       "confirm_configs_deletion_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত কাস্টম কনফিগারেশনগুলি মুছতে চান?",
       "confirm_conversion_confirmation": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি রূপান্তর করতে চান?",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "পরিষেবা {{name}} কে খসড়াতে রূপান্তর করুন",
       "convert_service_to_online": "পরিষেবা {{name}} কে অনলাইনে রূপান্তর করুন",
       "delete_config": "কাস্টম কনফিগারেশন {{name}} মুছুন",
+      "delete_file": "ক্যাশ ফাইল মুছুন: {{filename}}",
       "delete_instance": "ইনস্ট্যান্স {{hostname}} মুছুন",
       "delete_plugin": "প্লাগইন {{name}} মুছুন",
       "delete_service": "পরিষেবা {{name}} মুছুন",

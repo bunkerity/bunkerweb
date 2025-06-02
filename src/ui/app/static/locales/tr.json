@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
+      "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
+      "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
       "confirm_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
       "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
       "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
+      "delete_file": "Önbellek Dosyasını Sil: {{filename}}",
       "delete_instance": "Instance Sil: {{hostname}}",
       "delete_plugin": "Eklentiyi Sil: {{name}}",
       "delete_service": "Servisi Sil: {{name}}",

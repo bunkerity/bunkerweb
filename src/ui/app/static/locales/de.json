@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Ziehen Sie Ihr Plugin-Archiv hierher oder klicken Sie, um Dateien auszuwählen.",
+      "confirm_cache_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte Cache-Datei löschen möchten?",
+      "confirm_cache_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten Cache-Dateien löschen möchten?",
       "confirm_configs_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte benutzerdefinierte Konfiguration löschen möchten?",
       "confirm_configs_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten benutzerdefinierten Konfigurationen löschen möchten?",
       "confirm_conversion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste konvertieren möchten?",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "Dienst {{name}} in Entwurf konvertieren",
       "convert_service_to_online": "Dienst {{name}} in Online konvertieren",
       "delete_config": "Benutzerdefinierte Konfiguration {{name}} löschen",
+      "delete_file": "Cache-Datei löschen: {{filename}}",
       "delete_instance": "Instanz {{hostname}} löschen",
       "delete_plugin": "Plugin {{name}} löschen",
       "delete_service": "Dienst {{name}} löschen",

@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "اسحب وأفلت أرشيف الإضافة الخاص بك هنا أو انقر لتحديد الملفات.",
+      "confirm_cache_deletion_alert": "هل أنت متأكد أنك تريد حذف ملف الذاكرة المؤقتة المحدد؟",
+      "confirm_cache_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف ملفات الذاكرة المؤقتة المحددة؟",
       "confirm_configs_deletion_alert": "هل أنت متأكد أنك تريد حذف التكوين المخصص المحدد؟",
       "confirm_configs_deletion_alert_plural": "هل أنت متأكد أنك تريد حذف التكوينات المخصصة المحددة؟",
       "confirm_conversion_confirmation": "هل أنت متأكد أنك تريد تحويل الخدمات المحددة؟",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "تحويل الخدمة {{name}} إلى مسودة",
       "convert_service_to_online": "تحويل الخدمة {{name}} إلى متصل",
       "delete_config": "حذف التكوين المخصص {{name}}",
+      "delete_file": "حذف ملف الذاكرة المؤقتة: {{filename}}",
       "delete_instance": "حذف المثيل {{hostname}}",
       "delete_plugin": "حذف الإضافة {{name}}",
       "delete_service": "حذف الخدمة {{name}}",

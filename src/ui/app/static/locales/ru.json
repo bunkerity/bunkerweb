@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Перетащите архив плагина сюда или нажмите, чтобы выбрать файлы.",
+      "confirm_cache_deletion_alert": "Вы уверены, что хотите удалить выбранный файл кэша?",
+      "confirm_cache_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные файлы кэша?",
       "confirm_configs_deletion_alert": "Вы уверены, что хотите удалить выбранную пользовательскую конфигурацию?",
       "confirm_configs_deletion_alert_plural": "Вы уверены, что хотите удалить выбранные пользовательские конфигурации?",
       "confirm_conversion_confirmation": "Вы уверены, что хотите конвертировать выбранные сервисы?",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "Конвертировать сервис {{name}} в черновик",
       "convert_service_to_online": "Конвертировать сервис {{name}} в онлайн",
       "delete_config": "Удалить кастомную конфигурацию {{name}}",
+      "delete_file": "Удалить файл кэша: {{filename}}",
       "delete_instance": "Удалить экземпляр {{hostname}}",
       "delete_plugin": "Удалить плагин {{name}}",
       "delete_service": "Удалить сервис {{name}}",

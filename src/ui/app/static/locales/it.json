@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Trascina e rilascia il tuo archivio plugin qui o clicca per selezionare i file.",
+      "confirm_cache_deletion_alert": "Sei sicuro di voler eliminare il file cache selezionato?",
+      "confirm_cache_deletion_alert_plural": "Sei sicuro di voler eliminare i file cache selezionati?",
       "confirm_configs_deletion_alert": "Sei sicuro di voler eliminare la configurazione personalizzata selezionata?",
       "confirm_configs_deletion_alert_plural": "Sei sicuro di voler eliminare le configurazioni personalizzate selezionate?",
       "confirm_conversion_confirmation": "Sei sicuro di voler convertire i servizi selezionati?",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "Converti Servizio {{name}} in Bozza",
       "convert_service_to_online": "Converti Servizio {{name}} in Online",
       "delete_config": "Elimina Configurazione Personalizzata {{name}}",
+      "delete_file": "Elimina file cache: {{filename}}",
       "delete_instance": "Elimina Istanza {{hostname}}",
       "delete_plugin": "Elimina Plugin {{name}}",
       "delete_service": "Elimina Servizio {{name}}",

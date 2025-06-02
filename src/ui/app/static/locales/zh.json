@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "将您的插件存档拖放到此处或单击以选择文件。",
+      "confirm_cache_deletion_alert": "您确定要删除选定的缓存文件吗？",
+      "confirm_cache_deletion_alert_plural": "您确定要删除选定的缓存文件吗？",
       "confirm_configs_deletion_alert": "您确定要删除选定的自定义配置吗？",
       "confirm_configs_deletion_alert_plural": "您确定要删除选定的自定义配置吗？",
       "confirm_conversion_confirmation": "您确定要转换选定的服务吗？",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
       "convert_service_to_online": "将服务 {{name}} 转换为在线",
       "delete_config": "删除自定义配置 {{name}}",
+      "delete_file": "删除缓存文件：{{filename}}",
       "delete_instance": "删除实例 {{hostname}}",
       "delete_plugin": "删除插件 {{name}}",
       "delete_service": "删除服务 {{name}}",

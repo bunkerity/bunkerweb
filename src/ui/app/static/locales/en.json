@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Drag and drop your plugin archive here or click to select files.",
+      "confirm_cache_deletion_alert": "Are you sure you want to delete the selected cache file?",
+      "confirm_cache_deletion_alert_plural": "Are you sure you want to delete the selected cache files?",
       "confirm_configs_deletion_alert": "Are you sure you want to delete the selected custom configuration?",
       "confirm_configs_deletion_alert_plural": "Are you sure you want to delete the selected custom configurations?",
       "confirm_conversion_confirmation": "Are you sure you want to convert the selected services?",
@@ -1150,6 +1152,7 @@
       "convert_service_to_draft": "Convert Service {{name}} to Draft",
       "convert_service_to_online": "Convert Service {{name}} to Online",
       "delete_config": "Delete Custom Config {{name}}",
+      "delete_file": "Delete Cache File: {{filename}}",
       "delete_instance": "Delete Instance {{hostname}}",
       "delete_plugin": "Delete Plugin {{name}}",
       "delete_service": "Delete Service {{name}}",

@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।",
+      "confirm_cache_deletion_alert": "क्या आप वाकई चयनित कैश फ़ाइल हटाना चाहते हैं?",
+      "confirm_cache_deletion_alert_plural": "क्या आप वाकई चयनित कैश फ़ाइलें हटाना चाहते हैं?",
       "confirm_configs_deletion_alert": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_configs_deletion_alert_plural": "क्या आप वाकई चयनित कस्टम कॉन्फ़िगरेशन हटाना चाहते हैं?",
       "confirm_conversion_confirmation": "क्या आप वाकई चयनित सेवाओं को कनवर्ट करना चाहते हैं?",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "सेवा {{name}} को ड्राफ्ट में बदलें",
       "convert_service_to_online": "सेवा {{name}} को ऑनलाइन में बदलें",
       "delete_config": "कस्टम कॉन्फ़िगरेशन {{name}} हटाएं",
+      "delete_file": "कैश फ़ाइल हटाएं: {{filename}}",
       "delete_instance": "इंस्टेंस {{hostname}} हटाएं",
       "delete_plugin": "प्लगइन {{name}} हटाएं",
       "delete_service": "सेवा {{name}} हटाएं",

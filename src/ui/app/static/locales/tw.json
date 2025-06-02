@@ -709,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "將您的外掛程式封存拖放到此處或點擊以選取檔案。",
+      "confirm_cache_deletion_alert": "您確定要刪除選定的快取檔案嗎？",
+      "confirm_cache_deletion_alert_plural": "您確定要刪除選定的快取檔案嗎？",
       "confirm_configs_deletion_alert": "您確定要刪除選定的自訂設定嗎？",
       "confirm_configs_deletion_alert_plural": "您確定要刪除選定的自訂設定嗎？",
       "confirm_conversion_confirmation": "您確定要轉換選定的服務嗎？",
@@ -1151,6 +1153,7 @@
       "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
       "convert_service_to_online": "將服務 {{name}} 轉換為線上",
       "delete_config": "刪除自訂設定 {{name}}",
+      "delete_file": "刪除快取檔案：{{filename}}",
       "delete_instance": "刪除執行個體 {{hostname}}",
       "delete_plugin": "刪除外掛程式 {{name}}",
       "delete_service": "刪除服務 {{name}}",
