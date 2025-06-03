@@ -156,7 +156,7 @@ function install_or_upgrade_parser() {
 export MULTISITE="${MULTISITE:-yes}"
 
 # Configure autorestart for enabled services
-log "ENTRYPOINT" "ℹ️" "Configuring autorestart for enabled services..."
+log "ENTRYPOINT" "ℹ️" "Configuring autostart/autorestart for enabled services..."
 
 # Enable autorestart for UI service if enabled
 if [ "${SERVICE_UI}" = "yes" ]; then
@@ -164,18 +164,27 @@ if [ "${SERVICE_UI}" = "yes" ]; then
 	export UI_HOST="${UI_HOST:-http://127.0.0.1:7000}"
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/ui.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for UI service"
+else
+	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/ui.ini
+	log "ENTRYPOINT" "ℹ️" "UI service is disabled, autostart not enabled"
 fi
 
 # Enable autorestart for scheduler service if enabled
 if [ "${SERVICE_SCHEDULER}" = "yes" ]; then
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/scheduler.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for scheduler service"
+else
+	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/scheduler.ini
+	log "ENTRYPOINT" "ℹ️" "Scheduler service is disabled, autostart not enabled"
 fi
 
 # Enable autorestart for autoconf service if enabled
 if [ "${AUTOCONF_MODE}" = "yes" ]; then
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/autoconf.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for autoconf service"
+else
+	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/autoconf.ini
+	log "ENTRYPOINT" "ℹ️" "Autoconf service is disabled, autostart not enabled"
 fi
 
 if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" == http://127.0.0.1* || "${CROWDSEC_API:-http://127.0.0.1:8000}" == http://localhost* ]]; then
@@ -261,6 +270,9 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	export CROWDSEC_API="http://127.0.0.1:8000"
 	export CROWDSEC_API_KEY="${BOUNCER_KEY}"
 	log "ENTRYPOINT" "✅" "[CROWDSEC] Configuration completed successfully."
+else
+	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/crowdsec.ini
+	log "ENTRYPOINT" "ℹ️" "CrowdSec service is disabled, autostart not enabled"
 fi
 
 if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] || [ "${REDIS_HOST:-127.0.0.1}" = "localhost" ]; }; then
@@ -268,6 +280,9 @@ if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] 
 	# Enable autorestart for Redis service
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/redis.ini
 	log "ENTRYPOINT" "✅" "Enabled autorestart for Redis service"
+else
+	sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/redis.ini
+	log "ENTRYPOINT" "ℹ️" "Redis service is disabled, autostart not enabled"
 fi
 
 # start supervisord in foreground
