@@ -1,3 +1,4 @@
+from re import escape
 from Test import Test
 from os.path import isdir, isfile
 from os import getenv, mkdir
@@ -131,9 +132,9 @@ class SwarmTest(Test):
             super()._setup_test()
             test = f"/tmp/tests/{self._name}"
             for ex_domain, test_domain in self._domains.items():
-                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.replace_in_files(test, escape(ex_domain), test_domain)
                 Test.rename(test, ex_domain, test_domain)
-            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
+            Test.replace_in_files(test, escape("example.com"), getenv("ROOT_DOMAIN"))
             setup = f"{test}/setup-swarm.sh"
             if isfile(setup):
                 proc = run("sudo ./setup-swarm.sh", cwd=test, shell=True)

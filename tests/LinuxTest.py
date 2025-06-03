@@ -1,3 +1,4 @@
+from re import escape
 from Test import Test
 from os.path import isfile
 from os import getenv
@@ -109,9 +110,9 @@ class LinuxTest(Test):
             super()._setup_test()
             test = f"/tmp/tests/{self._name}"
             for ex_domain, test_domain in self._domains.items():
-                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.replace_in_files(test, escape(ex_domain), test_domain)
                 Test.rename(test, ex_domain, test_domain)
-            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
+            Test.replace_in_files(test, escape("example.com"), getenv("ROOT_DOMAIN"))
             proc = self.docker_cp(self.__distro, test, f"/opt/{self._name}")
             if proc.returncode != 0:
                 raise Exception("docker cp failed (test)")
