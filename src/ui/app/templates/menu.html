@@ -1,10 +1,7 @@
 <!-- Menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand main mb-2">
-        <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui"
-           target="_blank"
-           rel="noopener"
-           class="app-brand-link p-5">
+        <a href="{{ url_for('home') }}" class="app-brand-link p-5">
             <span class="app-brand-logo main w-100">
                 <img class="img-fluid"
                      src="{% if theme == 'light' %}{{ url_for('static', filename='img/logo-menu.png') }}{% else %}{{ url_for('static', filename='img/logo-menu-white.png') }}{% endif %}"
