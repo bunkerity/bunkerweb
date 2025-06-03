@@ -125,7 +125,7 @@ try:
     use_right_crs_version = False
     use_modsecurity_crs_plugins = False
 
-    services = getenv("SERVER_NAME", "").strip()
+    services = getenv("SERVER_NAME", "www.example.com").strip()
 
     if not services:
         LOGGER.warning("No services found, exiting...")

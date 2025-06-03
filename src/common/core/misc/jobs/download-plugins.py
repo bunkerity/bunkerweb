@@ -95,7 +95,7 @@ def install_plugin(plugin_path: Path, db) -> bool:
 
 try:
     # Check if we have plugins to download
-    plugin_urls = getenv("EXTERNAL_PLUGIN_URLS")
+    plugin_urls = getenv("EXTERNAL_PLUGIN_URLS", "").strip()
     if not plugin_urls:
         LOGGER.info("No external plugins to download")
         sys_exit(0)

@@ -498,7 +498,7 @@ def healthcheck_job():
                 api_caller = ApiCaller([bw_instance])
 
                 if env is None:
-                    env = SCHEDULER.db.get_config()
+                    env = SCHEDULER.db.get_non_default_settings()
                     env["DATABASE_URI"] = SCHEDULER.db.database_uri
                     tz = getenv("TZ")
                     if tz:
@@ -686,7 +686,7 @@ if __name__ == "__main__":
                 continue
             sleep(5)
 
-        env = SCHEDULER.db.get_config()
+        env = SCHEDULER.db.get_non_default_settings()
         env["DATABASE_URI"] = SCHEDULER.db.database_uri
         tz = getenv("TZ")
         if tz:
@@ -819,20 +819,7 @@ if __name__ == "__main__":
             thread.join()
 
         LOGGER.info("Running plugins download jobs ...")
-
-        threads.clear()
-        threads.extend(
-            [
-                Thread(target=SCHEDULER.run_single, args=("download-plugins",)),
-                Thread(target=SCHEDULER.run_single, args=("download-pro-plugins",)),
-            ]
-        )
-
-        for thread in threads:
-            thread.start()
-
-        for thread in threads:
-            thread.join()
+        SCHEDULER.run_once(("misc", "pro"))
 
         db_metadata = SCHEDULER.db.get_metadata()
         if db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]:
@@ -869,7 +856,7 @@ if __name__ == "__main__":
                     LOGGER.error("Config saver failed, configuration will not work as expected...")
 
             SCHEDULER.update_jobs()
-            env = SCHEDULER.db.get_config()
+            env = SCHEDULER.db.get_non_default_settings()
             env["DATABASE_URI"] = SCHEDULER.db.database_uri
             tz = getenv("TZ")
             if tz:
@@ -879,6 +866,7 @@ if __name__ == "__main__":
 
         del dotenv_env
 
+        FIRST_START = True
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
         CHANGES = []
@@ -899,6 +887,7 @@ if __name__ == "__main__":
                 if not SCHEDULER.reload(
                     env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
                     changed_plugins=changed_plugins,
+                    ignore_plugins=("misc", "pro") if FIRST_START else (),
                 ):
                     LOGGER.error("At least one job in run_once() failed")
                 else:
@@ -908,7 +897,7 @@ if __name__ == "__main__":
                 healthcheck_job_run = False
 
             if CONFIG_NEED_GENERATION:
-                ret = generate_configs(env)
+                ret = generate_configs(SCHEDULER.db.get_config())
                 if ret and SCHEDULER.apis:
                     # send nginx configs
                     threads.append(Thread(target=send_file_to_bunkerweb, args=(CONFIG_PATH, "/confs")))
@@ -1037,6 +1026,7 @@ if __name__ == "__main__":
             except BaseException as e:
                 LOGGER.error(f"Error while setting changes to checked in the database: {e}")
 
+            FIRST_START = False
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False
             CONFIG_NEED_GENERATION = False
@@ -1207,7 +1197,7 @@ if __name__ == "__main__":
                 if CONFIG_NEED_GENERATION:
                     CHANGES.append("config")
                     old_env = env.copy()
-                    env = SCHEDULER.db.get_config()
+                    env = SCHEDULER.db.get_non_default_settings()
                     if old_env["API_HTTP_PORT"] != env["API_HTTP_PORT"] or old_env["API_SERVER_NAME"] != env["API_SERVER_NAME"]:
                         err = SCHEDULER.db.update_instances(
                             [

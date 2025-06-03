@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.2-rc4 - ????/??
+
+- [MISC] Greatly improve scheduler's performance by optimizing the way it handles environment variables and settings, reducing the number of database queries and improving overall efficiency
+- [MISC] Optimize variable loading during the init phase to improve startup performance
+
 ## v1.6.2-rc3 - ????/??/??
 
 - [BUGFIX] Refactor CLI command handling to support additional arguments

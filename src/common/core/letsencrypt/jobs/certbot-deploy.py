@@ -32,7 +32,7 @@ try:
     tgz.seek(0, 0)
     files = {"archive.tar.gz": tgz}
 
-    db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
+    db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
 
     instances = db.get_instances()
     services = db.get_non_default_settings(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" ")
