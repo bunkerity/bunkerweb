@@ -244,9 +244,9 @@ class UIDatabase(Database):
             session.add(user_session)
 
             try:
-                session.commit()
-                session.refresh(user_session)
+                session.flush()  # Flush to get the auto-generated ID
                 session_id = user_session.id
+                session.commit()
                 return session_id
             except BaseException as e:
                 return str(e)

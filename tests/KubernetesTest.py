@@ -1,3 +1,4 @@
+from re import escape
 from Test import Test
 from os.path import isfile
 from os import getenv, mkdir
@@ -192,9 +193,9 @@ class KubernetesTest(Test):
             super()._setup_test()
             test = f"/tmp/tests/{self._name}"
             for ex_domain, test_domain in self._domains.items():
-                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.replace_in_files(test, escape(ex_domain), test_domain)
                 Test.rename(test, ex_domain, test_domain)
-            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
+            Test.replace_in_files(test, escape("example.com"), getenv("ROOT_DOMAIN"))
             setup = f"{test}/setup-kubernetes.sh"
             if isfile(setup):
                 proc = run("./setup-kubernetes.sh", cwd=test, shell=True)

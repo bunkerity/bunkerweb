@@ -5,7 +5,7 @@ from traceback import format_exc
 from shutil import copytree
 from os.path import isdir, join
 from os import mkdir, walk, rename
-from re import compile as re_compile, escape, sub, search, MULTILINE
+from re import compile as re_compile, sub, search, MULTILINE
 from subprocess import run
 from logger import log
 from string import ascii_lowercase, digits
@@ -178,7 +178,7 @@ class Test(ABC):
         try:
             with open(path, "r") as f:
                 content = f.read()
-            pattern = re_compile(escape(old), flags=MULTILINE)
+            pattern = re_compile(old, flags=MULTILINE)
             content = pattern.sub(new, content)
             with open(path, "w") as f:
                 f.write(content)
