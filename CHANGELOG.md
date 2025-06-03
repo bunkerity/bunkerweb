@@ -7,6 +7,7 @@
 - [FEATURE] Add request ID to error pages, logs and display it in UI reports for easier tracking of issues
 - [FEATURE] Add support for Docker secrets in all services
 - [FEATURE] Add more data to ModSecurity reports
+- [FEATURE] Add new `LETS_ENCRYPT_MAX_RETRIES` setting to the `Let's Encrypt` plugin to configure how many times certificate generation should be retried with Let's Encrypt (default is 0, meaning no retries)
 - [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
 - [ALL-IN-ONE] Fully integrate Redis in the all-in-one image (activated by default)
 - [UI] Add clear notifications feature to both UI and backend for improved notification management

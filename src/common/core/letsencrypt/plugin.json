@@ -135,6 +135,15 @@
       "label": "Disable Public Suffixes (PSL Blacklist)",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "LETS_ENCRYPT_MAX_RETRIES": {
+      "context": "multisite",
+      "default": "0",
+      "help": "Number of times to retry certificate generation on failure (0 disables retries).",
+      "id": "lets-encrypt-max-retries",
+      "label": "Maximum Retries",
+      "regex": "^\\d+$",
+      "type": "text"
     }
   },
   "jobs": [
