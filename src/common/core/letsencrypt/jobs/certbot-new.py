@@ -12,6 +12,7 @@ from re import MULTILINE, match, search
 from select import select
 from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
+from time import sleep
 from traceback import format_exc
 from typing import Dict, Literal, Type, Union
 
@@ -127,6 +128,56 @@ def is_domain_blacklisted(domain, psl):
             if len(labels[i:]) == 2:
                 return True  # Block foo.bar and *.foo.bar
     return False
+
+
+def certbot_new_with_retry(
+    challenge_type: Literal["dns", "http"],
+    domains: str,
+    email: str,
+    provider: str = None,
+    credentials_path: Union[str, Path] = None,
+    propagation: str = "default",
+    profile: str = "classic",
+    staging: bool = False,
+    force: bool = False,
+    cmd_env: Dict[str, str] = None,
+    max_retries: int = 0,
+) -> int:
+    """Execute certbot with retry mechanism."""
+    attempt = 1
+    while attempt <= max_retries + 1:  # +1 for the initial attempt
+        if attempt > 1:
+            LOGGER.warning(f"Certificate generation failed, retrying... (attempt {attempt}/{max_retries + 1})")
+            # Wait before retrying (exponential backoff: 30s, 60s, 120s...)
+            wait_time = min(30 * (2 ** (attempt - 2)), 300)  # Cap at 5 minutes
+            LOGGER.info(f"Waiting {wait_time} seconds before retry...")
+            sleep(wait_time)
+
+        result = certbot_new(
+            challenge_type,
+            domains,
+            email,
+            provider,
+            credentials_path,
+            propagation,
+            profile,
+            staging,
+            force,
+            cmd_env,
+        )
+
+        if result == 0:
+            if attempt > 1:
+                LOGGER.info(f"Certificate generation succeeded on attempt {attempt}")
+            return result
+
+        if attempt >= max_retries + 1:
+            LOGGER.error(f"Certificate generation failed after {max_retries + 1} attempts")
+            return result
+
+        attempt += 1
+
+    return result
 
 
 def certbot_new(
@@ -463,6 +514,7 @@ try:
             "propagation": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
             "profile": getenv(f"{first_server}_LETS_ENCRYPT_PROFILE", getenv("LETS_ENCRYPT_PROFILE", "classic")),
             "check_psl": getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")) == "yes",
+            "max_retries": getenv(f"{first_server}_LETS_ENCRYPT_MAX_RETRIES", getenv("LETS_ENCRYPT_MAX_RETRIES", "0")),
             "credential_items": {},
         }
 
@@ -479,6 +531,12 @@ try:
             data["use_wildcard"] and not domains_to_ask.get(WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))[0].lstrip("*."))
         ):
             continue
+
+        if not data["max_retries"].isdigit():
+            LOGGER.warning(f"Invalid max retries value for service {first_server} : {data['max_retries']}, using default value of 0...")
+            data["max_retries"] = 0
+        else:
+            data["max_retries"] = int(data["max_retries"])
 
         # * Getting the DNS provider data if necessary
         if data["challenge"] == "dns":
@@ -652,7 +710,7 @@ try:
         )
 
         if (
-            certbot_new(
+            certbot_new_with_retry(
                 data["challenge"],
                 domains,
                 data["email"],
@@ -663,6 +721,7 @@ try:
                 data["staging"],
                 domains_to_ask[first_server] == 2,
                 cmd_env=env.copy(),
+                max_retries=data["max_retries"],
             )
             != 0
         ):
@@ -710,7 +769,7 @@ try:
                     active_cert_names.add(base_domain)
 
                 if (
-                    certbot_new(
+                    certbot_new_with_retry(
                         "dns",
                         domains,
                         email,
@@ -719,8 +778,8 @@ try:
                         "default",
                         profile,
                         staging,
-                        domains_to_ask[base_domain] == 2,
-                        env.copy(),
+                        domains_to_ask.get(base_domain, 0) == 2,
+                        cmd_env=env.copy(),
                     )
                     != 0
                 ):

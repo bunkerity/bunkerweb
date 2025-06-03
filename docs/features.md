@@ -2584,6 +2584,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 | `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Clear Old Certificates:** When set to `yes`, removes old certificates that are no longer needed during renewal.                                                                    |
 | `LETS_ENCRYPT_PROFILE`             | `classic`                | multisite | no       | **Certificate Profile:** Select the certificate profile to use. Options: `classic` (general-purpose), `tlsserver` (optimized for TLS servers), or `shortlived` (7-day certificates). |
 | `LETS_ENCRYPT_CUSTOM_PROFILE`      |                          | multisite | no       | **Custom Certificate Profile:** Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides `LETS_ENCRYPT_PROFILE` if set.                 |
+| `LETS_ENCRYPT_MAX_RETRIES`         | `3`                      | multisite | no       | **Maximum Retries:** Number of times to retry certificate generation on failure. Set to `0` to disable retries. Useful for handling temporary network issues or API rate limits.     |
 
 !!! info "Information and behavior"
     - The `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.
@@ -2673,15 +2674,16 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_2: "aws_secret_access_key YOUR_SECRET_KEY"
     ```
 
-=== "Testing with Staging Environment"
+=== "Testing with Staging Environment and Retries"
 
-    Configuration for testing setup with the staging environment:
+    Configuration for testing setup with the staging environment and enhanced retry settings:
 
     ```yaml
     AUTO_LETS_ENCRYPT: "yes"
     EMAIL_LETS_ENCRYPT: "admin@example.com"
     LETS_ENCRYPT_CHALLENGE: "http"
     USE_LETS_ENCRYPT_STAGING: "yes"
+    LETS_ENCRYPT_MAX_RETRIES: "5"
     ```
 
 === "DigitalOcean with Custom Propagation Time"
