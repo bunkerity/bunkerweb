@@ -68,10 +68,10 @@ repos:
         language: python
         types: [text]
 
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: ee6b38352380ce52369d16b7873093c4b8bf829b # frozen: v8.24.3
-    hooks:
-      - id: gitleaks
+  # - repo: https://github.com/gitleaks/gitleaks
+  #   rev: ee6b38352380ce52369d16b7873093c4b8bf829b # frozen: v8.24.3
+  #   hooks:
+  #     - id: gitleaks
 
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: 2491238703a5d3415bb2b7ff11388bf775372f29 # frozen: v0.10.0

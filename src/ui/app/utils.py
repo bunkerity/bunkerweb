@@ -38,10 +38,10 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "9": True,
     },
     "cache": {
-        "3": True,
         "4": True,
         "5": True,
-        "6": False,
+        "6": True,
+        "7": False,
     },
     "configs": {
         "3": True,
@@ -74,15 +74,15 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "8": True,
     },
     "reports": {
-        "3": True,
-        "4": False,
+        "4": True,
         "5": False,
-        "6": False,
+        "6": True,
         "7": False,
-        "8": True,
+        "8": False,
         "9": True,
         "10": True,
         "11": True,
+        "12": True,
     },
     "services": {
         "3": True,
@@ -90,6 +90,26 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "5": True,
         "6": True,
     },
+}
+
+ALWAYS_USED_PLUGINS = (
+    "general",
+    "errors",
+    "headers",
+    "misc",
+    "php",
+    "pro",
+    "sessions",
+    "ssl",
+)
+PLUGINS_SPECIFICS = {
+    "COUNTRY": {"BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": ""},
+    "CUSTOMCERT": {"USE_CUSTOM_SSL": "no"},
+    "INJECT": {"INJECT_BODY": "", "INJECT_HEAD": ""},
+    "LETSENCRYPT": {"AUTO_LETS_ENCRYPT": "no"},
+    "LIMIT": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
+    "REDIRECT": {"REDIRECT_TO": ""},
+    "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
 }
 
 
@@ -229,3 +249,19 @@ def human_readable_number(value: Union[str, int]) -> str:
     elif value >= 1_000:
         return f"{value/1_000:.1f}k"
     return str(value)
+
+
+def is_plugin_active(plugin_id: str, plugin_name: str, config: dict) -> bool:
+    plugin_name_formatted = plugin_name.replace(" ", "_").upper()
+
+    def plugin_used(plugin_id: str) -> bool:
+        plugin_id = plugin_id.upper()
+        if plugin_id in PLUGINS_SPECIFICS:
+            for key, value in PLUGINS_SPECIFICS[plugin_id].items():
+                if config.get(key, {"value": value})["value"] != value:
+                    return True
+        elif config.get(f"USE_{plugin_id}", config.get(f"USE_{plugin_name_formatted}", {"value": "no"}))["value"] != "no":
+            return True
+        return False
+
+    return plugin_id in ALWAYS_USED_PLUGINS or plugin_used(plugin_id)

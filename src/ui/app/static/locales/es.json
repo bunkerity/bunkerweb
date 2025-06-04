@@ -8,6 +8,7 @@
     "version": "Versión: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Por favor, selecciona una fecha de fin personalizada.",
     "important": "Importante",
     "no_changes_detected": "No se detectaron cambios.",
     "notice": "Aviso",
@@ -75,6 +76,7 @@
     "convert_services": "Convertir Servicios",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
+    "copy_raw": "Copiar Datos sin Procesar",
     "copy_visible": "Copiar Visibles",
     "create_config": "Crear Configuración Personalizada",
     "create_instance": "Crear Instancia",
@@ -115,14 +117,21 @@
     "select_file": "Seleccionar Archivo",
     "select_page": "Seleccionar Página",
     "service": "Servicio",
+    "set_1h": "Establecer 1 Hora",
+    "set_24h": "Establecer 24 Horas",
+    "set_1w": "Establecer 1 Semana",
+    "set_permanent": "Establecer Permanente",
     "setup": "Configurar",
     "show": "Mostrar",
     "stop": "Detener",
     "submit": "Enviar",
     "subscribe": "Suscribirse",
     "unban": "Desbloquear",
+    "update_duration": "Actualizar Duración del Bloqueo",
     "update_key": "Actualizar Clave",
     "upload_photo": "Subir Nueva Foto",
+    "view_details": "Ver Detalles",
+    "view_raw_data": "Ver Datos sin Procesar",
     "wipe_other_sessions": "Limpiar Otras Sesiones"
   },
   "country": {
@@ -401,6 +410,14 @@
         "status": "{{core}} core / {{pro}} PRO / {{external}} externo",
         "title": "Plugins"
       },
+      "ram": {
+        "critical_high": "Crítico: ¡El sistema se está quedando sin memoria!",
+        "good_high": "Memoria excelente para entornos de producción",
+        "info_medium": "Considera actualizar a 16GB+ para uso en producción",
+        "title": "RAM del Sistema",
+        "usage": "{{percent}}% usado",
+        "warning_low": "Advertencia: Poca memoria puede afectar el rendimiento"
+      },
       "services": {
         "status": "{{online}} en línea / {{draft}} borrador",
         "title": "Servicios"
@@ -524,6 +541,13 @@
     "news_fetch_fail": "Error al obtener noticias:",
     "skipping_malformed_line": "Omitiendo línea mal formada: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Hora",
+    "24_hours": "24 Horas",
+    "1_week": "1 Semana",
+    "permanent": "Permanente",
+    "custom": "Personalizado"
+  },
   "error": {
     "401": {
       "help": "Debes iniciar sesión para acceder a este recurso.",
@@ -545,7 +569,9 @@
       "message": "Ocurrió un error inesperado en el servidor.",
       "title": "Error del Servidor"
     },
-    "reports_load_error": "Error al cargar los informes. Por favor, intenta refrescar la página."
+    "ban_update_failed": "Error al actualizar la duración del bloqueo. Por favor, inténtalo de nuevo.",
+    "reports_load_error": "Error al cargar los informes. Por favor, intenta refrescar la página.",
+    "unban_failed": "Error al desbloquear la dirección IP. Por favor, inténtalo de nuevo."
   },
   "flash": {
     "easter_egg": "Si lees esto, significa que eres curioso 👀",
@@ -589,6 +615,7 @@
       "configuration_name": "Nombre de Configuración",
       "confirm_password": "Confirmar Contraseña",
       "current_password": "Contraseña Actual",
+      "custom_end_date": "Fecha de Fin Personalizada",
       "custom_ssl_certificate": "Certificado SSL Personalizado",
       "custom_ssl_certificate_data": "Datos Certificado SSL Pers. (Base64/PEM)",
       "custom_ssl_key": "Clave SSL Personalizada",
@@ -607,7 +634,9 @@
       "lets_encrypt_dns_credential_items": "Credenciales DNS para Let's Encrypt",
       "lets_encrypt_profile": "Perfil de Let's Encrypt",
       "license_key": "Clave de Licencia",
+      "make_permanent": "Hacer Permanente",
       "name": "Nombre",
+      "new_duration": "Nueva Duración",
       "new_password": "Nueva Contraseña",
       "optional": "(Opcional)",
       "password": "Contraseña",
@@ -632,6 +661,7 @@
       "config_name": "mi-config-personalizada",
       "enter_username": "Introduce tu nombre de usuario",
       "keywords": "Palabras clave...",
+      "plugin_search": "Buscar plugins...",
       "search": "Buscar...",
       "select_service": "Seleccionar Servicio",
       "secret_token": "Token Secreto",
@@ -679,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Arrastra y suelta tu archivo de plugin aquí o haz clic para seleccionar archivos.",
+      "confirm_cache_deletion_alert": "¿Estás seguro de que quieres eliminar el archivo de caché seleccionado?",
+      "confirm_cache_deletion_alert_plural": "¿Estás seguro de que quieres eliminar los archivos de caché seleccionados?",
       "confirm_configs_deletion_alert": "¿Estás seguro de que quieres eliminar la configuración personalizada seleccionada?",
       "confirm_configs_deletion_alert_plural": "¿Estás seguro de que quieres eliminar las configuraciones personalizadas seleccionadas?",
       "confirm_conversion_confirmation": "¿Estás seguro de que quieres convertir los servicios seleccionados?",
@@ -695,7 +727,8 @@
       "reset_template_alert": "¿Estás seguro de que quieres restablecer la configuración de la plantilla actual y las configuraciones personalizadas?",
       "services_deletion_confirmation": "¿Estás seguro de que quieres eliminar los servicios seleccionados?",
       "unban_confirmation_alert": "¿Estás seguro de que quieres desbloquear la dirección IP seleccionada?",
-      "unban_confirmation_alert_plural": "¿Estás seguro de que quieres desbloquear las direcciones IP seleccionadas?"
+      "unban_confirmation_alert_plural": "¿Estás seguro de que quieres desbloquear las direcciones IP seleccionadas?",
+      "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:"
     },
     "button": {
       "reset_template_confirm": "Restablecer Configuración de Plantilla"
@@ -719,7 +752,8 @@
       "job_history_count": "Últimas {{count}} ejecuciones de la Tarea",
       "recovery_codes": "Códigos de Recuperación",
       "reset_template_config": "¿Restablecer Configuración de Plantilla?",
-      "server_name_not_unique": "El Nombre del Servidor no es Único"
+      "server_name_not_unique": "El Nombre del Servidor no es Único",
+      "update_duration": "Actualizar Duración del Bloqueo"
     }
   },
   "mode": {
@@ -753,6 +787,10 @@
     "misc": "Varios",
     "mode_selection": "Selección de Modo",
     "more": "Más...",
+    "plugin_activated": "Plugin Activado",
+    "plugin_deactivated": "Plugin Desactivado",
+    "plugin_activated_global": "Plugin Activado Globalmente",
+    "plugin_deactivated_global": "Plugin Desactivado Globalmente",
     "plugins": "Plugins",
     "plugins_pages": "Páginas de Plugins",
     "pro": "Pro",
@@ -869,6 +907,10 @@
       "sessions": "Sesiones"
     }
   },
+  "reports": {
+    "security_incident": "Incidente de Seguridad",
+    "security_report_data": "Datos del Informe de Seguridad"
+  },
   "scope": {
     "all_services": "Todos los Servicios",
     "global": "Global",
@@ -888,6 +930,7 @@
     "country": "País",
     "created": "Creado",
     "data": "Datos",
+    "date": "Fecha",
     "empty": "No hay paneles de búsqueda disponibles",
     "end_date": "Fecha de Fin",
     "first_seen": "Visto por Primera Vez",
@@ -970,9 +1013,10 @@
   "status": {
     "admin_user_exists": "🧑‍🚀 Ya existe un usuario administrador. Por favor, continúa al siguiente paso.",
     "blog_connection_fail": "No se pudo conectar al blog para las noticias.",
-    "default_server": "servidor predeterminado",
+    "default_server": "Servidor Predeterminado",
     "down": "Inactivo",
     "draft": "Borrador",
+    "error_loading_bans": "Error al cargar los bloqueos. Por favor, intenta refrescar la página.",
     "failed": "Fallido",
     "loading": "Cargando...",
     "loading_bans": "Cargando bloqueos...",
@@ -989,7 +1033,7 @@
     "loading_services": "Cargando servicios...",
     "news_connection_error": "No se pudo conectar al blog para las noticias.",
     "no": "No",
-    "no_data": "No hay datos para mostrar.",
+    "no_data": "Sin datos",
     "no_history": "No hay historial disponible.",
     "no_item": "Ningún elemento",
     "no_notifications": "No hay notificaciones para mostrar.",
@@ -1045,6 +1089,7 @@
       "checksum": "Checksum",
       "country": "País",
       "created": "Creado",
+      "current_time_left": "Tiempo Restante Actual",
       "data": "Datos",
       "date": "Fecha",
       "description": "Descripción",
@@ -1064,6 +1109,7 @@
       "plugin": "Plugin",
       "reason": "Motivo",
       "reload": "Recargar",
+      "request_id": "ID de Solicitud",
       "scope": "Alcance",
       "security_mode": "Modo Seguridad",
       "server_name": "Nombre Servidor",
@@ -1089,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Si el servicio se elimina o reinicia, tu configuración de UI se perderá.",
     "autoconf_disclaimer_detail": "Esto se debe a que el método del servicio es 'autoconf', diseñado para prevenir conflictos de configuración.",
+    "ban_updated": "¡Duración del bloqueo actualizada con éxito!",
     "body": {
       "ping_succeed": "Instancias: {{instances}}"
     },
@@ -1097,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping fallido",
       "ping_succeed": "Ping exitoso"
-    }
+    },
+    "ip_unbanned": "¡Dirección IP desbloqueada con éxito!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Si se debe solicitar automáticamente un certificado Let's Encrypt.",
@@ -1105,6 +1153,7 @@
       "convert_service_to_draft": "Convertir Servicio {{name}} a Borrador",
       "convert_service_to_online": "Convertir Servicio {{name}} a En Línea",
       "delete_config": "Eliminar Configuración Personalizada {{name}}",
+      "delete_file": "Eliminar archivo de caché: {{filename}}",
       "delete_instance": "Eliminar Instancia {{hostname}}",
       "delete_plugin": "Eliminar Plugin {{name}}",
       "delete_service": "Eliminar Servicio {{name}}",
@@ -1138,6 +1187,7 @@
     "custom_ssl_cert_path": "Ruta al archivo del certificado SSL personalizado.",
     "custom_ssl_key_data": "Los datos de la clave privada SSL personalizada (formato PEM o codificado en Base64).",
     "custom_ssl_key_path": "Ruta al archivo de la clave privada SSL personalizada.",
+    "different_from_template": "El valor difiere del predeterminado de la plantilla",
     "disabled_by_method": "Deshabilitado: Gestionado mediante el método '{{method}}'.",
     "disabled_db_readonly": "Deshabilitado: La base de datos está en modo de solo lectura.",
     "disabled_draft": "Deshabilitado: El servicio está en modo Borrador.",
@@ -1274,6 +1324,7 @@
         "ip_address": "Dirección IP que activó el informe",
         "method": "Método HTTP de la solicitud reportada",
         "reason": "Motivo por el que se generó el informe",
+        "request_id": "El identificador único de la solicitud",
         "security_mode": "Modo de seguridad activo cuando se generó el informe",
         "select_all": "Seleccionar todos los Informes",
         "server_name": "Nombre del servidor (vhost) que generó el informe",

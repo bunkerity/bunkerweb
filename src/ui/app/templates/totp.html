@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block page %}
     <!-- Content -->
     <!-- Dark Mode Toggle - Enhanced Floating Button -->

@@ -1,4 +1,4 @@
-from os import getenv, sep
+from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import path as sys_path
@@ -7,6 +7,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from common_utils import handle_docker_secrets  # type: ignore
 from logger import setup_logger  # type: ignore
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
@@ -70,7 +71,16 @@ def on_starting(server):
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Handle Docker secrets first
+    docker_secrets = handle_docker_secrets()
+    if docker_secrets:
+        environ.update(docker_secrets)
+
     LOGGER = setup_logger("TMP-UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+
+    if docker_secrets:
+        LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
+
     LOGGER.info("TMP-UI is ready")
 
 

@@ -1,4 +1,21 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/leaflet/leaflet.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/home.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <div class="row g-4">
@@ -12,7 +29,7 @@
                 {% else %}
                     <i class='bx bxs-rocket bx-sm position-absolute top-0 end-0 m-3'></i>
                 {% endif %}
-                <p class="ps-4 fs-4 mb-2 text-white">
+                <p class="ps-4 fs-4 mb-2 text-white h-100">
                     <span data-i18n="dashboard.card.plan.title">Plan</span>
                     <br />
                     <span class="fs-3 fw-bold don-jose">
@@ -33,11 +50,38 @@
             </div>
         </div>
         <div class="col-md-3 mb-2">
+            <div class="card p-4 position-relative shadow-sm rounded-3 {% if memory_info.memory_state == 'danger' %}bg-danger{% elif memory_info.memory_state == 'low' %}bg-warning{% elif memory_info.memory_state == 'medium' %}bg-secondary{% else %}bg-bw-green{% endif %} text-white h-100">
+                <i class='bx bx-chip bx-sm position-absolute top-0 end-0 m-3 text-white'></i>
+                <p class="ps-4 fs-4 mb-2">
+                    <span data-i18n="dashboard.card.ram.title">System RAM</span>
+                    <br />
+                    <span class="fs-3 don-jose">{{ memory_info.used_gb }}GB / {{ memory_info.total_gb }}GB</span>
+                </p>
+                <small class="ps-4 text-white-80 mt-0">
+                    <span data-i18n="dashboard.card.ram.usage"
+                          data-i18n-options='{"percent": {{ memory_info.used_percent|round(1) }}}'>{{ memory_info.used_percent|round(1) }}% used</span>
+                    {% if memory_info.memory_state == 'danger' %}
+                        <br />
+                        <i class='bx bxs-radiation'></i> <span data-i18n="dashboard.card.ram.critical_high">Critical: System is running out of memory!</span>
+                    {% elif memory_info.memory_state == 'low' %}
+                        <br />
+                        <i class='bx bx-error-alt'></i> <span data-i18n="dashboard.card.ram.warning_low">Warning: Low memory may affect performance</span>
+                    {% elif memory_info.memory_state == 'medium' %}
+                        <br />
+                        <i class='bx bx-info-circle'></i> <span data-i18n="dashboard.card.ram.info_medium">Consider upgrading to 16GB+ for production use</span>
+                    {% else %}
+                        <br />
+                        <i class='bx bx-check-circle'></i> <span data-i18n="dashboard.card.ram.good_high">Excellent memory for production environments</span>
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+        <div class="col-md-2 mb-2">
             <a role="button"
                href="{{ url_for('instances') }}"
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-server bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
-                <p class="ps-4 fs-4 mb-2">
+                <p class="ps-4 fs-4 mb-2 h-100">
                     <span data-i18n="dashboard.card.instances.title">Instances</span>
                     <br />
                     <span class="fs-3 don-jose">
@@ -60,12 +104,12 @@
                 </small>
             </a>
         </div>
-        <div class="col-md-3 mb-2">
+        <div class="col-md-2 mb-2">
             <a role="button"
                href="{{ url_for('services') }}"
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-cube bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
-                <p class="ps-4 fs-4 mb-2">
+                <p class="ps-4 fs-4 mb-2 h-100">
                     <span data-i18n="dashboard.card.services.title">Services</span>
                     <br />
                     <span class="fs-3 don-jose">
@@ -86,12 +130,12 @@
                 </small>
             </a>
         </div>
-        <div class="col-md-3 mb-2">
+        <div class="col-md-2 mb-2">
             <a role="button"
                href="{{ url_for('plugins') }}"
                class="card p-4 position-relative shadow-sm rounded-3 h-100">
                 <i class='bx bx-plug bx-sm position-absolute top-0 end-0 m-3 text-secondary'></i>
-                <p class="ps-4 fs-4 mb-2">
+                <p class="ps-4 fs-4 mb-2 h-100">
                     <span data-i18n="dashboard.card.plugins.title">Plugins</span>
                     <br />
                     <span class="fs-3 don-jose">
@@ -267,4 +311,16 @@
         </div>
     </div>
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/apexcharts/apexcharts.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/home.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

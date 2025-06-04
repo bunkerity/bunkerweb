@@ -1,4 +1,21 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <!-- Flatpickr -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.css') }}"
+          nonce="{{ style_nonce }}" />
+    {% if theme == 'dark' %}
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.dark.css') }}"
+              nonce="{{ style_nonce }}" />
+    {% endif %}
+{% endblock %}
 {% block content %}
     <!-- Content -->
     {% set is_overlapped = pro_status == "active" and pro_overlapped %}
@@ -37,7 +54,7 @@
                             </h4>
                             <h5 class="mt-2 mb-2 courier-prime fw-medium{% if is_overlapped %} text-decoration-line-through{% endif %}"
                                 data-i18n="pro.status.services_count"
-                                data-i18n-options="{'online_services': {{ online_services }}, 'pro_services': {{ pro_services }}}">
+                                data-i18n-options='{"online_services": {{ online_services }}, "pro_services": {{ pro_services }}}'>
                                 {{ online_services }} Online service{{ 's' if online_services > 1 else '' }} / {{ pro_services }} PRO service{{ 's' if pro_services > 1 else '' }}
                             </h5>
                             {% if is_overlapped %}
@@ -48,7 +65,7 @@
                                           data-i18n-options="{'pro_services': {{ pro_services }}}">Delete or draft some services to reach the number of {{ pro_services }} services.</span>
                                 </div>
                             {% endif %}
-                            <a href="{% if is_pro_version %}https://panel.bunkerweb.io/clientarea.php?action=services&utm_campaign=self&utm_source=ui{% else %}https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&utm_source=ui{% endif %}"
+                            <a href="{% if is_pro_version %}https://panel.bunkerweb.io/clientarea.php?action=services&utm_campaign=self&utm_source=ui{% else %}https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui{% endif %}"
                                role="button"
                                aria-pressed="true"
                                class="btn btn-pro-now courier-prime"
@@ -78,7 +95,7 @@
                     </div>
                     <small class="position-absolute bottom-0 end-0 text-muted"
                            data-i18n="pro.status.draft_services_count"
-                           data-i18n-options="{'draft_services': {{ draft_services }}}">
+                           data-i18n-options='{"draft_services": {{ draft_services }}}'>
                         {{ draft_services }} Draft service{{ 's' if draft_services > 1 else '' }}
                     </small>
                 </div>
@@ -177,4 +194,13 @@
         </div>
     </div>
     <!--/ Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/pro.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

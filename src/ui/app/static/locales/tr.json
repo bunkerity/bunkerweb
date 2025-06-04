@@ -8,6 +8,7 @@
     "version": "Versiyon: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Lütfen özel bir bitiş tarihi seçin.",
     "important": "Önemli",
     "no_changes_detected": "Değişiklik tespit edilmedi.",
     "notice": "Bildirim",
@@ -75,6 +76,7 @@
     "convert_services": "Servisleri Dönüştür",
     "copy": "Kopyala",
     "copy_codes": "Kodları Kopyala",
+    "copy_raw": "Ham Veriyi Kopyala",
     "copy_visible": "Görüneni Kopyala",
     "create_config": "Özel Yapılandırma Oluştur",
     "create_instance": "Instance Oluştur",
@@ -115,14 +117,21 @@
     "select_file": "Dosya Seç",
     "select_page": "Sayfa Seç",
     "service": "Servis",
+    "set_1h": "1 Saat Ayarla",
+    "set_24h": "24 Saat Ayarla",
+    "set_1w": "1 Hafta Ayarla",
+    "set_permanent": "Kalıcı Ayarla",
     "setup": "Kurulum",
     "show": "Göster",
     "stop": "Durdur",
     "submit": "Gönder",
     "subscribe": "Abone Ol",
     "unban": "Yasağı Kaldır",
+    "update_duration": "Yasaklama Süresini Güncelle",
     "update_key": "Anahtarı Güncelle",
     "upload_photo": "Yeni Fotoğraf Yükle",
+    "view_details": "Detayları Görüntüle",
+    "view_raw_data": "Ham Veriyi Görüntüle",
     "wipe_other_sessions": "Diğer Oturumları Sonlandır"
   },
   "country": {
@@ -401,6 +410,14 @@
         "status": "{{core}} çekirdek / {{pro}} PRO / {{external}} harici",
         "title": "Eklentiler"
       },
+      "ram": {
+        "critical_high": "Kritik: Sistem belleği tükenmek üzere!",
+        "good_high": "Üretim ortamları için mükemmel bellek",
+        "info_medium": "Üretim ortamlarında kullanım için 16 GB veya daha fazlasına yükseltmeyi düşünün",
+        "title": "Sistem RAM'i",
+        "usage": "{{percent}}% kullanıldı",
+        "warning_low": "Uyarı: Düşük bellek performansı etkileyebilir"
+      },
       "services": {
         "status": "{{online}} çevrimiçi / {{draft}} taslak",
         "title": "Servisler"
@@ -524,6 +541,13 @@
     "news_fetch_fail": "Haberler alınamadı:",
     "skipping_malformed_line": "Bozuk satır atlanıyor: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Saat",
+    "24_hours": "24 Saat",
+    "1_week": "1 Hafta",
+    "permanent": "Kalıcı",
+    "custom": "Özel"
+  },
   "error": {
     "401": {
       "help": "Bu kaynağa erişmek için giriş yapmalısınız.",
@@ -545,7 +569,9 @@
       "message": "Beklenmeyen bir sunucu hatası oluştu.",
       "title": "Sunucu Hatası"
     },
-    "reports_load_error": "Raporlar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin."
+    "ban_update_failed": "Yasaklama süresi güncellenemedi. Lütfen tekrar deneyin.",
+    "reports_load_error": "Raporlar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin.",
+    "unban_failed": "IP adresinin yasağı kaldırılamadı. Lütfen tekrar deneyin."
   },
   "flash": {
     "easter_egg": "Bunu okuyorsan meraklısın demektir 👀",
@@ -589,6 +615,7 @@
       "configuration_name": "Konfigürasyon Adı",
       "confirm_password": "Şifreyi Onayla",
       "current_password": "Mevcut Şifre",
+      "custom_end_date": "Özel Bitiş Tarihi",
       "custom_ssl_certificate": "Özel SSL Sertifikası",
       "custom_ssl_certificate_data": "Özel SSL Sertifikası Verisi (Base64/PEM)",
       "custom_ssl_key": "Özel SSL Anahtarı",
@@ -607,7 +634,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS Kimlik Bilgileri",
       "lets_encrypt_profile": "Let's Encrypt Profili",
       "license_key": "Lisans Anahtarı",
+      "make_permanent": "Kalıcı Yap",
       "name": "Ad",
+      "new_duration": "Yeni Süre",
       "new_password": "Yeni Şifre",
       "optional": "(Opsiyonel)",
       "password": "Şifre",
@@ -632,6 +661,7 @@
       "config_name": "ozel-konfig-adim",
       "enter_username": "Kullanıcı adı girin",
       "keywords": "Anahtar Kelimeler",
+      "plugin_search": "Eklenti ara...",
       "search": "Ara...",
       "select_service": "Servis Seç",
       "secret_token": "Gizli Token",
@@ -679,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Eklenti arşivinizi buraya sürükleyip bırakın veya dosya seçmek için tıklayın.",
+      "confirm_cache_deletion_alert": "Seçili önbellek dosyasını silmek istediğinizden emin misiniz?",
+      "confirm_cache_deletion_alert_plural": "Seçili önbellek dosyalarını silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert": "Seçili özel yapılandırmayı silmek istediğinizden emin misiniz?",
       "confirm_configs_deletion_alert_plural": "Seçili özel yapılandırmaları silmek istediğinizden emin misiniz?",
       "confirm_conversion_confirmation": "Seçili servisleri dönüştürmek istediğinizden emin misiniz?",
@@ -695,7 +727,8 @@
       "reset_template_alert": "Mevcut şablon ayarlarını ve özel yapılandırmaları sıfırlamak istediğinizden emin misiniz?",
       "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
-      "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?"
+      "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
+      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:"
     },
     "button": {
       "reset_template_confirm": "Şablon Yapılandırmasını Sıfırla"
@@ -719,7 +752,8 @@
       "job_history_count": "İşin Son {{count}} Çalıştırması",
       "recovery_codes": "Kurtarma Kodları",
       "reset_template_config": "Şablon Yapılandırması Sıfırlansın mı?",
-      "server_name_not_unique": "Sunucu Adı Benzersiz Değil"
+      "server_name_not_unique": "Sunucu Adı Benzersiz Değil",
+      "update_duration": "Yasaklama Süresini Güncelle"
     }
   },
   "mode": {
@@ -753,6 +787,10 @@
     "misc": "Çeşitli",
     "mode_selection": "Mod Seçimi",
     "more": "Daha fazla...",
+    "plugin_activated": "Eklenti Etkinleştirildi",
+    "plugin_deactivated": "Eklenti Devre Dışı Bırakıldı",
+    "plugin_activated_global": "Eklenti Global Olarak Etkinleştirildi",
+    "plugin_deactivated_global": "Eklenti Global Olarak Devre Dışı Bırakıldı",
     "plugins": "Eklentiler",
     "plugins_pages": "Eklentiler Sayfası",
     "pro": "Pro",
@@ -869,6 +907,10 @@
       "sessions": "Oturumlar"
     }
   },
+  "reports": {
+    "security_incident": "Güvenlik Olayı",
+    "security_report_data": "Güvenlik Raporu Verisi"
+  },
   "scope": {
     "all_services": "Tüm Servisler",
     "global": "Global",
@@ -888,6 +930,7 @@
     "country": "Ülke",
     "created": "Oluşturulma",
     "data": "Veri",
+    "date": "Tarih",
     "empty": "Kullanılabilir arama paneli yok",
     "end_date": "Bitiş Tarihi",
     "first_seen": "İlk Görülme",
@@ -973,6 +1016,7 @@
     "default_server": "varsayılan sunucu",
     "down": "Kapalı",
     "draft": "Taslak",
+    "error_loading_bans": "Yasaklamalar yüklenirken hata oluştu. Lütfen sayfayı yenilemeyi deneyin.",
     "failed": "Başarısız",
     "loading": "Yükleniyor...",
     "loading_bans": "Yasaklamalar yükleniyor...",
@@ -989,7 +1033,7 @@
     "loading_services": "Servisler yükleniyor...",
     "news_connection_error": "Haber güncellemeleri için bloga bağlanılamadı.",
     "no": "Hayır",
-    "no_data": "Gösterilecek veri yok.",
+    "no_data": "Veri yok",
     "no_history": "Geçmiş yok.",
     "no_item": "Öğe Yok",
     "no_notifications": "Gösterilecek bildirim yok.",
@@ -1045,6 +1089,7 @@
       "checksum": "Sağlama",
       "country": "Ülke",
       "created": "Oluşturulma",
+      "current_time_left": "Mevcut Kalan Süre",
       "data": "Veri",
       "date": "Tarih",
       "description": "Açıklama",
@@ -1064,6 +1109,7 @@
       "plugin": "Eklenti",
       "reason": "Sebep",
       "reload": "Yeniden Yükle",
+      "request_id": "İstek Kimliği",
       "scope": "Kapsam",
       "security_mode": "Güvenlik Modu",
       "server_name": "Sunucu Adı",
@@ -1089,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Servis kaldırılır veya yeniden başlatılırsa, UI yapılandırmanız kaybolacaktır.",
     "autoconf_disclaimer_detail": "Bunun nedeni, servisin yönteminin 'autoconf' olmasıdır ve bu, yapılandırma çakışmalarını önlemek için tasarlanmıştır.",
+    "ban_updated": "Yasaklama süresi başarıyla güncellendi!",
     "body": {
       "ping_succeed": "Instances: {{instances}}"
     },
@@ -1097,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping başarısız",
       "ping_succeed": "Ping başarılı"
-    }
+    },
+    "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği.",
@@ -1105,6 +1153,7 @@
       "convert_service_to_draft": "Servisi Taslağa Dönüştür: {{name}}",
       "convert_service_to_online": "Servisi Çevrimiçine Dönüştür: {{name}}",
       "delete_config": "Özel Yapılandırmayı Sil: {{name}}",
+      "delete_file": "Önbellek Dosyasını Sil: {{filename}}",
       "delete_instance": "Instance Sil: {{hostname}}",
       "delete_plugin": "Eklentiyi Sil: {{name}}",
       "delete_service": "Servisi Sil: {{name}}",
@@ -1138,6 +1187,7 @@
     "custom_ssl_cert_path": "Özel SSL sertifika dosyasının yolu.",
     "custom_ssl_key_data": "Özel SSL özel anahtar verisi (PEM formatında veya Base64 kodlu).",
     "custom_ssl_key_path": "Özel SSL özel anahtar dosyasının yolu.",
+    "different_from_template": "Değer, şablon varsayılanından farklı",
     "disabled_by_method": "Devre dışı: '{{method}}' yöntemiyle yönetiliyor.",
     "disabled_db_readonly": "Devre dışı: Veritabanı salt okunur modda.",
     "disabled_draft": "Devre dışı: Servis Taslak modunda.",
@@ -1274,6 +1324,7 @@
         "ip_address": "Raporu tetikleyen IP adresi",
         "method": "Raporlanan isteğin HTTP yöntemi",
         "reason": "Raporun oluşturulma sebebi",
+        "request_id": "İsteğin benzersiz kimliği",
         "security_mode": "Rapor oluşturulurken aktif olan güvenlik modu",
         "select_all": "Tüm Raporları seç",
         "server_name": "Raporu oluşturan sunucu adı (vhost)",

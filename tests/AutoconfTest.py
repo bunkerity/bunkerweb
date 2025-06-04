@@ -1,3 +1,4 @@
+from re import escape
 from Test import Test
 from os.path import isdir, isfile
 from os import getenv, mkdir
@@ -53,6 +54,7 @@ class AutoconfTest(Test):
             if data["services"]["bw-scheduler"]["environment"].get("AUTO_LETS_ENCRYPT", "no") != "yes":
                 data["services"]["bw-scheduler"]["environment"]["AUTO_LETS_ENCRYPT"] = "yes"
             data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
+            data["services"]["bw-scheduler"]["environment"]["LETS_ENCRYPT_MAX_RETRIES"] = "3"
             data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
             data["services"]["bw-autoconf"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
             data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
@@ -139,9 +141,9 @@ class AutoconfTest(Test):
             Test.replace_in_file(compose, r"\- bw_data:/", "- /tmp/bw-data:/")
             Test.replace_in_file(compose, r"\- bw\-data:/", "- /tmp/bw-data:/")
             for ex_domain, test_domain in self._domains.items():
-                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.replace_in_files(test, escape(ex_domain), test_domain)
                 Test.rename(test, ex_domain, test_domain)
-            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
+            Test.replace_in_files(test, escape("example.com"), getenv("ROOT_DOMAIN"))
             setup = f"{test}/setup-autoconf.sh"
             if isfile(setup):
                 proc = run("sudo ./setup-autoconf.sh", cwd=test, shell=True)

@@ -8,6 +8,7 @@
     "version": "Version: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Please select a custom end date.",
     "important": "Important",
     "no_changes_detected": "No changes detected.",
     "notice": "Notice",
@@ -75,6 +76,7 @@
     "convert_services": "Convert Services",
     "copy": "Copy",
     "copy_codes": "Copy Codes",
+    "copy_raw": "Copy Raw Data",
     "copy_visible": "Copy Visible",
     "create_config": "Create Custom Config",
     "create_instance": "Create Instance",
@@ -115,14 +117,21 @@
     "select_file": "Select File",
     "select_page": "Select Page",
     "service": "Service",
+    "set_1h": "Set 1 Hour",
+    "set_1w": "Set 1 Week",
+    "set_24h": "Set 24 Hours",
+    "set_permanent": "Set Permanent",
     "setup": "Setup",
     "show": "Show",
     "stop": "Stop",
     "submit": "Submit",
     "subscribe": "Subscribe",
     "unban": "Unban",
+    "update_duration": "Update Ban Duration",
     "update_key": "Update Key",
     "upload_photo": "Upload New Photo",
+    "view_details": "View Details",
+    "view_raw_data": "View Raw Data",
     "wipe_other_sessions": "Wipe Other Sessions"
   },
   "country": {
@@ -401,6 +410,14 @@
         "status": "{{core}} core / {{pro}} PRO / {{external}} external",
         "title": "Plugins"
       },
+      "ram": {
+        "critical_high": "Critical: System is running out of memory!",
+        "good_high": "Excellent memory for production environments",
+        "info_medium": "Consider upgrading to 16GB+ for production use",
+        "title": "System RAM",
+        "usage": "{{percent}}% used",
+        "warning_low": "Warning: Low memory may affect performance"
+      },
       "services": {
         "status": "{{online}} online / {{draft}} draft",
         "title": "Services"
@@ -524,6 +541,13 @@
     "news_fetch_fail": "Failed to fetch news:",
     "skipping_malformed_line": "Skipping malformed line: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Hour",
+    "1_week": "1 Week",
+    "24_hours": "24 Hours",
+    "custom": "Custom",
+    "permanent": "Permanent"
+  },
   "error": {
     "401": {
       "help": "You must be logged in to access this resource.",
@@ -545,7 +569,9 @@
       "message": "An unexpected server error occurred.",
       "title": "Server Error"
     },
-    "reports_load_error": "Error loading reports. Please try refreshing the page."
+    "ban_update_failed": "Failed to update ban duration. Please try again.",
+    "reports_load_error": "Error loading reports. Please try refreshing the page.",
+    "unban_failed": "Failed to unban IP address. Please try again."
   },
   "flash": {
     "easter_egg": "If you read this, it means that you're curious 👀",
@@ -589,6 +615,7 @@
       "configuration_name": "Configuration Name",
       "confirm_password": "Confirm Password",
       "current_password": "Current Password",
+      "custom_end_date": "Custom End Date",
       "custom_ssl_certificate": "Custom SSL Certificate",
       "custom_ssl_certificate_data": "Custom SSL Certificate Data (Base64/PEM)",
       "custom_ssl_key": "Custom SSL Key",
@@ -607,7 +634,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS Credential Items",
       "lets_encrypt_profile": "Let's Encrypt Profile",
       "license_key": "License Key",
+      "make_permanent": "Make Permanent",
       "name": "Name",
+      "new_duration": "New Duration",
       "new_password": "New Password",
       "optional": "(Optional)",
       "password": "Password",
@@ -632,9 +661,10 @@
       "config_name": "my-custom-config",
       "enter_username": "Enter username",
       "keywords": "Keywords",
+      "plugin_search": "Search for plugins...",
       "search": "Search...",
-      "select_service": "Select Service",
       "secret_token": "Secret Token",
+      "select_service": "Select Service",
       "username_example": "johndoe"
     },
     "validation": {
@@ -679,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Drag and drop your plugin archive here or click to select files.",
+      "confirm_cache_deletion_alert": "Are you sure you want to delete the selected cache file?",
+      "confirm_cache_deletion_alert_plural": "Are you sure you want to delete the selected cache files?",
       "confirm_configs_deletion_alert": "Are you sure you want to delete the selected custom configuration?",
       "confirm_configs_deletion_alert_plural": "Are you sure you want to delete the selected custom configurations?",
       "confirm_conversion_confirmation": "Are you sure you want to convert the selected services?",
@@ -695,7 +727,8 @@
       "reset_template_alert": "Are you sure you want to reset the current template settings and custom configurations?",
       "services_deletion_confirmation": "Are you sure you want to delete the selected services?",
       "unban_confirmation_alert": "Are you sure you want to unban the selected IP address?",
-      "unban_confirmation_alert_plural": "Are you sure you want to unban the selected IP addresses?"
+      "unban_confirmation_alert_plural": "Are you sure you want to unban the selected IP addresses?",
+      "update_duration_alert": "Select a new duration for the selected bans:"
     },
     "button": {
       "reset_template_confirm": "Reset Template Configuration"
@@ -719,7 +752,8 @@
       "job_history_count": "Last {{count}} executions of Job",
       "recovery_codes": "Recovery Codes",
       "reset_template_config": "Reset Template Configuration?",
-      "server_name_not_unique": "Server Name Is Not Unique"
+      "server_name_not_unique": "Server Name Is Not Unique",
+      "update_duration": "Update Ban Duration"
     }
   },
   "mode": {
@@ -753,6 +787,10 @@
     "misc": "Misc",
     "mode_selection": "Mode Selection",
     "more": "More...",
+    "plugin_activated": "Plugin Activated",
+    "plugin_activated_global": "Plugin Activated Globally",
+    "plugin_deactivated": "Plugin Deactivated",
+    "plugin_deactivated_global": "Plugin Deactivated Globally",
     "plugins": "Plugins",
     "plugins_pages": "Plugins Pages",
     "pro": "Pro",
@@ -869,6 +907,10 @@
       "sessions": "Sessions"
     }
   },
+  "reports": {
+    "security_incident": "Security Incident",
+    "security_report_data": "Security Report Data"
+  },
   "scope": {
     "all_services": "All Services",
     "global": "Global",
@@ -888,6 +930,7 @@
     "country": "Country",
     "created": "Created",
     "data": "Data",
+    "date": "Date",
     "empty": "No search panes available",
     "end_date": "End Date",
     "first_seen": "First Seen",
@@ -902,7 +945,6 @@
     "last_run": "Last Run State",
     "last_seen": "Last Seen",
     "last_update": "Last Update",
-    "loading": "Loading Search Panes...",
     "method": "Method",
     "next_24h": "Next 24 hours",
     "next_30d": "Next 30 days",
@@ -970,9 +1012,10 @@
   "status": {
     "admin_user_exists": "🧑‍🚀 An admin user already exists. Please proceed to the next step.",
     "blog_connection_fail": "Could not connect to the blog for news updates.",
-    "default_server": "default server",
+    "default_server": "Default Server",
     "down": "Down",
     "draft": "Draft",
+    "error_loading_bans": "Error loading bans. Please try refreshing the page.",
     "failed": "Failed",
     "loading": "Loading...",
     "loading_bans": "Loading bans...",
@@ -989,7 +1032,7 @@
     "loading_services": "Loading services...",
     "news_connection_error": "Could not connect to the blog for news updates.",
     "no": "No",
-    "no_data": "No data to show.",
+    "no_data": "No data",
     "no_history": "No history available.",
     "no_item": "No Item",
     "no_notifications": "No notifications to show.",
@@ -1045,6 +1088,7 @@
       "checksum": "Checksum",
       "country": "Country",
       "created": "Created",
+      "current_time_left": "Current Time Left",
       "data": "Data",
       "date": "Date",
       "description": "Description",
@@ -1064,6 +1108,7 @@
       "plugin": "Plugin",
       "reason": "Reason",
       "reload": "Reload",
+      "request_id": "Request ID",
       "scope": "Scope",
       "security_mode": "Security Mode",
       "server_name": "Server Name",
@@ -1074,8 +1119,8 @@
       "template": "Template",
       "time_left": "Time Left",
       "type": "Type",
-      "user_agent": "User-Agent",
       "url": "URL",
+      "user_agent": "User-Agent",
       "version": "Version"
     }
   },
@@ -1089,6 +1134,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "If the service is removed or restarted, your UI configuration will be lost.",
     "autoconf_disclaimer_detail": "This is because the service's method is 'autoconf', which is designed to prevent configuration conflicts.",
+    "ban_updated": "Ban duration updated successfully!",
     "body": {
       "ping_succeed": "Instances: {{instances}}"
     },
@@ -1097,7 +1143,8 @@
     "header": {
       "ping_failed": "Ping failed",
       "ping_succeed": "Ping successful"
-    }
+    },
+    "ip_unbanned": "IP address unbanned successfully!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Whether to automatically request a Let's Encrypt certificate.",
@@ -1105,6 +1152,7 @@
       "convert_service_to_draft": "Convert Service {{name}} to Draft",
       "convert_service_to_online": "Convert Service {{name}} to Online",
       "delete_config": "Delete Custom Config {{name}}",
+      "delete_file": "Delete Cache File: {{filename}}",
       "delete_instance": "Delete Instance {{hostname}}",
       "delete_plugin": "Delete Plugin {{name}}",
       "delete_service": "Delete Service {{name}}",
@@ -1138,6 +1186,7 @@
     "custom_ssl_cert_path": "Path to the custom SSL certificate file.",
     "custom_ssl_key_data": "The custom SSL private key data (PEM format or Base64 encoded).",
     "custom_ssl_key_path": "Path to the custom SSL private key file.",
+    "different_from_template": "Value differs from template default",
     "disabled_by_method": "Disabled: Managed via method '{{method}}'.",
     "disabled_db_readonly": "Disabled: The database is in read-only mode.",
     "disabled_draft": "Disabled: Service is in Draft mode.",
@@ -1274,6 +1323,7 @@
         "ip_address": "IP address that triggered the report",
         "method": "HTTP method of the reported request",
         "reason": "Reason why the report was generated",
+        "request_id": "The unique identifier for the request",
         "security_mode": "Security mode active when the report was generated",
         "select_all": "Select all Reports",
         "server_name": "Server name (vhost) that generated the report",

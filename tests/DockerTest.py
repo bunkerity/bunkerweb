@@ -1,3 +1,4 @@
+from re import escape
 from yaml import safe_load, dump
 from Test import Test
 from os.path import isdir, isfile
@@ -53,6 +54,7 @@ class DockerTest(Test):
                 data = safe_load(f.read())
             if data["services"]["bw-scheduler"]["environment"].get("AUTO_LETS_ENCRYPT", "no") == "yes":
                 data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
+                data["services"]["bw-scheduler"]["environment"]["LETS_ENCRYPT_MAX_RETRIES"] = "3"
             data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
             data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
             data["services"]["bw-scheduler"]["environment"]["USE_BUNKERNET"] = "no"
@@ -62,9 +64,9 @@ class DockerTest(Test):
             with open(compose, "w") as f:
                 f.write(dump(data))
             for ex_domain, test_domain in self._domains.items():
-                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.replace_in_files(test, escape(ex_domain), test_domain)
                 Test.rename(test, ex_domain, test_domain)
-            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
+            Test.replace_in_files(test, escape("example.com"), getenv("ROOT_DOMAIN"))
             setup = test + "/setup-docker.sh"
             if isfile(setup):
                 proc = run("sudo ./setup-docker.sh", cwd=test, shell=True)

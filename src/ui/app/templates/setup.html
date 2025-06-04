@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block page %}
     <!-- Content -->
     <div class="bg-light-subtle">
@@ -40,7 +45,7 @@
                                 <a role="button"
                                    class="btn btn-sm btn-outline-dark d-flex align-items-center h-100"
                                    aria-pressed="true"
-                                   href="https://panel.bunkerweb.io/order/support/?utm_campaign=self&utm_source=ui"
+                                   href="https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui"
                                    target="_blank"
                                    rel="noopener">
                                     <span class="bx bx-help-circle me-0 me-md-2"></span>
@@ -1320,4 +1325,13 @@
     </div>
 </div>
 <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/setup.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

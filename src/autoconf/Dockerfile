@@ -63,11 +63,11 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
   find core/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-  chmod 750 cli/main.py autoconf/main.py helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
+  chmod 750 cli/main.py autoconf/main.py autoconf/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.2-rc2"
+LABEL version="1.6.2-rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="autoconf"
 
@@ -79,4 +79,4 @@ USER autoconf:autoconf
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=60s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
 
-CMD [ "./main.py" ]
+CMD [ "./entrypoint.sh" ]

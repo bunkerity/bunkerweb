@@ -8,6 +8,7 @@
     "version": "版本：{{version}}"
   },
   "alert": {
+    "custom_end_date_required": "请选择一个自定义结束日期。",
     "important": "重要",
     "no_changes_detected": "未检测到任何更改。",
     "notice": "注意",
@@ -75,6 +76,7 @@
     "convert_services": "转换服务",
     "copy": "复制",
     "copy_codes": "复制代码",
+    "copy_raw": "复制原始数据",
     "copy_visible": "复制可见",
     "create_config": "创建自定义配置",
     "create_instance": "创建实例",
@@ -115,14 +117,21 @@
     "select_file": "选择文件",
     "select_page": "选择页面",
     "service": "服务",
+    "set_1h": "设置 1 小时",
+    "set_24h": "设置 24 小时",
+    "set_1w": "设置 1 周",
+    "set_permanent": "设置永久",
     "setup": "设置",
     "show": "显示",
     "stop": "停止",
     "submit": "提交",
     "subscribe": "订阅",
     "unban": "解禁",
+    "update_duration": "更新封禁期限",
     "update_key": "更新密钥",
     "upload_photo": "上传新照片",
+    "view_details": "查看详情",
+    "view_raw_data": "查看原始数据",
     "wipe_other_sessions": "清除其他会话"
   },
   "country": {
@@ -401,6 +410,14 @@
         "status": "{{core}} 核心 / {{pro}} PRO / {{external}} 外部",
         "title": "插件"
       },
+      "ram": {
+        "critical_high": "严重：系统内存即将耗尽！",
+        "good_high": "内存充足，适合生产环境",
+        "info_medium": "建议升级到 16GB+ 以用于生产环境",
+        "title": "系统内存",
+        "usage": "{{percent}}% 已使用",
+        "warning_low": "警告：内存不足可能影响性能"
+      },
       "services": {
         "status": "{{online}} 在线 / {{draft}} 草稿",
         "title": "服务"
@@ -524,6 +541,13 @@
     "news_fetch_fail": "获取新闻失败：",
     "skipping_malformed_line": "跳过格式错误的行：{{line}}"
   },
+  "duration": {
+    "1_hour": "1 小时",
+    "24_hours": "24 小时",
+    "1_week": "1 周",
+    "permanent": "永久",
+    "custom": "自定义"
+  },
   "error": {
     "401": {
       "help": "您必须登录才能访问此资源。",
@@ -545,7 +569,9 @@
       "message": "发生意外的服务器错误。",
       "title": "服务器错误"
     },
-    "reports_load_error": "加载报告时出错。请尝试刷新页面。"
+    "ban_update_failed": "更新封禁期限失败。请重试。",
+    "reports_load_error": "加载报告时出错。请尝试刷新页面。",
+    "unban_failed": "解禁 IP 地址失败。请重试。"
   },
   "flash": {
     "easter_egg": "如果你读到了这条信息，说明你很好奇 👀",
@@ -589,6 +615,7 @@
       "configuration_name": "配置名称",
       "confirm_password": "确认密码",
       "current_password": "当前密码",
+      "custom_end_date": "自定义结束日期",
       "custom_ssl_certificate": "自定义 SSL 证书",
       "custom_ssl_certificate_data": "自定义 SSL 证书数据 (Base64/PEM)",
       "custom_ssl_key": "自定义 SSL 密钥",
@@ -607,7 +634,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS 凭证项",
       "lets_encrypt_profile": "Let's Encrypt 配置文件",
       "license_key": "许可证密钥",
+      "make_permanent": "设为永久",
       "name": "名称",
+      "new_duration": "新期限",
       "new_password": "新密码",
       "optional": "（可选）",
       "password": "密码",
@@ -632,6 +661,7 @@
       "config_name": "我的自定义配置",
       "enter_username": "输入您的用户名",
       "keywords": "关键词...",
+      "plugin_search": "搜索插件...",
       "search": "搜索...",
       "select_service": "选择服务",
       "secret_token": "密钥",
@@ -679,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "将您的插件存档拖放到此处或单击以选择文件。",
+      "confirm_cache_deletion_alert": "您确定要删除选定的缓存文件吗？",
+      "confirm_cache_deletion_alert_plural": "您确定要删除选定的缓存文件吗？",
       "confirm_configs_deletion_alert": "您确定要删除选定的自定义配置吗？",
       "confirm_configs_deletion_alert_plural": "您确定要删除选定的自定义配置吗？",
       "confirm_conversion_confirmation": "您确定要转换选定的服务吗？",
@@ -695,7 +727,8 @@
       "reset_template_alert": "您确定要重置当前模板设置和自定义配置吗？",
       "services_deletion_confirmation": "您确定要删除选定的服务吗？",
       "unban_confirmation_alert": "您确定要解禁选定的 IP 地址吗？",
-      "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？"
+      "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？",
+      "update_duration_alert": "请为选定的封禁选择新的期限："
     },
     "button": {
       "reset_template_confirm": "重置模板配置"
@@ -719,7 +752,8 @@
       "job_history_count": "任务 {{count}} 次执行",
       "recovery_codes": "恢复代码",
       "reset_template_config": "重置模板配置？",
-      "server_name_not_unique": "服务器名称不是唯一的"
+      "server_name_not_unique": "服务器名称不是唯一的",
+      "update_duration": "更新封禁期限"
     }
   },
   "mode": {
@@ -753,6 +787,10 @@
     "misc": "杂项",
     "mode_selection": "模式选择",
     "more": "更多...",
+    "plugin_activated": "插件已激活",
+    "plugin_deactivated": "插件已停用",
+    "plugin_activated_global": "插件已全局激活",
+    "plugin_deactivated_global": "插件已全局停用",
     "plugins": "插件",
     "plugins_pages": "插件页面",
     "pro": "Pro",
@@ -869,6 +907,10 @@
       "sessions": "会话"
     }
   },
+  "reports": {
+    "security_incident": "安全事件",
+    "security_report_data": "安全报告数据"
+  },
   "scope": {
     "all_services": "所有服务",
     "global": "全局",
@@ -888,6 +930,7 @@
     "country": "国家/地区",
     "created": "创建时间",
     "data": "数据",
+    "date": "日期",
     "empty": "无可用搜索窗格",
     "end_date": "结束日期",
     "first_seen": "首次出现",
@@ -973,6 +1016,7 @@
     "default_server": "默认服务器",
     "down": "已停止",
     "draft": "草稿",
+    "error_loading_bans": "加载封禁时出错。请尝试刷新页面。",
     "failed": "失败",
     "loading": "加载中...",
     "loading_bans": "正在加载封禁...",
@@ -989,7 +1033,7 @@
     "loading_services": "正在加载服务...",
     "news_connection_error": "无法连接到博客获取新闻更新。",
     "no": "否",
-    "no_data": "无数据显示。",
+    "no_data": "无数据",
     "no_history": "无可用历史记录。",
     "no_item": "无项目",
     "no_notifications": "无通知显示。",
@@ -1045,6 +1089,7 @@
       "checksum": "校验和",
       "country": "国家/地区",
       "created": "创建时间",
+      "current_time_left": "当前剩余时间",
       "data": "数据",
       "date": "日期",
       "description": "描述",
@@ -1064,6 +1109,7 @@
       "plugin": "插件",
       "reason": "原因",
       "reload": "重新加载",
+      "request_id": "请求 ID",
       "scope": "范围",
       "security_mode": "安全模式",
       "server_name": "服务器名称",
@@ -1089,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "如果服务被移除或重启，您的 UI 配置将会丢失。",
     "autoconf_disclaimer_detail": "这是因为服务的创建方法是 'autoconf'，旨在防止配置冲突。",
+    "ban_updated": "封禁期限已成功更新！",
     "body": {
       "ping_succeed": "实例：{{instances}}"
     },
@@ -1097,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping 失败",
       "ping_succeed": "Ping 成功"
-    }
+    },
+    "ip_unbanned": "IP 地址已成功解禁！"
   },
   "tooltip": {
     "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",
@@ -1105,6 +1153,7 @@
       "convert_service_to_draft": "将服务 {{name}} 转换为草稿",
       "convert_service_to_online": "将服务 {{name}} 转换为在线",
       "delete_config": "删除自定义配置 {{name}}",
+      "delete_file": "删除缓存文件：{{filename}}",
       "delete_instance": "删除实例 {{hostname}}",
       "delete_plugin": "删除插件 {{name}}",
       "delete_service": "删除服务 {{name}}",
@@ -1138,6 +1187,7 @@
     "custom_ssl_cert_path": "自定义 SSL 证书文件的路径。",
     "custom_ssl_key_data": "自定义 SSL 私钥数据（PEM 格式或 Base64 编码）。",
     "custom_ssl_key_path": "自定义 SSL 私钥文件的路径。",
+    "different_from_template": "值与模板默认值不同",
     "disabled_by_method": "已禁用：通过方法 '{{method}}' 管理。",
     "disabled_db_readonly": "已禁用：数据库处于只读模式。",
     "disabled_draft": "已禁用：服务处于草稿模式。",
@@ -1274,6 +1324,7 @@
         "ip_address": "触发报告的 IP 地址",
         "method": "报告的请求的 HTTP 方法",
         "reason": "生成报告的原因",
+        "request_id": "请求的唯一标识符",
         "security_mode": "生成报告时活动的安全模式",
         "select_all": "选择所有报告",
         "server_name": "生成报告的服务器名称 (vhost)",

@@ -2,9 +2,10 @@
 
 from contextlib import suppress
 from os import getenv
+from re import compile as re_compile
 from time import sleep
 from traceback import format_exc
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from threading import Thread, Lock
 
 from kubernetes import client, config, watch
@@ -30,6 +31,7 @@ class IngressController(Controller):
 
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
+        self.__ip_pattern = re_compile(r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
 
         self.__use_fqdn = getenv("USE_KUBERNETES_FQDN", "yes").lower().strip() == "yes"
         self._logger.info(f"Using Pod {'FQDN' if self.__use_fqdn else 'IP'} as hostname")
@@ -46,6 +48,9 @@ class IngressController(Controller):
             self._logger.warning(f"Unsupported service protocol {self.__service_protocol}")
             self.__service_protocol = "http"
         self._logger.info(f"Using service protocol: {self.__service_protocol}")
+
+        self.__service_name = getenv("BUNKERWEB_SERVICE_NAME", "bunkerweb")
+        self.__namespace = getenv("BUNKERWEB_NAMESPACE", "bunkerweb")
 
     def _get_controller_instances(self) -> list:
         instances = []
@@ -443,8 +448,104 @@ class IngressController(Controller):
                     self._logger.warning("Got exception, retrying in 10 seconds ...")
                     sleep(10)
 
+    def __get_loadbalancer_ip(self, name: str, namespace: str) -> Optional[str]:
+        try:
+            if not name or not namespace:
+                self._logger.warning("Service name or namespace is empty, cannot retrieve LoadBalancer IP")
+                return None
+
+            service = self.__corev1.read_namespaced_service(name=name, namespace=namespace)
+
+            if not service.status:
+                self._logger.warning(f"Service {name} in {namespace} has no status")
+                return None
+
+            if not service.status.load_balancer:
+                self._logger.warning(f"Service {name} in {namespace} has no LoadBalancer status")
+                return None
+
+            ingress_list = service.status.load_balancer.ingress
+            if not ingress_list:
+                self._logger.warning(f"No ingress entries found in LoadBalancer status for service {name} in {namespace}")
+                return None
+
+            for ingress_entry in ingress_list:
+                if ingress_entry.ip:
+                    self._logger.debug(f"Found LoadBalancer IP {ingress_entry.ip} for service {name} in {namespace}")
+                    return ingress_entry.ip
+                elif ingress_entry.hostname:
+                    self._logger.debug(f"Found LoadBalancer hostname {ingress_entry.hostname} for service {name} in {namespace}")
+                    return ingress_entry.hostname
+
+            self._logger.warning(f"No IP or hostname found in LoadBalancer ingress entries for service {name} in {namespace}")
+
+        except ApiException as e:
+            if e.status == 404:
+                self._logger.warning(f"Service {name} not found in namespace {namespace}")
+            else:
+                self._logger.error(f"API error retrieving service {name} in {namespace}: {e.status} - {e.reason}")
+                self._logger.debug(format_exc())
+        except Exception as e:
+            self._logger.error(f"Unexpected error retrieving LoadBalancer IP for service {name} in {namespace}: {e}")
+            self._logger.debug(format_exc())
+
+        return None
+
+    def __patch_ingress_status(self, ingress, ip: str):
+        if not ip:
+            self._logger.warning("Cannot patch ingress without IP address")
+            return False
+
+        if not ingress or not ingress.metadata:
+            self._logger.error("Invalid ingress object provided for status patching")
+            return False
+
+        ingress_name = ingress.metadata.name
+        ingress_namespace = ingress.metadata.namespace
+
+        if not ingress_name or not ingress_namespace:
+            self._logger.error("Ingress name or namespace is empty, cannot patch status")
+            return False
+
+        # Determine if IP is an actual IP address or hostname
+        patch_body = {"status": {"loadBalancer": {"ingress": []}}}
+        ip_match = self.__ip_pattern.match(ip)
+
+        if ip_match:
+            patch_body["status"]["loadBalancer"]["ingress"].append({"ip": ip})
+        else:
+            patch_body["status"]["loadBalancer"]["ingress"].append({"hostname": ip})
+
+        try:
+            self.__networkingv1.patch_namespaced_ingress_status(name=ingress_name, namespace=ingress_namespace, body=patch_body)
+            self._logger.info(
+                f"Successfully patched status of ingress {ingress_name} in namespace {ingress_namespace} with {'IP' if ip_match else 'hostname'} {ip}"
+            )
+            return True
+        except ApiException as e:
+            if e.status == 404:
+                self._logger.warning(f"Ingress {ingress_name} not found in namespace {ingress_namespace}, skipping status patch")
+            elif e.status == 403:
+                self._logger.warning(f"Insufficient permissions to patch ingress {ingress_name} status in namespace {ingress_namespace}")
+            elif e.status == 422:
+                self._logger.error(f"Invalid patch data for ingress {ingress_name} in namespace {ingress_namespace}: {e.reason}")
+                self._logger.debug(f"Patch body was: {patch_body}")
+            else:
+                self._logger.error(f"API error patching ingress {ingress_name} in namespace {ingress_namespace}: {e.status} - {e.reason}")
+            self._logger.debug(format_exc())
+            return False
+        except Exception as e:
+            self._logger.error(f"Unexpected error patching ingress {ingress_name} in namespace {ingress_namespace}: {e}")
+            self._logger.debug(format_exc())
+            return False
+
     def apply_config(self) -> bool:
-        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config)
+        result = self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded, extra_config=self._extra_config)
+        if result:
+            ip = self.__get_loadbalancer_ip(self.__service_name, self.__namespace)
+            for ingress in self._get_controller_services():
+                self.__patch_ingress_status(ingress, ip)
+        return result
 
     def process_events(self):
         self._set_autoconf_load_db()

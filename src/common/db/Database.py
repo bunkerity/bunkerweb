@@ -459,7 +459,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.2-rc2"
+                return "1.6.2-rc3"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -491,7 +491,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.2-rc2",
+            "version": "1.6.2-rc3",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -1400,7 +1400,7 @@ class Database:
                                 changed_plugins.add(plugin_id)
 
                         # Handle special SERVER_NAME case
-                        if key == "SERVER_NAME":
+                        if key in ("SERVER_NAME", f"{db_service_config.service_id}_SERVER_NAME"):
                             changed_services = True
                 except Exception as e:
                     self.logger.warning(f"Error processing service config {db_service_config.setting_id}: {e}")
@@ -1557,6 +1557,8 @@ class Database:
                                 local_to_update.append(
                                     {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}}
                                 )
+                                if key == "SERVER_NAME":
+                                    local_changed_services = True
                             elif (service_setting["value"] != value and method in (service_setting["method"], "autoconf")) or (
                                 method == "autoconf" and service_setting["method"] != "autoconf"
                             ):
@@ -1580,6 +1582,8 @@ class Database:
                                         {"model": Services, "filter": {"id": server_name}, "values": {"last_update": datetime.now().astimezone()}},
                                     ]
                                 )
+                                if key == "SERVER_NAME":
+                                    local_changed_services = True
 
                         return local_to_put, local_to_update, local_to_delete, local_changed_plugins, local_changed_services
 
@@ -2162,7 +2166,11 @@ class Database:
                 query = session.query(Settings).with_entities(Settings.id, Settings.default).filter(Settings.multiple.in_(multiple.keys()))
 
                 for setting in query:
-                    for window, suffixes in multiple[multiple_groups[setting.id]].items():
+                    group_key = multiple_groups.get(setting.id)
+                    if group_key is None or group_key not in multiple:
+                        continue
+
+                    for window, suffixes in multiple[group_key].items():
                         template = templates.get(window, "") or templates.get("global", "")
                         for suffix in suffixes:
                             if window == "global" or service:
@@ -2455,8 +2463,10 @@ class Database:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
+            session.query(Jobs_cache).filter_by(**filters).delete(synchronize_session=False)
+
             try:
-                session.query(Jobs_cache).filter_by(**filters).delete()
+                session.commit()
             except BaseException as e:
                 return str(e)
 

@@ -95,7 +95,7 @@ jobs:
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -108,7 +108,7 @@ jobs:
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -134,11 +134,12 @@ jobs:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
       - name: Docker Scout Analysis
         if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
-        uses: docker/scout-action@381b657c498a4d287752e7f2cfb2b41823f566d9 # v1.17.1
+        uses: docker/scout-action@aceeb83b88f2ae54376891227858dda7af647183 # v1.18.1
         with:
           command: cves,recommendations
           image: local/${{ inputs.IMAGE }}
           only-fixed: true
+          only-package-types: apk,pypi
           exit-code: true
       # Push image
       - name: Push image

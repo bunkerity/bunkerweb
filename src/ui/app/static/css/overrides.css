@@ -1180,11 +1180,24 @@ div.dtsp-panesContainer
   z-index: 2;
   margin: 0 !important;
   padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
-  transition: none !important;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease !important;
+  border-radius: 0.25rem;
+  color: #ff7f50 !important;
 }
 
 span.cursor-pointer ~ .reset-setting {
   right: 3rem !important;
+}
+
+/* Show reset button on parent container hover */
+.form-floating:hover .reset-setting:not(.text-muted),
+.form-check:hover .reset-setting:not(.text-muted) {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Adjust position when near validation feedback */
@@ -1195,29 +1208,145 @@ span.cursor-pointer ~ .reset-setting {
 .reset-setting.text-muted {
   cursor: not-allowed;
   pointer-events: none;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
-.reset-setting:hover {
+.reset-setting:hover:not(.text-muted) {
   transform: translateY(-50%) scale(1.05) !important;
-  transition: none !important;
+  color: #ff4500 !important;
 }
 
-/* Add more space for select arrows */
+/* Add more space for select arrows and reset button */
 .form-select.plugin-setting,
 .form-select.plugin-setting:focus {
-  background-position: right 2.25rem center;
+  background-position: right 0.75rem center;
+  padding-right: 4rem !important;
+  transition: background-position 0.2s ease;
+}
+
+/* Move arrow when reset button is visible (on hover) */
+.form-floating:hover .form-select.plugin-setting:not(.text-muted) {
+  background-position: right 3rem center;
 }
 
 .was-validated .form-select.plugin-setting:valid,
 .form-select.plugin-setting.is-valid {
   background-position:
-    right 2.25rem center,
-    center right 3.9rem;
+    right 0.75rem center,
+    center right 1.5rem;
+  padding-right: 4rem !important;
+  transition: background-position 0.2s ease;
+}
+
+/* Move arrow and validation icon when reset button is visible (on hover) */
+.form-floating:hover
+  .was-validated
+  .form-select.plugin-setting:valid:not(.text-muted),
+.form-floating:hover .form-select.plugin-setting.is-valid:not(.text-muted) {
+  background-position:
+    right 3rem center,
+    center right 4.5rem;
+}
+
+/* Adjust input text padding to avoid overlap with reset button */
+.form-control.plugin-setting {
+  padding-right: 3.5rem !important;
+}
+
+.form-check .form-check-label {
+  padding-right: 3rem !important;
 }
 
 .was-validated .form-check-input:valid:checked,
 .form-check-input.is-valid:checked {
   background-color: #0b354a;
+}
+
+#data-notifications-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+}
+#notifications-toast-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.newsletter-signup {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Plugin navigation item styles */
+.plugin-navigation-item {
+  border-left: 3px solid transparent;
+  transition: all 0.25s ease;
+  margin-bottom: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.plugin-navigation-item.active {
+  border-left-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+  box-shadow: 0 2px 6px rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.plugin-navigation-item:hover:not(.active) {
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  border-left-color: rgba(var(--bs-primary-rgb), 0.4);
+}
+
+.plugin-navigation-item .step-number {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.plugin-navigation-item.active .step-number {
+  transform: scale(1.1);
+}
+
+.plugin-navigation-item:hover .step-number:not(.active) {
+  transform: scale(1.05);
+}
+
+.plugin-navigation-item .step-details {
+  transition: all 0.25s ease;
+}
+
+.plugin-navigation-item.active .step-details .fw-bold {
+  color: var(--bs-primary) !important;
+}
+
+.plugin-navigation-item small.text-muted {
+  transition: opacity 0.2s ease;
+  opacity: 0.7;
+}
+
+.plugin-navigation-item:hover small.text-muted,
+.plugin-navigation-item.active small.text-muted {
+  opacity: 1;
+}
+
+/* Fade effect for plugin tab panes */
+.plugin-tab-pane {
+  opacity: 0;
+  transition: opacity 0.2s;
+  display: none;
+}
+.plugin-tab-pane.show {
+  display: block;
+}
+.plugin-tab-pane.fade-in {
+  opacity: 1;
 }
 
 /*
@@ -1705,4 +1834,13 @@ html.dark-style div.dts div.dataTables_scrollBody table {
 .dark-style .list-group-item.active:focus {
   background-color: #0a4b69 !important;
   color: #fff !important;
+}
+
+/* Dark mode reset button styling */
+.dark-style .reset-setting {
+  color: #ff7f50 !important;
+}
+
+.dark-style .reset-setting:hover:not(.text-muted) {
+  color: #ff4500 !important;
 }

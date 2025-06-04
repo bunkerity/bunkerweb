@@ -1,4 +1,28 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <!-- Flatpickr -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.css') }}"
+          nonce="{{ style_nonce }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.css') }}"
+          nonce="{{ style_nonce }}" />
+    {% if theme == 'dark' %}
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='libs/flatpickr/themes/airbnb.dark.css') }}"
+              nonce="{{ style_nonce }}" />
+    {% endif %}
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
@@ -195,6 +219,99 @@
                 </div>
             </div>
         </div>
+        <div class="modal modal-lg fade"
+             id="modal-update-duration"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.update_duration">Update Ban Duration</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <form action="{{ url_for("bans") }}/update_duration" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden"
+                                   id="selected-ips-input-update-duration"
+                                   name="updates"
+                                   value="" />
+                            <div class="alert alert-info text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.update_duration_alert">
+                                Select a new duration for the selected bans:
+                            </div>
+                            <ul id="selected-ips-update-duration" class="list-group w-100 mb-3">
+                            </ul>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="duration-select"
+                                           class="form-label"
+                                           data-i18n="form.label.new_duration">New Duration</label>
+                                    <select id="duration-select" name="duration" class="form-select" required>
+                                        <option value="1h" data-i18n="duration.1_hour">1 Hour</option>
+                                        <option value="24h" data-i18n="duration.24_hours">24 Hours</option>
+                                        <option value="1w" data-i18n="duration.1_week">1 Week</option>
+                                        <option value="permanent" data-i18n="duration.permanent">Permanent</option>
+                                        <option value="custom" data-i18n="duration.custom">Custom</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="custom-duration-fields"
+                                 class="row g-3 mt-2"
+                                 style="display: none">
+                                <div class="col-12">
+                                    <label for="custom-end-date"
+                                           class="form-label"
+                                           data-i18n="form.label.custom_end_date">Custom End Date</label>
+                                    <input type="flatpickr-datetime-update"
+                                           id="custom-end-date"
+                                           name="custom_end_date"
+                                           class="form-control"
+                                           placeholder="Select end date and time" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit"
+                                    class="btn btn-warning me-2"
+                                    data-i18n="button.update_duration">Update Duration</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     {% endif %}
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/flatpickr/flatpickr.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/flatpickr/plugins/minMaxTimePlugin.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/bans.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

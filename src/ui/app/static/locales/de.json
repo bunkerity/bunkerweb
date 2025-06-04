@@ -8,6 +8,7 @@
     "version": "Version: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Bitte wählen Sie ein benutzerdefiniertes Enddatum.",
     "important": "Wichtig",
     "no_changes_detected": "Keine Änderungen festgestellt.",
     "notice": "Hinweis",
@@ -75,6 +76,7 @@
     "convert_services": "Dienste konvertieren",
     "copy": "Kopieren",
     "copy_codes": "Codes kopieren",
+    "copy_raw": "Rohdaten kopieren",
     "copy_visible": "Sichtbare kopieren",
     "create_config": "Benutzerdefinierte Konfig. erstellen",
     "create_instance": "Instanz erstellen",
@@ -115,14 +117,21 @@
     "select_file": "Datei auswählen",
     "select_page": "Seite auswählen",
     "service": "Dienst",
+    "set_1h": "1 Stunde einstellen",
+    "set_24h": "24 Stunden einstellen",
+    "set_1w": "1 Woche einstellen",
+    "set_permanent": "Permanent einstellen",
     "setup": "Einrichten",
     "show": "Anzeigen",
     "stop": "Stoppen",
     "submit": "Senden",
     "subscribe": "Abonnieren",
     "unban": "Entsperren",
+    "update_duration": "Sperrdauer aktualisieren",
     "update_key": "Schlüssel aktualisieren",
     "upload_photo": "Neues Foto hochladen",
+    "view_details": "Details anzeigen",
+    "view_raw_data": "Rohdaten anzeigen",
     "wipe_other_sessions": "Andere Sitzungen löschen"
   },
   "country": {
@@ -401,6 +410,14 @@
         "status": "{{core}} Core / {{pro}} PRO / {{external}} Extern",
         "title": "Plugins"
       },
+      "ram": {
+        "critical_high": "Kritisch: Das System hat fast keinen Speicher mehr!",
+        "good_high": "Ausgezeichneter Speicher für Produktionsumgebungen",
+        "info_medium": "Für den Produktionseinsatz wird ein Upgrade auf 16GB+ empfohlen",
+        "title": "System-RAM",
+        "usage": "{{percent}}% verwendet",
+        "warning_low": "Warnung: Wenig Speicher kann die Leistung beeinträchtigen"
+      },
       "services": {
         "status": "{{online}} online / {{draft}} Entwurf",
         "title": "Dienste"
@@ -524,6 +541,13 @@
     "news_fetch_fail": "Fehler beim Abrufen der Nachrichten:",
     "skipping_malformed_line": "Überspringe fehlerhafte Zeile: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Stunde",
+    "24_hours": "24 Stunden",
+    "1_week": "1 Woche",
+    "permanent": "Permanent",
+    "custom": "Benutzerdefiniert"
+  },
   "error": {
     "401": {
       "help": "Sie müssen angemeldet sein, um auf diese Ressource zuzugreifen.",
@@ -545,7 +569,9 @@
       "message": "Ein unerwarteter Serverfehler ist aufgetreten.",
       "title": "Serverfehler"
     },
-    "reports_load_error": "Fehler beim Laden der Berichte. Bitte versuchen Sie, die Seite neu zu laden."
+    "ban_update_failed": "Fehler beim Aktualisieren der Sperrdauer. Bitte versuchen Sie es erneut.",
+    "reports_load_error": "Fehler beim Laden der Berichte. Bitte versuchen Sie, die Seite neu zu laden.",
+    "unban_failed": "Fehler beim Entsperren der IP-Adresse. Bitte versuchen Sie es erneut."
   },
   "flash": {
     "easter_egg": "Wenn du das liest, bist du neugierig 👀",
@@ -589,6 +615,7 @@
       "configuration_name": "Konfigurationsname",
       "confirm_password": "Passwort bestätigen",
       "current_password": "Aktuelles Passwort",
+      "custom_end_date": "Benutzerdefiniertes Enddatum",
       "custom_ssl_certificate": "Benutzerdefiniertes SSL-Zertifikat",
       "custom_ssl_certificate_data": "Benutzerdefinierte SSL-Zertifikatsdaten (Base64/PEM)",
       "custom_ssl_key": "Benutzerdefinierter SSL-Schlüssel",
@@ -607,7 +634,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS-Anmeldeinformationen",
       "lets_encrypt_profile": "Let's Encrypt-Profil",
       "license_key": "Lizenzschlüssel",
+      "make_permanent": "Dauerhaft machen",
       "name": "Name",
+      "new_duration": "Neue Dauer",
       "new_password": "Neues Passwort",
       "optional": "(Optional)",
       "password": "Passwort",
@@ -632,6 +661,7 @@
       "config_name": "meine-benutzerdefinierte-konfig",
       "enter_username": "Benutzernamen eingeben",
       "keywords": "Schlüsselwörter...",
+      "plugin_search": "Plugins suchen...",
       "search": "Suchen...",
       "select_service": "Dienst auswählen",
       "secret_token": "Geheimer Token",
@@ -679,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Ziehen Sie Ihr Plugin-Archiv hierher oder klicken Sie, um Dateien auszuwählen.",
+      "confirm_cache_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte Cache-Datei löschen möchten?",
+      "confirm_cache_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten Cache-Dateien löschen möchten?",
       "confirm_configs_deletion_alert": "Sind Sie sicher, dass Sie die ausgewählte benutzerdefinierte Konfiguration löschen möchten?",
       "confirm_configs_deletion_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten benutzerdefinierten Konfigurationen löschen möchten?",
       "confirm_conversion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste konvertieren möchten?",
@@ -695,7 +727,8 @@
       "reset_template_alert": "Sind Sie sicher, dass Sie die aktuellen Vorlageneinstellungen und benutzerdefinierten Konfigurationen zurücksetzen möchten?",
       "services_deletion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste löschen möchten?",
       "unban_confirmation_alert": "Sind Sie sicher, dass Sie die Sperre für die ausgewählte IP-Adresse aufheben möchten?",
-      "unban_confirmation_alert_plural": "Sind Sie sicher, dass Sie die Sperre für die ausgewählten IP-Adressen aufheben möchten?"
+      "unban_confirmation_alert_plural": "Sind Sie sicher, dass Sie die Sperre für die ausgewählten IP-Adressen aufheben möchten?",
+      "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:"
     },
     "button": {
       "reset_template_confirm": "Vorlagenkonfiguration zurücksetzen"
@@ -719,7 +752,8 @@
       "job_history_count": "Letzte {{count}} Ausführungen von Auftrag",
       "recovery_codes": "Wiederherstellungscodes",
       "reset_template_config": "Vorlagenkonfiguration zurücksetzen?",
-      "server_name_not_unique": "Servername ist nicht eindeutig"
+      "server_name_not_unique": "Servername ist nicht eindeutig",
+      "update_duration": "Sperrdauer aktualisieren"
     }
   },
   "mode": {
@@ -753,6 +787,10 @@
     "misc": "Verschiedenes",
     "mode_selection": "Modusauswahl",
     "more": "Mehr...",
+    "plugin_activated": "Plugin aktiviert",
+    "plugin_deactivated": "Plugin deaktiviert",
+    "plugin_activated_global": "Plugin global aktiviert",
+    "plugin_deactivated_global": "Plugin global deaktiviert",
     "plugins": "Plugins",
     "plugins_pages": "Plugin-Seiten",
     "pro": "Pro",
@@ -869,6 +907,10 @@
       "sessions": "Sitzungen"
     }
   },
+  "reports": {
+    "security_incident": "Sicherheitsvorfall",
+    "security_report_data": "Daten des Sicherheitsberichts"
+  },
   "scope": {
     "all_services": "Alle Dienste",
     "global": "Global",
@@ -888,6 +930,7 @@
     "country": "Land",
     "created": "Erstellt",
     "data": "Daten",
+    "date": "Datum",
     "empty": "Keine Suchbereiche verfügbar",
     "end_date": "Enddatum",
     "first_seen": "Zuerst gesehen",
@@ -973,6 +1016,7 @@
     "default_server": "Standardserver",
     "down": "Inaktiv",
     "draft": "Entwurf",
+    "error_loading_bans": "Fehler beim Laden der Sperren. Bitte versuchen Sie, die Seite neu zu laden.",
     "failed": "Fehlgeschlagen",
     "loading": "Laden...",
     "loading_bans": "Sperren werden geladen...",
@@ -989,7 +1033,7 @@
     "loading_services": "Dienste werden geladen...",
     "news_connection_error": "Verbindung zum Blog für Nachrichten konnte nicht hergestellt werden.",
     "no": "Nein",
-    "no_data": "Keine Daten zum Anzeigen.",
+    "no_data": "Keine Daten",
     "no_history": "Kein Verlauf verfügbar.",
     "no_item": "Kein Element",
     "no_notifications": "Keine Benachrichtigungen zum Anzeigen.",
@@ -1045,6 +1089,7 @@
       "checksum": "Prüfsumme",
       "country": "Land",
       "created": "Erstellt",
+      "current_time_left": "Aktuelle verbleibende Zeit",
       "data": "Daten",
       "date": "Datum",
       "description": "Beschreibung",
@@ -1064,6 +1109,7 @@
       "plugin": "Plugin",
       "reason": "Grund",
       "reload": "Neu laden",
+      "request_id": "Anfrage-ID",
       "scope": "Geltungsbereich",
       "security_mode": "Sicherheitsmodus",
       "server_name": "Servername",
@@ -1089,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Wenn der Dienst entfernt oder neu gestartet wird, geht Ihre UI-Konfiguration verloren.",
     "autoconf_disclaimer_detail": "Dies liegt daran, dass die Methode des Dienstes 'autoconf' ist, die darauf ausgelegt ist, Konfigurationskonflikte zu verhindern.",
+    "ban_updated": "Sperrdauer erfolgreich aktualisiert!",
     "body": {
       "ping_succeed": "Instanzen: {{instances}}"
     },
@@ -1097,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping fehlgeschlagen",
       "ping_succeed": "Ping erfolgreich"
-    }
+    },
+    "ip_unbanned": "IP-Adresse erfolgreich entsperrt!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Ob automatisch ein Let's Encrypt-Zertifikat angefordert werden soll.",
@@ -1105,6 +1153,7 @@
       "convert_service_to_draft": "Dienst {{name}} in Entwurf konvertieren",
       "convert_service_to_online": "Dienst {{name}} in Online konvertieren",
       "delete_config": "Benutzerdefinierte Konfiguration {{name}} löschen",
+      "delete_file": "Cache-Datei löschen: {{filename}}",
       "delete_instance": "Instanz {{hostname}} löschen",
       "delete_plugin": "Plugin {{name}} löschen",
       "delete_service": "Dienst {{name}} löschen",
@@ -1138,6 +1187,7 @@
     "custom_ssl_cert_path": "Pfad zur benutzerdefinierten SSL-Zertifikatsdatei.",
     "custom_ssl_key_data": "Die benutzerdefinierten SSL-Privatschlüsseldaten (PEM-Format oder Base64-kodiert).",
     "custom_ssl_key_path": "Pfad zur benutzerdefinierten SSL-Privatschlüsselsdatei.",
+    "different_from_template": "Wert weicht vom Vorlagenstandard ab",
     "disabled_by_method": "Deaktiviert: Verwaltet über Methode '{{method}}'.",
     "disabled_db_readonly": "Deaktiviert: Die Datenbank befindet sich im schreibgeschützten Modus.",
     "disabled_draft": "Deaktiviert: Der Dienst befindet sich im Entwurfsmodus.",
@@ -1274,6 +1324,7 @@
         "ip_address": "IP-Adresse, die den Bericht ausgelöst hat",
         "method": "HTTP-Methode der gemeldeten Anfrage",
         "reason": "Grund für die Erstellung des Berichts",
+        "request_id": "Die eindeutige Kennung für die Anfrage",
         "security_mode": "Sicherheitsmodus, der bei der Berichtserstellung aktiv war",
         "select_all": "Alle Berichte auswählen",
         "server_name": "Servername (vhost), der den Bericht erstellt hat",

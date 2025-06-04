@@ -20,7 +20,7 @@ from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from logger import setup_logger  # type: ignore
 
-from common_utils import get_redis_client  # type: ignore
+from common_utils import get_redis_client, handle_docker_secrets  # type: ignore
 
 
 def format_remaining_time(seconds):
@@ -82,6 +82,14 @@ class CLI(ApiCaller):
 
     def __init__(self):
         self.__logger = setup_logger("CLI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+
+        # Handle Docker secrets first
+        docker_secrets = handle_docker_secrets()
+        if docker_secrets:
+            self.__logger.info(f"Loaded {len(docker_secrets)} Docker secrets")
+            # Update environment with secrets
+            environ.update(docker_secrets)
+
         variables_path = Path(sep, "etc", "nginx", "variables.env")
         self.__variables = {}
         self.__db = None
@@ -452,7 +460,7 @@ class CLI(ApiCaller):
 
         return True, plugins_str
 
-    def custom(self, plugin_id: str, command: str, *args: str, debug: bool = False) -> Tuple[bool, str]:
+    def custom(self, plugin_id: str, command: str, debug: bool = False, extra_args: Optional[list] = None) -> Tuple[bool, str]:
         if not self.__db:
             return False, self.__format_error("This command can only be executed on the scheduler")
 
@@ -484,8 +492,8 @@ class CLI(ApiCaller):
             )
 
         cmd = [command_path.as_posix()]
-        if args:
-            cmd.extend(args)
+        if extra_args:
+            cmd.extend(extra_args)
 
         self.__logger.debug(f"Executing command {' '.join(cmd)}")
 

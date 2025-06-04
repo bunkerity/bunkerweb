@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block page %}
     <!-- Content -->
     <div class="position-fixed top-0 end-0 m-5 me-7" style="z-index: 1030">

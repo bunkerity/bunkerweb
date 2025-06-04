@@ -1,6 +1,34 @@
 # Changelog
 
-## v1.6.2-rc2 - ????/??/??
+## v1.6.2-rc3 - ????/??/??
+
+- [BUGFIX] Refactor CLI command handling to support additional arguments
+- [DOCS] Update the documentation about the `all-in-one` image to include the new features and improvements, also move it to its own section
+- [FEATURE] Add request ID to error pages, logs and display it in UI reports for easier tracking of issues
+- [FEATURE] Add support for Docker secrets in all services
+- [FEATURE] Add more data to ModSecurity reports
+- [FEATURE] Add new `LETS_ENCRYPT_MAX_RETRIES` setting to the `Let's Encrypt` plugin to configure how many times certificate generation should be retried with Let's Encrypt (default is 0, meaning no retries)
+- [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
+- [ALL-IN-ONE] Fully integrate Redis in the all-in-one image (activated by default)
+- [UI] Add clear notifications feature to both UI and backend for improved notification management
+- [UI] Improve plugin navigation by displaying plugins as a vertical list on the left side of the card, replacing the dropdown combobox
+- [UI] Display a small "enabled/disabled" icon next to each plugin name in the plugin sidebar and menu to indicate whether the plugin is active (e.g., show if Reverse Proxy is enabled)
+- [UI] Update QR code generation to use PilImage and output JPEG format for improved compatibility
+- [UI] Add a modal to update ban durations, with support for localization
+- [UI] Add system memory usage monitoring to the home page dashboard for real-time insights
+- [UI] Add a more robust system when showing reports and bans data to avoid potential XSS vulnerabilities
+- [UI] Refactor the data display on the report page for a more user-friendly experience
+- [UI] Add quick actions for bans back
+- [UI] Enhance reset button visibility and tooltip handling across various settings templates
+- [UI] Add the possibility to delete cache files
+- [MISC] Refactor template rendering for improved performance and efficiency
+- [LINUX] Provide an interactive installer script for BunkerWeb that guides users through setup options
+- [DEPS] Updated NGINX version to 1.28.0 (except for Fedora as it is not yet available)
+- [CONTRIBUTION] Thank you @lenglet-k for your contribution to the Ingress controller
+- [CONTRIBUTION] Thank you @kovacs-andras for your contribution to the PRO urls in the documentation
+- [CONTRIBUTION] Thank you @mevenG for your contribution to the README file
+
+## v1.6.2-rc2 - 2025/05/19
 
 - [BUGFIX] Fix draft services deletion when editing the global config in the web UI
 - [BUGFIX] Enhance the `Let's Encrypt` plugin's Cloudflare Provider with default values and validation for credentials to avoid having to set all of them all the time (`api_token` or `email` and `api_key`)

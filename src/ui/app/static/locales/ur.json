@@ -8,6 +8,7 @@
     "version": "ورژن: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "براہ کرم ایک حسب ضرورت اختتامی تاریخ منتخب کریں۔",
     "important": "اہم",
     "no_changes_detected": "کوئی تبدیلی نہیں ملی۔",
     "notice": "نوٹس",
@@ -75,6 +76,7 @@
     "convert_services": "خدمات تبدیل کریں",
     "copy": "کاپی کریں",
     "copy_codes": "کوڈز کاپی کریں",
+    "copy_raw": "خام ڈیٹا کاپی کریں",
     "copy_visible": "نظر آنے والے کاپی کریں",
     "create_config": "حسب ضرورت کنفیگریشن بنائیں",
     "create_instance": "انسٹینس بنائیں",
@@ -115,14 +117,21 @@
     "select_file": "فائل منتخب کریں",
     "select_page": "صفحہ منتخب کریں",
     "service": "سروس",
+    "set_1h": "1 گھنٹہ سیٹ کریں",
+    "set_24h": "24 گھنٹے سیٹ کریں",
+    "set_1w": "1 ہفتہ سیٹ کریں",
+    "set_permanent": "مستقل سیٹ کریں",
     "setup": "سیٹ اپ",
     "show": "دکھائیں",
     "stop": "روکیں",
     "submit": "جمع کرائیں",
     "subscribe": "سبسکرائب کریں",
     "unban": "پابندی ہٹائیں",
+    "update_duration": "پابندی کی مدت اپ ڈیٹ کریں",
     "update_key": "کلید اپ ڈیٹ کریں",
     "upload_photo": "نئی تصویر اپ لوڈ کریں",
+    "view_details": "تفصیلات دیکھیں",
+    "view_raw_data": "خام ڈیٹا دیکھیں",
     "wipe_other_sessions": "دیگر سیشنز صاف کریں"
   },
   "country": {
@@ -401,6 +410,14 @@
         "status": "{{core}} کور / {{pro}} پرو / {{external}} بیرونی",
         "title": "پلگ انز"
       },
+      "ram": {
+        "critical_high": "انتہائی سنگین: سسٹم کی میموری ختم ہو رہی ہے!",
+        "good_high": "پیداواری ماحول کے لیے بہترین میموری۔",
+        "info_medium": "پیداواری استعمال کے لیے 16GB+ میں اپ گریڈ کرنے پر غور کریں۔",
+        "title": "سسٹم RAM",
+        "usage": "{{percent}}% استعمال شدہ",
+        "warning_low": "انتباہ: کم میموری کارکردگی کو متاثر کر سکتی ہے۔"
+      },
       "services": {
         "status": "{{online}} آن لائن / {{draft}} ڈرافٹ",
         "title": "خدمات"
@@ -524,6 +541,13 @@
     "news_fetch_fail": "خبریں حاصل کرنے میں ناکام:",
     "skipping_malformed_line": "خراب فارمیٹ والی لائن کو نظر انداز کیا جا رہا ہے: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 گھنٹہ",
+    "24_hours": "24 گھنٹے",
+    "1_week": "1 ہفتہ",
+    "permanent": "مستقل",
+    "custom": "حسب ضرورت"
+  },
   "error": {
     "401": {
       "help": "اس وسیلہ تک رسائی کے لیے آپ کو لاگ ان ہونا ضروری ہے۔",
@@ -545,7 +569,9 @@
       "message": "سرور میں ایک غیر متوقع خرابی پیش آئی۔",
       "title": "سرور کی خرابی"
     },
-    "reports_load_error": "رپورٹس لوڈ کرتے وقت خرابی پیش آئی۔ براہ کرم صفحہ ریفریش کرنے کی کوشش کریں۔"
+    "ban_update_failed": "پابندی کی مدت اپ ڈیٹ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+    "reports_load_error": "رپورٹس لوڈ کرتے وقت خرابی پیش آئی۔ براہ کرم صفحہ ریفریش کرنے کی کوشش کریں۔",
+    "unban_failed": "IP ایڈریس سے پابندی ہٹانے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔"
   },
   "flash": {
     "easter_egg": "اگر آپ یہ پڑھ رہے ہیں، تو اس کا مطلب ہے کہ آپ متجسس ہیں 👀",
@@ -589,6 +615,7 @@
       "configuration_name": "کنفیگریشن کا نام",
       "confirm_password": "پاس ورڈ کی تصدیق کریں",
       "current_password": "موجودہ پاس ورڈ",
+      "custom_end_date": "حسب ضرورت اختتامی تاریخ",
       "custom_ssl_certificate": "کسٹم SSL سرٹیفکیٹ",
       "custom_ssl_certificate_data": "کسٹم SSL سرٹیفکیٹ ڈیٹا (Base64/PEM)",
       "custom_ssl_key": "کسٹم SSL کلید",
@@ -607,7 +634,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS کریڈینشل آئٹمز",
       "lets_encrypt_profile": "Let's Encrypt پروفائل",
       "license_key": "لائسنس کلید",
+      "make_permanent": "مستقل بنائیں",
       "name": "نام",
+      "new_duration": "نئی مدت",
       "new_password": "نیا پاس ورڈ",
       "optional": "(اختیاری)",
       "password": "پاس ورڈ",
@@ -632,6 +661,7 @@
       "config_name": "میری-کسٹم-کنفیگ",
       "enter_username": "اپنا صارف نام درج کریں",
       "keywords": "کلیدی الفاظ...",
+      "plugin_search": "پلگ ان تلاش کریں...",
       "search": "تلاش کریں...",
       "select_service": "سروس منتخب کریں",
       "secret_token": "خفیہ ٹوکن",
@@ -679,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "اپنا پلگ ان آرکائیو یہاں ڈریگ اور ڈراپ کریں یا فائلیں منتخب کرنے کے لیے کلک کریں۔",
+      "confirm_cache_deletion_alert": "کیا آپ واقعی منتخب کردہ کیشے فائل حذف کرنا چاہتے ہیں؟",
+      "confirm_cache_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کیشے فائلیں حذف کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert": "کیا آپ واقعی منتخب کردہ کسٹم کنفیگریشن حذف کرنا چاہتے ہیں؟",
       "confirm_configs_deletion_alert_plural": "کیا آپ واقعی منتخب کردہ کسٹم کنفیগریشنز حذف کرنا چاہتے ہیں؟",
       "confirm_conversion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات کو تبدیل کرنا چاہتے ہیں؟",
@@ -695,7 +727,8 @@
       "reset_template_alert": "کیا آپ واقعی موجودہ ٹیمپلیٹ سیٹنگز اور کسٹم کنفیگریشنز ری سیٹ کرنا چاہتے ہیں؟",
       "services_deletion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات حذف کرنا چاہتے ہیں؟",
       "unban_confirmation_alert": "کیا آپ واقعی منتخب کردہ IP ایڈریس سے پابندی ہٹانا چاہتے ہیں؟",
-      "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں?"
+      "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں؟",
+      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:"
     },
     "button": {
       "reset_template_confirm": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں"
@@ -719,7 +752,8 @@
       "job_history_count": "ٹاسک کی آخری {{count}} ایگزیکیوشنز",
       "recovery_codes": "ریکوری کوڈز",
       "reset_template_config": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں؟",
-      "server_name_not_unique": "سرور کا نام منفرد نہیں ہے"
+      "server_name_not_unique": "سرور کا نام منفرد نہیں ہے",
+      "update_duration": "پابندی کی مدت اپ ڈیٹ کریں"
     }
   },
   "mode": {
@@ -753,6 +787,10 @@
     "misc": "متفرق",
     "mode_selection": "موڈ کا انتخاب",
     "more": "مزید...",
+    "plugin_activated": "پلگ ان فعال ہو گیا",
+    "plugin_deactivated": "پلگ ان غیر فعال ہو گیا",
+    "plugin_activated_global": "پلگ ان عالمی طور پر فعال ہو گیا",
+    "plugin_deactivated_global": "پلگ ان عالمی طور پر غیر فعال ہو گیا",
     "plugins": "پلگ انز",
     "plugins_pages": "پلگ ان صفحات",
     "pro": "پرو",
@@ -869,6 +907,10 @@
       "sessions": "سیشنز"
     }
   },
+  "reports": {
+    "security_incident": "سیکیورٹی واقعہ",
+    "security_report_data": "سیکیورٹی رپورٹ ڈیٹا"
+  },
   "scope": {
     "all_services": "تمام خدمات",
     "global": "عالمی",
@@ -888,6 +930,7 @@
     "country": "ملک",
     "created": "بنایا گیا",
     "data": "ڈیٹا",
+    "date": "تاریخ",
     "empty": "کوئی تلاش پینل دستیاب نہیں",
     "end_date": "اختتامی تاریخ",
     "first_seen": "پہلی بار دیکھا گیا",
@@ -973,6 +1016,7 @@
     "default_server": "ڈیفالٹ سرور",
     "down": "غیر فعال",
     "draft": "ڈرافٹ",
+    "error_loading_bans": "پابندیاں لوڈ کرتے وقت خرابی پیش آئی۔ براہ کرم صفحہ ریفریش کرنے کی کوشش کریں۔",
     "failed": "ناکام",
     "loading": "لوڈ ہو رہا ہے...",
     "loading_bans": "پابندیاں لوڈ ہو رہی ہیں...",
@@ -989,7 +1033,7 @@
     "loading_services": "خدمات لوڈ ہو رہی ہیں...",
     "news_connection_error": "خبروں کی اپ ڈیٹس کے لیے بلاگ سے رابطہ نہیں ہو سکا۔",
     "no": "نہیں",
-    "no_data": "دکھانے کے لیے کوئی ڈیٹا نہیں۔",
+    "no_data": "کوئی ڈیٹا نہیں",
     "no_history": "کوئی تاریخچہ دستیاب نہیں۔",
     "no_item": "کوئی آئٹم نہیں",
     "no_notifications": "دکھانے کے لیے کوئی اطلاعات نہیں۔",
@@ -1045,6 +1089,7 @@
       "checksum": "چیک سم",
       "country": "ملک",
       "created": "بنایا گیا",
+      "current_time_left": "موجودہ باقی وقت",
       "data": "ڈیٹا",
       "date": "تاریخ",
       "description": "تفصیل",
@@ -1064,6 +1109,7 @@
       "plugin": "پلگ ان",
       "reason": "وجہ",
       "reload": "دوبارہ لوڈ کریں",
+      "request_id": "ریکویسٹ آئی ڈی",
       "scope": "دائرہ کار",
       "security_mode": "سیکیورٹی موڈ",
       "server_name": "سرور کا نام",
@@ -1089,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "اگر سروس ہٹا دی جاتی ہے یا دوبارہ شروع کی جاتی ہے، تو آپ کی UI کنفیگریشن ضائع ہو جائے گی۔",
     "autoconf_disclaimer_detail": "یہ اس لیے ہے کیونکہ سروس کا طریقہ 'autoconf' ہے، جو کنفیگریشن کے تنازعات کو روکنے کے لیے ڈیزائن کیا گیا ہے۔",
+    "ban_updated": "پابندی کی مدت کامیابی سے اپ ڈیٹ ہو گئی!",
     "body": {
       "ping_succeed": "انسٹینسز: {{instances}}"
     },
@@ -1097,7 +1144,8 @@
     "header": {
       "ping_failed": "پنگ ناکام",
       "ping_succeed": "پنگ کامیاب"
-    }
+    },
+    "ip_unbanned": "IP ایڈریس سے پابندی کامیابی سے ہٹا دی گئی!"
   },
   "tooltip": {
     "auto_lets_encrypt": "کیا خود بخود Let's Encrypt سرٹیفکیٹ کی درخواست کرنی ہے۔",
@@ -1105,6 +1153,7 @@
       "convert_service_to_draft": "سروس {{name}} کو ڈرافٹ میں تبدیل کریں",
       "convert_service_to_online": "سروس {{name}} کو آن لائن میں تبدیل کریں",
       "delete_config": "کسٹم کنفیگریشن {{name}} حذف کریں",
+      "delete_file": "کیشے فائل حذف کریں: {{filename}}",
       "delete_instance": "انسٹینس {{hostname}} حذف کریں",
       "delete_plugin": "پلگ ان {{name}} حذف کریں",
       "delete_service": "سروس {{name}} حذف کریں",
@@ -1138,6 +1187,7 @@
     "custom_ssl_cert_path": "کسٹم SSL سرٹیفکیٹ فائل کا پاتھ۔",
     "custom_ssl_key_data": "کسٹم SSL نجی کلید ڈیٹا (PEM فارمیٹ یا Base64 انکوڈ شدہ)۔",
     "custom_ssl_key_path": "کسٹم SSL نجی کلید فائل کا پاتھ۔",
+    "different_from_template": "قدر ٹیمپلیٹ ڈیفالٹ سے مختلف ہے",
     "disabled_by_method": "غیر فعال: طریقہ '{{method}}' کے ذریعے منظم۔",
     "disabled_db_readonly": "غیر فعال: ڈیٹا بیس صرف پڑھنے کے موڈ میں ہے۔",
     "disabled_draft": "غیر فعال: سروس ڈرافٹ موڈ میں ہے۔",
@@ -1274,6 +1324,7 @@
         "ip_address": "رپورٹ کو متحرک کرنے والا IP ایڈریس",
         "method": "رپورٹ کردہ درخواست کا HTTP طریقہ",
         "reason": "رپورٹ بنانے کی وجہ",
+        "request_id": "درخواست کا منفرد شناخت کنندہ",
         "security_mode": "رپورٹ بناتے وقت فعال سیکیورٹی موڈ",
         "select_all": "تمام رپورٹس منتخب کریں",
         "server_name": "رپورٹ بنانے والے سرور کا نام (vhost)",

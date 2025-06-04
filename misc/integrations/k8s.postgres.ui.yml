@@ -9,6 +9,9 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
     verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses/status"]
+    verbs: ["patch"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -55,7 +58,7 @@ spec:
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.6.2-rc2
+          image: bunkerity/bunkerweb:1.6.2-rc3
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -109,7 +112,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.6.2-rc2
+          image: bunkerity/bunkerweb-autoconf:1.6.2-rc3
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -136,7 +139,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc3
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -238,7 +241,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-ui
-          image: bunkerity/bunkerweb-ui:1.6.2-rc2
+          image: bunkerity/bunkerweb-ui:1.6.2-rc3
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE

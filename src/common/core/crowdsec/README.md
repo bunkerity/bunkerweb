@@ -87,7 +87,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.2-rc2
+        image: bunkerity/bunkerweb:1.6.2-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -104,7 +104,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -258,6 +258,12 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     ```shell
     sudo systemctl reload bunkerweb
     ```
+
+=== "All-in-one"
+
+    The BunkerWeb All-In-One (AIO) Docker image comes with CrowdSec fully integrated. You don't need to set up a separate CrowdSec instance or manually configure acquisition files for BunkerWeb logs when using the internal CrowdSec agent.
+
+    Refer to the [All-In-One (AIO) Image integration documentation](integrations.md#crowdsec-integration).
 
 ### Configuration Settings
 

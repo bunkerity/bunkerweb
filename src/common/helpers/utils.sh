@@ -61,3 +61,22 @@ for var_name in $(python3 -c 'import os ; [print(k) for k in os.environ]') ; do
 	fi
 done
 }
+
+# Function to handle Docker secrets
+function handle_docker_secrets() {
+	local secrets_dir="/run/secrets"
+	if [ -d "$secrets_dir" ]; then
+		log "ENTRYPOINT" "ℹ️" "Processing Docker secrets from $secrets_dir ..."
+		for secret_file in "$secrets_dir"/*; do
+			if [ -f "$secret_file" ]; then
+				local secret_name
+				secret_name=$(basename "$secret_file")
+				local secret_value
+				secret_value=$(cat "$secret_file")
+				# Export the secret as an environment variable (uppercase)
+				export "${secret_name^^}"="$secret_value"
+				log "ENTRYPOINT" "ℹ️" "Loaded Docker secret: ${secret_name^^}"
+			fi
+		done
+	fi
+}

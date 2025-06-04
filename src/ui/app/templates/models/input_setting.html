@@ -27,7 +27,10 @@
         {% endif %}
         <button type="button"
                 class="btn btn-sm btn-link {% if disabled or input_readonly %}text-muted{% else %}text-danger{% endif %} position-absolute end-0 top-0 mt-1 me-1 reset-setting"
-                {% if not disabled and not input_readonly %} data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="{{ tooltip_fallback }}" data-i18n="{{ tooltip_key }}" {% endif %}>
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+                data-bs-original-title="{{ tooltip_fallback }}"
+                data-i18n="{{ tooltip_key }}">
             <i class="bx bx-sm bx-reset"></i>
         </button>
     {% endif %}

@@ -8,6 +8,7 @@
     "version": "Versão: {{version}}"
   },
   "alert": {
+    "custom_end_date_required": "Por favor, selecione uma data final personalizada.",
     "important": "Importante",
     "no_changes_detected": "Nenhuma alteração detectada.",
     "notice": "Aviso",
@@ -75,6 +76,7 @@
     "convert_services": "Converter Serviços",
     "copy": "Copiar",
     "copy_codes": "Copiar Códigos",
+    "copy_raw": "Copiar Dados Brutos",
     "copy_visible": "Copiar Visíveis",
     "create_config": "Criar Configuração Personalizada",
     "create_instance": "Criar Instância",
@@ -115,14 +117,21 @@
     "select_file": "Selecionar Arquivo",
     "select_page": "Selecionar Página",
     "service": "Serviço",
+    "set_1h": "Definir 1 Hora",
+    "set_24h": "Definir 24 Horas",
+    "set_1w": "Definir 1 Semana",
+    "set_permanent": "Definir Permanente",
     "setup": "Configurar",
     "show": "Mostrar",
     "stop": "Parar",
     "submit": "Enviar",
     "subscribe": "Subscrever",
     "unban": "Desbloquear",
+    "update_duration": "Atualizar Duração do Bloqueio",
     "update_key": "Atualizar Chave",
     "upload_photo": "Carregar Nova Foto",
+    "view_details": "Ver Detalhes",
+    "view_raw_data": "Ver Dados Brutos",
     "wipe_other_sessions": "Limpar Outras Sessões"
   },
   "country": {
@@ -401,6 +410,14 @@
         "status": "{{core}} core / {{pro}} PRO / {{external}} externo",
         "title": "Plugins"
       },
+      "ram": {
+        "critical_high": "Crítico: o sistema está ficando sem memória!",
+        "good_high": "Memória excelente para ambientes de produção",
+        "info_medium": "Considere atualizar para 16GB+ para uso em produção",
+        "title": "RAM do Sistema",
+        "usage": "{{percent}}% em uso",
+        "warning_low": "Aviso: pouca memória pode afetar o desempenho"
+      },
       "services": {
         "status": "{{online}} online / {{draft}} rascunho",
         "title": "Serviços"
@@ -524,6 +541,13 @@
     "news_fetch_fail": "Falha ao buscar notícias:",
     "skipping_malformed_line": "Ignorando linha mal formada: {{line}}"
   },
+  "duration": {
+    "1_hour": "1 Hora",
+    "24_hours": "24 Horas",
+    "1_week": "1 Semana",
+    "permanent": "Permanente",
+    "custom": "Personalizado"
+  },
   "error": {
     "401": {
       "help": "Você deve estar logado para acessar este recurso.",
@@ -545,7 +569,9 @@
       "message": "Ocorreu um erro inesperado no servidor.",
       "title": "Erro do Servidor"
     },
-    "reports_load_error": "Erro ao carregar relatórios. Por favor, tente atualizar a página."
+    "ban_update_failed": "Falha ao atualizar a duração do bloqueio. Por favor, tente novamente.",
+    "reports_load_error": "Erro ao carregar relatórios. Por favor, tente atualizar a página.",
+    "unban_failed": "Falha ao desbloquear o endereço IP. Por favor, tente novamente."
   },
   "flash": {
     "easter_egg": "Se você está lendo isto, significa que você é curioso 👀",
@@ -589,6 +615,7 @@
       "configuration_name": "Nome da Configuração",
       "confirm_password": "Confirmar Senha",
       "current_password": "Senha Atual",
+      "custom_end_date": "Data Final Personalizada",
       "custom_ssl_certificate": "Certificado SSL Personalizado",
       "custom_ssl_certificate_data": "Dados Certif. SSL Pers. (Base64/PEM)",
       "custom_ssl_key": "Chave SSL Personalizada",
@@ -607,7 +634,9 @@
       "lets_encrypt_dns_credential_items": "Itens Credenciais DNS Let's Encrypt",
       "lets_encrypt_profile": "Perfil Let's Encrypt",
       "license_key": "Chave de Licença",
+      "make_permanent": "Tornar Permanente",
       "name": "Nome",
+      "new_duration": "Nova Duração",
       "new_password": "Nova Senha",
       "optional": "(Opcional)",
       "password": "Senha",
@@ -632,6 +661,7 @@
       "config_name": "minha-config-personalizada",
       "enter_username": "Digite seu nome de usuário",
       "keywords": "Palavras-chave...",
+      "plugin_search": "Pesquisar plugins...",
       "search": "Pesquisar...",
       "select_service": "Selecionar Serviço",
       "secret_token": "Token Secreto",
@@ -679,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "Arraste e solte o arquivo do seu plugin aqui ou clique para selecionar arquivos.",
+      "confirm_cache_deletion_alert": "Tem certeza de que deseja eliminar o arquivo de cache selecionado?",
+      "confirm_cache_deletion_alert_plural": "Tem certeza de que deseja eliminar os arquivos de cache selecionados?",
       "confirm_configs_deletion_alert": "Tem certeza de que deseja eliminar a configuração personalizada selecionada?",
       "confirm_configs_deletion_alert_plural": "Tem certeza de que deseja eliminar as configurações personalizadas selecionadas?",
       "confirm_conversion_confirmation": "Tem certeza de que deseja converter os serviços selecionados?",
@@ -695,7 +727,8 @@
       "reset_template_alert": "Tem certeza de que deseja redefinir as configurações do modelo atual e as configurações personalizadas?",
       "services_deletion_confirmation": "Tem certeza de que deseja eliminar os serviços selecionados?",
       "unban_confirmation_alert": "Tem certeza de que deseja desbloquear o endereço IP selecionado?",
-      "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?"
+      "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?",
+      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:"
     },
     "button": {
       "reset_template_confirm": "Redefinir Configuração do Modelo"
@@ -719,7 +752,8 @@
       "job_history_count": "Últimas {{count}} execuções da Tarefa",
       "recovery_codes": "Códigos de Recuperação",
       "reset_template_config": "Redefinir Configuração do Modelo?",
-      "server_name_not_unique": "Nome do Servidor não é Único"
+      "server_name_not_unique": "Nome do Servidor não é Único",
+      "update_duration": "Atualizar Duração do Bloqueio"
     }
   },
   "mode": {
@@ -753,6 +787,10 @@
     "misc": "Diversos",
     "mode_selection": "Seleção de Modo",
     "more": "Mais...",
+    "plugin_activated": "Plugin Ativado",
+    "plugin_deactivated": "Plugin Desativado",
+    "plugin_activated_global": "Plugin Ativado Globalmente",
+    "plugin_deactivated_global": "Plugin Desativado Globalmente",
     "plugins": "Plugins",
     "plugins_pages": "Páginas de Plugins",
     "pro": "Pro",
@@ -869,6 +907,10 @@
       "sessions": "Sessões"
     }
   },
+  "reports": {
+    "security_incident": "Incidente de Segurança",
+    "security_report_data": "Dados do Relatório de Segurança"
+  },
   "scope": {
     "all_services": "Todos os Serviços",
     "global": "Global",
@@ -888,6 +930,7 @@
     "country": "País",
     "created": "Criado",
     "data": "Dados",
+    "date": "Data",
     "empty": "Nenhum painel de pesquisa disponível",
     "end_date": "Data Final",
     "first_seen": "Visto pela Primeira Vez",
@@ -973,6 +1016,7 @@
     "default_server": "servidor padrão",
     "down": "Inativo",
     "draft": "Rascunho",
+    "error_loading_bans": "Erro ao carregar bloqueios. Por favor, tente atualizar a página.",
     "failed": "Falhou",
     "loading": "Carregando...",
     "loading_bans": "Carregando bloqueios...",
@@ -989,7 +1033,7 @@
     "loading_services": "Carregando serviços...",
     "news_connection_error": "Não foi possível conectar ao blog para notícias.",
     "no": "Não",
-    "no_data": "Nenhum dado para mostrar.",
+    "no_data": "Sem dados",
     "no_history": "Nenhum histórico disponível.",
     "no_item": "Nenhum Item",
     "no_notifications": "Nenhuma notificação para mostrar.",
@@ -1045,6 +1089,7 @@
       "checksum": "Checksum",
       "country": "País",
       "created": "Criado",
+      "current_time_left": "Tempo Restante Atual",
       "data": "Dados",
       "date": "Data",
       "description": "Descrição",
@@ -1064,6 +1109,7 @@
       "plugin": "Plugin",
       "reason": "Motivo",
       "reload": "Recarregar",
+      "request_id": "ID da Solicitação",
       "scope": "Escopo",
       "security_mode": "Modo Segurança",
       "server_name": "Nome Servidor",
@@ -1089,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "Se o serviço for removido ou reiniciado, sua configuração da UI será perdida.",
     "autoconf_disclaimer_detail": "Isso ocorre porque o método do serviço é 'autoconf', projetado para prevenir conflitos de configuração.",
+    "ban_updated": "Duração do bloqueio atualizada com sucesso!",
     "body": {
       "ping_succeed": "Instâncias: {{instances}}"
     },
@@ -1097,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping falhou",
       "ping_succeed": "Ping bem-sucedido"
-    }
+    },
+    "ip_unbanned": "Endereço IP desbloqueado com sucesso!"
   },
   "tooltip": {
     "auto_lets_encrypt": "Se deve solicitar automaticamente um certificado Let's Encrypt.",
@@ -1105,6 +1153,7 @@
       "convert_service_to_draft": "Converter Serviço {{name}} para Rascunho",
       "convert_service_to_online": "Converter Serviço {{name}} para Online",
       "delete_config": "Eliminar Configuração Personalizada {{name}}",
+      "delete_file": "Eliminar Arquivo de Cache: {{filename}}",
       "delete_instance": "Eliminar Instância {{hostname}}",
       "delete_plugin": "Eliminar Plugin {{name}}",
       "delete_service": "Eliminar Serviço {{name}}",
@@ -1138,6 +1187,7 @@
     "custom_ssl_cert_path": "Caminho para o arquivo do certificado SSL personalizado.",
     "custom_ssl_key_data": "Os dados da chave privada SSL personalizada (formato PEM ou codificado em Base64).",
     "custom_ssl_key_path": "Caminho para o arquivo da chave privada SSL personalizada.",
+    "different_from_template": "O valor difere do padrão do modelo",
     "disabled_by_method": "Desabilitado: Gerenciado através do método '{{method}}'.",
     "disabled_db_readonly": "Desabilitado: O banco de dados está em modo somente leitura.",
     "disabled_draft": "Desabilitado: O serviço está em modo Rascunho.",
@@ -1274,6 +1324,7 @@
         "ip_address": "Endereço IP que ativou o relatório",
         "method": "Método HTTP da solicitação reportada",
         "reason": "Motivo pelo qual o relatório foi gerado",
+        "request_id": "Identificador único da solicitação",
         "security_mode": "Modo de segurança ativo quando o relatório foi gerado",
         "select_all": "Selecionar todos os Relatórios",
         "server_name": "Nome do servidor (vhost) que gerou o relatório",

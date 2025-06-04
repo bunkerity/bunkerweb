@@ -6,7 +6,7 @@ from typing import List, Optional
 from passlib.totp import TOTP, MalformedTokenError, TokenError, TotpMatch
 from passlib.pwd import genword
 from qrcode import make
-from qrcode.image.svg import SvgImage
+from qrcode.image.pil import PilImage
 
 from app.models.models import UiUsers
 from app.dependencies import DATA
@@ -70,12 +70,12 @@ class Totp:
 
     def generate_qrcode(self, username: str, totp: str) -> str:
         """Generate QRcode Using username, totp, generate the actual QRcode image."""
-        totp_image = make(self.get_totp_uri(username, totp), image_factory=SvgImage)
+        totp_image = make(self.get_totp_uri(username, totp), image_factory=PilImage)
         with BytesIO() as virtual_file:
-            totp_image.save(virtual_file)
+            totp_image.save(virtual_file, format="JPEG")
             image_as_str = b64encode(virtual_file.getvalue()).decode("ascii")
 
-        return f"data:image/svg+xml;base64,{image_as_str}"
+        return f"data:image/jpeg;base64,{image_as_str}"
 
     def get_last_counter(self, user: UiUsers) -> Optional[int]:
         """Fetch stored last_counter from cache."""

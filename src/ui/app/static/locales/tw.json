@@ -8,6 +8,7 @@
     "version": "版本：{{version}}"
   },
   "alert": {
+    "custom_end_date_required": "請選擇一個自訂結束日期。",
     "important": "重要",
     "no_changes_detected": "未偵測到任何變更。",
     "notice": "注意",
@@ -75,6 +76,7 @@
     "convert_services": "轉換服務",
     "copy": "複製",
     "copy_codes": "複製代碼",
+    "copy_raw": "複製原始資料",
     "copy_visible": "複製可見部分",
     "create_config": "建立自訂設定",
     "create_instance": "建立執行個體",
@@ -115,14 +117,21 @@
     "select_file": "選取檔案",
     "select_page": "選取頁面",
     "service": "服務",
+    "set_1h": "設定 1 小時",
+    "set_24h": "設定 24 小時",
+    "set_1w": "設定 1 週",
+    "set_permanent": "設定永久",
     "setup": "設定",
     "show": "顯示",
     "stop": "停止",
     "submit": "提交",
     "subscribe": "訂閱",
     "unban": "解除封鎖",
+    "update_duration": "更新封鎖期限",
     "update_key": "更新金鑰",
     "upload_photo": "上傳新相片",
+    "view_details": "檢視詳情",
+    "view_raw_data": "檢視原始資料",
     "wipe_other_sessions": "清除其他工作階段"
   },
   "country": {
@@ -401,6 +410,14 @@
         "status": "{{core}} 核心 / {{pro}} PRO / {{external}} 外部",
         "title": "外掛程式"
       },
+      "ram": {
+        "critical_high": "危急：系統記憶體即將耗盡！",
+        "good_high": "適合生產環境的優質記憶體",
+        "info_medium": "建議升級至 16GB 以上以用於生產環境",
+        "title": "系統 RAM",
+        "usage": "{{percent}}% 已使用",
+        "warning_low": "警告：記憶體不足可能影響效能"
+      },
       "services": {
         "status": "{{online}} 線上 / {{draft}} 草稿",
         "title": "服務"
@@ -524,6 +541,13 @@
     "news_fetch_fail": "取得新聞失敗：",
     "skipping_malformed_line": "跳過格式錯誤的行：{{line}}"
   },
+  "duration": {
+    "1_hour": "1 小時",
+    "24_hours": "24 小時",
+    "1_week": "1 週",
+    "permanent": "永久",
+    "custom": "自訂"
+  },
   "error": {
     "401": {
       "help": "您必須登入才能存取此資源。",
@@ -545,7 +569,9 @@
       "message": "發生未預期的伺服器錯誤。",
       "title": "伺服器錯誤"
     },
-    "reports_load_error": "載入報告時發生錯誤。請嘗試重新整理頁面。"
+    "ban_update_failed": "更新封鎖期限失敗。請再試一次。",
+    "reports_load_error": "載入報告時發生錯誤。請嘗試重新整理頁面。",
+    "unban_failed": "解除封鎖 IP 位址失敗。請再試一次。"
   },
   "flash": {
     "easter_egg": "如果你讀到這條訊息，表示你很好奇 👀",
@@ -589,6 +615,7 @@
       "configuration_name": "設定名稱",
       "confirm_password": "確認密碼",
       "current_password": "目前密碼",
+      "custom_end_date": "自訂結束日期",
       "custom_ssl_certificate": "自訂 SSL 憑證",
       "custom_ssl_certificate_data": "自訂 SSL 憑證資料 (Base64/PEM)",
       "custom_ssl_key": "自訂 SSL 金鑰",
@@ -607,7 +634,9 @@
       "lets_encrypt_dns_credential_items": "Let's Encrypt DNS 憑證項目",
       "lets_encrypt_profile": "Let's Encrypt 設定檔",
       "license_key": "授權金鑰",
+      "make_permanent": "設為永久",
       "name": "名稱",
+      "new_duration": "新期限",
       "new_password": "新密碼",
       "optional": "（選填）",
       "password": "密碼",
@@ -632,6 +661,7 @@
       "config_name": "我的自訂設定",
       "enter_username": "輸入您的使用者名稱",
       "keywords": "關鍵字...",
+      "plugin_search": "搜尋外掛程式...",
       "search": "搜尋...",
       "select_service": "選擇服務",
       "secret_token": "密鑰",
@@ -679,6 +709,8 @@
   "modal": {
     "body": {
       "add_plugin_dropzone": "將您的外掛程式封存拖放到此處或點擊以選取檔案。",
+      "confirm_cache_deletion_alert": "您確定要刪除選定的快取檔案嗎？",
+      "confirm_cache_deletion_alert_plural": "您確定要刪除選定的快取檔案嗎？",
       "confirm_configs_deletion_alert": "您確定要刪除選定的自訂設定嗎？",
       "confirm_configs_deletion_alert_plural": "您確定要刪除選定的自訂設定嗎？",
       "confirm_conversion_confirmation": "您確定要轉換選定的服務嗎？",
@@ -695,7 +727,8 @@
       "reset_template_alert": "您確定要重設目前的範本設定和自訂設定嗎？",
       "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
-      "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？"
+      "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
+      "update_duration_alert": "請為選定的封鎖選擇新的期限："
     },
     "button": {
       "reset_template_confirm": "重設範本設定"
@@ -719,7 +752,8 @@
       "job_history_count": "任務 {{count}} 次執行",
       "recovery_codes": "恢復碼",
       "reset_template_config": "重設範本設定？",
-      "server_name_not_unique": "伺服器名稱不是唯一的"
+      "server_name_not_unique": "伺服器名稱不是唯一的",
+      "update_duration": "更新封鎖期限"
     }
   },
   "mode": {
@@ -753,6 +787,10 @@
     "misc": "雜項",
     "mode_selection": "模式選擇",
     "more": "更多...",
+    "plugin_activated": "外掛程式已啟用",
+    "plugin_deactivated": "外掛程式已停用",
+    "plugin_activated_global": "外掛程式已全域啟用",
+    "plugin_deactivated_global": "外掛程式已全域停用",
     "plugins": "外掛程式",
     "plugins_pages": "外掛程式頁面",
     "pro": "Pro",
@@ -869,6 +907,10 @@
       "sessions": "工作階段"
     }
   },
+  "reports": {
+    "security_incident": "安全事件",
+    "security_report_data": "安全報告資料"
+  },
   "scope": {
     "all_services": "所有服務",
     "global": "全域",
@@ -888,6 +930,7 @@
     "country": "國家/地區",
     "created": "建立時間",
     "data": "資料",
+    "date": "日期",
     "empty": "無可用搜尋窗格",
     "end_date": "結束日期",
     "first_seen": "首次出現",
@@ -973,6 +1016,7 @@
     "default_server": "預設伺服器",
     "down": "已停止",
     "draft": "草稿",
+    "error_loading_bans": "載入封鎖時發生錯誤。請嘗試重新整理頁面。",
     "failed": "失敗",
     "loading": "載入中...",
     "loading_bans": "正在載入封鎖...",
@@ -989,7 +1033,7 @@
     "loading_services": "正在載入服務...",
     "news_connection_error": "無法連線至部落格以取得新聞更新。",
     "no": "否",
-    "no_data": "無資料可顯示。",
+    "no_data": "無資料",
     "no_history": "無可用歷史記錄。",
     "no_item": "無項目",
     "no_notifications": "無通知可顯示。",
@@ -1045,6 +1089,7 @@
       "checksum": "校驗和",
       "country": "國家/地區",
       "created": "建立時間",
+      "current_time_left": "目前剩餘時間",
       "data": "資料",
       "date": "日期",
       "description": "描述",
@@ -1064,6 +1109,7 @@
       "plugin": "外掛程式",
       "reason": "原因",
       "reload": "重新載入",
+      "request_id": "請求識別碼",
       "scope": "範圍",
       "security_mode": "安全模式",
       "server_name": "伺服器名稱",
@@ -1089,6 +1135,7 @@
   "toast": {
     "autoconf_disclaimer_bold": "如果服務被移除或重新啟動，您的 UI 設定將會遺失。",
     "autoconf_disclaimer_detail": "這是因為服務的建立方法是 'autoconf'，旨在防止設定衝突。",
+    "ban_updated": "封鎖期限已成功更新！",
     "body": {
       "ping_succeed": "執行個體：{{instances}}"
     },
@@ -1097,7 +1144,8 @@
     "header": {
       "ping_failed": "Ping 失敗",
       "ping_succeed": "Ping 成功"
-    }
+    },
+    "ip_unbanned": "IP 位址已成功解除封鎖！"
   },
   "tooltip": {
     "auto_lets_encrypt": "是否自動請求 Let's Encrypt 憑證。",
@@ -1105,6 +1153,7 @@
       "convert_service_to_draft": "將服務 {{name}} 轉換為草稿",
       "convert_service_to_online": "將服務 {{name}} 轉換為線上",
       "delete_config": "刪除自訂設定 {{name}}",
+      "delete_file": "刪除快取檔案：{{filename}}",
       "delete_instance": "刪除執行個體 {{hostname}}",
       "delete_plugin": "刪除外掛程式 {{name}}",
       "delete_service": "刪除服務 {{name}}",
@@ -1138,6 +1187,7 @@
     "custom_ssl_cert_path": "自訂 SSL 憑證檔案的路徑。",
     "custom_ssl_key_data": "自訂 SSL 私密金鑰資料（PEM 格式或 Base64 編碼）。",
     "custom_ssl_key_path": "自訂 SSL 私密金鑰檔案的路徑。",
+    "different_from_template": "值與範本預設值不同",
     "disabled_by_method": "已停用：透過方法 '{{method}}' 管理。",
     "disabled_db_readonly": "已停用：資料庫處於唯讀模式。",
     "disabled_draft": "已停用：服務處於草稿模式。",
@@ -1274,6 +1324,7 @@
         "ip_address": "觸發報告的 IP 位址",
         "method": "報告的請求的 HTTP 方法",
         "reason": "產生報告的原因",
+        "request_id": "請求的唯一識別碼",
         "security_mode": "產生報告時啟用的安全模式",
         "select_all": "選取所有報告",
         "server_name": "產生報告的伺服器名稱 (vhost)",
