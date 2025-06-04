@@ -9,7 +9,7 @@ from pathlib import Path
 from random import choice
 from string import ascii_letters, digits
 from sys import path as sys_path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 # Correct the sys.path modification logic
 deps_path = join("usr", "share", "bunkerweb", "deps", "python")
@@ -18,10 +18,30 @@ if deps_path not in sys_path:
 
 from logger import setup_logger  # type: ignore
 
-from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader
+from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undefined
 
 # Configure logging
 logger = setup_logger("Templator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+
+
+class ConfigDict(dict):
+    """A special dictionary that falls back to full_config when values are None."""
+
+    def __init__(self, *args, full_config=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._full_config = full_config or {}
+
+    def __getitem__(self, key):
+        value = super().get(key)
+        if value is None and key in self._full_config:
+            return self._full_config[key]
+        return super().__getitem__(key)
+
+    def get(self, key, default=None):
+        value = super().get(key, default)
+        if value is None and key in self._full_config:
+            return self._full_config[key]
+        return value
 
 
 class Templator:
@@ -36,6 +56,8 @@ class Templator:
         output: str,
         target: str,
         config: Dict[str, Any],
+        full_config: Dict[str, Any],
+        custom_undefined: Type[Undefined] = Undefined,
     ):
         """Initialize the Templator with paths and configuration.
 
@@ -66,16 +88,30 @@ class Templator:
         self._jinja_cache_dir = Path(sep, "var", "cache", "bunkerweb", "jinja_cache")
         self._jinja_cache_dir.mkdir(parents=True, exist_ok=True)
         self._templates = templates
-        self._global_templates = {template.name for template in Path(self._templates).rglob("*.conf")}
+        self._global_templates = frozenset(template.name for template in Path(self._templates).rglob("*.conf"))
         self._core = Path(core)
         self._plugins = Path(plugins)
         self._pro_plugins = Path(pro_plugins)
-        self._output = output
+        self._output = Path(output)  # Convert to Path for efficiency
         self._target = target
-        self._config = config
+        self._config = ConfigDict(config, full_config=full_config)
+        self._full_config = full_config
+        self._custom_undefined = custom_undefined
         self._jinja_env = self._load_jinja_env()
         self.__all_templates = frozenset(self._jinja_env.list_templates())
         self._template_path_cache = {}
+
+        # Pre-categorize templates for faster lookup
+        self._categorized_templates = self._categorize_templates()
+
+        # Cache common template variables to avoid recreation
+        self._base_template_vars = {
+            "is_custom_conf": Templator.is_custom_conf,
+            "has_variable": Templator.has_variable,
+            "random": Templator.random,
+            "read_lines": Templator.read_lines,
+            "import": import_module,
+        }
 
     def render(self) -> None:
         """Render the templates based on the provided configuration."""
@@ -106,7 +142,37 @@ class Templator:
             bytecode_cache=FileSystemBytecodeCache(directory=self._jinja_cache_dir.as_posix()),
             auto_reload=False,
             cache_size=-1,
+            undefined=self._custom_undefined,
         )
+
+    def _categorize_templates(self) -> Dict[str, List[str]]:
+        """Pre-categorize templates by context for faster lookup.
+
+        Returns:
+            Dict[str, List[str]]: Dictionary mapping context names to template lists.
+        """
+        categories = {
+            "global": [],
+            "http": [],
+            "stream": [],
+            "default-server-http": [],
+            "modsec": [],
+            "modsec-crs": [],
+            "crs-plugins-before": [],
+            "crs-plugins-after": [],
+            "server-http": [],
+            "server-stream": [],
+        }
+
+        for template in self.__all_templates:
+            if "/" not in template:
+                categories["global"].append(template)
+            else:
+                context = template.split("/", 1)[0]
+                if context in categories:
+                    categories[context].append(template)
+
+        return categories
 
     def _find_templates(self, contexts: List[str]) -> List[str]:
         """Find templates matching the given contexts.
@@ -123,14 +189,10 @@ class Templator:
 
         templates = []
 
-        # Process contexts in order to maintain consistent template ordering
+        # Use pre-categorized templates for faster lookup
         for context in contexts:
-            if context == "global":
-                # Handle global context specially for better performance
-                templates.extend(t for t in self.__all_templates if "/" not in t)
-            else:
-                # Process other contexts
-                templates.extend(t for t in self.__all_templates if t.startswith(f"{context}/"))
+            if context in self._categorized_templates:
+                templates.extend(self._categorized_templates[context])
 
         # Remove duplicates while preserving order
         seen = set()
@@ -143,18 +205,14 @@ class Templator:
         self._template_path_cache[cache_key] = result
         return result
 
-    def _write_config(self, subpath: Optional[str] = None, config: Optional[Dict[str, Any]] = None) -> None:
-        """Write the configuration to a variables.env file.
-
-        Args:
-            subpath (Optional[str], optional): Subpath under the output directory. Defaults to None.
-            config (Optional[Dict[str, Any]], optional): Configuration dictionary. Defaults to None.
-        """
-        real_config = config if config is not None else self._config
-        real_path = Path(self._output, subpath or "", "variables.env")
+    def _write_config(self) -> None:
+        """Write the configuration to a variables.env file."""
+        real_path = self._output / "variables.env"
         try:
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            real_path.write_text("".join(f"{k}={v}\n" for k, v in real_config.items()))
+            # Use more efficient string joining for large configs
+            config_lines = [f"{k}={v}\n" for k, v in self._full_config.items()]
+            real_path.write_text("".join(config_lines))
         except IOError as e:
             logger.error(f"Error writing configuration to {real_path}: {e}")
 
@@ -194,14 +252,9 @@ class Templator:
             ]
         )
 
-        template_vars = {
-            "all": self._config,
-            "is_custom_conf": Templator.is_custom_conf,
-            "has_variable": Templator.has_variable,
-            "random": Templator.random,
-            "read_lines": Templator.read_lines,
-            "import": import_module,
-        }
+        # Create template variables once and reuse
+        template_vars = self._base_template_vars
+        template_vars["all"] = self._config
         template_vars.update(self._config)
 
         max_workers = min(max(1, (cpu_count() or 1) // 2), len(templates))
@@ -235,14 +288,8 @@ class Templator:
             subpath = server
             config = self._get_server_config(server)
 
-        template_vars = {
-            "all": config,
-            "is_custom_conf": Templator.is_custom_conf,
-            "has_variable": Templator.has_variable,
-            "random": Templator.random,
-            "read_lines": Templator.read_lines,
-            "import": import_module,
-        }
+        template_vars = self._base_template_vars
+        template_vars["all"] = ConfigDict(self._config, full_config=self._full_config)
         template_vars.update(config)
 
         for template in templates:

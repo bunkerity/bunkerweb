@@ -83,9 +83,6 @@ FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
 
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
-SCHEDULER_TMP_ENV_PATH = TMP_PATH.joinpath("scheduler.env")
-SCHEDULER_TMP_ENV_PATH.touch()
-
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 LOGGER = setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
@@ -405,10 +402,6 @@ def generate_caches():
 
 
 def generate_configs(env: Dict[str, str], logger: Logger = LOGGER) -> bool:
-    content = ""
-    for k, v in env.items():
-        content += f"{k}={v}\n"
-    SCHEDULER_TMP_ENV_PATH.write_text(content)
     # run the generator
     proc = subprocess_run(
         [
@@ -419,8 +412,6 @@ def generate_configs(env: Dict[str, str], logger: Logger = LOGGER) -> bool:
             BUNKERWEB_PATH.joinpath("confs").as_posix(),
             "--output",
             CONFIG_PATH.as_posix(),
-            "--variables",
-            SCHEDULER_TMP_ENV_PATH.as_posix(),
         ],
         stdin=DEVNULL,
         stderr=STDOUT,
