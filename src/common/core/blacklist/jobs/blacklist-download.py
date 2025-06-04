@@ -58,6 +58,11 @@ status = 0
 
 KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT", "IGNORE_URI")
 
+KINDS_URLS_DEFAULTS = {
+    "IP": "https://www.dan.me.uk/torlist/?exit",
+    "USER_AGENT": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
+}
+
 try:
     # Check if at least a server has Blacklist activated
     blacklist_activated = False
@@ -81,7 +86,9 @@ try:
                 services_blacklist_urls[first_server] = {}
                 for kind in KINDS:
                     services_blacklist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", getenv(f"BLACKLIST_{kind}_URLS", "")).strip().split(" "):
+                    for url in (
+                        getenv(f"{first_server}_BLACKLIST_{kind}_URLS", getenv(f"BLACKLIST_{kind}_URLS", KINDS_URLS_DEFAULTS.get(kind, ""))).strip().split(" ")
+                    ):
                         if url:
                             services_blacklist_urls[first_server][kind].add(url)
     # Singlesite case
@@ -92,7 +99,7 @@ try:
         services_blacklist_urls[services[0]] = {}
         for kind in KINDS:
             services_blacklist_urls[services[0]][kind] = set()
-            for url in getenv(f"BLACKLIST_{kind}_URLS", "").strip().split(" "):
+            for url in getenv(f"BLACKLIST_{kind}_URLS", KINDS_URLS_DEFAULTS.get(kind, "")).strip().split(" "):
                 if url:
                     services_blacklist_urls[services[0]][kind].add(url)
 

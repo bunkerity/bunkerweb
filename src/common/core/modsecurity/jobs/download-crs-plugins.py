@@ -139,7 +139,7 @@ try:
             if getenv(f"{first_server}_MODSECURITY_CRS_VERSION", getenv("MODSECURITY_CRS_VERSION", "4")) != "3":
                 use_right_crs_version = True
 
-            if getenv(f"{first_server}_USE_MODSECURITY_CRS_PLUGINS", getenv("USE_MODSECURITY_CRS_PLUGINS", "no")) == "yes":
+            if getenv(f"{first_server}_USE_MODSECURITY_CRS_PLUGINS", getenv("USE_MODSECURITY_CRS_PLUGINS", "yes")) == "yes":
                 use_modsecurity_crs_plugins = True
 
             service_plugins = getenv(f"{first_server}_MODSECURITY_CRS_PLUGINS", getenv("MODSECURITY_CRS_PLUGINS", "")).strip()
@@ -149,7 +149,7 @@ try:
         if getenv("MODSECURITY_CRS_VERSION", "4") != "3":
             use_right_crs_version = True
 
-        if getenv("USE_MODSECURITY_CRS_PLUGINS", "no") == "yes":
+        if getenv("USE_MODSECURITY_CRS_PLUGINS", "yes") == "yes":
             use_modsecurity_crs_plugins = True
 
         plugins = getenv("MODSECURITY_CRS_PLUGINS", "").strip()
