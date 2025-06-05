@@ -60,7 +60,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui]
+        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
         arch: ["linux/arm64,linux/arm/v7"]
         include:
           - release: rc
