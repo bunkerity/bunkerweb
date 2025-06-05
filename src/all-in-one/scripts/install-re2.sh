@@ -11,9 +11,6 @@ echo "ℹ️ Cloning and building re2 $VERSION"
 echo "ℹ️ Cloning re2 from $URL (commit $COMMIT)"
 git_clone_commit re2 "$URL" "$COMMIT"
 
-echo "ℹ️ Building re2"
-make -j "$NTASK"
-
 echo "ℹ️ Installing re2"
 make install
 

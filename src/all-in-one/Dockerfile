@@ -19,7 +19,7 @@ RUN bash install.sh
 
 WORKDIR /tmp/crowdsec/deps
 
-RUN apk add --no-cache cmake jq git libc-dev wget
+RUN apk add --no-cache jq git libc-dev gettext binutils-gold coreutils pkgconfig wget
 
 COPY src/all-in-one/deps/go.json go.json
 COPY --chmod=644 src/all-in-one/scripts/install-go.sh install-go.sh
@@ -38,23 +38,16 @@ RUN export PLATFORM="$(case "$TARGETPLATFORM" in \
     export SHA256="$(if [ "$PLATFORM" = "386" ]; then jq -r '.checksums."386"' go.json; else jq -r ".checksums.$PLATFORM" go.json; fi)" && \
     bash install-go.sh
 
-COPY src/all-in-one/deps/abseil-cpp.json abseil-cpp.json
-COPY --chmod=644 src/all-in-one/scripts/install-abseil-cpp.sh install-abseil-cpp.sh
-
-# Compile and install abseil-cpp
-RUN export VERSION="$(jq -r .version abseil-cpp.json)" && \
-    export URL="$(jq -r .url abseil-cpp.json)" && \
-    export COMMIT="$(jq -r .commit abseil-cpp.json)" && \
-    bash install-abseil-cpp.sh
-
 COPY src/all-in-one/deps/re2.json re2.json
 COPY --chmod=644 src/all-in-one/scripts/install-re2.sh install-re2.sh
 
 # Compile and install re2
-RUN export VERSION="$(jq -r .version re2.json)" && \
+RUN export PATH="/usr/local/go/bin:$PATH" && \
+    export VERSION="$(jq -r .version re2.json)" && \
     export URL="$(jq -r .url re2.json)" && \
     export COMMIT="$(jq -r .commit re2.json)" && \
-    bash install-re2.sh
+    bash install-re2.sh && \
+    go install github.com/mikefarah/yq/v4@v4.44.3
 
 COPY src/all-in-one/deps/crowdsec.json crowdsec.json
 COPY --chmod=644 src/all-in-one/scripts/install-crowdsec.sh install-crowdsec.sh
