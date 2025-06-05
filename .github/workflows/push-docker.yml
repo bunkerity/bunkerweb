@@ -75,7 +75,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
-          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
+          platforms: ${{ contains(inputs.IMAGE, 'all-in-one') && 'linux/amd64,linux/386,linux/arm64' || 'linux/amd64,linux/386,linux/arm64,linux/arm/v7' }}
           push: true
           tags: ${{ inputs.TAGS }}
           labels: ${{ steps.meta.outputs.labels }}

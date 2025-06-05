@@ -60,7 +60,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui]
         arch: ["linux/arm64,linux/arm/v7"]
         include:
           - release: beta
@@ -76,6 +76,7 @@ jobs:
           - image: ui
             dockerfile: src/ui/Dockerfile
           - image: all-in-one
+            arch: "linux/arm64"
             dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
