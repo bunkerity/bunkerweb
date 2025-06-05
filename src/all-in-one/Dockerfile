@@ -19,7 +19,7 @@ RUN bash install.sh
 
 WORKDIR /tmp/crowdsec/deps
 
-RUN apk add --no-cache cmake g++ jq git libc-dev
+RUN apk add --no-cache cmake jq git libc-dev wget
 
 COPY src/all-in-one/deps/go.json go.json
 COPY --chmod=644 src/all-in-one/scripts/install-go.sh install-go.sh
@@ -29,13 +29,13 @@ COPY --chmod=644 src/all-in-one/scripts/utils.sh utils.sh
 RUN export PLATFORM="$(case "$TARGETPLATFORM" in \
     linux/amd64) echo "amd64" ;; \
     linux/arm64) echo "arm64" ;; \
-    linux/arm/v6) echo "armv6l" ;; \
+    linux/arm/v7) echo "armv6l" ;; \
     linux/386) echo "386" ;; \
     *) echo "amd64" ;; \
     esac)" && \
     export VERSION="$(jq -r .version go.json)" && \
     export URL="$(jq -r .url go.json | sed "s/{VERSION}/$VERSION/" | sed "s/{PLATFORM}/$PLATFORM/")" && \
-    export SHA256="$(jq -r ".checksums.$PLATFORM" go.json)" && \
+    export SHA256="$(if [ "$PLATFORM" = "386" ]; then jq -r '.checksums."386"' go.json; else jq -r ".checksums.$PLATFORM" go.json; fi)" && \
     bash install-go.sh
 
 COPY src/all-in-one/deps/abseil-cpp.json abseil-cpp.json

@@ -4,7 +4,7 @@ FROM python:3.13-alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4
 ARG TARGETPLATFORM
 
 # Install python dependencies
-RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo
+RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo zlib-dev jpeg-dev
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
