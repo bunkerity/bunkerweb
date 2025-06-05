@@ -76,7 +76,7 @@ jobs:
           - image: ui
             dockerfile: src/ui/Dockerfile
           - image: all-in-one
-            arch: "linux/arm64"
+            arch: "linux/arm/v7"
             dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
