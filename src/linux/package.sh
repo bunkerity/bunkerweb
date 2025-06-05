@@ -41,7 +41,7 @@ type="deb"
 if [[ "$linux" = fedora* ]] || [ "$linux" = "centos" ] || [[ "$linux" = rhel* ]] ; then
 	type="rpm"
 fi
-do_and_check_cmd docker run --rm -v "${package_dir}:/data" "local/bunkerweb-${linux}:latest" "$type"
+do_and_check_cmd docker run --rm -e FPM_SKIP_COMPRESSION=yes -v "${package_dir}:/data" "local/bunkerweb-${linux}:latest" "$type"
 name="bunkerweb_${version}-1_${arch}"
 if [ "$type" = "rpm" ] ; then
 	name="bunkerweb-${version}-1.${arch}"
