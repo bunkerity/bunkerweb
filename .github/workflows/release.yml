@@ -70,7 +70,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui]
+        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
         arch: ["linux/arm64,linux/arm/v7"]
         include:
           - release: latest
@@ -85,6 +85,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ${{ matrix.release }}
@@ -94,25 +96,6 @@ jobs:
       CACHE: ${{ matrix.cache }}
       PUSH: ${{ matrix.push }}
       CACHE_SUFFIX: ${{ matrix.cache_suffix }}
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
-      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
-      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-
-  # Build all-in-one arm/v7 image
-  build-all-in-one-arm:
-    needs: [create-arm]
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: latest
-      ARCH: "linux/arm/v7"
-      IMAGE: all-in-one
-      DOCKERFILE: src/all-in-one/Dockerfile
-      CACHE: false
-      PUSH: false
-      CACHE_SUFFIX: arm
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}

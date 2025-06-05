@@ -29,7 +29,7 @@ COPY --chmod=644 src/all-in-one/scripts/utils.sh utils.sh
 RUN export PLATFORM="$(case "$TARGETPLATFORM" in \
     linux/amd64) echo "amd64" ;; \
     linux/arm64) echo "arm64" ;; \
-    linux/arm/v6) echo "armv6l" ;; \
+    linux/arm/v7) echo "armv6l" ;; \
     linux/386) echo "386" ;; \
     *) echo "amd64" ;; \
     esac)" && \
