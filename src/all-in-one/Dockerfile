@@ -19,7 +19,7 @@ RUN bash install.sh
 
 WORKDIR /tmp/crowdsec/deps
 
-RUN apk add --no-cache cmake g++ jq git libc-dev wget
+RUN apk add --no-cache cmake jq git libc-dev wget
 
 COPY src/all-in-one/deps/go.json go.json
 COPY --chmod=644 src/all-in-one/scripts/install-go.sh install-go.sh
