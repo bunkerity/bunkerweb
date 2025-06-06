@@ -13,6 +13,9 @@ jobs:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
         arch: [linux/amd64, linux/386]
+        exclude:
+          - image: all-in-one
+            arch: linux/386 # TODO: Add back when we fixed the docker registry push issue
         include:
           - release: rc
             cache: false
@@ -56,11 +59,12 @@ jobs:
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
   # Build arm64 + arm/v7 images
+  # TODO: Add All-in-one image back when it works with the registry push issue
   build-containers-arm:
     needs: [create-arm]
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui]
         arch: ["linux/arm64,linux/arm/v7"]
         include:
           - release: rc
@@ -75,8 +79,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
-          - image: all-in-one
-            dockerfile: src/all-in-one/Dockerfile
+          # - image: all-in-one
+          #   dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ${{ matrix.release }}
