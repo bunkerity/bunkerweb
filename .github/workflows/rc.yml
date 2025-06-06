@@ -171,14 +171,12 @@ jobs:
     needs: [create-arm, wait-builds]
     strategy:
       matrix:
-        image:
-          [
+        image: [
             bunkerweb,
             bunkerweb-scheduler,
             bunkerweb-autoconf,
             bunkerweb-ui,
-            bunkerweb-all-in-one,
-          ]
+          ] # TODO: Add all-in-one back when it works with the registry push issue
         include:
           - release: rc
           - image: bunkerweb
