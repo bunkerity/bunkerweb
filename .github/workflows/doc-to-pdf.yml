@@ -19,9 +19,9 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install doc dependencies
-        run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt && sudo apt install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
+        run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt && sudo apt update && sudo apt install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
       - name: Install chromium
-        run: sudo apt install chromium-browser
+        run: sudo apt update && sudo apt install chromium-browser
       - name: Install node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
