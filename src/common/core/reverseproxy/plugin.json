@@ -83,6 +83,16 @@
       "type": "text",
       "multiple": "reverse-proxy"
     },
+    "REVERSE_PROXY_HIDE_HEADERS": {
+      "context": "multisite",
+      "default": "Upgrade",
+      "help": "List of HTTP headers to hide from clients when received from the proxied resource (values for proxy_hide_header directive).",
+      "id": "reverse-proxy-hide-headers",
+      "label": "Reverse proxy hide headers",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
     "REVERSE_PROXY_HEADERS_CLIENT": {
       "context": "multisite",
       "default": "",
