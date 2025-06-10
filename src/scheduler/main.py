@@ -401,7 +401,7 @@ def generate_caches():
                 resource_path.chmod(desired_perms)
 
 
-def generate_configs(env: Dict[str, str], logger: Logger = LOGGER) -> bool:
+def generate_configs(logger: Logger = LOGGER) -> bool:
     # run the generator
     proc = subprocess_run(
         [
@@ -495,7 +495,7 @@ def healthcheck_job():
                     if tz:
                         env["TZ"] = tz
 
-                generate_configs(env, HEALTHCHECK_LOGGER)
+                generate_configs(HEALTHCHECK_LOGGER)
 
                 tmp_threads = [
                     Thread(
@@ -553,7 +553,7 @@ def healthcheck_job():
                 if not api_caller.send_to_apis(
                     "POST",
                     f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
+                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
                 )[0]:
                     HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
                     ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
@@ -888,7 +888,7 @@ if __name__ == "__main__":
                 healthcheck_job_run = False
 
             if CONFIG_NEED_GENERATION:
-                ret = generate_configs(SCHEDULER.db.get_config())
+                ret = generate_configs()
                 if ret and SCHEDULER.apis:
                     # send nginx configs
                     threads.append(Thread(target=send_file_to_bunkerweb, args=(CONFIG_PATH, "/confs")))
@@ -909,7 +909,7 @@ if __name__ == "__main__":
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
+                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
                         response=True,
                     )
                     if not success:
@@ -999,7 +999,7 @@ if __name__ == "__main__":
                         if not SCHEDULER.send_to_apis(
                             "POST",
                             f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
+                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
                         )[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 elif not reachable:
@@ -1189,15 +1189,17 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     old_env = env.copy()
                     env = SCHEDULER.db.get_non_default_settings()
-                    if old_env["API_HTTP_PORT"] != env["API_HTTP_PORT"] or old_env["API_SERVER_NAME"] != env["API_SERVER_NAME"]:
+                    if old_env.get("API_HTTP_PORT", "5000") != env.get("API_HTTP_PORT", "5000") or old_env.get("API_SERVER_NAME", "bwapi") != env.get(
+                        "API_SERVER_NAME", "bwapi"
+                    ):
                         err = SCHEDULER.db.update_instances(
                             [
                                 {
                                     "hostname": db_instance["hostname"],
                                     "name": db_instance["name"],
                                     "env": {
-                                        "API_HTTP_PORT": env["API_HTTP_PORT"],
-                                        "API_SERVER_NAME": env["API_SERVER_NAME"],
+                                        "API_HTTP_PORT": env.get("API_HTTP_PORT", "5000"),
+                                        "API_SERVER_NAME": env.get("API_SERVER_NAME", "bwapi"),
                                     },
                                     "type": db_instance["type"],
                                     "status": db_instance["status"],
