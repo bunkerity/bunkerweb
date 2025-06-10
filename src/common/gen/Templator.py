@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from concurrent.futures import ProcessPoolExecutor
+from contextlib import suppress
 from importlib import import_module
 from glob import glob
 from os import cpu_count, getenv
@@ -24,24 +25,103 @@ from jinja2 import Environment, FileSystemBytecodeCache, FileSystemLoader, Undef
 logger = setup_logger("Templator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
 
-class ConfigDict(dict):
-    """A special dictionary that falls back to full_config when values are None."""
+class ConfigurableCustomUndefined(Undefined):
+    """A custom undefined class that can access configuration values."""
 
-    def __init__(self, *args, full_config=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._full_config = full_config or {}
+    # Class variable to store the config dictionary
+    _config_dict = {}
 
-    def __getitem__(self, key):
-        value = super().get(key)
-        if value is None and key in self._full_config:
-            return self._full_config[key]
-        return super().__getitem__(key)
+    @classmethod
+    def set_config(cls, config_dict: Dict[str, Any]):
+        """Set the configuration dictionary for this class."""
+        cls._config_dict = config_dict
 
-    def get(self, key, default=None):
-        value = super().get(key, default)
-        if value is None and key in self._full_config:
-            return self._full_config[key]
-        return value
+    def __getattr__(self, name: str) -> Any:
+        # First check if the original undefined name exists in config_dict
+        if self._undefined_name and self._undefined_name in self._config_dict:
+            base_value = self._config_dict[self._undefined_name]
+            if hasattr(base_value, name):
+                return getattr(base_value, name)
+
+        # Check if the attribute access creates a valid config key
+        if self._undefined_name:
+            attr_key = f"{self._undefined_name}.{name}"
+        else:
+            attr_key = name
+
+        if attr_key in self._config_dict:
+            return self._config_dict[attr_key]
+
+        # Return a new instance for chaining
+        return self.__class__(name=attr_key)
+
+    def __getitem__(self, key: str) -> Any:
+        # First check if the original undefined name exists in config_dict
+        if self._undefined_name and self._undefined_name in self._config_dict:
+            base_value = self._config_dict[self._undefined_name]
+            if hasattr(base_value, "__getitem__"):
+                with suppress(KeyError, TypeError, IndexError):
+                    return base_value[key]
+
+        # Check if the item access creates a valid config key
+        if self._undefined_name:
+            item_key = f"{self._undefined_name}[{key}]"
+        else:
+            item_key = f"[{key}]"
+
+        if item_key in self._config_dict:
+            return self._config_dict[item_key]
+
+        # Return a new instance for chaining
+        return self.__class__(name=item_key)
+
+    def __eq__(self, other: Any) -> bool:
+        value = self._config_dict.get(self._undefined_name)
+        if value is not None:
+            return value == other
+        return super().__eq__(other)
+
+    def __ne__(self, other: Any) -> bool:
+        value = self._config_dict.get(self._undefined_name)
+        if value is not None:
+            return value != other
+        return super().__ne__(other)
+
+    def __str__(self) -> str:
+        value = self._config_dict.get(self._undefined_name)
+        if value is not None:
+            return str(value)
+        return super().__str__()
+
+    def __len__(self) -> int:
+        value = self._config_dict.get(self._undefined_name)
+        if value is not None and hasattr(value, "__len__"):
+            return len(value)
+        return super().__len__()
+
+    def __iter__(self):
+        value = self._config_dict.get(self._undefined_name)
+        if value is not None and hasattr(value, "__iter__"):
+            return iter(value)
+        return super().__iter__()
+
+    def __bool__(self) -> bool:
+        value = self._config_dict.get(self._undefined_name)
+        if value is not None:
+            return bool(value)
+        return super().__bool__()
+
+    def __contains__(self, item: Any) -> bool:
+        value = self._config_dict.get(self._undefined_name)
+        if value is not None and hasattr(value, "__contains__"):
+            return item in value
+        return super().__contains__(item)
+
+
+def create_custom_undefined_class(full_config: Dict[str, Any]):
+    """Factory function that returns ConfigurableCustomUndefined with the config set."""
+    ConfigurableCustomUndefined.set_config(full_config)
+    return ConfigurableCustomUndefined
 
 
 class Templator:
@@ -57,7 +137,6 @@ class Templator:
         target: str,
         config: Dict[str, Any],
         full_config: Dict[str, Any],
-        custom_undefined: Type[Undefined] = Undefined,
     ):
         """Initialize the Templator with paths and configuration.
 
@@ -94,9 +173,9 @@ class Templator:
         self._pro_plugins = Path(pro_plugins)
         self._output = Path(output)  # Convert to Path for efficiency
         self._target = target
-        self._config = ConfigDict(config, full_config=full_config)
+        self._config = config
         self._full_config = full_config
-        self._custom_undefined = custom_undefined
+        self._custom_undefined = create_custom_undefined_class(full_config)
         self._jinja_env = self._load_jinja_env()
         self.__all_templates = frozenset(self._jinja_env.list_templates())
         self._template_path_cache = {}
@@ -116,9 +195,9 @@ class Templator:
     def render(self) -> None:
         """Render the templates based on the provided configuration."""
         self._render_global()
-        servers = [self._config.get("SERVER_NAME", "").strip()]
+        servers = [self._config.get("SERVER_NAME", "www.example.com").strip()]
         if self._config.get("MULTISITE", "no") == "yes":
-            servers = self._config.get("SERVER_NAME", "").strip().split(" ")
+            servers = self._config.get("SERVER_NAME", "www.example.com").strip().split(" ")
 
         num_workers = min(max(1, (cpu_count() or 1) // 2), len(servers))
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
@@ -216,7 +295,7 @@ class Templator:
         except IOError as e:
             logger.error(f"Error writing configuration to {real_path}: {e}")
 
-    def _get_server_config(self, server: str) -> Dict[str, Any]:
+    def _get_server_config(self, server: str, config: Dict[str, Any]) -> Dict[str, Any]:
         """Get the configuration for a specific server.
 
         Args:
@@ -227,15 +306,14 @@ class Templator:
         """
         prefix = f"{server}_"
         prefix_len = len(prefix)
-        config = self._config.copy()
         config["NGINX_PREFIX"] = f"{join(self._target, server)}/"
 
         # Efficient single-pass override of server-specific values
-        for key, value in ((k, v) for k, v in self._config.items() if k.startswith(prefix)):
+        for key, value in ((k, v) for k, v in config.copy().items() if k.startswith(prefix)):
             config[key[prefix_len:]] = value
 
         # Set default SERVER_NAME if not explicitly defined
-        if f"{prefix}SERVER_NAME" not in self._config:
+        if f"{prefix}SERVER_NAME" not in config:
             config["SERVER_NAME"] = server
 
         return config
@@ -254,7 +332,7 @@ class Templator:
 
         # Create template variables once and reuse
         template_vars = self._base_template_vars
-        template_vars["all"] = self._config
+        template_vars["all"] = self._full_config
         template_vars.update(self._config)
 
         max_workers = min(max(1, (cpu_count() or 1) // 2), len(templates))
@@ -283,18 +361,22 @@ class Templator:
 
         # Step 2: Handle multisite configuration if applicable
         subpath = None
-        config = self._config
+        config = self._config.copy()
+        full_config = self._full_config.copy()
         if self._config.get("MULTISITE", "no") == "yes":
             subpath = server
-            config = self._get_server_config(server)
+            config = self._get_server_config(server, config)
+            full_config = self._get_server_config(server, full_config)
+
+        server_custom_undefined = create_custom_undefined_class(full_config)
 
         template_vars = self._base_template_vars
-        template_vars["all"] = ConfigDict(self._config, full_config=self._full_config)
+        template_vars["all"] = full_config
         template_vars.update(config)
 
         for template in templates:
             name = basename(template) if any(template.endswith(root_conf) for root_conf in self._global_templates) else None
-            self._render_template(template, template_vars, subpath=subpath, name=name)
+            self._render_template(template, template_vars, subpath=subpath, name=name, custom_undefined=server_custom_undefined)
 
     def _render_template(
         self,
@@ -302,6 +384,7 @@ class Templator:
         template_vars: Optional[Dict[str, Any]] = None,
         subpath: Optional[str] = None,
         name: Optional[str] = None,
+        custom_undefined: Optional[Type[Undefined]] = None,
     ) -> None:
         """Render a single template.
 
@@ -313,7 +396,21 @@ class Templator:
         """
         real_path = Path(self._output, subpath or "", name or template)
         try:
-            jinja_template = self._jinja_env.get_template(template)
+            if custom_undefined:
+                temp_env = Environment(
+                    loader=self._jinja_env.loader,
+                    lstrip_blocks=True,
+                    trim_blocks=True,
+                    keep_trailing_newline=True,
+                    bytecode_cache=self._jinja_env.bytecode_cache,
+                    auto_reload=False,
+                    cache_size=-1,
+                    undefined=custom_undefined,
+                )
+                jinja_template = temp_env.get_template(template)
+            else:
+                jinja_template = self._jinja_env.get_template(template)
+
             real_path.parent.mkdir(parents=True, exist_ok=True)
             with real_path.open("w") as f:
                 f.write(jinja_template.render(template_vars))

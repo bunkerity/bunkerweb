@@ -127,82 +127,6 @@ if __name__ == "__main__":
             config: Dict[str, Any] = db.get_non_default_settings()
             full_config = db.get_config()
 
-        class CustomUndefined(Undefined):
-            def __getattr__(self, name: str) -> Any:
-                # First check if the original undefined name exists in full_config
-                if self._undefined_name and self._undefined_name in full_config:
-                    base_value = full_config[self._undefined_name]
-                    if hasattr(base_value, name):
-                        return getattr(base_value, name)
-
-                # Check if the attribute access creates a valid config key
-                if self._undefined_name:
-                    attr_key = f"{self._undefined_name}.{name}" if hasattr(self, "_undefined_name") else name
-                else:
-                    attr_key = name
-
-                if attr_key in full_config:
-                    return full_config[attr_key]
-
-                # Return a new CustomUndefined for chaining
-                return CustomUndefined(name=attr_key)
-
-            def __getitem__(self, key: str) -> Any:
-                # First check if the original undefined name exists in full_config
-                if self._undefined_name and self._undefined_name in full_config:
-                    base_value = full_config[self._undefined_name]
-                    if hasattr(base_value, "__getitem__"):
-                        with suppress(KeyError, TypeError, IndexError):
-                            return base_value[key]
-
-                # Check if the item access creates a valid config key
-                if self._undefined_name:
-                    item_key = f"{self._undefined_name}[{key}]"
-                else:
-                    item_key = f"[{key}]"
-
-                if item_key in full_config:
-                    return full_config[item_key]
-
-                # Return a new CustomUndefined for chaining
-                return CustomUndefined(name=item_key)
-
-            def __eq__(self, other: Any) -> bool:
-                value = full_config.get(self._undefined_name)
-                if value is not None:
-                    return value == other
-                return super().__eq__(other)
-
-            def __ne__(self, other: Any) -> bool:
-                value = full_config.get(self._undefined_name)
-                if value is not None:
-                    return value != other
-                return super().__ne__(other)
-
-            def __str__(self) -> str:
-                value = full_config.get(self._undefined_name)
-                if value is not None:
-                    return str(value)
-                return super().__str__()
-
-            def __len__(self) -> int:
-                value = full_config.get(self._undefined_name)
-                if value is not None and hasattr(value, "__len__"):
-                    return len(value)
-                return super().__len__()
-
-            def __iter__(self):
-                value = full_config.get(self._undefined_name)
-                if value is not None and hasattr(value, "__iter__"):
-                    return iter(value)
-                return super().__iter__()
-
-            def __bool__(self) -> bool:
-                value = full_config.get(self._undefined_name)
-                if value is not None:
-                    return bool(value)
-                return super().__bool__()
-
         # Remove old files
         LOGGER.info("Removing old files ...")
         files = glob(join(args.output, "*"))
@@ -224,7 +148,6 @@ if __name__ == "__main__":
             target_path.as_posix(),
             config,
             full_config,
-            CustomUndefined,
         )
         templator.render()
     except SystemExit as e:
