@@ -29,6 +29,7 @@ exec
 file
 filegroup
 fopen
+fputs
 glob
 imagegif
 imagejpeg
@@ -37,12 +38,16 @@ imagewbmp
 imagexbm
 is_a
 md5
+mkdir
 opendir
 passthru
 popen
 readfile
+rtrim
+strip_tags
 tmpfile
 unpack
+usort
 
 ##! English words, or potential snippets of them, are added here to perform a regex match.
 ##! Compared to the parallel match performed by 933150, fewer false positives will be generated.

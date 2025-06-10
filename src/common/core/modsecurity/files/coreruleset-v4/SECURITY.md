@@ -11,8 +11,8 @@ Along those lines, OWASP CRS team may not issue security notifications for unsup
 
 | Version   | Supported          |
 | --------- | ------------------ |
+| 4.15.z    | :white_check_mark: |
 | 4.14.z    | :white_check_mark: |
-| 4.13.z    | :white_check_mark: |
 | 4.y.z     | :x: |
 | 3.3.x     | :white_check_mark: |
 | 3.2.x     | :x:                |
@@ -53,7 +53,7 @@ Primary key fingerprint: 3600 6F0E 0BA1 6783 2158  8211 38EE ACA1 AB8A 6E72
 If the signature was good, the verification succeeded. If you see a warning like the above, it means you know our public key, but you are not trusting it. You can trust it by using the following method:
 
 ```bash
-gpg edit-key 36006F0E0BA167832158821138EEACA1AB8A6E72
+gpg --edit-key 36006F0E0BA167832158821138EEACA1AB8A6E72
 gpg> trust
 Your decision: 5 (ultimate trust)
 Are you sure: Yes
@@ -80,6 +80,7 @@ Do this before submitting a vulnerability using our email:
 1) Verify that you have the latest version of OWASP CRS.
 2) Validate which Paranoia Level this bypass applies to. If it works in PL4, please send us an email.
 3) If you detected anything that causes unexpected behavior of the engine via manipulation of existing CRS provided rules, please send it by email.
+4) Check whether the exploit/vulnerability is covered at a higher paranoia level by testing it against the [CRS Sandbox](https://coreruleset.org/docs/6-development/6-4-using-the-crs-sandbox/) at a higher paranoia level.
 
 We also provide you with the [Sandbox project](https://coreruleset.org/docs/development/sandbox/), where you can test your bypass and report back to us. If testing using the sandbox, please include the `X-Unique-ID` from the response in your email.
 
