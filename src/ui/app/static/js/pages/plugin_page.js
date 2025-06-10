@@ -21,7 +21,7 @@ $(document).ready(function () {
   });
 
   $(".table").each(function () {
-    var tableLength = parseInt($(`#${this.id}-length`).val().trim());
+    let tableLength = parseInt($(`#${this.id}-length`).val().trim());
 
     var tableOrder;
     const $tableOrder = $(`#${this.id}-order`);
