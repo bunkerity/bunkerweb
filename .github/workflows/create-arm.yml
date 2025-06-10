@@ -55,7 +55,7 @@ jobs:
         id: scw
         uses: scaleway/action-scw@be2696f261325a78354eda14988c80405f33e082
         with:
-          args: instance server create zone=fr-par-2 type=${{ env.TYPE }} root-volume=block:50GB
+          args: instance server create zone=fr-par-2 type=${{ env.TYPE }} root-volume=block:100GB
       - name: Get info
         id: getinfo
         run: |

@@ -112,6 +112,16 @@ function metrics:log(bypass_checks)
 						end
 						lru:set(lru_key, metric_counter)
 					end
+				-- Add table entries
+				elseif kind == "tables" then
+					for metric_key, metric_value in pairs(kind_metrics) do
+						local lru_key = plugin_id .. "_table_" .. metric_key
+						local metric_table = lru:get(lru_key) or {}
+						-- Add value to table
+						table_insert(metric_table, metric_value)
+						-- Update LRU cache
+						lru:set(lru_key, metric_table)
+					end
 				end
 			end
 		end

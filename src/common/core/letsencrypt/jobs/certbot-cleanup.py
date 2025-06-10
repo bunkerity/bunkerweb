@@ -27,7 +27,7 @@ try:
 
     # Cluster case
     if integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
-        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI", None))
+        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
         instances = db.get_instances()
 
         LOGGER.info(f"Cleaning challenge from {len(instances)} instances")

@@ -19,7 +19,7 @@ RUN bash install.sh
 
 WORKDIR /tmp/crowdsec/deps
 
-RUN apk add --no-cache cmake g++ jq git libc-dev
+RUN apk add --no-cache jq git libc-dev gettext binutils-gold coreutils pkgconfig wget
 
 COPY src/all-in-one/deps/go.json go.json
 COPY --chmod=644 src/all-in-one/scripts/install-go.sh install-go.sh
@@ -29,32 +29,25 @@ COPY --chmod=644 src/all-in-one/scripts/utils.sh utils.sh
 RUN export PLATFORM="$(case "$TARGETPLATFORM" in \
     linux/amd64) echo "amd64" ;; \
     linux/arm64) echo "arm64" ;; \
-    linux/arm/v6) echo "armv6l" ;; \
+    linux/arm/v7) echo "armv6l" ;; \
     linux/386) echo "386" ;; \
     *) echo "amd64" ;; \
     esac)" && \
     export VERSION="$(jq -r .version go.json)" && \
     export URL="$(jq -r .url go.json | sed "s/{VERSION}/$VERSION/" | sed "s/{PLATFORM}/$PLATFORM/")" && \
-    export SHA256="$(jq -r ".checksums.$PLATFORM" go.json)" && \
+    export SHA256="$(if [ "$PLATFORM" = "386" ]; then jq -r '.checksums."386"' go.json; else jq -r ".checksums.$PLATFORM" go.json; fi)" && \
     bash install-go.sh
-
-COPY src/all-in-one/deps/abseil-cpp.json abseil-cpp.json
-COPY --chmod=644 src/all-in-one/scripts/install-abseil-cpp.sh install-abseil-cpp.sh
-
-# Compile and install abseil-cpp
-RUN export VERSION="$(jq -r .version abseil-cpp.json)" && \
-    export URL="$(jq -r .url abseil-cpp.json)" && \
-    export COMMIT="$(jq -r .commit abseil-cpp.json)" && \
-    bash install-abseil-cpp.sh
 
 COPY src/all-in-one/deps/re2.json re2.json
 COPY --chmod=644 src/all-in-one/scripts/install-re2.sh install-re2.sh
 
 # Compile and install re2
-RUN export VERSION="$(jq -r .version re2.json)" && \
+RUN export PATH="/usr/local/go/bin:$PATH" && \
+    export VERSION="$(jq -r .version re2.json)" && \
     export URL="$(jq -r .url re2.json)" && \
     export COMMIT="$(jq -r .commit re2.json)" && \
-    bash install-re2.sh
+    bash install-re2.sh && \
+    go install github.com/mikefarah/yq/v4@v4.44.3
 
 COPY src/all-in-one/deps/crowdsec.json crowdsec.json
 COPY --chmod=644 src/all-in-one/scripts/install-crowdsec.sh install-crowdsec.sh
@@ -127,7 +120,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "pyc>=3.12.11-r0" "python3>=3.12.11-r0" "python3-pyc>=3.12.11-r0" "python3-pycache-pyc0>=3.12.11-r0" # CVE-2024-12718 CVE-2025-4138 CVE-2025-4517 CVE-2025-4330
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

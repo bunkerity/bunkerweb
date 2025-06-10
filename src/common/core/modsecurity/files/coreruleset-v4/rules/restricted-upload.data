@@ -121,6 +121,7 @@ config.php
 config.sample.php
 config.yml
 cpuinfo
+database.yaml
 database.yml
 default.settings.php
 defaults.inc.php

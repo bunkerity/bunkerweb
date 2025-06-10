@@ -119,8 +119,10 @@ if __name__ == "__main__":
                 variables_path.as_posix(),
                 LOGGER,
             ).get_config(db)
+            full_config = config.copy()
         else:
-            config: Dict[str, Any] = db.get_config()
+            config: Dict[str, Any] = db.get_non_default_settings() | {"DATABASE_URI": db.database_uri}
+            full_config = db.get_config() | {"DATABASE_URI": db.database_uri}
 
         # Remove old files
         LOGGER.info("Removing old files ...")
@@ -142,6 +144,7 @@ if __name__ == "__main__":
             output_path.as_posix(),
             target_path.as_posix(),
             config,
+            full_config,
         )
         templator.render()
     except SystemExit as e:

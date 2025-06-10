@@ -176,7 +176,7 @@ status = 0
 
 try:
     self_signed_path = Path(sep, "var", "cache", "bunkerweb", "selfsigned")
-    servers = getenv("SERVER_NAME") or []
+    servers = getenv("SERVER_NAME", "www.example.com") or []
 
     if isinstance(servers, str):
         servers = servers.split(" ")

@@ -10,6 +10,6 @@ echo "ℹ️ Cloning CrowdSec from $URL (commit $COMMIT)"
 git_clone_commit crowdsec "$URL" "$COMMIT"
 
 echo "ℹ️ Building CrowdSec"
-make BUILD_VERSION="$VERSION" BUILD_STATIC=1 release
+make clean release BUILD_VERSION="$VERSION" DOCKER_BUILD=1 BUILD_STATIC=1 CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
 
 echo "✅ CrowdSec $VERSION built successfully"

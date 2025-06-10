@@ -607,6 +607,7 @@ rake~
 raku
 rar
 rar@
+rc@
 readelf
 red
 red@
@@ -657,9 +658,6 @@ screen~
 script
 script@
 script~
-self
-self@
-self~
 service
 service@
 service~

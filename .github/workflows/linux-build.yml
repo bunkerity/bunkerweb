@@ -125,6 +125,7 @@ jobs:
       - name: Generate package (ARM)
         if: startsWith(env.ARCH, 'arm') == true
         run: |
+          # Transfer image and generate package
           docker save local/bunkerweb-${{ inputs.LINUX }}:latest | ssh -C root@arm docker load
           scp ./src/linux/package.sh root@arm:/opt/package_${{ inputs.LINUX }}.sh
           ssh root@arm chmod +x /opt/package_${{ inputs.LINUX }}.sh

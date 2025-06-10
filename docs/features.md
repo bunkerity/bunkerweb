@@ -841,9 +841,29 @@ Follow these steps to configure and use the Blacklist feature:
 
 **General**
 
-| Setting         | Default | Context   | Multiple | Description                                                         |
-| --------------- | ------- | --------- | -------- | ------------------------------------------------------------------- |
-| `USE_BLACKLIST` | `yes`   | multisite | no       | **Enable Blacklist:** Set to `yes` to enable the blacklist feature. |
+| Setting                     | Default                                                 | Context   | Multiple | Description                                                                                             |
+| --------------------------- | ------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `USE_BLACKLIST`             | `yes`                                                   | multisite | no       | **Enable Blacklist:** Set to `yes` to enable the blacklist feature.                                     |
+| `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Community Blacklists:** Select pre-configured community-maintained blacklists to include in blocking. |
+
+=== "Community Blacklists"
+    **What this does:** Enables you to quickly add well-maintained, community-sourced blacklists without having to manually configure URLs.
+
+    The `BLACKLIST_COMMUNITY_LISTS` setting allows you to select from curated blacklist sources. Available options include:
+
+    | ID                                  | Description                                                                                                                                                                                                              | Source                                                                                                                          |
+    | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+    | `ip:laurent-minne-fr-be-agressive`  | Intelligence Blocklist (IPv4): Botnets, RaT, CVE's RCE, Scanners. DST = FR - BE                                                                                                                                          | `https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt` |
+    | `ip:danmeuk-tor-exit`               | Tor Exit Nodes IPs (dan.me.uk)                                                                                                                                                                                           | `https://www.dan.me.uk/torlist/?exit`                                                                                           |
+    | `ua:mitchellkrogza-bad-user-agents` | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`  |
+
+    **Configuration:** Specify multiple lists separated by spaces. For example:
+    ```yaml
+    BLACKLIST_COMMUNITY_LISTS: "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents"
+    ```
+
+    !!! tip "Community vs Manual Configuration"
+        Community blacklists provide a convenient way to get started with proven blacklist sources. You can use them alongside manual URL configurations for maximum flexibility.
 
 === "IP Address"
     **What this does:** Blocks visitors based on their IP address or network.
@@ -912,7 +932,14 @@ Follow these steps to configure and use the Blacklist feature:
 
 === "Basic IP and User-Agent Protection"
 
-    A simple configuration that blocks known Tor exit nodes and common bad user agents:
+    A simple configuration that blocks known Tor exit nodes and common bad user agents using community blacklists:
+
+    ```yaml
+    USE_BLACKLIST: "yes"
+    BLACKLIST_COMMUNITY_LISTS: "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents"
+    ```
+
+    Alternatively, you can use manual URL configuration:
 
     ```yaml
     USE_BLACKLIST: "yes"
@@ -1536,7 +1563,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.2-rc3
+        image: bunkerity/bunkerweb:1.6.2-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1553,7 +1580,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -3397,7 +3424,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.14.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.14.0) (**default**).
+- **`4`**: Stable [v4.15.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.15.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"

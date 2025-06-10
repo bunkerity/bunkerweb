@@ -1,29 +1,32 @@
-# This list comes mainly from:
-# - https://www.php.net/manual/en/ini.core.php
-# - https://www.php.net/manual/en/ini.list.php
-#
-# There are additional directives defined in some of the modules, that can be parsed from each modules's configuration page:
-# - https://www.php.net/manual/en/$book.configuration.php (book comes from funcref.php)
-#
-# As the source code is in docbook format with many dependencies, the easiest
-# way to get it is using an xpath parser on the ini list and getting all
-# using '//table/tbody/tr/td[1]'. A simple helper tool you can use is https://www.videlibri.de/xidel.html
-#
-# Small post-processing is needed to remove numbers coming from a column,
-# and `*` chars (e.g. `pdo.dsn.*`).
-# Also removed single words like `from` to prevent FP.
-#
-# Example usage:
-# `xidel https://www.php.net/manual/en/ini.core.php https://www.php.net/manual/en/ini.list.php --xpath '//table/tbody/tr/td[1]' | sort | uniq`
-#
-# And for configuration in submodules:
-#
-# for book in $(xidel  https://www.php.net/manual/en/funcref.php -e '//a/extract(@href, "book\.(.+)\.php", 1)[. != ""]')                                                                                                 ─╯
-# do
-#   xidel https://www.php.net/manual/en/$book.configuration.php --xpath '//table/tbody/tr/td[1]' >> php-config-directives.txt
-# done
-#
-# ** Remember to always `sort` the output so its easy to spot the changes, and remove duplicates if any.
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! This list comes mainly from:
+##! - https://www.php.net/manual/en/ini.core.php
+##! - https://www.php.net/manual/en/ini.list.php
+
+##! There are additional directives defined in some of the modules, that can be parsed from each modules's configuration page:
+##! - https://www.php.net/manual/en/$book.configuration.php (book comes from funcref.php)
+
+##! As the source code is in docbook format with many dependencies, the easiest
+##! way to get it is using an xpath parser on the ini list and getting all
+##! using '//table/tbody/tr/td[1]'. A simple helper tool you can use is https://www.videlibri.de/xidel.html
+
+##! Small post-processing is needed to remove numbers coming from a column,
+##! and `*` chars (e.g. `pdo.dsn.*`).
+##! Also removed single words like `from` to prevent FP.
+
+##! Example usage:
+##! `xidel https://www.php.net/manual/en/ini.core.php https://www.php.net/manual/en/ini.list.php --xpath '//table/tbody/tr/td[1]' | sort | uniq`
+
+##! And for configuration in submodules:
+
+##! for book in $(xidel  https://www.php.net/manual/en/funcref.php -e '//a/extract(@href, "book\.(.+)\.php", 1)[. != ""]')                                                                                                 ─╯
+##! do
+##!   xidel https://www.php.net/manual/en/$book.configuration.php --xpath '//table/tbody/tr/td[1]' >> php-config-directives.txt
+##! done
+
+##! ** Remember to always `sort` the output so its easy to spot the changes, and remove duplicates if any.
 
 allow_url_fopen
 allow_url_include

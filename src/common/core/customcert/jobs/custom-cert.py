@@ -129,7 +129,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
 status = 0
 
 try:
-    all_domains = getenv("SERVER_NAME") or []
+    all_domains = getenv("SERVER_NAME", "www.example.com") or []
 
     if isinstance(all_domains, str):
         all_domains = all_domains.split(" ")

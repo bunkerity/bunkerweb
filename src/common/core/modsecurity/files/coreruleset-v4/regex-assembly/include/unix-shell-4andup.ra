@@ -466,8 +466,7 @@ sched@
 screen@
 script@
 sdiff@
-self@
-sendmail
+sendmail@
 service@
 setarch
 setenv

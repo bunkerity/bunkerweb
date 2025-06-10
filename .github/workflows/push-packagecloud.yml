@@ -98,7 +98,7 @@ jobs:
       # Update name
       - name: Rename package
         if: inputs.BW_VERSION == '1.5'
-        run: sudo apt install -y rename && rename 's/dev/1.5-dev/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+        run: sudo apt update && sudo apt install -y rename && rename 's/dev/1.5-dev/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package
       - name: Push package to packagecloud
         if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy' && inputs.LINUX != 'fedora-40' && inputs.LINUX != 'fedora-41' && inputs.LINUX != 'fedora-42'

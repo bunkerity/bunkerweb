@@ -1,4 +1,4 @@
-FROM ubuntu:jammy@sha256:67cadaff1dca187079fce41360d5a7eb6f7dcd3745e53c79ad5efd8563118240 AS builder
+FROM ubuntu:jammy@sha256:01a3ee0b5e413cefaaffc6abe68c9c37879ae3cced56a8e088b1649e5b269eee AS builder
 
 ENV OS=ubuntu
 ENV NGINX_VERSION=1.28.0
@@ -62,7 +62,7 @@ RUN apt-get install -y nodejs npm && \
     npm install -g uglify-js && \
     for file in $(find ui/app/static -type f -name "*.js"); do uglifyjs "$file" --compress --mangle --verbose --output "$file"; done
 
-FROM ubuntu:jammy@sha256:67cadaff1dca187079fce41360d5a7eb6f7dcd3745e53c79ad5efd8563118240
+FROM ubuntu:jammy@sha256:01a3ee0b5e413cefaaffc6abe68c9c37879ae3cced56a8e088b1649e5b269eee
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
