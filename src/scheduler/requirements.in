@@ -26,6 +26,6 @@ importlib-metadata==8.7.0
 maxminddb==2.7.0
 pydantic==2.11.5
 python-magic==0.4.27
-requests==2.32.3
+requests==2.32.4
 schedule==1.2.2
 urllib3<2.0.0
