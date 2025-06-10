@@ -333,6 +333,18 @@ class ScalewayProvider(Provider):
     )
 
 
+class NjallaProvider(Provider):
+    """Njalla DNS provider."""
+
+    dns_njalla_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_njalla_token": ("dns_njalla_token", "njalla_token", "token", "api_token", "auth_token"),
+        }
+    )
+
+
 class WildcardGenerator:
     """Manages the generation of wildcard domains across domain groups."""
 
