@@ -79,7 +79,18 @@ function badbehavior:log()
 	if not ok then
 		return self:ret(false, "can't add incr operation : " .. err)
 	end
-	self:set_metric("counters", status, 1)
+	self:set_metric("counters", "status_" .. status, 1)
+	self:set_metric("counters", "ip_" .. self.ctx.bw.remote_addr, 1)
+	self:set_metric("counters", "url_" .. self.ctx.bw.request_uri, 1)
+	self:set_metric("tables", "increments", {
+		date = self.ctx.bw.start_time,
+		id = self.ctx.bw.request_id,
+		ip = self.ctx.bw.remote_addr,
+		server_name = self.ctx.bw.server_name,
+		status = status,
+		method = self.ctx.bw.request_method,
+		url = self.ctx.bw.request_uri,
+	})
 	return self:ret(true, "success")
 end
 
