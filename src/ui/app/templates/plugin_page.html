@@ -174,7 +174,7 @@
                                                             {% for val_key in value['data'] %}
                                                                 <th>{{ val_key|trim }}</th>
                                                                 {% set ns_list.size = value['data'][val_key]|length if
-                                                                                                                                    value['data'][val_key]|length > ns_list.size else ns_list.size %}
+                                                                                                                                value['data'][val_key]|length > ns_list.size else ns_list.size %}
                                                             {% endfor %}
                                                         {% endif %}
                                                     </tr>

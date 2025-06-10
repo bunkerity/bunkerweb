@@ -3,6 +3,7 @@ from operator import itemgetter
 from traceback import format_exc
 from datetime import datetime
 
+
 def pre_render(**kwargs):
     logger = getLogger("UI")
     ret = {
@@ -80,10 +81,7 @@ def pre_render(**kwargs):
                     )
 
         # Format data for top_bad_behavior_status
-        format_data = [
-            {"code": code, "count": count}
-            for code, count in status_counts.items()
-        ]
+        format_data = [{"code": code, "count": count} for code, count in status_counts.items()]
         format_data.sort(key=itemgetter("count"), reverse=True)
         data = {"code": [], "count": []}
         for item in format_data:
@@ -92,10 +90,7 @@ def pre_render(**kwargs):
         ret["top_bad_behavior_status"]["data"] = data
 
         # Format data for top_bad_behavior_ips
-        format_data = [
-            {"ip": ip, "count": count}
-            for ip, count in ips_counts.items()
-        ]
+        format_data = [{"ip": ip, "count": count} for ip, count in ips_counts.items()]
         format_data.sort(key=itemgetter("count"), reverse=True)
         data = {"ip": [], "count": []}
         for item in format_data:
@@ -104,10 +99,7 @@ def pre_render(**kwargs):
         ret["top_bad_behavior_ips"]["data"] = data
 
         # Format data for top_bad_behavior_urls
-        format_data = [
-            {"url": url, "count": count}
-            for url, count in urls_counts.items()
-        ]
+        format_data = [{"url": url, "count": count} for url, count in urls_counts.items()]
         format_data.sort(key=itemgetter("count"), reverse=True)
         data = {"url": [], "count": []}
         for item in format_data:

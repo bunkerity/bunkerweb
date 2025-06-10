@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from contextlib import suppress
 from glob import glob
 from os import R_OK, W_OK, X_OK, access, getenv, sep
 from os.path import join
@@ -14,8 +13,6 @@ from typing import Any, Dict
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
-
-from jinja2 import Undefined
 
 from logger import setup_logger  # type: ignore
 from Configurator import Configurator
