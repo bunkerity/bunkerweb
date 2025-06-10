@@ -20,6 +20,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    op.execute("ALTER TYPE settings_types_enum ADD VALUE IF NOT EXISTS 'multiselect'")
+
     op.create_table(
         "bw_multiselects",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),

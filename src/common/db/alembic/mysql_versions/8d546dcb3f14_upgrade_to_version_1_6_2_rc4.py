@@ -34,6 +34,14 @@ def upgrade() -> None:
         sa.UniqueConstraint("setting_id", "order"),
     )
 
+    with op.batch_alter_table("bw_settings") as batch_op:
+        batch_op.alter_column(
+            "type",
+            existing_type=mysql.ENUM("password", "text", "check", "select"),
+            type_=mysql.ENUM("password", "text", "check", "select", "multiselect"),
+            existing_nullable=False,
+        )
+
     with op.batch_alter_table("bw_ui_user_sessions") as batch_op:
         batch_op.alter_column("id", existing_type=mysql.VARCHAR(length=256), type_=sa.Integer(), existing_nullable=False, autoincrement=True)
 
@@ -44,6 +52,14 @@ def upgrade() -> None:
 def downgrade() -> None:
     with op.batch_alter_table("bw_ui_user_sessions") as batch_op:
         batch_op.alter_column("id", existing_type=sa.Integer(), type_=mysql.VARCHAR(length=256), existing_nullable=False, autoincrement=True)
+
+    with op.batch_alter_table("bw_settings") as batch_op:
+        batch_op.alter_column(
+            "type",
+            existing_type=mysql.ENUM("password", "text", "check", "select", "multiselect"),
+            type_=mysql.ENUM("password", "text", "check", "select"),
+            existing_nullable=False,
+        )
 
     op.drop_table("bw_multiselects")
 
