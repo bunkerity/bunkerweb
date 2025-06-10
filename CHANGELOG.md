@@ -8,7 +8,7 @@
 - [MISC] Optimize variable loading during the init phase to improve startup performance
 - [DEPS] Update coreruleset-v4 version to v4.15.0
 
-## v1.6.2-rc3 - ????/??/??
+## v1.6.2-rc3 - 2025/06/06
 
 - [BUGFIX] Refactor CLI command handling to support additional arguments
 - [DOCS] Update the documentation about the `all-in-one` image to include the new features and improvements, also move it to its own section
