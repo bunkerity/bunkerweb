@@ -245,8 +245,8 @@ def certbot_new(
             command.extend(["--rsa-key-size", "4096"])
 
         # * Adding plugin argument
-        if provider in ("desec", "infomaniak", "ionos", "scaleway"):
-            # ? Desec, Infomaniak, IONOS and Scaleway plugins use different arguments
+        if provider in ("desec", "infomaniak", "ionos", "njalla", "scaleway"):
+            # ? Desec, Infomaniak, IONOS, Njalla and Scaleway plugins use different arguments
             command.extend(["--authenticator", f"dns-{provider}"])
         else:
             command.append(f"--dns-{provider}")
