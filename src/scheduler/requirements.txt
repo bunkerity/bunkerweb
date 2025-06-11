@@ -136,6 +136,9 @@ certbot-dns-sakuracloud==4.0.0 \
     --hash=sha256:627f4c5bc6cd1a52f627b0763eff614f4229108c247d3a3a07124b10f12a74f9 \
     --hash=sha256:b658870de64ffab5f302575f391b8b37774a1cd5d294e8dbbe6db46a794bdd36
     # via -r requirements.in
+certbot-dns-njalla==2.0.2 \
+    --hash=sha256:668f91f3027edd4c4cbca99095fd5ec66d4ccefcb4b9366367873e25e624e1bd
+    # via -r requirements.in
 certbot-dns-scaleway==0.0.7 \
     --hash=sha256:999dda5b8689277facb77e1757b8a6b207baeecc0ded0c27aea2c51331affc92 \
     --hash=sha256:bc0833ed71a5cd314a93f8d02144c54e17066ee1e2b950ed868b14b2211f5e9e
