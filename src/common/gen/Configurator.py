@@ -44,7 +44,7 @@ class Configurator:
         self.__mandatory_job_keys = frozenset(("name", "file", "every", "reload"))
         self.__valid_stream_values = frozenset(("yes", "no", "partial"))
         self.__valid_contexts = frozenset(("global", "multisite"))
-        self.__valid_setting_types = frozenset(("password", "text", "check", "select"))
+        self.__valid_setting_types = frozenset(("password", "text", "check", "select", "multiselect"))
         self.__valid_job_every_values = frozenset(("once", "minute", "hour", "day", "week"))
 
         # Pre-compile regex patterns cache

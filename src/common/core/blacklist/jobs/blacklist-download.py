@@ -58,9 +58,10 @@ status = 0
 
 KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT", "IGNORE_URI")
 
-KINDS_URLS_DEFAULTS = {
-    "IP": "https://www.dan.me.uk/torlist/?exit",
-    "USER_AGENT": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
+COMMUNITY_LISTS = {
+    "ip:laurent-minne-fr-be-agressive": "https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt",
+    "ip:danmeuk-tor-exit": "https://www.dan.me.uk/torlist/?exit",
+    "ua:mitchellkrogza-bad-user-agents": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
 }
 
 try:
@@ -86,11 +87,37 @@ try:
                 services_blacklist_urls[first_server] = {}
                 for kind in KINDS:
                     services_blacklist_urls[first_server][kind] = set()
-                    for url in (
-                        getenv(f"{first_server}_BLACKLIST_{kind}_URLS", getenv(f"BLACKLIST_{kind}_URLS", KINDS_URLS_DEFAULTS.get(kind, ""))).strip().split(" ")
-                    ):
+                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", getenv(f"BLACKLIST_{kind}_URLS", "")).strip().split(" "):
                         if url:
                             services_blacklist_urls[first_server][kind].add(url)
+
+                # Add community blacklist URLs
+                community_lists = getenv(
+                    f"{first_server}_BLACKLIST_COMMUNITY_LISTS", getenv("BLACKLIST_COMMUNITY_LISTS", "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents")
+                ).strip()
+                for community_id in community_lists.split(" "):
+                    if not community_id:
+                        continue
+
+                    if community_id in COMMUNITY_LISTS:
+                        url = COMMUNITY_LISTS[community_id]
+                        # Determine kind from prefix
+                        prefix = community_id.split(":", 1)[0].lower()
+                        if prefix == "ip":
+                            kind = "IP"
+                        elif prefix == "ua":
+                            kind = "USER_AGENT"
+                        elif prefix == "rdns":
+                            kind = "RDNS"
+                        elif prefix == "asn":
+                            kind = "ASN"
+                        elif prefix == "uri":
+                            kind = "URI"
+                        else:
+                            kind = "IP"  # Default fallback
+                        services_blacklist_urls[first_server][kind].add(url)
+                    else:
+                        LOGGER.warning(f"Community blacklist {community_id} not found in predefined lists")
     # Singlesite case
     elif getenv("USE_BLACKLIST", "yes") == "yes":
         blacklist_activated = True
@@ -99,9 +126,35 @@ try:
         services_blacklist_urls[services[0]] = {}
         for kind in KINDS:
             services_blacklist_urls[services[0]][kind] = set()
-            for url in getenv(f"BLACKLIST_{kind}_URLS", KINDS_URLS_DEFAULTS.get(kind, "")).strip().split(" "):
+            for url in getenv(f"BLACKLIST_{kind}_URLS", "").strip().split(" "):
                 if url:
                     services_blacklist_urls[services[0]][kind].add(url)
+
+        # Add community blacklist URLs for singlesite
+        community_lists = getenv("BLACKLIST_COMMUNITY_LISTS", "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents").strip()
+        for community_id in community_lists.split(" "):
+            if not community_id:
+                continue
+
+            if community_id in COMMUNITY_LISTS:
+                url = COMMUNITY_LISTS[community_id]
+                # Determine kind from prefix
+                prefix = community_id.split(":", 1)[0].lower()
+                if prefix == "ip":
+                    kind = "IP"
+                elif prefix == "ua":
+                    kind = "USER_AGENT"
+                elif prefix == "rdns":
+                    kind = "RDNS"
+                elif prefix == "asn":
+                    kind = "ASN"
+                elif prefix == "uri":
+                    kind = "URI"
+                else:
+                    kind = "IP"  # Default fallback
+                services_blacklist_urls[services[0]][kind].add(url)
+            else:
+                LOGGER.warning(f"Community blacklist {community_id} not found in predefined lists")
 
     if not blacklist_activated:
         LOGGER.info("Blacklist is not activated, skipping downloads...")

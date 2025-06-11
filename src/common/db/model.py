@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
-SETTINGS_TYPES_ENUM = Enum("password", "text", "check", "select", name="settings_types_enum")
+SETTINGS_TYPES_ENUM = Enum("password", "text", "check", "select", "multiselect", name="settings_types_enum")
 METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
@@ -79,6 +79,7 @@ class Settings(Base):
     order = Column(Integer, default=0, nullable=False)
 
     selects = relationship("Selects", back_populates="setting", cascade="all")
+    multiselects = relationship("Multiselects", back_populates="setting", cascade="all")
     services = relationship("Services_settings", back_populates="setting", cascade="all")
     global_value = relationship("Global_values", back_populates="setting", cascade="all")
     templates = relationship("Template_settings", back_populates="setting", cascade="all")
@@ -98,6 +99,23 @@ class Selects(Base):
     order = Column(Integer, default=0, nullable=False)
 
     setting = relationship("Settings", back_populates="selects")
+
+
+class Multiselects(Base):
+    __tablename__ = "bw_multiselects"
+    __table_args__ = (
+        UniqueConstraint("setting_id", "option_id"),
+        UniqueConstraint("setting_id", "order"),
+    )
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    option_id = Column(String(256), nullable=False)
+    label = Column(String(256), nullable=False)
+    value = Column(Text, nullable=True, default="")
+    order = Column(Integer, default=0, nullable=False)
+
+    setting = relationship("Settings", back_populates="multiselects")
 
 
 class Global_values(Base):
@@ -326,7 +344,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.2-rc3", nullable=False)
+    version = Column(String(32), default="1.6.2-rc4", nullable=False)
 
 
 ## UI Models

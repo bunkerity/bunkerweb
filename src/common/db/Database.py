@@ -35,6 +35,7 @@ from model import (
     Jobs_runs,
     Custom_configs,
     Selects,
+    Multiselects,
     Bw_cli_commands,
     Templates,
     Template_steps,
@@ -459,7 +460,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.2-rc3"
+                return "1.6.2-rc4"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -491,7 +492,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.2-rc3",
+            "version": "1.6.2-rc4",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -656,6 +657,11 @@ class Database:
             for sel in old_data.get("bw_selects", []):
                 old_selects[(sel.setting_id, self._empty_if_none(sel.value), sel.order)] = sel
 
+            # For multiselects:
+            old_multiselects = {}
+            for msel in old_data.get("bw_multiselects", []):
+                old_multiselects[(msel.setting_id, msel.option_id, msel.label, self._empty_if_none(msel.value), msel.order)] = msel
+
             # For jobs:
             old_jobs = {}
             for j in old_data.get("bw_jobs", []):
@@ -690,6 +696,7 @@ class Database:
             desired_plugins = {}
             desired_settings = {}
             desired_selects = set()
+            desired_multiselects = set()
             desired_jobs = {}
             desired_plugin_pages = {}
             desired_cli_commands = {}
@@ -761,8 +768,9 @@ class Database:
                     plugin_saved_settings = set()
                     for setting_key, value in settings.items():
                         # setting_key is e.g. "my_setting"
-                        # value should contain "id", "select", etc.
+                        # value should contain "id", "select", "multiselect", etc.
                         select_values = value.pop("select", [])
+                        multiselect_values = value.pop("multiselect", [])
                         # The main setting id:
                         setting_id = setting_key
                         # Ensure plugin_id and name in the value
@@ -774,6 +782,11 @@ class Database:
                         desired_settings[(base_plugin["id"], setting_id)] = value
                         desired_selects.update(
                             (setting_id, self._empty_if_none(sel_val), sel_order) for sel_order, sel_val in enumerate(select_values, start=1)
+                        )
+                        desired_multiselects.update(
+                            (setting_id, msel_val.get("id", ""), msel_val.get("label", ""), self._empty_if_none(msel_val.get("value", "")), msel_order)
+                            for msel_order, msel_val in enumerate(multiselect_values, start=1)
+                            if isinstance(msel_val, dict)
                         )
                         plugin_saved_settings.add(setting_id)
                         order += 1
@@ -1027,6 +1040,17 @@ class Database:
             for sel in desired_selects:
                 to_put.append(Selects(setting_id=sel[0], value=self._empty_if_none(sel[1]), order=sel[2]))
 
+            # Handle multiselects similar to selects
+            settings_being_updated_multiselects = set()
+            settings_being_updated_multiselects.update({msel[0] for msel in desired_multiselects})
+
+            for setting_id in settings_being_updated_multiselects:
+                to_delete.append({"type": "multiselect", "filter": {"setting_id": setting_id}})
+
+            # Now insert all new multiselects
+            for msel in desired_multiselects:
+                to_put.append(Multiselects(setting_id=msel[0], option_id=msel[1], label=msel[2], value=self._empty_if_none(msel[3]), order=msel[4]))
+
             # Delete old selects not needed (for settings not in our updated list)
             for sel in old_select_keys - desired_selects:
                 if sel[0] not in settings_being_updated:  # Only delete if not already handled above
@@ -1232,6 +1256,8 @@ class Database:
                         session.query(Template_custom_configs).filter_by(**delete["filter"]).delete()
                     elif t == "select":
                         session.query(Selects).filter_by(**delete["filter"]).delete()
+                    elif t == "multiselect":
+                        session.query(Multiselects).filter_by(**delete["filter"]).delete()
                     elif t == "plugin":
                         session.query(Plugins).filter_by(**delete["filter"]).delete()
 
@@ -2628,6 +2654,7 @@ class Database:
                         # Remove settings that are no longer in the list
                         session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
                         session.query(Selects).filter(Selects.setting_id.in_(missing_ids)).delete()
+                        session.query(Multiselects).filter(Multiselects.setting_id.in_(missing_ids)).delete()
                         session.query(Services_settings).filter(Services_settings.setting_id.in_(missing_ids)).delete()
                         session.query(Global_values).filter(Global_values.setting_id.in_(missing_ids)).delete()
                         session.query(Template_settings).filter(Template_settings.setting_id.in_(missing_ids)).delete()
@@ -2659,6 +2686,18 @@ class Database:
                             changes = True
                             for sel_order, select in enumerate(value.pop("select", []), start=1):
                                 to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))
+
+                            for msel_order, multiselect in enumerate(value.pop("multiselect", []), start=1):
+                                if isinstance(multiselect, dict):
+                                    to_put.append(
+                                        Multiselects(
+                                            setting_id=setting,
+                                            option_id=multiselect.get("id", ""),
+                                            label=multiselect.get("label", ""),
+                                            value=self._empty_if_none(multiselect.get("value", "")),
+                                            order=msel_order,
+                                        )
+                                    )
 
                             to_put.append(Settings(**value | {"order": order}))
                         else:
@@ -2709,6 +2748,37 @@ class Database:
                                 # Add new selects with the new values
                                 for sel_order, select in enumerate(value.get("select", []), start=1):
                                     to_put.append(Selects(setting_id=setting, value=self._empty_if_none(select), order=sel_order))
+
+                            # Handle multiselects
+                            db_multiselect_values = [
+                                (msel.option_id, msel.label, self._empty_if_none(msel.value), msel.order)
+                                for msel in session.query(Multiselects)
+                                .with_entities(Multiselects.option_id, Multiselects.label, Multiselects.value, Multiselects.order)
+                                .filter_by(setting_id=setting)
+                            ]
+                            multiselect_values = [
+                                (msel.get("id", ""), msel.get("label", ""), self._empty_if_none(msel.get("value", "")), order)
+                                for order, msel in enumerate(value.get("multiselect", []), start=1)
+                                if isinstance(msel, dict)
+                            ]
+                            different_multiselect_values = db_multiselect_values != multiselect_values
+
+                            if different_multiselect_values:
+                                changes = True
+                                # Remove old multiselects
+                                session.query(Multiselects).filter(Multiselects.setting_id == setting).delete()
+                                # Add new multiselects with the new values
+                                for msel_order, multiselect in enumerate(value.get("multiselect", []), start=1):
+                                    if isinstance(multiselect, dict):
+                                        to_put.append(
+                                            Multiselects(
+                                                setting_id=setting,
+                                                option_id=multiselect.get("id", ""),
+                                                label=multiselect.get("label", ""),
+                                                value=self._empty_if_none(multiselect.get("value", "")),
+                                                order=msel_order,
+                                            )
+                                        )
 
                         order += 1
 
@@ -3132,6 +3202,18 @@ class Database:
                     for sel_order, select in enumerate(value.pop("select", []), start=1):
                         to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))
 
+                    for msel_order, multiselect in enumerate(value.pop("multiselect", []), start=1):
+                        if isinstance(multiselect, dict):
+                            to_put.append(
+                                Multiselects(
+                                    setting_id=value["id"],
+                                    option_id=multiselect.get("id", ""),
+                                    label=multiselect.get("label", ""),
+                                    value=self._empty_if_none(multiselect.get("value", "")),
+                                    order=msel_order,
+                                )
+                            )
+
                     to_put.append(Settings(**value | {"order": order}))
                     order += 1
                     plugin_settings.add(setting)
@@ -3342,6 +3424,7 @@ class Database:
             session.query(Plugins).filter_by(id=plugin_id, method=method).delete()
             for db_setting in session.query(Settings).filter_by(plugin_id=plugin_id).all():
                 session.query(Selects).filter_by(setting_id=db_setting.id).delete()
+                session.query(Multiselects).filter_by(setting_id=db_setting.id).delete()
                 session.query(Services_settings).filter_by(setting_id=db_setting.id).delete()
                 session.query(Global_values).filter_by(setting_id=db_setting.id).delete()
                 session.query(Template_settings).filter_by(setting_id=db_setting.id).delete()
@@ -3426,6 +3509,16 @@ class Database:
                 for sel in selects:
                     selects_map.setdefault(sel.setting_id, []).append(self._empty_if_none(sel.value))
 
+            # Pre-fetch multiselects for settings of type "multiselect".
+            multiselect_setting_ids = [s.id for s in settings_rows if s.type == "multiselect"]
+            multiselects_map: Dict[str, List[Dict[str, Any]]] = {}
+            if multiselect_setting_ids:
+                multiselects = session.query(Multiselects).filter(Multiselects.setting_id.in_(multiselect_setting_ids)).order_by(Multiselects.order).all()
+                for msel in multiselects:
+                    multiselects_map.setdefault(msel.setting_id, []).append(
+                        {"id": msel.option_id, "label": msel.label, "value": self._empty_if_none(msel.value)}
+                    )
+
             # Pre-fetch bw_cli commands.
             commands_rows = session.query(Bw_cli_commands).filter(Bw_cli_commands.plugin_id.in_(plugin_ids)).all()
             commands_map: Dict[str, Dict[str, Any]] = {}
@@ -3464,6 +3557,8 @@ class Database:
                         setting_data["multiple"] = setting.multiple
                     if setting.type == "select":
                         setting_data["select"] = selects_map.get(setting.id, [])
+                    elif setting.type == "multiselect":
+                        setting_data["multiselect"] = multiselects_map.get(setting.id, [])
                     plugin_data["settings"][setting.id] = setting_data
 
                 if plugin.id in commands_map:

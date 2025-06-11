@@ -271,6 +271,8 @@
                                     </div>
                                     {% if setting_data["type"] == "select" %}
                                         {% include "models/select_setting.html" %}
+                                    {% elif setting_data["type"] == "multiselect" %}
+                                        {% include "models/multiselect_setting.html" %}
                                     {% elif setting_data["type"] == "check" %}
                                         {% include "models/checkbox_setting.html" %}
                                     {% else %}
@@ -413,6 +415,8 @@
                                                                 </div>
                                                                 {% if setting_data["type"] == "select" %}
                                                                     {% include "models/select_setting.html" %}
+                                                                {% elif setting_data["type"] == "multiselect" %}
+                                                                    {% include "models/multiselect_setting.html" %}
                                                                 {% elif setting_data["type"] == "check" %}
                                                                     {% include "models/checkbox_setting.html" %}
                                                                 {% else %}
