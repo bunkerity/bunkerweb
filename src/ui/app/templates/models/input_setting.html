@@ -10,7 +10,7 @@
            data-default="{{ setting_default }}"
            {% if setting_data['type'] == 'password' %}autocomplete="off"{% endif %}
            {% if disabled %}disabled{% endif %}
-           {% if required %}required{% endif %}
+           {% if setting == 'SERVER_NAME' or required %}required{% endif %}
            {% if input_readonly %}readonly{% endif %}>
     <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
            class="text-truncate">{{ setting }}</label>

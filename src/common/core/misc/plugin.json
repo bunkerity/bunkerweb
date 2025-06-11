@@ -29,7 +29,7 @@
       "help": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
       "id": "allowed-methods",
       "label": "Allowed methods",
-      "regex": "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
+      "regex": "^(?!\\|)(\\|?[A-Z]{3,})+$",
       "type": "text"
     },
     "MAX_CLIENT_SIZE": {
@@ -146,7 +146,7 @@
       "help": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
       "id": "external-plugin-urls",
       "label": "External plugin URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
       "type": "text"
     },
     "DENY_HTTP_STATUS": {

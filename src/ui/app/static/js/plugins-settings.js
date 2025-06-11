@@ -1090,6 +1090,138 @@ $(document).ready(() => {
       if (!allStepsValid) return;
     }
 
+    // For advanced mode, validate all plugin settings before saving
+    if (currentMode === "advanced") {
+      let allValid = true;
+      let firstInvalidPlugin = null;
+      let firstInvalidInput = null;
+
+      // Validate all plugin containers
+      $("div[id^='navs-plugins-']").each(function () {
+        const $pluginContainer = $(this);
+        const pluginId = $pluginContainer
+          .attr("id")
+          .replace("navs-plugins-", "");
+        let pluginHasErrors = false;
+
+        // Check all inputs in this plugin
+        $pluginContainer.find(".plugin-setting").each(function () {
+          const $input = $(this);
+          let value = $input.val();
+          const isRequired = $input.prop("required");
+          const pattern = $input.attr("pattern");
+          let $label = $(`label[for="${$input.attr("id")}"]`);
+          let fieldName =
+            $input.attr("name") || t("validation.default_field_name");
+
+          // Handle multiselect hidden inputs
+          if (
+            $input.is('input[type="hidden"]') &&
+            $input.closest(".dropdown").find(".multiselect-toggle").length
+          ) {
+            const $dropdown = $input.closest(".dropdown");
+            const $toggleLabel = $dropdown.find(".multiselect-toggle label");
+            if ($toggleLabel.length) {
+              $label = $toggleLabel;
+            }
+          }
+
+          if ($label.length) {
+            const i18nKey = $label.attr("data-i18n");
+            const labelText = $label
+              .text()
+              .trim()
+              .replace(/\(optional\)$/i, "")
+              .replace(/\(\d+ selected\)$/i, "")
+              .trim();
+            fieldName = i18nKey ? t(i18nKey, labelText) : labelText;
+          }
+
+          // Custom error messages
+          const requiredMessage = t("validation.required", {
+            field: fieldName,
+          });
+          const patternMessage = t("validation.pattern", {
+            field: fieldName,
+          });
+
+          let errorMessage = "";
+          let isValid = true;
+
+          // Check if the field is required and not empty
+          if (isRequired && value === "") {
+            errorMessage = requiredMessage;
+            isValid = false;
+          }
+
+          // Validate based on pattern if the input is not empty
+          if (isValid && pattern && value !== "") {
+            try {
+              const regex = new RegExp(pattern);
+              if (!regex.test(value)) {
+                errorMessage = patternMessage;
+                isValid = false;
+              }
+            } catch (e) {
+              console.error(
+                "Invalid regex pattern:",
+                pattern,
+                "for input:",
+                $input.attr("id"),
+              );
+              errorMessage = t("validation.pattern", { field: fieldName });
+              isValid = false;
+            }
+          }
+
+          // Toggle valid/invalid classes
+          $input.toggleClass("is-invalid", !isValid);
+
+          // Manage the invalid-feedback element
+          let $feedback = $input.next(".invalid-feedback");
+          if (!$feedback.length) {
+            $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+              $input,
+            );
+          }
+
+          if (!isValid) {
+            $feedback.text(errorMessage);
+            allValid = false;
+            pluginHasErrors = true;
+
+            // Store the first invalid input for focusing later
+            if (!firstInvalidInput) {
+              firstInvalidInput = $input;
+              firstInvalidPlugin = pluginId;
+            }
+          } else {
+            $feedback.text("");
+          }
+        });
+      });
+
+      // If validation failed, navigate to the first invalid plugin and focus on the error
+      if (!allValid && firstInvalidPlugin && firstInvalidInput) {
+        // Navigate to the plugin with the first error
+        const $targetPlugin = $(
+          `.plugin-navigation-item[data-plugin='${firstInvalidPlugin}']`,
+        );
+        if ($targetPlugin.length) {
+          $targetPlugin.trigger("click");
+
+          // After navigation, highlight and focus the invalid input
+          setTimeout(() => {
+            const $setting = firstInvalidInput.closest(".col-12");
+            highlightSettings($setting);
+            firstInvalidInput.focus();
+          }, 300);
+        }
+
+        return; // Don't proceed with saving if validation fails
+      }
+    }
+
     // If all validations pass, submit the form
     const form = getFormFromSettings($(this));
 
@@ -1899,37 +2031,6 @@ $(document).ready(() => {
         const $checkbox = $(this).find('input[type="checkbox"]');
         $checkbox.prop("checked", !$checkbox.prop("checked")).trigger("change");
       }
-    }
-  });
-
-  // Reset functionality for multiselect dropdowns
-  $(document).on("click", ".reset-setting", function (e) {
-    const $dropdown = $(this).closest("div").find(".dropdown");
-    if ($dropdown.find(".multiselect-toggle").length) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const isGlobal = $(this)
-        .attr("data-bs-original-title")
-        .includes("global");
-      const $hiddenInput = $dropdown.find('input[type="hidden"]');
-      const valueToSet = isGlobal
-        ? $hiddenInput.data("original") || ""
-        : $hiddenInput.data("default") || "";
-
-      // Split the value and update checkboxes
-      const selectedIds = valueToSet.trim() ? valueToSet.split(" ") : [];
-
-      $dropdown.find('input[type="checkbox"]').each(function () {
-        const isSelected = selectedIds.includes($(this).val());
-        $(this).prop("checked", isSelected);
-      });
-
-      updateMultiselectDisplay($dropdown);
-
-      // Highlight the setting to indicate it's been reset
-      const $setting = $dropdown.closest(".col-12");
-      highlightSettings($setting);
     }
   });
 

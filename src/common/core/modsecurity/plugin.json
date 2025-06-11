@@ -86,7 +86,7 @@
       "help": "SecAuditLogParts directive of ModSecurity.",
       "id": "modsecurity-sec-audit-log-parts",
       "label": "SecAuditLogParts",
-      "regex": "^A(([B-K])(?!.*\\2))+Z$",
+      "regex": "^A[B-K]+Z$",
       "type": "text"
     },
     "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {
