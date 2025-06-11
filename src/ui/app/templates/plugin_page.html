@@ -162,53 +162,30 @@
                                             <table id="table-{{ key.replace('_', '-') }}" class="table w-100 d-none">
                                                 <thead>
                                                     <tr>
-                                                        {% if key.startswith("list_") %}
-                                                            {% if value['data'] %}
-                                                                {% for
-                                                                    header_key in value['data'][0].keys() %}
-                                                                    <th>{{ header_key|trim }}</th>
-                                                                {% endfor %}
-                                                            {% endif %}
-                                                        {% else %}
-                                                            {% set ns_list = namespace(size=0) %}
-                                                            {% for val_key in value['data'] %}
-                                                                <th>{{ val_key|trim }}</th>
-                                                                {% set ns_list.size = value['data'][val_key]|length if
-                                                                                                                                value['data'][val_key]|length > ns_list.size else ns_list.size %}
-                                                            {% endfor %}
-                                                        {% endif %}
+                                                        {% set ns_list = namespace(size=0) %}
+                                                        {% for val_key in value['data'] %}
+                                                            <th>{{ val_key|trim }}</th>
+                                                            {% set ns_list.size = value['data'][val_key]|length if
+                                                                                                                        value['data'][val_key]|length > ns_list.size else ns_list.size %}
+                                                        {% endfor %}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {% if key.startswith("list_") %}
-                                                        {% for item in value['data'] %}
-                                                            <tr>
-                                                                {% for item_key, item_value in item.items() %}<td>{{ item_value|trim }}</td>{% endfor %}
-                                                            </tr>
-                                                        {% endfor %}
-                                                    {% else %}
-                                                        {% for n in range(ns_list.size) %}
-                                                            <tr>
-                                                                {% for val_key, items in value['data'].items() %}
-                                                                    <td>
-                                                                        {{ items[n]|trim if n < items|length else '' }}
-                                                                    </td>
-                                                                {% endfor %}
-                                                            </tr>
-                                                        {% endfor %}
-                                                    {% endif %}
+                                                    {% for n in range(ns_list.size) %}
+                                                        <tr>
+                                                            {% for val_key, items in value['data'].items() %}
+                                                                <td>
+                                                                    {{ items[n]|trim if n < items|length else '' }}
+                                                                </td>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
                                                 </tbody>
                                             </table>
                                         </div>
-                                        {% if key.startswith("list_") %}
-                                            <input type="hidden"
-                                                   id="table-{{ key.replace('_', '-') }}-length"
-                                                   value="{{ value['data']|length }}" />
-                                        {% else %}
-                                            <input type="hidden"
-                                                   id="table-{{ key.replace('_', '-') }}-length"
-                                                   value="{{ ns_list.size }}" />
-                                        {% endif %}
+                                        <input type="hidden"
+                                               id="table-{{ key.replace('_', '-') }}-length"
+                                               value="{{ ns_list.size }}" />
                                     {% else %}
                                         <div class="d-flex align-items-center justify-content-center h-100">
                                             <div class="text-center mt-2">

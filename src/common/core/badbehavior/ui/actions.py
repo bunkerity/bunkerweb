@@ -47,41 +47,15 @@ def pre_render(**kwargs):
     try:
         metrics = kwargs["bw_instances_utils"].get_metrics("badbehavior")
 
-        # Dictionaries to accumulate data
-        status_counts = {}
-        ips_counts = {}
-        urls_counts = {}
-        increments_data = []
-
-        # Process all metrics in a single loop
-        for key, value in metrics.items():
-            if key.startswith("counter_status_"):
-                # Process counters for top_bad_behavior_status
-                code = int(key.split("_")[2])
-                status_counts[code] = int(value)
-            elif key.startswith("counter_ip_"):
-                ip = key.split("_")[2]
-                ips_counts[ip] = int(value)
-            elif key.startswith("counter_url_"):
-                url = key.split("_", 2)[2]  # Use split with maxsplit=2 to handle URLs with underscores
-                urls_counts[url] = int(value)
-            elif key == "table_increments":
-                # Process increments for list_bad_behavior_history
-                for increment in value:
-                    increments_data.append(
-                        {
-                            "date": datetime.fromtimestamp(increment["date"]).isoformat(),
-                            "id": increment["id"],
-                            "ip": increment["ip"],
-                            "server_name": increment["server_name"],
-                            "method": increment["method"],
-                            "url": increment["url"],
-                            "status": increment["status"],
-                        }
-                    )
-
         # Format data for top_bad_behavior_status
-        format_data = [{"code": code, "count": count} for code, count in status_counts.items()]
+        format_data = [
+            {
+                "code": int(key.split("_")[2]),
+                "count": int(value),
+            }
+            for key, value in metrics.items()
+            if key.startswith("counter_status_")
+        ]
         format_data.sort(key=itemgetter("count"), reverse=True)
         data = {"code": [], "count": []}
         for item in format_data:
@@ -90,7 +64,14 @@ def pre_render(**kwargs):
         ret["top_bad_behavior_status"]["data"] = data
 
         # Format data for top_bad_behavior_ips
-        format_data = [{"ip": ip, "count": count} for ip, count in ips_counts.items()]
+        format_data = [
+            {
+                "ip": key.split("_")[2],
+                "count": int(value),
+            }
+            for key, value in metrics.items()
+            if key.startswith("counter_ip_")
+        ]
         format_data.sort(key=itemgetter("count"), reverse=True)
         data = {"ip": [], "count": []}
         for item in format_data:
@@ -99,7 +80,14 @@ def pre_render(**kwargs):
         ret["top_bad_behavior_ips"]["data"] = data
 
         # Format data for top_bad_behavior_urls
-        format_data = [{"url": url, "count": count} for url, count in urls_counts.items()]
+        format_data = [
+            {
+                "url": key.split("_", 2)[2],  # Use split with maxsplit=2 to handle URLs with underscores
+                "count": int(value),
+            }
+            for key, value in metrics.items()
+            if key.startswith("counter_url_")
+        ]
         format_data.sort(key=itemgetter("count"), reverse=True)
         data = {"url": [], "count": []}
         for item in format_data:
@@ -108,7 +96,17 @@ def pre_render(**kwargs):
         ret["top_bad_behavior_urls"]["data"] = data
 
         # Format data for list_bad_behavior_history
-        ret["list_bad_behavior_history"]["data"] = increments_data
+        list_data = {"date": [], "id": [], "ip": [], "server_name": [], "method": [], "url": [], "status": []}
+        if "table_increments" in metrics:
+            for increment in metrics["table_increments"]:
+                list_data["date"].append(datetime.fromtimestamp(increment["date"]).isoformat())
+                list_data["id"].append(increment["id"])
+                list_data["ip"].append(increment["ip"])
+                list_data["server_name"].append(increment["server_name"])
+                list_data["method"].append(increment["method"])
+                list_data["url"].append(increment["url"])
+                list_data["status"].append(increment["status"])
+        ret["list_bad_behavior_history"]["data"] = list_data
 
     except BaseException as e:
         logger.debug(format_exc())

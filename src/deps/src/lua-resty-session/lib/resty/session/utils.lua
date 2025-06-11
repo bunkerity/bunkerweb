@@ -815,31 +815,21 @@ end
 
 
 local hmac_sha256 do
-  local mac
   local hmac
-  local MAC_MAC = "HMAC"
-  local MAC_DIGEST = "sha256"
+  local HMAC_SHA256_DIGEST = "sha256"
 
   local function hmac_sha256_real(key, value)
-    local _, err, output
-    if not hmac then
-      hmac, err = mac.new(key, MAC_MAC, nil, MAC_DIGEST)
-      if err then
-        return nil, err
-      end
-    end
-
-    output, err = hmac:final(value)
-    if not output then
+    local mac, err = hmac.new(key, HMAC_SHA256_DIGEST)
+    if not mac then
       return nil, err
     end
 
-    _, err = hmac:reset()
-    if err then
-      hmac = nil
+    local digest, err = mac:final(value)
+    if not digest then
+      return nil, err
     end
 
-    return output
+    return digest
   end
 
   ---
@@ -858,8 +848,8 @@ local hmac_sha256 do
   -- local key, err = utils.derive_hmac_sha256_key(ikm, nonce)
   -- local mac, err = utils.hmac_sha256(key, "hello")
   hmac_sha256 = function(key, value)
-    if not mac then
-      mac = require("resty.openssl.mac")
+    if not hmac then
+      hmac = require("resty.openssl.hmac")
     end
     hmac_sha256 = hmac_sha256_real
     return hmac_sha256(key, value)

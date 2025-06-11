@@ -7,6 +7,10 @@
 - [MISC] Greatly improve scheduler's performance by optimizing the way it handles environment variables and settings, reducing the number of database queries and improving overall efficiency
 - [MISC] Optimize variable loading during the init phase to improve startup performance
 - [DEPS] Update coreruleset-v4 version to v4.15.0
+- [DEPS] Update lua-resty-session version to 4.1.2
+- [DEPS] Update LuaJIT version to v2.1-20250529
+- [CONTRIBUTION] Thank you @Ablablab for your contribution to the `Headers` plugin
+- [CONTRIBUTION] Thank you @sachin-vcs for your contribution to the `Let's Encrypt` plugin by helping the implementation of the new `Njalla` DNS provider
 
 ## v1.6.2-rc3 - 2025/06/06
 

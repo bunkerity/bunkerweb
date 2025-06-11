@@ -47,6 +47,10 @@
         tooltip: "Date until which the certificate is valid",
       },
       {
+        title: "Preferred Profile",
+        tooltip: "Preferred profile for the certificate",
+      },
+      {
         title: "Challenge",
         tooltip: "Challenge type used for domain validation",
       },
@@ -182,7 +186,7 @@
           viewTotal: true,
           cascadePanes: true,
           collapse: false,
-          columns: [2, 5, 6], // Issuer, Challenge, Key Type
+          columns: [2, 5, 6, 7], // Issuer, Preferred Profile, Challenge and Key Type
         },
       },
       topStart: {},
@@ -400,10 +404,18 @@
         {
           searchPanes: {
             show: true,
+            header: t("searchpane.preferred_profile", "Preferred Profile"),
+            combiner: "or",
+          },
+          targets: 5, // Preferred Profile column
+        },
+        {
+          searchPanes: {
+            show: true,
             header: t("searchpane.challenge", "Challenge"),
             combiner: "or",
           },
-          targets: 5, // Challenge column
+          targets: 6, // Challenge column
         },
         {
           searchPanes: {
@@ -411,7 +423,7 @@
             header: t("searchpane.key_type", "Key Type"),
             combiner: "or",
           },
-          targets: 6, // Key Type column
+          targets: 7, // Key Type column
         },
       ];
     }
@@ -445,6 +457,10 @@
         {
           data: "valid_to",
           title: "Valid To",
+        },
+        {
+          data: "preferred_profile",
+          title: "Preferred Profile",
         },
         {
           data: "challenge",
@@ -492,7 +508,7 @@
     const letsencrypt_config = {
       tableSelector: "#letsencrypt",
       tableName: "letsencrypt",
-      columnVisibilityCondition: (column) => column > 2 && column < 12,
+      columnVisibilityCondition: (column) => column > 2 && column < 13,
       dataTableOptions: {
         columnDefs: buildColumnDefs(),
         order: [[2, "asc"]], // Sort by domain name

@@ -35,6 +35,7 @@ from letsencrypt import (
     IonosProvider,
     LinodeProvider,
     LuaDnsProvider,
+    NjallaProvider,
     NSOneProvider,
     OvhProvider,
     Rfc2136Provider,
@@ -244,8 +245,8 @@ def certbot_new(
             command.extend(["--rsa-key-size", "4096"])
 
         # * Adding plugin argument
-        if provider in ("desec", "infomaniak", "ionos", "scaleway"):
-            # ? Desec, Infomaniak, IONOS and Scaleway plugins use different arguments
+        if provider in ("desec", "infomaniak", "ionos", "njalla", "scaleway"):
+            # ? Desec, Infomaniak, IONOS, Njalla and Scaleway plugins use different arguments
             command.extend(["--authenticator", f"dns-{provider}"])
         else:
             command.append(f"--dns-{provider}")
@@ -344,6 +345,7 @@ try:
                 Type[IonosProvider],
                 Type[LinodeProvider],
                 Type[LuaDnsProvider],
+                Type[NjallaProvider],
                 Type[NSOneProvider],
                 Type[OvhProvider],
                 Type[Rfc2136Provider],
@@ -363,6 +365,7 @@ try:
             "ionos": IonosProvider,
             "linode": LinodeProvider,
             "luadns": LuaDnsProvider,
+            "njalla": NjallaProvider,
             "nsone": NSOneProvider,
             "ovh": OvhProvider,
             "rfc2136": Rfc2136Provider,

@@ -61,6 +61,7 @@ def retrieve_certificates():
         "serial_number": [],
         "fingerprint": [],
         "version": [],
+        "preferred_profile": [],
         "challenge": [],
         "authenticator": [],
         "key_type": [],
@@ -78,6 +79,7 @@ def retrieve_certificates():
             "serial_number": "Unknown",
             "fingerprint": "Unknown",
             "version": "Unknown",
+            "preferred_profile": "Unknown",
             "challenge": "Unknown",
             "authenticator": "Unknown",
             "key_type": "Unknown",
@@ -104,7 +106,9 @@ def retrieve_certificates():
             if renewal_file.exists():
                 with renewal_file.open("r") as f:
                     for line in f:
-                        if line.startswith("pref_challs = "):
+                        if line.startswith("preferred_profile = "):
+                            cert_info["preferred_profile"] = line.split(" = ")[1].strip()
+                        elif line.startswith("pref_challs = "):
                             cert_info["challenge"] = line.split(" = ")[1].strip().split(",")[0]
                         elif line.startswith("authenticator = "):
                             cert_info["authenticator"] = line.split(" = ")[1].strip()
@@ -149,6 +153,7 @@ def letsencrypt_fetch():
                     "serial_number": certs.get("serial_number", [""])[i],
                     "fingerprint": certs.get("fingerprint", [""])[i],
                     "version": certs.get("version", [""])[i],
+                    "preferred_profile": certs.get("preferred_profile", [""])[i],
                     "challenge": certs.get("challenge", [""])[i],
                     "authenticator": certs.get("authenticator", [""])[i],
                     "key_type": certs.get("key_type", [""])[i],

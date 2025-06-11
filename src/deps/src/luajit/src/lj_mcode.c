@@ -98,21 +98,35 @@ static int mcode_setprot(void *p, size_t sz, DWORD prot)
 #define MAP_ANONYMOUS	MAP_ANON
 #endif
 
+/* Check for macOS hardened runtime. */
+#if defined(LUAJIT_ENABLE_OSX_HRT) && LUAJIT_SECURITY_MCODE != 0 && defined(MAP_JIT) && __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 110000
+#include <pthread.h>
+#define MCMAP_CREATE	MAP_JIT
+#else
+#define MCMAP_CREATE	0
+#endif
+
 #define MCPROT_RW	(PROT_READ|PROT_WRITE)
 #define MCPROT_RX	(PROT_READ|PROT_EXEC)
 #define MCPROT_RWX	(PROT_READ|PROT_WRITE|PROT_EXEC)
 #ifdef PROT_MPROTECT
 #define MCPROT_CREATE	(PROT_MPROTECT(MCPROT_RWX))
+#elif MCMAP_CREATE
+#define MCPROT_CREATE	PROT_EXEC
 #else
 #define MCPROT_CREATE	0
 #endif
 
 static void *mcode_alloc_at(jit_State *J, uintptr_t hint, size_t sz, int prot)
 {
-  void *p = mmap((void *)hint, sz, prot|MCPROT_CREATE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+  void *p = mmap((void *)hint, sz, prot|MCPROT_CREATE, MAP_PRIVATE|MAP_ANONYMOUS|MCMAP_CREATE, -1, 0);
   if (p == MAP_FAILED) {
     if (!hint) lj_trace_err(J, LJ_TRERR_MCODEAL);
     p = NULL;
+#if MCMAP_CREATE
+  } else {
+    pthread_jit_write_protect_np(0);
+#endif
   }
   return p;
 }
@@ -125,7 +139,12 @@ static void mcode_free(jit_State *J, void *p, size_t sz)
 
 static int mcode_setprot(void *p, size_t sz, int prot)
 {
+#if MCMAP_CREATE
+  pthread_jit_write_protect_np((prot & PROT_EXEC));
+  return 0;
+#else
   return mprotect(p, sz, prot);
+#endif
 }
 
 #else
