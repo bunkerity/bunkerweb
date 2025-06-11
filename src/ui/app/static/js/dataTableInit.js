@@ -87,6 +87,32 @@ function initializeDataTable(config) {
     }
   }
 
+  if (safeDataTableOptions.infoCallback === undefined) {
+    safeDataTableOptions.infoCallback = function (
+      settings,
+      start,
+      end,
+      max,
+      total,
+    ) {
+      if (total === 0) {
+        return t(
+          `datatable.info_empty_${entityName}`,
+          `No ${entityName} available`,
+        );
+      }
+      return t(
+        `datatable.info_${entityName}`,
+        "Showing _START_ to _END_ of _TOTAL_ entries",
+        {
+          start: start,
+          end: end,
+          total: total,
+        },
+      );
+    };
+  }
+
   // Initialize DataTable
   const dataTable = new DataTable(tableSelector, safeDataTableOptions);
   applyTranslations();
