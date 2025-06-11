@@ -351,7 +351,7 @@ function antibot:prepare_challenge()
 			time_resolve = now_time,
 			type = self.variables["USE_ANTIBOT"],
 			resolved = false,
-			original_uri = self.ctx.bw.uri == self.variables["USE_ANTIBOT"] and "/" or self.ctx.bw.request_uri,
+			original_uri = self.ctx.bw.uri == self.variables["ANTIBOT_URI"] and "/" or self.ctx.bw.request_uri,
 		}
 
 		-- Set type-specific fields

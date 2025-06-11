@@ -2217,9 +2217,11 @@ LJFOLD(HREF TDUP KNUM)
 LJFOLDF(fwd_href_tdup)
 {
   TValue keyv;
+  cTValue *val;
   lj_ir_kvalue(J->L, &keyv, fright);
-  if (lj_tab_get(J->L, ir_ktab(IR(fleft->op1)), &keyv) == niltvg(J2G(J)) &&
-      lj_opt_fwd_href_nokey(J))
+  val = lj_tab_get(J->L, ir_ktab(IR(fleft->op1)), &keyv);
+  /* Check for either nil or the nil value marker in the template table. */
+  if ((tvisnil(val) || tvistab(val)) && lj_opt_fwd_href_nokey(J))
     return lj_ir_kkptr(J, niltvg(J2G(J)));
   return NEXTFOLD;
 }

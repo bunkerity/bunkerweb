@@ -101,11 +101,15 @@ function initializeDataTable(config) {
           `No ${entityName} available`,
         );
       }
-      return t(`datatable.info_${entityName}`, {
-        start: start,
-        end: end,
-        total: total,
-      });
+      return t(
+        `datatable.info_${entityName}`,
+        "Showing _START_ to _END_ of _TOTAL_ entries",
+        {
+          start: start,
+          end: end,
+          total: total,
+        },
+      );
     };
   }
 

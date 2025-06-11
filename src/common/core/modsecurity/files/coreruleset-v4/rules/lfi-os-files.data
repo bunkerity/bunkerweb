@@ -213,6 +213,8 @@ config/custom.php
 config/database.php
 configuration.php
 cpanel/logs
+database.yaml
+database.yml
 data/elasticsearch
 data/kafka
 defaults.inc.php

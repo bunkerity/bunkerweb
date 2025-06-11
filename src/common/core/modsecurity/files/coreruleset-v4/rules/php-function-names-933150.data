@@ -41,7 +41,6 @@ fclose
 file_exists
 file_get_contents
 finfo_open
-fputs
 fsockopen
 ftp_connect
 ftp_get
@@ -124,7 +123,6 @@ mb_eregi_replace
 mb_parse_str
 md5_file
 method_exists
-mkdir
 move_uploaded_file
 mysql_query
 number_format
@@ -185,7 +183,6 @@ readgzfile
 register_shutdown_function
 register_tick_function
 rename_function
-rtrim
 runkit_constant_add
 runkit_constant_redefine
 runkit_function_add
@@ -224,7 +221,6 @@ sqlite_unbuffered_query
 str_replace
 stream_context_create
 stream_socket_client
-strip_tags
 stripcslashes
 stripslashes
 strlen
@@ -239,6 +235,5 @@ uksort
 unserialize
 urldecode
 urlencode
-usort
 var_dump
 zlib_decode

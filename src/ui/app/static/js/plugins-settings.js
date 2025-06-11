@@ -291,11 +291,23 @@ $(document).ready(() => {
 
     currentStepContainer.find(".plugin-setting").each(function () {
       const $input = $(this);
-      const value = $input.val();
+      let value = $input.val();
       const isRequired = $input.prop("required");
       const pattern = $input.attr("pattern");
-      const $label = $(`label[for="${$input.attr("id")}"]`);
+      let $label = $(`label[for="${$input.attr("id")}"]`);
       let fieldName = $input.attr("name") || t("validation.default_field_name");
+
+      // Handle multiselect hidden inputs
+      if (
+        $input.is('input[type="hidden"]') &&
+        $input.closest(".dropdown").find(".multiselect-toggle").length
+      ) {
+        const $dropdown = $input.closest(".dropdown");
+        const $toggleLabel = $dropdown.find(".multiselect-toggle label");
+        if ($toggleLabel.length) {
+          $label = $toggleLabel;
+        }
+      }
 
       if ($label.length) {
         const i18nKey = $label.attr("data-i18n");
@@ -303,6 +315,7 @@ $(document).ready(() => {
           .text()
           .trim()
           .replace(/\(optional\)$/i, "")
+          .replace(/\(\d+ selected\)$/i, "")
           .trim();
         fieldName = i18nKey ? t(i18nKey, labelText) : labelText;
       }
@@ -430,6 +443,23 @@ $(document).ready(() => {
 
         appendHiddenInput(form, settingName, settingValue);
       });
+
+      // Handle multiselect dropdowns
+      elem
+        .find(".dropdown")
+        .has(".multiselect-toggle")
+        .each(function () {
+          const $dropdown = $(this);
+          const $hiddenInput = $dropdown.find(
+            'input[type="hidden"].plugin-setting',
+          );
+
+          if ($hiddenInput.length && $hiddenInput.attr("name")) {
+            const settingName = $hiddenInput.attr("name");
+            const settingValue = $hiddenInput.val() || "";
+            appendHiddenInput(form, settingName, settingValue);
+          }
+        });
     };
 
     // Handle missing CSRF token gracefully
@@ -1058,6 +1088,138 @@ $(document).ready(() => {
       }
 
       if (!allStepsValid) return;
+    }
+
+    // For advanced mode, validate all plugin settings before saving
+    if (currentMode === "advanced") {
+      let allValid = true;
+      let firstInvalidPlugin = null;
+      let firstInvalidInput = null;
+
+      // Validate all plugin containers
+      $("div[id^='navs-plugins-']").each(function () {
+        const $pluginContainer = $(this);
+        const pluginId = $pluginContainer
+          .attr("id")
+          .replace("navs-plugins-", "");
+        let pluginHasErrors = false;
+
+        // Check all inputs in this plugin
+        $pluginContainer.find(".plugin-setting").each(function () {
+          const $input = $(this);
+          let value = $input.val();
+          const isRequired = $input.prop("required");
+          const pattern = $input.attr("pattern");
+          let $label = $(`label[for="${$input.attr("id")}"]`);
+          let fieldName =
+            $input.attr("name") || t("validation.default_field_name");
+
+          // Handle multiselect hidden inputs
+          if (
+            $input.is('input[type="hidden"]') &&
+            $input.closest(".dropdown").find(".multiselect-toggle").length
+          ) {
+            const $dropdown = $input.closest(".dropdown");
+            const $toggleLabel = $dropdown.find(".multiselect-toggle label");
+            if ($toggleLabel.length) {
+              $label = $toggleLabel;
+            }
+          }
+
+          if ($label.length) {
+            const i18nKey = $label.attr("data-i18n");
+            const labelText = $label
+              .text()
+              .trim()
+              .replace(/\(optional\)$/i, "")
+              .replace(/\(\d+ selected\)$/i, "")
+              .trim();
+            fieldName = i18nKey ? t(i18nKey, labelText) : labelText;
+          }
+
+          // Custom error messages
+          const requiredMessage = t("validation.required", {
+            field: fieldName,
+          });
+          const patternMessage = t("validation.pattern", {
+            field: fieldName,
+          });
+
+          let errorMessage = "";
+          let isValid = true;
+
+          // Check if the field is required and not empty
+          if (isRequired && value === "") {
+            errorMessage = requiredMessage;
+            isValid = false;
+          }
+
+          // Validate based on pattern if the input is not empty
+          if (isValid && pattern && value !== "") {
+            try {
+              const regex = new RegExp(pattern);
+              if (!regex.test(value)) {
+                errorMessage = patternMessage;
+                isValid = false;
+              }
+            } catch (e) {
+              console.error(
+                "Invalid regex pattern:",
+                pattern,
+                "for input:",
+                $input.attr("id"),
+              );
+              errorMessage = t("validation.pattern", { field: fieldName });
+              isValid = false;
+            }
+          }
+
+          // Toggle valid/invalid classes
+          $input.toggleClass("is-invalid", !isValid);
+
+          // Manage the invalid-feedback element
+          let $feedback = $input.next(".invalid-feedback");
+          if (!$feedback.length) {
+            $feedback = $('<div class="invalid-feedback"></div>').insertAfter(
+              $input,
+            );
+          }
+
+          if (!isValid) {
+            $feedback.text(errorMessage);
+            allValid = false;
+            pluginHasErrors = true;
+
+            // Store the first invalid input for focusing later
+            if (!firstInvalidInput) {
+              firstInvalidInput = $input;
+              firstInvalidPlugin = pluginId;
+            }
+          } else {
+            $feedback.text("");
+          }
+        });
+      });
+
+      // If validation failed, navigate to the first invalid plugin and focus on the error
+      if (!allValid && firstInvalidPlugin && firstInvalidInput) {
+        // Navigate to the plugin with the first error
+        const $targetPlugin = $(
+          `.plugin-navigation-item[data-plugin='${firstInvalidPlugin}']`,
+        );
+        if ($targetPlugin.length) {
+          $targetPlugin.trigger("click");
+
+          // After navigation, highlight and focus the invalid input
+          setTimeout(() => {
+            const $setting = firstInvalidInput.closest(".col-12");
+            highlightSettings($setting);
+            firstInvalidInput.focus();
+          }, 300);
+        }
+
+        return; // Don't proceed with saving if validation fails
+      }
     }
 
     // If all validations pass, submit the form
@@ -1734,6 +1896,143 @@ $(document).ready(() => {
   });
 
   isInit = false;
+
+  // Multiselect dropdown functionality
+  const updateMultiselectDisplay = ($dropdown) => {
+    const $toggle = $dropdown.find(".multiselect-toggle");
+    const $label = $toggle.find("label");
+    const $checkboxes = $dropdown.find('input[type="checkbox"]');
+
+    const checkedCheckboxes = $checkboxes.filter(":checked");
+    const checkedCount = checkedCheckboxes.length;
+
+    // Update the count in the label
+    $label.text(`(${checkedCount} selected)`);
+
+    // Update the hidden value - space-separated list of selected option IDs
+    const selectedIds = checkedCheckboxes
+      .map(function () {
+        return $(this).attr("value"); // Use the option ID from the value attribute
+      })
+      .get();
+
+    // Find or create hidden input to store the value
+    let $hiddenInput = $dropdown.find('input[type="hidden"]');
+    if ($hiddenInput.length === 0) {
+      const settingName = $toggle.find(".multiselect-text").text();
+      $hiddenInput = $(
+        `<input type="hidden" name="${settingName}" class="plugin-setting">`,
+      );
+      $dropdown.append($hiddenInput);
+    }
+
+    // Save as space-separated list of option IDs
+    $hiddenInput.val(selectedIds.join(" "));
+
+    // Trigger change event for validation
+    $hiddenInput.trigger("change");
+  };
+
+  // Initialize multiselect dropdowns with custom behavior
+  $(".dropdown")
+    .has(".multiselect-toggle")
+    .each(function () {
+      const $dropdown = $(this);
+      updateMultiselectDisplay($dropdown);
+
+      // Initialize Bootstrap dropdown with autoClose disabled
+      const $toggle = $dropdown.find(".multiselect-toggle");
+      if ($toggle.length) {
+        new bootstrap.Dropdown($toggle[0], {
+          autoClose: false,
+        });
+      }
+    });
+
+  // Handle multiselect toggle button clicks manually
+  $(document).on("click", ".multiselect-toggle", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const $dropdown = $(this).closest(".dropdown");
+    const $menu = $dropdown.find(".dropdown-menu");
+    const isOpen = $dropdown.hasClass("show");
+
+    // Close all other multiselect dropdowns first
+    $(".dropdown")
+      .has(".multiselect-toggle")
+      .not($dropdown)
+      .each(function () {
+        const $otherDropdown = $(this);
+        const $otherMenu = $otherDropdown.find(".dropdown-menu");
+        const $otherToggle = $otherDropdown.find(".multiselect-toggle");
+
+        $otherDropdown.removeClass("show");
+        $otherMenu.removeClass("show");
+        $otherToggle.attr("aria-expanded", "false");
+      });
+
+    if (isOpen) {
+      // Close this dropdown
+      $dropdown.removeClass("show");
+      $menu.removeClass("show");
+      $(this).attr("aria-expanded", "false");
+    } else {
+      // Open this dropdown
+      $dropdown.addClass("show");
+      $menu.addClass("show");
+      $(this).attr("aria-expanded", "true");
+    }
+  });
+
+  // Handle clicks outside multiselect dropdowns to close them
+  $(document).on("click", function (e) {
+    const $target = $(e.target);
+
+    // Check if click is outside any multiselect dropdown
+    $(".dropdown")
+      .has(".multiselect-toggle")
+      .each(function () {
+        const $dropdown = $(this);
+        const $menu = $dropdown.find(".dropdown-menu");
+        const $toggle = $dropdown.find(".multiselect-toggle");
+
+        // If click is outside this dropdown and it's open, close it
+        if (
+          !$dropdown.is($target) &&
+          $dropdown.has($target).length === 0 &&
+          $dropdown.hasClass("show")
+        ) {
+          $dropdown.removeClass("show");
+          $menu.removeClass("show");
+          $toggle.attr("aria-expanded", "false");
+        }
+      });
+  });
+
+  // Handle checkbox changes in multiselect dropdowns
+  $(document).on("change", '.dropdown input[type="checkbox"]', function () {
+    const $dropdown = $(this).closest(".dropdown");
+    if ($dropdown.find(".multiselect-toggle").length) {
+      updateMultiselectDisplay($dropdown);
+    }
+  });
+
+  // Handle clicking on dropdown items - toggle checkbox but keep dropdown open
+  $(document).on("click", ".dropdown-menu .dropdown-item", function (e) {
+    // Only handle if this is a multiselect dropdown
+    if ($(this).closest(".dropdown").find(".multiselect-toggle").length) {
+      e.stopPropagation(); // Prevent event bubbling
+
+      if (
+        !$(e.target).is('input[type="checkbox"]') &&
+        !$(e.target).is("label")
+      ) {
+        const $checkbox = $(this).find('input[type="checkbox"]');
+        $checkbox.prop("checked", !$checkbox.prop("checked")).trigger("change");
+      }
+    }
+  });
 
   // Sidebar plugin navigation: ensure clicking a plugin shows its pane
   $(document).off("click", ".plugin-navigation-item");

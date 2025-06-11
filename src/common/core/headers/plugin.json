@@ -21,7 +21,7 @@
       "help": "Headers to remove (Header1 Header2 Header3 ...)",
       "id": "remove-headers",
       "label": "Remove headers",
-      "regex": "^(?! )( ?[\\w\\-]+)*$",
+      "regex": "^( *[\\w\\-]+ *)*$",
       "type": "text"
     },
     "KEEP_UPSTREAM_HEADERS": {
@@ -30,7 +30,7 @@
       "help": "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
       "id": "keep-upstream-headers",
       "label": "Keep upstream headers",
-      "regex": "^((?! )( ?[\\w\\-]+)+|\\*)?$",
+      "regex": "^(( *[\\w\\-]+ *)+|\\*)?$",
       "type": "text"
     },
     "STRICT_TRANSPORT_SECURITY": {
@@ -48,7 +48,7 @@
       "help": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
       "id": "cookie-flags",
       "label": "Cookie flags",
-      "regex": "^(\\*|[^\\s;]+)?(\\s*(([Ee]xpires)(?!.*\\4)=[^\\s;]+|([Dd]omain)(?!.*\\5)=[^\\s;]+|([Pp]ath)(?!.*\\6)=[^\\s;]+|[Hh]ttp[Oo]nly|[Ss]ame[Ss]ite(=([Ll]ax|[Ss]trict|[NN]one))?|[Ss]ecure)(?!.*\\3))*$",
+      "regex": "^(\\*|[^\\s;]+)?(\\s*(([Ee]xpires)=[^\\s;]+|([Dd]omain)=[^\\s;]+|([Pp]ath)=[^\\s;]+|[Hh]ttp[Oo]nly|[Ss]ame[Ss]ite(=([Ll]ax|[Ss]trict|[Nn]one))?|[Ss]ecure))*$",
       "type": "text",
       "multiple": "cookie-flags"
     },
@@ -85,7 +85,7 @@
       "help": "Value for the Referrer-Policy header.",
       "id": "referrer-policy",
       "label": "Referrer-Policy",
-      "regex": "^(?!^(,| ))((, )?(no-referrer-when-downgrade|no-referrer|origin-when-cross-origin|same-origin|strict-origin-when-cross-origin|strict-origin|origin|unsafe-url)(?!\\b.*, \\4\\b))*$",
+      "regex": "^(?!^(,| ))((, )?(no-referrer-when-downgrade|no-referrer|origin-when-cross-origin|same-origin|strict-origin-when-cross-origin|strict-origin|origin|unsafe-url))*$",
       "type": "text"
     },
     "PERMISSIONS_POLICY": {
@@ -94,7 +94,7 @@
       "help": "Value for the Permissions-Policy header.",
       "id": "permissions-policy",
       "label": "Permissions-Policy",
-      "regex": "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
+      "regex": "^(?![, ])(,? ?([a-z\\-]+)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
       "type": "text"
     },
     "X_FRAME_OPTIONS": {

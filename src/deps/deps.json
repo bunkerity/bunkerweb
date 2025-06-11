@@ -152,9 +152,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.1.1",
+      "name": "lua-resty-session v4.1.2",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "e4ee19ab9788293ee868f01e56a5303387cf7d04",
+      "commit": "f4b773244f7841bbc4065ffe15c422a1bd67efaa",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {
@@ -189,13 +189,13 @@
       "name": "lua-upstream-nginx-module v0.07",
       "url": "https://github.com/openresty/lua-upstream-nginx-module.git",
       "commit": "a84fbbb3d3b07684c232f642eccbc5334bafcbfe",
-      "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t/t"
+      "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t"
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20250117",
+      "name": "LuaJIT v2.1-20250529",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "93162f34e7424cd0ea3c4046a9ffacce621626bc",
+      "commit": "afc74313c6f919f713e2a25003cf0066852bb24a",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {

@@ -5,6 +5,24 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.15.0 - 2025-06-03
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat: add User-Agent and Referer into targets (942280 PL1) by @azurit in https://github.com/coreruleset/coreruleset/pull/4115
+* feat: update `java-classes.data` by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4080
+* feat: block database yaml files by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4130
+### 🧰 Other Changes
+* fix: false positive with `title_strip_tags` by moving `strip_tags` to 933160 by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4105
+* fix: remove  `self` command by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4111
+* fix: remove rc shell to reduce FPs by @theseion in https://github.com/coreruleset/coreruleset/pull/4125
+* feat: remove unnecessary character class from 933151 by @TimDiam0nd in https://github.com/coreruleset/coreruleset/pull/4135
+* fix: false positives with session tokens/cookies 933150 by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4142
+* fix: add word ending to unix command sendmail (932235 PL1, 932236 PL2, 932239 PL2, 932260 PL1) by @franbuehler in https://github.com/coreruleset/coreruleset/pull/4141
+* feat: 933151 change from capture and double `pmf` to regex by @TimDiam0nd in https://github.com/coreruleset/coreruleset/pull/4139
+* feat: 933120 change from capture and double `pmf` to regex by @TimDiam0nd in https://github.com/coreruleset/coreruleset/pull/4138
+* feat: remove exclusion of deprecated `__utm` cookies by @theseion in https://github.com/coreruleset/coreruleset/pull/4151
+
 ## Version 4.14.0 - 2025-04-29
 
 ## What's Changed

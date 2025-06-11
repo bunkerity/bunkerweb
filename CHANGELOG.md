@@ -1,6 +1,18 @@
 # Changelog
 
-## v1.6.2-rc3 - ????/??/??
+## v1.6.2-rc4 - ????/??
+
+- [FEATURE] Introduce `multiselect` setting type, enabling users to choose multiple options from a configurable list
+- [FEATURE] Add new `BLACKLIST_COMMUNITY_LISTS` setting to the `blacklist` plugin, allowing users to choose which community blocklists to use for blacklisting
+- [MISC] Greatly improve scheduler's performance by optimizing the way it handles environment variables and settings, reducing the number of database queries and improving overall efficiency
+- [MISC] Optimize variable loading during the init phase to improve startup performance
+- [DEPS] Update coreruleset-v4 version to v4.15.0
+- [DEPS] Update lua-resty-session version to 4.1.2
+- [DEPS] Update LuaJIT version to v2.1-20250529
+- [CONTRIBUTION] Thank you @Ablablab for your contribution to the `Headers` plugin
+- [CONTRIBUTION] Thank you @sachin-vcs for your contribution to the `Let's Encrypt` plugin by helping the implementation of the new `Njalla` DNS provider
+
+## v1.6.2-rc3 - 2025/06/06
 
 - [BUGFIX] Refactor CLI command handling to support additional arguments
 - [DOCS] Update the documentation about the `all-in-one` image to include the new features and improvements, also move it to its own section

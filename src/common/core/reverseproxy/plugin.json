@@ -79,7 +79,17 @@
       "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
       "id": "reverse-proxy-headers",
       "label": "Reverse proxy headers",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
+      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_HIDE_HEADERS": {
+      "context": "multisite",
+      "default": "Upgrade",
+      "help": "List of HTTP headers to hide from clients when received from the proxied resource (values for proxy_hide_header directive).",
+      "id": "reverse-proxy-hide-headers",
+      "label": "Reverse proxy hide headers",
+      "regex": "^.*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -89,7 +99,7 @@
       "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
       "id": "reverse-proxy-headers-client",
       "label": "Reverse proxy headers-client",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
+      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -185,7 +195,7 @@
       "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
       "id": "reverse-proxy-auth-request-set",
       "label": "Reverse proxy auth request set",
-      "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
+      "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -195,7 +205,7 @@
       "help": "Additional configuration to include in the location block, separated with spaces.",
       "id": "reverse-proxy-includes",
       "label": "Reverse proxy includes",
-      "regex": "^(?! )( ?([^ ])(?!.*\\b\\2\\b))*$",
+      "regex": "^(?! )( ?([^ ]))*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -251,7 +261,7 @@
       "help": "HTTP methods that should trigger a cache operation.",
       "id": "proxy-cache-methods",
       "label": "Reverse proxy cache methods",
-      "regex": "^(?! )( ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
+      "regex": "^(?! )( ?[A-Z]{3,})+$",
       "type": "text"
     },
     "PROXY_CACHE_MIN_USES": {
@@ -269,7 +279,7 @@
       "help": "The key used to uniquely identify a cached response.",
       "id": "proxy-cache-key",
       "label": "Reverse proxy cache key",
-      "regex": "^(?! )( ?(\\$[a-z_]+)(?!.*\\2))+$",
+      "regex": "^(?! )( ?\\$[a-z_]+)+$",
       "type": "text"
     },
     "PROXY_CACHE_VALID": {
@@ -278,7 +288,7 @@
       "help": "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
       "id": "proxy-cache-valid",
       "label": "Reverse proxy cache valid",
-      "regex": "^(?! )( ?([1-5]\\d{2})(?!.*\\2=)=\\d+(ms?|[shdwMy]))*$",
+      "regex": "^(?! )( ?[1-5]\\d{2}=\\d+(ms?|[shdwMy]))*$",
       "type": "text"
     },
     "PROXY_NO_CACHE": {

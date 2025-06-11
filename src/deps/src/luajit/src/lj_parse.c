@@ -1517,23 +1517,11 @@ static void fs_fixup_var(LexState *ls, GCproto *pt, uint8_t *p, size_t ofsvar)
 
 #endif
 
-/* Check if bytecode op returns. */
-static int bcopisret(BCOp op)
-{
-  switch (op) {
-  case BC_CALLMT: case BC_CALLT:
-  case BC_RETM: case BC_RET: case BC_RET0: case BC_RET1:
-    return 1;
-  default:
-    return 0;
-  }
-}
-
 /* Fixup return instruction for prototype. */
 static void fs_fixup_ret(FuncState *fs)
 {
   BCPos lastpc = fs->pc;
-  if (lastpc <= fs->lasttarget || !bcopisret(bc_op(fs->bcbase[lastpc-1].ins))) {
+  if (lastpc <= fs->lasttarget || !bc_isret_or_tail(bc_op(fs->bcbase[lastpc-1].ins))) {
     if ((fs->bl->flags & FSCOPE_UPVAL))
       bcemit_AJ(fs, BC_UCLO, 0, 0);
     bcemit_AD(fs, BC_RET0, 0, 1);  /* Need final return. */
@@ -1725,7 +1713,7 @@ static void expr_table(LexState *ls, ExpDesc *e)
   FuncState *fs = ls->fs;
   BCLine line = ls->linenumber;
   GCtab *t = NULL;
-  int vcall = 0, needarr = 0, fixt = 0;
+  int vcall = 0, needarr = 0;
   uint32_t narr = 1;  /* First array index. */
   uint32_t nhash = 0;  /* Number of hash entries. */
   BCReg freg = fs->freereg;
@@ -1770,9 +1758,10 @@ static void expr_table(LexState *ls, ExpDesc *e)
       lj_gc_anybarriert(fs->L, t);
       if (expr_isk_nojump(&val)) {  /* Add const key/value to template table. */
 	expr_kvalue(fs, v, &val);
-      } else {  /* Otherwise create dummy string key (avoids lj_tab_newkey). */
-	settabV(fs->L, v, t);  /* Preserve key with table itself as value. */
-	fixt = 1;   /* Fix this later, after all resizes. */
+	/* Mark nil value with table value itself to preserve the key. */
+	if (key.k == VKSTR && tvisnil(v)) settabV(fs->L, v, t);
+      } else {  /* Preserve the key for the following non-const store.  */
+	settabV(fs->L, v, t);
 	goto nonconst;
       }
     } else {
@@ -1814,17 +1803,6 @@ static void expr_table(LexState *ls, ExpDesc *e)
   } else {
     if (needarr && t->asize < narr)
       lj_tab_reasize(fs->L, t, narr-1);
-    if (fixt) {  /* Fix value for dummy keys in template table. */
-      Node *node = noderef(t->node);
-      uint32_t i, hmask = t->hmask;
-      for (i = 0; i <= hmask; i++) {
-	Node *n = &node[i];
-	if (tvistab(&n->val)) {
-	  lj_assertFS(tabV(&n->val) == t, "bad dummy key in template table");
-	  setnilV(&n->val);  /* Turn value into nil. */
-	}
-      }
-    }
     lj_gc_check(fs->L);
   }
 }

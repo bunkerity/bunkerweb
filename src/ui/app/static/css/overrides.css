@@ -1350,6 +1350,71 @@ span.cursor-pointer ~ .reset-setting {
 }
 
 /*
+* Multiselect dropdown styling to match form-select
+******************************************************************************/
+
+.multiselect-toggle {
+  text-align: left !important;
+  position: relative;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  color: var(--bs-body-color);
+  cursor: pointer;
+}
+
+.multiselect-toggle:hover:not([disabled]):not([focus]) {
+  border-color: var(--bs-primary);
+}
+
+.multiselect-toggle:focus {
+  border-color: var(--bs-primary) !important;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.multiselect-toggle:disabled {
+  background-color: var(--bs-secondary-bg);
+  opacity: var(--bs-btn-disabled-opacity);
+  cursor: not-allowed;
+}
+
+.multiselect-toggle::after {
+  display: none; /* Hide the default dropdown arrow */
+}
+
+/* Remove default dropdown arrow for multiselect */
+.multiselect-toggle.dropdown-toggle::before {
+  display: none;
+}
+
+/* Ensure text doesn't overlap with arrow */
+.multiselect-text {
+  padding-right: 2rem;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dark mode styles for multiselect */
+.dark-style .multiselect-toggle {
+  background-color: #0c283a;
+  border-color: #384551;
+  color: #fff;
+}
+
+.dark-style .multiselect-toggle:hover:not([disabled]):not([focus]) {
+  border-color: #fff;
+}
+
+.dark-style .multiselect-toggle:focus {
+  border-color: #fff !important;
+}
+
+.dark-style .multiselect-toggle:disabled {
+  background-color: #133044;
+}
+
+/*
 * Dark mode overrides
 ******************************************************************************/
 

@@ -35,6 +35,7 @@ from letsencrypt import (
     IonosProvider,
     LinodeProvider,
     LuaDnsProvider,
+    NjallaProvider,
     NSOneProvider,
     OvhProvider,
     Rfc2136Provider,
@@ -244,8 +245,8 @@ def certbot_new(
             command.extend(["--rsa-key-size", "4096"])
 
         # * Adding plugin argument
-        if provider in ("desec", "infomaniak", "ionos", "scaleway"):
-            # ? Desec, Infomaniak, IONOS and Scaleway plugins use different arguments
+        if provider in ("desec", "infomaniak", "ionos", "njalla", "scaleway"):
+            # ? Desec, Infomaniak, IONOS, Njalla and Scaleway plugins use different arguments
             command.extend(["--authenticator", f"dns-{provider}"])
         else:
             command.append(f"--dns-{provider}")
@@ -295,7 +296,7 @@ def certbot_new(
 IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
 
 try:
-    servers = getenv("SERVER_NAME", "").lower() or []
+    servers = getenv("SERVER_NAME", "www.example.com").lower() or []
 
     if isinstance(servers, str):
         servers = servers.split(" ")
@@ -315,10 +316,10 @@ try:
         domains_server_names = {}
 
         for first_server in servers:
-            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
+            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) == "yes":
                 use_letsencrypt = True
 
-            if first_server and getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") == "dns":
+            if first_server and getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http")) == "dns":
                 use_letsencrypt_dns = True
 
             domains_server_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server).lower()
@@ -344,6 +345,7 @@ try:
                 Type[IonosProvider],
                 Type[LinodeProvider],
                 Type[LuaDnsProvider],
+                Type[NjallaProvider],
                 Type[NSOneProvider],
                 Type[OvhProvider],
                 Type[Rfc2136Provider],
@@ -363,6 +365,7 @@ try:
             "ionos": IonosProvider,
             "linode": LinodeProvider,
             "luadns": LuaDnsProvider,
+            "njalla": NjallaProvider,
             "nsone": NSOneProvider,
             "ovh": OvhProvider,
             "rfc2136": Rfc2136Provider,

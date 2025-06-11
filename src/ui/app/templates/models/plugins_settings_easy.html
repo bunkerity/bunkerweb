@@ -235,6 +235,8 @@
                                                                    value="{{ template_data['settings'].get(setting, setting_default) }}">
                                                             {% if setting_data["type"] == "select" %}
                                                                 {% include "models/select_setting.html" %}
+                                                            {% elif setting_data["type"] == "multiselect" %}
+                                                                {% include "models/multiselect_setting.html" %}
                                                             {% elif setting_data["type"] == "check" %}
                                                                 {% include "models/checkbox_setting.html" %}
                                                             {% else %}
@@ -295,7 +297,7 @@
                     <div class="text-center">
                         <h5 class="text-dark fw-bold mt-5"
                             data-i18n="status.template_in_use"
-                            data-data-i18n-options='{"template": "{{ selected_template }}", "method": "{{ template_method }}"}'>
+                            data-i18n-options='{"template": "{{ selected_template }}", "method": "{{ template_method }}"}'>
                             This service currently uses template "{{ selected_template }}" which is of method "{{ template_method }}"
                         </h5>
                         <p class="text-muted" data-i18n="status.template_in_use_description">

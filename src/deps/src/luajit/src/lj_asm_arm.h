@@ -1927,7 +1927,7 @@ static void asm_hiop(ASMState *as, IRIns *ir)
   } else if ((ir-1)->o == IR_MIN || (ir-1)->o == IR_MAX) {
     as->curins--;  /* Always skip the loword min/max. */
     if (uselo || usehi)
-      asm_sfpmin_max(as, ir-1, (ir-1)->o == IR_MIN ? CC_PL : CC_LE);
+      asm_sfpmin_max(as, ir-1, (ir-1)->o == IR_MIN ? CC_HS : CC_LS);
     return;
 #elif LJ_HASFFI
   } else if ((ir-1)->o == IR_CONV) {

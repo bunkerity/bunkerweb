@@ -11,7 +11,7 @@
       "help": "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
       "id": "errors",
       "label": "Errors",
-      "regex": "^(?! )( ?([1-5]\\d{2})(?!.*\\2(?![^=]))=([^ ]*)(?!.*\\3(?!.)))*$",
+      "regex": "^( *([1-5]\\d{2})=[^ ]+ *)*$",
       "type": "text"
     },
     "INTERCEPTED_ERROR_CODES": {
@@ -20,7 +20,7 @@
       "help": "List of HTTP error code intercepted by BunkerWeb",
       "id": "intercepted-error-codes",
       "label": "Intercepted error codes",
-      "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)*$",
+      "regex": "^( *([1-5]\\d{2}) *)*$",
       "type": "text"
     }
   }
