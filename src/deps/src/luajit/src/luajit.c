@@ -35,6 +35,21 @@
 
 #if !LJ_TARGET_CONSOLE
 #include <signal.h>
+
+#if LJ_TARGET_POSIX
+/* Improve signal handling on POSIX. Try CTRL-C on: luajit -e 'io.read()' */
+static void signal_set(int sig, void (*h)(int))
+{
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = h;
+  sigemptyset(&sa.sa_mask);
+  sigaction(sig, &sa, NULL);
+}
+#else
+#define signal_set	signal
+#endif
+
 #endif
 
 static lua_State *globalL = NULL;
@@ -54,8 +69,8 @@ static void lstop(lua_State *L, lua_Debug *ar)
 
 static void laction(int i)
 {
-  signal(i, SIG_DFL); /* if another SIGINT happens before lstop,
-			 terminate process (default action) */
+  /* Terminate process if another SIGINT happens (double CTRL-C). */
+  signal_set(i, SIG_DFL);
   lua_sethook(globalL, lstop, LUA_MASKCALL | LUA_MASKRET | LUA_MASKCOUNT, 1);
 }
 #endif
@@ -117,11 +132,11 @@ static int docall(lua_State *L, int narg, int clear)
   lua_pushcfunction(L, traceback);  /* push traceback function */
   lua_insert(L, base);  /* put it under chunk and args */
 #if !LJ_TARGET_CONSOLE
-  signal(SIGINT, laction);
+  signal_set(SIGINT, laction);
 #endif
   status = lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);
 #if !LJ_TARGET_CONSOLE
-  signal(SIGINT, SIG_DFL);
+  signal_set(SIGINT, SIG_DFL);
 #endif
   lua_remove(L, base);  /* remove traceback function */
   /* force a complete garbage collection in case of errors */

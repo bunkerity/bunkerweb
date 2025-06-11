@@ -956,8 +956,10 @@ const BCIns *lj_snap_restore(jit_State *J, void *exptr)
   const BCIns *pc = snap_pc(&map[nent]);
   lua_State *L = J->L;
 
-  /* Set interpreter PC to the next PC to get correct error messages. */
-  setcframe_pc(L->cframe, pc+1);
+  /* Set interpreter PC to the next PC to get correct error messages.
+  ** But not for returns or tail calls, since pc+1 may be out-of-range.
+  */
+  setcframe_pc(L->cframe, bc_isret_or_tail(bc_op(*pc)) ? pc : pc+1);
   setcframe_pc(cframe_raw(cframe_prev(L->cframe)), pc);
 
   /* Make sure the stack is big enough for the slots from the snapshot. */

@@ -317,6 +317,14 @@ static void *callback_mcode_init(global_State *g, uint32_t *page)
 #define CCPROT_CREATE	0
 #endif
 
+/* Check for macOS hardened runtime. */
+#if defined(LUAJIT_ENABLE_OSX_HRT) && LUAJIT_SECURITY_MCODE != 0 && defined(MAP_JIT) && __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 110000
+#include <pthread.h>
+#define CCMAP_CREATE	MAP_JIT
+#else
+#define CCMAP_CREATE	0
+#endif
+
 #endif
 
 /* Allocate and initialize area for callback function pointers. */
@@ -331,10 +339,13 @@ static void callback_mcode_new(CTState *cts)
   if (!p)
     lj_err_caller(cts->L, LJ_ERR_FFI_CBACKOV);
 #elif LJ_TARGET_POSIX
-  p = mmap(NULL, sz, (PROT_READ|PROT_WRITE|CCPROT_CREATE), MAP_PRIVATE|MAP_ANONYMOUS,
-	   -1, 0);
+  p = mmap(NULL, sz, PROT_READ|PROT_WRITE|CCPROT_CREATE,
+	   MAP_PRIVATE|MAP_ANONYMOUS|CCMAP_CREATE, -1, 0);
   if (p == MAP_FAILED)
     lj_err_caller(cts->L, LJ_ERR_FFI_CBACKOV);
+#if CCMAP_CREATE
+  pthread_jit_write_protect_np(0);
+#endif
 #else
   /* Fallback allocator. Fails if memory is not executable by default. */
   p = lj_mem_new(cts->L, sz);
@@ -351,7 +362,11 @@ static void callback_mcode_new(CTState *cts)
     LJ_WIN_VPROTECT(p, sz, PAGE_EXECUTE_READ, &oprot);
   }
 #elif LJ_TARGET_POSIX
+#if CCMAP_CREATE
+  pthread_jit_write_protect_np(1);
+#else
   mprotect(p, sz, (PROT_READ|PROT_EXEC));
+#endif
 #endif
 }
 

@@ -117,7 +117,7 @@ hold all user-configurable settings:
 <li><tt>Makefile</tt> has settings for <b>installing</b> LuaJIT (POSIX
 only).</li>
 <li><tt>src/Makefile</tt> has settings for <b>compiling</b> LuaJIT
-under POSIX, MinGW or Cygwin.</li>
+under POSIX or MinGW.</li>
 <li><tt>src/msvcbuild.bat</tt> has settings for compiling LuaJIT with
 MSVC (Visual Studio).</li>
 </ul>
@@ -195,10 +195,8 @@ Obviously the prefixes given during build and installation need to be the same.
 <h2 id="windows">Windows Systems</h2>
 <h3>Prerequisites</h3>
 <p>
-Either install one of the open source SDKs
-(<a href="http://mingw.org/"><span class="ext">&raquo;</span>&nbsp;MinGW</a> or
-<a href="https://www.cygwin.com/"><span class="ext">&raquo;</span>&nbsp;Cygwin</a>), which come with a modified
-GCC plus the required development headers.
+Either install the open source SDK <a href="http://mingw.org/"><span class="ext">&raquo;</span>&nbsp;MinGW</a>,
+which comes with a modified GCC plus the required development headers.
 Or install Microsoft's Visual Studio (MSVC).
 </p>
 <h3>Building with MSVC</h3>
@@ -217,20 +215,14 @@ Then follow the installation instructions below.
 <p>
 For an x64 to ARM64 cross-build run this first: <tt>vcvarsall.bat x64_arm64</tt>
 </p>
-<h3>Building with MinGW or Cygwin</h3>
+<h3>Building with MinGW</h3>
 <p>
-Open a command prompt window and make sure the MinGW or Cygwin programs
+Open a command prompt window and make sure the MinGW programs
 are in your path. Then <tt>cd</tt> to the directory of the git repository.
 Then run this command for MinGW:
 </p>
 <pre class="code">
 mingw32-make
-</pre>
-<p>
-Or this command for Cygwin:
-</p>
-<pre class="code">
-make
 </pre>
 <p>
 Then follow the installation instructions below.
@@ -249,6 +241,19 @@ absolute path names &mdash; all modules are loaded relative to the
 directory where <tt>luajit.exe</tt> is installed
 (see <tt>src/luaconf.h</tt>).
 </p>
+<p>
+The final directory layout should look like this:
+</p>
+<pre class="code">
+├── luajit.exe
+├── lua51.dll
+├── <- put your own classic Lua/C API modules (*.dll) here
+└── lua
+    ├── <- put your own Lua modules (*.lua) here
+    └── jit
+        ├── bc.lua
+        └── (etc …)
+</pre>
 
 <h2 id="cross">Cross-compiling LuaJIT</h2>
 <p>

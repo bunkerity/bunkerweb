@@ -163,7 +163,7 @@ GCtab * LJ_FASTCALL lj_tab_new1(lua_State *L, uint32_t ahsize)
 #endif
 
 /* Duplicate a table. */
-GCtab * LJ_FASTCALL lj_tab_dup(lua_State *L, const GCtab *kt)
+GCtab * lj_tab_dup_helper(lua_State *L, const GCtab *kt, int is_tab_clone)
 {
   GCtab *t;
   uint32_t asize, hmask;
@@ -196,10 +196,16 @@ GCtab * LJ_FASTCALL lj_tab_dup(lua_State *L, const GCtab *kt)
       Node *next = nextnode(kn);
       /* Don't use copyTV here, since it asserts on a copy of a dead key. */
       n->val = kn->val; n->key = kn->key;
+      if (!is_tab_clone && tvistab(&n->val)) setnilV(&n->val); /* Replace nil value marker. */
       setmref(n->next, next == NULL? next : (Node *)((char *)next + d));
     }
   }
   return t;
+}
+
+GCtab * LJ_FASTCALL lj_tab_dup(lua_State *L, const GCtab *kt)
+{
+  return lj_tab_dup_helper(L, kt, 0);
 }
 
 /* Clear a table. */
@@ -689,7 +695,7 @@ MSize LJ_FASTCALL lj_tab_len_hint(GCtab *t, size_t hint)
 
 GCtab * LJ_FASTCALL lj_tab_clone(lua_State *L, const GCtab *src)
 {
-  return lj_tab_dup(L, src);
+  return lj_tab_dup_helper(L, src, 1);
 }
 
 int LJ_FASTCALL lj_tab_isarray(const GCtab *src)

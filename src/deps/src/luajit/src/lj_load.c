@@ -122,8 +122,9 @@ LUALIB_API int luaL_loadfilex(lua_State *L, const char *filename,
     copyTV(L, L->top-1, L->top);
   }
   if (err) {
+    const char *fname = filename ? filename : "stdin";
     L->top--;
-    lua_pushfstring(L, "cannot read %s: %s", chunkname+1, strerror(err));
+    lua_pushfstring(L, "cannot read %s: %s", fname, strerror(err));
     return LUA_ERRFILE;
   }
   return status;

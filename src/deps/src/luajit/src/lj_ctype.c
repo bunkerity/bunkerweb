@@ -33,10 +33,12 @@
   _("int16_t",			INT16) \
   _("int32_t",			INT32) \
   _("int64_t",			INT64) \
+  _("int128_t",			INT128) \
   _("uint8_t",			UINT8) \
   _("uint16_t",			UINT16) \
   _("uint32_t",			UINT32) \
   _("uint64_t",			UINT64) \
+  _("uint128_t",		UINT128) \
   _("intptr_t",			INT_PSZ) \
   _("uintptr_t",		UINT_PSZ) \
   /* From POSIX. */ \
@@ -55,6 +57,7 @@
   _("__int16",		2,	CTOK_INT) \
   _("__int32",		4,	CTOK_INT) \
   _("__int64",		8,	CTOK_INT) \
+  _("__int128",		16,	CTOK_INT) \
   _("float",		4,	CTOK_FP) \
   _("double",		8,	CTOK_FP) \
   _("long",		0,	CTOK_LONG) \

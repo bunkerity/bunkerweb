@@ -172,7 +172,7 @@ LJLIB_CF(table_concat)		LJLIB_REC(.)
 LJLIB_NOREG LJLIB_CF(table_clone) LJLIB_REC(.)
 {
   GCtab *src = lj_lib_checktab(L, 1);
-  GCtab *dup = lj_tab_dup(L, src);
+  GCtab *dup = lj_tab_dup_helper(L, src, 1);
 
   settabV(L, L->base, dup);
   L->top = L->base+1;

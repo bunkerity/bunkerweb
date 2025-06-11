@@ -8,6 +8,7 @@
 - [MISC] Optimize variable loading during the init phase to improve startup performance
 - [DEPS] Update coreruleset-v4 version to v4.15.0
 - [DEPS] Update lua-resty-session version to 4.1.2
+- [DEPS] Update LuaJIT version to v2.1-20250529
 - [CONTRIBUTION] Thank you @Ablablab for your contribution to the `Headers` plugin
 - [CONTRIBUTION] Thank you @sachin-vcs for your contribution to the `Let's Encrypt` plugin by helping the implementation of the new `Njalla` DNS provider
 
