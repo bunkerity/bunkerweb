@@ -1083,7 +1083,7 @@
 <p>When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.</p>
 <p>Please note that you can set the <code>LOG_LEVEL</code> to <code>info</code> (default: <code>notice</code>) to increase BunkerWeb’s verbosity.</p>
 <p>Here is how you can access the logs, depending on your integration :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">All-in-one</label><label for="__tabbed_1_4">Swarm</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="admonition tip">
@@ -1113,6 +1113,15 @@ docker<span class="w"> </span>logs<span class="w"> </span>myautoconf
 <p>Here is the docker-compose equivalent (replace <code>mybunker</code> and <code>myautoconf</code> with the name of the services declared in the docker-compose.yml file) :
 <div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>logs<span class="w"> </span>mybunker
 docker-compose<span class="w"> </span>logs<span class="w"> </span>myautoconf
+</code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<div class="admonition tip">
+<p class="admonition-title">Container name</p>
+<p>The default container name for the All-in-one image is <code>bunkerweb-aio</code>. If you've used a different name, please adjust the command accordingly.</p>
+</div>
+<p>You can use the <code>docker logs</code> command:
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>bunkerweb-aio
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1159,7 +1168,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info <a href="../advanced/#custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
 <h2 id="ip-unban">IP unban</h2>
 <p>You can manually unban an IP, which is useful when performing tests so that you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:6"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">All-in-one</label><label for="__tabbed_2_4">Swarm</label><label for="__tabbed_2_5">Kubernetes</label><label for="__tabbed_2_6">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can use the <code>docker exec</code> command (replace <code>mybunker</code> with the name of your container) :
@@ -1175,6 +1184,15 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </code></pre></div></p>
 <p>Here is the docker-compose equivalent (replace <code>myautoconf</code> with the name of the services declared in the docker-compose.yml file) :
 <div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>myautoconf<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
+</code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<div class="admonition tip">
+<p class="admonition-title">Container name</p>
+<p>The default container name for the All-in-one image is <code>bunkerweb-aio</code>. If you've used a different name, please adjust the command accordingly.</p>
+</div>
+<p>You can use the <code>docker exec</code> command:
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>bunkerweb-aio<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1314,7 +1332,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Linux</label><label for="__tabbed_4_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Linux</label><label for="__tabbed_4_2">Docker</label><label for="__tabbed_4_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Install SQLite (Debian/Ubuntu):</p>
@@ -1340,12 +1358,26 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <div class="highlight"><pre><span></span><code>apk<span class="w"> </span>add<span class="w"> </span>sqlite
 </code></pre></div>
 </div>
+<div class="tabbed-block">
+<p>Get a shell into your All-in-one container:</p>
+<div class="admonition note">
+<p class="admonition-title">Docker arguments</p>
+<ul>
+<li>the <code>-u 0</code> option is to run the command as root (mandatory).</li>
+<li>the <code>-it</code> options are to run the command interactively (mandatory).</li>
+<li><code>bunkerweb-aio</code> is the default container name; adjust if you used a custom name.</li>
+</ul>
+</div>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-it<span class="w"> </span>bunkerweb-aio<span class="w"> </span>bash
+</code></pre></div>
+</div>
 </div>
 </div>
 <p>Access your database :</p>
 <div class="admonition note">
 <p class="admonition-title">Database path</p>
-<p>We assume that you are using the default database path. If you are using a custom path, you will need to adapt the command.</p>
+<p>We assume that you are using the default database path. If you are using a custom path, you will need to adapt the command.
+For All-in-one, we assume the database is <code>db.sqlite3</code> located in the persistent <code>/data</code> volume (<code>/data/db.sqlite3</code>).</p>
 </div>
 <div class="highlight"><pre><span></span><code>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
 </code></pre></div>
@@ -1364,7 +1396,7 @@ sqlite&gt;
 <p class="admonition-title">Credentials and database name</p>
 <p>You will need to use the same credentials and database named used in the <code>DATABASE_URI</code> setting.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Linux</label><label for="__tabbed_5_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Linux</label><label for="__tabbed_5_2">Docker</label><label for="__tabbed_5_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Access your local database :</p>
@@ -1387,6 +1419,10 @@ sqlite&gt;
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-it<span class="w"> </span>&lt;bunkerweb_db_container&gt;<span class="w"> </span>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;user&gt;<span class="w"> </span>-p<span class="w"> </span>&lt;database&gt;
 </code></pre></div>
 <p>Then enter the database user’s password and you should be able to access your database.</p>
+</div>
+<div class="tabbed-block">
+<p>The All-in-One image does not include a MariaDB/MySQL server. If you have configured the AIO to use an external MariaDB/MySQL database (by setting the <code>DATABASE_URI</code> environment variable), you should connect to that database directly using standard MySQL client tools.</p>
+<p>The connection method would be similar to the "Linux" tab (if connecting from the host where AIO runs or another machine) or by running a MySQL client in a separate Docker container if preferred, targeting your external database's host and credentials.</p>
 </div>
 </div>
 </div>

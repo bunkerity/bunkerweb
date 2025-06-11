@@ -806,6 +806,39 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#using-custom-dns-resolution-mechanisms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using custom DNS resolution mechanisms
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using custom DNS resolution mechanisms">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-systemd-resolved" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using systemd-resolved
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-dnsmasq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using dnsmasq
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Custom configurations
@@ -946,11 +979,11 @@
           <li class="md-nav__item">
   <a href="#backup-and-restore" class="md-nav__link">
     <span class="md-ellipsis">
-      Backup and restore
+      Backup and restore.
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Backup and restore">
+    <nav class="md-nav" aria-label="Backup and restore.">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -964,9 +997,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#manual-backup" class="md-nav__link">
+  <a href="#manual-backupmg-srcassetsimgpro-iconsvg-altcrow-pro-icon-height24px-width24px-styletransform-translatey3px-pro" class="md-nav__link">
     <span class="md-ellipsis">
-      Manual backup
+      Manual backupmg src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"&gt; (PRO)
     </span>
   </a>
   
@@ -1005,6 +1038,15 @@
   <a href="#create-a-migration-file" class="md-nav__link">
     <span class="md-ellipsis">
       Create a migration file
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
     </span>
   </a>
   
@@ -1058,7 +1100,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
+  <a href="#best-practices_1" class="md-nav__link">
     <span class="md-ellipsis">
       Best Practices
     </span>
@@ -1294,7 +1336,7 @@
 <li>They use the <code>X-Forwarded-For</code> header to set the real IP</li>
 <li>They have IPs in the <code>1.2.3.0/24</code> and <code>100.64.0.0/10</code> networks</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:6"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Web UI</label><label for="__tabbed_2_2">Linux</label><label for="__tabbed_2_3">Docker</label><label for="__tabbed_2_4">Docker autoconf</label><label for="__tabbed_2_5">Kubernetes</label><label for="__tabbed_2_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Web UI</label><label for="__tabbed_2_2">Linux</label><label for="__tabbed_2_3">All-in-one</label><label for="__tabbed_2_4">Docker</label><label for="__tabbed_2_5">Docker autoconf</label><label for="__tabbed_2_6">Kubernetes</label><label for="__tabbed_2_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Navigate to the <strong>Global config</strong> page, select the <strong>Real IP</strong> plugin and fill out the following settings :</p>
@@ -1313,6 +1355,21 @@ REAL_IP_HEADER=X-Forwarded-For
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>You will need to add the settings to the environment variables when running the All-in-one container :</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">USE_REAL_IP</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REAL_IP_FROM</span><span class="o">=</span><span class="s2">&quot;1.2.3.0/24 100.64.0.0/10&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REAL_IP_HEADER</span><span class="o">=</span><span class="s2">&quot;X-Forwarded-For&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.</p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:</p>
@@ -1416,7 +1473,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <li>They use the <code>PROXY protocol</code> v1 or v2 to set the real IP</li>
 <li>They have IPs in the <code>1.2.3.0/24</code> and <code>100.64.0.0/10</code> networks</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:6"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web UI</label><label for="__tabbed_3_2">Linux</label><label for="__tabbed_3_3">Docker</label><label for="__tabbed_3_4">Docker autoconf</label><label for="__tabbed_3_5">Kubernetes</label><label for="__tabbed_3_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web UI</label><label for="__tabbed_3_2">Linux</label><label for="__tabbed_3_3">All-in-one</label><label for="__tabbed_3_4">Docker</label><label for="__tabbed_3_5">Docker autoconf</label><label for="__tabbed_3_6">Kubernetes</label><label for="__tabbed_3_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Navigate to the <strong>Global config</strong> page, select the <strong>Real IP</strong> plugin and fill out the following settings :</p>
@@ -1436,6 +1493,22 @@ REAL_IP_HEADER=proxy_protocol
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>You will need to add the settings to the environment variables when running the All-in-one container :</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">USE_REAL_IP</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">USE_PROXY_PROTOCOL</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REAL_IP_FROM</span><span class="o">=</span><span class="s2">&quot;1.2.3.0/24 100.64.0.0/10&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REAL_IP_HEADER</span><span class="o">=</span><span class="s2">&quot;X-Forwarded-For&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.</p>
 </div>
 <div class="tabbed-block">
 <p>You will need to add the settings to the environment variables of both the BunkerWeb and scheduler containers:</p>
@@ -1544,6 +1617,177 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 </div>
 </div>
 </div>
+<h3 id="using-custom-dns-resolution-mechanisms">Using custom DNS resolution mechanisms</h3>
+<p>BunkerWeb's NGINX configuration can be customized to use different DNS resolvers depending on your needs. This can be particularly useful in various scenarios:</p>
+<ol>
+<li>To respect entries in your local <code>/etc/hosts</code> file</li>
+<li>When you need to use custom DNS servers for certain domains</li>
+<li>To integrate with local DNS caching solutions</li>
+</ol>
+<h4 id="using-systemd-resolved">Using systemd-resolved</h4>
+<p>Many modern Linux systems use <code>systemd-resolved</code> for DNS resolution. If you want BunkerWeb to respect the content of your <code>/etc/hosts</code> file and use the system's DNS resolution mechanism, you can configure it to use the local systemd-resolved DNS service.</p>
+<p>To verify that systemd-resolved is running on your system, you can use:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>systemd-resolved
+</code></pre></div>
+<p>To enable systemd-resolved as your DNS resolver in BunkerWeb, set the <code>DNS_RESOLVERS</code> setting to <code>127.0.0.53</code>, which is the default listening address for systemd-resolved:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Web UI</label><label for="__tabbed_4_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Navigate to the <strong>Global config</strong> page and set the DNS resolvers to <code>127.0.0.53</code></p>
+</div>
+<div class="tabbed-block">
+<p>You will need to modify the <code>/etc/bunkerweb/variables.env</code> file:</p>
+<div class="highlight"><pre><span></span><code>...
+DNS_RESOLVERS=127.0.0.53
+...
+</code></pre></div>
+<p>After making this change, reload BunkerWeb to apply the configuration:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</div>
+</div>
+</div>
+<h4 id="using-dnsmasq">Using dnsmasq</h4>
+<p><a href="http://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> is a lightweight DNS, DHCP, and TFTP server that's commonly used for local DNS caching and customization. It's particularly useful when you need more control over your DNS resolution than systemd-resolved provides.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Linux</label><label for="__tabbed_5_2">All-in-one</label><label for="__tabbed_5_3">Docker</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>First, install and configure dnsmasq on your Linux system:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Debian/Ubuntu</label><label for="__tabbed_6_2">RHEL/CentOS/Fedora</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># Install dnsmasq</span>
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>dnsmasq
+
+<span class="c1"># Configure dnsmasq to listen only on localhost</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;listen-address=127.0.0.1&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dnsmasq.conf
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;bind-interfaces&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dnsmasq.conf
+
+<span class="c1"># Add custom DNS entries if needed</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;address=/custom.example.com/192.168.1.10&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dnsmasq.conf
+
+<span class="c1"># Restart dnsmasq</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dnsmasq
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>dnsmasq
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># Install dnsmasq</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>dnsmasq
+
+<span class="c1"># Configure dnsmasq to listen only on localhost</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;listen-address=127.0.0.1&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dnsmasq.conf
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;bind-interfaces&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dnsmasq.conf
+
+<span class="c1"># Add custom DNS entries if needed</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;address=/custom.example.com/192.168.1.10&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dnsmasq.conf
+
+<span class="c1"># Restart dnsmasq</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>dnsmasq
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>dnsmasq
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Then configure BunkerWeb to use dnsmasq by setting <code>DNS_RESOLVERS</code> to <code>127.0.0.1</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Web UI</label><label for="__tabbed_7_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Navigate to the <strong>Global config</strong> page, select the <strong>NGINX</strong> plugin and set the DNS resolvers to <code>127.0.0.1</code>.</p>
+</div>
+<div class="tabbed-block">
+<p>You will need to modify the <code>/etc/bunkerweb/variables.env</code> file:</p>
+<div class="highlight"><pre><span></span><code>...
+DNS_RESOLVERS=127.0.0.1
+...
+</code></pre></div>
+<p>After making this change, reload BunkerWeb:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>When using the All-in-one container, run dnsmasq in a separate container and configure BunkerWeb to use it:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create a custom network for DNS communication</span>
+docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>bw-dns
+
+<span class="c1"># Run dnsmasq container using dockurr/dnsmasq with Quad9 DNS</span>
+<span class="c1"># Quad9 provides security-focused DNS resolution with malware blocking</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>dnsmasq<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--network<span class="w"> </span>bw-dns<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">DNS1</span><span class="o">=</span><span class="s2">&quot;9.9.9.9&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">DNS2</span><span class="o">=</span><span class="s2">&quot;149.112.112.112&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">53</span>:53/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">53</span>:53/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cap-add<span class="o">=</span>NET_ADMIN<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--restart<span class="o">=</span>always<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>dockurr/dnsmasq
+
+<span class="c1"># Run BunkerWeb All-in-one with dnsmasq DNS resolver</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--network<span class="w"> </span>bw-dns<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">DNS_RESOLVERS</span><span class="o">=</span><span class="s2">&quot;dnsmasq&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Add a dnsmasq service to your docker-compose file and configure BunkerWeb to use it:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dnsmasq</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dockurr/dnsmasq</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dnsmasq</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># Using Quad9 DNS servers for enhanced security and privacy</span>
+<span class="w">      </span><span class="c1"># Primary: 9.9.9.9 (Quad9 with malware blocking)</span>
+<span class="w">      </span><span class="c1"># Secondary: 149.112.112.112 (Quad9 backup server)</span>
+<span class="w">      </span><span class="nt">DNS1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;9.9.9.9&quot;</span>
+<span class="w">      </span><span class="nt">DNS2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;149.112.112.112&quot;</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53:53/udp</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">53:53/tcp</span>
+<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_ADMIN</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-dns</span>
+
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">DNS_RESOLVERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dnsmasq&quot;</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-dns</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">DNS_RESOLVERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dnsmasq&quot;</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-dns</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># ...existing networks...</span>
+<span class="w">  </span><span class="nt">bw-dns</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-dns</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h3 id="custom-configurations">Custom configurations</h3>
 <p>To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found <a href="../features/#custom-configurations">here</a>.</p>
 <p>Here are the available types of custom configurations:</p>
@@ -1561,7 +1805,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class=
 <p>Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the <a href="../concepts/#multisite-mode">multisite mode</a> is enabled.</p>
 <p>The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the <code>.conf</code> suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.</p>
 <p>Some integrations provide more convenient ways to apply configurations, such as using <a href="https://docs.docker.com/engine/swarm/configs/">Configs</a> in Docker Swarm or <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> in Kubernetes. These options offer simpler approaches for managing and applying configurations.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:6"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><input id="__tabbed_4_6" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Web UI</label><label for="__tabbed_4_2">Linux</label><label for="__tabbed_4_3">Docker</label><label for="__tabbed_4_4">Docker autoconf</label><label for="__tabbed_4_5">Kubernetes</label><label for="__tabbed_4_6">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:7"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><input id="__tabbed_8_6" name="__tabbed_8" type="radio" /><input id="__tabbed_8_7" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Web UI</label><label for="__tabbed_8_2">Linux</label><label for="__tabbed_8_3">All-in-one</label><label for="__tabbed_8_4">Docker</label><label for="__tabbed_8_5">Docker autoconf</label><label for="__tabbed_8_6">Kubernetes</label><label for="__tabbed_8_7">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Navigate to the <strong>Configs</strong> page, click on <strong>Create new custom config</strong>, you can then choose if it's a global one or specific to a service, the configuration type and the configuration name :</p>
@@ -1590,6 +1834,60 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 <p>Otherwise, we will need to start it :</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>When using the <a href="../integrations/#all-in-one-aio-image">All-in-one image</a>, you have two choices for adding custom configurations:</p>
+<ul>
+<li>Using specific settings <code>*_CUSTOM_CONF_*</code> as environment variables when running the container (recommended).</li>
+<li>Writing <code>.conf</code> files to the <code>/data/configs/</code> directory within the volume mounted to <code>/data</code>.</li>
+</ul>
+<p><strong>Using settings (Environment Variables)</strong></p>
+<p>The settings to use must follow the pattern <code>&lt;SITE&gt;_CUSTOM_CONF_&lt;TYPE&gt;_&lt;NAME&gt;</code>:</p>
+<ul>
+<li><code>&lt;SITE&gt;</code> : Optional primary server name if multisite mode is enabled and the config must be applied to a specific service.</li>
+<li><code>&lt;TYPE&gt;</code> : The type of config, accepted values are <code>HTTP</code>, <code>DEFAULT_SERVER_HTTP</code>, <code>SERVER_HTTP</code>, <code>MODSEC</code>, <code>MODSEC_CRS</code>, <code>CRS_PLUGINS_BEFORE</code>, <code>CRS_PLUGINS_AFTER</code>, <code>STREAM</code> and <code>SERVER_STREAM</code>.</li>
+<li><code>&lt;NAME&gt;</code> : The name of config without the <code>.conf</code> suffix.</li>
+</ul>
+<p>Here is a dummy example when running the All-in-one container:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s2">&quot;CUSTOM_CONF_SERVER_HTTP_hello-world=location /hello { \</span>
+<span class="s2">        default_type &#39;text/plain&#39;; \</span>
+<span class="s2">        content_by_lua_block { \</span>
+<span class="s2">          ngx.say(&#39;world&#39;); \</span>
+<span class="s2">        } \</span>
+<span class="s2">      }&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.</p>
+<p><strong>Using files</strong></p>
+<p>The first thing to do is to create the folders :</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>./bw-data/configs/server-http
+</code></pre></div>
+<p>You can now write your configurations :</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;location /hello {</span>
+<span class="s2">    default_type &#39;text/plain&#39;;</span>
+<span class="s2">    content_by_lua_block {</span>
+<span class="s2">        ngx.say(&#39;world&#39;)</span>
+<span class="s2">    }</span>
+<span class="s2">}&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>./bw-data/configs/server-http/hello-world.conf
+</code></pre></div>
+<p>Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>When starting the scheduler container, you will need to mount the folder on /data :</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>./bw-data:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -1842,8 +2140,37 @@ LISTEN_STREAM_PORT_SSL_1=4344
 ...
 </code></pre></div>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:5"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><input id="__tabbed_5_4" name="__tabbed_5" type="radio" /><input id="__tabbed_5_5" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Docker</label><label for="__tabbed_5_2">Docker autoconf</label><label for="__tabbed_5_3">Swarm</label><label for="__tabbed_5_4">Kubernetes</label><label for="__tabbed_5_5">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:6"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><input id="__tabbed_9_4" name="__tabbed_9" type="radio" /><input id="__tabbed_9_5" name="__tabbed_9" type="radio" /><input id="__tabbed_9_6" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">All-in-one</label><label for="__tabbed_9_2">Docker</label><label for="__tabbed_9_3">Docker autoconf</label><label for="__tabbed_9_4">Swarm</label><label for="__tabbed_9_5">Kubernetes</label><label for="__tabbed_9_6">Linux</label></div>
 <div class="tabbed-content">
+<div class="tabbed-block">
+<p>You will need to add the settings to the environment variables when running the All-in-one container. You will also need to expose the stream ports.</p>
+<p>This example configures BunkerWeb to proxy two stream-based applications, <code>app1.example.com</code> and <code>app2.example.com</code>.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span><span class="s2">&quot;no&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">SERVER_NAME</span><span class="o">=</span><span class="s2">&quot;app1.example.com app2.example.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">MULTISITE</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">USE_REVERSE_PROXY</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">SERVER_TYPE</span><span class="o">=</span><span class="s2">&quot;stream&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span>app1.example.com_REVERSE_PROXY_HOST<span class="o">=</span><span class="s2">&quot;myapp1:9000&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span>app1.example.com_LISTEN_STREAM_PORT<span class="o">=</span><span class="s2">&quot;10000&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span>app2.example.com_REVERSE_PROXY_HOST<span class="o">=</span><span class="s2">&quot;myapp2:9000&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span>app2.example.com_LISTEN_STREAM_PORT<span class="o">=</span><span class="s2">&quot;20000&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">10000</span>:10000/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">20000</span>:20000/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.</p>
+<p>Your applications (<code>myapp1</code>, <code>myapp2</code>) should be running in separate containers (or be otherwise accessible) and their hostnames/IPs (e.g., <code>myapp1</code>, <code>myapp2</code> used in <code>_REVERSE_PROXY_HOST</code>) must be resolvable and reachable from the <code>bunkerweb-aio</code> container. This typically involves connecting them to a shared Docker network.</p>
+<div class="admonition note">
+<p class="admonition-title">Deactivate UI Service</p>
+<p>Deactivating the UI service (e.g., by setting <code>SERVICE_UI=no</code> as an environment variable) is recommended as the Web UI is not compatible with <code>SERVER_TYPE=stream</code>.</p>
+</div>
+</div>
 <div class="tabbed-block">
 <p>When using Docker integration, the easiest way of protecting existing network applications is to add the services in the <code>bw-services</code> network :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-api-env</span>
@@ -2196,8 +2523,55 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 <li><code>LOCAL_PHP</code> : Path to the local socket file of PHP-FPM instance.</li>
 <li><code>LOCAL_PHP_PATH</code> : Root folder containing files in the local PHP-FPM instance.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:5"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><input id="__tabbed_6_5" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Docker</label><label for="__tabbed_6_2">Docker autoconf</label><label for="__tabbed_6_3">Swarm</label><label for="__tabbed_6_4">Kubernetes</label><label for="__tabbed_6_5">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:6"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><input id="__tabbed_10_5" name="__tabbed_10" type="radio" /><input id="__tabbed_10_6" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">All-in-one</label><label for="__tabbed_10_2">Docker</label><label for="__tabbed_10_3">Docker autoconf</label><label for="__tabbed_10_4">Swarm</label><label for="__tabbed_10_5">Kubernetes</label><label for="__tabbed_10_6">Linux</label></div>
 <div class="tabbed-content">
+<div class="tabbed-block">
+<p>When using the <a href="../integrations/#all-in-one-aio-image">All-in-one image</a>, to support PHP applications, you will need to :</p>
+<ul>
+<li>Mount your PHP files into the <code>/var/www/html</code> folder of BunkerWeb.</li>
+<li>Set up a PHP-FPM container for your application and mount the folder containing PHP files.</li>
+<li>Use the specific settings <code>REMOTE_PHP</code> and <code>REMOTE_PHP_PATH</code> as environment variables when running BunkerWeb.</li>
+</ul>
+<p>If you enable the <a href="../concepts/#multisite-mode">multisite mode</a>, you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of <code>SERVER_NAME</code>. Here is a dummy example :</p>
+<div class="highlight"><pre><span></span><code>www
+├── app1.example.com
+│   └── index.php
+└── app2.example.com
+    └── index.php
+
+2 directories, 2 files
+</code></pre></div>
+<p>We will assume that your PHP apps are located into a folder named <code>www</code>. Please note that you will need to fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the <code>php:fpm</code> image) is the owner of the files and folders :</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">33</span>:101<span class="w"> </span>./www<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-exec<span class="w"> </span>chmod<span class="w"> </span><span class="m">0640</span><span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-exec<span class="w"> </span>chmod<span class="w"> </span><span class="m">0750</span><span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span>
+</code></pre></div>
+<p>You can now run BunkerWeb, configure it for your PHP application and also run the PHP apps. You will need to create a custom Docker network to allow BunkerWeb to communicate with your PHP-FPM containers.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create a custom network</span>
+docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>php-network
+
+<span class="c1"># Run PHP-FPM containers</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>myapp1-php<span class="w"> </span>--network<span class="w"> </span>php-network<span class="w"> </span>-v<span class="w"> </span>./www/app1.example.com:/app<span class="w"> </span>php:fpm
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>myapp2-php<span class="w"> </span>--network<span class="w"> </span>php-network<span class="w"> </span>-v<span class="w"> </span>./www/app2.example.com:/app<span class="w"> </span>php:fpm
+
+<span class="c1"># Run BunkerWeb All-in-one</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--network<span class="w"> </span>php-network<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>./www:/var/www/html<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">SERVER_NAME</span><span class="o">=</span><span class="s2">&quot;app1.example.com app2.example.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">MULTISITE</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REMOTE_PHP_PATH</span><span class="o">=</span><span class="s2">&quot;/app&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span>app1.example.com_REMOTE_PHP<span class="o">=</span><span class="s2">&quot;myapp1-php&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span>app2.example.com_REMOTE_PHP<span class="o">=</span><span class="s2">&quot;myapp2-php&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.</p>
+</div>
 <div class="tabbed-block">
 <p>When using the <a href="../integrations/#docker">Docker integration</a>, to support PHP applications, you will need to :</p>
 <ul>
@@ -2631,7 +3005,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
 </div>
 <p>By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set <code>USE_IPV6=yes</code>. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Docker / Autoconf / Swarm</label><label for="__tabbed_7_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Docker / Autoconf / Swarm</label><label for="__tabbed_11_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>First of all, you will need to configure your Docker daemon to enable IPv6 support for containers and use ip6tables if needed. Here is sample configuration for your <code>/etc/docker/daemon.json</code> file :</p>
@@ -2697,38 +3071,6 @@ USE_IPV6=yes
 </figure>
 <h2 id="crowdsec-console-integration">CrowdSec Console integration</h2>
 <p>If you aren’t already familiar with CrowdSec Console integration, <a href="https://www.crowdsec.net/?utm_campaign=bunkerweb&amp;utm_source=doc">CrowdSec</a> leverages crowdsourced intelligence to combat cyber threats. Think of it as the "Waze of cybersecurity"—when one server is attacked, other systems worldwide are alerted and protected from the same attackers. You can learn more about it <a href="https://www.crowdsec.net/about?utm_campaign=bunkerweb&amp;utm_source=blog">here</a>.</p>
-<p>Through our partnership with CrowdSec, you can enroll your BunkerWeb instances into your <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec Console</a>. This means that attacks blocked by BunkerWeb will be visible in your CrowdSec Console alongside attacks blocked by CrowdSec Security Engines, giving you a unified view of threats.</p>
-<p>Importantly, CrowdSec does not need to be installed for this integration (though we highly recommend trying it out with the <a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">CrowdSec plugin for BunkerWeb</a> to further enhance the security of your web services). Additionally, you can enroll your CrowdSec Security Engines into the same Console account for even greater synergy.</p>
-<p><strong>Step #1: Create your CrowdSec Console account</strong></p>
-<p>Go to the <a href="https://app.crowdsec.net/signup?utm_source=external-blog&amp;utm_medium=cta&amp;utm_campaign=bunker-web-integration">CrowdSec Console</a> and register if you don’t already have an account. Once done, note the enroll key found under "Security Engines" after clicking on "Add Security Engine":</p>
-<figure>
-<p><img align="center" alt="Overview" src="../assets/img/crowdity1.png" />
-  </p>
-<figcaption>Get your Crowdsec Console enroll key</figcaption>
-</figure>
-<p><strong>Step #2: Get your BunkerNet ID</strong></p>
-<p>Activating the BunkerNet feature (enabled by default) is mandatory if you want to enroll your BunkerWeb instance(s) in your CrowdSec Console. Enable it by setting <code>USE_BUNKERNET</code> to <code>yes</code>.</p>
-<p>For Docker, get your BunkerNet ID using:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>my-bw-scheduler<span class="w"> </span>cat<span class="w"> </span>/var/cache/bunkerweb/bunkernet/instance.id
-</code></pre></div>
-<p>For Linux, use:</p>
-<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>/var/cache/bunkerweb/bunkernet/instance.id
-</code></pre></div>
-<p><strong>Step #3: Enroll your instance using the Panel</strong></p>
-<p>Once you have your BunkerNet ID and CrowdSec Console enroll key, <a href="https://panel.bunkerweb.io/order/bunkernet/11?utm_campaign=self&amp;utm_source=doc">order the free product "BunkerNet / CrowdSec" on the Panel</a>. You may be prompted to create an account if you haven’t already.</p>
-<p>You can now select the "BunkerNet / CrowdSec" service and fill out the form by pasting your BunkerNet ID and CrowdSec Console enroll key:</p>
-<figure>
-<p><img align="center" alt="Overview" src="../assets/img/crowdity2.png" />
-  </p>
-<figcaption>Enroll your BunkerWeb instance into the CrowdSec Console</figcaption>
-</figure>
-<p><strong>Step #4: Accept the new security engine on the Console</strong></p>
-<p>Then, go back to your CrowdSec Console and accept the new Security Engine:</p>
-<figure>
-<p><img align="center" alt="Overview" src="../assets/img/crowdity3.png" />
-  </p>
-<figcaption>Accept enroll into the CrowdSec Console</figcaption>
-</figure>
 <p><strong>Congratulations, your BunkerWeb instance is now enrolled in your CrowdSec Console!</strong></p>
 <p>Pro tip: When viewing your alerts, click the "columns" option and check the "context" checkbox to access BunkerWeb-specific data.</p>
 <figure>
@@ -2898,6 +3240,12 @@ USE_IPV6=yes
 <td>The host server used for SMTP sending.</td>
 </tr>
 <tr>
+<td>```bash</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
 <td><code>REPORTING_SMTP_PORT</code></td>
 <td><code>465</code></td>
 <td>global</td>
@@ -2914,6 +3262,12 @@ USE_IPV6=yes
 <td></td>
 <td>global</td>
 <td>The user authentication value for sending via the from email address.</td>
+</tr>
+<tr>
+<td>To resolve this issue, you can execute the following command to change the authentication plugin to <code>mysql_native_password</code>:</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
 <td><code>REPORTING_SMTP_FROM_PASSWORD</code></td>
@@ -2938,311 +3292,340 @@ USE_IPV6=yes
 <div class="admonition info">
 <p class="admonition-title">Information and behavior</p>
 <ul>
-<li>case <code>USE_REPORTING_SMTP</code> is set to <code>yes</code>, the setting <code>REPORTING_SMTP_EMAILS</code> must be set.</li>
+<li>case <code>USE_REPORTING_SMTP</code> is set to <code>yes</code>, the setting <code>REPORTING_SMTP_EMAILS</code> must be set.you're using the Docker integration, you can add the following command to the <code>docker-compose.yml</code> file to automatically change the authentication plugin:</li>
 <li>case <code>USE_REPORTING_WEBHOOK</code> is set to <code>yes</code>, the setting <code>REPORTING_WEBHOOK_URLS</code> must be set.</li>
 <li>Accepted values for <code>REPORTING_SCHEDULE</code> are <code>daily</code>, <code>weekly</code>and <code>monthly</code>.</li>
-<li>case no <code>REPORTING_SMTP_FROM_USER</code> and <code>REPORTING_SMTP_FROM_PASSWORD</code> are set, the plugin will try to send the email without authentication.</li>
-<li>case <code>REPORTING_SMTP_FROM_USER</code> isn't set but <code>REPORTING_SMTP_FROM_PASSWORD</code> is set, the plugin will use the <code>REPORTING_SMTP_FROM_EMAIL</code> as the username.</li>
-<li>case the job fails, the plugin will retry sending the report in the next execution.</li>
+<li>case no <code>REPORTING_SMTP_FROM_USER</code> and <code>REPORTING_SMTP_FROM_PASSWORD</code> are set, the plugin will try to send the email without authentication.
+    <div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:&lt;version&gt;</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--default-authentication-plugin=mysql_native_password</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div></li>
+</ul>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">MySQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
+<ul>
+<li>case <code>REPORTING_SMTP_FROM_USER</code> isn't set but <code>REPORTING_SMTP_FROM_PASSWORD</code> is set, the plugin will use the <code>REPORTING_SMTP_FROM_EMAIL</code> as the username.
+    bw-db:</li>
+<li>case the job fails, the plugin will retry sending the report in the next execution.            image: mysql:<version></li>
 </ul>
 </div>
-<h3 id="backup-and-restore">Backup and restore</h3>
+<p>mand: --default-authentication-plugin=mysql_native_password</p>
+<h3 id="backup-and-restore">Backup and restore.</h3>
 <h4 id="backup-s3-pro">Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
-<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
-<p>The Backup S3 tool seamlessly automates data protection, similar to the community backup plugin. However, it stands out by securely storing backups directly in an S3 bucket.</p>
+<p>store
+STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" />
+To manually initiate a restore, execute the following command:
+The Backup S3 tool seamlessly automates data protection, similar to the community backup plugin. However, it stands out by securely storing backups directly in an S3 bucket.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
 <p>By activating this feature, you're proactively safeguarding your <strong>data's integrity</strong>. Storing backups <strong>remotely</strong> shields crucial information from threats like <strong>hardware failures</strong>, <strong>cyberattacks</strong>, or <strong>natural disasters</strong>. This ensures both <strong>security</strong> and <strong>availability</strong>, enabling swift recovery during <strong>unexpected events</strong>, preserving <strong>operational continuity</strong>, and ensuring <strong>peace of mind</strong>.</p>
 <div class="admonition warning">
-<p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.9 users</p>
-<p>If you are using <strong>RHEL 8.9</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">MySQL/MariaDB</label><label for="__tabbed_8_2">PostgreSQL</label></div>
+<p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.10 users</p>
+<p>If you are using <strong>RHEL 8.10</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:1"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">MySQL/MariaDB"</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
-<li>
-<p><strong>Install the MySQL repository configuration package</strong></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
-</code></pre></div>
-</li>
-<li>
-<p><strong>Enable the MySQL repository</strong></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>--enable<span class="w"> </span>mysql80-community
-</code></pre></div>
-</li>
-<li>
-<p><strong>Install the MySQL client</strong></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>mysql-community-client
-</code></pre></div>
-</li>
-</ol>
-</div>
-<div class="tabbed-block">
-<ol>
-<li>
-<p><strong>Install the PostgreSQL repository configuration package</strong></p>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">/pgdg-redhat-repo-latest.noarch.rpm&quot;</span>
-</code></pre></div>
-</li>
-<li>
-<p><strong>Install the PostgreSQL client</strong></p>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span>postgresql&lt;version&gt;
-</code></pre></div>
-</li>
+<li><strong>Install the MySQL repository configuration package</strong></li>
 </ol>
 </div>
 </div>
 </div>
+<p>docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+        <code>bash
+        sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm</code>-one"</p>
+<pre><code>2. **Enable the MySQL repository**
+</code></pre>
 </div>
-<p><strong>List of features</strong></p>
+<p>bwcli plugin backup_s3 restore
+            <code>bash
+            sudo dnf config-manager --enable mysql80-community</code> will create a temporary backup of your database in the S3 bucket specified in the <code>BACKUP_S3_BUCKET</code> setting and restore your database to the latest backup available in the bucket.</p>
+<pre><code>    3. **Install the MySQL client**o specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
+
+        ```bashnux"
+        sudo dnf install mysql-community-client
+        ```
+bwcli plugin backup_s3 restore s3_backup_file.zip
+=== "PostgreSQL"
+
+    1. **Install the PostgreSQL repository configuration package**cker"
+
+        ```bash
+        dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"    docker exec -it &lt;scheduler_container&gt; bwcli plugin backup restore s3_backup_file.zip
+        ```
+
+    2. **Install the PostgreSQL client**-one"
+
+        ```bash
+        dnf install postgresql&lt;version&gt;_s3 restore s3_backup_file.zip
+        ```
+</code></pre>
+<p><strong>List of features</strong>"In case of failure"</p>
 <ul>
-<li>Automatic data backup to an S3 bucket</li>
+<li>Automatic data backup to an S3 bucketorry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:</li>
 <li>Flexible scheduling options: daily, weekly, or monthly</li>
-<li>Rotation management for controlling the number of backups to keep</li>
+<li>Rotation management for controlling the number of backups to keep "Linux"</li>
 <li>Customizable compression level for backup files</li>
 </ul>
-<p><strong>List of settings</strong></p>
-<table>
-<thead>
-<tr>
-<th>Setting</th>
-<th>Default</th>
-<th>Context</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>USE_BACKUP_S3</code></td>
-<td><code>no</code></td>
-<td>global</td>
-<td>Enable or disable the S3 backup feature</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_SCHEDULE</code></td>
-<td><code>daily</code></td>
-<td>global</td>
-<td>The frequency of the backup</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_ROTATION</code></td>
-<td><code>7</code></td>
-<td>global</td>
-<td>The number of backups to keep</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_ENDPOINT</code></td>
-<td></td>
-<td>global</td>
-<td>The S3 endpoint</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_BUCKET</code></td>
-<td></td>
-<td>global</td>
-<td>The S3 bucket</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_DIR</code></td>
-<td></td>
-<td>global</td>
-<td>The S3 directory</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_REGION</code></td>
-<td></td>
-<td>global</td>
-<td>The S3 region</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_ACCESS_KEY_ID</code></td>
-<td></td>
-<td>global</td>
-<td>The S3 access key ID</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_ACCESS_KEY_SECRET</code></td>
-<td></td>
-<td>global</td>
-<td>The S3 access key secret</td>
-</tr>
-<tr>
-<td><code>BACKUP_S3_COMP_LEVEL</code></td>
-<td><code>6</code></td>
-<td>global</td>
-<td>The compression level of the backup zip file</td>
-</tr>
-</tbody>
-</table>
-<h5 id="manual-backup">Manual backup</h5>
-<p>To manually initiate a backup, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Linux</label><label for="__tabbed_9_2">Docker</label></div>
+<p><strong>List of settings</strong>        bwcli plugin backup_s3 restore</p>
+<p>| Setting | Default | Context | Description |
+| ------- | ------- | ------- | ----------- |"Docker"
+| <code>USE_BACKUP_S3</code>               | <code>no</code>    | global  | Enable or disable the S3 backup feature      |
+| <code>BACKUP_S3_SCHEDULE</code>          | <code>daily</code> | global  | The frequency of the backup                  |
+| <code>BACKUP_S3_ROTATION</code>          | <code>7</code>     | global  | The number of backups to keep                |        docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+| <code>BACKUP_S3_ENDPOINT</code>          |         | global  | The S3 endpoint                              |
+| <code>BACKUP_S3_BUCKET</code>            |         | global  | The S3 bucket                                |
+| <code>BACKUP_S3_DIR</code>               |         | global  | The S3 directory                             |-one"
+| <code>BACKUP_S3_REGION</code>            |         | global  | The S3 region                                |
+| <code>BACKUP_S3_ACCESS_KEY_ID</code>     |         | global  | The S3 access key ID                         |
+| <code>BACKUP_S3_ACCESS_KEY_SECRET</code> |         | global  | The S3 access key secret                     |bwcli plugin backup_s3 restore
+| <code>BACKUP_S3_COMP_LEVEL</code>        | <code>6</code>     | global  | The compression level of the backup zip file |</p>
+<h5 id="manual-backupmg-srcassetsimgpro-iconsvg-altcrow-pro-icon-height24px-width24px-styletransform-translatey3px-pro">Manual backupmg src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"&gt; (PRO)</h5>
+<p>To manually initiate a backup, execute the following command:<img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>=== "Linux"on plugin <strong>revolutionizes</strong> BunkerWeb configuration transfers between instances with its <strong>user-friendly web interface</strong>, simplifying the entire migration journey. Whether you're upgrading systems, scaling infrastructure, or transitioning environments, this tool empowers you to effortlessly transfer <strong>settings, preferences, and data</strong> with unmatched ease and confidence. Say goodbye to cumbersome manual processes and hello to a <strong>seamless, hassle-free migration experience</strong>.</p>
+<pre><code>```bash
+bwcli plugin backup_s3 save
+```Migration:** Easily transfer BunkerWeb configurations between instances without the complexities of manual procedures.
+</code></pre>
+<p>=== "Docker"ve Web Interface:** Navigate through the migration process effortlessly with a user-friendly web interface designed for intuitive operation.</p>
+<pre><code>```bashQL, ensuring compatibility with your preferred database environment.
+docker exec -it &lt;scheduler_container&gt; bwcli plugin backup_s3 save
+```
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:1"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
+<p><div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>bunkerweb-aio<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
-</code></pre></div>
+bwcli plugin migration create /path/to/migration/file</p>
 </div>
 </div>
 </div>
 <p>This command will create a backup of your database and store it in the S3 bucket specified in the <code>BACKUP_S3_BUCKET</code> setting.</p>
 <p>You can also specify a custom S3 bucket for the backup by providing the <code>BACKUP_S3_BUCKET</code> environment variable when executing the command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Linux</label><label for="__tabbed_10_2">Docker</label></div>
+<p>=== "Linux"le:</p>
+<pre><code>```bash
+BACKUP_S3_BUCKET=your-bucket-name bwcli plugin backup_s3 save        docker exec -it &lt;scheduler_container&gt; bwcli plugin migration create /path/to/migration/file
+```
+</code></pre>
+<p>=== "Docker" the migration file to your local machine:</p>
+<pre><code>```bash ```bash
+docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name &lt;scheduler_container&gt; bwcli plugin backup_s3 save        docker cp &lt;scheduler_container&gt;:/path/to/migration/file /path/to/migration/file
+```
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">BACKUP_S3_BUCKET</span><span class="o">=</span>your-bucket-name<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>save
-</code></pre></div>
+<p><code>bash migration file:
+docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name bunkerweb-aio bwcli plugin backup_s3 save</code>bash
+    docker exec -it bunkerweb-aio bwcli plugin migration create /path/to/migration/file</p>
 </div>
 </div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Specifications for MariaDB/MySQL</p>
-<p>In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:</p>
-<div class="highlight"><pre><span></span><code>caching_sha2_password<span class="w"> </span>could<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>loaded:<span class="w"> </span>Error<span class="w"> </span>loading<span class="w"> </span>shared<span class="w"> </span>library<span class="w"> </span>/usr/lib/mariadb/plugin/caching_sha2_password.so
+<p>In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database: migration file to your local machine:</p>
+<div class="highlight"><pre><span></span><code>caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so        docker cp bunkerweb-aio:/path/to/migration/file /path/to/migration/file
 </code></pre></div>
-<p>To resolve this issue, you can execute the following command to change the authentication plugin to <code>mysql_native_password</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
-</code></pre></div>
-<p>If you're using the Docker integration, you can add the following command to the <code>docker-compose.yml</code> file to automatically change the authentication plugin:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">MariaDB</label><label for="__tabbed_11_2">MySQL</label></div>
+<p>To resolve this issue, you can execute the following command to change the authentication plugin to <code>mysql_native_password</code>:up of your database and store it in the backup directory specified in the command.</p>
+<p><code>sqlfications for MariaDB/MySQL"
+ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';</code> you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:</p>
+<p>If you're using the Docker integration, you can add the following command to the <code>docker-compose.yml</code> file to automatically change the authentication plugin:
+caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:1"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">MariaDB</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:&lt;version&gt;</span>
-<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--default-authentication-plugin=mysql_native_password</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql:&lt;version&gt;</span>
-<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--default-authentication-plugin=mysql_native_password</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-</code></pre></div>
+<p><code>yamllve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
+bw-db:
+    image: mariadb:&lt;version&gt;
+    command: --default-authentication-plugin=mysql_native_password    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
+    ...</code></p>
 </div>
 </div>
 </div>
 </div>
+<p>utomatically change the authentication plugin:
+    === "MySQL"
+riaDB"
+        <code>yaml
+        bw-db:</code>yaml
+            image: mysql:<version>        bw-db:
+            command: --default-authentication-plugin=mysql_native_password
+            ...            command: --default-authentication-plugin=mysql_native_password
+        ```  ...</p>
 <h5 id="manual-restore">Manual restore</h5>
-<p>To manually initiate a restore, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Linux</label><label for="__tabbed_12_2">Docker</label></div>
+<pre><code>=== "MySQL"
+</code></pre>
+<p>To manually initiate a restore, execute the following command:
+        ```yaml</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:1"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
-</code></pre></div>
+<pre><code>    image: mysql:&lt;version&gt;
+</code></pre>
+<p><code>bashmand: --default-authentication-plugin=mysql_native_password
+bwcli plugin backup_s3 restore.</code></p>
 </div>
 </div>
 </div>
-<p>This command will create a temporary backup of your database in the S3 bucket specified in the <code>BACKUP_S3_BUCKET</code> setting and restore your database to the latest backup available in the bucket.</p>
-<p>You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Linux</label><label for="__tabbed_13_2">Docker</label></div>
+<p>=== "Docker" a migration</p>
+<pre><code>```bashTo manually initialize a migration, execute the following command:
+docker exec -it &lt;scheduler_container&gt; bwcli plugin backup_s3 restore
+```=== "Linux"
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:1"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">All-in-one</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
+<p>/path/to/migration/file
+    <code>bash
+    docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore</code>"</p>
+<p>This command will create a temporary backup of your database in the S3 bucket specified in the <code>BACKUP_S3_BUCKET</code> setting and restore your database to the latest backup available in the bucket.ile to the container:</p>
+<p>You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
+        docker cp /path/to/migration/file <scheduler_container>:/path/to/migration/file</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Linux</label><label for="__tabbed_20_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
-</code></pre></div>
+<p><code>bashialize the migration:
+bwcli plugin backup_s3 restore s3_backup_file.zip</code> ```bash
+    docker exec -it <scheduler_container> bwcli plugin migration migrate /path/to/migration/file</p>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>restore<span class="w"> </span>s3_backup_file.zip
-</code></pre></div>
+<p><code>bash
+docker exec -it &lt;scheduler_container&gt; bwcli plugin backup restore s3_backup_file.zip</code> migration file to the container:</p>
 </div>
 </div>
 </div>
-<div class="admonition example">
-<p class="admonition-title">In case of failure</p>
-<p>Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Linux</label><label for="__tabbed_14_2">Docker</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup_s3<span class="w"> </span>restore
-</code></pre></div>
-</div>
-</div>
-</div>
-</div>
+<p>=== "All-in-one"bash
+        docker cp /path/to/migration/file bunkerweb-aio:/path/to/migration/file
+    <code>bash
+    docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore s3_backup_file.zip</code>ze the migration:</p>
+<p>!!! example "In case of failure"bash
+        docker exec -it bunkerweb-aio bwcli plugin migration migrate /path/to/migration/file
+    Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:</p>
+<pre><code>=== "Linux"data to precisely match the configuration outlined in the migration file.
+
+    ```bashmg src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"&gt; (PRO)
+    bwcli plugin backup_s3 restore
+    ```ort :x:
+
+=== "Docker"s advanced protection against Distributed Denial of Service (DDoS) attacks by monitoring, analyzing, and filtering suspicious traffic in real-time.
+
+    ```bash**sliding window mechanism**, the plugin maintains an in-memory dictionary of request timestamps to detect abnormal traffic spikes from individual IP addresses. Based on the configured security mode, it can either block offending connections or log the suspicious activity for further review.
+    docker exec -it &lt;scheduler_container&gt; bwcli plugin backup_s3 restore
+    ```es
+
+=== "All-in-one"
+</code></pre>
+<ul>
+<li><strong>Sliding Window Mechanism:</strong> Tracks recent request activity within a configurable time window.
+        <code>bash
+        docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore- **Advanced Blocking Logic:** Evaluates both per-IP request counts and the number of distinct IPs exceeding the threshold.</code>ity Modes:** Choose between immediate connection blocking or detection-only (logging) mode.</li>
+<li><strong>Optimized In-Memory Datastore:</strong> Ensures high-speed lookups and efficient metric tracking.</li>
+</ul>
 <h3 id="migration-pro">Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h3>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
-<p>The Migration plugin <strong>revolutionizes</strong> BunkerWeb configuration transfers between instances with its <strong>user-friendly web interface</strong>, simplifying the entire migration journey. Whether you're upgrading systems, scaling infrastructure, or transitioning environments, this tool empowers you to effortlessly transfer <strong>settings, preferences, and data</strong> with unmatched ease and confidence. Say goodbye to cumbersome manual processes and hello to a <strong>seamless, hassle-free migration experience</strong>.</p>
-<p><strong>List of features</strong></p>
-<ul>
-<li>
-<p><strong>Effortless Migration:</strong> Easily transfer BunkerWeb configurations between instances without the complexities of manual procedures.</p>
-</li>
-<li>
-<p><strong>Intuitive Web Interface:</strong> Navigate through the migration process effortlessly with a user-friendly web interface designed for intuitive operation.</p>
-</li>
-<li>
-<p><strong>Cross-Database Compatibility:</strong> Enjoy seamless migration across various database platforms, including SQLite, MySQL, MariaDB, and PostgreSQL, ensuring compatibility with your preferred database environment.</p>
-</li>
-</ul>
+<p>The Migration plugin <strong>revolutionizes</strong> BunkerWeb configuration transfers between instances with its <strong>user-friendly web interface</strong>, simplifying the entire migration journey. Whether you're upgrading systems, scaling infrastructure, or transitioning environments, this tool empowers you to effortlessly transfer <strong>settings, preferences, and data</strong> with unmatched ease and confidence. Say goodbye to cumbersome manual processes and hello to a <strong>seamless, hassle-free migration experience</strong>. plugin behavior using the following settings:</p>
+<table>
+<thead>
+<tr>
+<th><strong>List of features</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>- <strong>Effortless Migration:</strong> Easily transfer BunkerWeb configurations between instances without the complexities of manual procedures. protection. Set to <code>"yes"</code> to activate the plugin.</td>
+</tr>
+<tr>
+<td>rics (e.g., <code>10M</code>, <code>500k</code>).</td>
+</tr>
+<tr>
+<td>- <strong>Intuitive Web Interface:</strong> Navigate through the migration process effortlessly with a user-friendly web interface designed for intuitive operation.llowed per IP within the defined time window.</td>
+</tr>
+<tr>
+<td>uring which suspicious requests are tallied.</td>
+</tr>
+<tr>
+<td>- <strong>Cross-Database Compatibility:</strong> Enjoy seamless migration across various database platforms, including SQLite, MySQL, MariaDB, and PostgreSQL, ensuring compatibility with your preferred database environment.ed suspicious and used to trigger anti-DDoS actions.</td>
+</tr>
+<tr>
+<td><code>ANTIDDOS_DISTINCT_IP</code></td>
+</tr>
+</tbody>
+</table>
 <h4 id="create-a-migration-file">Create a migration file</h4>
-<p>To manually create a migration file, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Linux</label><label for="__tabbed_15_2">Docker</label></div>
+<h4 id="best-practices">Best Practices</h4>
+<p>To manually create a migration file, execute the following command:
+- <strong>Threshold Tuning:</strong> Adjust <code>ANTIDDOS_THRESHOLD</code> and <code>ANTIDDOS_WINDOW_TIME</code> based on your typical traffic patterns.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
 </code></pre></div>
 </div>
-<div class="tabbed-block">
-<ol>
-<li>
-<p>Create a migration file:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>create<span class="w"> </span>/path/to/migration/file
-</code></pre></div>
-</li>
-<li>
-<p>Copy the migration file to your local machine:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>&lt;scheduler_container&gt;:/path/to/migration/file<span class="w"> </span>/path/to/migration/file
-</code></pre></div>
-</li>
-</ol>
+<div class="tabbed-block"></div>
 </div>
 </div>
-</div>
-<p>This command will create a backup of your database and store it in the backup directory specified in the command.</p>
-<div class="admonition note">
-<p class="admonition-title">Specifications for MariaDB/MySQL</p>
-<p>In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:</p>
-<div class="highlight"><pre><span></span><code>caching_sha2_password<span class="w"> </span>could<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>loaded:<span class="w"> </span>Error<span class="w"> </span>loading<span class="w"> </span>shared<span class="w"> </span>library<span class="w"> </span>/usr/lib/mariadb/plugin/caching_sha2_password.so
-</code></pre></div>
-<p>To resolve this issue, you can execute the following command to change the authentication plugin to <code>mysql_native_password</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="s1">&#39;yourusername&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span><span class="w"> </span><span class="n">IDENTIFIED</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">mysql_native_password</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="s1">&#39;youpassword&#39;</span><span class="p">;</span>
-</code></pre></div>
-<p>If you're using the Docker integration, you can add the following command to the <code>docker-compose.yml</code> file to automatically change the authentication plugin:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">MariaDB</label><label for="__tabbed_16_2">MySQL</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:&lt;version&gt;</span>
-<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--default-authentication-plugin=mysql_native_password</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql:&lt;version&gt;</span>
-<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--default-authentication-plugin=mysql_native_password</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-</div>
+<p>led user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.
+    1. Create a migration file:</p>
+<pre><code>    ```bash
+    docker exec -it &lt;scheduler_container&gt; bwcli plugin migration create /path/to/migration/file
+    ```
+
+2. Copy the migration file to your local machine:- **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
+
+    ```bash
+    docker cp &lt;scheduler_container&gt;:/path/to/migration/file /path/to/migration/file
+    ```  ![Overview](assets/img/user-manager.png){ align=center }
+</code></pre>
+<p>=== "All-in-one"</figure></p>
+<pre><code>1. Create a migration file:&lt;figure markdown&gt;
+
+    ```bash
+    docker exec -it bunkerweb-aio bwcli plugin migration create /path/to/migration/file
+    ```
+
+2. Copy the migration file to your local machine:  ![Activities page](assets/img/user-manager-activities.png){ align=center }
+</code></pre>
+<p>r Manager - Activities page</figcaption>
+        <code>bash
+        docker cp bunkerweb-aio:/path/to/migration/file /path/to/migration/file</code>This command will create a backup of your database and store it in the backup directory specified in the command.!!! note "Specifications for MariaDB/MySQL"    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:    <code>bash    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so</code>
+    To resolve this issue, you can execute the following command to change the authentication plugin to <code>mysql_native_password</code>:</p>
+<pre><code>```sql
+ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
+```
+
+If you're using the Docker integration, you can add the following command to the `docker-compose.yml` file to automatically change the authentication plugin:
+
+=== "MariaDB"
+
+    ```yaml
+    bw-db:
+        image: mariadb:&lt;version&gt;
+        command: --default-authentication-plugin=mysql_native_password
+        ...
+    ```
+
+=== "MySQL"
+
+    ```yaml
+    bw-db:
+        image: mysql:&lt;version&gt;
+        command: --default-authentication-plugin=mysql_native_password
+        ...
+    ```
+</code></pre>
 <h4 id="initialize-a-migration">Initialize a migration</h4>
 <p>To manually initialize a migration, execute the following command:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Linux</label><label for="__tabbed_17_2">Docker</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Linux</label><label for="__tabbed_22_2">Docker</label><label for="__tabbed_22_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
@@ -3258,6 +3641,20 @@ USE_IPV6=yes
 <li>
 <p>Initialize the migration:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p>Copy the migration file to the container:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>/path/to/migration/file<span class="w"> </span>bunkerweb-aio:/path/to/migration/file
+</code></pre></div>
+</li>
+<li>
+<p>Initialize the migration:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>bunkerweb-aio<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>migration<span class="w"> </span>migrate<span class="w"> </span>/path/to/migration/file
 </code></pre></div>
 </li>
 </ol>
@@ -3336,7 +3733,7 @@ USE_IPV6=yes
 </tr>
 </tbody>
 </table>
-<h4 id="best-practices">Best Practices</h4>
+<h4 id="best-practices_1">Best Practices</h4>
 <ul>
 <li><strong>Threshold Tuning:</strong> Adjust <code>ANTIDDOS_THRESHOLD</code> and <code>ANTIDDOS_WINDOW_TIME</code> based on your typical traffic patterns.</li>
 <li><strong>Status Code Review:</strong> Regularly update <code>ANTIDDOS_STATUS_CODES</code> to capture new or evolving suspicious behaviors.</li>

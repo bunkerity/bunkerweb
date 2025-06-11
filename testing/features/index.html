@@ -4172,7 +4172,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li>When a visitor receives a "bad" HTTP status code (like 400, 401, 403, 404, etc.), the counter for that IP address is incremented.</li>
 <li>If an IP address exceeds the configured threshold of bad status codes within the specified time period, the IP is automatically banned.</li>
 <li>Banned IPs can be blocked either at the service level (just for the specific site) or globally (across all sites), depending on your configuration.</li>
-<li>Bans automatically expire after the configured ban duration.</li>
+<li>Bans automatically expire after the configured ban duration, or remain permanent if configured with <code>-1</code>.</li>
 </ol>
 <div class="admonition success">
 <p class="admonition-title">Key benefits</p>
@@ -4181,7 +4181,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>Customizable Rules:</strong> Fine-tune what constitutes "bad behavior" based on your specific needs.</li>
 <li><strong>Resource Conservation:</strong> Prevents malicious actors from consuming server resources with repeated invalid requests.</li>
 <li><strong>Flexible Scope:</strong> Choose whether bans should apply just to the current service or globally across all services.</li>
-<li><strong>Temporary Bans:</strong> All bans automatically expire after the configured duration, preventing permanent lockouts.</li>
+<li><strong>Ban Duration Control:</strong> Set temporary bans that automatically expire after the configured duration, or permanent bans that remain until manually removed.</li>
 </ol>
 </div>
 <h3 id="how-to-use_3">How to Use</h3>
@@ -4242,7 +4242,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td><code>86400</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Ban Duration:</strong> How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds).</td>
+<td><strong>Ban Duration:</strong> How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). Set to <code>-1</code> for permanent bans that never expire.</td>
 </tr>
 <tr>
 <td><code>BAD_BEHAVIOR_BAN_SCOPE</code></td>
@@ -4262,7 +4262,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p>Start with conservative settings (higher threshold, shorter ban time) and adjust based on your specific needs and traffic patterns. Monitor your logs to ensure that legitimate users are not mistakenly banned.</p>
 </div>
 <h3 id="example-configurations_4">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Default Configuration</label><label for="__tabbed_7_2">Strict Configuration</label><label for="__tabbed_7_3">Lenient Configuration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:4"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Default Configuration</label><label for="__tabbed_7_2">Strict Configuration</label><label for="__tabbed_7_3">Lenient Configuration</label><label for="__tabbed_7_4">Permanent Ban Configuration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>The default configuration provides a balanced approach suitable for most websites:</p>
@@ -4292,6 +4292,16 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <span class="nt">BAD_BEHAVIOR_COUNT_TIME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30&quot;</span>
 <span class="nt">BAD_BEHAVIOR_BAN_TIME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3600&quot;</span><span class="w">  </span><span class="c1"># 1 hour</span>
 <span class="nt">BAD_BEHAVIOR_BAN_SCOPE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;service&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>For scenarios where you want detected attackers permanently banned until manually unbanned:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_BAD_BEHAVIOR</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">BAD_BEHAVIOR_STATUS_CODES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;400</span><span class="nv"> </span><span class="s">401</span><span class="nv"> </span><span class="s">403</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">444&quot;</span>
+<span class="nt">BAD_BEHAVIOR_THRESHOLD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10&quot;</span>
+<span class="nt">BAD_BEHAVIOR_COUNT_TIME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60&quot;</span>
+<span class="nt">BAD_BEHAVIOR_BAN_TIME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-1&quot;</span><span class="w">  </span><span class="c1"># Permanent ban (never expires)</span>
+<span class="nt">BAD_BEHAVIOR_BAN_SCOPE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;global&quot;</span><span class="w"> </span><span class="c1"># Ban across all services</span>
 </code></pre></div>
 </div>
 </div>
@@ -4340,10 +4350,54 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <td>no</td>
 <td><strong>Enable Blacklist:</strong> Set to <code>yes</code> to enable the blacklist feature.</td>
 </tr>
+<tr>
+<td><code>BLACKLIST_COMMUNITY_LISTS</code></td>
+<td><code>ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Community Blacklists:</strong> Select pre-configured community-maintained blacklists to include in blocking.</td>
+</tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:5"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">IP Address</label><label for="__tabbed_8_2">Reverse DNS</label><label for="__tabbed_8_3">ASN</label><label for="__tabbed_8_4">User Agent</label><label for="__tabbed_8_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:6"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><input id="__tabbed_8_6" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Community Blacklists</label><label for="__tabbed_8_2">IP Address</label><label for="__tabbed_8_3">Reverse DNS</label><label for="__tabbed_8_4">ASN</label><label for="__tabbed_8_5">User Agent</label><label for="__tabbed_8_6">URI</label></div>
 <div class="tabbed-content">
+<div class="tabbed-block">
+<p><strong>What this does:</strong> Enables you to quickly add well-maintained, community-sourced blacklists without having to manually configure URLs.</p>
+<p>The <code>BLACKLIST_COMMUNITY_LISTS</code> setting allows you to select from curated blacklist sources. Available options include:</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Description</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ip:laurent-minne-fr-be-agressive</code></td>
+<td>Intelligence Blocklist (IPv4): Botnets, RaT, CVE's RCE, Scanners. DST = FR - BE</td>
+<td><code>https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt</code></td>
+</tr>
+<tr>
+<td><code>ip:danmeuk-tor-exit</code></td>
+<td>Tor Exit Nodes IPs (dan.me.uk)</td>
+<td><code>https://www.dan.me.uk/torlist/?exit</code></td>
+</tr>
+<tr>
+<td><code>ua:mitchellkrogza-bad-user-agents</code></td>
+<td>Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders</td>
+<td><code>https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Configuration:</strong> Specify multiple lists separated by spaces. For example:
+<div class="highlight"><pre><span></span><code><span class="nt">BLACKLIST_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ip:danmeuk-tor-exit</span><span class="nv"> </span><span class="s">ua:mitchellkrogza-bad-user-agents&quot;</span>
+</code></pre></div></p>
+<div class="admonition tip">
+<p class="admonition-title">Community vs Manual Configuration</p>
+<p>Community blacklists provide a convenient way to get started with proven blacklist sources. You can use them alongside manual URL configurations for maximum flexibility.</p>
+</div>
+</div>
 <div class="tabbed-block">
 <p><strong>What this does:</strong> Blocks visitors based on their IP address or network.</p>
 <table>
@@ -4588,7 +4642,11 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Basic IP and User-Agent Protection</label><label for="__tabbed_9_2">Advanced Protection with Custom Rules</label><label for="__tabbed_9_3">Using Local Files</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>A simple configuration that blocks known Tor exit nodes and common bad user agents:</p>
+<p>A simple configuration that blocks known Tor exit nodes and common bad user agents using community blacklists:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_BLACKLIST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">BLACKLIST_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ip:danmeuk-tor-exit</span><span class="nv"> </span><span class="s">ua:mitchellkrogza-bad-user-agents&quot;</span>
+</code></pre></div>
+<p>Alternatively, you can use manual URL configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_BLACKLIST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">BLACKLIST_IP_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://www.dan.me.uk/torlist/?exit&quot;</span>
 <span class="nt">BLACKLIST_USER_AGENT_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list&quot;</span>
@@ -4833,7 +4891,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <div class="highlight"><pre><span></span><code>cat<span class="w"> </span>/var/cache/bunkerweb/bunkernet/instance.id
 </code></pre></div>
 <p><strong>Step #3: Enroll your instance using the Panel</strong></p>
-<p>Once you have your BunkerNet ID and CrowdSec Console enroll key, <a href="https://panel.bunkerweb.io/order/bunkernet/11?utm_campaign=self&amp;utm_source=doc">order the free product "BunkerNet / CrowdSec" on the Panel</a>. You may be prompted to create an account if you haven’t already.</p>
+<p>Once you have your BunkerNet ID and CrowdSec Console enroll key, <a href="https://panel.bunkerweb.io/store/bunkernet?utm_campaign=self&amp;utm_source=doc">order the free product "BunkerNet / CrowdSec" on the Panel</a>. You may be prompted to create an account if you haven’t already.</p>
 <p>You can now select the "BunkerNet / CrowdSec" service and fill out the form by pasting your BunkerNet ID and CrowdSec Console enroll key:</p>
 <figure>
 <p><img align="center" alt="Overview" src="../assets/img/crowdity2.png" />
@@ -5254,7 +5312,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </ol>
 </div>
 <h3 id="setup">Setup</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Acquisition file</strong></p>
@@ -5450,6 +5508,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Finally, reload the BunkerWeb service:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>bunkerweb
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>The BunkerWeb All-In-One (AIO) Docker image comes with CrowdSec fully integrated. You don't need to set up a separate CrowdSec instance or manually configure acquisition files for BunkerWeb logs when using the internal CrowdSec agent.</p>
+<p>Refer to the <a href="../integrations/#crowdsec-integration">All-In-One (AIO) Image integration documentation</a>.</p>
 </div>
 </div>
 </div>
@@ -6797,7 +6859,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Let's Encrypt provides different certificate profiles for different use cases:
 - <strong>classic</strong>: General-purpose certificates with 90-day validity (default)
 - <strong>tlsserver</strong>: Optimized for TLS server authentication with 90-day validity and smaller payload
-- <strong>shortlived</strong>: Enhanced security with 7-day validity for automated environments</p>
+- <strong>shortlived</strong>: Enhanced security with 7-day validity for automated environments
+- <strong>custom</strong>: If your ACME server supports a different profile, set it using <code>LETS_ENCRYPT_CUSTOM_PROFILE</code>.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Profile Availability</p>
@@ -6884,6 +6947,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>multisite</td>
 <td>no</td>
 <td><strong>Certificate Profile:</strong> Select the certificate profile to use. Options: <code>classic</code> (general-purpose), <code>tlsserver</code> (optimized for TLS servers), or <code>shortlived</code> (7-day certificates).</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_CUSTOM_PROFILE</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Custom Certificate Profile:</strong> Enter a custom certificate profile if your ACME server supports non-standard profiles. This overrides <code>LETS_ENCRYPT_PROFILE</code> if set.</td>
+</tr>
+<tr>
+<td><code>LETS_ENCRYPT_MAX_RETRIES</code></td>
+<td><code>3</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Maximum Retries:</strong> Number of times to retry certificate generation on failure. Set to <code>0</code> to disable retries. Useful for handling temporary network issues or API rate limits.</td>
 </tr>
 </tbody>
 </table>
@@ -7010,6 +7087,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td><a href="https://certbot-dns-luadns.readthedocs.io/en/stable/">Documentation</a></td>
 </tr>
 <tr>
+<td><code>njalla</code></td>
+<td>Njalla</td>
+<td><code>token</code></td>
+<td></td>
+<td><a href="https://github.com/chaptergy/certbot-dns-njalla">Documentation</a></td>
+</tr>
+<tr>
 <td><code>nsone</code></td>
 <td>NS1</td>
 <td><code>api_key</code></td>
@@ -7054,7 +7138,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tbody>
 </table>
 <h3 id="example-configurations_19">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:6"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><input id="__tabbed_26_5" name="__tabbed_26" type="radio" /><input id="__tabbed_26_6" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Basic HTTP Challenge</label><label for="__tabbed_26_2">Cloudflare DNS with Wildcard</label><label for="__tabbed_26_3">AWS Route53 Configuration</label><label for="__tabbed_26_4">Testing with Staging Environment</label><label for="__tabbed_26_5">DigitalOcean with Custom Propagation Time</label><label for="__tabbed_26_6">Google Cloud DNS</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:6"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><input id="__tabbed_26_5" name="__tabbed_26" type="radio" /><input id="__tabbed_26_6" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Basic HTTP Challenge</label><label for="__tabbed_26_2">Cloudflare DNS with Wildcard</label><label for="__tabbed_26_3">AWS Route53 Configuration</label><label for="__tabbed_26_4">Testing with Staging Environment and Retries</label><label for="__tabbed_26_5">DigitalOcean with Custom Propagation Time</label><label for="__tabbed_26_6">Google Cloud DNS</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Simple configuration using HTTP challenges for a single domain:</p>
@@ -7084,11 +7168,12 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>Configuration for testing setup with the staging environment:</p>
+<p>Configuration for testing setup with the staging environment and enhanced retry settings:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">AUTO_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">EMAIL_LETS_ENCRYPT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin@example.com&quot;</span>
 <span class="nt">LETS_ENCRYPT_CHALLENGE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http&quot;</span>
 <span class="nt">USE_LETS_ENCRYPT_STAGING</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">LETS_ENCRYPT_MAX_RETRIES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5&quot;</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7375,13 +7460,6 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>global</td>
 <td>yes</td>
 <td>Load balancing mode (round-robin or sticky).</td>
-</tr>
-<tr>
-<td><code>LOADBALANCER_UPSTREAM_STICKY</code></td>
-<td><code>srv_id expires=4h</code></td>
-<td>global</td>
-<td>yes</td>
-<td>Settings when load balancing mode is set to sticky (see sticky directive of nginx).</td>
 </tr>
 <tr>
 <td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
@@ -8238,7 +8316,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <p>Select a CRS version to best match your security needs:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.14.0">v4.14.0</a> (<strong>default</strong>).</li>
+<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.15.0">v4.15.0</a> (<strong>default</strong>).</li>
 <li><strong><code>nightly</code></strong>: <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Nightly build</a> offering the latest rule updates.</li>
 </ul>
 <div class="admonition example">
@@ -8565,7 +8643,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <h3 id="how-to-use_22">How to Use</h3>
 <p>Follow these steps to configure and use the Pro features:</p>
 <ol>
-<li><strong>Obtain a license key:</strong> Purchase a Pro license from the <a href="https://panel.bunkerweb.io/order/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>.</li>
+<li><strong>Obtain a license key:</strong> Purchase a Pro license from the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a>.</li>
 <li><strong>Configure your license key:</strong> Use the <code>PRO_LICENSE_KEY</code> setting to configure your license.</li>
 <li><strong>Let BunkerWeb handle the rest:</strong> Once configured with a valid license, Pro plugins are automatically downloaded and activated.</li>
 <li><strong>Monitor your Pro status:</strong> Check the health indicators in the <a href="../web-ui/">web UI</a> to confirm your Pro subscription status.</li>

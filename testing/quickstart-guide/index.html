@@ -1029,7 +1029,7 @@
 <p>We expect that you're already familiar with the <a href="../concepts/">core concepts</a> and have followed the <a href="../integrations/">integrations instructions</a> for your environment.</p>
 <p>This quickstart guide assumes that BunkerWeb is accessible from the Internet and that you have configured at least two domains: one for the web UI and one for your web service.</p>
 <p><strong>System requirements</strong></p>
-<p>The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 4 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.</p>
+<p>The minimum recommended specifications for BunkerWeb are a machine with 2 (v)CPUs and 8 GB of RAM. Please note that this should be sufficient for testing environments or setups with very few services.</p>
 <p>For production environments with many services to protect, we recommend at least 4 (v)CPUs and 16 GB of RAM. Resources should be adjusted based on your use case, network traffic, and potential DDoS attacks you may face.</p>
 <p>It is highly recommended to enable global loading of CRS rules (by setting the <code>USE_MODSECURITY_GLOBAL_CRS</code> parameter to <code>yes</code>) if you are in environments with limited RAM or in production with many services. More details can be found in the <a href="../advanced/#running-many-services-in-production">advanced usages</a> section of the documentation.</p>
 </div>
@@ -1037,10 +1037,29 @@
 <p>Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb: it will act as a classical <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> with extra security features.</p>
 <p>See the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples folder</a> of the repository to get real-world examples.</p>
 <h2 id="basic-setup">Basic setup</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Linux</label><label for="__tabbed_1_2">Docker</label><label for="__tabbed_1_3">Docker autoconf</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Swarm</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">All-in-one</label><label for="__tabbed_1_2">Linux</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Docker autoconf</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Swarm</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Please ensure that you have <strong>NGINX 1.26.3 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<p>To deploy the all-in-one container, run the following command:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>By default, the container exposes:</p>
+<ul>
+<li>8080/tcp for HTTP</li>
+<li>8443/tcp for HTTPS</li>
+<li>8443/udp for QUIC</li>
+<li>7000/tcp for the web UI access without BunkerWeb in front (not recommended for production)</li>
+</ul>
+<p>The All-In-One image comes with several built-in services, which can be controlled using environment variables. See the <a href="../integrations/#all-in-one-aio-image">All-In-One (AIO) Image section</a> of the integrations page for more details.</p>
+</div>
+<div class="tabbed-block">
+<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. For Fedora, as NGINX 1.28.0 is not yet available, we will use NGINX 1.26.3. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Debian</label><label for="__tabbed_2_2">Ubuntu</label><label for="__tabbed_2_3">Fedora</label><label for="__tabbed_2_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1052,9 +1071,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>You should now be able to install NGINX 1.26.3:</p>
+<p>You should now be able to install NGINX 1.28.0:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.26.3-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Testing/dev version</p>
@@ -1080,9 +1099,9 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 <span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
 </code></pre></div>
-<p>You should now be able to install NGINX 1.26.3:</p>
+<p>You should now be able to install NGINX 1.28.0:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.26.3-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Testing/dev version</p>
@@ -1116,7 +1135,7 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 </div>
 </div>
 </div>
-<p>Fedora already provides NGINX 1.26.3 that we support:</p>
+<p>Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.26.3
 </code></pre></div>
 <p>And finally install BunkerWeb testing:</p>
@@ -1147,12 +1166,11 @@ enabled=0
 gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
-<p>You should now be able to install NGINX 1.26.3:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.26.3
+<p>You should now be able to install NGINX 1.28.0:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.28.0
 </code></pre></div>
 <p>And finally install BunkerWeb testing:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
 </code></pre></div>
@@ -1543,7 +1561,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <figcaption>Web interface home</figcaption>
 </figure>
 <h2 id="creating-a-new-service">Creating a new service</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:6"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><input id="__tabbed_4_6" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Web UI</label><label for="__tabbed_4_2">Linux variables.env file</label><label for="__tabbed_4_3">Docker</label><label for="__tabbed_4_4">Docker autoconf labels</label><label for="__tabbed_4_5">Kubernetes annotations</label><label for="__tabbed_4_6">Swarm labels</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:7"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><input id="__tabbed_4_6" name="__tabbed_4" type="radio" /><input id="__tabbed_4_7" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Web UI</label><label for="__tabbed_4_2">All-in-one</label><label for="__tabbed_4_3">Linux variables.env file</label><label for="__tabbed_4_4">Docker</label><label for="__tabbed_4_5">Docker autoconf labels</label><label for="__tabbed_4_6">Kubernetes annotations</label><label for="__tabbed_4_7">Swarm labels</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can create a new service by navigating to the <code>Services</code> section of the web interface and clicking on the <code>➕ Create new service</code> button.</p>
@@ -1601,6 +1619,50 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
   <figcaption>Web interface services page</figcaption>
 </figure></p>
 <p>If you wish to edit the service, you can click on the service name or the <code>📝 Edit</code> button.</p>
+</div>
+<div class="tabbed-block">
+<p>When using the All-in-One image, new services are configured by adding environment variables to the <code>docker run</code> command for the <code>bunkerweb-aio</code> container. If the container is already running, you must stop and remove it, then re-run it with the updated environment variables.</p>
+<p>Suppose you want to protect an application <code>myapp</code> (running in another container and accessible as <code>http://myapp:8080</code> from BunkerWeb) and make it available at <code>www.example.com</code>. You would add or modify the following environment variables in your <code>docker run</code> command:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># First, stop and remove the existing container if it&#39;s running:</span>
+<span class="c1"># docker stop bunkerweb-aio</span>
+<span class="c1"># docker rm bunkerweb-aio</span>
+
+<span class="c1"># Then, re-run the bunkerweb-aio container with additional/updated environment variables:</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="c1"># --- Add/modify these environment variables for your new service ---</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">MULTISITE</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">SERVER_NAME</span><span class="o">=</span><span class="s2">&quot;www.example.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s2">&quot;www.example.com_USE_REVERSE_PROXY=yes&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s2">&quot;www.example.com_REVERSE_PROXY_HOST=http://myapp:8080&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="s2">&quot;www.example.com_REVERSE_PROXY_URL=/&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="c1"># --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---</span>
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Your application container (<code>myapp</code>) and the <code>bunkerweb-aio</code> container must be on the same Docker network for BunkerWeb to reach it using the hostname <code>myapp</code>.</p>
+<p><strong>Network Setup Example:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Create a custom Docker network (if you haven&#39;t already):</span>
+docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>my-app-network
+
+<span class="c1"># 2. Run your application container on this network:</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>myapp<span class="w"> </span>--network<span class="w"> </span>my-app-network<span class="w"> </span>your-app-image
+
+<span class="c1"># 3. Add --network my-app-network to the bunkerweb-aio docker run command:</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--network<span class="w"> </span>my-app-network<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="c1">#   ... (all other relevant environment variables as shown in the main example above) ...</span>
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div></p>
+<p>Make sure to replace <code>myapp</code> with the actual name or IP of your application container and <code>http://myapp:8080</code> with its correct address and port.</p>
 </div>
 <div class="tabbed-block">
 <p>We assume that you followed the <a href="#__tabbed_1_5">Basic setup</a> and that the Linux integration is running on your machine.</p>
