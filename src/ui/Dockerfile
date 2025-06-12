@@ -38,11 +38,9 @@ COPY src/ui ui
 # Minify JS files (can be skipped with SKIP_MINIFY=yes)
 ARG SKIP_MINIFY=no
 RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
-  apk add --no-cache nodejs npm && \
+  apk add --no-cache nodejs npm parallel && \
   npm install -g uglify-js && \
-  for file in $(find ui/app/static -type f -name "*.js") ; do \
-    uglifyjs "$file" --compress --mangle --verbose --output "$file" ; \
-  done ; \
+  find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
   else \
   echo "Skipping JS minification"; \
   fi
