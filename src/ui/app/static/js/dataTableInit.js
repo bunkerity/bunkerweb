@@ -352,6 +352,17 @@ function initializeDataTable(config) {
     }
   });
 
+  dataTable.on(
+    "buttons-action.dt",
+    function (e, buttonApi, dtApi, node, config) {
+      if (config.className.includes("buttons-colvisRestore")) {
+        applyTranslations();
+      }
+    },
+  );
+
+  dataTable.columns.adjust().responsive.recalc();
+
   return dataTable;
 }
 
