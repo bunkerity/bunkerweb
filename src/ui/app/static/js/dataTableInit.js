@@ -103,7 +103,7 @@ function initializeDataTable(config) {
       }
       return t(
         `datatable.info_${entityName}`,
-        "Showing _START_ to _END_ of _TOTAL_ entries",
+        `Showing ${start} to ${end} of ${total} entries`,
         {
           start: start,
           end: end,
@@ -351,6 +351,17 @@ function initializeDataTable(config) {
           .tooltip();
     }
   });
+
+  dataTable.on(
+    "buttons-action.dt",
+    function (e, buttonApi, dtApi, node, config) {
+      if (config.className.includes("buttons-colvisRestore")) {
+        applyTranslations();
+      }
+    },
+  );
+
+  dataTable.columns.adjust().responsive.recalc();
 
   return dataTable;
 }

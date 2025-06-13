@@ -25,7 +25,7 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "www.example.com").strip().split(" "):
-            if getenv(f"{first_server}_USE_CROWDSEC", getenv("USE_CROWDSEC", "no")) == "yes":
+            if getenv(f"{first_server}_USE_CROWDSEC", "no") == "yes":
                 cs_activated = True
                 break
     # Singlesite case

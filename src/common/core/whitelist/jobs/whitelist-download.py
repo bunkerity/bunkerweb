@@ -74,14 +74,14 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in services:
-            if getenv(f"{first_server}_USE_WHITELIST", getenv("USE_WHITELIST", "yes")) == "yes":
+            if getenv(f"{first_server}_USE_WHITELIST", "yes") == "yes":
                 whitelist_activated = True
 
                 # Get services URLs
                 services_whitelist_urls[first_server] = {}
                 for kind in KINDS:
                     services_whitelist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_WHITELIST_{kind}_URLS", getenv(f"WHITELIST_{kind}_URLS", "")).strip().split(" "):
+                    for url in getenv(f"{first_server}_WHITELIST_{kind}_URLS", "").strip().split(" "):
                         if url:
                             services_whitelist_urls[first_server][kind].add(url)
     # Singlesite case

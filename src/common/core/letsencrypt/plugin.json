@@ -14,6 +14,15 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "LETS_ENCRYPT_PASSTHROUGH": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Pass through Let's Encrypt requests to the web server.",
+      "id": "lets-encrypt-passthrough",
+      "label": "Pass Through Let's Encrypt",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "EMAIL_LETS_ENCRYPT": {
       "context": "multisite",
       "default": "",

@@ -42,7 +42,9 @@ COPY src/all-in-one/deps/re2.json re2.json
 COPY --chmod=644 src/all-in-one/scripts/install-re2.sh install-re2.sh
 
 # Compile and install re2
-RUN export PATH="/usr/local/go/bin:$PATH" && \
+RUN export MAKEFLAGS="-j$(nproc)" && \
+    export GOMAXPROCS="-j$(nproc)" && \
+    export PATH="/usr/local/go/bin:$PATH" && \
     export VERSION="$(jq -r .version re2.json)" && \
     export URL="$(jq -r .url re2.json)" && \
     export COMMIT="$(jq -r .commit re2.json)" && \
@@ -53,7 +55,8 @@ COPY src/all-in-one/deps/crowdsec.json crowdsec.json
 COPY --chmod=644 src/all-in-one/scripts/install-crowdsec.sh install-crowdsec.sh
 
 # Compile and install crowdsec
-RUN export PATH="/usr/local/go/bin:$PATH" && \
+RUN export GOMAXPROCS="-j$(nproc)" && \
+    export PATH="/usr/local/go/bin:$PATH" && \
     export VERSION="$(jq -r .version crowdsec.json)" && \
     export URL="$(jq -r .url crowdsec.json)" && \
     export COMMIT="$(jq -r .commit crowdsec.json)" && \
@@ -102,11 +105,9 @@ COPY misc/*.ascii misc/
 # Minify JS files (can be skipped with SKIP_MINIFY=yes)
 ARG SKIP_MINIFY=no
 RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
-    apk add --no-cache nodejs npm && \
+    apk add --no-cache nodejs npm parallel && \
     npm install -g uglify-js && \
-    for file in $(find ui/app/static -type f -name "*.js") ; do \
-        uglifyjs "$file" --compress --mangle --verbose --output "$file" ; \
-    done ; \
+    find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
     else \
     echo "Skipping JS minification"; \
     fi
@@ -130,7 +131,7 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     rm -f /tmp/requirements-deps.txt
 
 # Copy dependencies
-COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
@@ -145,11 +146,9 @@ RUN cp helpers/bwcli /usr/bin/ && \
 	for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
 	chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
 	chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
-    find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-    find core/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-    find ui/ -type f -name "*.py" -print0 | xargs -0 chmod 750 && \
-	chmod 750 cli/main.py gen/*.py helpers/*.sh all-in-one/*.sh autoconf/main.py scheduler/main.py scheduler/entrypoint.sh ui/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
-    chmod 770 db/alembic db/alembic/alembic.ini db/alembic/env.py && \
+    find . \( -path './all-in-one' -o -path './scheduler' -o -path './ui' -o -path './autoconf' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+    find all-in-one scheduler ui autoconf cli lua core db gen helpers deps -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+    chmod 550 entrypoint.sh && \
     chmod 660 INTEGRATION && \
     mkdir -p /var/log/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
@@ -187,7 +186,8 @@ RUN mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
 
 # Set up supervisor configuration
 RUN mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
-    mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d
+    mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d && \
+    chmod 770 -R /etc/supervisor.d
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.1"

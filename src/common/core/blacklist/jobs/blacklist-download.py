@@ -80,21 +80,19 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in services:
-            if getenv(f"{first_server}_USE_BLACKLIST", getenv("USE_BLACKLIST", "yes")) == "yes":
+            if getenv(f"{first_server}_USE_BLACKLIST", "yes") == "yes":
                 blacklist_activated = True
 
                 # Get services URLs
                 services_blacklist_urls[first_server] = {}
                 for kind in KINDS:
                     services_blacklist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", getenv(f"BLACKLIST_{kind}_URLS", "")).strip().split(" "):
+                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", "").strip().split(" "):
                         if url:
                             services_blacklist_urls[first_server][kind].add(url)
 
                 # Add community blacklist URLs
-                community_lists = getenv(
-                    f"{first_server}_BLACKLIST_COMMUNITY_LISTS", getenv("BLACKLIST_COMMUNITY_LISTS", "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents")
-                ).strip()
+                community_lists = getenv(f"{first_server}_BLACKLIST_COMMUNITY_LISTS", "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents").strip()
                 for community_id in community_lists.split(" "):
                     if not community_id:
                         continue
