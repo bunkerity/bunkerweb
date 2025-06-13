@@ -1,19 +1,19 @@
-certbot==4.1.0
+certbot==4.1.1
 
 # Official certbot plugins
-certbot-dns-cloudflare==4.1.0
-certbot-dns-digitalocean==4.1.0
-certbot-dns-dnsimple==4.1.0
-certbot-dns-dnsmadeeasy==4.1.0
-certbot-dns-gehirn==4.1.0
-certbot-dns-google==4.1.0
-certbot-dns-linode==4.1.0
-certbot-dns-luadns==4.1.0
-certbot-dns-nsone==4.1.0
-certbot-dns-ovh==4.1.0
-certbot-dns-rfc2136==4.1.0
-certbot-dns-route53==4.1.0
-certbot-dns-sakuracloud==4.1.0
+certbot-dns-cloudflare==4.1.1
+certbot-dns-digitalocean==4.1.1
+certbot-dns-dnsimple==4.1.1
+certbot-dns-dnsmadeeasy==4.1.1
+certbot-dns-gehirn==4.1.1
+certbot-dns-google==4.1.1
+certbot-dns-linode==4.1.1
+certbot-dns-luadns==4.1.1
+certbot-dns-nsone==4.1.1
+certbot-dns-ovh==4.1.1
+certbot-dns-rfc2136==4.1.1
+certbot-dns-route53==4.1.1
+certbot-dns-sakuracloud==4.1.1
 
 # Third-party certbot plugins
 certbot-dns-desec==1.2.1
@@ -25,7 +25,7 @@ certbot-dns-scaleway==0.0.7
 cryptography==45.0.4
 importlib-metadata==8.7.0
 maxminddb==2.7.0
-pydantic==2.11.5
+pydantic==2.11.6
 python-magic==0.4.27
 requests==2.32.4
 schedule==1.2.2
