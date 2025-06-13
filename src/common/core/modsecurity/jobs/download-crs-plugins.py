@@ -136,13 +136,13 @@ try:
 
     if getenv("MULTISITE", "no") == "yes":
         for first_server in services:
-            if getenv(f"{first_server}_MODSECURITY_CRS_VERSION", getenv("MODSECURITY_CRS_VERSION", "4")) != "3":
+            if getenv(f"{first_server}_MODSECURITY_CRS_VERSION", "4") != "3":
                 use_right_crs_version = True
 
-            if getenv(f"{first_server}_USE_MODSECURITY_CRS_PLUGINS", getenv("USE_MODSECURITY_CRS_PLUGINS", "yes")) == "yes":
+            if getenv(f"{first_server}_USE_MODSECURITY_CRS_PLUGINS", "yes") == "yes":
                 use_modsecurity_crs_plugins = True
 
-            service_plugins = getenv(f"{first_server}_MODSECURITY_CRS_PLUGINS", getenv("MODSECURITY_CRS_PLUGINS", "")).strip()
+            service_plugins = getenv(f"{first_server}_MODSECURITY_CRS_PLUGINS", "").strip()
             if service_plugins:
                 services_plugins[first_server] = set(service_plugins.split(" "))
     else:

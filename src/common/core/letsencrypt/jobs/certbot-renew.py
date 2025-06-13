@@ -35,7 +35,7 @@ try:
         use_letsencrypt = getenv("AUTO_LETS_ENCRYPT", "no") == "yes"
     else:
         for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
-            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) == "yes":
+            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
                 break
 

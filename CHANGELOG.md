@@ -1,7 +1,8 @@
 # Changelog
 
-## v1.6.2 - ????/??/??
+## v1.6.2-rc5 - ????/??/??
 
+- [BUGFIX] Ensure jobs correctly retrieve multisite settings when a service uses its default value while the global setting is overridden, preventing configuration mismatches.
 - [FEATURE] Add new `LETS_ENCRYPT_PASSTHROUGH` setting to the `Let's Encrypt` plugin to allow passing through the Let's Encrypt challenge requests to the upstream server (default is `no`)
 
 ## v1.6.2-rc4 - 2025/06/12
