@@ -4,6 +4,10 @@
 
 - [BUGFIX] Ensure jobs correctly retrieve multisite settings when a service uses its default value while the global setting is overridden, preventing configuration mismatches.
 - [FEATURE] Add new `LETS_ENCRYPT_PASSTHROUGH` setting to the `Let's Encrypt` plugin to allow passing through the Let's Encrypt challenge requests to the upstream server (default is `no`)
+- [UI] Fix i18n shenanigans in services page and in dataTables
+- [UI] Fix plugins delete button not working
+- [LINUX] Make sure that the NGINX service is disabled every time in the post-install script to avoid issues with the NGINX service being started when it shouldn't be
+- [SECURITY] Refactor permissions in BunkerWeb files to ensure that only the necessary files are readable/writable/executable by the user running the service, enhancing security and preventing unauthorized access to sensitive files.
 
 ## v1.6.2-rc4 - 2025/06/12
 
