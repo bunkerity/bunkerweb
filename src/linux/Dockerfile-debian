@@ -57,12 +57,17 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-# Minify JS files
-RUN apt-get install -y nodejs npm && \
+# Minify JS files (can be skipped with SKIP_MINIFY=yes)
+ARG SKIP_MINIFY=no
+RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+    apt-get install -y nodejs npm parallel && \
     npm install -g uglify-js && \
-    for file in $(find ui/app/static -type f -name "*.js"); do uglifyjs "$file" --compress --mangle --verbose --output "$file"; done
+    find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
 
-FROM debian:bookworm-slim@sha256:4b50eb66f977b4062683ff434ef18ac191da862dbe966961bc11990cf5791a8d
+FROM debian:bookworm-slim@sha256:e5865e6858dacc255bead044a7f2d0ad8c362433cfaa5acefb670c1edf54dfef
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -77,7 +82,7 @@ RUN apt-get update && \
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /etc/nginx /etc/nginx
-COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
@@ -90,11 +95,9 @@ RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
     find . -path ./deps -prune -o -type d -print0 | xargs -0 chmod 0750 && \
     chmod 755 /var/log/bunkerweb && \
     touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log && \
-    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ db/alembic db/alembic/alembic.ini db/alembic/env.py && \
-    chmod 750 gen/*.py scheduler/*.py cli/*.py ui/*.sh helpers/*.sh /var/www/ && \
-    find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-    find core/ ui/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-    chmod 755 .
+    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ && \
+    find . \( -path './scheduler' -o -path './ui' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+    find scheduler ui lua core db gen helpers deps -type f ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
