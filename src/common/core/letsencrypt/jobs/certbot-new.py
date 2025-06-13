@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from base64 import b64decode
+from contextlib import suppress
 from copy import deepcopy
 from datetime import datetime, timedelta
 from json import dumps, loads
@@ -491,6 +492,62 @@ try:
                     domains_to_ask[first_server] = 2
                     LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
                     continue
+
+                # Check if DNS credentials have changed
+                if letsencrypt_provider and current_provider == letsencrypt_provider:
+                    credential_key = f"{first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
+                    current_credential_items = {}
+
+                    # Collect current credential items
+                    for env_key, env_value in environ.items():
+                        if env_value and env_key.startswith(credential_key):
+                            if " " not in env_value:
+                                current_credential_items["json_data"] = env_value
+                                continue
+                            key, value = env_value.split(" ", 1)
+                            current_credential_items[key.lower()] = (
+                                value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                            )
+
+                    if "json_data" in current_credential_items:
+                        value = current_credential_items.pop("json_data")
+                        if not current_credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                            with suppress(BaseException):
+                                decoded = b64decode(value).decode("utf-8")
+                                json_data = loads(decoded)
+                                if isinstance(json_data, dict):
+                                    current_credential_items = {
+                                        k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                                        for k, v in json_data.items()
+                                    }
+
+                    if current_credential_items:
+                        # Process regular credentials for base64 decoding
+                        for key, value in current_credential_items.items():
+                            if letsencrypt_provider != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                                with suppress(BaseException):
+                                    decoded = b64decode(value).decode("utf-8")
+                                    if decoded != value:
+                                        current_credential_items[key] = (
+                                            decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                                        )
+
+                        # Generate current credentials content
+                        if letsencrypt_provider in provider_classes:
+                            with suppress(ValidationError, KeyError):
+                                current_provider_instance = provider_classes[letsencrypt_provider](**current_credential_items)
+                                current_credentials_content = current_provider_instance.get_formatted_credentials()
+
+                                # Check if stored credentials file exists and compare
+                                file_type = current_provider_instance.get_file_type()
+                                stored_credentials_path = CACHE_PATH.joinpath(first_server, f"credentials.{file_type}")
+
+                                if stored_credentials_path.is_file():
+                                    stored_credentials_content = stored_credentials_path.read_bytes()
+                                    if stored_credentials_content != current_credentials_content:
+                                        domains_to_ask[first_server] = 2
+                                        LOGGER.warning(f"[{original_first_server}] DNS credentials for {first_server} have changed, asking new certificate...")
+                                        continue
             elif current_provider != "manual" and letsencrypt_challenge == "http":
                 domains_to_ask[first_server] = 2
                 LOGGER.warning(f"[{original_first_server}] {first_server} is no longer using DNS challenge, asking new certificate...")
