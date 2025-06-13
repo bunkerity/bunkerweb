@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.2-rc4 - ????/??
+## v1.6.2 - ????/??/??
+
+- [FEATURE] Add new `LETS_ENCRYPT_PASSTHROUGH` setting to the `Let's Encrypt` plugin to allow passing through the Let's Encrypt challenge requests to the upstream server (default is `no`)
+
+## v1.6.2-rc4 - 2025/06/12
 
 - [FEATURE] Introduce `multiselect` setting type, enabling users to choose multiple options from a configurable list
 - [FEATURE] Add new `BLACKLIST_COMMUNITY_LISTS` setting to the `blacklist` plugin, allowing users to choose which community blocklists to use for blacklisting
