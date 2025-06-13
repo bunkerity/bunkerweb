@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Set NTASK to number of processors
-set_ntask() {
-    NTASK="$(nproc)"
-    export NTASK
-}
-
 # Clone a git repo at a specific commit
 git_clone_commit() {
     local DIR="$1"
