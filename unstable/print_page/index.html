@@ -7666,6 +7666,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td><strong>Enable Let's Encrypt:</strong> Set to <code>yes</code> to enable automatic certificate issuance and renewal.</td>
 </tr>
 <tr>
+<td><code>LETS_ENCRYPT_PASSTHROUGH</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Pass Through Let's Encrypt:</strong> Set to <code>yes</code> to pass through Let's Encrypt requests to the web server. This is useful when BunkerWeb is behind another reverse proxy handling SSL.</td>
+</tr>
+<tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
 <td><code>contact@{FIRST_SERVER}</code></td>
 <td>multisite</td>
@@ -7750,6 +7757,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>The <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> setting is a multiple setting and can be used to set multiple items for the DNS provider. The items will be saved as a cache file, and Certbot will read the credentials from it.</li>
 <li>If no <code>LETS_ENCRYPT_DNS_PROPAGATION</code> setting is provided, the provider's default propagation time is used.</li>
 <li>Full Let's Encrypt automation using the <code>http</code> challenge works in stream mode as long as you open the <code>80/tcp</code> port from the outside. Use the <code>LISTEN_STREAM_PORT_SSL</code> setting to choose your listening SSL/TLS port.</li>
+<li>If <code>LETS_ENCRYPT_PASSTHROUGH</code> is set to <code>yes</code>, BunkerWeb will not handle the ACME challenge requests itself but will pass them to the backend web server. This is useful in scenarios where BunkerWeb is acting as a reverse proxy in front of another server that is configured to handle Let's Encrypt challenges</li>
 </ul>
 </div>
 <div class="admonition tip">
