@@ -54,7 +54,7 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl t
 RUN apk add --no-cache "pyc>=3.12.11-r0" "python3>=3.12.11-r0" "python3-pyc>=3.12.11-r0" "python3-pycache-pyc0>=3.12.11-r0" # CVE-2024-12718 CVE-2025-4138 CVE-2025-4517 CVE-2025-4330
 
 # Copy dependencies
-COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
@@ -68,14 +68,17 @@ RUN cp helpers/bwcli /usr/bin/ && \
 	for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
 	chown -R root:nginx /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
 	chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
-	chmod 750 cli/main.py gen/main.py helpers/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
+	find . \( -path './cli' -o -path './lua' -o -path './core' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+  find cli lua gen helpers deps -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+  find core -type f ! -name '*.lua' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+	chmod 550 entrypoint.sh && \
 	rm -f /var/log/bunkerweb/* && \
 	ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
 	ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.2-rc4"
+LABEL version="1.6.2-rc5"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

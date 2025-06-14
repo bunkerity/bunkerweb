@@ -564,7 +564,7 @@ $(document).ready(function () {
       );
       return;
     }
-    $this = $(this);
+    const $this = $(this);
     setupDeletionModal([$this.data("plugin-id")]);
   });
 

@@ -74,14 +74,14 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in services:
-            if getenv(f"{first_server}_USE_GREYLIST", getenv("USE_GREYLIST", "no")) == "yes":
+            if getenv(f"{first_server}_USE_GREYLIST", "no") == "yes":
                 greylist_activated = True
 
                 # Get services URLs
                 services_greylist_urls[first_server] = {}
                 for kind in KINDS:
                     services_greylist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_GREYLIST_{kind}_URLS", getenv(f"GREYLIST_{kind}_URLS", "")).strip().split(" "):
+                    for url in getenv(f"{first_server}_GREYLIST_{kind}_URLS", "").strip().split(" "):
                         if url:
                             services_greylist_urls[first_server][kind].add(url)
     # Singlesite case

@@ -55,12 +55,12 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in services:
-            if getenv(f"{first_server}_USE_REAL_IP", getenv("USE_REAL_IP", "no")) == "yes":
+            if getenv(f"{first_server}_USE_REAL_IP", "no") == "yes":
                 realip_activated = True
 
                 # Get service URLs
                 services_realip_urls[first_server] = set()
-                for url in getenv(f"{first_server}_REAL_IP_FROM_URLS", getenv("REAL_IP_FROM_URLS", "")).strip().split(" "):
+                for url in getenv(f"{first_server}_REAL_IP_FROM_URLS", "").strip().split(" "):
                     if url:
                         services_realip_urls[first_server].add(url)
     # Singlesite case

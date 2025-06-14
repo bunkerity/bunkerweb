@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:b4d299311845147e7e47c970566906caf8378a1f04e5d3de65b5f2e834f8e3bf AS builder
+FROM python:3.13-alpine@sha256:9b4929a72599b6c6389ece4ecbf415fd1355129f22bb92bb137eea098f05e975 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -32,7 +32,7 @@ COPY src/common/utils utils
 COPY src/autoconf autoconf
 COPY src/VERSION VERSION
 
-FROM python:3.13-alpine@sha256:b4d299311845147e7e47c970566906caf8378a1f04e5d3de65b5f2e834f8e3bf
+FROM python:3.13-alpine@sha256:9b4929a72599b6c6389ece4ecbf415fd1355129f22bb92bb137eea098f05e975
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -46,7 +46,7 @@ RUN apk add --no-cache bash tzdata && \
 # There are no CVEs for the following packages
 
 # Copy dependencies
-COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
@@ -61,13 +61,12 @@ RUN cp helpers/bwcli /usr/bin/ && \
   for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:autoconf INTEGRATION /data /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-  find core/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-  chmod 750 cli/main.py autoconf/main.py autoconf/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
+  find . \( -path './autoconf' -o -path './cli' -o -path './core' -o -path './db' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+  find autoconf cli core db helpers deps -type f ! -path 'deps/python/bin/*' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.2-rc4"
+LABEL version="1.6.2-rc5"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="autoconf"
 

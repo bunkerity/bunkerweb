@@ -60,6 +60,10 @@ fi
 
 systemctl daemon-reload
 
+# Always stop and disable nginx service
+echo "🛑 Stopping and disabling the nginx service..."
+do_and_check_cmd systemctl disable --now nginx
+
 # Manage the BunkerWeb service
 echo "Configuring BunkerWeb service..."
 
@@ -79,19 +83,13 @@ if {
         fi
     # Fresh installation scenario
     else
-        echo "🛑 Stopping and disabling the nginx service..."
-        do_and_check_cmd systemctl stop nginx
-        do_and_check_cmd systemctl disable nginx
-
         echo "🚀 Enabling and starting the BunkerWeb service..."
-        do_and_check_cmd systemctl enable bunkerweb
-        do_and_check_cmd systemctl start bunkerweb
+        do_and_check_cmd systemctl enable --now bunkerweb
     fi
 # Disable BunkerWeb if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb; then
     echo "🛑 Disabling and stopping the BunkerWeb service..."
-    do_and_check_cmd systemctl stop bunkerweb
-    do_and_check_cmd systemctl disable bunkerweb
+    do_and_check_cmd systemctl disable --now bunkerweb
 else
     echo "ℹ️ BunkerWeb service is not enabled in the current configuration."
 fi
@@ -109,8 +107,7 @@ if {
     # Fresh installation or explicit scheduler enablement
     if [[ -f /var/tmp/bunkerweb_enable_scheduler || ! -f /var/tmp/bunkerweb_upgrade ]]; then
         echo "🚀 Enabling and starting the BunkerWeb Scheduler service..."
-        do_and_check_cmd systemctl enable bunkerweb-scheduler
-        do_and_check_cmd systemctl start bunkerweb-scheduler
+        do_and_check_cmd systemctl enable --now bunkerweb-scheduler
 
         # Clean up scheduler enablement flag if it exists
         if [ -f /var/tmp/bunkerweb_enable_scheduler ]; then
@@ -128,8 +125,7 @@ if {
 # Disable scheduler if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb-scheduler; then
     echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
-    do_and_check_cmd systemctl stop bunkerweb-scheduler
-    do_and_check_cmd systemctl disable bunkerweb-scheduler
+    do_and_check_cmd systemctl disable --now bunkerweb-scheduler
 else
     echo "ℹ️ BunkerWeb Scheduler service is not enabled in the current configuration."
 fi
@@ -173,8 +169,7 @@ EOF
             do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
 
             echo "🚀 Enabling and starting the BunkerWeb UI service..."
-            do_and_check_cmd systemctl enable bunkerweb-ui
-            do_and_check_cmd systemctl start bunkerweb-ui
+            do_and_check_cmd systemctl enable --now bunkerweb-ui
 
             echo "🧙 The setup wizard has been activated automatically."
             echo "📝 Please complete the initial configuration at: https://your-ip-address-or-fqdn/setup"
@@ -193,8 +188,7 @@ EOF
 # Disable UI if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb-ui; then
     echo "🛑 Disabling and stopping the BunkerWeb UI service..."
-    do_and_check_cmd systemctl stop bunkerweb-ui
-    do_and_check_cmd systemctl disable bunkerweb-ui
+    do_and_check_cmd systemctl disable --now bunkerweb-ui
 else
     echo "ℹ️ BunkerWeb UI service is not enabled in the current configuration."
 fi

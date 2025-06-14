@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from base64 import b64decode
+from contextlib import suppress
 from copy import deepcopy
 from datetime import datetime, timedelta
 from json import dumps, loads
@@ -316,10 +317,10 @@ try:
         domains_server_names = {}
 
         for first_server in servers:
-            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) == "yes":
+            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
 
-            if first_server and getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http")) == "dns":
+            if first_server and getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") == "dns":
                 use_letsencrypt_dns = True
 
             domains_server_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server).lower()
@@ -413,13 +414,16 @@ try:
     else:
         certificate_blocks = stdout.split("Certificate Name: ")[1:]
         for first_server, domains in domains_server_names.items():
-            if getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
+            if (getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") if IS_MULTISITE else getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
                 continue
 
-            letsencrypt_challenge = getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http"))
+            letsencrypt_challenge = getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") if IS_MULTISITE else getenv("LETS_ENCRYPT_CHALLENGE", "http")
             original_first_server = deepcopy(first_server)
 
-            if letsencrypt_challenge == "dns" and getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes":
+            if (
+                letsencrypt_challenge == "dns"
+                and (getenv(f"{original_first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes"
+            ):
                 wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))
                 first_server = wildcards[0].lstrip("*.")
                 domains = set(wildcards)
@@ -462,7 +466,9 @@ try:
                 )
                 continue
 
-            use_letsencrypt_staging = getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes"
+            use_letsencrypt_staging = (
+                getenv(f"{original_first_server}_USE_LETS_ENCRYPT_STAGING", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_STAGING", "no")
+            ) == "yes"
             is_test_cert = "TEST_CERT" in cert_domains.group("expiry_date")
 
             if (is_test_cert and not use_letsencrypt_staging) or (not is_test_cert and use_letsencrypt_staging):
@@ -470,7 +476,7 @@ try:
                 LOGGER.warning(f"[{original_first_server}] Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
                 continue
 
-            letsencrypt_provider = getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", ""))
+            letsencrypt_provider = getenv(f"{original_first_server}_LETS_ENCRYPT_DNS_PROVIDER", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROVIDER", "")
 
             renewal_file = DATA_PATH.joinpath("renewal", f"{first_server}.conf")
             if not renewal_file.is_file():
@@ -491,6 +497,62 @@ try:
                     domains_to_ask[first_server] = 2
                     LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
                     continue
+
+                # Check if DNS credentials have changed
+                if letsencrypt_provider and current_provider == letsencrypt_provider:
+                    credential_key = f"{original_first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
+                    current_credential_items = {}
+
+                    # Collect current credential items
+                    for env_key, env_value in environ.items():
+                        if env_value and env_key.startswith(credential_key):
+                            if " " not in env_value:
+                                current_credential_items["json_data"] = env_value
+                                continue
+                            key, value = env_value.split(" ", 1)
+                            current_credential_items[key.lower()] = (
+                                value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                            )
+
+                    if "json_data" in current_credential_items:
+                        value = current_credential_items.pop("json_data")
+                        if not current_credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                            with suppress(BaseException):
+                                decoded = b64decode(value).decode("utf-8")
+                                json_data = loads(decoded)
+                                if isinstance(json_data, dict):
+                                    current_credential_items = {
+                                        k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                                        for k, v in json_data.items()
+                                    }
+
+                    if current_credential_items:
+                        # Process regular credentials for base64 decoding
+                        for key, value in current_credential_items.items():
+                            if letsencrypt_provider != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                                with suppress(BaseException):
+                                    decoded = b64decode(value).decode("utf-8")
+                                    if decoded != value:
+                                        current_credential_items[key] = (
+                                            decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                                        )
+
+                        # Generate current credentials content
+                        if letsencrypt_provider in provider_classes:
+                            with suppress(ValidationError, KeyError):
+                                current_provider_instance = provider_classes[letsencrypt_provider](**current_credential_items)
+                                current_credentials_content = current_provider_instance.get_formatted_credentials()
+
+                                # Check if stored credentials file exists and compare
+                                file_type = current_provider_instance.get_file_type()
+                                stored_credentials_path = CACHE_PATH.joinpath(first_server, f"credentials.{file_type}")
+
+                                if stored_credentials_path.is_file():
+                                    stored_credentials_content = stored_credentials_path.read_bytes()
+                                    if stored_credentials_content != current_credentials_content:
+                                        domains_to_ask[first_server] = 2
+                                        LOGGER.warning(f"[{original_first_server}] DNS credentials for {first_server} have changed, asking new certificate...")
+                                        continue
             elif current_provider != "manual" and letsencrypt_challenge == "http":
                 domains_to_ask[first_server] = 2
                 LOGGER.warning(f"[{original_first_server}] {first_server} is no longer using DNS challenge, asking new certificate...")
@@ -503,26 +565,32 @@ try:
     psl_rules = None
 
     for first_server, domains in domains_server_names.items():
-        if getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
+        if (getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") if IS_MULTISITE else getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
             LOGGER.info(f"Let's Encrypt is not activated for {first_server}, skipping...")
             continue
 
         # * Getting all the necessary data
         data = {
-            "email": getenv(f"{first_server}_EMAIL_LETS_ENCRYPT", getenv("EMAIL_LETS_ENCRYPT", "")) or f"contact@{first_server}",
-            "challenge": getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", getenv("LETS_ENCRYPT_CHALLENGE", "http")),
-            "staging": getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes",
-            "use_wildcard": getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes",
-            "provider": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", getenv("LETS_ENCRYPT_DNS_PROVIDER", "")),
-            "propagation": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")),
-            "profile": getenv(f"{first_server}_LETS_ENCRYPT_PROFILE", getenv("LETS_ENCRYPT_PROFILE", "classic")),
-            "check_psl": getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")) == "yes",
-            "max_retries": getenv(f"{first_server}_LETS_ENCRYPT_MAX_RETRIES", getenv("LETS_ENCRYPT_MAX_RETRIES", "0")),
+            "email": (getenv(f"{first_server}_EMAIL_LETS_ENCRYPT", "") if IS_MULTISITE else getenv("EMAIL_LETS_ENCRYPT", "")) or f"contact@{first_server}",
+            "challenge": getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") if IS_MULTISITE else getenv("LETS_ENCRYPT_CHALLENGE", "http"),
+            "staging": getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes",
+            "use_wildcard": getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no") == "yes",
+            "provider": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROVIDER", ""),
+            "propagation": (
+                getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", "default") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")
+            ),
+            "profile": getenv(f"{first_server}_LETS_ENCRYPT_PROFILE", "classic") if IS_MULTISITE else getenv("LETS_ENCRYPT_PROFILE", "classic"),
+            "check_psl": (
+                getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")
+                if IS_MULTISITE
+                else getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes") == "no"
+            ),
+            "max_retries": getenv(f"{first_server}_LETS_ENCRYPT_MAX_RETRIES", "0") if IS_MULTISITE else getenv("LETS_ENCRYPT_MAX_RETRIES", "0"),
             "credential_items": {},
         }
 
         # Override profile if custom profile is set
-        custom_profile = getenv(f"{first_server}_LETS_ENCRYPT_CUSTOM_PROFILE", getenv("LETS_ENCRYPT_CUSTOM_PROFILE", "")).strip()
+        custom_profile = (getenv(f"{first_server}_LETS_ENCRYPT_CUSTOM_PROFILE", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_CUSTOM_PROFILE", "")).strip()
         if custom_profile:
             data["profile"] = custom_profile
 

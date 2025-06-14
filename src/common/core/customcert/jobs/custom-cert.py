@@ -130,6 +130,7 @@ status = 0
 
 try:
     all_domains = getenv("SERVER_NAME", "www.example.com") or []
+    multisite = getenv("MULTISITE", "no") == "yes"
 
     if isinstance(all_domains, str):
         all_domains = all_domains.split(" ")
@@ -139,7 +140,7 @@ try:
         sys_exit(0)
 
     skipped_servers = []
-    if not getenv("MULTISITE", "no") == "yes":
+    if not multisite:
         all_domains = [all_domains[0]]
         if getenv("USE_CUSTOM_SSL", "no") == "no":
             LOGGER.info("Custom SSL is not enabled, skipping ...")
@@ -147,17 +148,17 @@ try:
 
     if not skipped_servers:
         for first_server in all_domains:
-            if getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")) == "no":
+            if (getenv(f"{first_server}_USE_CUSTOM_SSL", "no") if multisite else getenv("USE_CUSTOM_SSL", "no")) == "no":
                 skipped_servers.append(first_server)
                 continue
 
             LOGGER.info(f"Service {first_server} is using custom SSL certificates, checking ...")
 
-            cert_priority = getenv(f"{first_server}_CUSTOM_SSL_CERT_PRIORITY", getenv("CUSTOM_SSL_CERT_PRIORITY", "file"))
-            cert_file_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", ""))
-            key_file_path = getenv(f"{first_server}_CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", ""))
-            cert_data = getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", getenv("CUSTOM_SSL_CERT_DATA", ""))
-            key_data = getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", getenv("CUSTOM_SSL_KEY_DATA", ""))
+            cert_priority = getenv(f"{first_server}_CUSTOM_SSL_CERT_PRIORITY", "file") if multisite else getenv("CUSTOM_SSL_CERT_PRIORITY", "file")
+            cert_file_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "") if multisite else getenv("CUSTOM_SSL_CERT", "")
+            key_file_path = getenv(f"{first_server}_CUSTOM_SSL_KEY", "") if multisite else getenv("CUSTOM_SSL_KEY", "")
+            cert_data = getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", "") if multisite else getenv("CUSTOM_SSL_CERT_DATA", "")
+            key_data = getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", "") if multisite else getenv("CUSTOM_SSL_KEY_DATA", "")
 
             # Use file or data based on priority
             use_cert_file = cert_priority == "file" and cert_file_path

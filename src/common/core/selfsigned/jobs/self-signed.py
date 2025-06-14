@@ -23,6 +23,8 @@ LOGGER = setup_logger("self-signed")
 JOB = Job(LOGGER, __file__)
 status = 0
 
+multisite = getenv("MULTISITE", "no") == "yes"
+
 
 def normalize_algorithm_name(algorithm: str) -> str:
     """Normalize algorithm names to handle equivalent curve names."""
@@ -56,7 +58,7 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
     key_path = server_path.joinpath("key.pem")
 
     # Get the algorithm from environment variable
-    algorithm = getenv(f"{first_server}_SELF_SIGNED_SSL_ALGORITHM", getenv("SELF_SIGNED_SSL_ALGORITHM", "ec-prime256v1"))
+    algorithm = getenv(f"{first_server}_SELF_SIGNED_SSL_ALGORITHM", "ec-prime256v1") if multisite else getenv("SELF_SIGNED_SSL_ALGORITHM", "ec-prime256v1")
 
     if cert_path.is_file() and key_path.is_file():
         if (
@@ -194,7 +196,7 @@ try:
 
     if not skipped_servers:
         for first_server in servers:
-            if getenv(f"{first_server}_GENERATE_SELF_SIGNED_SSL", getenv("GENERATE_SELF_SIGNED_SSL", "no")) != "yes":
+            if (getenv(f"{first_server}_GENERATE_SELF_SIGNED_SSL", "no") if multisite else getenv("GENERATE_SELF_SIGNED_SSL", "no")) == "no":
                 skipped_servers.append(first_server)
                 continue
 
@@ -202,8 +204,8 @@ try:
 
             ret, ret_status = generate_cert(
                 first_server,
-                getenv(f"{first_server}_SELF_SIGNED_SSL_EXPIRY", getenv("SELF_SIGNED_SSL_EXPIRY", "365")),
-                getenv(f"{first_server}_SELF_SIGNED_SSL_SUBJ", getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/")),
+                getenv(f"{first_server}_SELF_SIGNED_SSL_EXPIRY", "365") if multisite else getenv("SELF_SIGNED_SSL_EXPIRY", "365"),
+                getenv(f"{first_server}_SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/") if multisite else getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"),
                 self_signed_path,
             )
             if not ret:
