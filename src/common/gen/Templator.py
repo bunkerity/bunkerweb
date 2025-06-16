@@ -4,6 +4,7 @@ from concurrent.futures import ProcessPoolExecutor
 from contextlib import suppress
 from importlib import import_module
 from glob import glob
+from math import ceil
 from os import cpu_count, getenv
 from os.path import basename, join, sep
 from pathlib import Path
@@ -118,9 +119,9 @@ class ConfigurableCustomUndefined(Undefined):
         return super().__contains__(item)
 
 
-def create_custom_undefined_class(full_config: Dict[str, Any]):
+def create_custom_undefined_class(default_config: Dict[str, Any]):
     """Factory function that returns ConfigurableCustomUndefined with the config set."""
-    ConfigurableCustomUndefined.set_config(full_config)
+    ConfigurableCustomUndefined.set_config(default_config)
     return ConfigurableCustomUndefined
 
 
@@ -136,6 +137,7 @@ class Templator:
         output: str,
         target: str,
         config: Dict[str, Any],
+        default_config: Dict[str, Any],
         full_config: Dict[str, Any],
     ):
         """Initialize the Templator with paths and configuration.
@@ -174,8 +176,9 @@ class Templator:
         self._output = Path(output)  # Convert to Path for efficiency
         self._target = target
         self._config = config
+        self._default_config = default_config
         self._full_config = full_config
-        self._custom_undefined = create_custom_undefined_class(full_config)
+        self._custom_undefined = create_custom_undefined_class(default_config)
         self._jinja_env = self._load_jinja_env()
         self.__all_templates = frozenset(self._jinja_env.list_templates())
         self._template_path_cache = {}
@@ -199,8 +202,8 @@ class Templator:
         if self._config.get("MULTISITE", "no") == "yes":
             servers = self._config.get("SERVER_NAME", "www.example.com").strip().split(" ")
 
-        num_workers = min(max(1, (cpu_count() or 1) // 2), len(servers))
-        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        max_workers = min(ceil(max(1, (cpu_count() or 1) * 0.75)), len(servers))
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(self._render_server, server) for server in servers]
             for future in futures:
                 future.result()
@@ -335,7 +338,7 @@ class Templator:
         template_vars["all"] = self._full_config
         template_vars.update(self._config)
 
-        max_workers = min(max(1, (cpu_count() or 1) // 2), len(templates))
+        max_workers = min(ceil(max(1, (cpu_count() or 1) * 0.75)), len(templates))
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(self._render_template, template, template_vars) for template in templates]
             for future in futures:
@@ -363,12 +366,14 @@ class Templator:
         subpath = None
         config = self._config.copy()
         full_config = self._full_config.copy()
+        default_config = self._default_config.copy()
         if self._config.get("MULTISITE", "no") == "yes":
             subpath = server
             config = self._get_server_config(server, config)
             full_config = self._get_server_config(server, full_config)
+            default_config = self._get_server_config(server, default_config)
 
-        server_custom_undefined = create_custom_undefined_class(full_config)
+        server_custom_undefined = create_custom_undefined_class(default_config)
 
         template_vars = self._base_template_vars
         template_vars["all"] = full_config
