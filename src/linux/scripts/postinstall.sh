@@ -15,9 +15,33 @@ function do_and_check_cmd() {
     return 0
 }
 
+# Decompress deps directory with pigz for fastest decompression
+echo "Decompressing deps directory with pigz..."
+cd /usr/share/bunkerweb || exit 1
+if [ -f "deps.tar.gz" ]; then
+    # Use pigz if available, fallback to gzip
+    if command -v pigz >/dev/null 2>&1; then
+        tar --use-compress-program="pigz -d -p$(nproc)" -xf deps.tar.gz
+    else
+        tar -xzf deps.tar.gz
+    fi
+    rm -f deps.tar.gz
+    echo "Decompression completed successfully"
+else
+    echo "No compressed deps directory found, skipping decompression"
+fi
+
 # Give all the permissions to the nginx user
 echo "Setting ownership for all necessary directories to nginx user and group..."
-do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
+do_and_check_cmd chown -R root:nginx /usr/share/bunkerweb
+do_and_check_cmd chown -R nginx:nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
+
+chmod 755 /var/log/bunkerweb
+chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/
+chmod 550 -R /usr/share/bunkerweb/
+find . \( -path './scheduler' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
+find scheduler/ ui/ cli/ lua/ core/ db/ gen/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
+chmod 770 -R db/alembic/
 
 # Function to migrate files from old locations to new ones
 function migrate_file() {
