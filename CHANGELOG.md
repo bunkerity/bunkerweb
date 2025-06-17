@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.2-rc5 - ????/??/??
+## v1.6.2 - ????/??/??
+
+- [SECURITY] Make sure the files/dirs in /usr/share/bunkerweb have the appropriate permissions to prevent unauthorized access to sensitive files on Linux integration
+
+## v1.6.2-rc5 - 2025/06/17
 
 - [BUGFIX] Ensure jobs correctly retrieve multisite settings when a service uses its default value while the global setting is overridden, preventing configuration mismatches.
 - [FEATURE] Add new `LETS_ENCRYPT_PASSTHROUGH` setting to the `Let's Encrypt` plugin to allow passing through the Let's Encrypt challenge requests to the upstream server (default is `no`)
