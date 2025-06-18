@@ -253,94 +253,48 @@ function helpers.load_variables(all_variables, plugins)
 	for setting, data in pairs(settings) do
 		all_settings[setting] = data
 	end
-
-	-- Pre-index variables by server name and type
-	local global_vars = {}
-	local server_vars = {}
-	local multiple_vars = {}
-
+	-- Extract vars
+	local variables = { ["global"] = {} }
 	local multisite = all_variables["MULTISITE"] == "yes"
 	local server_names = {}
 	if multisite then
 		for server_name in all_variables["SERVER_NAME"]:gmatch("%S+") do
-			server_vars[server_name] = {}
+			variables[server_name] = {}
 			table.insert(server_names, server_name)
 		end
 	end
-
-	-- Single pass through all_variables to categorize them
-	for variable, value in pairs(all_variables) do
-		local matched = false
-
-		-- Check for server-specific variables first
-		if multisite then
-			for _, server_name in ipairs(server_names) do
-				local server_prefix = server_name .. "_"
-				if variable:sub(1, #server_prefix) == server_prefix then
-					local setting_name = variable:sub(#server_prefix + 1)
-					server_vars[server_name][setting_name] = value
-					matched = true
-					break
-				end
-			end
-		end
-
-		-- If not server-specific, check for multiple pattern
-		if not matched then
-			local base_setting = variable:match("^(.-)_%d+$")
-			if base_setting then
-				if not multiple_vars[base_setting] then
-					multiple_vars[base_setting] = {}
-				end
-				multiple_vars[base_setting][variable] = value
-			else
-				global_vars[variable] = value
-			end
-		end
-	end
-
-	-- Build final variables structure
-	local variables = { ["global"] = {} }
-	if multisite then
-		for _, server_name in ipairs(server_names) do
-			variables[server_name] = {}
-		end
-	end
-
-	-- Process settings only once
 	for setting, data in pairs(all_settings) do
-		-- Global variables
-		if global_vars[setting] then
-			variables["global"][setting] = global_vars[setting]
+		local escaped_setting = setting:gsub("([^%w])", "%%%1")
+		if all_variables[setting] then
+			variables["global"][setting] = all_variables[setting]
 		end
-
-		-- Multiple variables
-		if data.multiple and multiple_vars[setting] then
-			for var_name, value in pairs(multiple_vars[setting]) do
-				variables["global"][var_name] = value
-			end
-		end
-
-		-- Server-specific variables
-		if multisite then
-			for _, server_name in ipairs(server_names) do
-				if server_vars[server_name][setting] then
-					variables[server_name][setting] = server_vars[server_name][setting]
+		if data.multiple then
+			for variable, value in pairs(all_variables) do
+				local multiple_setting = variable:match("^(" .. escaped_setting .. "_%d+)$")
+				if multiple_setting then
+					variables["global"][multiple_setting] = value
 				end
-
-				-- Server-specific multiple variables
-				if data.multiple and multiple_vars[setting] then
-					for var_name, value in pairs(multiple_vars[setting]) do
-						if var_name:match("^" .. server_name .. "_") then
-							local clean_name = var_name:match("^" .. server_name .. "_(.+)")
-							variables[server_name][clean_name] = value
+				if multisite then
+					for _, server_name in ipairs(server_names) do
+						local escaped_server_name = server_name:gsub("([^%w])", "%%%1")
+						multiple_setting =
+							variable:match("^" .. escaped_server_name .. "_(" .. escaped_setting .. "_%d+)$")
+						if multiple_setting then
+							variables[server_name][multiple_setting] = value
 						end
 					end
 				end
 			end
 		end
+		if multisite then
+			for _, server_name in ipairs(server_names) do
+				local key = server_name .. "_" .. setting
+				if all_variables[key] then
+					variables[server_name][setting] = all_variables[key]
+				end
+			end
+		end
 	end
-
 	return true, variables
 end
 
