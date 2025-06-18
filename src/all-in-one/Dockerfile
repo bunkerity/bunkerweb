@@ -154,15 +154,10 @@ RUN cp helpers/bwcli /usr/bin/ && \
     mkdir -p /var/log/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chmod -R 755 /var/log/nginx && \
-    rm -rf /var/log/bunkerweb/*
-
-COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
-COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
-
-# Setup CrowdSec
-RUN tar -xzf crowdsec-release.tgz && \
+    rm -rf /var/log/bunkerweb/* && \
+    # Setup CrowdSec
+    tar -xzf crowdsec-release.tgz && \
     mkdir /data/crowdsec && ln -s /data/crowdsec /var/lib/crowdsec && \
-    # mkdir /data/crowdsec/config && ln -s /data/crowdsec/config /etc/crowdsec && \
     cd crowdsec-v* && \
     ./wizard.sh --docker-mode && \
     cd .. && \
@@ -174,21 +169,22 @@ RUN tar -xzf crowdsec-release.tgz && \
 	chmod -R 770 /data /var/lib/bunkerweb /etc/crowdsec /usr/local/lib/crowdsec && \
     find /etc/crowdsec/ -type f -name "*.yaml" -print0 | xargs -0 chmod 660 && \
     mv /etc/crowdsec/online_api_credentials.yaml /var/lib/crowdsec/online_api_credentials.yaml && \
-    mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml
-
-# Setup Redis
-RUN mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
+    mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml && \
+    # Setup Redis && \
+    mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
     apk add --no-cache redis && \
     mv all-in-one/conf/redis.conf /etc/redis.conf && \
     rm -rf all-in-one/conf && \
     chown -R root:nginx /data /var/lib/redis /etc/redis.conf && \
     chmod -R 770 /data /var/lib/redis && \
-    chmod 660 /etc/redis.conf
-
-# Set up supervisor configuration
-RUN mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
+    chmod 660 /etc/redis.conf && \
+    # Set up supervisor configuration && \
+    mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
     mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d && \
     chmod 770 -R /etc/supervisor.d
+
+COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.1"
