@@ -2,7 +2,6 @@
 
 from argparse import ArgumentParser
 from glob import glob
-from json import loads
 from os import R_OK, W_OK, X_OK, access, getenv, sep
 from os.path import join
 from pathlib import Path
@@ -124,29 +123,9 @@ if __name__ == "__main__":
             default_config = config.copy()
         else:
             config: Dict[str, Any] = db.get_non_default_settings() | {"DATABASE_URI": db.database_uri}
-            full_config = db.get_config() | {"DATABASE_URI": db.database_uri}
-
-            general_settings = loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
-            db_plugins = db.get_plugins()
-            default_config = {
-                **{k: v["default"] for db_plugin in db_plugins for k, v in db_plugin["settings"].items()},
-                **{k: v["default"] for k, v in general_settings.items()},
-            }
-
-            if config.get("MULTISITE", "no").lower() == "yes":
-                server_names = config.get("SERVER_NAME", "www.example.com").split(" ")
-                for server_name in server_names:
-                    if not server_name:
-                        continue
-
-                    for general_setting, data in general_settings.items():
-                        if data["context"] == "multisite":
-                            default_config[f"{server_name}_{general_setting}"] = default_config.get(general_setting, data["default"])
-
-                    for db_plugin in db_plugins:
-                        for setting, data in db_plugin["settings"].items():
-                            if data["context"] == "multisite":
-                                default_config[f"{server_name}_{setting}"] = default_config.get(setting, data["default"])
+            full_config = db.get_config(methods=True) | {"DATABASE_URI": {"default": "sqlite:////var/lib/bunkerweb/db.sqlite3", "value": db.database_uri}}
+            default_config = {setting: data["default"] for setting, data in full_config.items()}
+            full_config = {setting: data["value"] for setting, data in full_config.items()}
 
         # Remove old files
         LOGGER.info("Removing old files ...")

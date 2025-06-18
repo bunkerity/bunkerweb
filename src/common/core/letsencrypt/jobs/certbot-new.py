@@ -380,8 +380,8 @@ try:
     # ? Restore data from db cache of certbot-renew job
     JOB.restore_cache(job_name="certbot-renew")
 
-    env = environ.copy()
-    env["PYTHONPATH"] = env.get("PYTHONPATH", "") + (f":{DEPS_PATH}" if DEPS_PATH not in env.get("PYTHONPATH", "") else "")
+    env = {"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")}
+    env["PYTHONPATH"] = env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in env["PYTHONPATH"] else "")
 
     proc = run(
         [

@@ -483,7 +483,11 @@ try:
             # * Patch the rules so we can extract the rule IDs when matching
             try:
                 LOGGER.info(f"Patching Core Rule Set (CRS) plugin {plugin_name}...")
-                result = run([PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()], check=True)
+                result = run(
+                    [PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()],
+                    check=True,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                )
             except CalledProcessError as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Failed to patch Core Rule Set (CRS) plugin {plugin_name}: {e}")
