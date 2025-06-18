@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import os
+
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
 from datetime import datetime
@@ -8,17 +10,15 @@ from glob import glob
 from importlib.util import module_from_spec, spec_from_file_location
 from json import loads
 from logging import Logger
-from os import cpu_count, environ, getenv, sep
-from os.path import basename, dirname, join
 from pathlib import Path
-import re
+from re import compile as re_compile
 from typing import Any, Dict, List, Optional
 import schedule
 from sys import path as sys_path
 from threading import Lock
 
 # Add dependencies to sys.path
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
+for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -30,7 +30,6 @@ from ApiCaller import ApiCaller  # type: ignore
 class JobScheduler(ApiCaller):
     def __init__(
         self,
-        env: Optional[Dict[str, Any]] = None,
         logger: Optional[Logger] = None,
         *,
         db: Optional[Database] = None,
@@ -38,19 +37,15 @@ class JobScheduler(ApiCaller):
         apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
-        self.__logger = logger or setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+        self.__logger = logger or setup_logger("Scheduler", os.getenv("CUSTOM_LOG_LEVEL", os.getenv("LOG_LEVEL", "INFO")))
         self.db = db or Database(self.__logger)
         # Store only essential environment variables to reduce memory usage
-        self.__base_env = environ.copy()
-        self.__env = env or {}
-        self.__cached_combined_env = None
-        self.__env_dirty = True
+        self.__base_env = os.environ.copy()
         self.__lock = lock
         self.__thread_lock = Lock()
-        self.__env_lock = Lock()  # Dedicated lock for environment operations
         self.__job_success = True
         self.__job_reload = False
-        self.__executor = ThreadPoolExecutor(max_workers=min(8, (cpu_count() or 1) * 4))
+        self.__executor = ThreadPoolExecutor(max_workers=min(8, (os.cpu_count() or 1) * 4))
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
         self.__module_paths_lock = Lock()  # Dedicated lock for module paths
@@ -59,49 +54,18 @@ class JobScheduler(ApiCaller):
     def __compile_regexes(self):
         """Precompile regular expressions for job validation."""
         return {
-            "name": re.compile(r"^[\w.-]{1,128}$"),
-            "file": re.compile(r"^[\w./-]{1,256}$"),
+            "name": re_compile(r"^[\w.-]{1,128}$"),
+            "file": re_compile(r"^[\w./-]{1,256}$"),
         }
-
-    def _get_combined_env(self) -> Dict[str, Any]:
-        """Get cached combined environment variables - thread-safe."""
-        with self.__env_lock:
-            if self.__cached_combined_env is None or self.__env_dirty:
-                self.__cached_combined_env = self.__base_env | self.__env | {"LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", self.__env.get("LOG_LEVEL", "notice"))}
-                self.__env_dirty = False
-            return self.__cached_combined_env.copy()  # Return a copy to avoid external mutations
-
-    def _update_env_context(self) -> Dict[str, str]:
-        """Update environment context for job execution with minimal overhead - thread-safe.
-        Returns the original environment state for restoration."""
-        combined_env = self._get_combined_env()
-        original_env = {}
-
-        # Store original values for restoration
-        for key, value in combined_env.items():
-            original_env[key] = environ.get(key)
-            if environ.get(key) != str(value):
-                environ[key] = str(value)
-
-        return original_env
-
-    def _restore_env_context(self, original_env: Dict[str, str]):
-        """Restore original environment context - thread-safe."""
-        for key, original_value in original_env.items():
-            if original_value is None:
-                environ.pop(key, None)
-            else:
-                environ[key] = original_value
 
     @property
     def env(self) -> Dict[str, Any]:
-        return self.__env
+        return os.environ.copy()
 
     @env.setter
     def env(self, env: Dict[str, Any]):
-        with self.__env_lock:
-            self.__env = env
-            self.__env_dirty = True
+        os.environ = self.__base_env.copy()  # Reset to base environment
+        os.environ.update(env)  # Update with new environment
 
     def update_jobs(self):
         self.__jobs = self.__get_jobs()
@@ -110,16 +74,16 @@ class JobScheduler(ApiCaller):
         jobs = {}
         plugin_files = []
         plugin_dirs = [
-            join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json"),
-            join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json"),
-            join(sep, "etc", "bunkerweb", "pro", "plugins", "*", "plugin.json"),
+            os.path.join(os.sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json"),
+            os.path.join(os.sep, "etc", "bunkerweb", "plugins", "*", "plugin.json"),
+            os.path.join(os.sep, "etc", "bunkerweb", "pro", "plugins", "*", "plugin.json"),
         ]
 
         for pattern in plugin_dirs:
             plugin_files.extend(glob(pattern))
 
         def load_plugin(plugin_file):
-            plugin_name = basename(dirname(plugin_file))
+            plugin_name = os.path.basename(os.path.dirname(plugin_file))
             try:
                 plugin_data = loads(Path(plugin_file).read_text(encoding="utf-8"))
                 plugin_jobs = plugin_data.get("jobs", [])
@@ -154,7 +118,7 @@ class JobScheduler(ApiCaller):
                 self.__logger.warning(f"Invalid job definition in plugin {plugin_name}. Job: {job}")
                 continue
 
-            job["path"] = dirname(plugin_file)
+            job["path"] = os.path.dirname(plugin_file)
             valid_jobs.append(job)
         return valid_jobs
 
@@ -172,7 +136,7 @@ class JobScheduler(ApiCaller):
 
     def __reload(self) -> bool:
         self.__logger.info("Reloading nginx...")
-        reload_min_timeout = self.__env.get("RELOAD_MIN_TIMEOUT", "5")
+        reload_min_timeout = self.env.get("RELOAD_MIN_TIMEOUT", "5")
 
         if not reload_min_timeout.isdigit():
             self.__logger.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
@@ -180,8 +144,8 @@ class JobScheduler(ApiCaller):
 
         reload_success = self.send_to_apis(
             "POST",
-            f"/reload?test={'no' if self.__env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
-            timeout=max(int(reload_min_timeout), 3 * len(self.__env.get("SERVER_NAME", "www.example.com").split(" "))),
+            f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
+            timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split(" "))),
         )[0]
         if reload_success:
             self.__logger.info("Successfully reloaded nginx")
@@ -217,7 +181,7 @@ class JobScheduler(ApiCaller):
         ret = -1
         start_date = datetime.now().astimezone()
         try:
-            self.__exec_plugin_module(join(path, "jobs", file), name)
+            self.__exec_plugin_module(os.path.join(path, "jobs", file), name)
             ret = 1
         except SystemExit as e:
             ret = e.code if isinstance(e.code, int) else 1
@@ -255,7 +219,7 @@ class JobScheduler(ApiCaller):
     def __update_cache_permissions(self):
         """Update permissions for cache files and directories."""
         self.__logger.info("Updating /var/cache/bunkerweb permissions...")
-        cache_path = Path(sep, "var", "cache", "bunkerweb")
+        cache_path = Path(os.sep, "var", "cache", "bunkerweb")
 
         DIR_MODE = 0o740
         FILE_MODE = 0o640
@@ -297,9 +261,6 @@ class JobScheduler(ApiCaller):
         self.__job_success = True
         self.__job_reload = False
 
-        # Update environment efficiently
-        original_env = self._update_env_context()
-
         try:
             # Use ThreadPoolExecutor to run jobs
             futures = [self.__executor.submit(job.run) for job in pending_jobs]
@@ -314,7 +275,7 @@ class JobScheduler(ApiCaller):
             if self.__job_reload:
                 try:
                     if self.apis:
-                        cache_path = join(sep, "var", "cache", "bunkerweb")
+                        cache_path = os.path.join(os.sep, "var", "cache", "bunkerweb")
                         self.__logger.info(f"Sending '{cache_path}' folder...")
                         if not self.send_files(cache_path, "/cache"):
                             success = False
@@ -334,9 +295,6 @@ class JobScheduler(ApiCaller):
 
             return success
         finally:
-            # Restore environment efficiently
-            self._restore_env_context(original_env)
-
             # Clean up module paths thread-safely
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
@@ -355,9 +313,6 @@ class JobScheduler(ApiCaller):
         self.__job_reload = False
 
         plugins = plugins or []
-
-        # Use optimized environment context
-        original_env = self._update_env_context()
 
         try:
             futures = []
@@ -389,8 +344,6 @@ class JobScheduler(ApiCaller):
 
             return self.__job_success
         finally:
-            self._restore_env_context(original_env)
-
             with self.__module_paths_lock:
                 for module_path in self.__module_paths.copy():
                     if module_path in sys_path:
@@ -421,9 +374,6 @@ class JobScheduler(ApiCaller):
                 self.__logger.warning(f"Job '{job_name}' not found")
                 return False
 
-            # Use optimized environment context
-            original_env = self._update_env_context()
-
             try:
                 self.__job_wrapper(
                     job_to_run["path"],
@@ -432,8 +382,6 @@ class JobScheduler(ApiCaller):
                     job_to_run["file"],
                 )
             finally:
-                self._restore_env_context(original_env)
-
                 with self.__module_paths_lock:
                     for module_path in self.__module_paths.copy():
                         if module_path in sys_path:
@@ -458,9 +406,8 @@ class JobScheduler(ApiCaller):
         self, env: Dict[str, Any], apis: Optional[list] = None, *, changed_plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None
     ) -> bool:
         try:
-            with self.__env_lock:
-                self.__env = env
-                self.__env_dirty = True
+            os.environ = self.__base_env.copy()
+            os.environ.update(env)  # Update with new environment
             super().__init__(apis or self.apis)
             self.clear()
             self.update_jobs()

@@ -489,7 +489,7 @@ def healthcheck_job():
                 api_caller = ApiCaller([bw_instance])
 
                 if env is None:
-                    env = SCHEDULER.db.get_non_default_settings()
+                    env = SCHEDULER.db.get_config()
                     env["DATABASE_URI"] = SCHEDULER.db.database_uri
                     tz = getenv("TZ")
                     if tz:
@@ -642,7 +642,7 @@ if __name__ == "__main__":
             with tmp_variables_path.open() as f:
                 dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
 
-        SCHEDULER = JobScheduler(environ, LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
+        SCHEDULER = JobScheduler(LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
         JOB = Job(LOGGER, __file__, SCHEDULER.db)
 
@@ -677,7 +677,7 @@ if __name__ == "__main__":
                 continue
             sleep(5)
 
-        env = SCHEDULER.db.get_non_default_settings()
+        env = SCHEDULER.db.get_config()
         env["DATABASE_URI"] = SCHEDULER.db.database_uri
         tz = getenv("TZ")
         if tz:
@@ -847,7 +847,7 @@ if __name__ == "__main__":
                     LOGGER.error("Config saver failed, configuration will not work as expected...")
 
             SCHEDULER.update_jobs()
-            env = SCHEDULER.db.get_non_default_settings()
+            env = SCHEDULER.db.get_config()
             env["DATABASE_URI"] = SCHEDULER.db.database_uri
             tz = getenv("TZ")
             if tz:
@@ -1188,7 +1188,7 @@ if __name__ == "__main__":
                 if CONFIG_NEED_GENERATION:
                     CHANGES.append("config")
                     old_env = env.copy()
-                    env = SCHEDULER.db.get_non_default_settings()
+                    env = SCHEDULER.db.get_config()
                     if old_env.get("API_HTTP_PORT", "5000") != env.get("API_HTTP_PORT", "5000") or old_env.get("API_SERVER_NAME", "bwapi") != env.get(
                         "API_SERVER_NAME", "bwapi"
                     ):
