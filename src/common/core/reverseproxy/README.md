@@ -126,11 +126,12 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Security Enhancement:** Add security-related headers or remove headers that might leak sensitive information
         - **Integration Support:** Provide necessary headers for authentication and proper backend operation
 
-    | Setting                                | Default | Context   | Multiple | Description                                                                           |
-    | -------------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_HEADERS`                |         | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons.        |
-    | `REVERSE_PROXY_HEADERS_CLIENT`         |         | multisite | yes      | **Client Headers:** HTTP headers to send to client separated with semicolons.         |
-    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`    | multisite | no       | **Underscores in Headers:** Enable or disable the `underscores_in_headers` directive. |
+    | Setting                                | Default   | Context   | Multiple | Description                                                                           |
+    | -------------------------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_HEADERS`                |           | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons.        |
+    | `REVERSE_PROXY_HIDE_HEADERS`           | `Upgrade` | multisite | yes      | **Hide Headers:** HTTP headers to hide from clients when received from the backend.   |
+    | `REVERSE_PROXY_HEADERS_CLIENT`         |           | multisite | yes      | **Client Headers:** HTTP headers to send to client separated with semicolons.         |
+    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | no       | **Underscores in Headers:** Enable or disable the `underscores_in_headers` directive. |
 
     !!! warning "Security Considerations"
         When using the reverse proxy feature, be cautious about what headers you forward to your backend applications. Certain headers might expose sensitive information about your infrastructure or bypass security controls.

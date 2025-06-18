@@ -279,7 +279,7 @@ def certbot_new(
 
     while process.poll() is None:
         if process.stderr:
-            rlist, _, _ = select([process.stderr], [], [], 1)  # 1-second timeout
+            rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
                 for line in process.stderr:
                     LOGGER_CERTBOT.info(line.strip())
@@ -573,18 +573,17 @@ try:
         data = {
             "email": (getenv(f"{first_server}_EMAIL_LETS_ENCRYPT", "") if IS_MULTISITE else getenv("EMAIL_LETS_ENCRYPT", "")) or f"contact@{first_server}",
             "challenge": getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") if IS_MULTISITE else getenv("LETS_ENCRYPT_CHALLENGE", "http"),
-            "staging": getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes",
-            "use_wildcard": getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no") == "yes",
+            "staging": (getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes",
+            "use_wildcard": (getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes",
             "provider": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROVIDER", ""),
             "propagation": (
                 getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", "default") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")
             ),
             "profile": getenv(f"{first_server}_LETS_ENCRYPT_PROFILE", "classic") if IS_MULTISITE else getenv("LETS_ENCRYPT_PROFILE", "classic"),
             "check_psl": (
-                getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")
-                if IS_MULTISITE
-                else getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes") == "no"
-            ),
+                getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes") if IS_MULTISITE else getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")
+            )
+            == "no",
             "max_retries": getenv(f"{first_server}_LETS_ENCRYPT_MAX_RETRIES", "0") if IS_MULTISITE else getenv("LETS_ENCRYPT_MAX_RETRIES", "0"),
             "credential_items": {},
         }
