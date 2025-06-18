@@ -1,6 +1,6 @@
-from os import environ
+from os import getenv
 from subprocess import DEVNULL, PIPE, STDOUT, run
-from os.path import dirname
+from os.path import dirname, join, sep
 from pathlib import Path
 from shutil import rmtree
 from io import BytesIO
@@ -26,11 +26,13 @@ letsencrypt = Blueprint(
     template_folder=f"{blueprint_path}/templates",
 )
 
-CERTBOT_BIN = "/usr/share/bunkerweb/deps/python/bin/certbot"
-LE_CACHE_DIR = "/var/cache/bunkerweb/letsencrypt/etc"
-DATA_PATH = "/var/tmp/bunkerweb/ui/letsencrypt/etc"
-WORK_DIR = "/var/tmp/bunkerweb/ui/letsencrypt/lib"
-LOGS_DIR = "/var/tmp/bunkerweb/letsencrypt/log"
+CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
+LE_CACHE_DIR = join(sep, "var", "cache", "bunkerweb", "letsencrypt", "etc")
+DATA_PATH = join(sep, "var", "tmp", "bunkerweb", "ui", "letsencrypt", "etc")
+WORK_DIR = join(sep, "var", "tmp", "bunkerweb", "ui", "letsencrypt", "lib")
+LOGS_DIR = join(sep, "var", "tmp", "bunkerweb", "letsencrypt", "log")
+
+DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
 
 
 def download_certificates():
@@ -183,7 +185,9 @@ def letsencrypt_delete():
 
     download_certificates()
 
-    env = environ.copy()
+    env = {"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")}
+    env["PYTHONPATH"] = env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in env["PYTHONPATH"] else "")
+
     delete_proc = run(
         [
             CERTBOT_BIN,

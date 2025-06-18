@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import chmod, sep
+from os import chmod, getenv, sep
 from os.path import join
 from pathlib import Path
 from stat import S_IRUSR, S_IWUSR
@@ -82,6 +82,7 @@ DNS.1 = www.example.org
                 stdout=PIPE,
                 text=True,
                 check=False,
+                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
             )
 
             if result.returncode != 0:
