@@ -70,7 +70,11 @@ PSL_STATIC_FILE = "public_suffix_list.dat"
 
 def load_public_suffix_list(job):
     job_cache = job.get_cache(PSL_STATIC_FILE, with_info=True, with_data=True)
-    if isinstance(job_cache, dict) and job_cache["last_update"] < (datetime.now().astimezone() - timedelta(days=1)).timestamp():
+    if (
+        isinstance(job_cache, dict)
+        and job_cache.get("last_update")
+        and job_cache["last_update"] < (datetime.now().astimezone() - timedelta(days=1)).timestamp()
+    ):
         return job_cache["data"].decode("utf-8").splitlines()
 
     try:
