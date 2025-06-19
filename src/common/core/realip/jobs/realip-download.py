@@ -198,7 +198,6 @@ try:
             urls.add(url_file)
 
         if not content:
-            LOGGER.warning(f"No data for {service} combined.list, skipping...")
             continue
 
         # Check if file has changed
