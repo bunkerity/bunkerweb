@@ -4,6 +4,7 @@
 
 - [BUGFIX] Ensure template defaults settings are correctly retrieved by jobs and templates.
 - [BUGFIX] No longer completely delete all PRO plugins data upon PRO deactivation, allowing for easier reactivation without losing data.
+- [BUGFIX] Enhance cache robustness by using dict.get() for lookups to avoid KeyError exceptions during cache operations.
 - [SECURITY] Make sure the files/dirs in /usr/share/bunkerweb have the appropriate permissions to prevent unauthorized access to sensitive files on Linux integration
 
 ## v1.6.2-rc5 - 2025/06/17
