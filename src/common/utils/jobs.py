@@ -167,12 +167,12 @@ class Job:
         is_cached = False
         try:
             cache_info = self.get_cache(name, job_name=job_name, service_id=service_id, plugin_id=plugin_id, with_info=True, with_data=False)
-            if isinstance(cache_info, dict):
+            if isinstance(cache_info, dict) and cache_info.get("last_update"):
                 current_time = datetime.now().astimezone().timestamp()
                 if current_time < cache_info["last_update"]:
                     return False
                 is_cached = current_time - cache_info["last_update"] < EXPIRE_TIME[expire]
-        except:
+        except BaseException:
             is_cached = False
         return is_cached
 
@@ -281,7 +281,7 @@ def get_file_in_db(file: Union[str, Path], db, *, job_name: str = "") -> Optiona
         file = Path(file)
     cache = job.get_cache(file.name, job_name=job_name, with_data=True)
     if isinstance(cache, dict):
-        return cache["data"]
+        return cache.get("data")
     return None
 
 
