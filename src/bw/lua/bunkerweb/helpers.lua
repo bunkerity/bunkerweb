@@ -253,7 +253,8 @@ function helpers.load_variables(all_variables, plugins)
 	for setting, data in pairs(settings) do
 		all_settings[setting] = data
 	end
-	-- Extract vars
+	
+	-- Initialize variables structure
 	local variables = { ["global"] = {} }
 	local multisite = all_variables["MULTISITE"] == "yes"
 	local server_names = {}
@@ -263,38 +264,50 @@ function helpers.load_variables(all_variables, plugins)
 			table.insert(server_names, server_name)
 		end
 	end
-	for setting, data in pairs(all_settings) do
-		local escaped_setting = setting:gsub("([^%w])", "%%%1")
-		if all_variables[setting] then
-			variables["global"][setting] = all_variables[setting]
+	
+	-- Pre-compile patterns for better performance
+	local escaped_server_names = {}
+	if multisite then
+		for _, server_name in ipairs(server_names) do
+			escaped_server_names[server_name] = server_name:gsub("([^%w])", "%%%1")
 		end
-		if data.multiple then
-			for variable, value in pairs(all_variables) do
-				local multiple_setting = variable:match("^(" .. escaped_setting .. "_%d+)$")
-				if multiple_setting then
-					variables["global"][multiple_setting] = value
-				end
-				if multisite then
-					for _, server_name in ipairs(server_names) do
-						local escaped_server_name = server_name:gsub("([^%w])", "%%%1")
-						multiple_setting =
-							variable:match("^" .. escaped_server_name .. "_(" .. escaped_setting .. "_%d+)$")
-						if multiple_setting then
-							variables[server_name][multiple_setting] = value
+	end
+	
+	-- Single pass through all_variables
+	for variable, value in pairs(all_variables) do
+		-- Check for direct global settings first
+		if all_settings[variable] then
+			variables["global"][variable] = value
+		end
+		
+		-- Handle multisite and multiple settings in one pass
+		if multisite then
+			-- Try to match server-specific variables
+			for _, server_name in ipairs(server_names) do
+				local escaped_server_name = escaped_server_names[server_name]
+				local setting = variable:match("^" .. escaped_server_name .. "_(.+)$")
+				if setting then
+					-- Check if it's a direct setting
+					if all_settings[setting] then
+						variables[server_name][setting] = value
+					-- Check if it's a multiple setting
+					elseif setting:match("^(.+)_%d+$") then
+						local base_setting = setting:match("^(.+)_%d+$")
+						if all_settings[base_setting] and all_settings[base_setting].multiple then
+							variables[server_name][setting] = value
 						end
 					end
 				end
 			end
 		end
-		if multisite then
-			for _, server_name in ipairs(server_names) do
-				local key = server_name .. "_" .. setting
-				if all_variables[key] then
-					variables[server_name][setting] = all_variables[key]
-				end
-			end
+		
+		-- Handle multiple settings for global
+		local base_setting = variable:match("^(.+)_%d+$")
+		if base_setting and all_settings[base_setting] and all_settings[base_setting].multiple then
+			variables["global"][variable] = value
 		end
 	end
+	
 	return true, variables
 end
 
