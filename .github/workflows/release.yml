@@ -74,10 +74,10 @@ jobs:
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
-        arch: ["linux/arm64,linux/arm/v7"]
+        arch: [linux/arm64, linux/arm/v7]
         exclude:
           - image: all-in-one
-            arch: "linux/arm64,linux/arm/v7"
+            arch: linux/arm/v7
         include:
           - release: latest
             cache: false
@@ -93,7 +93,6 @@ jobs:
             dockerfile: src/ui/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
-            arch: "linux/arm64"
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ${{ matrix.release }}
@@ -162,14 +161,7 @@ jobs:
   # Wait for all builds and extract VERSION
   wait-builds:
     runs-on: ubuntu-latest
-    needs:
-      [
-        codeql,
-        build-containers,
-        build-containers-arm,
-        build-all-in-one-arm,
-        build-packages,
-      ]
+    needs: [codeql, build-containers, build-containers-arm, build-packages]
     outputs:
       version: ${{ steps.getversion.outputs.version }}
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
