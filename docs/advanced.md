@@ -1,8 +1,8 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc5/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc6/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc5/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc6/misc/integrations) folder.
 
 This section only focuses on advanced usages and security tuning, see the [settings section](features.md) of the documentation to see all the available settings.
 
@@ -87,7 +87,7 @@ You will find more settings about real IP in the [settings section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.2-rc5
+            bunkerity/bunkerweb-all-in-one:1.6.2-rc6
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -98,7 +98,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc5
+          image: bunkerity/bunkerweb:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +106,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +123,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc5
+          image: bunkerity/bunkerweb:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +131,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -178,7 +178,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc5
+          image: bunkerity/bunkerweb:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +186,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ You will find more settings about real IP in the [settings section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.2-rc5
+            bunkerity/bunkerweb-all-in-one:1.6.2-rc6
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -262,7 +262,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc5
+          image: bunkerity/bunkerweb:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +272,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +290,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc5
+          image: bunkerity/bunkerweb:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +300,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -352,7 +352,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc5
+          image: bunkerity/bunkerweb:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +362,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+          image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -510,7 +510,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc5
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc6
     ```
 
 === "Docker"
@@ -538,7 +538,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc5
+        image: bunkerity/bunkerweb:1.6.2-rc6
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -549,7 +549,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -663,7 +663,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc5
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc6
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -703,7 +703,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc5
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc6
     ```
 
 === "Docker"
@@ -726,7 +726,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+      image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -769,7 +769,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+      image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
       volumes:
         - ./bw-data:/data
       ...
@@ -839,7 +839,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+      image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
       volumes:
         - ./bw-data:/data
       ...
@@ -1051,7 +1051,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc5
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc6
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1072,7 +1072,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc5
+        image: bunkerity/bunkerweb:1.6.2-rc6
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1087,7 +1087,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1138,7 +1138,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc5
+        image: bunkerity/bunkerweb:1.6.2-rc6
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1192,7 +1192,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc5
+        image: bunkerity/bunkerweb:1.6.2-rc6
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -1498,7 +1498,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc5
+        bunkerity/bunkerweb-all-in-one:1.6.2-rc6
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1542,7 +1542,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc5
+        image: bunkerity/bunkerweb:1.6.2-rc6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1557,7 +1557,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1651,7 +1651,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc5
+        image: bunkerity/bunkerweb:1.6.2-rc6
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1664,7 +1664,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1679,7 +1679,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.2-rc5
+        image: bunkerity/bunkerweb-autoconf:1.6.2-rc6
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1829,7 +1829,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc5
+        image: bunkerity/bunkerweb:1.6.2-rc6
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2016,7 +2016,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
         environment:
           USE_IPv6: "yes"
 
@@ -2154,272 +2154,230 @@ The Reporting plugin provides a comprehensive solution for regular reporting of 
 
 **List of settings**
 
-| Setting                  | Default  | Context | Description                                                                         |
-| ------------------------ | -------- | ------- | ----------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`     | `no`     | global  | Enable sending the report via email.                                                |
-| `USE_REPORTING_WEBHOOK`  | `no`     | global  | Enable sending the report via webhook.                                              |
-| `REPORTING_SCHEDULE`     | `weekly` | global  | The frequency at which reports are sent.                                            |
-| `REPORTING_WEBHOOK_URLS` |          | global  | List of webhook URLs to receive the report in Markdown (separated by spaces).       |
-| `REPORTING_SMTP_EMAILS`  |          | global  | List of email addresses to receive the report in HTML format (separated by spaces). |
-| `REPORTING_SMTP_HOST`    |          | global  | The host server used for SMTP sending.                                              |
-    ```bash
-| `REPORTING_SMTP_PORT`          | `465`              | global  | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
+| Setting                        | Default            | Context | Description                                                                                                                        |
+| ------------------------------ | ------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global  | Enable sending the report via email.                                                                                               |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global  | Enable sending the report via webhook.                                                                                             |
+| `REPORTING_SCHEDULE`           | `weekly`           | global  | The frequency at which reports are sent.                                                                                           |
+| `REPORTING_WEBHOOK_URLS`       |                    | global  | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
+| `REPORTING_SMTP_EMAILS`        |                    | global  | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
+| `REPORTING_SMTP_HOST`          |                    | global  | The host server used for SMTP sending.                                                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | global  | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
 | `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
 | `REPORTING_SMTP_FROM_USER`     |                    | global  | The user authentication value for sending via the from email address.                                                              |
-    To resolve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
 | `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | The password authentication value for sending via the from email address.                                                          |
 | `REPORTING_SMTP_SSL`           | `SSL`              | global  | Determine whether or not to use a secure connection for SMTP.                                                                      |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | The subject line of the email.                                                                                                     |    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | The subject line of the email.                                                                                                     |
 
 !!! info "Information and behavior"
-    - case `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.you're using the Docker integration, you can add the following command to the `docker-compose.yml` file to automatically change the authentication plugin:
+    - case `USE_REPORTING_SMTP` is set to `yes`, the setting `REPORTING_SMTP_EMAILS` must be set.
     - case `USE_REPORTING_WEBHOOK` is set to `yes`, the setting `REPORTING_WEBHOOK_URLS` must be set.
     - Accepted values for `REPORTING_SCHEDULE` are `daily`, `weekly`and `monthly`.
     - case no `REPORTING_SMTP_FROM_USER` and `REPORTING_SMTP_FROM_PASSWORD` are set, the plugin will try to send the email without authentication.
-        ```yaml
-        bw-db:
-            image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password
-            ...
-        ```
-
-    === "MySQL"
-
     - case `REPORTING_SMTP_FROM_USER` isn't set but `REPORTING_SMTP_FROM_PASSWORD` is set, the plugin will use the `REPORTING_SMTP_FROM_EMAIL` as the username.
-        bw-db:
-    - case the job fails, the plugin will retry sending the report in the next execution.            image: mysql:<version>
-mand: --default-authentication-plugin=mysql_native_password
-### Backup and restore.
+    - case the job fails, the plugin will retry sending the report in the next execution.
+
+### Backup and restore
 
 #### Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
-store
+
 STREAM support :white_check_mark:
-To manually initiate a restore, execute the following command:
+
 The Backup S3 tool seamlessly automates data protection, similar to the community backup plugin. However, it stands out by securely storing backups directly in an S3 bucket.
-=== "Linux"
+
 By activating this feature, you're proactively safeguarding your **data's integrity**. Storing backups **remotely** shields crucial information from threats like **hardware failures**, **cyberattacks**, or **natural disasters**. This ensures both **security** and **availability**, enabling swift recovery during **unexpected events**, preserving **operational continuity**, and ensuring **peace of mind**.
 
-!!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
-    If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+!!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
+    If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
-    === "MySQL/MariaDB""
+    === "MySQL/MariaDB"
 
         1. **Install the MySQL repository configuration package**
-    docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+
             ```bash
             sudo dnf install https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
-            ```-one"
+            ```
 
         2. **Enable the MySQL repository**
-bwcli plugin backup_s3 restore
+
             ```bash
             sudo dnf config-manager --enable mysql80-community
-            ``` will create a temporary backup of your database in the S3 bucket specified in the `BACKUP_S3_BUCKET` setting and restore your database to the latest backup available in the bucket.
+            ```
 
-        3. **Install the MySQL client**o specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
+        3. **Install the MySQL client**
 
-            ```bashnux"
+            ```bash
             sudo dnf install mysql-community-client
             ```
-    bwcli plugin backup_s3 restore s3_backup_file.zip
+
     === "PostgreSQL"
 
-        1. **Install the PostgreSQL repository configuration package**cker"
+        1. **Install the PostgreSQL repository configuration package**
 
             ```bash
-            dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"    docker exec -it <scheduler_container> bwcli plugin backup restore s3_backup_file.zip
+            dnf install "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-$(uname -m)/pgdg-redhat-repo-latest.noarch.rpm"
             ```
 
-        2. **Install the PostgreSQL client**-one"
+        2. **Install the PostgreSQL client**
 
             ```bash
-            dnf install postgresql<version>_s3 restore s3_backup_file.zip
+            dnf install postgresql<version>
             ```
 
-**List of features**"In case of failure"
+**List of features**
 
-- Automatic data backup to an S3 bucketorry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:
+- Automatic data backup to an S3 bucket
 - Flexible scheduling options: daily, weekly, or monthly
-- Rotation management for controlling the number of backups to keep "Linux"
+- Rotation management for controlling the number of backups to keep
 - Customizable compression level for backup files
 
-**List of settings**        bwcli plugin backup_s3 restore
+**List of settings**
 
-| Setting | Default | Context | Description |
-| ------- | ------- | ------- | ----------- |"Docker"
+| Setting                       | Default | Context | Description                                  |
+| ----------------------------- | ------- | ------- | -------------------------------------------- |
 | `USE_BACKUP_S3`               | `no`    | global  | Enable or disable the S3 backup feature      |
 | `BACKUP_S3_SCHEDULE`          | `daily` | global  | The frequency of the backup                  |
-| `BACKUP_S3_ROTATION`          | `7`     | global  | The number of backups to keep                |        docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+| `BACKUP_S3_ROTATION`          | `7`     | global  | The number of backups to keep                |
 | `BACKUP_S3_ENDPOINT`          |         | global  | The S3 endpoint                              |
 | `BACKUP_S3_BUCKET`            |         | global  | The S3 bucket                                |
-| `BACKUP_S3_DIR`               |         | global  | The S3 directory                             |-one"
+| `BACKUP_S3_DIR`               |         | global  | The S3 directory                             |
 | `BACKUP_S3_REGION`            |         | global  | The S3 region                                |
 | `BACKUP_S3_ACCESS_KEY_ID`     |         | global  | The S3 access key ID                         |
-| `BACKUP_S3_ACCESS_KEY_SECRET` |         | global  | The S3 access key secret                     |bwcli plugin backup_s3 restore
+| `BACKUP_S3_ACCESS_KEY_SECRET` |         | global  | The S3 access key secret                     |
 | `BACKUP_S3_COMP_LEVEL`        | `6`     | global  | The compression level of the backup zip file |
 
-##### Manual backupmg src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+##### Manual backup
 
-To manually initiate a backup, execute the following command::white_check_mark:
+To manually initiate a backup, execute the following command:
 
-=== "Linux"on plugin **revolutionizes** BunkerWeb configuration transfers between instances with its **user-friendly web interface**, simplifying the entire migration journey. Whether you're upgrading systems, scaling infrastructure, or transitioning environments, this tool empowers you to effortlessly transfer **settings, preferences, and data** with unmatched ease and confidence. Say goodbye to cumbersome manual processes and hello to a **seamless, hassle-free migration experience**.
+=== "Linux"
 
     ```bash
     bwcli plugin backup_s3 save
-    ```Migration:** Easily transfer BunkerWeb configurations between instances without the complexities of manual procedures.
+    ```
 
-=== "Docker"ve Web Interface:** Navigate through the migration process effortlessly with a user-friendly web interface designed for intuitive operation.
+=== "Docker"
 
-    ```bashQL, ensuring compatibility with your preferred database environment.
+    ```bash
     docker exec -it <scheduler_container> bwcli plugin backup_s3 save
     ```
 
-=== "All-in-one"
-
-    ```bash
-    docker exec -it bunkerweb-aio bwcli plugin backup_s3 save
-    ```
-    bwcli plugin migration create /path/to/migration/file
 This command will create a backup of your database and store it in the S3 bucket specified in the `BACKUP_S3_BUCKET` setting.
 
 You can also specify a custom S3 bucket for the backup by providing the `BACKUP_S3_BUCKET` environment variable when executing the command:
 
-=== "Linux"le:
+=== "Linux"
 
     ```bash
-    BACKUP_S3_BUCKET=your-bucket-name bwcli plugin backup_s3 save        docker exec -it <scheduler_container> bwcli plugin migration create /path/to/migration/file
+    BACKUP_S3_BUCKET=your-bucket-name bwcli plugin backup_s3 save
     ```
 
-=== "Docker" the migration file to your local machine:
+=== "Docker"
 
-    ```bash ```bash
-    docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name <scheduler_container> bwcli plugin backup_s3 save        docker cp <scheduler_container>:/path/to/migration/file /path/to/migration/file
-    ```
-
-=== "All-in-one"
-
-    ```bash migration file:
-    docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name bunkerweb-aio bwcli plugin backup_s3 save
     ```bash
-        docker exec -it bunkerweb-aio bwcli plugin migration create /path/to/migration/file
+    docker exec -it -e BACKUP_S3_BUCKET=your-bucket-name <scheduler_container> bwcli plugin backup_s3 save
+    ```
+
 !!! note "Specifications for MariaDB/MySQL"
 
-    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database: migration file to your local machine:
+    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:
 
-    ```bashbash
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so        docker cp bunkerweb-aio:/path/to/migration/file /path/to/migration/file
+    ```bash
+    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
     ```
 
-    To resolve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:up of your database and store it in the backup directory specified in the command.
+    To resolve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
 
-    ```sqlfications for MariaDB/MySQL"
+    ```sql
     ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
-    ``` you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:
+    ```
 
     If you're using the Docker integration, you can add the following command to the `docker-compose.yml` file to automatically change the authentication plugin:
-    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
+
     === "MariaDB"
 
-        ```yamllve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
+        ```yaml
         bw-db:
             image: mariadb:<version>
-            command: --default-authentication-plugin=mysql_native_password    ALTER USER 'yourusername'@'localhost' IDENTIFIED WITH mysql_native_password BY 'youpassword';
+            command: --default-authentication-plugin=mysql_native_password
             ...
         ```
-utomatically change the authentication plugin:
+
     === "MySQL"
-riaDB"
+
         ```yaml
-        bw-db: ```yaml
-            image: mysql:<version>        bw-db:
+        bw-db:
+            image: mysql:<version>
             command: --default-authentication-plugin=mysql_native_password
-            ...            command: --default-authentication-plugin=mysql_native_password
-        ```  ...
+            ...
+        ```
 
 ##### Manual restore
-    === "MySQL"
+
 To manually initiate a restore, execute the following command:
-        ```yaml
+
 === "Linux"
-            image: mysql:<version>
-    ```bashmand: --default-authentication-plugin=mysql_native_password
-    bwcli plugin backup_s3 restore.
+
+    ```bash
+    bwcli plugin backup_s3 restore
     ```
 
-=== "Docker" a migration
+=== "Docker"
 
-    ```bashTo manually initialize a migration, execute the following command:
-    docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
-    ```=== "Linux"
-
-=== "All-in-one"
- /path/to/migration/file
     ```bash
-    docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore
-    ```"
+    docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+    ```
 
-This command will create a temporary backup of your database in the S3 bucket specified in the `BACKUP_S3_BUCKET` setting and restore your database to the latest backup available in the bucket.ile to the container:
+This command will create a temporary backup of your database in the S3 bucket specified in the `BACKUP_S3_BUCKET` setting and restore your database to the latest backup available in the bucket.
 
 You can also specify a custom backup file for the restore by providing the path to it as an argument when executing the command:
-        docker cp /path/to/migration/file <scheduler_container>:/path/to/migration/file
+
 === "Linux"
 
-    ```bashialize the migration:
+    ```bash
     bwcli plugin backup_s3 restore s3_backup_file.zip
-    ``` ```bash
-        docker exec -it <scheduler_container> bwcli plugin migration migrate /path/to/migration/file
+    ```
+
 === "Docker"
 
     ```bash
     docker exec -it <scheduler_container> bwcli plugin backup restore s3_backup_file.zip
-    ``` migration file to the container:
+    ```
 
-=== "All-in-one"bash
-        docker cp /path/to/migration/file bunkerweb-aio:/path/to/migration/file
-    ```bash
-    docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore s3_backup_file.zip
-    ```ze the migration:
+!!! example "In case of failure"
 
-!!! example "In case of failure"bash
-        docker exec -it bunkerweb-aio bwcli plugin migration migrate /path/to/migration/file
     Don't worry if the restore fails, you can always restore your database to the previous state by executing the command again as a backup is created before the restore:
 
-    === "Linux"data to precisely match the configuration outlined in the migration file.
+    === "Linux"
 
-        ```bashmg src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
-        bwcli plugin backup_s3 restore
-        ```ort :x:
-
-    === "Docker"s advanced protection against Distributed Denial of Service (DDoS) attacks by monitoring, analyzing, and filtering suspicious traffic in real-time.
-
-        ```bash**sliding window mechanism**, the plugin maintains an in-memory dictionary of request timestamps to detect abnormal traffic spikes from individual IP addresses. Based on the configured security mode, it can either block offending connections or log the suspicious activity for further review.
-        docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
-        ```es
-
-    === "All-in-one"
-- **Sliding Window Mechanism:** Tracks recent request activity within a configurable time window.
         ```bash
-        docker exec -it bunkerweb-aio bwcli plugin backup_s3 restore- **Advanced Blocking Logic:** Evaluates both per-IP request counts and the number of distinct IPs exceeding the threshold.
-        ```ity Modes:** Choose between immediate connection blocking or detection-only (logging) mode.
-- **Optimized In-Memory Datastore:** Ensures high-speed lookups and efficient metric tracking.
+        bwcli plugin backup_s3 restore
+        ```
+
+    === "Docker"
+
+        ```bash
+        docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
+        ```
+
 ### Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM support :white_check_mark:
 
-The Migration plugin **revolutionizes** BunkerWeb configuration transfers between instances with its **user-friendly web interface**, simplifying the entire migration journey. Whether you're upgrading systems, scaling infrastructure, or transitioning environments, this tool empowers you to effortlessly transfer **settings, preferences, and data** with unmatched ease and confidence. Say goodbye to cumbersome manual processes and hello to a **seamless, hassle-free migration experience**. plugin behavior using the following settings:
+The Migration plugin **revolutionizes** BunkerWeb configuration transfers between instances with its **user-friendly web interface**, simplifying the entire migration journey. Whether you're upgrading systems, scaling infrastructure, or transitioning environments, this tool empowers you to effortlessly transfer **settings, preferences, and data** with unmatched ease and confidence. Say goodbye to cumbersome manual processes and hello to a **seamless, hassle-free migration experience**.
 
-**List of features**                                                          |
-------------------------------------------------------------------- |
-- **Effortless Migration:** Easily transfer BunkerWeb configurations between instances without the complexities of manual procedures. protection. Set to `"yes"` to activate the plugin.             |
-rics (e.g., `10M`, `500k`).               |
-- **Intuitive Web Interface:** Navigate through the migration process effortlessly with a user-friendly web interface designed for intuitive operation.llowed per IP within the defined time window.           |
-uring which suspicious requests are tallied.                           |
-- **Cross-Database Compatibility:** Enjoy seamless migration across various database platforms, including SQLite, MySQL, MariaDB, and PostgreSQL, ensuring compatibility with your preferred database environment.ed suspicious and used to trigger anti-DDoS actions.                 |
-| `ANTIDDOS_DISTINCT_IP`       | `5`           | global  | no       | Minimum number of distinct IPs that must exceed the threshold before enforcing the block mode. |
+**List of features**
+
+- **Effortless Migration:** Easily transfer BunkerWeb configurations between instances without the complexities of manual procedures.
+
+- **Intuitive Web Interface:** Navigate through the migration process effortlessly with a user-friendly web interface designed for intuitive operation.
+
+- **Cross-Database Compatibility:** Enjoy seamless migration across various database platforms, including SQLite, MySQL, MariaDB, and PostgreSQL, ensuring compatibility with your preferred database environment.
+
 #### Create a migration file
-#### Best Practices
+
 To manually create a migration file, execute the following command:
-- **Threshold Tuning:** Adjust `ANTIDDOS_THRESHOLD` and `ANTIDDOS_WINDOW_TIME` based on your typical traffic patterns.
+
 === "Linux"
 
     ```bash
@@ -2427,31 +2385,29 @@ To manually create a migration file, execute the following command:
     ```
 
 === "Docker"
-led user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.
+
     1. Create a migration file:
 
         ```bash
         docker exec -it <scheduler_container> bwcli plugin migration create /path/to/migration/file
         ```
 
-    2. Copy the migration file to your local machine:- **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
+    2. Copy the migration file to your local machine:
 
         ```bash
         docker cp <scheduler_container>:/path/to/migration/file /path/to/migration/file
-        ```  ![Overview](assets/img/user-manager.png){ align=center }
-
-=== "All-in-one"</figure>
-
-    1. Create a migration file:<figure markdown>
-
-        ```bash
-        docker exec -it bunkerweb-aio bwcli plugin migration create /path/to/migration/file
         ```
 
-    2. Copy the migration file to your local machine:  ![Activities page](assets/img/user-manager-activities.png){ align=center }
-r Manager - Activities page</figcaption>
-        ```bash
-        docker cp bunkerweb-aio:/path/to/migration/file /path/to/migration/file        ```This command will create a backup of your database and store it in the backup directory specified in the command.!!! note "Specifications for MariaDB/MySQL"    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:    ```bash    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so    ```
+This command will create a backup of your database and store it in the backup directory specified in the command.
+
+!!! note "Specifications for MariaDB/MySQL"
+
+    In case you are using MariaDB/MySQL, you may encounter the following error when trying to backup your database:
+
+    ```bash
+    caching_sha2_password could not be loaded: Error loading shared library /usr/lib/mariadb/plugin/caching_sha2_password.so
+    ```
+
     To resolve this issue, you can execute the following command to change the authentication plugin to `mysql_native_password`:
 
     ```sql

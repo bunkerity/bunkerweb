@@ -70,7 +70,11 @@ PSL_STATIC_FILE = "public_suffix_list.dat"
 
 def load_public_suffix_list(job):
     job_cache = job.get_cache(PSL_STATIC_FILE, with_info=True, with_data=True)
-    if isinstance(job_cache, dict) and job_cache["last_update"] < (datetime.now().astimezone() - timedelta(days=1)).timestamp():
+    if (
+        isinstance(job_cache, dict)
+        and job_cache.get("last_update")
+        and job_cache["last_update"] < (datetime.now().astimezone() - timedelta(days=1)).timestamp()
+    ):
         return job_cache["data"].decode("utf-8").splitlines()
 
     try:
@@ -279,7 +283,7 @@ def certbot_new(
 
     while process.poll() is None:
         if process.stderr:
-            rlist, _, _ = select([process.stderr], [], [], 1)  # 1-second timeout
+            rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
                 for line in process.stderr:
                     LOGGER_CERTBOT.info(line.strip())
@@ -380,8 +384,15 @@ try:
     # ? Restore data from db cache of certbot-renew job
     JOB.restore_cache(job_name="certbot-renew")
 
-    env = environ.copy()
-    env["PYTHONPATH"] = env.get("PYTHONPATH", "") + (f":{DEPS_PATH}" if DEPS_PATH not in env.get("PYTHONPATH", "") else "")
+    env = {
+        "PATH": getenv("PATH", ""),
+        "PYTHONPATH": getenv("PYTHONPATH", ""),
+        "RELOAD_MIN_TIMEOUT": getenv("RELOAD_MIN_TIMEOUT", "5"),
+        "DISABLE_CONFIGURATION_TESTING": getenv("DISABLE_CONFIGURATION_TESTING", "no").lower(),
+    }
+    env["PYTHONPATH"] = env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in env["PYTHONPATH"] else "")
+    if getenv("DATABASE_URI"):
+        env["DATABASE_URI"] = getenv("DATABASE_URI")
 
     proc = run(
         [
@@ -573,18 +584,17 @@ try:
         data = {
             "email": (getenv(f"{first_server}_EMAIL_LETS_ENCRYPT", "") if IS_MULTISITE else getenv("EMAIL_LETS_ENCRYPT", "")) or f"contact@{first_server}",
             "challenge": getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") if IS_MULTISITE else getenv("LETS_ENCRYPT_CHALLENGE", "http"),
-            "staging": getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes",
-            "use_wildcard": getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no") == "yes",
+            "staging": (getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes",
+            "use_wildcard": (getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes",
             "provider": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROVIDER", ""),
             "propagation": (
                 getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", "default") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")
             ),
             "profile": getenv(f"{first_server}_LETS_ENCRYPT_PROFILE", "classic") if IS_MULTISITE else getenv("LETS_ENCRYPT_PROFILE", "classic"),
             "check_psl": (
-                getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")
-                if IS_MULTISITE
-                else getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes") == "no"
-            ),
+                getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes") if IS_MULTISITE else getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")
+            )
+            == "no",
             "max_retries": getenv(f"{first_server}_LETS_ENCRYPT_MAX_RETRIES", "0") if IS_MULTISITE else getenv("LETS_ENCRYPT_MAX_RETRIES", "0"),
             "credential_items": {},
         }
@@ -791,7 +801,7 @@ try:
                 data["profile"],
                 data["staging"],
                 domains_to_ask[first_server] == 2,
-                cmd_env=env.copy(),
+                cmd_env=env,
                 max_retries=data["max_retries"],
             )
             != 0
@@ -850,7 +860,7 @@ try:
                         profile,
                         staging,
                         domains_to_ask.get(base_domain, 0) == 2,
-                        cmd_env=env.copy(),
+                        cmd_env=env,
                     )
                     != 0
                 ):

@@ -460,7 +460,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.2-rc5"
+                return "1.6.2-rc6"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -492,7 +492,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.2-rc5",
+            "version": "1.6.2-rc6",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -2540,7 +2540,12 @@ class Database:
         return ""
 
     def update_external_plugins(
-        self, plugins: List[Dict[str, Any]], *, _type: Literal["external", "ui", "pro"] = "external", delete_missing: bool = True
+        self,
+        plugins: List[Dict[str, Any]],
+        *,
+        _type: Literal["external", "ui", "pro"] = "external",
+        delete_missing: bool = True,
+        only_clear_metadata: bool = False,
     ) -> str:
         """Update external plugins from the database"""
         to_put = []
@@ -2560,26 +2565,30 @@ class Database:
                 if missing_ids:
                     changes = True
                     # Remove plugins that are no longer in the list
-                    session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
-                    session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
-                    session.query(Bw_cli_commands).filter(Bw_cli_commands.plugin_id.in_(missing_ids)).delete()
+                    if not only_clear_metadata:
+                        session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
 
-                    for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_ids)):
-                        session.query(Jobs_runs).filter(Jobs_runs.job_name == plugin_job.name).delete()
-                        session.query(Jobs_cache).filter(Jobs_cache.job_name == plugin_job.name).delete()
-                        session.query(Jobs).filter(Jobs.name == plugin_job.name).delete()
+                        session.query(Plugin_pages).filter(Plugin_pages.plugin_id.in_(missing_ids)).delete()
+                        session.query(Bw_cli_commands).filter(Bw_cli_commands.plugin_id.in_(missing_ids)).delete()
 
-                    for plugin_setting in session.query(Settings).with_entities(Settings.id).filter(Settings.plugin_id.in_(missing_ids)):
-                        session.query(Selects).filter(Selects.setting_id == plugin_setting.id).delete()
-                        session.query(Services_settings).filter(Services_settings.setting_id == plugin_setting.id).delete()
-                        session.query(Global_values).filter(Global_values.setting_id == plugin_setting.id).delete()
-                        session.query(Settings).filter(Settings.id == plugin_setting.id).delete()
+                        for plugin_job in session.query(Jobs).with_entities(Jobs.name).filter(Jobs.plugin_id.in_(missing_ids)):
+                            session.query(Jobs_runs).filter(Jobs_runs.job_name == plugin_job.name).delete()
+                            session.query(Jobs_cache).filter(Jobs_cache.job_name == plugin_job.name).delete()
+                            session.query(Jobs).filter(Jobs.name == plugin_job.name).delete()
 
-                    for plugin_template in session.query(Templates).with_entities(Templates.id).filter(Templates.plugin_id.in_(missing_ids)):
-                        session.query(Template_steps).filter(Template_steps.template_id == plugin_template.id).delete()
-                        session.query(Template_settings).filter(Template_settings.template_id == plugin_template.id).delete()
-                        session.query(Template_custom_configs).filter(Template_custom_configs.template_id == plugin_template.id).delete()
-                        session.query(Templates).filter(Templates.id == plugin_template.id).delete()
+                        for plugin_setting in session.query(Settings).with_entities(Settings.id).filter(Settings.plugin_id.in_(missing_ids)):
+                            session.query(Selects).filter(Selects.setting_id == plugin_setting.id).delete()
+                            session.query(Services_settings).filter(Services_settings.setting_id == plugin_setting.id).delete()
+                            session.query(Global_values).filter(Global_values.setting_id == plugin_setting.id).delete()
+                            session.query(Settings).filter(Settings.id == plugin_setting.id).delete()
+
+                        for plugin_template in session.query(Templates).with_entities(Templates.id).filter(Templates.plugin_id.in_(missing_ids)):
+                            session.query(Template_steps).filter(Template_steps.template_id == plugin_template.id).delete()
+                            session.query(Template_settings).filter(Template_settings.template_id == plugin_template.id).delete()
+                            session.query(Template_custom_configs).filter(Template_custom_configs.template_id == plugin_template.id).delete()
+                            session.query(Templates).filter(Templates.id == plugin_template.id).delete()
+                    else:
+                        session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
 
             db_settings = [setting.id for setting in session.query(Settings).with_entities(Settings.id)]
 

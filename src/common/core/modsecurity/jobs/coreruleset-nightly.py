@@ -58,7 +58,7 @@ try:
     retry_count = 0
     while retry_count < max_retries:
         try:
-            resp = get("https://github.com/coreruleset/coreruleset/releases/tag/nightly", timeout=5)
+            resp = get("https://github.com/coreruleset/coreruleset/releases/tag/nightly", timeout=7)
             break
         except ConnectionError as e:
             retry_count += 1
@@ -143,7 +143,11 @@ try:
     # * Patch the rules so we can extract the rule IDs when matching
     try:
         LOGGER.info("Patching Core Rule Set (CRS) nightly rules...")
-        result = run([PATCH_SCRIPT.as_posix(), CRS_NIGHTLY_PATH.as_posix()], check=True)
+        result = run(
+            [PATCH_SCRIPT.as_posix(), CRS_NIGHTLY_PATH.as_posix()],
+            check=True,
+            env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+        )
     except CalledProcessError as e:
         LOGGER.debug(format_exc())
         LOGGER.error(f"Failed to patch Core Rule Set (CRS) nightly rules: \n{e}")

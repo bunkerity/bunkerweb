@@ -147,22 +147,17 @@ RUN cp helpers/bwcli /usr/bin/ && \
 	chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
 	chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
     find . \( -path './all-in-one' -o -path './scheduler' -o -path './ui' -o -path './autoconf' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
-    find all-in-one scheduler ui autoconf cli lua core db gen helpers deps -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+    find all-in-one scheduler ui autoconf cli lua core db gen helpers deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
     chmod 770 -R db/alembic && \
     chmod 550 entrypoint.sh && \
     chmod 660 INTEGRATION && \
     mkdir -p /var/log/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chmod -R 755 /var/log/nginx && \
-    rm -rf /var/log/bunkerweb/*
-
-COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
-COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
-
-# Setup CrowdSec
-RUN tar -xzf crowdsec-release.tgz && \
+    rm -rf /var/log/bunkerweb/* && \
+    # Setup CrowdSec
+    tar -xzf crowdsec-release.tgz && \
     mkdir /data/crowdsec && ln -s /data/crowdsec /var/lib/crowdsec && \
-    # mkdir /data/crowdsec/config && ln -s /data/crowdsec/config /etc/crowdsec && \
     cd crowdsec-v* && \
     ./wizard.sh --docker-mode && \
     cd .. && \
@@ -174,21 +169,22 @@ RUN tar -xzf crowdsec-release.tgz && \
 	chmod -R 770 /data /var/lib/bunkerweb /etc/crowdsec /usr/local/lib/crowdsec && \
     find /etc/crowdsec/ -type f -name "*.yaml" -print0 | xargs -0 chmod 660 && \
     mv /etc/crowdsec/online_api_credentials.yaml /var/lib/crowdsec/online_api_credentials.yaml && \
-    mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml
-
-# Setup Redis
-RUN mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
+    mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml && \
+    # Setup Redis && \
+    mkdir /data/redis && ln -s /data/redis /var/lib/redis && \
     apk add --no-cache redis && \
     mv all-in-one/conf/redis.conf /etc/redis.conf && \
     rm -rf all-in-one/conf && \
     chown -R root:nginx /data /var/lib/redis /etc/redis.conf && \
     chmod -R 770 /data /var/lib/redis && \
-    chmod 660 /etc/redis.conf
-
-# Set up supervisor configuration
-RUN mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
+    chmod 660 /etc/redis.conf && \
+    # Set up supervisor configuration && \
+    mv /usr/share/bunkerweb/all-in-one/supervisord.conf /etc/supervisord.conf && \
     mv /usr/share/bunkerweb/all-in-one/supervisor.d /etc/supervisor.d && \
     chmod 770 -R /etc/supervisor.d
+
+COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.1"

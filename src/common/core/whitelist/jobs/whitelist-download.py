@@ -157,12 +157,16 @@ try:
                     if url in failed_urls:
                         if url_file not in urls:
                             aggregated_recap[kind]["failed_count"] += 1
-                    elif isinstance(cached_url, dict) and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
+                    elif (
+                        isinstance(cached_url, dict)
+                        and cached_url.get("last_update")
+                        and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
+                    ):
                         LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
                         if url_file not in urls:
-                            aggregated_recap[kind]["skipped_urls"] += 1
+                            aggregated_recap["skipped_urls"] += 1
                         # Remove first line (URL) and add to content
-                        content += b"\n".join(cached_url["data"].split(b"\n")[1:]) + b"\n"
+                        content += b"\n".join(cached_url.get("data", b"").split(b"\n")[1:]) + b"\n"
                     else:
                         failed = False
                         LOGGER.info(f"Downloading whitelist data from {url} ...")
@@ -232,7 +236,6 @@ try:
                 urls.add(url_file)
 
             if not content:
-                LOGGER.warning(f"No data for {service} {kind}, skipping...")
                 continue
 
             # Check if file has changed

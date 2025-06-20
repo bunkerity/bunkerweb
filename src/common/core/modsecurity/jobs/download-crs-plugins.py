@@ -178,11 +178,11 @@ try:
         plugin_registry = JOB.get_cache("plugin_registry.json", with_info=True, with_data=True)
 
         if isinstance(plugin_registry, dict):
-            up_to_date = plugin_registry["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
+            up_to_date = plugin_registry.get("last_update") and plugin_registry["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
 
             if up_to_date:
                 try:
-                    plugin_registry = loads(plugin_registry["data"])
+                    plugin_registry = loads(plugin_registry.get("data"))
                 except BaseException as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Failed to load the plugin registry data from cache: \n{e}")
@@ -483,7 +483,11 @@ try:
             # * Patch the rules so we can extract the rule IDs when matching
             try:
                 LOGGER.info(f"Patching Core Rule Set (CRS) plugin {plugin_name}...")
-                result = run([PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()], check=True)
+                result = run(
+                    [PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()],
+                    check=True,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                )
             except CalledProcessError as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Failed to patch Core Rule Set (CRS) plugin {plugin_name}: {e}")

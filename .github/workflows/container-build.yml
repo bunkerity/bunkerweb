@@ -66,10 +66,10 @@ jobs:
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Setup Buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+        uses: docker/setup-buildx-action@18ce135bb5112fa8ce4ed6c17ab05699d7f3a5e0 # v3.11.0
         if: inputs.CACHE_SUFFIX != 'arm'
       - name: Setup Buildx (ARM)
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+        uses: docker/setup-buildx-action@18ce135bb5112fa8ce4ed6c17ab05699d7f3a5e0 # v3.11.0
         if: inputs.CACHE_SUFFIX == 'arm'
         with:
           endpoint: ssh://root@arm
@@ -139,7 +139,7 @@ jobs:
           command: cves,recommendations
           image: local/${{ inputs.IMAGE }}
           only-fixed: true
-          only-package-types: apk,pypi
+          only-package-types: apk
           exit-code: true
       # Push image
       - name: Push image

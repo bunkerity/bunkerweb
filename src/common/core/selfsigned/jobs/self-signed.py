@@ -67,6 +67,7 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
                 stdin=DEVNULL,
                 stderr=DEVNULL,
                 check=False,
+                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
             ).returncode
             == 0
         ):
@@ -155,6 +156,7 @@ def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Pat
             stdin=DEVNULL,
             stderr=DEVNULL,
             check=False,
+            env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
         ).returncode
         != 0
     ):

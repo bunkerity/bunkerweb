@@ -1,6 +1,13 @@
 # Changelog
 
-## v1.6.2-rc5 - ????/??/??
+## v1.6.2-rc6 - ????/??/??
+
+- [BUGFIX] Ensure template defaults settings are correctly retrieved by jobs and templates.
+- [BUGFIX] No longer completely delete all PRO plugins data upon PRO deactivation, allowing for easier reactivation without losing data.
+- [BUGFIX] Enhance cache robustness by using dict.get() for lookups to avoid KeyError exceptions during cache operations.
+- [SECURITY] Make sure the files/dirs in /usr/share/bunkerweb have the appropriate permissions to prevent unauthorized access to sensitive files on Linux integration
+
+## v1.6.2-rc5 - 2025/06/17
 
 - [BUGFIX] Ensure jobs correctly retrieve multisite settings when a service uses its default value while the global setting is overridden, preventing configuration mismatches.
 - [FEATURE] Add new `LETS_ENCRYPT_PASSTHROUGH` setting to the `Let's Encrypt` plugin to allow passing through the Let's Encrypt challenge requests to the upstream server (default is `no`)
@@ -13,6 +20,7 @@
 
 - [FEATURE] Introduce `multiselect` setting type, enabling users to choose multiple options from a configurable list
 - [FEATURE] Add new `BLACKLIST_COMMUNITY_LISTS` setting to the `blacklist` plugin, allowing users to choose which community blocklists to use for blacklisting
+- [FEATURE] Add new `REVERSE_PROXY_HIDE_HEADERS` setting to the `Reverse Proxy` plugin, allowing users to specify a list of HTTP headers to hide from clients when received from the proxied resource (values for proxy_hide_header directive).
 - [MISC] Greatly improve scheduler's performance by optimizing the way it handles environment variables and settings, reducing the number of database queries and improving overall efficiency
 - [MISC] Optimize variable loading during the init phase to improve startup performance
 - [DEPS] Update coreruleset-v4 version to v4.15.0

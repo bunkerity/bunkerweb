@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from json import dumps, loads
-from os import environ, getenv
+from os import getenv
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, run
@@ -76,7 +76,13 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             LOGGER.info("Creating a backup for the SQLite database ...")
 
             # For SQLite, use a different approach to dump only specific tables
-            proc = run(["sqlite3", db_path.as_posix()], input="\n".join([f".dump {table}" for table in model_tables]).encode(), stdout=PIPE, stderr=PIPE)
+            proc = run(
+                ["sqlite3", db_path.as_posix()],
+                input="\n".join([f".dump {table}" for table in model_tables]).encode(),
+                stdout=PIPE,
+                stderr=PIPE,
+                env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+            )
         else:
             url = make_url(db.database_uri)
             db_user = url.username or ""
@@ -103,7 +109,12 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 # Add specific tables to backup
                 cmd.extend(model_tables)
 
-                proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | {"MYSQL_PWD": db_password})
+                proc = run(
+                    cmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    env={"MYSQL_PWD": db_password, "PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                )
             elif database == "postgresql":
                 LOGGER.info("Creating a backup for the PostgreSQL database ...")
 
@@ -123,7 +134,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 for table in model_tables:
                     cmd.extend(["-t", table])
 
-                proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | pg_env)
+                proc = run(cmd, stdout=PIPE, stderr=PIPE, env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")} | pg_env)
             elif database == "oracle":
                 LOGGER.warning("Creating a database backup for Oracle is not supported")
                 return db
@@ -157,7 +168,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         db_path = Path(database_url.database)
 
         # Clear the database
-        proc = run(["sqlite3", db_path.as_posix(), ".read", "/dev/null"], stdout=PIPE, stderr=PIPE)
+        proc = run(
+            ["sqlite3", db_path.as_posix(), ".read", "/dev/null"],
+            stdout=PIPE,
+            stderr=PIPE,
+            env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+        )
 
         LOGGER.info("Restoring the SQLite database ...")
 
@@ -165,7 +181,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         with ZipFile(backup_file, "r") as zipf:
             zipf.extractall(path=tmp_file.parent)
 
-        proc = run(["sqlite3", db_path.as_posix(), f".read {tmp_file.as_posix()}"], stdout=PIPE, stderr=PIPE)
+        proc = run(
+            ["sqlite3", db_path.as_posix(), f".read {tmp_file.as_posix()}"],
+            stdout=PIPE,
+            stderr=PIPE,
+            env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+        )
         tmp_file.unlink(missing_ok=True)
     else:
         url = make_url(db.database_uri)
@@ -195,7 +216,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
                     cmd,
                     stdout=PIPE,
                     stderr=PIPE,
-                    env=environ | {"MYSQL_PWD": db_password},
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", ""), "MYSQL_PWD": db_password},
                     input=zipf.read(backup_file.with_suffix(".sql").name),
                 )
         elif database == "postgresql":
@@ -214,7 +235,13 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
                     pg_env["PGSSLROOTCERT"] = value
 
             with ZipFile(backup_file, "r") as zipf:
-                proc = run(cmd, stdout=PIPE, stderr=PIPE, env=environ | pg_env, input=zipf.read(backup_file.with_suffix(".sql").name))
+                proc = run(
+                    cmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    input=zipf.read(backup_file.with_suffix(".sql").name),
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")} | pg_env,
+                )
         elif database == "oracle":
             LOGGER.warning("Restoring a database backup for Oracle is not supported")
             return db

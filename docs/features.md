@@ -1563,7 +1563,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.2-rc5
+        image: bunkerity/bunkerweb:1.6.2-rc6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1580,7 +1580,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc5
+        image: bunkerity/bunkerweb-scheduler:1.6.2-rc6
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -4272,11 +4272,12 @@ Follow these steps to configure and use the Reverse Proxy feature:
         - **Security Enhancement:** Add security-related headers or remove headers that might leak sensitive information
         - **Integration Support:** Provide necessary headers for authentication and proper backend operation
 
-    | Setting                                | Default | Context   | Multiple | Description                                                                           |
-    | -------------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------- |
-    | `REVERSE_PROXY_HEADERS`                |         | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons.        |
-    | `REVERSE_PROXY_HEADERS_CLIENT`         |         | multisite | yes      | **Client Headers:** HTTP headers to send to client separated with semicolons.         |
-    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`    | multisite | no       | **Underscores in Headers:** Enable or disable the `underscores_in_headers` directive. |
+    | Setting                                | Default   | Context   | Multiple | Description                                                                           |
+    | -------------------------------------- | --------- | --------- | -------- | ------------------------------------------------------------------------------------- |
+    | `REVERSE_PROXY_HEADERS`                |           | multisite | yes      | **Custom Headers:** HTTP headers to send to backend separated with semicolons.        |
+    | `REVERSE_PROXY_HIDE_HEADERS`           | `Upgrade` | multisite | yes      | **Hide Headers:** HTTP headers to hide from clients when received from the backend.   |
+    | `REVERSE_PROXY_HEADERS_CLIENT`         |           | multisite | yes      | **Client Headers:** HTTP headers to send to client separated with semicolons.         |
+    | `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` | `no`      | multisite | no       | **Underscores in Headers:** Enable or disable the `underscores_in_headers` directive. |
 
     !!! warning "Security Considerations"
         When using the reverse proxy feature, be cautious about what headers you forward to your backend applications. Certain headers might expose sensitive information about your infrastructure or bypass security controls.

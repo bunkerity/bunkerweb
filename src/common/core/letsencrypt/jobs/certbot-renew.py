@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import environ, getenv, sep
+from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, Popen
@@ -45,8 +45,15 @@ try:
 
     JOB = Job(LOGGER, __file__)
 
-    env = environ.copy()
-    env["PYTHONPATH"] = env.get("PYTHONPATH", "") + (f":{DEPS_PATH}" if DEPS_PATH not in env.get("PYTHONPATH", "") else "")
+    env = {
+        "PATH": getenv("PATH", ""),
+        "PYTHONPATH": getenv("PYTHONPATH", ""),
+        "RELOAD_MIN_TIMEOUT": getenv("RELOAD_MIN_TIMEOUT", "5"),
+        "DISABLE_CONFIGURATION_TESTING": getenv("DISABLE_CONFIGURATION_TESTING", "no").lower(),
+    }
+    env["PYTHONPATH"] = env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in env["PYTHONPATH"] else "")
+    if getenv("DATABASE_URI"):
+        env["DATABASE_URI"] = getenv("DATABASE_URI")
 
     process = Popen(
         [
