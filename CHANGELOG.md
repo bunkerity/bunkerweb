@@ -3,6 +3,7 @@
 ## v1.6.2 - ????/??/??
 
 - [FEATURE] Introduce a new `number` setting type with built-in numeric validation and enhanced rendering in the web UI.
+- [FEATURE] Introduce a new `multivalue` setting type with customizable separator and validation, enhancing user experience for multi-value inputs in the web UI.
 - [MISC] Switch the `Bad Behavior` plugin to use the new numeric `BAD_BEHAVIOR_BAN_TIME` setting by updating the permanent ban value from `-1` to `0`.
 
 ## v1.6.2-rc6 - ????/??/??

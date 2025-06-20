@@ -21,7 +21,8 @@
       "id": "gzip-types",
       "label": "MIME types",
       "regex": "^( *[\\-\\w.]+/[\\-\\w.+]+ *)+$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "GZIP_MIN_LENGTH": {
       "context": "multisite",
@@ -49,7 +50,8 @@
       "id": "gzip-proxied",
       "label": "Proxied requests",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     }
   }
 }

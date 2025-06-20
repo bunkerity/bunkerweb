@@ -599,6 +599,7 @@
       "ban_specific_service": "Yasaklama yalnızca bu servise uygulanacaktır.",
       "hostname_length_limit": "Hostname 256 karakter ile sınırlıdır.",
       "hostname_special_chars": "Protokol/port belirtimi için yalnızca `/` ve `:` kullanılabilir.",
+      "multivalue_separator": "Değerler şunlarla ayrılır:",
       "permanent_ban": "Seçiliyse, yasaklama manuel olarak kaldırılana kadar asla sona ermeyecek",
       "photo_extensions": "İzin verilen JPG, GIF veya PNG. Maksimum boyut: 800KB."
     },
@@ -662,6 +663,7 @@
       "config_name": "ozel-konfig-adim",
       "enter_username": "Kullanıcı adı girin",
       "keywords": "Anahtar Kelimeler",
+      "multivalue_enter_value": "Değer girin...",
       "plugin_search": "Eklenti ara...",
       "search": "Ara...",
       "select_service": "Servis Seç",

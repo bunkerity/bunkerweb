@@ -67,7 +67,8 @@
       "id": "crowdsec-exclude-location",
       "label": "CrowdSec exclude location",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": ","
     },
     "CROWDSEC_CACHE_EXPIRATION": {
       "context": "global",

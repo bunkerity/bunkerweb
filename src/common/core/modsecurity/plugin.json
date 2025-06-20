@@ -49,7 +49,8 @@
       "id": "modsecurity-crs-plugins",
       "label": "Core Rule Set Plugins",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "USE_MODSECURITY_GLOBAL_CRS": {
       "context": "global",

@@ -3568,6 +3568,8 @@ class Database:
                         setting_data["select"] = selects_map.get(setting.id, [])
                     elif setting.type == "multiselect":
                         setting_data["multiselect"] = multiselects_map.get(setting.id, [])
+                    elif setting.type == "multivalue":
+                        setting_data["separator"] = getattr(setting, "separator", " ")
                     plugin_data["settings"][setting.id] = setting_data
 
                 if plugin.id in commands_map:

@@ -47,7 +47,8 @@
       "id": "blacklist-ip",
       "label": "Blacklist IP/network",
       "regex": "^( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_RDNS": {
       "context": "multisite",
@@ -56,7 +57,8 @@
       "id": "blacklist-rdns",
       "label": "Blacklist reverse DNS",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_RDNS_GLOBAL": {
       "context": "multisite",
@@ -74,7 +76,8 @@
       "id": "blacklist-asn",
       "label": "Blacklist ASN",
       "regex": "^( *(ASN?)?\\d+ *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_USER_AGENT": {
       "context": "multisite",
@@ -83,7 +86,8 @@
       "id": "blacklist-user-agent",
       "label": "Blacklist User-Agent",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_URI": {
       "context": "multisite",
@@ -92,7 +96,8 @@
       "id": "blacklist-uri",
       "label": "Blacklist URI",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_IP": {
       "context": "multisite",
@@ -101,7 +106,8 @@
       "id": "blacklist-ignore-ip",
       "label": "Blacklist ignore IP/network",
       "regex": "^( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_RDNS": {
       "context": "multisite",
@@ -110,7 +116,8 @@
       "id": "blacklist-ignore-rdns",
       "label": "Blacklist ignore reverse DNS",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_ASN": {
       "context": "multisite",
@@ -119,7 +126,8 @@
       "id": "blacklist-ignore-asn",
       "label": "Blacklist ignore ASN",
       "regex": "^( *(ASN?)?\\d+ *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_USER_AGENT": {
       "context": "multisite",
@@ -128,7 +136,8 @@
       "id": "blacklist-ignore-user-agent",
       "label": "Blacklist ignore User-Agent",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_URI": {
       "context": "multisite",
@@ -137,7 +146,8 @@
       "id": "blacklist-ignore-uri",
       "label": "Blacklist ignore URI",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IP_URLS": {
       "context": "multisite",
@@ -146,7 +156,8 @@
       "id": "blacklist-ip-urls",
       "label": "Blacklist IP/network URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_RDNS_URLS": {
       "context": "multisite",
@@ -155,7 +166,8 @@
       "id": "blacklist-rdns-urls",
       "label": "Blacklist reverse DNS URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_ASN_URLS": {
       "context": "multisite",
@@ -164,7 +176,8 @@
       "id": "blacklist-asn-urls",
       "label": "Blacklist ASN URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_USER_AGENT_URLS": {
       "context": "multisite",
@@ -173,7 +186,8 @@
       "id": "blacklist-user-agent-urls",
       "label": "Blacklist User-Agent URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_URI_URLS": {
       "context": "multisite",
@@ -182,7 +196,8 @@
       "id": "blacklist-uri-urls",
       "label": "Blacklist URI URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_IP_URLS": {
       "context": "multisite",
@@ -191,7 +206,8 @@
       "id": "blacklist-ignore-ip-urls",
       "label": "Blacklist ignore IP/network URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_RDNS_URLS": {
       "context": "multisite",
@@ -200,7 +216,8 @@
       "id": "blacklist-ignore-rdns-urls",
       "label": "Blacklist ignore reverse DNS URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_ASN_URLS": {
       "context": "multisite",
@@ -209,7 +226,8 @@
       "id": "blacklist-ignore-asn-urls",
       "label": "Blacklist ignore ASN URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_USER_AGENT_URLS": {
       "context": "multisite",
@@ -218,7 +236,8 @@
       "id": "blacklist-ignore-user-agent-urls",
       "label": "Blacklist ignore User-Agent URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_URI_URLS": {
       "context": "multisite",
@@ -227,7 +246,8 @@
       "id": "blacklist-ignore-uri-urls",
       "label": "Blacklist ignore URI URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     }
   },
   "jobs": [

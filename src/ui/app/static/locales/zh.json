@@ -599,6 +599,7 @@
       "ban_specific_service": "封禁将仅适用于此特定服务。",
       "hostname_length_limit": "主机名限制为 256 个字符。",
       "hostname_special_chars": "协议/端口规范中只允许使用 `/` 和 `:`。",
+      "multivalue_separator": "值的分隔符：",
       "permanent_ban": "如果选中，封禁将永久有效，直到手动移除为止。",
       "photo_extensions": "允许的格式：JPG、GIF 或 PNG。最大大小：800KB。"
     },
@@ -662,6 +663,7 @@
       "config_name": "我的自定义配置",
       "enter_username": "输入您的用户名",
       "keywords": "关键词...",
+      "multivalue_enter_value": "输入值...",
       "plugin_search": "搜索插件...",
       "search": "搜索...",
       "select_service": "选择服务",

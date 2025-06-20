@@ -12,7 +12,8 @@
       "id": "country-blacklist",
       "label": "Country blacklist",
       "regex": "^( *([A-Z]{2}) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "WHITELIST_COUNTRY": {
       "context": "multisite",
@@ -21,7 +22,8 @@
       "id": "country-whitelist",
       "label": "Country whitelist",
       "regex": "^( *([A-Z]{2}) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     }
   }
 }

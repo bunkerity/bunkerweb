@@ -599,6 +599,7 @@
       "ban_specific_service": "Die Sperre gilt nur für diesen spezifischen Dienst.",
       "hostname_length_limit": "Der Hostname ist auf 256 Zeichen begrenzt.",
       "hostname_special_chars": "Nur `/` und `:` sind für die Protokoll-/Port-Spezifikation erlaubt.",
+      "multivalue_separator": "Werte werden getrennt durch:",
       "permanent_ban": "Wenn aktiviert, läuft die Sperre nie ab und muss manuell entfernt werden.",
       "photo_extensions": "Erlaubt sind JPG, GIF oder PNG. Max. Größe: 800 KB."
     },
@@ -662,6 +663,7 @@
       "config_name": "meine-benutzerdefinierte-konfig",
       "enter_username": "Benutzernamen eingeben",
       "keywords": "Schlüsselwörter...",
+      "multivalue_enter_value": "Wert eingeben...",
       "plugin_search": "Plugins suchen...",
       "search": "Suchen...",
       "select_service": "Dienst auswählen",
