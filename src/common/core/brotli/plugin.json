@@ -30,7 +30,7 @@
       "id": "brotli-min-length",
       "label": "Minimum length",
       "regex": "^\\d+",
-      "type": "text"
+      "type": "number"
     },
     "BROTLI_COMP_LEVEL": {
       "context": "multisite",

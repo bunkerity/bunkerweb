@@ -129,7 +129,7 @@
       "id": "open-file-cache-min-uses",
       "label": "Open file cache min uses",
       "regex": "^[1-9]\\d*$",
-      "type": "text"
+      "type": "number"
     },
     "OPEN_FILE_CACHE_VALID": {
       "context": "multisite",

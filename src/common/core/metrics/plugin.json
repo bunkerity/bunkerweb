@@ -30,7 +30,7 @@
       "id": "metrics-max-blocked-requests",
       "label": "Metrics max blocked requests",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "METRICS_MAX_BLOCKED_REQUESTS_REDIS": {
       "context": "global",
@@ -39,7 +39,7 @@
       "id": "metrics-max-blocked-requests-redis",
       "label": "Metrics max blocked requests Redis",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     }
   }
 }

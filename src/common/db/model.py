@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
-SETTINGS_TYPES_ENUM = Enum("password", "text", "check", "select", "multiselect", name="settings_types_enum")
+SETTINGS_TYPES_ENUM = Enum("password", "text", "number", "check", "select", "multiselect", name="settings_types_enum")
 METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(

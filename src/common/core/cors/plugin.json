@@ -96,7 +96,7 @@
       "id": "cors-max-age",
       "label": "Access-Control-Max-Age value",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "CORS_DENY_REQUEST": {
       "context": "multisite",

@@ -30,7 +30,7 @@
       "id": "gzip-min-length",
       "label": "Minimum length",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "GZIP_COMP_LEVEL": {
       "context": "multisite",

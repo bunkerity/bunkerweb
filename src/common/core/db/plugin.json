@@ -40,7 +40,7 @@
       "id": "database-max-jobs-runs",
       "label": "The maximum number of jobs runs",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     }
   },
   "jobs": [

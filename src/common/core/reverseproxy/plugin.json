@@ -271,7 +271,7 @@
       "id": "proxy-cache-min-uses",
       "label": "Reverse proxy cache minimum uses",
       "regex": "^[1-9]\\d*$",
-      "type": "text"
+      "type": "number"
     },
     "PROXY_CACHE_KEY": {
       "context": "multisite",

@@ -716,7 +716,7 @@ Attackers often generate "suspicious" HTTP status codes when probing for or expl
 2. When a visitor receives a "bad" HTTP status code (like 400, 401, 403, 404, etc.), the counter for that IP address is incremented.
 3. If an IP address exceeds the configured threshold of bad status codes within the specified time period, the IP is automatically banned.
 4. Banned IPs can be blocked either at the service level (just for the specific site) or globally (across all sites), depending on your configuration.
-5. Bans automatically expire after the configured ban duration, or remain permanent if configured with `-1`.
+5. Bans automatically expire after the configured ban duration, or remain permanent if configured with `0`.
 
 !!! success "Key benefits"
 
@@ -741,14 +741,14 @@ Follow these steps to configure and use the Bad Behavior feature:
 
 ### Configuration Settings
 
-| Setting                     | Default                       | Context   | Multiple | Description                                                                                                                                                                            |
-| --------------------------- | ----------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | no       | **Enable Bad Behavior:** Set to `yes` to enable the bad behavior detection and banning feature.                                                                                        |
-| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | no       | **Bad Status Codes:** List of HTTP status codes that will be counted as "bad" behavior when returned to a client.                                                                      |
-| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Threshold:** The number of "bad" status codes an IP can generate within the counting period before being banned.                                                                     |
-| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Count Period:** The time window (in seconds) during which bad status codes are counted toward the threshold.                                                                         |
-| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Ban Duration:** How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). Set to `-1` for permanent bans that never expire. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | multisite | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                                                                    |
+| Setting                     | Default                       | Context   | Multiple | Description                                                                                                                                                                           |
+| --------------------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_BAD_BEHAVIOR`          | `yes`                         | multisite | no       | **Enable Bad Behavior:** Set to `yes` to enable the bad behavior detection and banning feature.                                                                                       |
+| `BAD_BEHAVIOR_STATUS_CODES` | `400 401 403 404 405 429 444` | multisite | no       | **Bad Status Codes:** List of HTTP status codes that will be counted as "bad" behavior when returned to a client.                                                                     |
+| `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Threshold:** The number of "bad" status codes an IP can generate within the counting period before being banned.                                                                    |
+| `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Count Period:** The time window (in seconds) during which bad status codes are counted toward the threshold.                                                                        |
+| `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Ban Duration:** How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). Set to `0` for permanent bans that never expire. |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | multisite | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                                                                   |
 
 !!! warning "False Positives"
     Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.
@@ -806,7 +806,7 @@ Follow these steps to configure and use the Bad Behavior feature:
     BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"
     BAD_BEHAVIOR_THRESHOLD: "10"
     BAD_BEHAVIOR_COUNT_TIME: "60"
-    BAD_BEHAVIOR_BAN_TIME: "-1"  # Permanent ban (never expires)
+    BAD_BEHAVIOR_BAN_TIME: "0"  # Permanent ban (never expires)
     BAD_BEHAVIOR_BAN_SCOPE: "global" # Ban across all services
     ```
 

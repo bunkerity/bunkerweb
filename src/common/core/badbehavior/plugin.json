@@ -39,16 +39,16 @@
       "id": "bad-behavior-period",
       "label": "Period (in seconds)",
       "regex": "^\\d+",
-      "type": "text"
+      "type": "number"
     },
     "BAD_BEHAVIOR_BAN_TIME": {
       "context": "multisite",
       "default": "86400",
-      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold. (Set to -1 to ban permanently)",
+      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold. (Set to 0 to ban permanently)",
       "id": "bad-behavior-ban-time",
       "label": "Ban duration (in seconds)",
-      "regex": "^(-1|\\d+)$",
-      "type": "text"
+      "regex": "^\\d+$",
+      "type": "number"
     },
     "BAD_BEHAVIOR_BAN_SCOPE": {
       "context": "multisite",
