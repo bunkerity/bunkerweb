@@ -2,5 +2,6 @@
   font-family: "Don Jose";
   font-style: normal;
   font-display: swap;
-  src: url(../fonts/DonJose_Black.otf), format("truetype");
+  src: url(../fonts/DonJose-Black.woff2) format("woff2"),
+       url(../fonts/DonJose_Black.otf) format("opentype");
 }
