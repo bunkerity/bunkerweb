@@ -340,7 +340,7 @@ def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt",
     
     for domain in domains_list:
         # Check DNS A/AAAA records with retry mechanism
-        if not check_domain_a_record_with_retry(domain, external_ips):
+        if not check_domain_a_record(domain, external_ips):
             invalid_domains.append(domain)
             continue
         
