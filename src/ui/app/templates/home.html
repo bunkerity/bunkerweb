@@ -319,6 +319,7 @@
     <script src="{{ url_for('static', filename='libs/leaflet/leaflet.min.js') }}"
             nonce="{{ script_nonce }}"
             defer></script>
+    <!-- load topojson-client before home.js -->        
     <script src="{{ url_for('static', filename='js/vendor/topojson-client/topojson-client.min.js') }}"></script>        
     <script src="{{ url_for('static', filename='js/pages/home.js') }}"
             nonce="{{ script_nonce }}"
