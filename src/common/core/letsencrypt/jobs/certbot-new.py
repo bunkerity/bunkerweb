@@ -391,7 +391,7 @@ def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt",
     caa_blocked_domains = []
     
     # Check if CAA validation should be skipped
-    skip_caa_check = getenv("ACME_LETS_ENCRYPT_SKIP_CAA_CHECK", "no") == "yes"
+    skip_caa_check = getenv("ACME_SKIP_CAA_CHECK", "no") == "yes"
     
     # Get external IPs once for all domain checks
     external_ips = get_external_ip()
@@ -414,7 +414,7 @@ def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt",
             if not check_caa_authorization(domain, ca_provider, is_wildcard):
                 caa_blocked_domains.append(domain)
         else:
-            LOGGER.info(f"CAA check skipped for {domain} (ACME_LETS_ENCRYPT_SKIP_CAA_CHECK=yes)")
+            LOGGER.info(f"CAA check skipped for {domain} (ACME_SKIP_CAA_CHECK=yes)")
     
     # Report results
     if invalid_domains:
@@ -427,7 +427,7 @@ def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt",
         LOGGER.error(f"The following domains have CAA records that block {ca_provider}: "
                     f"{', '.join(caa_blocked_domains)}")
         LOGGER.error("Please update CAA records to authorize the certificate authority or use a different CA")
-        LOGGER.info("You can skip CAA checking by setting ACME_LETS_ENCRYPT_SKIP_CAA_CHECK=yes")
+        LOGGER.info("You can skip CAA checking by setting ACME_SKIP_CAA_CHECK=yes")
         return False
     
     LOGGER.info(f"All domains have valid DNS records and CAA authorization for HTTP challenge: {', '.join(domains_list)}")
@@ -575,7 +575,7 @@ def check_domain_a_record(domain, external_ips=None):
                     LOGGER.warning(f"  HTTP challenge may fail - ensure domain points to this server")
                     
                     # Check if we should treat this as an error
-                    strict_ip_check = getenv("LETS_ENCRYPT_HTTP_STRICT_IP_CHECK", "no") == "yes"
+                    strict_ip_check = getenv("ACME_HTTP_STRICT_IP_CHECK", "no") == "yes"
                     if strict_ip_check:
                         LOGGER.error(f"Strict IP check enabled - rejecting certificate request for {check_domain}")
                         return False
