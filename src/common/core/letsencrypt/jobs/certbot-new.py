@@ -159,30 +159,82 @@ def get_certificate_authority_config(ca_provider, staging=False):
 
 def setup_zerossl_eab_credentials(email, api_key=None):
     # Setup External Account Binding (EAB) credentials for ZeroSSL
+    LOGGER.info(f"Setting up ZeroSSL EAB credentials for email: {email}")
+    
     if not api_key:
+        LOGGER.error("❌ ZeroSSL API key not provided")
         LOGGER.warning("ZeroSSL API key not provided, attempting registration with email")
         return None, None
     
+    LOGGER.info("Making request to ZeroSSL API for EAB credentials")
+    
+    # Try the correct ZeroSSL API endpoint
     try:
-        # Register with ZeroSSL API to get EAB credentials
+        # The correct endpoint for ZeroSSL EAB credentials
         response = get(
-            "https://api.zerossl.com/acme/eab-credentials-email",
-            params={"email": email},
+            "https://api.zerossl.com/acme/eab-credentials",
             headers={"Authorization": f"Bearer {api_key}"},
             timeout=30
         )
-        response.raise_for_status()
-        eab_data = response.json()
+        LOGGER.info(f"ZeroSSL API response status: {response.status_code}")
         
-        if eab_data.get("success"):
-            return eab_data.get("eab_kid"), eab_data.get("eab_hmac_key")
+        if response.status_code == 200:
+            response.raise_for_status()
+            eab_data = response.json()
+            LOGGER.info(f"ZeroSSL API response data: {eab_data}")
+            
+            # ZeroSSL typically returns eab_kid and eab_hmac_key directly
+            if "eab_kid" in eab_data and "eab_hmac_key" in eab_data:
+                eab_kid = eab_data.get("eab_kid")
+                eab_hmac_key = eab_data.get("eab_hmac_key")
+                LOGGER.info(f"✓ Successfully obtained EAB credentials from ZeroSSL")
+                LOGGER.info(f"EAB Kid: {eab_kid[:10] if eab_kid else 'None'}...")
+                LOGGER.info(f"EAB HMAC Key: {eab_hmac_key[:10] if eab_hmac_key else 'None'}...")
+                return eab_kid, eab_hmac_key
+            else:
+                LOGGER.error(f"❌ Invalid ZeroSSL API response format: {eab_data}")
+                return None, None
         else:
-            LOGGER.error(f"ZeroSSL EAB registration failed: {eab_data}")
-            return None, None
+            # Try alternative endpoint if first one fails
+            LOGGER.warning(f"Primary endpoint failed with {response.status_code}, trying alternative")
+            response_text = response.text
+            LOGGER.info(f"Primary endpoint response: {response_text}")
+            
+            # Try alternative endpoint with email parameter
+            response = get(
+                "https://api.zerossl.com/acme/eab-credentials-email",
+                params={"email": email},
+                headers={"Authorization": f"Bearer {api_key}"},
+                timeout=30
+            )
+            LOGGER.info(f"Alternative ZeroSSL API response status: {response.status_code}")
+            response.raise_for_status()
+            eab_data = response.json()
+            
+            LOGGER.info(f"Alternative ZeroSSL API response data: {eab_data}")
+            
+            if eab_data.get("success"):
+                eab_kid = eab_data.get("eab_kid")
+                eab_hmac_key = eab_data.get("eab_hmac_key")
+                LOGGER.info(f"✓ Successfully obtained EAB credentials from ZeroSSL (alternative endpoint)")
+                LOGGER.info(f"EAB Kid: {eab_kid[:10] if eab_kid else 'None'}...")
+                LOGGER.info(f"EAB HMAC Key: {eab_hmac_key[:10] if eab_hmac_key else 'None'}...")
+                return eab_kid, eab_hmac_key
+            else:
+                LOGGER.error(f"❌ ZeroSSL EAB registration failed: {eab_data}")
+                return None, None
             
     except BaseException as e:
         LOGGER.debug(format_exc())
-        LOGGER.error(f"Error setting up ZeroSSL EAB credentials: {e}")
+        LOGGER.error(f"❌ Error setting up ZeroSSL EAB credentials: {e}")
+        
+        # Additional troubleshooting info
+        LOGGER.error("Troubleshooting steps:")
+        LOGGER.error("1. Verify your ZeroSSL API key is valid")
+        LOGGER.error("2. Check your ZeroSSL account has ACME access enabled")
+        LOGGER.error("3. Ensure the API key has the correct permissions")
+        LOGGER.error("4. Try regenerating your ZeroSSL API key")
+        
         return None, None
 
 
@@ -191,11 +243,12 @@ def get_caa_records(domain):
     
     # Check if dig command is available
     if not which("dig"):
-        LOGGER.debug("dig command not available for CAA record checking")
+        LOGGER.info("dig command not available for CAA record checking")
         return None
     
     try:
         # Use dig to query CAA records
+        LOGGER.info(f"Querying CAA records for domain: {domain}")
         result = run(
             ["dig", "+short", domain, "CAA"], 
             capture_output=True, 
@@ -204,6 +257,7 @@ def get_caa_records(domain):
         )
         
         if result.returncode == 0 and result.stdout.strip():
+            LOGGER.info(f"Found CAA records for domain {domain}")
             caa_records = []
             for line in result.stdout.strip().split('\n'):
                 line = line.strip()
@@ -220,17 +274,21 @@ def get_caa_records(domain):
                             'tag': tag,
                             'value': value
                         })
+            LOGGER.info(f"Parsed {len(caa_records)} CAA records for domain {domain}")
             return caa_records
         else:
+            LOGGER.info(f"No CAA records found for domain {domain} (dig return code: {result.returncode})")
             return []
             
     except BaseException as e:
-        LOGGER.debug(f"Error querying CAA records for {domain}: {e}")
+        LOGGER.info(f"Error querying CAA records for {domain}: {e}")
         return None
 
 
 def check_caa_authorization(domain, ca_provider, is_wildcard=False):
     # Check if the CA provider is authorized by CAA records
+    
+    LOGGER.info(f"Checking CAA authorization for domain: {domain}, CA: {ca_provider}, wildcard: {is_wildcard}")
     
     # Map CA providers to their CAA identifiers
     ca_identifiers = {
@@ -246,9 +304,11 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
     # Check CAA records for the domain and parent domains
     check_domain = domain.lstrip("*.")
     domain_parts = check_domain.split(".")
+    LOGGER.info(f"Will check CAA records for domain chain: {check_domain}")
     
     for i in range(len(domain_parts)):
         current_domain = ".".join(domain_parts[i:])
+        LOGGER.info(f"Checking CAA records for: {current_domain}")
         caa_records = get_caa_records(current_domain)
         
         if caa_records is None:
@@ -285,12 +345,15 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
                 check_records = issue_records
                 record_type = "issue"
             
+            LOGGER.info(f"Using CAA {record_type} records for authorization check")
+            
             if not check_records:
                 LOGGER.info(f"No relevant CAA {record_type} records found for {current_domain}")
                 continue
             
             # Check if any of our CA identifiers are authorized
             authorized = False
+            LOGGER.info(f"Checking authorization for CA identifiers: {', '.join(allowed_identifiers)}")
             for identifier in allowed_identifiers:
                 for record in check_records:
                     # Handle explicit deny (empty value or semicolon)
@@ -313,6 +376,7 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
                 return False
             
             # If we found CAA records and we're authorized, we can stop checking parent domains
+            LOGGER.info(f"✓ CAA authorization successful for {domain}")
             return True
     
     # No CAA records found in the entire chain
@@ -322,6 +386,7 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
 
 def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt", is_wildcard=False):
     # Validate that all domains have valid A/AAAA records and CAA authorization for HTTP challenge
+    LOGGER.info(f"Validating {len(domains_list)} domains for HTTP challenge: {', '.join(domains_list)}")
     invalid_domains = []
     caa_blocked_domains = []
     
@@ -371,6 +436,7 @@ def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt",
 
 def get_external_ip():
     # Get the external/public IP addresses of this server (both IPv4 and IPv6)
+    LOGGER.info("Getting external IP addresses for server")
     ipv4_services = [
         "https://ipv4.icanhazip.com",
         "https://api.ipify.org",
@@ -387,6 +453,7 @@ def get_external_ip():
     external_ips = {"ipv4": None, "ipv6": None}
     
     # Try to get IPv4 address
+    LOGGER.info("Attempting to get external IPv4 address")
     for service in ipv4_services:
         try:
             if "jsonip.com" in service:
@@ -407,14 +474,16 @@ def get_external_ip():
                     # Validate it's a proper IPv4 address
                     getaddrinfo(ip, None, AF_INET)
                     external_ips["ipv4"] = ip
+                    LOGGER.info(f"Successfully obtained external IPv4 address: {ip}")
                     break
                 except gaierror:
                     continue
         except BaseException as e:
-            LOGGER.debug(f"Failed to get IPv4 address from {service}: {e}")
+            LOGGER.info(f"Failed to get IPv4 address from {service}: {e}")
             continue
     
     # Try to get IPv6 address
+    LOGGER.info("Attempting to get external IPv6 address")
     for service in ipv6_services:
         try:
             if "jsonip.com" in service:
@@ -433,22 +502,25 @@ def get_external_ip():
                     # Validate it's a proper IPv6 address
                     getaddrinfo(ip, None, AF_INET6)
                     external_ips["ipv6"] = ip
+                    LOGGER.info(f"Successfully obtained external IPv6 address: {ip}")
                     break
                 except gaierror:
                     continue
         except BaseException as e:
-            LOGGER.debug(f"Failed to get IPv6 address from {service}: {e}")
+            LOGGER.info(f"Failed to get IPv6 address from {service}: {e}")
             continue
     
     if not external_ips["ipv4"] and not external_ips["ipv6"]:
         LOGGER.warning("Could not determine external IP address (IPv4 or IPv6) from any service")
         return None
     
+    LOGGER.info(f"External IP detection completed - IPv4: {external_ips['ipv4'] or 'not found'}, IPv6: {external_ips['ipv6'] or 'not found'}")
     return external_ips
 
 
 def check_domain_a_record(domain, external_ips=None):
     # Check if domain has valid A/AAAA records for HTTP challenge
+    LOGGER.info(f"Checking DNS A/AAAA records for domain: {domain}")
     try:
         # Remove wildcard prefix if present
         check_domain = domain.lstrip("*.")
@@ -508,22 +580,26 @@ def check_domain_a_record(domain, external_ips=None):
                         LOGGER.error(f"Strict IP check enabled - rejecting certificate request for {check_domain}")
                         return False
             
+            LOGGER.info(f"✓ Domain {check_domain} DNS validation passed")
             return True
         else:
+            LOGGER.info(f"Domain {check_domain} validation failed - no DNS resolution")
             LOGGER.warning(f"Domain {check_domain} does not resolve")
             return False
             
     except gaierror as e:
+        LOGGER.info(f"Domain {check_domain} DNS resolution failed (gaierror): {e}")
         LOGGER.warning(f"DNS resolution failed for domain {check_domain}: {e}")
         return False
     except BaseException as e:
-        LOGGER.debug(format_exc())
+        LOGGER.info(format_exc())
         LOGGER.error(f"Error checking DNS records for domain {check_domain}: {e}")
         return False
 
 
 def validate_domains_for_http_challenge(domains_list):
     # Validate that all domains have valid A/AAAA records for HTTP challenge
+    LOGGER.info(f"Validating {len(domains_list)} domains for HTTP challenge: {', '.join(domains_list)}")
     invalid_domains = []
     
     # Get external IPs once for all domain checks
@@ -668,15 +744,34 @@ def certbot_new(
             LOGGER.info(f"Using Let's Encrypt P-256 curve for {domains}")
     
     # Handle ZeroSSL EAB credentials
-    if ca_provider.lower() == "zerossl":        
-        if api_key:
+    if ca_provider.lower() == "zerossl":
+        LOGGER.info(f"ZeroSSL detected as CA provider for {domains}")
+        
+        # Check for manually provided EAB credentials first
+        eab_kid_env = getenv("ACME_ZEROSSL_EAB_KID", "") or getenv(f"{server_name}_ACME_ZEROSSL_EAB_KID", "")
+        eab_hmac_env = getenv("ACME_ZEROSSL_EAB_HMAC_KEY", "") or getenv(f"{server_name}_ACME_ZEROSSL_EAB_HMAC_KEY", "")
+        
+        if eab_kid_env and eab_hmac_env:
+            LOGGER.info("✓ Using manually provided ZeroSSL EAB credentials from environment")
+            command.extend(["--eab-kid", eab_kid_env, "--eab-hmac-key", eab_hmac_env])
+            LOGGER.info(f"✓ Using ZeroSSL EAB credentials for {domains}")
+            LOGGER.info(f"EAB Kid: {eab_kid_env[:10]}...")
+        elif api_key:
+            LOGGER.info(f"ZeroSSL API key provided, setting up EAB credentials")
             eab_kid, eab_hmac = setup_zerossl_eab_credentials(email, api_key)
             if eab_kid and eab_hmac:
                 command.extend(["--eab-kid", eab_kid, "--eab-hmac-key", eab_hmac])
-                LOGGER.info(f"Using ZeroSSL EAB credentials for {domains}")
+                LOGGER.info(f"✓ Using ZeroSSL EAB credentials for {domains}")
+                LOGGER.info(f"EAB Kid: {eab_kid[:10]}...")
             else:
-                LOGGER.warning("Failed to obtain ZeroSSL EAB credentials, "
-                              "proceeding without EAB")
+                LOGGER.error("❌ Failed to obtain ZeroSSL EAB credentials")
+                LOGGER.error("Alternative: Set ACME_ZEROSSL_EAB_KID and ACME_ZEROSSL_EAB_HMAC_KEY environment variables")
+                LOGGER.warning("Proceeding without EAB - this will likely fail")
+        else:
+            LOGGER.error("❌ No ZeroSSL API key provided!")
+            LOGGER.error("Set ACME_ZEROSSL_API_KEY environment variable")
+            LOGGER.error("Or set ACME_ZEROSSL_EAB_KID and ACME_ZEROSSL_EAB_HMAC_KEY directly")
+            LOGGER.warning("Proceeding without EAB - this will likely fail")
 
     if challenge_type == "dns":
         command.append("--preferred-challenges=dns")
@@ -719,6 +814,21 @@ def certbot_new(
     if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG":
         command.append("-v")
 
+    LOGGER.info(f"Executing certbot command for {domains}")
+    # Show command but mask sensitive EAB values for security
+    safe_command = []
+    mask_next = False
+    for item in command:
+        if mask_next:
+            safe_command.append("***MASKED***")
+            mask_next = False
+        elif item in ["--eab-kid", "--eab-hmac-key"]:
+            safe_command.append(item)
+            mask_next = True
+        else:
+            safe_command.append(item)
+    LOGGER.info(f"Command: {' '.join(safe_command)}")
+    
     current_date = datetime.now()
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
 
@@ -1134,6 +1244,13 @@ try:
                        else getenv("ACME_ZEROSSL_API_KEY", "")),
             "credential_items": {},
         }
+        
+        LOGGER.info(f"Service {first_server} configuration:")
+        LOGGER.info(f"  CA Provider: {data['ca_provider']}")
+        LOGGER.info(f"  API Key provided: {'Yes' if data['api_key'] else 'No'}")
+        LOGGER.info(f"  Challenge type: {data['challenge']}")
+        LOGGER.info(f"  Staging: {data['staging']}")
+        LOGGER.info(f"  Wildcard: {data['use_wildcard']}")
 
         # Override profile if custom profile is set
         custom_profile = (getenv(f"{first_server}_LETS_ENCRYPT_CUSTOM_PROFILE", "") 
@@ -1225,11 +1342,16 @@ try:
         LOGGER.debug(f"Data for service {first_server} : {dumps(data)}")
 
         # Validate CA provider and API key requirements
+        LOGGER.info(f"Service {first_server} - CA Provider: {data['ca_provider']}, "
+                   f"API Key provided: {'Yes' if data['api_key'] else 'No'}")
+        
         if data["ca_provider"].lower() == "zerossl":
             if not data["api_key"]:
                 LOGGER.warning(f"ZeroSSL API key not provided for service {first_server}, "
                               "falling back to Let's Encrypt...")
                 data["ca_provider"] = "letsencrypt"
+            else:
+                LOGGER.info(f"✓ ZeroSSL configuration valid for service {first_server}")
 
         # Checking if the DNS data is valid
         if data["challenge"] == "dns":
@@ -1300,7 +1422,7 @@ try:
                     domains.split(" ")
                 )
 
-                LOGGER.debug(f"Wildcard domains for {first_server} : {wildcards}")
+                LOGGER.info(f"Wildcard domains for {first_server} : {wildcards}")
 
                 for d in wildcards:
                     if is_domain_blacklisted(d, psl_rules):
@@ -1314,7 +1436,7 @@ try:
                 WILDCARD_GENERATOR.extend(group, domains.split(" "), data["email"], 
                                         data["staging"])
                 file_path = (f"{group}.{file_type}",)
-                LOGGER.debug(f"[{first_server}] Wildcard group {group}")
+                LOGGER.info(f"[{first_server}] Wildcard group {group}")
         elif data["check_psl"]:
             if psl_lines is None:
                 psl_lines = load_public_suffix_list(JOB)
@@ -1500,7 +1622,7 @@ try:
                     continue
                 # If the file is not in the wildcard groups, remove it
                 if file not in credential_paths:
-                    LOGGER.debug(f"Removing old credentials file {file}")
+                    LOGGER.info(f"Removing old credentials file {file}")
                     JOB.del_cache(file.name, job_name="certbot-renew", 
                                 service_id=file.parent.name if file.parent.name != "letsencrypt" else "")
 
@@ -1536,7 +1658,7 @@ try:
 
                 # Skip certificates that are in our active list
                 if cert_name in active_cert_names:
-                    LOGGER.debug(f"Keeping active certificate: {cert_name}")
+                    LOGGER.info(f"Keeping active certificate: {cert_name}")
                     continue
 
                 LOGGER.warning(f"Removing old certificate {cert_name} "
