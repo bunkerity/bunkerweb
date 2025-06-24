@@ -262,41 +262,68 @@ $(function () {
     return await setToIndexedDB(key, data);
   }
 
-  // Function to load and cache geo data
-  async function loadGeoData() {
-    // Check if TopoJSON is cached
-    if (geoDataCache.topojson) {
-      processTopoJSONData(geoDataCache.topojson);
+  // Generic helper function to load and cache geo data
+  async function loadAndCacheGeoData(
+    cacheKey,
+    memoryCache,
+    url,
+    processFn,
+    fallbackFn = null
+  ) {
+    // Check if data is already in memory cache
+    if (memoryCache) {
+      processFn(memoryCache);
       return;
     }
 
-    // Try to load from cache first
-    const cachedTopoJSON = await getCachedData("bunkerweb_topojson_data");
-    if (cachedTopoJSON) {
+    // Try to load from persistent cache first
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
       try {
-        geoDataCache.topojson = cachedTopoJSON;
-        processTopoJSONData(cachedTopoJSON);
+        // Update memory cache
+        if (cacheKey.includes("topojson")) {
+          geoDataCache.topojson = cachedData;
+        } else {
+          geoDataCache.geojson = cachedData;
+        }
+        processFn(cachedData);
         return;
       } catch (e) {
-        console.warn("Failed to parse cached TopoJSON data");
+        console.warn(`Failed to parse cached ${cacheKey} data`);
       }
     }
 
-    // Load TopoJSON data from server
-    $.getJSON(`${baseUrl}/json/countries.topojson`, async (topojsonData) => {
-      // Cache the data
-      geoDataCache.topojson = topojsonData;
-      const cached = await setCachedData(
-        "bunkerweb_topojson_data",
-        topojsonData
-      );
-      if (!cached) {
-        console.warn("Failed to cache TopoJSON data");
+    // Load data from server
+    $.getJSON(url, async (data) => {
+      // Update memory cache
+      if (cacheKey.includes("topojson")) {
+        geoDataCache.topojson = data;
+      } else {
+        geoDataCache.geojson = data;
       }
-      processTopoJSONData(topojsonData);
+
+      // Cache the data
+      const cached = await setCachedData(cacheKey, data);
+      if (!cached) {
+        console.warn(`Failed to cache ${cacheKey} data`);
+      }
+      processFn(data);
     }).fail(function () {
-      loadGeoJSONFallback();
+      if (fallbackFn) {
+        fallbackFn();
+      }
     });
+  }
+
+  // Function to load and cache geo data
+  async function loadGeoData() {
+    await loadAndCacheGeoData(
+      "bunkerweb_topojson_data",
+      geoDataCache.topojson,
+      `${baseUrl}/json/countries.topojson`,
+      processTopoJSONData,
+      loadGeoJSONFallback
+    );
   }
 
   // Function to process TopoJSON data
@@ -325,35 +352,13 @@ $(function () {
 
   // Function to load GeoJSON as fallback
   async function loadGeoJSONFallback() {
-    // Check if GeoJSON is cached
-    if (geoDataCache.geojson) {
-      processGeoJSONData(geoDataCache.geojson);
-      return;
-    }
-
-    // Try to load from cache first
-    const cachedGeoJSON = await getCachedData("bunkerweb_geojson_data");
-    if (cachedGeoJSON) {
-      try {
-        geoDataCache.geojson = cachedGeoJSON;
-        processGeoJSONData(cachedGeoJSON);
-        return;
-      } catch (e) {
-        console.warn("Failed to parse cached GeoJSON data");
-      }
-    }
-
-    // Fallback to GeoJSON if TopoJSON fails
     console.warn("Failed to load TopoJSON, falling back to GeoJSON");
-    $.getJSON(`${baseUrl}/json/countries.geojson`, async (geojsonData) => {
-      // Cache the data
-      geoDataCache.geojson = geojsonData;
-      const cached = await setCachedData("bunkerweb_geojson_data", geojsonData);
-      if (!cached) {
-        console.warn("Failed to cache GeoJSON data");
-      }
-      processGeoJSONData(geojsonData);
-    });
+    await loadAndCacheGeoData(
+      "bunkerweb_geojson_data",
+      geoDataCache.geojson,
+      `${baseUrl}/json/countries.geojson`,
+      processGeoJSONData
+    );
   }
 
   // Function to process GeoJSON data
