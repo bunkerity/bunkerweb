@@ -1,0 +1,243 @@
+FONTLOG for the Public Sans fonts
+
+This file provides detailed information on the Public Sans Font Software.
+
+This information should be distributed along with the Public Sans fonts and any
+derivative works.
+
+Basic Font Information
+
+Public Sans is based off of Libre Franklin
+Libre Franklin is an interpretation and expancion based on the 1912 Morris Fuller Benton’s classic.
+
+To contribute to Public Sans please read [CONTRIBUTING.md](https://github.com/uswds/public-sans/blob/master/CONTRIBUTING.md).
+
+See [the Public Sans releases page](https://github.com/uswds/public-sans/releases) for more details about changes to the typeface.
+
+April 29 2022 Public Sans v2.001
+- https://github.com/uswds/public-sans/releases/tag/v2.001
+General
+- Fixed style linking in stat table
+- Update to 2.001
+
+November 1 2021 Public Sans v2.000
+- https://github.com/uswds/public-sans/releases/tag/v2.000
+
+General
+- Rename `PublicSans-italics` → `PublicSans-Italic`
+- Fixed language feature encoding
+- Update to 2.000
+
+Glyphs
+- Modified `eth` contours
+- Adjusted curves of `S` and `Thorn`
+- Corrected 
+  - `Eng`, `eng`
+  - `Ldot`, '`ldot`
+  - `Tbar`, `tbar`
+  - `gcommaaccent`
+- Removed unnecessary anchors
+- Decomposed and transformed components
+- Corrected dot accent position in thin masters
+- Slightly shifted position of `acute` and `grave`
+- Adjusted percent and perthousand
+- Corrected positon of `caron.alt`
+- Added caret anchors
+- Corrected Naira currency
+- Decomposed nested components
+- Corrected kerning group inconsistencies in caps and lowercases
+- Corrected position of `breve_hookabove`
+- Adjusted alignment zones
+- Renamed narrow acutecomb variants `acutecomb.001` → `acutecomb.narrow`
+- Added `gravecomb.narrow`
+- Fixed contour directons
+- Added `_ringacute` in `aringacute` italic, decomposed and merged `_ringacute`
+- Decomposed overlapping components
+
+Structure
+- Renames `/src` directory to `/sources`, which includes the build script and the Glyphs sources
+- Renames `/binaries` directory to `/fonts` adding TTF fonts as a `/fonts/ttf` directory separate from webfonts
+- Adds `AUTHORS.txt` for copyright-holding authors
+- Adds `CONTRIBUTORS.txt` for contributors who are not copyright authors
+- Adds explicit description file
+- Adds `requirements.txt` for python 3.x `pip3 install -r requirements.txt`
+- Moves old version binaries to an `/old` directory
+- Removes dash from `Public-Sans` in source files → `PublicSans`
+
+Build
+- Add weight class fix in build script
+- Added new fontbakery tools to `requirements.txt` and build script
+- Uses new locations
+- Removes autohinting
+- Updates build process to build with Docker
+- Adds gftools gen-stat to the build process, as well as a stat.yaml file
+
+
+January 8 2020 (USWDS) Public Sans v1.008
+- https://github.com/uswds/public-sans/releases/tag/v1.008
+
+General
+- Improves overall texture and spacing
+- Added NPM scripts for building and testing
+
+Kerning and spacing
+- Tightened kerning around `r`, `t`, `f`, and `l`
+- Loosened spacing around `o`
+- Improved spacing around `n`
+- Balanced `o|v|o` kerning
+- Widen `space` glyph
+- Balance sidebearings in capitals
+
+Glyphs
+- Added `division slash`
+
+November 13 2019 (USWDS) Public Sans v1.007
+- https://github.com/uswds/public-sans/releases/tag/v1.007
+
+General
+- Rewrite type test to better test unusual combinations
+- Remove AFM files for simplicity
+- Rename `fonts` to `binaries`
+- Keep UFOs and designspace files in `src`
+- Move Glyphs files to `src/glyphs`
+- Update test strings
+- Add Google Analytics code to site
+- Update dependencies
+- Remediate package vulnerabilities in `gulp-notify`
+- Normalized sidebearings to multiples of 5
+- Used sidebearing groups more consistently
+- Update and clarify Public Sans license
+
+Metadata
+- Update description
+- Remove trademark metadata
+- Update copyright and designer information
+
+Metrics changes
+- Changed ascender height to 1900
+
+| Parameter | v1.006 | v1.007
+| --- | --- | ---
+| Ascender | 2000 | 1900
+| typoAscender | 2000 | 1900
+| hheaAscender | 2000 | 1900
+
+Kerning and spacing
+- Improve `Æ` spacing
+- Improve kerning of the following: `s`|`s`, `t`|`t`, `g`|`g`, `r`|`g`, `E`|`t`, `V`|[`a`,`e`], `R`|`e`, 'P'|'e'
+- Fix spacing around U
+- Set width of the colonsign.tf to 1400
+- Use 600 width for tf punctuation
+- Rebalance roman tabular figures
+- Use components for .tf numbers and rebalance
+
+Glyphs
+- Widen `H`
+- Redraw `Þ`
+- Add and synchronize italic tabular figs
+- Add currency to tabular figures
+- Align diacritics
+- Fix faulty dot accents
+- Fix italic `i`
+- Square terminals and regularize shapes in `s`,`e`,`c`
+- Update italic `æ` and `Æ`
+- Update italic `œ` and `Œ`
+
+July 17 2019 (USWDS) Public Sans v1.006
+- https://github.com/uswds/public-sans/releases/tag/v1.006
+- Adds a new python-based build script for generating webfonts and variable fonts. Use /.build.sh from the project directory. Based on https://github.com/thundernixon/googlefonts-qa-template/blob/master/sources/build.sh
+- Moves to 2000 UPM
+- Adjusts kerning overall
+- Improves vertical metrics
+- Rounds counters in b, d, p, and q glyphs
+- Widens o and e glyphs
+- Narrows s glyph
+- Slightly squares curves in rounded lowercase thin glyphs
+- Squares counters on S and C glyphs
+- Aligns C and G glyph upper terminals
+- Improves output of variable fonts
+- Outputs better binaries for Font Bakery (https://github.com/googlefonts/fontbakery)
+
+June 6 2019 (USWDS) Public Sans v1.005
+- https://github.com/uswds/public-sans/releases/tag/v1.005
+- Redraws eth character
+- Improves Vietnamese diacritics with better positioning and shape
+- Fixes bad masters that resulted in faulty interpolation in fractions and some math characters
+- Improves spacing of caron.alt–related glyphs
+
+June 3 2019 (USWDS) Public Sans v1.004
+- https://github.com/uswds/public-sans/releases/tag/v1.004
+- Improved kerning
+- Improved hinting and rendering on Windows
+- Improved fractions and subscript/superscript numerals
+- Improved spacing for hyphens and em/en dashes
+- Fixes the colón character
+
+May 7 2019 (USWDS) Public Sans v1.003
+- https://github.com/uswds/public-sans/releases/tag/v1.003
+- Address some spacing regressions in v1.002
+- Thicken regular weight to 365 from 350
+- Adds explicit underline metadata to address a rendering quirk in Firefox
+
+May 6 2019 (USWDS) Public Sans v1.002
+- https://github.com/uswds/public-sans/releases/tag/v1.002
+- This release tries to simplify the kerning and spacing and make both easier to maintain. There may be some small spacing regressions as we evaluate this version in production and continue to update.
+- Added 'okina character
+- Improved appearance and spacing of diacritic glyphs — especially Czech, Slovak, and Vietnamese
+- Improved consistency between roman and italic
+- Upscaled to 2000 UPM
+- Use 100-900 as range for variable font output
+- Rebalanced numbers
+- Improved kerning in fractions
+- Corrected some spacing issues in tabular figures, especially in italic tabular figures
+- Adjusted position of hcircumflex
+- Removed spur from eszett
+- Simplified spacing and kerning
+- Updated and made better use of sidebearing groups
+- Updated and made better use of kerning groups
+
+October 5 2018 (Dan O. Williams) Public Sans v1.000
+- Release Public Sans as part of USWDS 2.0.0 Beta
+
+Earlier
+- adjusted letterforms throughout
+- added tablular numerals
+- adjusted spacing and kerning
+- removed rounded corners
+- added hook `l` character
+
+^^^ Changes since the Public Sans fork ^^^
+
+01 June 2016 (Pablo Impallari, Rodrigo Fuenzalida) Libre Franklin v1.003
+- fixed some small bugs
+
+28 April 2016 (Pablo Impallari, Rodrigo Fuenzalida) Libre Franklin v1.002
+- fixed hungarumlaut interpolation bug
+- Some more dekinking in the Italics
+
+15 Jan 2016 (Pablo Impallari, Rodrigo Fuenzalida) Libre Franklin v1.001
+- Initial Release
+
+01 June 2015 (Pablo Impallari, Rodrigo Fuenzalida) Libre Franklin v0.001
+- Initial Beta
+
+Acknowledgements
+
+If you make modifications be sure to add your name (N),
+email (E), web-address (if you have one) (W) and
+description (D). This list is in alphabetical order.
+
+N: Pablo Impallari
+E: impallari@gmail.com
+W: http://www.impallari.com
+D: Designer
+
+N: Rodrigo Fuenzalida
+E: fuenzarodrigo@gmail.com
+W: http://www.impallari.com
+D: Designer
+
+N: Dan O. Williams
+E: daniel.williams@gsa.gov
+W: https://designsystem.digital.gov
+D: Designer
