@@ -99,6 +99,20 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 if db_port:
                     cmd.extend(["-P", db_port])
 
+                # Add options to handle large data and improve compatibility
+                cmd.extend(
+                    [
+                        "--single-transaction",  # Consistent backup for InnoDB
+                        "--routines",  # Include stored procedures and functions
+                        "--triggers",  # Include triggers
+                        "--max_allowed_packet=2147483648",  # 2GB max packet size
+                        "--quick",  # Retrieve rows one at a time
+                        "--lock-tables=false",  # Don't lock tables
+                        "--skip-add-locks",  # Don't add LOCK TABLES statements
+                        "--default-character-set=utf8mb4",  # Use utf8mb4 charset
+                    ]
+                )
+
                 # Apply additional arguments from query parameters
                 for key, value in db_query_args.items():
                     if key == "ssl" and value == "true":
@@ -118,9 +132,19 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             elif database == "postgresql":
                 LOGGER.info("Creating a backup for the PostgreSQL database ...")
 
-                cmd = ["pg_dump", "-h", db_host, "-U", db_user, db_database_name, "-w"]
+                cmd = ["pg_dump", "-h", db_host, "-U", db_user, db_database_name, "-w", "--no-password"]
                 if db_port:
                     cmd.extend(["-p", db_port])
+
+                # Add options to handle large data and improve compatibility
+                cmd.extend(
+                    [
+                        "--no-owner",  # Skip ownership commands
+                        "--no-privileges",  # Skip privilege commands
+                        "--format=plain",  # Plain text format
+                        "--verbose",  # Verbose output for debugging
+                    ]
+                )
 
                 # Apply additional arguments from query parameters
                 pg_env = {"PGPASSWORD": db_password}
@@ -139,7 +163,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                 LOGGER.warning("Creating a database backup for Oracle is not supported")
                 return db
 
-        stderr = proc.stderr.decode() if hasattr(proc, "stderr") else ""
+        stderr = proc.stderr.decode() if hasattr(proc, "stderr") and proc.stderr else ""
         if "Table 'db.test_" not in stderr and proc.returncode != 0:
             LOGGER.error(f"Failed to dump the database: {stderr}")
             sys_exit(1)
