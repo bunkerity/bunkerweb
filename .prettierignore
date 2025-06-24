@@ -16,6 +16,7 @@ src/common/core/*/ui/*
 src/ui/app/static/libs/*
 src/ui/app/static/css/core.css
 src/ui/app/static/json/countries.geojson
+src/ui/app/static/json/countries.topojson
 src/bw/loading/index.html
 src/common/core/misc/files/default.html
 src/common/core/antibot/files/*.html

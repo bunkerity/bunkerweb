@@ -50,7 +50,7 @@
       "id": "limit-conn-max-http1",
       "label": "Maximum number of HTTP/1.X connections",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "LIMIT_CONN_MAX_HTTP2": {
       "context": "multisite",
@@ -59,7 +59,7 @@
       "id": "limit-conn-max-http2",
       "label": "Maximum number of HTTP/2 streams",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "LIMIT_CONN_MAX_HTTP3": {
       "context": "multisite",
@@ -68,7 +68,7 @@
       "id": "limit-conn-max-http3",
       "label": "Maximum number of HTTP/3 streams",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "LIMIT_CONN_MAX_STREAM": {
       "context": "multisite",
@@ -77,7 +77,7 @@
       "id": "limit-conn-max-stream",
       "label": "Maximum number of stream connections",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     }
   }
 }

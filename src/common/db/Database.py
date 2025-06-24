@@ -460,7 +460,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.2-rc6"
+                return "1.6.2-rc7"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -492,7 +492,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.2-rc6",
+            "version": "1.6.2-rc7",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -3568,6 +3568,8 @@ class Database:
                         setting_data["select"] = selects_map.get(setting.id, [])
                     elif setting.type == "multiselect":
                         setting_data["multiselect"] = multiselects_map.get(setting.id, [])
+                    elif setting.type == "multivalue":
+                        setting_data["separator"] = getattr(setting, "separator", " ")
                     plugin_data["settings"][setting.id] = setting_data
 
                 if plugin.id in commands_map:

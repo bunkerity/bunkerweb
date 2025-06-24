@@ -239,7 +239,7 @@ function badbehavior:timer()
 					ret = false
 					ret_err = "can't save ban : " .. err
 				else
-					local ban_duration = data.ban_time == -1 and "permanently" or "for " .. data.ban_time .. "s"
+					local ban_duration = data.ban_time == 0 and "permanently" or "for " .. data.ban_time .. "s"
 					self.logger:log(
 						WARN,
 						string.format(
@@ -254,7 +254,7 @@ function badbehavior:timer()
 					)
 				end
 			else
-				local detection_msg = data.ban_time == -1 and "permanently" or "for " .. data.ban_time .. "s"
+				local detection_msg = data.ban_time == 0 and "permanently" or "for " .. data.ban_time .. "s"
 				self.logger:log(
 					WARN,
 					string.format(
@@ -419,8 +419,8 @@ function badbehavior:redis_increase(ip, count_time, ban_time, server_name, ban_s
 			return ret_expire
 		end
 		if ret_incr > tonumber(ARGV[2]) then
-			-- For permanent bans (ban_time = -1), don't set an expiration
-			if tonumber(ARGV[2]) == -1 then
+			-- For permanent bans (ban_time = 0), don't set an expiration
+			if tonumber(ARGV[2]) == 0 then
 				local ret_set = redis.pcall("SET", KEYS[2], "bad behavior")
 				if type(ret_set) == "table" and ret_set["err"] ~= nil then
 					redis.log(redis.LOG_WARNING, "Bad behavior increase SET (permanent) error : " .. ret_set["err"])

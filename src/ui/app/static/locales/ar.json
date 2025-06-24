@@ -599,6 +599,7 @@
       "ban_specific_service": "سيطبق الحظر فقط على هذه الخدمة المحددة.",
       "hostname_length_limit": "اسم المضيف محدود بـ 256 حرفًا.",
       "hostname_special_chars": "يُسمح فقط بـ `/` و `:` لتحديد البروتوكول/المنفذ.",
+      "multivalue_separator": "القيم مفصولة بـ:",
       "permanent_ban": "إذا تم تحديده، لن تنتهي صلاحية الحظر أبدًا حتى تتم إزالته يدويًا.",
       "photo_extensions": "مسموح بـ JPG، GIF، أو PNG. الحجم الأقصى: 800KB."
     },
@@ -662,6 +663,7 @@
       "config_name": "تكوين-مخصص-لي",
       "enter_username": "أدخل اسم المستخدم الخاص بك",
       "keywords": "الكلمات المفتاحية...",
+      "multivalue_enter_value": "أدخل قيمة...",
       "plugin_search": "ابحث عن الإضافات...",
       "search": "بحث...",
       "select_service": "اختر خدمة",

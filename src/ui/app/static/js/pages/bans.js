@@ -1468,8 +1468,8 @@ $(document).ready(function () {
 
         bans.push({
           ip: ip,
-          end_date: isPermanent ? "-1" : `${end_date}${getTimeZoneOffset()}`,
-          exp: isPermanent ? -1 : null, // Set exp to -1 if permanent ban
+          end_date: isPermanent ? "0" : `${end_date}${getTimeZoneOffset()}`,
+          exp: isPermanent ? 0 : null, // Set exp to 0 if permanent ban
           reason: reason,
           ban_scope: ban_scope,
           service: service,

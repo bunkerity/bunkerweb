@@ -599,6 +599,7 @@
       "ban_specific_service": "封鎖將僅適用於此特定服務。",
       "hostname_length_limit": "主機名稱限制為 256 個字元。",
       "hostname_special_chars": "協定/連接埠規範中只允許使用 `/` 和 `:`。",
+      "multivalue_separator": "值以以下字元分隔：",
       "permanent_ban": "如果勾選，封鎖將永久有效，直到手動移除為止。",
       "photo_extensions": "允許的格式：JPG、GIF 或 PNG。最大大小：800KB。"
     },
@@ -662,6 +663,7 @@
       "config_name": "我的自訂設定",
       "enter_username": "輸入您的使用者名稱",
       "keywords": "關鍵字...",
+      "multivalue_enter_value": "輸入值...",
       "plugin_search": "搜尋外掛程式...",
       "search": "搜尋...",
       "select_service": "選擇服務",

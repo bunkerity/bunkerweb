@@ -49,11 +49,11 @@ def bans_fetch():
                     ban_data = loads(data.decode("utf-8", "replace"))
                     # Ensure consistent scope for frontend display
                     ban_data["ban_scope"] = "global"
-                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == -1
+                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
 
                     # Check if this is a permanent ban
                     if ban_data.get("permanent", False):
-                        exp = -1  # Override TTL for permanent bans
+                        exp = 0  # Override TTL for permanent bans
 
                     bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
                 except Exception as e:
@@ -73,11 +73,11 @@ def bans_fetch():
                     # Ensure consistent scope for frontend display
                     ban_data["ban_scope"] = "service"
                     ban_data["service"] = service
-                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == -1
+                    ban_data["permanent"] = ban_data.get("permanent", False) or exp == 0
 
                     # Check if this is a permanent ban
                     if ban_data.get("permanent", False):
-                        exp = -1  # Override TTL for permanent bans
+                        exp = 0  # Override TTL for permanent bans
 
                     bans.append({"ip": ip, "exp": exp, "permanent": ban_data.get("permanent", False)} | ban_data)
                 except Exception as e:
@@ -112,8 +112,8 @@ def bans_fetch():
     for ban in bans:
         exp = ban.pop("exp", 0)
 
-        # Handle permanent bans (exp = -1)
-        if exp == -1 or ban.get("permanent", False):
+        # Handle permanent bans (exp = 0)
+        if exp == 0 or ban.get("permanent", False):
             ban["remain"] = "permanent"
             ban["permanent"] = True
             ban["end_date"] = "permanent"
@@ -202,7 +202,8 @@ def bans_fetch():
                     return False
 
                 filtered = list(filter(scope_filter, filtered))
-            elif field == "end_date":
+            # Special handling for end_date searchpane
+            if field == "end_date":
                 # Special handling for end_date searchpane
                 now = time()
 
@@ -380,8 +381,8 @@ def bans_fetch():
         {
             "label": '<span data-i18n="searchpane.permanent">Permanent</span>',
             "value": "permanent",
-            "total": sum(1 for ban in bans if ban.get("permanent", False) or ban.get("exp", 0) == -1),
-            "count": sum(1 for ban in filtered_bans if ban.get("permanent", False) or ban.get("exp", 0) == -1),
+            "total": sum(1 for ban in bans if ban.get("permanent", False) or ban.get("exp", 0) == 0),
+            "count": sum(1 for ban in filtered_bans if ban.get("permanent", False) or ban.get("exp", 0) == 0),
         },
         {
             "label": '<span data-i18n="searchpane.next_24h">Next 24 hours</span>',
@@ -471,9 +472,9 @@ def bans_ban():
 
         # Check for permanent ban
         is_permanent = False
-        if ban.get("end_date") == "-1" or ban.get("exp") == -1:
+        if ban.get("end_date") == "0" or ban.get("exp") == 0:
             is_permanent = True
-            ban_end = -1  # Set to -1 for permanent bans
+            ban_end = 0  # Set to 0 for permanent bans
         else:
             try:
                 # Parse and normalize the ban end date from ISO format
@@ -675,7 +676,7 @@ def bans_update_duration():
         # Calculate new expiration time based on duration
         if duration == "permanent":
             is_permanent = True
-            new_exp = -1
+            new_exp = 0
         elif duration == "1h":
             is_permanent = False
             new_exp = 3600  # 1 hour in seconds

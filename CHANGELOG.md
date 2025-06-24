@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.6.2-rc7 - ????/??/??
+
+- [BUGFIX] Add a conditional `proxy_hide_header` rule for the `Upgrade` header to preserve WebSocket connections in the `Reverse Proxy` plugin, preventing issues with WebSocket connections when the `REVERSE_PROXY_HIDE_HEADERS` setting is used.
+- [BUGFIX] Correct the Logs page copy-to-clipboard button so it reliably copies selected log entries.
+- [FEATURE] Introduce a new `number` setting type with built-in numeric validation and enhanced rendering in the web UI.
+- [FEATURE] Introduce a new `multivalue` setting type with customizable separator and validation, enhancing user experience for multi-value inputs in the web UI.
+- [MISC] Switch the `Bad Behavior` plugin to use the new numeric `BAD_BEHAVIOR_BAN_TIME` setting by updating the permanent ban value from `-1` to `0`.
+- [CONTRIBUTION] Thank you @Michal-Koeckeis-Fresel for the optimizations regarding the web UI fonts and geoip data loading, which significantly improves the performance of the web UI and the new dhparam file to respect the latest security standards.
+
 ## v1.6.2-rc6 - ????/??/??
 
 - [BUGFIX] Ensure template defaults settings are correctly retrieved by jobs and templates.

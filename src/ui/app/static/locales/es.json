@@ -599,6 +599,7 @@
       "ban_specific_service": "El bloqueo solo se aplicará a este servicio específico.",
       "hostname_length_limit": "El nombre de host está limitado a 256 caracteres.",
       "hostname_special_chars": "Solo se permiten `/` y `:` para la especificación de protocolo/puerto.",
+      "multivalue_separator": "Los valores están separados por:",
       "permanent_ban": "Si está marcado, el bloqueo nunca expirará hasta que se elimine manualmente",
       "photo_extensions": "Permitido JPG, GIF o PNG. Tamaño máximo: 800KB."
     },
@@ -662,6 +663,7 @@
       "config_name": "mi-config-personalizada",
       "enter_username": "Introduce tu nombre de usuario",
       "keywords": "Palabras clave...",
+      "multivalue_enter_value": "Introduce un valor...",
       "plugin_search": "Buscar plugins...",
       "search": "Buscar...",
       "select_service": "Seleccionar Servicio",

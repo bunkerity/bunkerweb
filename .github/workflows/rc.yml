@@ -64,10 +64,10 @@ jobs:
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
-        arch: ["linux/arm64,linux/arm/v7"]
+        arch: [linux/arm64, linux/arm/v7]
         exclude:
           - image: all-in-one
-            arch: "linux/arm64,linux/arm/v7"
+            arch: linux/arm/v7
         include:
           - release: rc
             cache: false
@@ -83,7 +83,6 @@ jobs:
             dockerfile: src/ui/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
-            arch: "linux/arm64"
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ${{ matrix.release }}

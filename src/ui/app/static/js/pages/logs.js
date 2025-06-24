@@ -33,7 +33,7 @@ $(document).ready(function () {
   $("#logs-waiting").addClass("visually-hidden");
 
   $("#copy-logs").click(function () {
-    $this = $(this);
+    const $this = $(this);
     editor.selectAll();
     editor.focus();
     navigator.clipboard

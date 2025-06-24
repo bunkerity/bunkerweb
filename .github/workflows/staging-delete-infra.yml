@@ -34,7 +34,7 @@ jobs:
           tar xf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4.0.0
+      - uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
         if: inputs.TYPE == 'k8s'
         with:
           version: "v1.29.1"

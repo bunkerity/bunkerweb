@@ -44,7 +44,7 @@ class Configurator:
         self.__mandatory_job_keys = frozenset(("name", "file", "every", "reload"))
         self.__valid_stream_values = frozenset(("yes", "no", "partial"))
         self.__valid_contexts = frozenset(("global", "multisite"))
-        self.__valid_setting_types = frozenset(("password", "text", "check", "select", "multiselect"))
+        self.__valid_setting_types = frozenset(("password", "text", "number", "check", "select", "multiselect", "multivalue"))
         self.__valid_job_every_values = frozenset(("once", "minute", "hour", "day", "week"))
 
         # Pre-compile regex patterns cache
@@ -386,7 +386,10 @@ class Configurator:
             elif len(data["regex"]) > 1024:
                 return (False, f"Invalid regex for setting {setting} in plugin {plugin['id']} (Max 1024 characters)")
             elif data["type"] not in self.__valid_setting_types:
-                return (False, f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, check or select)")
+                return (
+                    False,
+                    f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, number, check, select, multiselect or multivalue)",
+                )
 
             if "multiple" in data:
                 if not self.__name_rx.match(data["multiple"]):
@@ -394,6 +397,16 @@ class Configurator:
                         False,
                         f"Invalid multiple for setting {setting} in plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128))",
                     )
+
+            if data["type"] == "multivalue":
+                if "separator" in data:
+                    if len(data["separator"]) > 10:
+                        return (False, f"Invalid separator for setting {setting} in plugin {plugin['id']} (Max 10 characters)")
+                    if not data["separator"]:
+                        return (False, f"Empty separator for multivalue setting {setting} in plugin {plugin['id']} (Must have at least 1 character)")
+                else:
+                    # Set default separator if not provided
+                    data["separator"] = " "
 
             for select in data.get("select", []):
                 if len(select) > 256:

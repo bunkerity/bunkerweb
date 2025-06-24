@@ -64,13 +64,14 @@ jobs:
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
-        arch: ["linux/arm64,linux/arm/v7"]
+        arch: [linux/arm64, linux/arm/v7]
         exclude:
           - image: all-in-one
-            arch: "linux/arm64,linux/arm/v7"
+            arch: linux/arm/v7
         include:
           - release: beta
             cache: false
+            push: false
             cache_suffix: arm
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -82,7 +83,6 @@ jobs:
             dockerfile: src/ui/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
-            arch: "linux/arm64"
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ${{ matrix.release }}
@@ -366,7 +366,7 @@ jobs:
   # Remove ARM VM
   rm-arm:
     if: ${{ always() }}
-    needs: [create-arm, push-images, build-packages, build-all-in-one-arm]
+    needs: [create-arm, push-images, build-packages]
     uses: ./.github/workflows/rm-arm.yml
     secrets:
       ARM_ID: ${{ needs.create-arm.outputs.id }}
