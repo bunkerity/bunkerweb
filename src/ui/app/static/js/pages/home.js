@@ -167,8 +167,11 @@ $(function () {
 
   let geojson;
 
-  // Load GeoJSON data and add to map
-  $.getJSON(`${baseUrl}/json/countries.geojson`, (geojsonData) => {
+  // Load TopoJSON data and add to map
+  $.getJSON(`${baseUrl}/json/countries.topojson`, (topojsonData) => {
+    // Convert TopoJSON to GeoJSON
+    const geojsonData = topojson.feature(topojsonData, topojsonData.objects.countries);
+    
     // Assign value to each country from requestsMapData
     geojsonData.features.forEach((feature) => {
       const isoCode = feature.properties.ISO_A2;
@@ -183,6 +186,23 @@ $(function () {
       style: style,
       onEachFeature: onEachFeature,
     }).addTo(map);
+  }).fail(function() {
+    // Fallback to GeoJSON if TopoJSON fails
+    console.warn("Failed to load TopoJSON, falling back to GeoJSON");
+    $.getJSON(`${baseUrl}/json/countries.geojson`, (geojsonData) => {
+      geojsonData.features.forEach((feature) => {
+        const isoCode = feature.properties.ISO_A2;
+        feature.properties.value =
+          (requestsMapData[isoCode] || {})["request"] || 0;
+        feature.properties.blocked =
+          (requestsMapData[isoCode] || {})["blocked"] || 0;
+      });
+
+      geojson = L.geoJson(geojsonData, {
+        style: style,
+        onEachFeature: onEachFeature,
+      }).addTo(map);
+    });
   });
 
   // Add a legend to the map
