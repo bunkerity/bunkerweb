@@ -53,7 +53,7 @@ $(function () {
               </div>
               <div class="card-body p-1 pt-1">
                   <p class="card-text">${t(
-                    "dashboard.map.blocked_requests",
+                    "dashboard.map.blocked_requests"
                   )}: ${props.blocked}</p>
               </div>
           </div>
@@ -167,11 +167,62 @@ $(function () {
 
   let geojson;
 
-  // Load TopoJSON data and add to map
-  $.getJSON(`${baseUrl}/json/countries.topojson`, (topojsonData) => {
+  // Cache for geo data
+  const geoDataCache = {
+    topojson: null,
+    geojson: null,
+  };
+
+  // Function to load and cache geo data
+  function loadGeoData() {
+    // Check if TopoJSON is cached
+    if (geoDataCache.topojson) {
+      processTopoJSONData(geoDataCache.topojson);
+      return;
+    }
+
+    // Try to load from localStorage first
+    const cachedTopoJSON = localStorage.getItem("bunkerweb_topojson_data");
+    if (cachedTopoJSON) {
+      try {
+        const topojsonData = JSON.parse(cachedTopoJSON);
+        geoDataCache.topojson = topojsonData;
+        processTopoJSONData(topojsonData);
+        return;
+      } catch (e) {
+        console.warn(
+          "Failed to parse cached TopoJSON data, removing from cache"
+        );
+        localStorage.removeItem("bunkerweb_topojson_data");
+      }
+    }
+
+    // Load TopoJSON data from server
+    $.getJSON(`${baseUrl}/json/countries.topojson`, (topojsonData) => {
+      // Cache the data
+      geoDataCache.topojson = topojsonData;
+      try {
+        localStorage.setItem(
+          "bunkerweb_topojson_data",
+          JSON.stringify(topojsonData)
+        );
+      } catch (e) {
+        console.warn("Failed to cache TopoJSON data to localStorage:", e);
+      }
+      processTopoJSONData(topojsonData);
+    }).fail(function () {
+      loadGeoJSONFallback();
+    });
+  }
+
+  // Function to process TopoJSON data
+  function processTopoJSONData(topojsonData) {
     // Convert TopoJSON to GeoJSON
-    const geojsonData = topojson.feature(topojsonData, topojsonData.objects.countries);
-    
+    const geojsonData = topojson.feature(
+      topojsonData,
+      topojsonData.objects.countries
+    );
+
     // Assign value to each country from requestsMapData
     geojsonData.features.forEach((feature) => {
       const isoCode = feature.properties.ISO_A2;
@@ -186,24 +237,67 @@ $(function () {
       style: style,
       onEachFeature: onEachFeature,
     }).addTo(map);
-  }).fail(function() {
+  }
+
+  // Function to load GeoJSON as fallback
+  function loadGeoJSONFallback() {
+    // Check if GeoJSON is cached
+    if (geoDataCache.geojson) {
+      processGeoJSONData(geoDataCache.geojson);
+      return;
+    }
+
+    // Try to load from localStorage first
+    const cachedGeoJSON = localStorage.getItem("bunkerweb_geojson_data");
+    if (cachedGeoJSON) {
+      try {
+        const geojsonData = JSON.parse(cachedGeoJSON);
+        geoDataCache.geojson = geojsonData;
+        processGeoJSONData(geojsonData);
+        return;
+      } catch (e) {
+        console.warn(
+          "Failed to parse cached GeoJSON data, removing from cache"
+        );
+        localStorage.removeItem("bunkerweb_geojson_data");
+      }
+    }
+
     // Fallback to GeoJSON if TopoJSON fails
     console.warn("Failed to load TopoJSON, falling back to GeoJSON");
     $.getJSON(`${baseUrl}/json/countries.geojson`, (geojsonData) => {
-      geojsonData.features.forEach((feature) => {
-        const isoCode = feature.properties.ISO_A2;
-        feature.properties.value =
-          (requestsMapData[isoCode] || {})["request"] || 0;
-        feature.properties.blocked =
-          (requestsMapData[isoCode] || {})["blocked"] || 0;
-      });
-
-      geojson = L.geoJson(geojsonData, {
-        style: style,
-        onEachFeature: onEachFeature,
-      }).addTo(map);
+      // Cache the data
+      geoDataCache.geojson = geojsonData;
+      try {
+        localStorage.setItem(
+          "bunkerweb_geojson_data",
+          JSON.stringify(geojsonData)
+        );
+      } catch (e) {
+        console.warn("Failed to cache GeoJSON data to localStorage:", e);
+      }
+      processGeoJSONData(geojsonData);
     });
-  });
+  }
+
+  // Function to process GeoJSON data
+  function processGeoJSONData(geojsonData) {
+    geojsonData.features.forEach((feature) => {
+      const isoCode = feature.properties.ISO_A2;
+      feature.properties.value =
+        (requestsMapData[isoCode] || {})["request"] || 0;
+      feature.properties.blocked =
+        (requestsMapData[isoCode] || {})["blocked"] || 0;
+    });
+
+    geojson = L.geoJson(geojsonData, {
+      style: style,
+      onEachFeature: onEachFeature,
+    }).addTo(map);
+  }
+
+  // Initialize geo data loading
+  loadGeoData();
 
   // Add a legend to the map
   const legend = L.control({ position: "bottomright" });
@@ -229,7 +323,7 @@ $(function () {
           getColor(from + 1) +
           '"></i> ' +
           from +
-          (to ? "&ndash;" + to : "+"),
+          (to ? "&ndash;" + to : "+")
       );
     }
 
@@ -246,7 +340,7 @@ $(function () {
   // Ensure each value is properly converted to a number
   const totalRequests = Object.values(requestsData).reduce(
     (acc, curr) => acc + parseInt(curr, 10), // Parse as integer
-    0, // Initial value for the accumulator
+    0 // Initial value for the accumulator
   );
 
   const blockedRequests = Object.keys(requestsData).reduce((acc, key) => {
@@ -349,7 +443,7 @@ $(function () {
 
     requestsChart = new ApexCharts(
       document.querySelector("#requests-stats"),
-      requestsOptions,
+      requestsOptions
     );
     requestsChart.render();
   }
@@ -459,7 +553,7 @@ $(function () {
 
     ipsChart = new ApexCharts(
       document.querySelector("#requests-ips"),
-      ipsOptions,
+      ipsOptions
     );
     ipsChart.render();
   }
@@ -473,14 +567,14 @@ $(function () {
   const blockingData = JSON.parse($("#requests-blocking-data").text());
 
   const dataValues = Object.values(blockingData).map((value) =>
-    parseInt(value, 10),
+    parseInt(value, 10)
   );
   const categories = Object.keys(blockingData).map((key) =>
     new Date(key).toLocaleTimeString([], {
       hour: "numeric",
       minute: undefined,
       hour12: true,
-    }),
+    })
   );
 
   const minValue = Math.min(...dataValues);
@@ -608,7 +702,7 @@ $(function () {
 
     blockingChart = new ApexCharts(
       document.querySelector("#requests-blocking"),
-      blockingOptions,
+      blockingOptions
     );
     blockingChart.render();
   }
