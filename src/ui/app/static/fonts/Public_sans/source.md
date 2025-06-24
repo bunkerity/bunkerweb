@@ -2,5 +2,6 @@
 
 # https://github.com/uswds/public-sans
 
-# Download: 
+# Download:
+
 https://github.com/uswds/public-sans/releases/download/v2.001/public-sans-v2.001.zip

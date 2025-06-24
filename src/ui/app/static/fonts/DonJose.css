@@ -3,6 +3,7 @@
   font-style: normal;
   font-weight: 900;
   font-display: swap;
-  src: url(../fonts/DonJose/DonJose-Black.woff2) format("woff2"),
-       url(../fonts/DonJose/DonJose_Black.otf) format("opentype");
+  src:
+    url(../fonts/DonJose/DonJose-Black.woff2) format("woff2"),
+    url(../fonts/DonJose/DonJose_Black.otf) format("opentype");
 }

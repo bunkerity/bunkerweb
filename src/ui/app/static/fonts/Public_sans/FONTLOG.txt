@@ -31,7 +31,7 @@ General
 Glyphs
 - Modified `eth` contours
 - Adjusted curves of `S` and `Thorn`
-- Corrected 
+- Corrected
   - `Eng`, `eng`
   - `Ldot`, '`ldot`
   - `Tbar`, `tbar`

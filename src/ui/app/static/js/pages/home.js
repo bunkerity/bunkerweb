@@ -53,7 +53,7 @@ $(function () {
               </div>
               <div class="card-body p-1 pt-1">
                   <p class="card-text">${t(
-                    "dashboard.map.blocked_requests"
+                    "dashboard.map.blocked_requests",
                   )}: ${props.blocked}</p>
               </div>
           </div>
@@ -268,7 +268,7 @@ $(function () {
     memoryCache,
     url,
     processFn,
-    fallbackFn = null
+    fallbackFn = null,
   ) {
     // Check if data is already in memory cache
     if (memoryCache) {
@@ -322,7 +322,7 @@ $(function () {
       geoDataCache.topojson,
       `${baseUrl}/json/countries.topojson`,
       processTopoJSONData,
-      loadGeoJSONFallback
+      loadGeoJSONFallback,
     );
   }
 
@@ -331,7 +331,7 @@ $(function () {
     // Convert TopoJSON to GeoJSON
     const geojsonData = topojson.feature(
       topojsonData,
-      topojsonData.objects.countries
+      topojsonData.objects.countries,
     );
 
     // Assign value to each country from requestsMapData
@@ -357,7 +357,7 @@ $(function () {
       "bunkerweb_geojson_data",
       geoDataCache.geojson,
       `${baseUrl}/json/countries.geojson`,
-      processGeoJSONData
+      processGeoJSONData,
     );
   }
 
@@ -404,7 +404,7 @@ $(function () {
           getColor(from + 1) +
           '"></i> ' +
           from +
-          (to ? "&ndash;" + to : "+")
+          (to ? "&ndash;" + to : "+"),
       );
     }
 
@@ -421,7 +421,7 @@ $(function () {
   // Ensure each value is properly converted to a number
   const totalRequests = Object.values(requestsData).reduce(
     (acc, curr) => acc + parseInt(curr, 10), // Parse as integer
-    0 // Initial value for the accumulator
+    0, // Initial value for the accumulator
   );
 
   const blockedRequests = Object.keys(requestsData).reduce((acc, key) => {
@@ -524,7 +524,7 @@ $(function () {
 
     requestsChart = new ApexCharts(
       document.querySelector("#requests-stats"),
-      requestsOptions
+      requestsOptions,
     );
     requestsChart.render();
   }
@@ -634,7 +634,7 @@ $(function () {
 
     ipsChart = new ApexCharts(
       document.querySelector("#requests-ips"),
-      ipsOptions
+      ipsOptions,
     );
     ipsChart.render();
   }
@@ -648,14 +648,14 @@ $(function () {
   const blockingData = JSON.parse($("#requests-blocking-data").text());
 
   const dataValues = Object.values(blockingData).map((value) =>
-    parseInt(value, 10)
+    parseInt(value, 10),
   );
   const categories = Object.keys(blockingData).map((key) =>
     new Date(key).toLocaleTimeString([], {
       hour: "numeric",
       minute: undefined,
       hour12: true,
-    })
+    }),
   );
 
   const minValue = Math.min(...dataValues);
@@ -783,7 +783,7 @@ $(function () {
 
     blockingChart = new ApexCharts(
       document.querySelector("#requests-blocking"),
-      blockingOptions
+      blockingOptions,
     );
     blockingChart.render();
   }

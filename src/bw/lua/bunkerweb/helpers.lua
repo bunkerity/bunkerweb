@@ -253,7 +253,7 @@ function helpers.load_variables(all_variables, plugins)
 	for setting, data in pairs(settings) do
 		all_settings[setting] = data
 	end
-	
+
 	-- Initialize variables structure
 	local variables = { ["global"] = {} }
 	local multisite = all_variables["MULTISITE"] == "yes"
@@ -264,7 +264,7 @@ function helpers.load_variables(all_variables, plugins)
 			table.insert(server_names, server_name)
 		end
 	end
-	
+
 	-- Pre-compile patterns for better performance
 	local escaped_server_names = {}
 	if multisite then
@@ -272,14 +272,14 @@ function helpers.load_variables(all_variables, plugins)
 			escaped_server_names[server_name] = server_name:gsub("([^%w])", "%%%1")
 		end
 	end
-	
+
 	-- Single pass through all_variables
 	for variable, value in pairs(all_variables) do
 		-- Check for direct global settings first
 		if all_settings[variable] then
 			variables["global"][variable] = value
 		end
-		
+
 		-- Handle multisite and multiple settings in one pass
 		if multisite then
 			-- Try to match server-specific variables
@@ -300,14 +300,14 @@ function helpers.load_variables(all_variables, plugins)
 				end
 			end
 		end
-		
+
 		-- Handle multiple settings for global
 		local base_setting = variable:match("^(.+)_%d+$")
 		if base_setting and all_settings[base_setting] and all_settings[base_setting].multiple then
 			variables["global"][variable] = value
 		end
 	end
-	
+
 	return true, variables
 end
 

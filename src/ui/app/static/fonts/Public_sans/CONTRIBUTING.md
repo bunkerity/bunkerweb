@@ -39,7 +39,7 @@ Public Sans is licensed under the [SIL Open Font License, Version 1.1](https://s
 
 License of USWDS’s Modified Version is based on the [SIL Open Font License, Version 1.1](https://github.com/uswds/public-sans/blob/master/LICENSE.md#sil-open-font-license-version-11) section of [LICENSE.md](https://github.com/uswds/public-sans/blob/master/LICENSE.md). The terms and conditions for modifications made to the original font by USWDS in the USWDS Modified Version can be found at https://github.com/uswds/public-sans/blob/master/LICENSE.md.
 
-By submitting a pull request, you agree to comply with the terms and conditions of the SIL Open Font License, Version 1.1. 
+By submitting a pull request, you agree to comply with the terms and conditions of the SIL Open Font License, Version 1.1.
 
 Public Sans is a GSA project. While GSA's contributions are not subject to copyright in the United States, contributors must license new contributions and derivative works under the SIL Open Font License, Version 1.1, as required under Section 5 of the SIL Open Font License, Version 1.1.
 
