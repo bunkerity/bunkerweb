@@ -1,0 +1,38 @@
+/* print styles for mkdocs material theme 
+https://github.com/squidfunk/mkdocs-material */
+
+
+/* Table of Contents styling */
+#print-site-page ul.toc-section-line-border { 
+    border-left: 5px solid var(--md-default-fg-color--lightest);
+}
+
+
+/* Box shadows don't do well in PDFs */
+#print-site-page table {
+    border: 1px solid hsla(200, 18%, 26%, 1); /* #EFEFEF */
+    box-shadow: none !important;
+}
+
+@media print {
+    #print-site-page td {
+        word-wrap: break-word;
+    }
+
+}
+
+@page {
+
+    size: A4 portrait;
+    margin: 4em 1.5em 4em 1.5em;
+    padding: 0em 0em 0em 0em;
+    counter-increment: page;
+
+    @bottom-center {
+        content: string(chapter);
+    }
+    @bottom-right {
+        content: 'Page ' counter(page);
+    }
+
+}
