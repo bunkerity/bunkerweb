@@ -30,7 +30,8 @@
       "id": "cors-allow-methods",
       "label": "Access-Control-Allow-Methods value",
       "regex": "^(\\*|(?![, ])(,? ?[A-Z]{3,})*)?$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": ", "
     },
     "CORS_ALLOW_HEADERS": {
       "context": "multisite",
@@ -39,7 +40,8 @@
       "id": "cors-allow-headers",
       "label": "Access-Control-Allow-Headers value",
       "regex": "^(\\*|(?![, ])(,? ?([\\w\\-]+))*)?$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": ","
     },
     "CORS_ALLOW_CREDENTIALS": {
       "context": "multisite",
@@ -57,7 +59,8 @@
       "id": "cors-expose-headers",
       "label": "Access-Control-Expose-Headers value",
       "regex": "^(\\*|(?![, ]+)(,? ?([\\w\\-]+))*)?$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": ","
     },
     "CROSS_ORIGIN_OPENER_POLICY": {
       "context": "multisite",
@@ -96,7 +99,7 @@
       "id": "cors-max-age",
       "label": "Access-Control-Max-Age value",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "CORS_DENY_REQUEST": {
       "context": "multisite",

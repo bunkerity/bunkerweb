@@ -4,9 +4,12 @@ from operator import itemgetter
 from psutil import virtual_memory
 from flask import Blueprint, render_template
 from flask_login import login_required
-
+from json import loads
+from itertools import chain
 
 from app.dependencies import BW_INSTANCES_UTILS, DB
+from app.routes.utils import get_redis_client
+from app.utils import LOGGER
 
 home = Blueprint("home", __name__)
 
@@ -14,7 +17,27 @@ home = Blueprint("home", __name__)
 @home.route("/home", methods=["GET"])
 @login_required
 def home_page():
-    blocked_requests = BW_INSTANCES_UTILS.get_metrics("requests").get("requests", [])
+    redis_client = get_redis_client()
+
+    # Fetch requests from both Redis and BW instances
+    def fetch_requests():
+        if redis_client:
+            try:
+                redis_requests = redis_client.lrange("requests", 0, -1)
+                redis_requests = (loads(request_raw.decode("utf-8", "replace")) for request_raw in redis_requests)
+            except Exception as e:
+                LOGGER.error(f"Failed to fetch requests from Redis: {e}")
+                redis_requests = []
+        else:
+            redis_requests = []
+
+        instance_requests = BW_INSTANCES_UTILS.get_metrics("requests").get("requests", [])
+        return chain(redis_requests, instance_requests)
+
+    # Get all blocked requests and filter unique ones
+    seen_ids = set()
+    blocked_requests = [request for request in fetch_requests() if request.get("id") not in seen_ids and not seen_ids.add(request.get("id"))]
+
     request_countries = {}
     request_ips = {}
     current_date = datetime.now().astimezone()

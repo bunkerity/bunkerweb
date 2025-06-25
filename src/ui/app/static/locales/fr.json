@@ -599,6 +599,7 @@
       "ban_specific_service": "Le bannissement s'appliquera uniquement à ce service spécifique.",
       "hostname_length_limit": "Le nom d'hôte est limité à 256 caractères.",
       "hostname_special_chars": "Seuls `/` et `:` sont autorisés pour la spécification du protocole/port.",
+      "multivalue_separator": "Les valeurs sont séparées par :",
       "permanent_ban": "Si coché, le bannissement ne prendra jamais fin jusqu'à suppression manuelle",
       "photo_extensions": "JPG, GIF ou PNG autorisés. Taille max : 800 Ko."
     },
@@ -662,6 +663,7 @@
       "config_name": "ma-config-perso",
       "enter_username": "Entrez votre nom d'utilisateur",
       "keywords": "Mots-clés...",
+      "multivalue_enter_value": "Entrez une valeur...",
       "plugin_search": "Rechercher des plugins...",
       "search": "Rechercher...",
       "select_service": "Sélectionner un Service",

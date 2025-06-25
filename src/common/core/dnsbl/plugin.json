@@ -21,7 +21,8 @@
       "id": "dnsbl-list",
       "label": "DNSBL list",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     }
   }
 }

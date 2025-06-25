@@ -30,7 +30,7 @@
       "id": "sessions-idling-timeout",
       "label": "Sessions idling timeout",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "SESSIONS_ROLLING_TIMEOUT": {
       "context": "global",
@@ -39,7 +39,7 @@
       "id": "sessions-rolling-timeout",
       "label": "Sessions rolling timeout",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "SESSIONS_ABSOLUTE_TIMEOUT": {
       "context": "global",
@@ -48,7 +48,7 @@
       "id": "sessions-absolute-timeout",
       "label": "Sessions absolute timeout",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "SESSIONS_CHECK_IP": {
       "context": "global",

@@ -24,7 +24,7 @@
     "id": "http-port",
     "label": "HTTP port",
     "regex": "^\\d+$",
-    "type": "text",
+    "type": "number",
     "multiple": "listen-http-ports"
   },
   "HTTPS_PORT": {
@@ -34,7 +34,7 @@
     "id": "https-port",
     "label": "HTTPS port",
     "regex": "^\\d+$",
-    "type": "text",
+    "type": "number",
     "multiple": "listen-https-ports"
   },
   "MULTISITE": {
@@ -71,7 +71,7 @@
     "id": "worker-rlimit-nofile",
     "label": "Open files per worker",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "number"
   },
   "WORKER_CONNECTIONS": {
     "context": "global",
@@ -80,7 +80,7 @@
     "id": "worker-connections",
     "label": "Connections per worker",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "number"
   },
   "LOG_FORMAT": {
     "context": "global",
@@ -189,7 +189,7 @@
     "id": "api-http-listen",
     "label": "API port number",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "number"
   },
   "API_LISTEN_IP": {
     "context": "global",

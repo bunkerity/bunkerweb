@@ -599,6 +599,7 @@
       "ban_specific_service": "پابندی صرف اس مخصوص سروس پر لاگو ہوگی۔",
       "hostname_length_limit": "ہوسٹ نام 256 حروف تک محدود ہے۔",
       "hostname_special_chars": "پروٹوکول/پورٹ تفصیلات کے لیے صرف `/` اور `:` کی اجازت ہے۔",
+      "multivalue_separator": "اقدار اس سے جدا ہیں:",
       "permanent_ban": "اگر منتخب کیا گیا تو پابندی اس وقت تک ختم نہیں ہوگی جب تک اسے دستی طور پر ہٹایا نہ جائے۔",
       "photo_extensions": "JPG, GIF, یا PNG کی اجازت ہے۔ زیادہ سے زیادہ سائز: 800KB۔"
     },
@@ -662,6 +663,7 @@
       "config_name": "میری-کسٹم-کنفیگ",
       "enter_username": "اپنا صارف نام درج کریں",
       "keywords": "کلیدی الفاظ...",
+      "multivalue_enter_value": "قدر درج کریں...",
       "plugin_search": "پلگ ان تلاش کریں...",
       "search": "تلاش کریں...",
       "select_service": "سروس منتخب کریں",

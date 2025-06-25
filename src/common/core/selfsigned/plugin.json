@@ -31,7 +31,7 @@
       "id": "self-signed-ssl-expiry",
       "label": "Certificate expiry",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "SELF_SIGNED_SSL_SUBJ": {
       "context": "multisite",

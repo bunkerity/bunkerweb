@@ -30,7 +30,8 @@
       "id": "allowed-methods",
       "label": "Allowed methods",
       "regex": "^(?!\\|)(\\|?[A-Z]{3,})+$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": "|"
     },
     "MAX_CLIENT_SIZE": {
       "context": "multisite",
@@ -129,7 +130,7 @@
       "id": "open-file-cache-min-uses",
       "label": "Open file cache min uses",
       "regex": "^[1-9]\\d*$",
-      "type": "text"
+      "type": "number"
     },
     "OPEN_FILE_CACHE_VALID": {
       "context": "multisite",
@@ -147,7 +148,8 @@
       "id": "external-plugin-urls",
       "label": "External plugin URLs",
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "DENY_HTTP_STATUS": {
       "context": "global",

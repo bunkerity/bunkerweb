@@ -80,7 +80,8 @@
       "id": "reverse-proxy-headers",
       "label": "Reverse proxy headers",
       "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
-      "type": "text",
+      "type": "multivalue",
+      "separator": ";",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_HIDE_HEADERS": {
@@ -100,7 +101,8 @@
       "id": "reverse-proxy-headers-client",
       "label": "Reverse proxy headers-client",
       "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
-      "type": "text",
+      "type": "multivalue",
+      "separator": ";",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_UNDERSCORES_IN_HEADERS": {
@@ -196,7 +198,8 @@
       "id": "reverse-proxy-auth-request-set",
       "label": "Reverse proxy auth request set",
       "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+) [^;]+)*$",
-      "type": "text",
+      "type": "multivalue",
+      "separator": ";",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_INCLUDES": {
@@ -206,7 +209,8 @@
       "id": "reverse-proxy-includes",
       "label": "Reverse proxy includes",
       "regex": "^(?! )( ?([^ ]))*$",
-      "type": "text",
+      "type": "multivalue",
+      "separator": " ",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_PASS_REQUEST_BODY": {
@@ -271,7 +275,7 @@
       "id": "proxy-cache-min-uses",
       "label": "Reverse proxy cache minimum uses",
       "regex": "^[1-9]\\d*$",
-      "type": "text"
+      "type": "number"
     },
     "PROXY_CACHE_KEY": {
       "context": "multisite",
@@ -289,7 +293,8 @@
       "id": "proxy-cache-valid",
       "label": "Reverse proxy cache valid",
       "regex": "^(?! )( ?[1-5]\\d{2}=\\d+(ms?|[shdwMy]))*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "PROXY_NO_CACHE": {
       "context": "multisite",

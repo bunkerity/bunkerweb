@@ -167,8 +167,173 @@ $(function () {
 
   let geojson;
 
-  // Load GeoJSON data and add to map
-  $.getJSON(`${baseUrl}/json/countries.geojson`, (geojsonData) => {
+  // Cache for geo data
+  const geoDataCache = {
+    topojson: null,
+    geojson: null,
+  };
+
+  // IndexedDB helper functions
+  const dbName = "BunkerWebGeoData";
+  const dbVersion = 1;
+  const storeName = "geoData";
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(dbName, dbVersion);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(storeName)) {
+          db.createObjectStore(storeName, { keyPath: "key" });
+        }
+      };
+    });
+  }
+
+  async function getFromIndexedDB(key) {
+    try {
+      const db = await openDB();
+      const transaction = db.transaction([storeName], "readonly");
+      const store = transaction.objectStore(storeName);
+      const request = store.get(key);
+
+      return new Promise((resolve, reject) => {
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result?.data);
+      });
+    } catch (e) {
+      console.warn("IndexedDB get failed:", e);
+      return null;
+    }
+  }
+
+  async function setToIndexedDB(key, data) {
+    try {
+      const db = await openDB();
+      const transaction = db.transaction([storeName], "readwrite");
+      const store = transaction.objectStore(storeName);
+      const request = store.put({ key, data });
+
+      return new Promise((resolve, reject) => {
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(true);
+      });
+    } catch (e) {
+      console.warn("IndexedDB set failed:", e);
+      return false;
+    }
+  }
+
+  async function getCachedData(key) {
+    // Try localStorage first (faster)
+    try {
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      console.warn("localStorage get failed, trying IndexedDB:", e);
+      localStorage.removeItem(key);
+    }
+
+    // Fallback to IndexedDB
+    return await getFromIndexedDB(key);
+  }
+
+  async function setCachedData(key, data) {
+    const dataString = JSON.stringify(data);
+    const dataSize = new Blob([dataString]).size;
+
+    // Try localStorage first for smaller data (< 1MB)
+    if (dataSize < 1024 * 1024) {
+      try {
+        localStorage.setItem(key, dataString);
+        return true;
+      } catch (e) {
+        console.warn("localStorage quota exceeded, using IndexedDB:", e);
+      }
+    }
+
+    // Use IndexedDB for larger data or when localStorage fails
+    return await setToIndexedDB(key, data);
+  }
+
+  // Generic helper function to load and cache geo data
+  async function loadAndCacheGeoData(
+    cacheKey,
+    memoryCache,
+    url,
+    processFn,
+    fallbackFn = null,
+  ) {
+    // Check if data is already in memory cache
+    if (memoryCache) {
+      processFn(memoryCache);
+      return;
+    }
+
+    // Try to load from persistent cache first
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+      try {
+        // Update memory cache
+        if (cacheKey.includes("topojson")) {
+          geoDataCache.topojson = cachedData;
+        } else {
+          geoDataCache.geojson = cachedData;
+        }
+        processFn(cachedData);
+        return;
+      } catch (e) {
+        console.warn(`Failed to parse cached ${cacheKey} data`);
+      }
+    }
+
+    // Load data from server
+    $.getJSON(url, async (data) => {
+      // Update memory cache
+      if (cacheKey.includes("topojson")) {
+        geoDataCache.topojson = data;
+      } else {
+        geoDataCache.geojson = data;
+      }
+
+      // Cache the data
+      const cached = await setCachedData(cacheKey, data);
+      if (!cached) {
+        console.warn(`Failed to cache ${cacheKey} data`);
+      }
+      processFn(data);
+    }).fail(function () {
+      if (fallbackFn) {
+        fallbackFn();
+      }
+    });
+  }
+
+  // Function to load and cache geo data
+  async function loadGeoData() {
+    await loadAndCacheGeoData(
+      "bunkerweb_topojson_data",
+      geoDataCache.topojson,
+      `${baseUrl}/json/countries.topojson`,
+      processTopoJSONData,
+      loadGeoJSONFallback,
+    );
+  }
+
+  // Function to process TopoJSON data
+  function processTopoJSONData(topojsonData) {
+    // Convert TopoJSON to GeoJSON
+    const geojsonData = topojson.feature(
+      topojsonData,
+      topojsonData.objects.countries,
+    );
+
     // Assign value to each country from requestsMapData
     geojsonData.features.forEach((feature) => {
       const isoCode = feature.properties.ISO_A2;
@@ -183,7 +348,37 @@ $(function () {
       style: style,
       onEachFeature: onEachFeature,
     }).addTo(map);
-  });
+  }
+
+  // Function to load GeoJSON as fallback
+  async function loadGeoJSONFallback() {
+    console.warn("Failed to load TopoJSON, falling back to GeoJSON");
+    await loadAndCacheGeoData(
+      "bunkerweb_geojson_data",
+      geoDataCache.geojson,
+      `${baseUrl}/json/countries.geojson`,
+      processGeoJSONData,
+    );
+  }
+
+  // Function to process GeoJSON data
+  function processGeoJSONData(geojsonData) {
+    geojsonData.features.forEach((feature) => {
+      const isoCode = feature.properties.ISO_A2;
+      feature.properties.value =
+        (requestsMapData[isoCode] || {})["request"] || 0;
+      feature.properties.blocked =
+        (requestsMapData[isoCode] || {})["blocked"] || 0;
+    });
+
+    geojson = L.geoJson(geojsonData, {
+      style: style,
+      onEachFeature: onEachFeature,
+    }).addTo(map);
+  }
+
+  // Initialize geo data loading
+  loadGeoData();
 
   // Add a legend to the map
   const legend = L.control({ position: "bottomright" });

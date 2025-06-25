@@ -599,6 +599,7 @@
       "ban_specific_service": "Il blocco verrà applicato solo a questo servizio specifico.",
       "hostname_length_limit": "Il nome host è limitato a 256 caratteri.",
       "hostname_special_chars": "Solo `/` e `:` sono consentiti per la specifica di protocollo/porta.",
+      "multivalue_separator": "I valori sono separati da:",
       "permanent_ban": "Se selezionato, il blocco non scadrà mai fino a rimozione manuale",
       "photo_extensions": "Consentiti JPG, GIF o PNG. Dimensione massima: 800KB."
     },
@@ -662,6 +663,7 @@
       "config_name": "mia-config-personalizzata",
       "enter_username": "Inserisci il tuo nome utente",
       "keywords": "Parole chiave...",
+      "multivalue_enter_value": "Inserisci valore...",
       "plugin_search": "Cerca plugin...",
       "search": "Cerca...",
       "select_service": "Seleziona Servizio",
