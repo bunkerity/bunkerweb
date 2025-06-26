@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.2-rc7 - ????/??/??
+## v1.6.2 - ????/??/??
+
+- [FEATURE] Refactor download scripts to canonicalize and deduplicate URLs before fetching and implement smarter cache management for improved efficiency
+
+## v1.6.2-rc7 - 2025/06/25
 
 - [BUGFIX] Add a conditional `proxy_hide_header` rule for the `Upgrade` header to preserve WebSocket connections in the `Reverse Proxy` plugin, preventing issues with WebSocket connections when the `REVERSE_PROXY_HIDE_HEADERS` setting is used.
 - [BUGFIX] Correct the Logs page copy-to-clipboard button so it reliably copies selected log entries.
@@ -10,7 +14,7 @@
 - [MISC] Switch the `Bad Behavior` plugin to use the new numeric `BAD_BEHAVIOR_BAN_TIME` setting by updating the permanent ban value from `-1` to `0`.
 - [CONTRIBUTION] Thank you @Michal-Koeckeis-Fresel for the optimizations regarding the web UI fonts and geoip data loading, which significantly improves the performance of the web UI and the new dhparam file to respect the latest security standards.
 
-## v1.6.2-rc6 - ????/??/??
+## v1.6.2-rc6 - 2025/06/20
 
 - [BUGFIX] Ensure template defaults settings are correctly retrieved by jobs and templates.
 - [BUGFIX] No longer completely delete all PRO plugins data upon PRO deactivation, allowing for easier reactivation without losing data.

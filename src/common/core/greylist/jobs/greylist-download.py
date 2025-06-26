@@ -118,6 +118,7 @@ try:
 
     urls = set()
     failed_urls = set()
+    processed_urls = set()  # Track which URLs have been processed globally
     # Initialize aggregation per kind with service tracking
     aggregated_recap = {
         kind: {
@@ -145,17 +146,20 @@ try:
             # Track that this service provided URLs for the current kind
             aggregated_recap[kind]["total_services"].add(service)
 
+            # Use set to avoid duplicate entries
+            unique_entries = set()
             content = b""
             for url in urls_list:
                 url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
                 cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
                 try:
-                    if url_file not in urls:
+                    # Only count URLs that haven't been processed globally
+                    if url not in processed_urls:
                         aggregated_recap[kind]["total_urls"] += 1
 
                     # If the URL has recently been downloaded, use cache
                     if url in failed_urls:
-                        if url_file not in urls:
+                        if url not in processed_urls:
                             aggregated_recap[kind]["failed_count"] += 1
                     elif (
                         isinstance(cached_url, dict)
@@ -163,10 +167,16 @@ try:
                         and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
                     ):
                         LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
-                        if url_file not in urls:
+                        if url not in processed_urls:
                             aggregated_recap[kind]["skipped_urls"] += 1
-                        # Remove first line (URL) and add to content
-                        content += b"\n".join(cached_url.get("data", b"").split(b"\n")[1:]) + b"\n"
+                        # Process cached data and add to unique_entries
+                        cached_data = cached_url.get("data", b"")
+                        if cached_data:
+                            # Skip first line (URL comment) and process entries
+                            for line in cached_data.split(b"\n")[1:]:
+                                line = line.strip()
+                                if line:
+                                    unique_entries.add(line)
                     else:
                         failed = False
                         LOGGER.info(f"Downloading greylist data from {url} ...")
@@ -207,9 +217,10 @@ try:
                                 iterable = resp.iter_lines()
 
                         if not failed:
-                            if url_file not in urls:
+                            if url not in processed_urls:
                                 aggregated_recap[kind]["downloaded_urls"] += 1
 
+                            url_content = b""
                             count_lines = 0
                             for line in iterable:
                                 line = line.strip()
@@ -219,11 +230,13 @@ try:
                                     line = line.split(b" ")[0]
                                 ok, data = check_line(kind, line)
                                 if ok:
-                                    content += data + b"\n"
+                                    unique_entries.add(data)
+                                    url_content += data + b"\n"
                                     count_lines += 1
-                            aggregated_recap[kind]["total_lines"] += count_lines
+                            if url not in processed_urls:
+                                aggregated_recap[kind]["total_lines"] += count_lines
 
-                            cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + content)
+                            cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + url_content)
                             if not cached:
                                 LOGGER.error(f"Error while caching url content for {url}: {err}")
                 except BaseException as e:
@@ -231,9 +244,15 @@ try:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while getting {service} greylist from {url} :\n{e}")
                     failed_urls.add(url)
-                    if url_file not in urls:
+                    if url not in processed_urls:
                         aggregated_recap[kind]["failed_count"] += 1
-                urls.add(url_file)
+                finally:
+                    # Mark URL as processed to avoid double counting
+                    processed_urls.add(url)
+                    urls.add(url_file)
+
+            # Build final content from unique entries, sorted for consistency
+            content = b"\n".join(sorted(unique_entries)) + b"\n" if unique_entries else b""
 
             if not content:
                 continue
