@@ -749,6 +749,7 @@ def before_request():
             supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],
+            extra_scripts=DATA.get("EXTRA_SCRIPTS", []),
             config=DB.get_config(global_only=True, methods=True),
         )
 
