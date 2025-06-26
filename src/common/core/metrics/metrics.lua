@@ -192,29 +192,63 @@ function metrics:timer()
 	for _, key in ipairs(lru:get_keys()) do
 		-- Get LRU data
 		local value = lru:get(key)
-		if key == "requests" and clusterstore_ok then
-			for _, request in ipairs(value) do
-				if not request.synced then
-					-- Add only unsynced requests
-					local ok
-					ok, err = self.clusterstore:call("rpush", "requests", encode(request))
-					if not ok then
-						self.logger:log(ERR, "Can't sync request to Redis: " .. err)
-						break
+		if clusterstore_ok then
+			if key == "requests" then
+				for _, request in ipairs(value) do
+					if not request.synced then
+						-- Add only unsynced requests
+						local ok
+						ok, err = self.clusterstore:call("rpush", "requests", encode(request))
+						if not ok then
+							self.logger:log(ERR, "Can't sync request to Redis: " .. err)
+							break
+						end
+						request.synced = true -- Mark as synced
 					end
-					request.synced = true -- Mark as synced
+				end
+
+				-- Remove old requests if needed
+				local max_requests = tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"])
+				local nb_requests = self.clusterstore:call("llen", "requests")
+				if nb_requests and nb_requests > max_requests then
+					self.clusterstore:call("ltrim", "requests", -max_requests, -1)
+				end
+
+				-- Update LRU cache
+				lru:set("requests", value)
+			elseif key ~= "setup" and self.variables["METRICS_SAVE_TO_REDIS"] == "yes" then
+				-- Sync other metrics (counters and tables) to Redis with optimized data structures
+				local redis_key = "metrics:" .. key .. ":" .. wid
+				local ok
+				if type(value) == "table" then
+					-- Use Redis list for table values
+					ok, err = self.clusterstore:call("del", redis_key)
+					if ok then
+						for _, item in ipairs(value) do
+							local item_value = type(item) == "table" and encode(item) or tostring(item)
+							ok, err = self.clusterstore:call("rpush", redis_key, item_value)
+							if not ok then
+								self.logger:log(ERR, "Can't push metric table item " .. key .. " to Redis: " .. err)
+								break
+							end
+						end
+					else
+						self.logger:log(ERR, "Can't clear metric table " .. key .. " in Redis: " .. err)
+					end
+				elseif type(value) == "number" then
+					-- Use Redis string for numeric counters
+					ok, err = self.clusterstore:call("set", redis_key, value)
+					if not ok then
+						self.logger:log(ERR, "Can't sync metric counter " .. key .. " to Redis: " .. err)
+					end
+				else
+					-- Use Redis string for other types
+					ok, err = self.clusterstore:call("set", redis_key, tostring(value))
+					if not ok then
+						self.logger:log(ERR, "Can't sync metric " .. key .. " to Redis: " .. err)
+					end
 				end
 			end
-
-			-- Remove old requests if needed
-			local max_requests = tonumber(self.variables["METRICS_MAX_BLOCKED_REQUESTS_REDIS"])
-			local nb_requests = self.clusterstore:call("llen", "requests")
-			if nb_requests and nb_requests > max_requests then
-				self.clusterstore:call("ltrim", "requests", -max_requests, -1)
-			end
-
-			-- Update LRU cache
-			lru:set("requests", value)
 		end
 		if type(value) == "table" then
 			value = encode(value)

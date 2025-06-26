@@ -3,6 +3,7 @@
 ## v1.6.2 - ????/??/??
 
 - [FEATURE] Refactor download scripts to canonicalize and deduplicate URLs before fetching and implement smarter cache management for improved efficiency
+- [FEATURE] Implement Redis-backed metrics storage and optimize retrieval workflows for faster, more reliable performance
 
 ## v1.6.2-rc7 - 2025/06/25
 
