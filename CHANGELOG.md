@@ -2,6 +2,7 @@
 
 ## v1.6.2 - ????/??/??
 
+- [SECURITY] Introduce ModSecurity exclusion rules targeting the password input upon login, preventing false-positive blocks on valid complex passwords while preserving strict overall request inspection.
 - [FEATURE] Refactor download scripts to canonicalize and deduplicate URLs before fetching and implement smarter cache management for improved efficiency
 - [FEATURE] Implement Redis-backed metrics storage and optimize retrieval workflows for faster, more reliable performance
 
