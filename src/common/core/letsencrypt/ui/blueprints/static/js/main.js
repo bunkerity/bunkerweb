@@ -1,585 +1,790 @@
 (async function waitForDependencies() {
-  // Wait for jQuery
-  while (typeof jQuery === "undefined") {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
+    # Wait for jQuery
+    while (typeof jQuery === "undefined") {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
-  // Wait for $ to be available (in case of jQuery.noConflict())
-  while (typeof $ === "undefined") {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
+    # Wait for $ to be available (in case of jQuery.noConflict())
+    while (typeof $ === "undefined") {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
-  // Wait for DataTable to be available
-  while (typeof $.fn.DataTable === "undefined") {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
+    # Wait for DataTable to be available
+    while (typeof $.fn.DataTable === "undefined") {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
-  $(document).ready(function () {
-    // Ensure i18next is loaded before using it
-    const t =
-      typeof i18next !== "undefined"
-        ? i18next.t
-        : (key, fallback) => fallback || key; // Fallback
+    $(document).ready(function () {
+        const logLevel = process.env.LOG_LEVEL;
+        const isDebug = logLevel === "debug";
 
-    var actionLock = false;
-    const isReadOnly = $("#is-read-only").val()?.trim() === "True";
-    const userReadOnly = $("#user-read-only").val()?.trim() === "True";
+        if (isDebug) {
+            console.debug("Initializing Let's Encrypt certificate management");
+            console.debug("Log level:", logLevel);
+            console.debug("jQuery version:", $.fn.jquery);
+            console.debug("DataTables version:", $.fn.DataTable.version);
+        }
 
-    const headers = [
-      {
-        title: "Domain",
-        tooltip: "Domain name for the certificate",
-      },
-      {
-        title: "Common Name",
-        tooltip: "Common Name (CN) in the certificate",
-      },
-      {
-        title: "Issuer",
-        tooltip: "Certificate issuing authority",
-      },
-      {
-        title: "Valid From",
-        tooltip: "Date from which the certificate is valid",
-      },
-      {
-        title: "Valid To",
-        tooltip: "Date until which the certificate is valid",
-      },
-      {
-        title: "Preferred Profile",
-        tooltip: "Preferred profile for the certificate",
-      },
-      {
-        title: "Challenge",
-        tooltip: "Challenge type used for domain validation",
-      },
-      {
-        title: "Key Type",
-        tooltip: "Type of key used in the certificate",
-      },
-    ];
+        # Ensure i18next is loaded before using it
+        const t =
+            typeof i18next !== "undefined"
+                ? i18next.t
+                : (key, fallback) => fallback || key;
 
-    // Set up the delete confirmation modal
-    const setupDeleteCertModal = (certs) => {
-      const $modalBody = $("#deleteCertContent");
-      $modalBody.empty(); // Clear previous content
+        var actionLock = false;
+        const isReadOnly = $("#is-read-only").val()?.trim() === "True";
+        const userReadOnly = $("#user-read-only").val()?.trim() === "True";
 
-      if (certs.length === 1) {
-        $modalBody.html(
-          `<p>You are about to delete the certificate for: <strong>${certs[0].domain}</strong></p>`
-        );
-        $("#confirmDeleteCertBtn").data("cert-name", certs[0].domain);
-      } else {
-        const certList = certs
-          .map((cert) => `<li>${cert.domain}</li>`)
-          .join("");
-        $modalBody.html(
-          `<p>You are about to delete these certificates:</p>
-         <ul>${certList}</ul>`
-        );
-        $("#confirmDeleteCertBtn").data(
-          "cert-names",
-          certs.map((c) => c.domain)
-        );
-      }
-    };
+        if (isDebug) {
+            console.debug("Application state initialized:");
+            console.debug("- Read-only mode:", isReadOnly);
+            console.debug("- User read-only:", userReadOnly);
+            console.debug("- Action lock:", actionLock);
+            console.debug("- CSRF token available:", !!$("#csrf_token").val());
+        }
 
-    // Set up error modal
-    const showErrorModal = (title, message) => {
-      $("#errorModalLabel").text(title);
-      $("#errorModalContent").html(message);
-      const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-      errorModal.show();
-    };
+        const headers = [
+            {
+                title: "Domain",
+                tooltip: "Domain name for the certificate",
+            },
+            {
+                title: "Common Name",
+                tooltip: "Common Name (CN) in the certificate",
+            },
+            {
+                title: "Issuer",
+                tooltip: "Certificate issuing authority",
+            },
+            {
+                title: "Valid From",
+                tooltip: "Date from which the certificate is valid",
+            },
+            {
+                title: "Valid To",
+                tooltip: "Date until which the certificate is valid",
+            },
+            {
+                title: "Preferred Profile",
+                tooltip: "Preferred profile for the certificate",
+            },
+            {
+                title: "Challenge",
+                tooltip: "Challenge type used for domain validation",
+            },
+            {
+                title: "Key Type",
+                tooltip: "Type of key used in the certificate",
+            },
+        ];
 
-    // Handle delete button click
-    $("#confirmDeleteCertBtn").on("click", function () {
-      const certName = $(this).data("cert-name");
-      const certNames = $(this).data("cert-names");
+        # Set up the delete confirmation modal for certificates
+        const setupDeleteCertModal = (certs) => {
+            if (isDebug) {
+                console.debug("Setting up delete modal for certificates:",
+                             certs);
+                console.debug("Modal setup - certificate count:", certs.length);
+            }
 
-      if (certName) {
-        // Delete single certificate
-        deleteCertificate(certName);
-      } else if (certNames && Array.isArray(certNames)) {
-        // Delete multiple certificates one by one
-        const deleteNext = (index) => {
-          if (index < certNames.length) {
-            deleteCertificate(certNames[index], () => {
-              deleteNext(index + 1);
-            });
-          } else {
-            // All deleted, close modal and reload table
-            $("#deleteCertModal").modal("hide");
-            $("#letsencrypt").DataTable().ajax.reload();
-          }
-        };
-        deleteNext(0);
-      }
+            const $modalBody = $("#deleteCertContent");
+            $modalBody.empty();
 
-      // Hide modal after starting delete process
-      $("#deleteCertModal").modal("hide");
-    });
+            if (certs.length === 1) {
+                if (isDebug) {
+                    console.debug("Configuring modal for single certificate:",
+                                  certs[0].domain);
+                }
 
-    function deleteCertificate(certName, callback) {
-      $.ajax({
-        url: `${window.location.pathname}/delete`,
-        type: "POST",
-        contentType: "application/json",
-        data: JSON.stringify({ cert_name: certName }),
-        headers: {
-          "X-CSRFToken": $("#csrf_token").val(),
-        },
-        success: function (response) {
-          if (response.status === "ok") {
-            if (callback) {
-              callback();
+                $modalBody.html(
+                    `<p>You are about to delete the certificate for: ` +
+                    `<strong>${certs[0].domain}</strong></p>`
+                );
+                $("#confirmDeleteCertBtn").data("cert-name", certs[0].domain);
             } else {
-              $("#letsencrypt").DataTable().ajax.reload();
+                if (isDebug) {
+                    console.debug("Configuring modal for multiple certificates:",
+                                  certs.map(c => c.domain));
+                }
+
+                const certList = certs
+                    .map((cert) => `<li>${cert.domain}</li>`)
+                    .join("");
+                $modalBody.html(
+                    `<p>You are about to delete these certificates:</p>
+                     <ul>${certList}</ul>`
+                );
+                $("#confirmDeleteCertBtn").data(
+                    "cert-names",
+                    certs.map((c) => c.domain)
+                );
             }
-          } else {
-            // Handle 200 OK but with error in response
-            showErrorModal(
-              "Certificate Deletion Error",
-              `<p>Error deleting certificate <strong>${certName}</strong>:</p><p>${response.message || "Unknown error"}</p>`
+
+            if (isDebug) {
+                console.debug("Modal configuration completed");
+            }
+        };
+
+        # Show error modal with title and message
+        const showErrorModal = (title, message) => {
+            if (isDebug) {
+                console.debug("Showing error modal:", title, message);
+            }
+
+            $("#errorModalLabel").text(title);
+            $("#errorModalContent").html(message);
+            const errorModal = new bootstrap.Modal(
+                document.getElementById("errorModal")
             );
-            if (callback) callback();
-            else $("#letsencrypt").DataTable().ajax.reload();
-          }
-        },
-        error: function (xhr, status, error) {
-          console.error("Error deleting certificate:", error, xhr);
+            errorModal.show();
+        };
 
-          // Create a more detailed error message
-          let errorMessage = `<p>Failed to delete certificate <strong>${certName}</strong>:</p>`;
+        # Handle delete button click events
+        $("#confirmDeleteCertBtn").on("click", function () {
+            const certName = $(this).data("cert-name");
+            const certNames = $(this).data("cert-names");
 
-          if (xhr.responseJSON && xhr.responseJSON.message) {
-            errorMessage += `<p>${xhr.responseJSON.message}</p>`;
-          } else if (xhr.responseText) {
-            try {
-              const parsedError = JSON.parse(xhr.responseText);
-              errorMessage += `<p>${parsedError.message || error}</p>`;
-            } catch (e) {
-              // If can't parse JSON, use the raw response text if not too large
-              if (xhr.responseText.length < 200) {
-                errorMessage += `<p>${xhr.responseText}</p>`;
-              } else {
-                errorMessage += `<p>${error || "Unknown error"}</p>`;
-              }
+            if (isDebug) {
+                console.debug("Delete button clicked:",
+                              { certName, certNames });
             }
-          } else {
-            errorMessage += `<p>${error || "Unknown error"}</p>`;
-          }
 
-          showErrorModal("Certificate Deletion Failed", errorMessage);
-
-          if (callback) callback();
-          else $("#letsencrypt").DataTable().ajax.reload();
-        },
-      });
-    }
-
-    // DataTable Layout and Buttons
-    const layout = {
-      top1: {
-        searchPanes: {
-          viewTotal: true,
-          cascadePanes: true,
-          collapse: false,
-          columns: [2, 5, 6, 7], // Issuer, Preferred Profile, Challenge and Key Type
-        },
-      },
-      topStart: {},
-      topEnd: {
-        search: true,
-        buttons: [
-          {
-            extend: "auto_refresh",
-            className:
-              "btn btn-sm btn-outline-primary d-flex align-items-center",
-          },
-          {
-            extend: "toggle_filters",
-            className: "btn btn-sm btn-outline-primary toggle-filters",
-          },
-        ],
-      },
-      bottomStart: {
-        pageLength: {
-          menu: [10, 25, 50, 100, { label: "All", value: -1 }],
-        },
-        info: true,
-      },
-    };
-
-    layout.topStart.buttons = [
-      {
-        extend: "colvis",
-        columns: "th:not(:nth-child(-n+3)):not(:last-child)",
-        text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
-          "button.columns",
-          "Columns"
-        )}</span>`,
-        className: "btn btn-sm btn-outline-primary rounded-start",
-        columnText: function (dt, idx, title) {
-          return `${idx + 1}. ${title}`;
-        },
-      },
-      {
-        extend: "colvisRestore",
-        text: `<span class="tf-icons bx bx-reset bx-18px me-2"></span><span class="d-none d-md-inline" data-i18n="button.reset_columns">${t(
-          "button.reset_columns",
-          "Reset columns"
-        )}</span>`,
-        className: "btn btn-sm btn-outline-primary d-none d-md-inline",
-      },
-      {
-        extend: "collection",
-        text: `<span class="tf-icons bx bx-export bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.export">${t(
-          "button.export",
-          "Export"
-        )}</span>`,
-        className: "btn btn-sm btn-outline-primary",
-        buttons: [
-          {
-            extend: "copy",
-            text: `<span class="tf-icons bx bx-copy bx-18px me-2"></span><span data-i18n="button.copy_visible">${t(
-              "button.copy_visible",
-              "Copy visible"
-            )}</span>`,
-            exportOptions: {
-              columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
-            },
-          },
-          {
-            extend: "csv",
-            text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV`,
-            bom: true,
-            filename: "bw_certificates",
-            exportOptions: {
-              modifier: { search: "none" },
-              columns: ":not(:nth-child(-n+2)):not(:last-child)",
-            },
-          },
-          {
-            extend: "excel",
-            text: `<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel`,
-            filename: "bw_certificates",
-            exportOptions: {
-              modifier: { search: "none" },
-              columns: ":not(:nth-child(-n+2)):not(:last-child)",
-            },
-          },
-        ],
-      },
-      {
-        extend: "collection",
-        text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
-          "button.actions",
-          "Actions"
-        )}</span>`,
-        className: "btn btn-sm btn-outline-primary action-button disabled",
-        buttons: [{ extend: "delete_cert", className: "text-danger" }],
-      },
-    ];
-
-    let autoRefresh = false;
-    let autoRefreshInterval = null;
-    const sessionAutoRefresh = sessionStorage.getItem("letsencryptAutoRefresh");
-
-    function toggleAutoRefresh() {
-      autoRefresh = !autoRefresh;
-      sessionStorage.setItem("letsencryptAutoRefresh", autoRefresh);
-      if (autoRefresh) {
-        $(".bx-loader")
-          .addClass("bx-spin")
-          .closest(".btn")
-          .removeClass("btn-outline-primary")
-          .addClass("btn-primary");
-        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-        autoRefreshInterval = setInterval(() => {
-          if (!autoRefresh) {
-            clearInterval(autoRefreshInterval);
-            autoRefreshInterval = null;
-          } else {
-            $("#letsencrypt").DataTable().ajax.reload(null, false);
-          }
-        }, 10000); // 10 seconds
-      } else {
-        $(".bx-loader")
-          .removeClass("bx-spin")
-          .closest(".btn")
-          .removeClass("btn-primary")
-          .addClass("btn-outline-primary");
-        if (autoRefreshInterval) {
-          clearInterval(autoRefreshInterval);
-          autoRefreshInterval = null;
-        }
-      }
-    }
-
-    if (sessionAutoRefresh === "true") {
-      toggleAutoRefresh();
-    }
-
-    const getSelectedCertificates = () => {
-      const certs = [];
-      $("tr.selected").each(function () {
-        const $row = $(this);
-        const domain = $row.find("td:eq(2)").text().trim();
-        certs.push({
-          domain: domain,
-        });
-      });
-      return certs;
-    };
-
-    $.fn.dataTable.ext.buttons.auto_refresh = {
-      text: '<span class="bx bx-loader bx-18px lh-1"></span>&nbsp;&nbsp;<span data-i18n="button.auto_refresh">Auto refresh</span>',
-      action: (e, dt, node, config) => {
-        toggleAutoRefresh();
-      },
-    };
-
-    $.fn.dataTable.ext.buttons.delete_cert = {
-      text: `<span class="tf-icons bx bx-trash bx-18px me-2"></span>Delete certificate`,
-      action: function (e, dt, node, config) {
-        if (isReadOnly) {
-          alert(
-            t(
-              "alert.readonly_mode",
-              "This action is not allowed in read-only mode."
-            )
-          );
-          return;
-        }
-        if (actionLock) return;
-        actionLock = true;
-        $(".dt-button-background").click();
-
-        const certs = getSelectedCertificates();
-        if (certs.length === 0) {
-          actionLock = false;
-          return;
-        }
-        setupDeleteCertModal(certs);
-
-        // Show the modal
-        const deleteModal = new bootstrap.Modal(
-          document.getElementById("deleteCertModal")
-        );
-        deleteModal.show();
-
-        actionLock = false;
-      },
-    };
-
-    // Create columns configuration
-    function buildColumnDefs() {
-      return [
-        { orderable: false, className: "dtr-control", targets: 0 },
-        { orderable: false, render: DataTable.render.select(), targets: 1 },
-        { type: "string", targets: 2 }, // domain
-        { orderable: true, targets: -1 },
-        {
-          targets: [5, 6],
-          render: function (data, type, row) {
-            if (type === "display" || type === "filter") {
-              const date = new Date(data);
-              if (!isNaN(date.getTime())) {
-                return date.toLocaleString();
-              }
+            if (certName) {
+                deleteCertificate(certName);
+            } else if (certNames && Array.isArray(certNames)) {
+                # Delete multiple certificates sequentially
+                const deleteNext = (index) => {
+                    if (index < certNames.length) {
+                        deleteCertificate(certNames[index], () => {
+                            deleteNext(index + 1);
+                        });
+                    } else {
+                        $("#deleteCertModal").modal("hide");
+                        $("#letsencrypt").DataTable().ajax.reload();
+                    }
+                };
+                deleteNext(0);
             }
-            return data;
-          },
-        },
-        {
-          searchPanes: {
-            show: true,
-            combiner: "or",
-            header: t("searchpane.issuer", "Issuer"),
-          },
-          targets: 2, // Issuer column
-        },
-        {
-          searchPanes: {
-            show: true,
-            header: t("searchpane.preferred_profile", "Preferred Profile"),
-            combiner: "or",
-          },
-          targets: 5, // Preferred Profile column
-        },
-        {
-          searchPanes: {
-            show: true,
-            header: t("searchpane.challenge", "Challenge"),
-            combiner: "or",
-          },
-          targets: 6, // Challenge column
-        },
-        {
-          searchPanes: {
-            show: true,
-            header: t("searchpane.key_type", "Key Type"),
-            combiner: "or",
-          },
-          targets: 7, // Key Type column
-        },
-      ];
-    }
 
-    // Define the columns for the DataTable
-    function buildColumns() {
-      return [
-        {
-          data: null,
-          defaultContent: "",
-          orderable: false,
-          className: "dtr-control",
-        },
-        { data: null, defaultContent: "", orderable: false },
-        {
-          data: "domain",
-          title: "Domain",
-        },
-        {
-          data: "common_name",
-          title: "Common Name",
-        },
-        {
-          data: "issuer",
-          title: "Issuer",
-        },
-        {
-          data: "valid_from",
-          title: "Valid From",
-        },
-        {
-          data: "valid_to",
-          title: "Valid To",
-        },
-        {
-          data: "preferred_profile",
-          title: "Preferred Profile",
-        },
-        {
-          data: "challenge",
-          title: "Challenge",
-        },
-        {
-          data: "key_type",
-          title: "Key Type",
-        },
-        {
-          data: "serial_number",
-          title: "Serial Number",
-        },
-        {
-          data: "fingerprint",
-          title: "Fingerprint",
-        },
-        {
-          data: "version",
-          title: "Version",
-        },
-      ];
-    }
-
-    // Utility function to manage header tooltips
-    function updateHeaderTooltips(selector, headers) {
-      $(selector)
-        .find("th")
-        .each((index, element) => {
-          const $th = $(element);
-          const tooltip = headers[index] ? headers[index].tooltip : "";
-          if (!tooltip) return;
-
-          $th.attr({
-            "data-bs-toggle": "tooltip",
-            "data-bs-placement": "bottom",
-            title: tooltip,
-          });
+            $("#deleteCertModal").modal("hide");
         });
 
-      $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
-    }
+        # Delete a single certificate with optional callback
+        function deleteCertificate(certName, callback) {
+            if (isDebug) {
+                console.debug("Starting certificate deletion process:");
+                console.debug("- Certificate name:", certName);
+                console.debug("- Has callback:", !!callback);
+                console.debug("- Request URL:", 
+                              `${window.location.pathname}/delete`);
+            }
 
-    // Initialize the DataTable with columns and configuration
-    const letsencrypt_config = {
-      tableSelector: "#letsencrypt",
-      tableName: "letsencrypt",
-      columnVisibilityCondition: (column) => column > 2 && column < 13,
-      dataTableOptions: {
-        columnDefs: buildColumnDefs(),
-        order: [[2, "asc"]], // Sort by domain name
-        autoFill: false,
-        responsive: true,
-        select: {
-          style: "multi+shift",
-          selector: "td:nth-child(2)",
-          headerCheckbox: true,
-        },
-        layout: layout,
-        processing: true,
-        serverSide: true,
-        ajax: {
-          url: `${window.location.pathname}/fetch`,
-          type: "POST",
-          data: function (d) {
-            d.csrf_token = $("#csrf_token").val();
-            return d;
-          },
-          // Add error handling for ajax requests
-          error: function (jqXHR, textStatus, errorThrown) {
-            console.error("DataTables AJAX error:", textStatus, errorThrown);
-            $("#letsencrypt").addClass("d-none");
-            $("#letsencrypt-waiting")
-              .removeClass("d-none")
-              .text(
-                "Error loading certificates. Please try refreshing the page."
-              )
-              .addClass("text-danger");
-            // Remove any loading indicators
-            $(".dataTables_processing").hide();
-          },
-        },
-        columns: buildColumns(),
-        initComplete: function (settings, json) {
-          $("#letsencrypt_wrapper .btn-secondary").removeClass("btn-secondary");
+            const requestData = { cert_name: certName };
+            const csrfToken = $("#csrf_token").val();
 
-          // Hide loading message and show table
-          $("#letsencrypt-waiting").addClass("d-none");
-          $("#letsencrypt").removeClass("d-none");
+            if (isDebug) {
+                console.debug("Request payload:", requestData);
+                console.debug("CSRF token:", csrfToken ? "present" : "missing");
+            }
 
-          if (isReadOnly) {
-            const titleKey = userReadOnly
-              ? "tooltip.readonly_user_action_disabled"
-              : "tooltip.readonly_db_action_disabled";
-            const defaultTitle = userReadOnly
-              ? "Your account is readonly, action disabled."
-              : "The database is in readonly, action disabled.";
-          }
-        },
-        headerCallback: function (thead) {
-          updateHeaderTooltips(thead, headers);
-        },
-      },
-    };
+            $.ajax({
+                url: `${window.location.pathname}/delete`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(requestData),
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+                beforeSend: function(xhr) {
+                    if (isDebug) {
+                        console.debug("AJAX request starting for:", certName);
+                        console.debug("Request headers:", xhr.getAllResponseHeaders());
+                    }
+                },
+                success: function (response) {
+                    if (isDebug) {
+                        console.debug("Delete response received:");
+                        console.debug("- Status:", response.status);
+                        console.debug("- Message:", response.message);
+                        console.debug("- Full response:", response);
+                    }
 
-    const dt = initializeDataTable(letsencrypt_config);
-    dt.on("draw.dt", function () {
-      updateHeaderTooltips(dt.table().header(), headers);
-      $(".tooltip").remove();
+                    if (response.status === "ok") {
+                        if (isDebug) {
+                            console.debug("Certificate deletion successful:",
+                                          certName);
+                        }
+
+                        if (callback) {
+                            if (isDebug) {
+                                console.debug("Executing callback function");
+                            }
+                            callback();
+                        } else {
+                            if (isDebug) {
+                                console.debug("Reloading DataTable data");
+                            }
+                            $("#letsencrypt").DataTable().ajax.reload();
+                        }
+                    } else {
+                        if (isDebug) {
+                            console.debug("Certificate deletion failed:",
+                                          response.message);
+                        }
+
+                        showErrorModal(
+                            "Certificate Deletion Error",
+                            `<p>Error deleting certificate ` +
+                            `<strong>${certName}</strong>:</p>` +
+                            `<p>${response.message || "Unknown error"}</p>`
+                        );
+                        if (callback) callback();
+                        else $("#letsencrypt").DataTable().ajax.reload();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    if (isDebug) {
+                        console.debug("AJAX error details:");
+                        console.debug("- XHR status:", xhr.status);
+                        console.debug("- Status text:", status);
+                        console.debug("- Error:", error);
+                        console.debug("- Response text:", xhr.responseText);
+                        console.debug("- Response JSON:", xhr.responseJSON);
+                    }
+
+                    console.error("Error deleting certificate:", error, xhr);
+
+                    let errorMessage = `<p>Failed to delete certificate ` +
+                                     `<strong>${certName}</strong>:</p>`;
+
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage += `<p>${xhr.responseJSON.message}</p>`;
+                    } else if (xhr.responseText) {
+                        try {
+                            const parsedError = JSON.parse(xhr.responseText);
+                            errorMessage += 
+                                `<p>${parsedError.message || error}</p>`;
+                        } catch (e) {
+                            if (isDebug) {
+                                console.debug("Failed to parse error response:",
+                                              e);
+                            }
+                            if (xhr.responseText.length < 200) {
+                                errorMessage += `<p>${xhr.responseText}</p>`;
+                            } else {
+                                errorMessage += `<p>${error || 
+                                                "Unknown error"}</p>`;
+                            }
+                        }
+                    } else {
+                        errorMessage += `<p>${error || "Unknown error"}</p>`;
+                    }
+
+                    showErrorModal("Certificate Deletion Failed",
+                                   errorMessage);
+
+                    if (callback) callback();
+                    else $("#letsencrypt").DataTable().ajax.reload();
+                },
+                complete: function(xhr, status) {
+                    if (isDebug) {
+                        console.debug("AJAX request completed:");
+                        console.debug("- Final status:", status);
+                        console.debug("- Certificate:", certName);
+                    }
+                }
+            });
+        }
+
+        # DataTable Layout and Button configuration
+        const layout = {
+            top1: {
+                searchPanes: {
+                    viewTotal: true,
+                    cascadePanes: true,
+                    collapse: false,
+                    # Issuer, Preferred Profile, Challenge and Key Type
+                    columns: [2, 5, 6, 7],
+                },
+            },
+            topStart: {},
+            topEnd: {
+                search: true,
+                buttons: [
+                    {
+                        extend: "auto_refresh",
+                        className: (
+                            "btn btn-sm btn-outline-primary " +
+                            "d-flex align-items-center"
+                        ),
+                    },
+                    {
+                        extend: "toggle_filters",
+                        className: "btn btn-sm btn-outline-primary " +
+                                  "toggle-filters",
+                    },
+                ],
+            },
+            bottomStart: {
+                pageLength: {
+                    menu: [10, 25, 50, 100, 
+                           { label: "All", value: -1 }],
+                },
+                info: true,
+            },
+        };
+
+        if (isDebug) {
+            console.debug("DataTable layout configuration:");
+            console.debug("- Search panes columns:", layout.top1.searchPanes.columns);
+            console.debug("- Page length options:", layout.bottomStart.pageLength.menu);
+            console.debug("- Layout structure:", layout);
+        }
+
+        layout.topStart.buttons = [
+            {
+                extend: "colvis",
+                columns: "th:not(:nth-child(-n+3)):not(:last-child)",
+                text: (
+                    `<span class="tf-icons bx bx-columns bx-18px ` +
+                    `me-md-2"></span><span class="d-none d-md-inline" ` +
+                    `data-i18n="button.columns">${t(
+                        "button.columns",
+                        "Columns"
+                    )}</span>`
+                ),
+                className: "btn btn-sm btn-outline-primary rounded-start",
+                columnText: function (dt, idx, title) {
+                    return `${idx + 1}. ${title}`;
+                },
+            },
+            {
+                extend: "colvisRestore",
+                text: (
+                    `<span class="tf-icons bx bx-reset bx-18px ` +
+                    `me-2"></span><span class="d-none d-md-inline" ` +
+                    `data-i18n="button.reset_columns">${t(
+                        "button.reset_columns",
+                        "Reset columns"
+                    )}</span>`
+                ),
+                className: "btn btn-sm btn-outline-primary d-none d-md-inline",
+            },
+            {
+                extend: "collection",
+                text: (
+                    `<span class="tf-icons bx bx-export bx-18px ` +
+                    `me-md-2"></span><span class="d-none d-md-inline" ` +
+                    `data-i18n="button.export">${t(
+                        "button.export",
+                        "Export"
+                    )}</span>`
+                ),
+                className: "btn btn-sm btn-outline-primary",
+                buttons: [
+                    {
+                        extend: "copy",
+                        text: (
+                            `<span class="tf-icons bx bx-copy bx-18px ` +
+                            `me-2"></span><span ` +
+                            `data-i18n="button.copy_visible">${t(
+                                "button.copy_visible",
+                                "Copy visible"
+                            )}</span>`
+                        ),
+                        exportOptions: {
+                            columns: (
+                                ":visible:not(:nth-child(-n+2)):" +
+                                "not(:last-child)"
+                            ),
+                        },
+                    },
+                    {
+                        extend: "csv",
+                        text: (
+                            `<span class="tf-icons bx bx-table bx-18px ` +
+                            `me-2"></span>CSV`
+                        ),
+                        bom: true,
+                        filename: "bw_certificates",
+                        exportOptions: {
+                            modifier: { search: "none" },
+                            columns: (
+                                ":not(:nth-child(-n+2)):not(:last-child)"
+                            ),
+                        },
+                    },
+                    {
+                        extend: "excel",
+                        text: (
+                            `<span class="tf-icons bx bx-table bx-18px ` +
+                            `me-2"></span>Excel`
+                        ),
+                        filename: "bw_certificates",
+                        exportOptions: {
+                            modifier: { search: "none" },
+                            columns: (
+                                ":not(:nth-child(-n+2)):not(:last-child)"
+                            ),
+                        },
+                    },
+                ],
+            },
+            {
+                extend: "collection",
+                text: (
+                    `<span class="tf-icons bx bx-play bx-18px ` +
+                    `me-md-2"></span><span class="d-none d-md-inline" ` +
+                    `data-i18n="button.actions">${t(
+                        "button.actions",
+                        "Actions"
+                    )}</span>`
+                ),
+                className: (
+                    "btn btn-sm btn-outline-primary action-button disabled"
+                ),
+                buttons: [
+                    { extend: "delete_cert", className: "text-danger" }
+                ],
+            },
+        ];
+
+        let autoRefresh = false;
+        let autoRefreshInterval = null;
+        const sessionAutoRefresh = 
+            sessionStorage.getItem("letsencryptAutoRefresh");
+
+        # Toggle auto-refresh functionality
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            sessionStorage.setItem("letsencryptAutoRefresh", autoRefresh);
+
+            if (isDebug) {
+                console.debug("Auto-refresh toggled:", autoRefresh);
+            }
+
+            if (autoRefresh) {
+                $(".bx-loader")
+                    .addClass("bx-spin")
+                    .closest(".btn")
+                    .removeClass("btn-outline-primary")
+                    .addClass("btn-primary");
+                
+                if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+                
+                autoRefreshInterval = setInterval(() => {
+                    if (!autoRefresh) {
+                        clearInterval(autoRefreshInterval);
+                        autoRefreshInterval = null;
+                    } else {
+                        $("#letsencrypt").DataTable().ajax.reload(null, false);
+                    }
+                }, 10000);
+            } else {
+                $(".bx-loader")
+                    .removeClass("bx-spin")
+                    .closest(".btn")
+                    .removeClass("btn-primary")
+                    .addClass("btn-outline-primary");
+                
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+            }
+        }
+
+        if (sessionAutoRefresh === "true") {
+            toggleAutoRefresh();
+        }
+
+        # Get currently selected certificates from DataTable
+        const getSelectedCertificates = () => {
+            const certs = [];
+            $("tr.selected").each(function () {
+                const $row = $(this);
+                const domain = $row.find("td:eq(2)").text().trim();
+                certs.push({ domain: domain });
+            });
+
+            if (isDebug) {
+                console.debug("Selected certificates:", certs);
+            }
+
+            return certs;
+        };
+
+        # Custom DataTable button for auto-refresh
+        $.fn.dataTable.ext.buttons.auto_refresh = {
+            text: (
+                '<span class="bx bx-loader bx-18px lh-1"></span>' +
+                '&nbsp;&nbsp;<span data-i18n="button.auto_refresh">' +
+                'Auto refresh</span>'
+            ),
+            action: (e, dt, node, config) => {
+                toggleAutoRefresh();
+            },
+        };
+
+        # Custom DataTable button for certificate deletion
+        $.fn.dataTable.ext.buttons.delete_cert = {
+            text: (
+                `<span class="tf-icons bx bx-trash bx-18px me-2"></span>` +
+                `Delete certificate`
+            ),
+            action: function (e, dt, node, config) {
+                if (isReadOnly) {
+                    alert(
+                        t(
+                            "alert.readonly_mode",
+                            "This action is not allowed in read-only mode."
+                        )
+                    );
+                    return;
+                }
+                
+                if (actionLock) return;
+                actionLock = true;
+                $(".dt-button-background").click();
+
+                const certs = getSelectedCertificates();
+                if (certs.length === 0) {
+                    actionLock = false;
+                    return;
+                }
+                
+                setupDeleteCertModal(certs);
+
+                const deleteModal = new bootstrap.Modal(
+                    document.getElementById("deleteCertModal")
+                );
+                deleteModal.show();
+
+                actionLock = false;
+            },
+        };
+
+        # Build column definitions for DataTable
+        function buildColumnDefs() {
+            return [
+                { 
+                    orderable: false, 
+                    className: "dtr-control", 
+                    targets: 0 
+                },
+                { 
+                    orderable: false, 
+                    render: DataTable.render.select(), 
+                    targets: 1 
+                },
+                { type: "string", targets: 2 },
+                { orderable: true, targets: -1 },
+                {
+                    targets: [5, 6],
+                    render: function (data, type, row) {
+                        if (type === "display" || type === "filter") {
+                            const date = new Date(data);
+                            if (!isNaN(date.getTime())) {
+                                return date.toLocaleString();
+                            }
+                        }
+                        return data;
+                    },
+                },
+                {
+                    searchPanes: {
+                        show: true,
+                        combiner: "or",
+                        header: t("searchpane.issuer", "Issuer"),
+                    },
+                    targets: 2,
+                },
+                {
+                    searchPanes: {
+                        show: true,
+                        header: t("searchpane.preferred_profile", 
+                                  "Preferred Profile"),
+                        combiner: "or",
+                    },
+                    targets: 5,
+                },
+                {
+                    searchPanes: {
+                        show: true,
+                        header: t("searchpane.challenge", "Challenge"),
+                        combiner: "or",
+                    },
+                    targets: 6,
+                },
+                {
+                    searchPanes: {
+                        show: true,
+                        header: t("searchpane.key_type", "Key Type"),
+                        combiner: "or",
+                    },
+                    targets: 7,
+                },
+            ];
+        }
+
+        # Define the columns for the DataTable
+        function buildColumns() {
+            return [
+                {
+                    data: null,
+                    defaultContent: "",
+                    orderable: false,
+                    className: "dtr-control",
+                },
+                { data: null, defaultContent: "", orderable: false },
+                { data: "domain", title: "Domain" },
+                { data: "common_name", title: "Common Name" },
+                { data: "issuer", title: "Issuer" },
+                { data: "valid_from", title: "Valid From" },
+                { data: "valid_to", title: "Valid To" },
+                { data: "preferred_profile", title: "Preferred Profile" },
+                { data: "challenge", title: "Challenge" },
+                { data: "key_type", title: "Key Type" },
+                { data: "serial_number", title: "Serial Number" },
+                { data: "fingerprint", title: "Fingerprint" },
+                { data: "version", title: "Version" },
+            ];
+        }
+
+        # Manage header tooltips for DataTable columns
+        function updateHeaderTooltips(selector, headers) {
+            $(selector)
+                .find("th")
+                .each((index, element) => {
+                    const $th = $(element);
+                    const tooltip = headers[index] ? 
+                                   headers[index].tooltip : "";
+                    if (!tooltip) return;
+
+                    $th.attr({
+                        "data-bs-toggle": "tooltip",
+                        "data-bs-placement": "bottom",
+                        title: tooltip,
+                    });
+                });
+
+            $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
+        }
+
+        # Initialize the DataTable with complete configuration
+        const letsencrypt_config = {
+            tableSelector: "#letsencrypt",
+            tableName: "letsencrypt",
+            columnVisibilityCondition: (column) => column > 2 && column < 13,
+            dataTableOptions: {
+                columnDefs: buildColumnDefs(),
+                order: [[2, "asc"]],
+                autoFill: false,
+                responsive: true,
+                select: {
+                    style: "multi+shift",
+                    selector: "td:nth-child(2)",
+                    headerCheckbox: true,
+                },
+                layout: layout,
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: `${window.location.pathname}/fetch`,
+                    type: "POST",
+                    data: function (d) {
+                        if (isDebug) {
+                            console.debug("DataTable AJAX request data:", d);
+                            console.debug("Request parameters:");
+                            console.debug("- Draw:", d.draw);
+                            console.debug("- Start:", d.start);
+                            console.debug("- Length:", d.length);
+                            console.debug("- Search value:", d.search?.value);
+                        }
+
+                        d.csrf_token = $("#csrf_token").val();
+                        return d;
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        if (isDebug) {
+                            console.debug("DataTable AJAX error details:");
+                            console.debug("- Status:", jqXHR.status);
+                            console.debug("- Status text:", textStatus);
+                            console.debug("- Error:", errorThrown);
+                            console.debug("- Response text:", jqXHR.responseText);
+                            console.debug("- Response headers:", 
+                                          jqXHR.getAllResponseHeaders());
+                        }
+
+                        console.error("DataTables AJAX error:", 
+                                      textStatus, errorThrown);
+                        
+                        $("#letsencrypt").addClass("d-none");
+                        $("#letsencrypt-waiting")
+                            .removeClass("d-none")
+                            .text("Error loading certificates. " +
+                                  "Please try refreshing the page.")
+                            .addClass("text-danger");
+                        
+                        $(".dataTables_processing").hide();
+                    },
+                    success: function(data, textStatus, jqXHR) {
+                        if (isDebug) {
+                            console.debug("DataTable AJAX success:");
+                            console.debug("- Records total:", data.recordsTotal);
+                            console.debug("- Records filtered:", data.recordsFiltered);
+                            console.debug("- Data length:", data.data?.length);
+                            console.debug("- Draw number:", data.draw);
+                        }
+                    }
+                },
+                columns: buildColumns(),
+                initComplete: function (settings, json) {
+                    if (isDebug) {
+                        console.debug("DataTable initialized with settings:",
+                                      settings);
+                    }
+
+                    $("#letsencrypt_wrapper .btn-secondary")
+                        .removeClass("btn-secondary");
+
+                    $("#letsencrypt-waiting").addClass("d-none");
+                    $("#letsencrypt").removeClass("d-none");
+
+                    if (isReadOnly) {
+                        const titleKey = userReadOnly
+                            ? "tooltip.readonly_user_action_disabled"
+                            : "tooltip.readonly_db_action_disabled";
+                        const defaultTitle = userReadOnly
+                            ? "Your account is readonly, action disabled."
+                            : "The database is in readonly, action disabled.";
+                    }
+                },
+                headerCallback: function (thead) {
+                    updateHeaderTooltips(thead, headers);
+                },
+            },
+        };
+
+        const dt = initializeDataTable(letsencrypt_config);
+        
+        dt.on("draw.dt", function () {
+            updateHeaderTooltips(dt.table().header(), headers);
+            $(".tooltip").remove();
+        });
+        
+        dt.on("column-visibility.dt", function (e, settings, column, state) {
+            updateHeaderTooltips(dt.table().header(), headers);
+            $(".tooltip").remove();
+        });
+
+        # Toggle action button based on selection
+        dt.on("select.dt deselect.dt", function () {
+            const count = dt.rows({ selected: true }).count();
+            $(".action-button").toggleClass("disabled", count === 0);
+            
+            if (isDebug) {
+                console.debug("Selection changed, count:", count);
+            }
+        });
     });
-    dt.on("column-visibility.dt", function (e, settings, column, state) {
-      updateHeaderTooltips(dt.table().header(), headers);
-      $(".tooltip").remove();
-    });
-
-    // Add selection event handler for toggle action button
-    dt.on("select.dt deselect.dt", function () {
-      const count = dt.rows({ selected: true }).count();
-      $(".action-button").toggleClass("disabled", count === 0);
-    });
-  });
 })();
