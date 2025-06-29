@@ -80,14 +80,19 @@ LETSENCRYPT_STAGING_SERVER = (
 )
 
 
-# Load and cache the public suffix list for domain validation.
-# Fetches the PSL from the official source and caches it locally.
-# Returns cached version if available and fresh (less than 1 day old).
-# Args: job - Job instance for caching operations
-# Returns: list - Lines from the public suffix list file
 def load_public_suffix_list(job):
+    # Load and cache the public suffix list for domain validation.
+    # Fetches the PSL from the official source and caches it locally.
+    # Returns cached version if available and fresh (less than 1 day old).
+    # 
+    # Args:
+    #     job - Job instance for caching operations
+    # 
+    # Returns:
+    #     list - Lines from the public suffix list file
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Loading public suffix list from cache or {PSL_URL}")
+        LOGGER.debug("Checking if cached PSL is available and fresh")
     
     job_cache = job.get_cache(PSL_STATIC_FILE, with_info=True, with_data=True)
     if (
@@ -99,41 +104,74 @@ def load_public_suffix_list(job):
     ):
         if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
             LOGGER.debug("Using cached public suffix list")
+            LOGGER.debug(f"Cache age: {(datetime.now().astimezone().timestamp() - job_cache['last_update']) / 3600:.1f} hours")
         return job_cache["data"].decode("utf-8").splitlines()
 
     try:
         if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
             LOGGER.debug(f"Downloading fresh PSL from {PSL_URL}")
+            LOGGER.debug("Cached PSL is missing or older than 1 day")
+        
         resp = get(PSL_URL, timeout=5)
         resp.raise_for_status()
         content = resp.text
+        
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Downloaded PSL successfully, {len(content)} bytes")
+            LOGGER.debug(f"PSL contains {len(content.splitlines())} lines")
+        
         cached, err = JOB.cache_file(PSL_STATIC_FILE, content.encode("utf-8"))
         if not cached:
             LOGGER.error(f"Error while saving public suffix list to cache: {err}")
+        else:
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("PSL successfully cached for future use")
+        
         return content.splitlines()
     except BaseException as e:
         LOGGER.debug(format_exc())
         LOGGER.error(f"Error while downloading public suffix list: {e}")
+        
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Download failed, checking for existing static file")
+        
         if PSL_STATIC_FILE.exists():
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Using existing static PSL file: {PSL_STATIC_FILE}")
             with PSL_STATIC_FILE.open("r", encoding="utf-8") as f:
                 return f.read().splitlines()
+        
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("No PSL data available - returning empty list")
         return []
 
 
-# Parse PSL lines into rules and exceptions sets.
-# Processes the public suffix list format, handling comments,
-# exceptions (lines starting with !), and regular rules.
-# Args: psl_lines - List of lines from the PSL file
-# Returns: dict - Contains 'rules' and 'exceptions' sets
 def parse_psl(psl_lines):
+    # Parse PSL lines into rules and exceptions sets.
+    # Processes the public suffix list format, handling comments,
+    # exceptions (lines starting with !), and regular rules.
+    # 
+    # Args:
+    #     psl_lines - List of lines from the PSL file
+    # 
+    # Returns:
+    #     dict - Contains 'rules' and 'exceptions' sets
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Parsing {len(psl_lines)} PSL lines")
+        LOGGER.debug("Processing rules, exceptions, and filtering comments")
     
     rules = set()
     exceptions = set()
+    comments_skipped = 0
+    empty_lines_skipped = 0
+    
     for line in psl_lines:
         line = line.strip()
-        if not line or line.startswith("//"):
+        if not line:
+            empty_lines_skipped += 1
+            continue
+        if line.startswith("//"):
+            comments_skipped += 1
             continue
         if line.startswith("!"):
             exceptions.add(line[1:])
@@ -142,74 +180,122 @@ def parse_psl(psl_lines):
     
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Parsed {len(rules)} rules and {len(exceptions)} exceptions")
+        LOGGER.debug(f"Skipped {comments_skipped} comments and {empty_lines_skipped} empty lines")
+        LOGGER.debug("PSL parsing completed successfully")
     
     return {"rules": rules, "exceptions": exceptions}
 
 
-# Check if domain is forbidden by PSL rules.
-# Validates whether a domain would be blacklisted according to the
-# Public Suffix List rules and exceptions.
-# Args: domain - Domain name to check
-#       psl - Parsed PSL data (dict with 'rules' and 'exceptions')
-# Returns: bool - True if domain is blacklisted
 def is_domain_blacklisted(domain, psl):
+    # Check if domain is forbidden by PSL rules.
+    # Validates whether a domain would be blacklisted according to the
+    # Public Suffix List rules and exceptions.
+    # 
+    # Args:
+    #     domain - Domain name to check
+    #     psl - Parsed PSL data (dict with 'rules' and 'exceptions')
+    # 
+    # Returns:
+    #     bool - True if domain is blacklisted
     domain = domain.lower().strip(".")
     labels = domain.split(".")
     
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Checking domain {domain} against PSL rules")
+        LOGGER.debug(f"Domain has {len(labels)} labels: {labels}")
+        LOGGER.debug(f"PSL contains {len(psl['rules'])} rules and {len(psl['exceptions'])} exceptions")
     
     for i in range(len(labels)):
         candidate = ".".join(labels[i:])
+        
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Checking candidate: {candidate}")
+        
         if candidate in psl["exceptions"]:
             if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
                 LOGGER.debug(f"Domain {domain} allowed by PSL exception {candidate}")
             return False
+        
         if candidate in psl["rules"]:
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Found PSL rule match: {candidate}")
+                LOGGER.debug(f"Checking blacklist conditions for i={i}")
+            
             if i == 0:
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"Domain {domain} blacklisted - exact PSL rule match")
                 return True
             if i == 0 and domain.startswith("*."):
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"Wildcard domain {domain} blacklisted - exact PSL rule match")
                 return True
             if i == 0 or (i == 1 and labels[0] == "*"):
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"Domain {domain} blacklisted - PSL rule violation")
                 return True
             if len(labels[i:]) == len(labels):
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"Domain {domain} blacklisted - full label match")
                 return True
-        if f"*.{candidate}" in psl["rules"]:
+        
+        wildcard_candidate = f"*.{candidate}"
+        if wildcard_candidate in psl["rules"]:
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Found PSL wildcard rule match: {wildcard_candidate}")
+            
             if len(labels[i:]) == 2:
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"Domain {domain} blacklisted - wildcard PSL rule match")
                 return True
+    
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"Domain {domain} not blacklisted by PSL")
     return False
 
 
-# Get ACME server configuration for the specified CA provider.
-# Returns the appropriate ACME server URL and name for the given
-# certificate authority and environment (staging/production).
-# Args: ca_provider - Certificate authority name ('zerossl' or 'letsencrypt')
-#       staging - Whether to use staging environment
-# Returns: dict - Server URL and CA name
 def get_certificate_authority_config(ca_provider, staging=False):
+    # Get ACME server configuration for the specified CA provider.
+    # Returns the appropriate ACME server URL and name for the given
+    # certificate authority and environment (staging/production).
+    # 
+    # Args:
+    #     ca_provider - Certificate authority name ('zerossl' or 'letsencrypt')
+    #     staging - Whether to use staging environment
+    # 
+    # Returns:
+    #     dict - Server URL and CA name
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Getting CA config for {ca_provider}, staging={staging}")
     
     if ca_provider.lower() == "zerossl":
-        return {
+        config = {
             "server": ZEROSSL_STAGING_SERVER if staging else ZEROSSL_ACME_SERVER,
             "name": "ZeroSSL"
         }
     else:  # Default to Let's Encrypt
-        return {
+        config = {
             "server": (LETSENCRYPT_STAGING_SERVER if staging 
                       else LETSENCRYPT_ACME_SERVER),
             "name": "Let's Encrypt"
         }
+    
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"CA config: {config}")
+    
+    return config
 
 
-# Setup External Account Binding (EAB) credentials for ZeroSSL.
-# Contacts the ZeroSSL API to obtain EAB credentials required for
-# ACME certificate issuance with ZeroSSL.
-# Args: email - Email address for the account
-#       api_key - ZeroSSL API key
-# Returns: tuple - (eab_kid, eab_hmac_key) or (None, None) on failure
 def setup_zerossl_eab_credentials(email, api_key=None):
+    # Setup External Account Binding (EAB) credentials for ZeroSSL.
+    # Contacts the ZeroSSL API to obtain EAB credentials required for
+    # ACME certificate issuance with ZeroSSL.
+    # 
+    # Args:
+    #     email - Email address for the account
+    #     api_key - ZeroSSL API key
+    # 
+    # Returns:
+    #     tuple - (eab_kid, eab_hmac_key) or (None, None) on failure
     LOGGER.info(f"Setting up ZeroSSL EAB credentials for email: {email}")
     
     if not api_key:
@@ -221,12 +307,17 @@ def setup_zerossl_eab_credentials(email, api_key=None):
     
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug("Making request to ZeroSSL API for EAB credentials")
+        LOGGER.debug(f"Email: {email}")
+        LOGGER.debug(f"API key provided: {bool(api_key)}")
     
     LOGGER.info("Making request to ZeroSSL API for EAB credentials")
     
     # Try the correct ZeroSSL API endpoint
     try:
         # The correct endpoint for ZeroSSL EAB credentials
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Attempting primary ZeroSSL EAB endpoint")
+        
         response = get(
             "https://api.zerossl.com/acme/eab-credentials",
             headers={"Authorization": f"Bearer {api_key}"},
@@ -235,6 +326,7 @@ def setup_zerossl_eab_credentials(email, api_key=None):
         
         if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
             LOGGER.debug(f"ZeroSSL API response status: {response.status_code}")
+            LOGGER.debug(f"Response headers: {dict(response.headers)}")
         LOGGER.info(f"ZeroSSL API response status: {response.status_code}")
         
         if response.status_code == 200:
@@ -271,6 +363,9 @@ def setup_zerossl_eab_credentials(email, api_key=None):
             LOGGER.info(f"Primary endpoint response: {response_text}")
             
             # Try alternative endpoint with email parameter
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("Attempting alternative ZeroSSL EAB endpoint")
+            
             response = get(
                 "https://api.zerossl.com/acme/eab-credentials-email",
                 params={"email": email},
@@ -312,6 +407,9 @@ def setup_zerossl_eab_credentials(email, api_key=None):
         LOGGER.debug(format_exc())
         LOGGER.error(f"❌ Error setting up ZeroSSL EAB credentials: {e}")
         
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("ZeroSSL EAB setup failed with exception")
+        
         # Additional troubleshooting info
         LOGGER.error("Troubleshooting steps:")
         LOGGER.error("1. Verify your ZeroSSL API key is valid")
@@ -322,12 +420,17 @@ def setup_zerossl_eab_credentials(email, api_key=None):
         return None, None
 
 
-# Get CAA records for a domain using dig command.
-# Queries DNS CAA records to check certificate authority authorization.
-# Returns None if dig command is not available.
-# Args: domain - Domain name to query
-# Returns: list or None - List of CAA record dicts or None if unavailable
 def get_caa_records(domain):
+    # Get CAA records for a domain using dig command.
+    # Queries DNS CAA records to check certificate authority authorization.
+    # Returns None if dig command is not available.
+    # 
+    # Args:
+    #     domain - Domain name to query
+    # 
+    # Returns:
+    #     list or None - List of CAA record dicts or None if unavailable
+    
     # Check if dig command is available
     if not which("dig"):
         if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
@@ -339,7 +442,9 @@ def get_caa_records(domain):
         # Use dig to query CAA records
         if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
             LOGGER.debug(f"Querying CAA records for domain: {domain}")
+            LOGGER.debug("Using dig command with +short flag")
         LOGGER.info(f"Querying CAA records for domain: {domain}")
+        
         result = run(
             ["dig", "+short", domain, "CAA"], 
             capture_output=True, 
@@ -347,12 +452,25 @@ def get_caa_records(domain):
             timeout=10
         )
         
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"dig command return code: {result.returncode}")
+            LOGGER.debug(f"dig stdout: {result.stdout}")
+            LOGGER.debug(f"dig stderr: {result.stderr}")
+        
         if result.returncode == 0 and result.stdout.strip():
             LOGGER.info(f"Found CAA records for domain {domain}")
             caa_records = []
-            for line in result.stdout.strip().split('\n'):
+            raw_lines = result.stdout.strip().split('\n')
+            
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Processing {len(raw_lines)} CAA record lines")
+            
+            for line in raw_lines:
                 line = line.strip()
                 if line:
+                    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                        LOGGER.debug(f"Parsing CAA record line: {line}")
+                    
                     # CAA record format: flags tag "value"
                     # Example: 0 issue "letsencrypt.org"
                     parts = line.split(' ', 2)
@@ -365,9 +483,12 @@ def get_caa_records(domain):
                             'tag': tag,
                             'value': value
                         })
+                        
+                        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                            LOGGER.debug(f"Parsed CAA record: flags={flags}, tag={tag}, value={value}")
             
             if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
-                LOGGER.debug(f"Parsed {len(caa_records)} CAA records for domain {domain}")
+                LOGGER.debug(f"Successfully parsed {len(caa_records)} CAA records for domain {domain}")
             LOGGER.info(f"Parsed {len(caa_records)} CAA records for domain {domain}")
             return caa_records
         else:
@@ -389,14 +510,18 @@ def get_caa_records(domain):
         return None
 
 
-# Check if the CA provider is authorized by CAA records.
-# Validates whether the certificate authority is permitted to issue
-# certificates for the domain according to CAA DNS records.
-# Args: domain - Domain name to check
-#       ca_provider - Certificate authority provider name
-#       is_wildcard - Whether this is for a wildcard certificate
-# Returns: bool - True if CA is authorized or no CAA restrictions exist
 def check_caa_authorization(domain, ca_provider, is_wildcard=False):
+    # Check if the CA provider is authorized by CAA records.
+    # Validates whether the certificate authority is permitted to issue
+    # certificates for the domain according to CAA DNS records.
+    # 
+    # Args:
+    #     domain - Domain name to check
+    #     ca_provider - Certificate authority provider name
+    #     is_wildcard - Whether this is for a wildcard certificate
+    # 
+    # Returns:
+    #     bool - True if CA is authorized or no CAA restrictions exist
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(
             f"Checking CAA authorization for domain: {domain}, "
@@ -417,7 +542,12 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
     allowed_identifiers = ca_identifiers.get(ca_provider.lower(), [])
     if not allowed_identifiers:
         LOGGER.warning(f"Unknown CA provider for CAA check: {ca_provider}")
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Returning True for unknown CA provider (conservative approach)")
         return True  # Allow unknown providers (conservative approach)
+    
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"CA identifiers for {ca_provider}: {allowed_identifiers}")
     
     # Check CAA records for the domain and parent domains
     check_domain = domain.lstrip("*.")
@@ -425,6 +555,7 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
     
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Will check CAA records for domain chain: {check_domain}")
+        LOGGER.debug(f"Domain parts: {domain_parts}")
     LOGGER.info(f"Will check CAA records for domain chain: {check_domain}")
     
     for i in range(len(domain_parts)):
@@ -438,6 +569,8 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
         if caa_records is None:
             # dig not available, skip CAA check
             LOGGER.info("CAA record checking skipped (dig command not available)")
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("Returning True due to unavailable dig command")
             return True
         
         if caa_records:
@@ -475,6 +608,7 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
             
             if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
                 LOGGER.debug(f"Using CAA {record_type} records for authorization check")
+                LOGGER.debug(f"Records to check: {check_records}")
             LOGGER.info(f"Using CAA {record_type} records for authorization check")
             
             if not check_records:
@@ -501,11 +635,16 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
             )
             for identifier in allowed_identifiers:
                 for record in check_records:
+                    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                        LOGGER.debug(f"Comparing identifier '{identifier}' with record '{record}'")
+                    
                     # Handle explicit deny (empty value or semicolon)
                     if record == ";" or record.strip() == "":
                         LOGGER.warning(
                             f"CAA {record_type} record explicitly denies all CAs"
                         )
+                        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                            LOGGER.debug("Found explicit deny record - authorization failed")
                         return False
                     
                     # Check for CA authorization
@@ -515,6 +654,8 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
                             f"✓ CA {ca_provider} ({identifier}) authorized by "
                             f"CAA {record_type} record"
                         )
+                        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                            LOGGER.debug(f"Authorization found: {identifier} in {record}")
                         break
                 if authorized:
                     break
@@ -531,34 +672,45 @@ def check_caa_authorization(domain, ca_provider, is_wildcard=False):
                 LOGGER.error(
                     f"But {ca_provider} uses: {', '.join(allowed_identifiers)}"
                 )
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug("CAA authorization failed - no matching identifiers")
                 return False
             
             # If we found CAA records and we're authorized, we can stop checking parent domains
             LOGGER.info(f"✓ CAA authorization successful for {domain}")
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("CAA authorization successful - stopping parent domain checks")
             return True
     
     # No CAA records found in the entire chain
     LOGGER.info(
         f"No CAA records found for {check_domain} or parent domains - any CA allowed"
     )
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug("No CAA records found in entire domain chain - allowing any CA")
     return True
 
 
-# Validate that all domains have valid A/AAAA records and CAA authorization 
-# for HTTP challenge.
-# Checks DNS resolution and certificate authority authorization for each
-# domain in the list to ensure HTTP challenge will succeed.
-# Args: domains_list - List of domain names to validate
-#       ca_provider - Certificate authority provider name
-#       is_wildcard - Whether this is for wildcard certificates
-# Returns: bool - True if all domains are valid for HTTP challenge
 def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt", 
                                        is_wildcard=False):
+    # Validate that all domains have valid A/AAAA records and CAA authorization 
+    # for HTTP challenge.
+    # Checks DNS resolution and certificate authority authorization for each
+    # domain in the list to ensure HTTP challenge will succeed.
+    # 
+    # Args:
+    #     domains_list - List of domain names to validate
+    #     ca_provider - Certificate authority provider name
+    #     is_wildcard - Whether this is for wildcard certificates
+    # 
+    # Returns:
+    #     bool - True if all domains are valid for HTTP challenge
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(
             f"Validating {len(domains_list)} domains for HTTP challenge: "
             f"{', '.join(domains_list)}"
         )
+        LOGGER.debug(f"CA provider: {ca_provider}, wildcard: {is_wildcard}")
     LOGGER.info(
         f"Validating {len(domains_list)} domains for HTTP challenge: "
         f"{', '.join(domains_list)}"
@@ -568,6 +720,9 @@ def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt",
     
     # Check if CAA validation should be skipped
     skip_caa_check = getenv("ACME_SKIP_CAA_CHECK", "no") == "yes"
+    
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"CAA check will be {'skipped' if skip_caa_check else 'performed'}")
     
     # Get external IPs once for all domain checks
     external_ips = get_external_ip()
@@ -581,20 +736,39 @@ def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt",
             "Could not determine server external IP - skipping IP match validation"
         )
     
+    validation_passed = 0
+    validation_failed = 0
+    
     for domain in domains_list:
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Validating domain: {domain}")
+        
         # Check DNS A/AAAA records with retry mechanism
         if not check_domain_a_record(domain, external_ips):
             invalid_domains.append(domain)
+            validation_failed += 1
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"DNS validation failed for {domain}")
             continue
         
         # Check CAA authorization
         if not skip_caa_check:
             if not check_caa_authorization(domain, ca_provider, is_wildcard):
                 caa_blocked_domains.append(domain)
+                validation_failed += 1
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"CAA authorization failed for {domain}")
         else:
             if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
                 LOGGER.debug(f"CAA check skipped for {domain} (ACME_SKIP_CAA_CHECK=yes)")
             LOGGER.info(f"CAA check skipped for {domain} (ACME_SKIP_CAA_CHECK=yes)")
+        
+        validation_passed += 1
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Validation passed for {domain}")
+    
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"Validation summary: {validation_passed} passed, {validation_failed} failed")
     
     # Report results
     if invalid_domains:
@@ -626,14 +800,17 @@ def validate_domains_for_http_challenge(domains_list, ca_provider="letsencrypt",
     return True
 
 
-# Get the external/public IP addresses of this server (both IPv4 and IPv6).
-# Queries multiple external services to determine the server's public
-# IP addresses for DNS validation purposes.
-# Returns: dict or None - Dict with 'ipv4' and 'ipv6' keys, or None if all fail
 def get_external_ip():
+    # Get the external/public IP addresses of this server (both IPv4 and IPv6).
+    # Queries multiple external services to determine the server's public
+    # IP addresses for DNS validation purposes.
+    # 
+    # Returns:
+    #     dict or None - Dict with 'ipv4' and 'ipv6' keys, or None if all fail
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug("Getting external IP addresses for server")
     LOGGER.info("Getting external IP addresses for server")
+    
     ipv4_services = [
         "https://ipv4.icanhazip.com",
         "https://api.ipify.org",
@@ -652,9 +829,14 @@ def get_external_ip():
     # Try to get IPv4 address
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug("Attempting to get external IPv4 address")
+        LOGGER.debug(f"Trying {len(ipv4_services)} IPv4 services")
     LOGGER.info("Attempting to get external IPv4 address")
-    for service in ipv4_services:
+    
+    for i, service in enumerate(ipv4_services):
         try:
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Trying IPv4 service {i+1}/{len(ipv4_services)}: {service}")
+            
             if "jsonip.com" in service:
                 # This service returns JSON format
                 response = get(service, timeout=5)
@@ -666,6 +848,9 @@ def get_external_ip():
                 response = get(service, timeout=5)
                 response.raise_for_status()
                 ip = response.text.strip()
+            
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Service returned: {ip}")
             
             # Basic IPv4 validation
             if ip and "." in ip and len(ip.split(".")) == 4:
@@ -679,6 +864,8 @@ def get_external_ip():
                     LOGGER.info(f"Successfully obtained external IPv4 address: {ip}")
                     break
                 except gaierror:
+                    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                        LOGGER.debug(f"Invalid IPv4 address returned: {ip}")
                     continue
         except BaseException as e:
             if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
@@ -689,9 +876,14 @@ def get_external_ip():
     # Try to get IPv6 address
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug("Attempting to get external IPv6 address")
+        LOGGER.debug(f"Trying {len(ipv6_services)} IPv6 services")
     LOGGER.info("Attempting to get external IPv6 address")
-    for service in ipv6_services:
+    
+    for i, service in enumerate(ipv6_services):
         try:
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Trying IPv6 service {i+1}/{len(ipv6_services)}: {service}")
+            
             if "jsonip.com" in service:
                 response = get(service, timeout=5)
                 response.raise_for_status()
@@ -701,6 +893,9 @@ def get_external_ip():
                 response = get(service, timeout=5)
                 response.raise_for_status()
                 ip = response.text.strip()
+            
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Service returned: {ip}")
             
             # Basic IPv6 validation
             if ip and ":" in ip:
@@ -714,6 +909,8 @@ def get_external_ip():
                     LOGGER.info(f"Successfully obtained external IPv6 address: {ip}")
                     break
                 except gaierror:
+                    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                        LOGGER.debug(f"Invalid IPv6 address returned: {ip}")
                     continue
         except BaseException as e:
             if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
@@ -725,6 +922,8 @@ def get_external_ip():
         LOGGER.warning(
             "Could not determine external IP address (IPv4 or IPv6) from any service"
         )
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("All external IP services failed")
         return None
     
     LOGGER.info(
@@ -735,13 +934,17 @@ def get_external_ip():
     return external_ips
 
 
-# Check if domain has valid A/AAAA records for HTTP challenge.
-# Validates DNS resolution and optionally checks if the domain's
-# IP addresses match the server's external IPs.
-# Args: domain - Domain name to check
-#       external_ips - Dict with server's external IPv4/IPv6 addresses
-# Returns: bool - True if domain has valid DNS records
 def check_domain_a_record(domain, external_ips=None):
+    # Check if domain has valid A/AAAA records for HTTP challenge.
+    # Validates DNS resolution and optionally checks if the domain's
+    # IP addresses match the server's external IPs.
+    # 
+    # Args:
+    #     domain - Domain name to check
+    #     external_ips - Dict with server's external IPv4/IPv6 addresses
+    # 
+    # Returns:
+    #     bool - True if domain has valid DNS records
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Checking DNS A/AAAA records for domain: {domain}")
     LOGGER.info(f"Checking DNS A/AAAA records for domain: {domain}")
@@ -749,14 +952,24 @@ def check_domain_a_record(domain, external_ips=None):
         # Remove wildcard prefix if present
         check_domain = domain.lstrip("*.")
         
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Checking domain after wildcard removal: {check_domain}")
+        
         # Attempt to resolve the domain to IP addresses
         result = getaddrinfo(check_domain, None)
         if result:
             ipv4_addresses = [addr[4][0] for addr in result if addr[0] == AF_INET]
             ipv6_addresses = [addr[4][0] for addr in result if addr[0] == AF_INET6]
             
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"DNS resolution results:")
+                LOGGER.debug(f"  IPv4 addresses: {ipv4_addresses}")
+                LOGGER.debug(f"  IPv6 addresses: {ipv6_addresses}")
+            
             if not ipv4_addresses and not ipv6_addresses:
                 LOGGER.warning(f"Domain {check_domain} has no A or AAAA records")
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug("No valid IP addresses found in DNS resolution")
                 return False
             
             # Log found addresses
@@ -785,6 +998,9 @@ def check_domain_a_record(domain, external_ips=None):
             if external_ips:
                 ipv4_match = False
                 ipv6_match = False
+                
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug("Checking IP address matches with server external IPs")
                 
                 # Check IPv4 match
                 if external_ips.get("ipv4") and ipv4_addresses:
@@ -826,6 +1042,10 @@ def check_domain_a_record(domain, external_ips=None):
                 has_any_match = ipv4_match or ipv6_match
                 has_external_ip = external_ips.get("ipv4") or external_ips.get("ipv6")
                 
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"IP match results: IPv4={ipv4_match}, IPv6={ipv6_match}")
+                    LOGGER.debug(f"Has external IP: {has_external_ip}, Has match: {has_any_match}")
+                
                 if has_external_ip and not has_any_match:
                     LOGGER.warning(
                         f"⚠ Domain {check_domain} records do not match "
@@ -842,9 +1062,13 @@ def check_domain_a_record(domain, external_ips=None):
                             f"Strict IP check enabled - rejecting certificate "
                             f"request for {check_domain}"
                         )
+                        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                            LOGGER.debug("Strict IP check failed - returning False")
                         return False
             
             LOGGER.info(f"✓ Domain {check_domain} DNS validation passed")
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("DNS validation completed successfully")
             return True
         else:
             if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
@@ -864,27 +1088,11 @@ def check_domain_a_record(domain, external_ips=None):
     except BaseException as e:
         LOGGER.info(format_exc())
         LOGGER.error(f"Error checking DNS records for domain {check_domain}: {e}")
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("DNS check failed with unexpected exception")
         return False
 
 
-# Execute certbot with retry mechanism.
-# Wrapper around certbot_new that implements automatic retries with
-# exponential backoff for failed certificate generation attempts.
-# Args: challenge_type - Type of ACME challenge ('dns' or 'http')
-#       domains - Comma-separated list of domain names
-#       email - Email address for certificate registration
-#       provider - DNS provider name (for DNS challenge)
-#       credentials_path - Path to credentials file
-#       propagation - DNS propagation time in seconds
-#       profile - Certificate profile to use
-#       staging - Whether to use staging environment
-#       force - Force renewal of existing certificates
-#       cmd_env - Environment variables for certbot process
-#       max_retries - Maximum number of retry attempts
-#       ca_provider - Certificate authority provider
-#       api_key - API key for CA (if required)
-#       server_name - Server name for multisite configurations
-# Returns: int - Exit code (0 for success)
 def certbot_new_with_retry(
     challenge_type: Literal["dns", "http"],
     domains: str,
@@ -901,6 +1109,33 @@ def certbot_new_with_retry(
     api_key: str = None,
     server_name: str = None,
 ) -> int:
+    # Execute certbot with retry mechanism.
+    # Wrapper around certbot_new that implements automatic retries with
+    # exponential backoff for failed certificate generation attempts.
+    # 
+    # Args:
+    #     challenge_type - Type of ACME challenge ('dns' or 'http')
+    #     domains - Comma-separated list of domain names
+    #     email - Email address for certificate registration
+    #     provider - DNS provider name (for DNS challenge)
+    #     credentials_path - Path to credentials file
+    #     propagation - DNS propagation time in seconds
+    #     profile - Certificate profile to use
+    #     staging - Whether to use staging environment
+    #     force - Force renewal of existing certificates
+    #     cmd_env - Environment variables for certbot process
+    #     max_retries - Maximum number of retry attempts
+    #     ca_provider - Certificate authority provider
+    #     api_key - API key for CA (if required)
+    #     server_name - Server name for multisite configurations
+    # 
+    # Returns:
+    #     int - Exit code (0 for success)
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"Starting certbot with retry for domains: {domains}")
+        LOGGER.debug(f"Max retries: {max_retries}, CA: {ca_provider}")
+        LOGGER.debug(f"Challenge: {challenge_type}, Provider: {provider}")
+    
     attempt = 1
     while attempt <= max_retries + 1:
         if attempt > 1:
@@ -912,8 +1147,12 @@ def certbot_new_with_retry(
             
             if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
                 LOGGER.debug(f"Waiting {wait_time} seconds before retry...")
+                LOGGER.debug(f"Exponential backoff: base=30s, attempt={attempt}")
             LOGGER.info(f"Waiting {wait_time} seconds before retry...")
             sleep(wait_time)
+
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Executing certbot attempt {attempt}")
 
         result = certbot_new(
             challenge_type,
@@ -934,34 +1173,23 @@ def certbot_new_with_retry(
         if result == 0:
             if attempt > 1:
                 LOGGER.info(f"Certificate generation succeeded on attempt {attempt}")
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("Certbot completed successfully")
             return result
 
         if attempt >= max_retries + 1:
             LOGGER.error(f"Certificate generation failed after {max_retries + 1} attempts")
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("Maximum retries reached - giving up")
             return result
 
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Attempt {attempt} failed, will retry")
         attempt += 1
 
     return result
 
 
-# Generate new certificate using certbot.
-# Main function to request SSL/TLS certificates from a certificate authority
-# using the ACME protocol via certbot.
-# Args: challenge_type - Type of ACME challenge ('dns' or 'http')
-#       domains - Comma-separated list of domain names
-#       email - Email address for certificate registration
-#       provider - DNS provider name (for DNS challenge)
-#       credentials_path - Path to credentials file
-#       propagation - DNS propagation time in seconds
-#       profile - Certificate profile to use
-#       staging - Whether to use staging environment
-#       force - Force renewal of existing certificates
-#       cmd_env - Environment variables for certbot process
-#       ca_provider - Certificate authority provider
-#       api_key - API key for CA (if required)
-#       server_name - Server name for multisite configurations
-# Returns: int - Exit code (0 for success)
 def certbot_new(
     challenge_type: Literal["dns", "http"],
     domains: str,
@@ -977,6 +1205,27 @@ def certbot_new(
     api_key: str = None,
     server_name: str = None,
 ) -> int:
+    # Generate new certificate using certbot.
+    # Main function to request SSL/TLS certificates from a certificate authority
+    # using the ACME protocol via certbot.
+    # 
+    # Args:
+    #     challenge_type - Type of ACME challenge ('dns' or 'http')
+    #     domains - Comma-separated list of domain names
+    #     email - Email address for certificate registration
+    #     provider - DNS provider name (for DNS challenge)
+    #     credentials_path - Path to credentials file
+    #     propagation - DNS propagation time in seconds
+    #     profile - Certificate profile to use
+    #     staging - Whether to use staging environment
+    #     force - Force renewal of existing certificates
+    #     cmd_env - Environment variables for certbot process
+    #     ca_provider - Certificate authority provider
+    #     api_key - API key for CA (if required)
+    #     server_name - Server name for multisite configurations
+    # 
+    # Returns:
+    #     int - Exit code (0 for success)
     if isinstance(credentials_path, str):
         credentials_path = Path(credentials_path)
 
@@ -984,6 +1233,9 @@ def certbot_new(
     
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Building certbot command for {domains}")
+        LOGGER.debug(f"CA config: {ca_config}")
+        LOGGER.debug(f"Challenge type: {challenge_type}")
+        LOGGER.debug(f"Profile: {profile}")
     
     command = [
         CERTBOT_BIN,
@@ -1046,6 +1298,11 @@ def certbot_new(
         eab_hmac_env = (getenv("ACME_ZEROSSL_EAB_HMAC_KEY", "") or 
                         getenv(f"{server_name}_ACME_ZEROSSL_EAB_HMAC_KEY", ""))
         
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Manual EAB credentials check:")
+            LOGGER.debug(f"  EAB KID provided: {bool(eab_kid_env)}")
+            LOGGER.debug(f"  EAB HMAC provided: {bool(eab_hmac_env)}")
+        
         if eab_kid_env and eab_hmac_env:
             LOGGER.info("✓ Using manually provided ZeroSSL EAB credentials from environment")
             command.extend(["--eab-kid", eab_kid_env, "--eab-hmac-key", eab_hmac_env])
@@ -1078,6 +1335,12 @@ def certbot_new(
     if challenge_type == "dns":
         command.append("--preferred-challenges=dns")
 
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"DNS challenge configuration:")
+            LOGGER.debug(f"  Provider: {provider}")
+            LOGGER.debug(f"  Propagation: {propagation}")
+            LOGGER.debug(f"  Credentials path: {credentials_path}")
+
         if propagation != "default":
             if not propagation.isdigit():
                 LOGGER.warning(
@@ -1086,8 +1349,12 @@ def certbot_new(
                 )
             else:
                 command.extend([f"--dns-{provider}-propagation-seconds", propagation])
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"Set DNS propagation time to {propagation} seconds")
 
         if provider == "route53":
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("Route53 provider - setting environment variables")
             with credentials_path.open("r") as file:
                 for line in file:
                     key, value = line.strip().split("=", 1)
@@ -1097,10 +1364,17 @@ def certbot_new(
 
         if provider in ("desec", "infomaniak", "ionos", "njalla", "scaleway"):
             command.extend(["--authenticator", f"dns-{provider}"])
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Using explicit authenticator for {provider}")
         else:
             command.append(f"--dns-{provider}")
 
     elif challenge_type == "http":
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("HTTP challenge configuration:")
+            LOGGER.debug(f"  Auth hook: {JOBS_PATH.joinpath('certbot-auth.py')}")
+            LOGGER.debug(f"  Cleanup hook: {JOBS_PATH.joinpath('certbot-cleanup.py')}")
+        
         command.extend(
             [
                 "--manual",
@@ -1114,9 +1388,13 @@ def certbot_new(
 
     if force:
         command.append("--force-renewal")
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Force renewal enabled")
 
     if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG":
         command.append("-v")
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Verbose mode enabled for certbot")
 
     LOGGER.info(f"Executing certbot command for {domains}")
     # Show command but mask sensitive EAB values for security
@@ -1134,18 +1412,26 @@ def certbot_new(
     
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug(f"Command: {' '.join(safe_command)}")
+        LOGGER.debug(f"Environment variables: {len(cmd_env)} items")
+        for key in cmd_env.keys():
+            LOGGER.debug(f"  {key}: {'***MASKED***' if 'key' in key.lower() or 'secret' in key.lower() or 'token' in key.lower() else 'set'}")
     LOGGER.info(f"Command: {' '.join(safe_command)}")
     
     current_date = datetime.now()
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug("Starting certbot process")
+    
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, 
                    env=cmd_env)
 
+    lines_processed = 0
     while process.poll() is None:
         if process.stderr:
             rlist, _, _ = select([process.stderr], [], [], 2)
             if rlist:
                 for line in process.stderr:
                     LOGGER_CERTBOT.info(line.strip())
+                    lines_processed += 1
                     break
 
         if datetime.now() - current_date > timedelta(seconds=5):
@@ -1158,17 +1444,33 @@ def certbot_new(
                 f"{challenge_info}..."
             )
             current_date = datetime.now()
+            
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Certbot still running, processed {lines_processed} output lines")
 
-    return process.returncode
+    final_return_code = process.returncode
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"Certbot process completed with return code: {final_return_code}")
+        LOGGER.debug(f"Total output lines processed: {lines_processed}")
+
+    return final_return_code
 
 
+# Global configuration and setup
 IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
 
 try:
+    # Main execution block for certificate generation
     servers = getenv("SERVER_NAME", "www.example.com").lower() or []
 
     if isinstance(servers, str):
         servers = servers.split(" ")
+
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"Server configuration detected:")
+        LOGGER.debug(f"  Multisite mode: {IS_MULTISITE}")
+        LOGGER.debug(f"  Server count: {len(servers)}")
+        LOGGER.debug(f"  Servers: {servers}")
 
     if not servers:
         LOGGER.warning("There are no server names, skipping generation...")
@@ -1181,6 +1483,11 @@ try:
         use_letsencrypt = getenv("AUTO_LETS_ENCRYPT", "no") == "yes"
         use_letsencrypt_dns = getenv("LETS_ENCRYPT_CHALLENGE", "http") == "dns"
         domains_server_names = {servers[0]: " ".join(servers).lower()}
+        
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Single-site configuration:")
+            LOGGER.debug(f"  Let's Encrypt enabled: {use_letsencrypt}")
+            LOGGER.debug(f"  DNS challenge: {use_letsencrypt_dns}")
     else:
         domains_server_names = {}
 
@@ -1195,6 +1502,12 @@ try:
             domains_server_names[first_server] = getenv(
                 f"{first_server}_SERVER_NAME", first_server
             ).lower()
+        
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Multi-site configuration:")
+            LOGGER.debug(f"  Let's Encrypt enabled anywhere: {use_letsencrypt}")
+            LOGGER.debug(f"  DNS challenge used anywhere: {use_letsencrypt_dns}")
+            LOGGER.debug(f"  Domain mappings: {domains_server_names}")
 
     if not use_letsencrypt:
         LOGGER.info("Let's Encrypt is not activated, skipping generation...")
@@ -1203,6 +1516,9 @@ try:
     provider_classes = {}
 
     if use_letsencrypt_dns:
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("DNS challenge detected - loading provider classes")
+        
         provider_classes: Dict[
             str,
             Union[
@@ -1249,6 +1565,8 @@ try:
     JOB = Job(LOGGER, __file__)
 
     # Restore data from db cache of certbot-renew job
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug("Restoring certificate data from database cache")
     JOB.restore_cache(job_name="certbot-renew")
 
     env = {
@@ -1265,6 +1583,9 @@ try:
     if getenv("DATABASE_URI"):
         env["DATABASE_URI"] = getenv("DATABASE_URI")
 
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug("Checking existing certificates")
+    
     proc = run(
         [
             CERTBOT_BIN,
@@ -1293,8 +1614,17 @@ try:
 
     if proc.returncode != 0:
         LOGGER.error(f"Error while checking certificates:\n{proc.stdout}")
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Certificate listing failed - proceeding anyway")
     else:
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Certificate listing successful - analyzing existing certificates")
+        
         certificate_blocks = stdout.split("Certificate Name: ")[1:]
+        
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Found {len(certificate_blocks)} existing certificates")
+        
         for first_server, domains in domains_server_names.items():
             if ((getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") if IS_MULTISITE 
                  else getenv("AUTO_LETS_ENCRYPT", "no")) != "yes"):
@@ -1306,12 +1636,20 @@ try:
             )
             original_first_server = deepcopy(first_server)
 
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Processing server: {first_server}")
+                LOGGER.debug(f"  Challenge: {letsencrypt_challenge}")
+                LOGGER.debug(f"  Domains: {domains}")
+
             if (
                 letsencrypt_challenge == "dns"
                 and (getenv(f"{original_first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") 
                      if IS_MULTISITE 
                      else getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes"
             ):
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"Using wildcard mode for {first_server}")
+                
                 wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains(
                     (first_server,)
                 )
@@ -1368,6 +1706,11 @@ try:
                 else set(domains.split())
             )
 
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Certificate domain comparison for {first_server}:")
+                LOGGER.debug(f"  Existing: {sorted(cert_domains_set)}")
+                LOGGER.debug(f"  Desired: {sorted(desired_domains_set)}")
+
             if cert_domains_set != desired_domains_set:
                 domains_to_ask[first_server] = 2
                 LOGGER.warning(
@@ -1400,6 +1743,11 @@ try:
                      else getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes"
                 )
                 
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"CA server comparison for {first_server}:")
+                    LOGGER.debug(f"  Current: {current_server}")
+                    LOGGER.debug(f"  Expected: {expected_config['server']}")
+                
                 if current_server and current_server != expected_config["server"]:
                     domains_to_ask[first_server] = 2
                     LOGGER.warning(
@@ -1414,6 +1762,11 @@ try:
                 else getenv("USE_LETS_ENCRYPT_STAGING", "no")
             ) == "yes"
             is_test_cert = "TEST_CERT" in cert_domains.group("expiry_date")
+
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Staging environment check for {first_server}:")
+                LOGGER.debug(f"  Use staging: {use_staging}")
+                LOGGER.debug(f"  Is test cert: {is_test_cert}")
 
             if (is_test_cert and not use_staging) or (not is_test_cert and use_staging):
                 domains_to_ask[first_server] = 2
@@ -1446,6 +1799,11 @@ try:
                         current_provider = value.strip().replace("dns-", "")
                         break
 
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Provider comparison for {first_server}:")
+                LOGGER.debug(f"  Current: {current_provider}")
+                LOGGER.debug(f"  Configured: {provider}")
+
             if letsencrypt_challenge == "dns":
                 if provider and current_provider != provider:
                     domains_to_ask[first_server] = 2
@@ -1458,6 +1816,9 @@ try:
 
                 # Check if DNS credentials have changed
                 if provider and current_provider == provider:
+                    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                        LOGGER.debug(f"Checking DNS credentials for {first_server}")
+                    
                     credential_key = (
                         f"{original_first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" 
                         if IS_MULTISITE 
@@ -1551,6 +1912,10 @@ try:
     psl_lines = None
     psl_rules = None
 
+    certificates_generated = 0
+    certificates_failed = 0
+
+    # Process each server configuration
     for first_server, domains in domains_server_names.items():
         if ((getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") if IS_MULTISITE 
              else getenv("AUTO_LETS_ENCRYPT", "no")) != "yes"):
@@ -1636,6 +2001,8 @@ try:
         ).strip()
         if custom_profile:
             data["profile"] = custom_profile
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Using custom profile: {custom_profile}")
 
         if data["challenge"] == "http" and data["use_wildcard"]:
             LOGGER.warning(
@@ -1650,6 +2017,8 @@ try:
                                   .lstrip("*.")
             )
         ):
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"No certificate needed for {first_server}")
             continue
 
         if not data["max_retries"].isdigit():
@@ -1663,6 +2032,9 @@ try:
 
         # Getting the DNS provider data if necessary
         if data["challenge"] == "dns":
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Processing DNS credentials for {first_server}")
+            
             credential_key = (
                 f"{first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" 
                 if IS_MULTISITE 
@@ -1732,7 +2104,11 @@ try:
                     data["credential_items"][key] = value
 
         if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
-            LOGGER.debug(f"Data for service {first_server}: {dumps(data)}")
+            safe_data = data.copy()
+            safe_data["credential_items"] = {k: "***MASKED***" for k in data["credential_items"].keys()}
+            if data["api_key"]:
+                safe_data["api_key"] = "***MASKED***"
+            LOGGER.debug(f"Safe data for service {first_server}: {dumps(safe_data)}")
 
         # Validate CA provider and API key requirements
         LOGGER.info(
@@ -1813,8 +2189,12 @@ try:
 
             if data["check_psl"]:
                 if psl_lines is None:
+                    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                        LOGGER.debug("Loading PSL for wildcard domain validation")
                     psl_lines = load_public_suffix_list(JOB)
                 if psl_rules is None:
+                    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                        LOGGER.debug("Parsing PSL rules")
                     psl_rules = parse_psl(psl_lines)
 
                 wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains(
@@ -1841,8 +2221,12 @@ try:
                 LOGGER.info(f"[{first_server}] Wildcard group {group}")
         elif data["check_psl"]:
             if psl_lines is None:
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug("Loading PSL for regular domain validation")
                 psl_lines = load_public_suffix_list(JOB)
             if psl_rules is None:
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug("Parsing PSL rules")
                 psl_rules = parse_psl(psl_lines)
 
             for d in domains.split():
@@ -1855,12 +2239,17 @@ try:
                     break
 
         if is_blacklisted:
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Skipping {first_server} due to PSL blacklist")
             continue
 
         # Generating the credentials file
         credentials_path = CACHE_PATH.joinpath(*file_path)
 
         if data["challenge"] == "dns":
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Managing credentials file for {first_server}: {credentials_path}")
+            
             if not credentials_path.is_file():
                 cached, err = JOB.cache_file(
                     credentials_path.name, content, job_name="certbot-renew", 
@@ -1913,6 +2302,8 @@ try:
             credentials_path.chmod(0o600)
 
         if data["use_wildcard"]:
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Wildcard processing complete for {first_server}")
             continue
 
         domains = domains.replace(" ", ",")
@@ -1920,8 +2311,11 @@ try:
         LOGGER.info(
             f"Asking {ca_name} certificates for domain(s): {domains} "
             f"(email = {data['email']}){' using staging' if data['staging'] else ''} "
-            f"with {data['challenge']} challenge, using {data['profile']!r} profile..."
+            f" with {data['challenge']} challenge, using {data['profile']!r} profile..."
         )
+
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Requesting certificate for {domains}")
 
         if (
             certbot_new_with_retry(
@@ -1943,9 +2337,11 @@ try:
             != 0
         ):
             status = 2
+            certificates_failed += 1
             LOGGER.error(f"Certificate generation failed for domain(s) {domains}...")
         else:
             status = 1 if status == 0 else status
+            certificates_generated += 1
             LOGGER.info(f"Certificate generation succeeded for domain(s): {domains}")
 
         generated_domains.update(domains.split(","))
@@ -1953,6 +2349,9 @@ try:
     # Generating the wildcards if necessary
     wildcards = WILDCARD_GENERATOR.get_wildcards()
     if wildcards:
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Processing {len(wildcards)} wildcard groups")
+        
         for group, data in wildcards.items():
             if not data:
                 continue
@@ -1962,6 +2361,12 @@ try:
             provider = group_parts[0]
             profile = group_parts[2]
             base_domain = group_parts[3]
+
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Processing wildcard group: {group}")
+                LOGGER.debug(f"  Provider: {provider}")
+                LOGGER.debug(f"  Profile: {profile}")
+                LOGGER.debug(f"  Base domain: {base_domain}")
 
             email = data.pop("email")
             credentials_file = CACHE_PATH.joinpath(
@@ -2011,6 +2416,9 @@ try:
                     base_domain = WILDCARD_GENERATOR.get_base_domain(domain)
                     active_cert_names.add(base_domain)
 
+                if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                    LOGGER.debug(f"Requesting wildcard certificate for {domains}")
+
                 if (
                     certbot_new_with_retry(
                         "dns",
@@ -2030,9 +2438,11 @@ try:
                     != 0
                 ):
                     status = 2
+                    certificates_failed += 1
                     LOGGER.error(f"Certificate generation failed for domain(s) {domains}...")
                 else:
                     status = 1 if status == 0 else status
+                    certificates_generated += 1
                     LOGGER.info(f"Certificate generation succeeded for domain(s): {domains}")
 
                 generated_domains.update(domains_split)
@@ -2041,8 +2451,18 @@ try:
             "No wildcard domains found, skipping wildcard certificate(s) generation..."
         )
 
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"Certificate generation summary:")
+        LOGGER.debug(f"  Generated: {certificates_generated}")
+        LOGGER.debug(f"  Failed: {certificates_failed}")
+        LOGGER.debug(f"  Total domains: {len(generated_domains)}")
+
     if CACHE_PATH.is_dir():
         # Clearing all missing credentials files
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Cleaning up old credentials files")
+        
+        cleaned_files = 0
         for ext in ("*.ini", "*.env", "*.json"):
             for file in list(CACHE_PATH.rglob(ext)):
                 if "etc" in file.parts or not file.is_file():
@@ -2055,6 +2475,10 @@ try:
                         service_id=(file.parent.name 
                                    if file.parent.name != "letsencrypt" else "")
                     )
+                    cleaned_files += 1
+        
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug(f"Cleaned up {cleaned_files} old credentials files")
 
     # Clearing all no longer needed certificates
     if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
@@ -2062,6 +2486,9 @@ try:
             "Clear old certificates is activated, removing old / no longer "
             "used certificates..."
         )
+
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Starting certificate cleanup process")
 
         # Get list of all certificates
         proc = run(
@@ -2085,6 +2512,12 @@ try:
 
         if proc.returncode == 0:
             certificate_blocks = proc.stdout.split("Certificate Name: ")[1:]
+            certificates_removed = 0
+            
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Found {len(certificate_blocks)} certificates to evaluate")
+                LOGGER.debug(f"Active certificates: {sorted(active_cert_names)}")
+            
             for block in certificate_blocks:
                 cert_name = block.split("\n", 1)[0].strip()
 
@@ -2123,6 +2556,7 @@ try:
 
                 if delete_proc.returncode == 0:
                     LOGGER.info(f"Successfully deleted certificate {cert_name}")
+                    certificates_removed += 1
                     cert_dir = DATA_PATH.joinpath("live", cert_name)
                     archive_dir = DATA_PATH.joinpath("archive", cert_name)
                     renewal_file = DATA_PATH.joinpath("renewal", f"{cert_name}.conf")
@@ -2152,22 +2586,40 @@ try:
                         f"Failed to delete certificate {cert_name}: "
                         f"{delete_proc.stdout}"
                     )
+            
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug(f"Certificate cleanup completed - removed {certificates_removed} certificates")
         else:
             LOGGER.error(f"Error listing certificates: {proc.stdout}")
 
     # Save data to db cache
     if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("Saving certificate data to database cache")
+        
         cached, err = JOB.cache_dir(DATA_PATH, job_name="certbot-renew")
         if not cached:
             LOGGER.error(f"Error while saving data to db cache: {err}")
         else:
             LOGGER.info("Successfully saved data to db cache")
+            if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+                LOGGER.debug("Database cache update completed")
+    else:
+        if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+            LOGGER.debug("No certificate data to cache")
             
 except SystemExit as e:
     status = e.code
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug(f"Script exiting via SystemExit with code: {e.code}")
 except BaseException as e:
     status = 1
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running certbot-new.py:\n{e}")
+    if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+        LOGGER.debug("Script failed with unexpected exception")
+
+if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
+    LOGGER.debug(f"Certificate generation process completed with status: {status}")
 
 sys_exit(status)
