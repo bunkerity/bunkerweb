@@ -1,3 +1,5 @@
+# Let's Encrypt Plugin
+
 The Let's Encrypt plugin simplifies SSL/TLS certificate management by automating the creation, renewal, and configuration of free certificates from multiple certificate authorities. This feature enables secure HTTPS connections for your websites without the complexity of manual certificate management, reducing both cost and administrative overhead.
 
 **How it works:**
@@ -12,7 +14,7 @@ The Let's Encrypt plugin simplifies SSL/TLS certificate management by automating
 !!! info "Prerequisites"
     To use this feature, ensure that proper DNS **A records** are configured for each domain, pointing to the public IP(s) where BunkerWeb is accessible. Without correct DNS configuration, the domain verification process will fail.
 
-### How to Use
+## How to Use
 
 Follow these steps to configure and use the Let's Encrypt feature:
 
@@ -29,7 +31,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
     The plugin supports multiple certificate authorities:
     - **Let's Encrypt**: Free, widely trusted, 90-day certificates
     - **ZeroSSL**: Free alternative with competitive rate limits, supports EAB (External Account Binding)
-    
+
     ZeroSSL requires an API key for automated EAB credential generation. Without an API key, you can manually provide EAB credentials using `ACME_ZEROSSL_EAB_KID` and `ACME_ZEROSSL_EAB_HMAC_KEY`.
 
 !!! tip "Certificate Profiles"
@@ -42,7 +44,7 @@ Follow these steps to configure and use the Let's Encrypt feature:
 !!! info "Profile Availability"
     Note that the `tlsserver` and `shortlived` profiles may not be available in all environments or with all ACME clients at this time. The `classic` profile has the widest compatibility and is recommended for most users. If a selected profile is not available, the system will automatically fall back to the `classic` profile.
 
-### Advanced Security Features
+## Advanced Security Features
 
 The plugin includes several advanced security and validation features:
 
@@ -52,7 +54,7 @@ The plugin includes several advanced security and validation features:
 - **Retry Mechanisms**: Intelligent retry with exponential backoff for failed certificate generation attempts
 - **Certificate Key Types**: Supports both RSA and ECDSA keys with provider-specific optimizations
 
-### Configuration Settings
+## Configuration Settings
 
 | Setting                            | Default                  | Context   | Multiple | Description                                                                                                                                                                          |
 | ---------------------------------- | ------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -108,32 +110,32 @@ The plugin includes several advanced security and validation features:
 !!! warning "Rate Limits"
     Certificate authorities impose rate limits on certificate issuance. When testing configurations, use the staging environment by setting `USE_LETS_ENCRYPT_STAGING` to `yes` to avoid hitting production rate limits. Staging certificates are not trusted by browsers but are useful for validating your setup.
 
-### Supported DNS Providers
+## Supported DNS Providers
 
 The Let's Encrypt plugin supports a wide range of DNS providers for DNS challenges. Each provider requires specific credentials that must be provided using the `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting.
 
 | Provider       | Description     | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Documentation                                                                         |
 | -------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| `cloudflare`   | Cloudflare      | either `api_token`<br>or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)             |
+| `cloudflare`   | Cloudflare      | either `api_token` or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)             |
 | `desec`        | deSEC           | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)    |
 | `digitalocean` | DigitalOcean    | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)           |
 | `dnsimple`     | DNSimple        | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)               |
-| `dnsmadeeasy`  | DNS Made Easy   | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)            |
-| `gehirn`       | Gehirn DNS      | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                 |
-| `google`       | Google Cloud    | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
+| `dnsmadeeasy`  | DNS Made Easy   | `api_key` `secret_key`                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)            |
+| `gehirn`       | Gehirn DNS      | `api_token` `api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                 |
+| `google`       | Google Cloud    | `project_id` `private_key_id` `private_key` `client_email` `client_id` `client_x509_cert_url` | `type` (default: `service_account`) `auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`) `token_uri` (default: `https://accounts.google.com/o/oauth2/token`) `auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
 | `infomaniak`   | Infomaniak      | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak)                 |
-| `ionos`        | IONOS           | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md) |
+| `ionos`        | IONOS           | `prefix` `secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md) |
 | `linode`       | Linode          | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
-| `luadns`       | LuaDNS          | `email`<br>`token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                 |
+| `luadns`       | LuaDNS          | `email` `token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                 |
 | `njalla`       | Njalla          | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/chaptergy/certbot-dns-njalla)                      |
 | `nsone`        | NS1             | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                  |
-| `ovh`          | OVH             | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (default: `ovh-eu`)                                                                                                                                                                                                                                           | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                    |
-| `rfc2136`      | RFC 2136        | `server`<br>`name`<br>`secret`                                                                               | `port` (default: `53`)<br>`algorithm` (default: `HMAC-SHA512`)<br>`sign_query` (default: `false`)                                                                                                                                                                        | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                |
-| `route53`      | Amazon Route 53 | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                |
-| `sakuracloud`  | Sakura Cloud    | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)            |
+| `ovh`          | OVH             | `application_key` `application_secret` `consumer_key`                                                  | `endpoint` (default: `ovh-eu`)                                                                                                                                                                                                                                           | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                    |
+| `rfc2136`      | RFC 2136        | `server` `name` `secret`                                                                               | `port` (default: `53`) `algorithm` (default: `HMAC-SHA512`) `sign_query` (default: `false`)                                                                                                                                                                        | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                |
+| `route53`      | Amazon Route 53 | `access_key_id` `secret_access_key`                                                                       |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                |
+| `sakuracloud`  | Sakura Cloud    | `api_token` `api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)            |
 | `scaleway`     | Scaleway        | `application_token`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst) |
 
-### Certificate Key Types and Optimization
+## Certificate Key Types and Optimization
 
 The plugin automatically selects optimal certificate key types based on the certificate authority and DNS provider:
 
@@ -143,7 +145,7 @@ The plugin automatically selects optimal certificate key types based on the cert
 - **RSA Keys**: Used for specific providers that require them
   - Infomaniak and IONOS: RSA-4096 for compatibility
 
-### Example Configurations
+## Example Configurations
 
 === "Basic HTTP Challenge with Let's Encrypt"
 
@@ -264,7 +266,7 @@ The plugin automatically selects optimal certificate key types based on the cert
     LETS_ENCRYPT_DNS_CREDENTIAL_ITEM_6: "client_x509_cert_url your-cert-url"
     ```
 
-### Troubleshooting
+## Troubleshooting
 
 **Common Issues and Solutions:**
 
@@ -294,6 +296,7 @@ The plugin automatically selects optimal certificate key types based on the cert
 **Debug Information:**
 
 Enable debug logging by setting `LOG_LEVEL: "DEBUG"` to get detailed information about:
+
 - Certificate generation process
 - DNS validation steps
 - HTTP challenge deployment
