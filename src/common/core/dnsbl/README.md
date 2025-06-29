@@ -1,3 +1,5 @@
+# DNSBL Plugin
+
 The DNSBL (Domain Name System Blacklist) plugin provides protection against known malicious IP addresses by checking client IP addresses against external DNSBL servers. This feature helps guard your website against spam, botnets, and various types of cyber threats by leveraging community-maintained lists of problematic IP addresses.
 
 **How it works:**
@@ -8,7 +10,7 @@ The DNSBL (Domain Name System Blacklist) plugin provides protection against know
 4. Results are cached to improve performance for repeat visitors from the same IP address.
 5. Lookups are performed efficiently using asynchronous queries to minimize impact on page load times.
 
-### How to Use
+## How to Use
 
 Follow these steps to configure and use the DNSBL feature:
 
@@ -17,7 +19,7 @@ Follow these steps to configure and use the DNSBL feature:
 3. **Apply settings:** Once configured, BunkerWeb will automatically check incoming connections against the specified DNSBL servers.
 4. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on requests blocked by DNSBL checks.
 
-### Configuration Settings
+## Configuration Settings
 
 | Setting      | Default                                             | Context   | Multiple | Description                                                                     |
 | ------------ | --------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------- |
@@ -37,7 +39,7 @@ Follow these steps to configure and use the DNSBL feature:
 !!! warning "Performance Considerations"
     While BunkerWeb optimizes DNSBL lookups for performance, adding a large number of DNSBL servers could potentially impact response times. Start with a few reputable DNSBL servers and monitor performance before adding more.
 
-### Example Configurations
+## Example Configurations
 
 === "Basic Configuration"
 
