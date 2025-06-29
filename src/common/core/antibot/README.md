@@ -1,17 +1,19 @@
+# Antibot
+
 Attackers often use automated tools (bots) to try and exploit your website. To protect against this, BunkerWeb includes an "Antibot" feature that challenges users to prove they are human. If a user successfully completes the challenge, they are granted access to your website. This feature is disabled by default.
 
 **How it works:**
 
-1.  When a user visits your site, BunkerWeb checks if they've already passed the antibot challenge.
-2.  If not, the user is redirected to a challenge page.
-3.  The user must complete the challenge (e.g., solve a CAPTCHA, run JavaScript).
-4.  If the challenge is successful, the user is redirected back to the page they were originally trying to visit and can browse your website normally.
+1. When a user visits your site, BunkerWeb checks if they've already passed the antibot challenge.
+2. If not, the user is redirected to a challenge page.
+3. The user must complete the challenge (e.g., solve a CAPTCHA, run JavaScript).
+4. If the challenge is successful, the user is redirected back to the page they were originally trying to visit and can browse your website normally.
 
-### How to Use
+## How to Use
 
 Follow these steps to enable and configure the Antibot feature:
 
-1. **Choose a challenge type:** Decide which type of antibot challenge to use (e.g., [captcha](#__tabbed_1_3), [hcaptcha](#__tabbed_1_5), [javascript](#__tabbed_1_2)).
+1. **Choose a challenge type:** Decide which type of antibot challenge to use (e.g., captcha, hCaptcha, JavaScript).
 2. **Enable the feature:** Set the `USE_ANTIBOT` setting to your chosen challenge type in your BunkerWeb configuration.
 3. **Configure the settings:** Adjust the other `ANTIBOT_*` settings as needed. For reCAPTCHA, hCaptcha, Turnstile, and mCaptcha, you must create an account with the respective service and obtain API keys.
 4. **Important:** Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
@@ -20,7 +22,7 @@ Follow these steps to enable and configure the Antibot feature:
     Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
 
 !!! warning "Session Configuration in Clustered Environments"
-    The antibot feature uses cookies to track whether a user has completed the challenge. If you are running BunkerWeb in a clustered environment (multiple BunkerWeb instances), you **must** configure session management properly. This involves setting the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to the **same values** across all BunkerWeb instances. If you don't do this, users may be repeatedly prompted to complete the antibot challenge. You can find more information about session configuration [here](#sessions).
+    The antibot feature uses cookies to track whether a user has completed the challenge. If you are running BunkerWeb in a clustered environment (multiple BunkerWeb instances), you **must** configure session management properly. This involves setting the `SESSIONS_SECRET` and `SESSIONS_NAME` settings to the **same values** across all BunkerWeb instances. If you don't do this, users may be repeatedly prompted to complete the antibot challenge. You can find more information about session configuration in the session management documentation.
 
 ### Common Settings
 
@@ -163,7 +165,7 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
 === "Turnstile"
 
-    Turnstile is a modern, privacy-friendly challenge mechanism that leverages Cloudflare’s technology to detect and block automated traffic. It validates user interactions in a seamless, background manner, reducing friction for legitimate users while effectively discouraging bots.
+    Turnstile is a modern, privacy-friendly challenge mechanism that leverages Cloudflare's technology to detect and block automated traffic. It validates user interactions in a seamless, background manner, reducing friction for legitimate users while effectively discouraging bots.
 
     To integrate Turnstile with BunkerWeb, ensure you obtain the necessary credentials from [Cloudflare Turnstile](https://www.cloudflare.com/turnstile).
 
