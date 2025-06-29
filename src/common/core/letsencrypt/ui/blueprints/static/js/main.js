@@ -1,15 +1,15 @@
 (async function waitForDependencies() {
-    # Wait for jQuery
+    // Wait for jQuery
     while (typeof jQuery === "undefined") {
         await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    # Wait for $ to be available (in case of jQuery.noConflict())
+    // Wait for $ to be available (in case of jQuery.noConflict())
     while (typeof $ === "undefined") {
         await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    # Wait for DataTable to be available
+    // Wait for DataTable to be available
     while (typeof $.fn.DataTable === "undefined") {
         await new Promise((resolve) => setTimeout(resolve, 100));
     }
@@ -25,7 +25,7 @@
             console.debug("DataTables version:", $.fn.DataTable.version);
         }
 
-        # Ensure i18next is loaded before using it
+        // Ensure i18next is loaded before using it
         const t =
             typeof i18next !== "undefined"
                 ? i18next.t
@@ -82,7 +82,7 @@
             },
         ];
 
-        # Set up the delete confirmation modal for certificates
+        // Set up the delete confirmation modal for certificates
         const setupDeleteCertModal = (certs) => {
             if (isDebug) {
                 console.debug("Setting up delete modal for certificates:",
@@ -128,7 +128,7 @@
             }
         };
 
-        # Show error modal with title and message
+        // Show error modal with title and message
         const showErrorModal = (title, message) => {
             if (isDebug) {
                 console.debug("Showing error modal:", title, message);
@@ -142,7 +142,7 @@
             errorModal.show();
         };
 
-        # Handle delete button click events
+        // Handle delete button click events
         $("#confirmDeleteCertBtn").on("click", function () {
             const certName = $(this).data("cert-name");
             const certNames = $(this).data("cert-names");
@@ -155,7 +155,7 @@
             if (certName) {
                 deleteCertificate(certName);
             } else if (certNames && Array.isArray(certNames)) {
-                # Delete multiple certificates sequentially
+                // Delete multiple certificates sequentially
                 const deleteNext = (index) => {
                     if (index < certNames.length) {
                         deleteCertificate(certNames[index], () => {
@@ -172,7 +172,7 @@
             $("#deleteCertModal").modal("hide");
         });
 
-        # Delete a single certificate with optional callback
+        // Delete a single certificate with optional callback
         function deleteCertificate(certName, callback) {
             if (isDebug) {
                 console.debug("Starting certificate deletion process:");
@@ -299,14 +299,14 @@
             });
         }
 
-        # DataTable Layout and Button configuration
+        // DataTable Layout and Button configuration
         const layout = {
             top1: {
                 searchPanes: {
                     viewTotal: true,
                     cascadePanes: true,
                     collapse: false,
-                    # Issuer, Preferred Profile, Challenge, Key Type, and OCSP
+                    // Issuer, Preferred Profile, Challenge, Key Type, and OCSP
                     columns: [2, 5, 6, 7, 8],
                 },
             },
@@ -458,7 +458,7 @@
         const sessionAutoRefresh = 
             sessionStorage.getItem("letsencryptAutoRefresh");
 
-        # Toggle auto-refresh functionality
+        // Toggle auto-refresh functionality
         function toggleAutoRefresh() {
             autoRefresh = !autoRefresh;
             sessionStorage.setItem("letsencryptAutoRefresh", autoRefresh);
@@ -502,7 +502,7 @@
             toggleAutoRefresh();
         }
 
-        # Get currently selected certificates from DataTable
+        // Get currently selected certificates from DataTable
         const getSelectedCertificates = () => {
             const certs = [];
             $("tr.selected").each(function () {
@@ -518,7 +518,7 @@
             return certs;
         };
 
-        # Custom DataTable button for auto-refresh
+        // Custom DataTable button for auto-refresh
         $.fn.dataTable.ext.buttons.auto_refresh = {
             text: (
                 '<span class="bx bx-loader bx-18px lh-1"></span>' +
@@ -530,7 +530,7 @@
             },
         };
 
-        # Custom DataTable button for certificate deletion
+        // Custom DataTable button for certificate deletion
         $.fn.dataTable.ext.buttons.delete_cert = {
             text: (
                 `<span class="tf-icons bx bx-trash bx-18px me-2"></span>` +
@@ -568,7 +568,7 @@
             },
         };
 
-        # Build column definitions for DataTable
+        // Build column definitions for DataTable
         function buildColumnDefs() {
             return [
                 { 
@@ -639,7 +639,7 @@
             ];
         }
 
-        # Define the columns for the DataTable
+        // Define the columns for the DataTable
         function buildColumns() {
             return [
                 {
@@ -664,7 +664,7 @@
             ];
         }
 
-        # Manage header tooltips for DataTable columns
+        // Manage header tooltips for DataTable columns
         function updateHeaderTooltips(selector, headers) {
             $(selector)
                 .find("th")
@@ -684,7 +684,7 @@
             $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
         }
 
-        # Initialize the DataTable with complete configuration
+        // Initialize the DataTable with complete configuration
         const letsencrypt_config = {
             tableSelector: "#letsencrypt",
             tableName: "letsencrypt",
@@ -791,7 +791,7 @@
             $(".tooltip").remove();
         });
 
-        # Toggle action button based on selection
+        // Toggle action button based on selection
         dt.on("select.dt deselect.dt", function () {
             const count = dt.rows({ selected: true }).count();
             $(".action-button").toggleClass("disabled", count === 0);
