@@ -76,7 +76,8 @@ def download_certificates():
                 cache_file["file_name"].startswith("folder:")):
             
             if is_debug:
-                LOGGER.debug(f"Extracting cache file: {cache_file['file_name']}")
+                LOGGER.debug(f"Extracting cache file: "
+                           f"{cache_file['file_name']}")
                 LOGGER.debug(f"File size: {len(cache_file['data'])} bytes")
             
             try:
@@ -84,35 +85,43 @@ def download_certificates():
                               mode="r:gz") as tar:
                     member_count = len(tar.getmembers())
                     if is_debug:
-                        LOGGER.debug(f"Archive contains {member_count} members")
+                        LOGGER.debug(f"Archive contains {member_count} "
+                                    f"members")
                     
                     try:
                         tar.extractall(DATA_PATH, filter="fully_trusted")
                         if is_debug:
-                            LOGGER.debug("Extraction completed with fully_trusted filter")
+                            LOGGER.debug("Extraction completed with "
+                                        "fully_trusted filter")
                     except TypeError:
                         if is_debug:
-                            LOGGER.debug("Falling back to extraction without filter")
+                            LOGGER.debug("Falling back to extraction without "
+                                        "filter")
                         tar.extractall(DATA_PATH)
                     
                     extracted_count += 1
                     if is_debug:
-                        LOGGER.debug(f"Successfully extracted {cache_file['file_name']}")
+                        LOGGER.debug(f"Successfully extracted "
+                                    f"{cache_file['file_name']}")
                         
             except Exception as e:
-                LOGGER.error(f"Failed to extract {cache_file['file_name']}: {e}")
+                LOGGER.error(f"Failed to extract {cache_file['file_name']}: "
+                           f"{e}")
                 if is_debug:
                     LOGGER.debug(f"Extraction error details: {format_exc()}")
         else:
             if is_debug:
-                LOGGER.debug(f"Skipping non-matching file: {cache_file['file_name']}")
+                LOGGER.debug(f"Skipping non-matching file: "
+                           f"{cache_file['file_name']}")
 
     if is_debug:
-        LOGGER.debug(f"Certificate download completed: {extracted_count} files extracted")
+        LOGGER.debug(f"Certificate download completed: {extracted_count} "
+                    f"files extracted")
         # List extracted directory contents
         if Path(DATA_PATH).exists():
             contents = list(Path(DATA_PATH).rglob("*"))
-            LOGGER.debug(f"Extracted directory contains {len(contents)} items")
+            LOGGER.debug(f"Extracted directory contains {len(contents)} "
+                        f"items")
             for item in contents[:10]:  # Show first 10 items
                 LOGGER.debug(f"  - {item}")
             if len(contents) > 10:
@@ -163,9 +172,11 @@ def retrieve_certificates():
         certificates["domain"].append(domain)
         
         if is_debug:
-            LOGGER.debug(f"Processing certificate {len(certificates['domain'])}: {domain}")
+            LOGGER.debug(f"Processing certificate "
+                        f"{len(certificates['domain'])}: {domain}")
             LOGGER.debug(f"Certificate file path: {cert_file}")
-            LOGGER.debug(f"Certificate file size: {cert_file.stat().st_size} bytes")
+            LOGGER.debug(f"Certificate file size: "
+                        f"{cert_file.stat().st_size} bytes")
         
         cert_info = {
             "common_name": "Unknown",
@@ -189,7 +200,8 @@ def retrieve_certificates():
             
             cert_data = cert_file.read_bytes()
             if is_debug:
-                LOGGER.debug(f"Certificate data length: {len(cert_data)} bytes")
+                LOGGER.debug(f"Certificate data length: {len(cert_data)} "
+                           f"bytes")
                 LOGGER.debug(f"Certificate starts with: {cert_data[:50]}")
             
             cert = x509.load_pem_x509_certificate(
@@ -207,10 +219,12 @@ def retrieve_certificates():
             if subject:
                 cert_info["common_name"] = subject[0].value
                 if is_debug:
-                    LOGGER.debug(f"Certificate CN extracted: {cert_info['common_name']}")
+                    LOGGER.debug(f"Certificate CN extracted: "
+                               f"{cert_info['common_name']}")
             else:
                 if is_debug:
-                    LOGGER.debug("No Common Name found in certificate subject")
+                    LOGGER.debug("No Common Name found in certificate "
+                                "subject")
             
             issuer = cert.issuer.get_attributes_for_oid(
                 x509.NameOID.COMMON_NAME
@@ -218,10 +232,12 @@ def retrieve_certificates():
             if issuer:
                 cert_info["issuer"] = issuer[0].value
                 if is_debug:
-                    LOGGER.debug(f"Certificate issuer extracted: {cert_info['issuer']}")
+                    LOGGER.debug(f"Certificate issuer extracted: "
+                               f"{cert_info['issuer']}")
             else:
                 if is_debug:
-                    LOGGER.debug("No Common Name found in certificate issuer")
+                    LOGGER.debug("No Common Name found in certificate "
+                                "issuer")
             
             cert_info["valid_from"] = (
                 cert.not_valid_before.astimezone().isoformat()
@@ -232,7 +248,8 @@ def retrieve_certificates():
             
             if is_debug:
                 LOGGER.debug(f"Certificate validity period: "
-                           f"{cert_info['valid_from']} to {cert_info['valid_to']}")
+                           f"{cert_info['valid_from']} to "
+                           f"{cert_info['valid_to']}")
             
             cert_info["serial_number"] = str(cert.serial_number)
             cert_info["fingerprint"] = cert.fingerprint(hashes.SHA256()).hex()
@@ -247,7 +264,9 @@ def retrieve_certificates():
                 for access_description in aia_ext.value:
                     if (access_description.access_method == 
                             oid.AuthorityInformationAccessOID.OCSP):
-                        ocsp_urls.append(str(access_description.access_location.value))
+                        ocsp_urls.append(
+                            str(access_description.access_location.value)
+                        )
                 
                 if ocsp_urls:
                     cert_info["ocsp_support"] = "Yes"
@@ -261,16 +280,19 @@ def retrieve_certificates():
             except x509.ExtensionNotFound:
                 cert_info["ocsp_support"] = "No"
                 if is_debug:
-                    LOGGER.debug("No Authority Information Access extension found")
+                    LOGGER.debug("No Authority Information Access extension "
+                                "found")
             except Exception as ocsp_error:
                 cert_info["ocsp_support"] = "Unknown"
                 if is_debug:
-                    LOGGER.debug(f"Error checking OCSP support: {ocsp_error}")
+                    LOGGER.debug(f"Error checking OCSP support: "
+                               f"{ocsp_error}")
             
             if is_debug:
                 LOGGER.debug(f"Certificate details extracted:")
                 LOGGER.debug(f"  - Serial: {cert_info['serial_number']}")
-                LOGGER.debug(f"  - Fingerprint: {cert_info['fingerprint'][:16]}...")
+                LOGGER.debug(f"  - Fingerprint: "
+                           f"{cert_info['fingerprint'][:16]}...")
                 LOGGER.debug(f"  - Version: {cert_info['version']}")
                 LOGGER.debug(f"  - OCSP Support: {cert_info['ocsp_support']}")
             
@@ -278,15 +300,18 @@ def retrieve_certificates():
             LOGGER.debug(format_exc())
             LOGGER.error(f"Error while parsing certificate {cert_file}: {e}")
             if is_debug:
-                LOGGER.debug(f"Certificate parsing failed for {domain}: {str(e)}")
+                LOGGER.debug(f"Certificate parsing failed for {domain}: "
+                           f"{str(e)}")
                 LOGGER.debug(f"Error type: {type(e).__name__}")
 
         try:
-            renewal_file = Path(DATA_PATH).joinpath("renewal", f"{domain}.conf")
+            renewal_file = Path(DATA_PATH).joinpath("renewal", 
+                                                   f"{domain}.conf")
             if renewal_file.exists():
                 if is_debug:
                     LOGGER.debug(f"Processing renewal file: {renewal_file}")
-                    LOGGER.debug(f"Renewal file size: {renewal_file.stat().st_size} bytes")
+                    LOGGER.debug(f"Renewal file size: "
+                                f"{renewal_file.stat().st_size} bytes")
                 
                 config_lines_processed = 0
                 with renewal_file.open("r") as f:
@@ -296,57 +321,69 @@ def retrieve_certificates():
                             continue
                             
                         config_lines_processed += 1
-                        if is_debug and line_num <= 10:  # Debug first 10 meaningful lines
-                            LOGGER.debug(f"Renewal config line {line_num}: {line}")
+                        if is_debug and line_num <= 10:  # Debug first 10 lines
+                            LOGGER.debug(f"Renewal config line {line_num}: "
+                                       f"{line}")
                         
                         if line.startswith("preferred_profile = "):
                             cert_info["preferred_profile"] = (
                                 line.split(" = ")[1].strip()
                             )
                             if is_debug:
-                                LOGGER.debug(f"Found preferred_profile: {cert_info['preferred_profile']}")
+                                LOGGER.debug(f"Found preferred_profile: "
+                                           f"{cert_info['preferred_profile']}")
                         elif line.startswith("pref_challs = "):
                             challenges = line.split(" = ")[1].strip()
                             cert_info["challenge"] = challenges.split(",")[0]
                             if is_debug:
-                                LOGGER.debug(f"Found challenge: {cert_info['challenge']} (from {challenges})")
+                                LOGGER.debug(f"Found challenge: "
+                                           f"{cert_info['challenge']} "
+                                           f"(from {challenges})")
                         elif line.startswith("authenticator = "):
                             cert_info["authenticator"] = (
                                 line.split(" = ")[1].strip()
                             )
                             if is_debug:
-                                LOGGER.debug(f"Found authenticator: {cert_info['authenticator']}")
+                                LOGGER.debug(f"Found authenticator: "
+                                           f"{cert_info['authenticator']}")
                         elif line.startswith("server = "):
                             cert_info["issuer_server"] = (
                                 line.split(" = ")[1].strip()
                             )
                             if is_debug:
-                                LOGGER.debug(f"Found issuer_server: {cert_info['issuer_server']}")
+                                LOGGER.debug(f"Found issuer_server: "
+                                           f"{cert_info['issuer_server']}")
                         elif line.startswith("key_type = "):
                             cert_info["key_type"] = (
                                 line.split(" = ")[1].strip()
                             )
                             if is_debug:
-                                LOGGER.debug(f"Found key_type: {cert_info['key_type']}")
+                                LOGGER.debug(f"Found key_type: "
+                                           f"{cert_info['key_type']}")
                 
                 if is_debug:
-                    LOGGER.debug(f"Processed {config_lines_processed} configuration lines")
+                    LOGGER.debug(f"Processed {config_lines_processed} "
+                                f"configuration lines")
                     LOGGER.debug(f"Final renewal configuration for {domain}:")
-                    LOGGER.debug(f"  - Profile: {cert_info['preferred_profile']}")
+                    LOGGER.debug(f"  - Profile: "
+                                f"{cert_info['preferred_profile']}")
                     LOGGER.debug(f"  - Challenge: {cert_info['challenge']}")
-                    LOGGER.debug(f"  - Authenticator: {cert_info['authenticator']}")
+                    LOGGER.debug(f"  - Authenticator: "
+                                f"{cert_info['authenticator']}")
                     LOGGER.debug(f"  - Server: {cert_info['issuer_server']}")
                     LOGGER.debug(f"  - Key type: {cert_info['key_type']}")
             else:
                 if is_debug:
-                    LOGGER.debug(f"No renewal file found for {domain} at {renewal_file}")
+                    LOGGER.debug(f"No renewal file found for {domain} at "
+                                f"{renewal_file}")
                     
         except BaseException as e:
             LOGGER.debug(format_exc())
             LOGGER.error(f"Error while parsing renewal configuration "
                         f"{renewal_file}: {e}")
             if is_debug:
-                LOGGER.debug(f"Renewal config parsing failed for {domain}: {str(e)}")
+                LOGGER.debug(f"Renewal config parsing failed for {domain}: "
+                           f"{str(e)}")
                 LOGGER.debug(f"Error type: {type(e).__name__}")
 
         for key in cert_info:
@@ -357,7 +394,9 @@ def retrieve_certificates():
         # Summary of OCSP support
         ocsp_support_counts = {"Yes": 0, "No": 0, "Unknown": 0}
         for ocsp_status in certificates.get('ocsp_support', []):
-            ocsp_support_counts[ocsp_status] = ocsp_support_counts.get(ocsp_status, 0) + 1
+            ocsp_support_counts[ocsp_status] = (
+                ocsp_support_counts.get(ocsp_status, 0) + 1
+            )
         LOGGER.debug(f"OCSP support summary: {ocsp_support_counts}")
 
     return certificates
@@ -401,7 +440,8 @@ def letsencrypt_fetch():
         certs = retrieve_certificates()
         
         if is_debug:
-            LOGGER.debug(f"Retrieved certificates: {len(certs.get('domain', []))}")
+            LOGGER.debug(f"Retrieved certificates: "
+                        f"{len(certs.get('domain', []))}")
         
         for i, domain in enumerate(certs.get("domain", [])):
             cert_data = {
@@ -424,7 +464,8 @@ def letsencrypt_fetch():
             
             if is_debug:
                 LOGGER.debug(f"Added certificate to list: {domain}")
-                LOGGER.debug(f"  - OCSP Support: {cert_data['ocsp_support']}")
+                LOGGER.debug(f"  - OCSP Support: "
+                           f"{cert_data['ocsp_support']}")
                 LOGGER.debug(f"  - Challenge: {cert_data['challenge']}")
                 LOGGER.debug(f"  - Key Type: {cert_data['key_type']}")
                 
@@ -440,7 +481,8 @@ def letsencrypt_fetch():
     }
     
     if is_debug:
-        LOGGER.debug(f"Returning {len(cert_list)} certificates to DataTables")
+        LOGGER.debug(f"Returning {len(cert_list)} certificates to "
+                    f"DataTables")
 
     return jsonify(response_data)
 
@@ -514,7 +556,8 @@ def letsencrypt_delete():
         # Clean up certificate directories and files
         cert_dir = Path(DATA_PATH).joinpath("live", cert_name)
         archive_dir = Path(DATA_PATH).joinpath("archive", cert_name)
-        renewal_file = Path(DATA_PATH).joinpath("renewal", f"{cert_name}.conf")
+        renewal_file = Path(DATA_PATH).joinpath("renewal", 
+                                               f"{cert_name}.conf")
 
         if is_debug:
             LOGGER.debug(f"Cleaning up directories for {cert_name}")
@@ -528,7 +571,8 @@ def letsencrypt_delete():
                             if is_debug:
                                 LOGGER.debug(f"Removed file: {file}")
                         except Exception as e:
-                            LOGGER.error(f"Failed to remove file {file}: {e}")
+                            LOGGER.error(f"Failed to remove file {file}: "
+                                       f"{e}")
                     path.rmdir()
                     LOGGER.info(f"Removed directory {path}")
                 except Exception as e:
@@ -585,7 +629,8 @@ def letsencrypt_delete():
                        "message": f"Successfully deleted certificate "
                                 f"{cert_name}"})
     else:
-        error_msg = f"Failed to delete certificate {cert_name}: {delete_proc.stdout}"
+        error_msg = (f"Failed to delete certificate {cert_name}: "
+                    f"{delete_proc.stdout}")
         LOGGER.error(error_msg)
         return jsonify({"status": "ko", "message": error_msg})
 

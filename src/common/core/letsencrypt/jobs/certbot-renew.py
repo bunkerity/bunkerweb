@@ -123,8 +123,9 @@ try:
     )
     
     # Pass database URI if configured (for cluster deployments)
-    if getenv("DATABASE_URI"):
-        env["DATABASE_URI"] = getenv("DATABASE_URI")
+    database_uri = getenv("DATABASE_URI")
+    if database_uri is not None:
+        env["DATABASE_URI"] = database_uri
     
     if getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         LOGGER.debug("Environment configuration for certbot:")
@@ -137,7 +138,7 @@ try:
         LOGGER.debug(f"  PYTHONPATH: {pythonpath_display}")
         LOGGER.debug(f"  RELOAD_MIN_TIMEOUT: {env['RELOAD_MIN_TIMEOUT']}")
         LOGGER.debug(f"  DISABLE_CONFIGURATION_TESTING: {env['DISABLE_CONFIGURATION_TESTING']}")
-        LOGGER.debug(f"  DATABASE_URI configured: {'Yes' if getenv('DATABASE_URI') else 'No'}")
+        LOGGER.debug(f"  DATABASE_URI configured: {'Yes' if database_uri else 'No'}")
 
     # Construct certbot renew command with appropriate options
     # --no-random-sleep-on-renew: Prevents random delays in scheduled runs

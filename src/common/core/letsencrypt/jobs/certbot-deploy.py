@@ -3,6 +3,7 @@
 from io import BytesIO
 from os import getenv, sep
 from os.path import join
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
 from traceback import format_exc
