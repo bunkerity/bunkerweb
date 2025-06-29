@@ -76,6 +76,10 @@
                 title: "Key Type",
                 tooltip: "Type of key used in the certificate",
             },
+            {
+                title: "OCSP",
+                tooltip: "Online Certificate Status Protocol support",
+            },
         ];
 
         # Set up the delete confirmation modal for certificates
@@ -302,8 +306,8 @@
                     viewTotal: true,
                     cascadePanes: true,
                     collapse: false,
-                    # Issuer, Preferred Profile, Challenge and Key Type
-                    columns: [2, 5, 6, 7],
+                    # Issuer, Preferred Profile, Challenge, Key Type, and OCSP
+                    columns: [2, 5, 6, 7, 8],
                 },
             },
             topStart: {},
@@ -338,6 +342,7 @@
             console.debug("- Search panes columns:", layout.top1.searchPanes.columns);
             console.debug("- Page length options:", layout.bottomStart.pageLength.menu);
             console.debug("- Layout structure:", layout);
+            console.debug("- Headers count:", headers.length);
         }
 
         layout.topStart.buttons = [
@@ -623,6 +628,14 @@
                     },
                     targets: 7,
                 },
+                {
+                    searchPanes: {
+                        show: true,
+                        header: t("searchpane.ocsp", "OCSP Support"),
+                        combiner: "or",
+                    },
+                    targets: 8,
+                },
             ];
         }
 
@@ -644,6 +657,7 @@
                 { data: "preferred_profile", title: "Preferred Profile" },
                 { data: "challenge", title: "Challenge" },
                 { data: "key_type", title: "Key Type" },
+                { data: "ocsp_support", title: "OCSP" },
                 { data: "serial_number", title: "Serial Number" },
                 { data: "fingerprint", title: "Fingerprint" },
                 { data: "version", title: "Version" },
@@ -674,7 +688,7 @@
         const letsencrypt_config = {
             tableSelector: "#letsencrypt",
             tableName: "letsencrypt",
-            columnVisibilityCondition: (column) => column > 2 && column < 13,
+            columnVisibilityCondition: (column) => column > 2 && column < 14,
             dataTableOptions: {
                 columnDefs: buildColumnDefs(),
                 order: [[2, "asc"]],

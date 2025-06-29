@@ -11,9 +11,11 @@ COLUMNS_PREFERENCES_DEFAULTS = {
     "6": True,    # Valid To
     "7": True,    # Preferred Profile
     "8": True,    # Challenge
-    "9": False,   # Serial Number (hidden by default)
-    "10": False,  # Fingerprint (hidden by default)
-    "11": True,   # Key Type
+    "9": True,    # Key Type
+    "10": True,   # OCSP Support
+    "11": False,  # Serial Number (hidden by default)
+    "12": False,  # Fingerprint (hidden by default)
+    "13": True,   # Version
 }
 
 
@@ -58,8 +60,15 @@ def context_processor():
     if is_debug:
         logger.debug(f"Processing context for path: {request.path}")
         logger.debug(f"Column preferences to inject:")
+        column_names = {
+            "3": "Common Name", "4": "Issuer", "5": "Valid From", 
+            "6": "Valid To", "7": "Preferred Profile", "8": "Challenge",
+            "9": "Key Type", "10": "OCSP Support", "11": "Serial Number",
+            "12": "Fingerprint", "13": "Version"
+        }
         for col_id, visible in COLUMNS_PREFERENCES_DEFAULTS.items():
-            logger.debug(f"  Column {col_id}: {'visible' if visible else 'hidden'}")
+            col_name = column_names.get(col_id, f"Column {col_id}")
+            logger.debug(f"  {col_name} (#{col_id}): {'visible' if visible else 'hidden'}")
 
     # Prepare context data for templates
     data = {

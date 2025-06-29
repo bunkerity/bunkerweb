@@ -10,6 +10,7 @@ from typing import Tuple
 from uuid import uuid4
 
 from cryptography import x509
+from cryptography.x509 import oid
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 
@@ -153,6 +154,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
         "challenge": [],
         "authenticator": [],
         "key_type": [],
+        "ocsp_support": [],
     }
 
     total_certs_processed = 0
@@ -191,6 +193,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                 "challenge": "Unknown",
                 "authenticator": "Unknown",
                 "key_type": "Unknown",
+                "ocsp_support": "Unknown",
             }
 
             # Parse the certificate file
@@ -269,12 +272,42 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                 # Extract version
                 cert_info["version"] = cert.version.name
                 
+                # Check for OCSP support via Authority Information Access extension
+                try:
+                    aia_ext = cert.extensions.get_extension_for_oid(
+                        oid.ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+                    )
+                    ocsp_urls = []
+                    for access_description in aia_ext.value:
+                        if (access_description.access_method == 
+                                oid.AuthorityInformationAccessOID.OCSP):
+                            ocsp_urls.append(str(access_description.access_location.value))
+                    
+                    if ocsp_urls:
+                        cert_info["ocsp_support"] = "Yes"
+                        if is_debug:
+                            logger.debug(f"OCSP URLs found for {domain}: {ocsp_urls}")
+                    else:
+                        cert_info["ocsp_support"] = "No"
+                        if is_debug:
+                            logger.debug(f"AIA extension found for {domain} but no OCSP URLs")
+                            
+                except x509.ExtensionNotFound:
+                    cert_info["ocsp_support"] = "No"
+                    if is_debug:
+                        logger.debug(f"No Authority Information Access extension found for {domain}")
+                except Exception as ocsp_error:
+                    cert_info["ocsp_support"] = "Unknown"
+                    if is_debug:
+                        logger.debug(f"Error checking OCSP support for {domain}: {ocsp_error}")
+                
                 if is_debug:
                     logger.debug(f"Certificate processing completed for {domain}")
                     logger.debug(f"  - Serial: {cert_info['serial_number']}")
                     logger.debug(f"  - Version: {cert_info['version']}")
                     logger.debug(f"  - Subject: {cert_info['common_name']}")
                     logger.debug(f"  - Issuer: {cert_info['issuer']}")
+                    logger.debug(f"  - OCSP Support: {cert_info['ocsp_support']}")
                 
             except BaseException as e:
                 error_msg = f"Error while parsing certificate {cert_file}: {e}"
@@ -349,6 +382,12 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
         logger.debug(f"Certificate retrieval complete. Processed "
                     f"{total_certs_processed} certificates from "
                     f"{len(folder_paths)} folders")
+        
+        # Summary of OCSP support
+        ocsp_support_counts = {"Yes": 0, "No": 0, "Unknown": 0}
+        for ocsp_status in certificates.get('ocsp_support', []):
+            ocsp_support_counts[ocsp_status] = ocsp_support_counts.get(ocsp_status, 0) + 1
+        logger.debug(f"OCSP support summary: {ocsp_support_counts}")
 
     return certificates
 
@@ -393,6 +432,7 @@ def pre_render(app, *args, **kwargs):
                 "challenge": [],
                 "authenticator": [],
                 "key_type": [],
+                "ocsp_support": [],
             },
             "order": {
                 "column": 5,
@@ -461,7 +501,10 @@ def pre_render(app, *args, **kwargs):
                 logger.debug("Sample certificate data (first certificate):")
                 for key in cert_data:
                     value = cert_data[key][0] if cert_data[key] else "None"
-                    logger.debug(f"  {key}: {value}")
+                    if key == "ocsp_support":
+                        logger.debug(f"  {key}: {value} (OCSP support detected)")
+                    else:
+                        logger.debug(f"  {key}: {value}")
         
         ret["list_certificates"]["data"] = cert_data
         

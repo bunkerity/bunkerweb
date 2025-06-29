@@ -8,6 +8,7 @@ from tarfile import open as tar_open
 from traceback import format_exc
 
 from cryptography import x509
+from cryptography.x509 import oid
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from flask import Blueprint, render_template, request, jsonify
@@ -149,6 +150,7 @@ def retrieve_certificates():
         "challenge": [],
         "authenticator": [],
         "key_type": [],
+        "ocsp_support": [],
     }
 
     cert_files = list(Path(DATA_PATH).joinpath("live").glob("*/fullchain.pem"))
@@ -178,6 +180,7 @@ def retrieve_certificates():
             "challenge": "Unknown",
             "authenticator": "Unknown",
             "key_type": "Unknown",
+            "ocsp_support": "Unknown",
         }
         
         try:
@@ -235,11 +238,41 @@ def retrieve_certificates():
             cert_info["fingerprint"] = cert.fingerprint(hashes.SHA256()).hex()
             cert_info["version"] = cert.version.name
             
+            # Check for OCSP support via Authority Information Access extension
+            try:
+                aia_ext = cert.extensions.get_extension_for_oid(
+                    oid.ExtensionOID.AUTHORITY_INFORMATION_ACCESS
+                )
+                ocsp_urls = []
+                for access_description in aia_ext.value:
+                    if (access_description.access_method == 
+                            oid.AuthorityInformationAccessOID.OCSP):
+                        ocsp_urls.append(str(access_description.access_location.value))
+                
+                if ocsp_urls:
+                    cert_info["ocsp_support"] = "Yes"
+                    if is_debug:
+                        LOGGER.debug(f"OCSP URLs found: {ocsp_urls}")
+                else:
+                    cert_info["ocsp_support"] = "No"
+                    if is_debug:
+                        LOGGER.debug("AIA extension found but no OCSP URLs")
+                        
+            except x509.ExtensionNotFound:
+                cert_info["ocsp_support"] = "No"
+                if is_debug:
+                    LOGGER.debug("No Authority Information Access extension found")
+            except Exception as ocsp_error:
+                cert_info["ocsp_support"] = "Unknown"
+                if is_debug:
+                    LOGGER.debug(f"Error checking OCSP support: {ocsp_error}")
+            
             if is_debug:
                 LOGGER.debug(f"Certificate details extracted:")
                 LOGGER.debug(f"  - Serial: {cert_info['serial_number']}")
                 LOGGER.debug(f"  - Fingerprint: {cert_info['fingerprint'][:16]}...")
                 LOGGER.debug(f"  - Version: {cert_info['version']}")
+                LOGGER.debug(f"  - OCSP Support: {cert_info['ocsp_support']}")
             
         except BaseException as e:
             LOGGER.debug(format_exc())
@@ -321,6 +354,11 @@ def retrieve_certificates():
 
     if is_debug:
         LOGGER.debug(f"Retrieved {len(certificates['domain'])} certificates")
+        # Summary of OCSP support
+        ocsp_support_counts = {"Yes": 0, "No": 0, "Unknown": 0}
+        for ocsp_status in certificates.get('ocsp_support', []):
+            ocsp_support_counts[ocsp_status] = ocsp_support_counts.get(ocsp_status, 0) + 1
+        LOGGER.debug(f"OCSP support summary: {ocsp_support_counts}")
 
     return certificates
 
@@ -380,11 +418,15 @@ def letsencrypt_fetch():
                 "challenge": certs.get("challenge", [""])[i],
                 "authenticator": certs.get("authenticator", [""])[i],
                 "key_type": certs.get("key_type", [""])[i],
+                "ocsp_support": certs.get("ocsp_support", [""])[i],
             }
             cert_list.append(cert_data)
             
             if is_debug:
                 LOGGER.debug(f"Added certificate to list: {domain}")
+                LOGGER.debug(f"  - OCSP Support: {cert_data['ocsp_support']}")
+                LOGGER.debug(f"  - Challenge: {cert_data['challenge']}")
+                LOGGER.debug(f"  - Key Type: {cert_data['key_type']}")
                 
     except BaseException as e:
         LOGGER.debug(format_exc())
