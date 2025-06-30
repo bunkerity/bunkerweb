@@ -168,7 +168,6 @@ preg_replace_callback
 preg_replace_callback_array
 preg_split
 print_r
-printf
 proc_close
 proc_get_status
 proc_nice

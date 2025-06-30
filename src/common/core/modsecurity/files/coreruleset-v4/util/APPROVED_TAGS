@@ -42,6 +42,7 @@ attack-reputation-scanner
 attack-rfi
 attack-sqli
 attack-ssrf
+attack-ssti
 attack-xss
 capec/1/180/77
 capec/1000/118/116

@@ -1,0 +1,12 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+java[a-z\.]+Exception
+java[a-z\.]+Error
+org\.[a-z\.]+Exception
+com\.[a-z\.]+Exception
+##! Java stack strace errors
+Exception in thread "[^"]*"
+at\s+(?:java|javax|jakarta|org|com)
