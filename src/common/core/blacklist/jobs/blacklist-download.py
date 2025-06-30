@@ -3,7 +3,6 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
 from ipaddress import ip_address, ip_network
-import os
 from os import getenv, sep
 from os.path import join, normpath
 from re import compile as re_compile
@@ -32,7 +31,7 @@ uri_rx = re_compile(rb"^/")
 def debug_log(logger, message):
     # Log debug messages only when LOG_LEVEL environment variable is set to
     # "debug"
-    if os.getenv("LOG_LEVEL") == "debug":
+    if getenv("LOG_LEVEL") == "debug":
         logger.debug(f"[DEBUG] {message}")
 
 

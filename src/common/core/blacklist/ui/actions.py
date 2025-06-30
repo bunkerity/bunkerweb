@@ -1,5 +1,4 @@
 from logging import getLogger
-import os
 from os import getenv
 from traceback import format_exc
 
@@ -7,7 +6,7 @@ from traceback import format_exc
 def debug_log(logger, message):
     # Log debug messages only when LOG_LEVEL environment variable is set to
     # "debug"
-    if os.getenv("LOG_LEVEL") == "debug":
+    if getenv("LOG_LEVEL") == "debug":
         logger.debug(f"[DEBUG] {message}")
 
 

@@ -8,6 +8,7 @@ local blacklist = class("blacklist", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local INFO = ngx.INFO
+local NOTICE = ngx.NOTICE
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
@@ -20,11 +21,10 @@ local ipmatcher_new = ipmatcher.new
 local tostring = tostring
 local open = io.open
 
--- Debug logging function that checks LOG_LEVEL environment variable
+-- Log debug messages only when LOG_LEVEL environment variable is set to "debug"
 local function debug_log(logger, message)
-    local log_level = os.getenv("LOG_LEVEL")
-    if log_level == "debug" then
-        logger:log(INFO, "[DEBUG] " .. message)
+    if os.getenv("LOG_LEVEL") == "debug" then
+        logger:log(NOTICE, "[DEBUG] " .. message)
     end
 end
 
