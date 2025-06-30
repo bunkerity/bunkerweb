@@ -43,6 +43,13 @@ end
 local antibot = class("antibot", plugin)
 local CACHE_PREFIX = "plugin_antibot_"
 
+-- Log debug messages only when LOG_LEVEL environment variable is set to "debug"
+local function debug_log(logger, message)
+    if os.getenv("LOG_LEVEL") == "debug" then
+        logger:log(INFO, "[DEBUG] " .. message)
+    end
+end
+
 -- Helper function to get table keys for debugging
 function antibot:get_table_keys(t)
     local keys = {}
@@ -65,20 +72,15 @@ end
 function antibot:initialize(ctx)
     plugin.initialize(self, "antibot", ctx)
     
-    local debug_mode = os.getenv("LOG_LEVEL") == "debug"
-    if debug_mode then
-        self.logger:log(INFO, "antibot:initialize called")
-        self.logger:log(INFO, "LOG_LEVEL environment variable: " .. 
+    debug_log(self.logger, "antibot:initialize called")
+    debug_log(self.logger, "LOG_LEVEL environment variable: " .. 
                         (os.getenv("LOG_LEVEL") or "nil"))
-        self.logger:log(INFO, "use_antibot setting: " .. 
+    debug_log(self.logger, "use_antibot setting: " .. 
                         tostring(self.use_antibot))
-        self.logger:log(INFO, "Current phase: " .. get_phase())
-    end
+    debug_log(self.logger, "Current phase: " .. get_phase())
     
     if get_phase() ~= "init" and self.use_antibot ~= "no" then
-        if debug_mode then
-            self.logger:log(INFO, "Initializing ignore lists")
-        end
+        debug_log(self.logger, "Initializing ignore lists")
         
         self.lists = {}
         for _, list in ipairs({ "IGNORE_URI", "IGNORE_IP", "IGNORE_RDNS", 
@@ -86,11 +88,9 @@ function antibot:initialize(ctx)
             self.lists[list] = {}
             local list_var = self.variables["ANTIBOT_" .. list]
             
-            if debug_mode then
-                self.logger:log(INFO, "Processing list: " .. list)
-                self.logger:log(INFO, "List variable value: " .. 
+            debug_log(self.logger, "Processing list: " .. list)
+            debug_log(self.logger, "List variable value: " .. 
                                tostring(list_var))
-            end
             
             if list_var then
                 local count = 0
@@ -98,24 +98,18 @@ function antibot:initialize(ctx)
                     if data ~= "" then
                         table.insert(self.lists[list], data)
                         count = count + 1
-                        if debug_mode then
-                            self.logger:log(INFO, "Added to " .. list .. 
+                        debug_log(self.logger, "Added to " .. list .. 
                                            ": " .. data)
-                        end
                     end
                 end
-                if debug_mode then
-                    self.logger:log(INFO, "Total items in " .. list .. 
+                debug_log(self.logger, "Total items in " .. list .. 
                                    ": " .. count)
-                end
             end
         end
         
-        if debug_mode then
-            self.logger:log(INFO, "Ignore lists initialization completed")
-        end
-    elseif debug_mode then
-        self.logger:log(INFO, "Skipping lists initialization - " ..
+        debug_log(self.logger, "Ignore lists initialization completed")
+    else
+        debug_log(self.logger, "Skipping lists initialization - " ..
                         "phase: " .. get_phase() .. 
                         ", use_antibot: " .. tostring(self.use_antibot))
     end
@@ -221,56 +215,42 @@ end
 
 -- Handle access phase processing
 function antibot:access()
-    local debug_mode = os.getenv("LOG_LEVEL") == "debug"
-    
-    if debug_mode then
-        self.logger:log(INFO, "antibot:access function started")
-        self.logger:log(INFO, "USE_ANTIBOT setting: " .. 
+    debug_log(self.logger, "antibot:access function started")
+    debug_log(self.logger, "USE_ANTIBOT setting: " .. 
                         self.variables["USE_ANTIBOT"])
-    end
     
     if self.variables["USE_ANTIBOT"] == "no" then
-        if debug_mode then
-            self.logger:log(INFO, "Antibot disabled, skipping processing")
-        end
+        debug_log(self.logger, "Antibot disabled, skipping processing")
         return self:ret(true, "antibot not activated")
     end
 
-    if debug_mode then
-        self.logger:log(INFO, "Getting session for antibot processing")
-        self.logger:log(INFO, "Remote address: " .. 
+    debug_log(self.logger, "Getting session for antibot processing")
+    debug_log(self.logger, "Remote address: " .. 
                         tostring(self.ctx.bw.remote_addr))
-        self.logger:log(INFO, "Request URI: " .. 
+    debug_log(self.logger, "Request URI: " .. 
                         tostring(self.ctx.bw.request_uri))
-        self.logger:log(INFO, "User agent: " .. 
+    debug_log(self.logger, "User agent: " .. 
                         tostring(self.ctx.bw.http_user_agent))
-    end
 
     local session, err = get_session(self.ctx)
     if not session then
-        if debug_mode then
-            self.logger:log(ERR, "Failed to get session: " .. err)
-        end
+        debug_log(self.logger, "Failed to get session: " .. err)
         return self:ret(false, "can't get session : " .. err)
     end
     
-    if debug_mode then
-        self.logger:log(INFO, "Session retrieved successfully")
-    end
+    debug_log(self.logger, "Session retrieved successfully")
     
     self.session = session
     self.session_data = session:get("antibot") or {}
     self.ctx.bw.antibot_session_data = self.session_data
 
-    if debug_mode then
-        self.logger:log(INFO, "Session data keys: " .. 
+    debug_log(self.logger, "Session data keys: " .. 
                         table.concat(self:get_table_keys(self.session_data), 
                                    ", "))
-        if self.session_data.resolved then
-            self.logger:log(INFO, "Client has already resolved challenge")
-        else
-            self.logger:log(INFO, "Client has not resolved challenge")
-        end
+    if self.session_data.resolved then
+        debug_log(self.logger, "Client has already resolved challenge")
+    else
+        debug_log(self.logger, "Client has not resolved challenge")
     end
 
     local msg = self:check_session()
@@ -278,22 +258,16 @@ function antibot:access()
 
     if self.session_data.resolved then
         if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
-            if debug_mode then
-                self.logger:log(INFO, "Redirecting to original URI: " .. 
+            debug_log(self.logger, "Redirecting to original URI: " .. 
                                tostring(self.session_data.original_uri))
-            end
             return self:ret(true, "client already resolved the challenge", 
                            nil, self.session_data.original_uri)
         end
-        if debug_mode then
-            self.logger:log(INFO, "Client already resolved, allowing access")
-        end
+        debug_log(self.logger, "Client already resolved, allowing access")
         return self:ret(true, "client already resolved the challenge")
     end
 
-    if debug_mode then
-        self.logger:log(INFO, "Setting up cache checks")
-    end
+    debug_log(self.logger, "Setting up cache checks")
 
     local checks = {
         ["IP"] = "ip" .. self.ctx.bw.remote_addr,
@@ -305,10 +279,8 @@ function antibot:access()
         checks["URI"] = "uri" .. self.ctx.bw.uri
     end
     
-    if debug_mode then
-        self.logger:log(INFO, "Cache check keys: " .. 
+    debug_log(self.logger, "Cache check keys: " .. 
                         table.concat(self:get_table_keys(checks), ", "))
-    end
     
     local already_cached = {
         ["IP"] = false,
@@ -316,43 +288,33 @@ function antibot:access()
         ["UA"] = false,
     }
     for k, v in pairs(checks) do
-        if debug_mode then
-            self.logger:log(INFO, "Checking cache for: " .. k .. " = " .. v)
-        end
+        debug_log(self.logger, "Checking cache for: " .. k .. " = " .. v)
         
         local ok, cached = self:is_in_cache(v)
         if not ok then
             self.logger:log(ERR, "error while checking cache : " .. cached)
         elseif cached and cached ~= "ko" then
-            if debug_mode then
-                self.logger:log(INFO, "Found in cache - " .. k .. 
+            debug_log(self.logger, "Found in cache - " .. k .. 
                                " ignored: " .. cached)
-            end
             return self:ret(true, k .. 
                            " is in cached antibot ignored (info : " .. 
                            cached .. ")")
         end
         if ok and cached then
             already_cached[k] = true
-            if debug_mode then
-                self.logger:log(INFO, k .. " already cached")
-            end
+            debug_log(self.logger, k .. " already cached")
         end
     end
 
     if self.lists then
-        if debug_mode then
-            self.logger:log(INFO, "Performing ignore list checks")
-        end
+        debug_log(self.logger, "Performing ignore list checks")
         
         for k, _ in pairs(checks) do
             if not already_cached[k] and 
                not (k == "URI" and 
                     self.ctx.bw.uri == self.variables["ANTIBOT_URI"]) then
                 
-                if debug_mode then
-                    self.logger:log(INFO, "Checking if " .. k .. " is ignored")
-                end
+                debug_log(self.logger, "Checking if " .. k .. " is ignored")
                 
                 local ok, ignored = self:is_ignored(k)
                 if ok == nil then
@@ -365,90 +327,70 @@ function antibot:access()
                         self.logger:log(ERR, 
                                        "error while adding element to cache : " ..
                                        err)
-                    elseif debug_mode then
-                        self.logger:log(INFO, "Added to cache: " .. k .. 
+                    else
+                        debug_log(self.logger, "Added to cache: " .. k .. 
                                        " = " .. ignored)
                     end
                     
                     if ignored ~= "ko" then
-                        if debug_mode then
-                            self.logger:log(INFO, k .. " is ignored: " .. 
+                        debug_log(self.logger, k .. " is ignored: " .. 
                                            ignored)
-                        end
                         return self:ret(true, k .. " is ignored (info : " .. 
                                        ignored .. ")")
                     end
                 end
-            elseif debug_mode then
-                self.logger:log(INFO, "Skipping " .. k .. 
+            else
+                debug_log(self.logger, "Skipping " .. k .. 
                                " check (cached or challenge URI)")
             end
         end
-    elseif debug_mode then
-        self.logger:log(INFO, "No ignore lists configured")
+    else
+        debug_log(self.logger, "No ignore lists configured")
     end
 
-    if debug_mode then
-        self.logger:log(INFO, "Preparing challenge")
-    end
+    debug_log(self.logger, "Preparing challenge")
     
     self:prepare_challenge()
 
     if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
-        if debug_mode then
-            self.logger:log(INFO, "Redirecting to challenge URI: " .. 
+        debug_log(self.logger, "Redirecting to challenge URI: " .. 
                            self.variables["ANTIBOT_URI"])
-        end
         return self:ret(true, "redirecting client to the challenge uri", nil, 
                        self.variables["ANTIBOT_URI"])
     end
 
     if self.session_data.resolved then
-        if debug_mode then
-            self.logger:log(INFO, "Challenge resolved, redirecting to: " .. 
+        debug_log(self.logger, "Challenge resolved, redirecting to: " .. 
                            tostring(self.session_data.original_uri))
-        end
         return self:ret(true, "client already resolved the challenge", nil, 
                        self.session_data.original_uri)
     end
 
     if self.ctx.bw.request_method == "GET" then
-        if debug_mode then
-            self.logger:log(INFO, "GET request - displaying challenge")
-        end
+        debug_log(self.logger, "GET request - displaying challenge")
         self.ctx.bw.antibot_display_content = true
         return self:ret(true, "displaying challenge to client", ngx.OK)
     end
 
     if self.ctx.bw.request_method == "POST" then
-        if debug_mode then
-            self.logger:log(INFO, "POST request - checking challenge response")
-        end
+        debug_log(self.logger, "POST request - checking challenge response")
         
         local ok, err, redirect = self:check_challenge()
         if ok == nil then
-            if debug_mode then
-                self.logger:log(ERR, "Challenge check error: " .. err)
-            end
+            debug_log(self.logger, "Challenge check error: " .. err)
             return self:ret(false, "check challenge error : " .. err, 
                            HTTP_INTERNAL_SERVER_ERROR)
         elseif not ok then
             self:set_metric("counters", "failed_challenges", 1)
             self.logger:log(ngx.WARN, "client failed challenge : " .. err)
-            if debug_mode then
-                self.logger:log(INFO, "Challenge failed, preparing new one")
-            end
+            debug_log(self.logger, "Challenge failed, preparing new one")
         else
-            if debug_mode then
-                self.logger:log(INFO, "Challenge passed successfully")
-            end
+            debug_log(self.logger, "Challenge passed successfully")
         end
         
         if redirect then
-            if debug_mode then
-                self.logger:log(INFO, "Redirecting after challenge: " .. 
+            debug_log(self.logger, "Redirecting after challenge: " .. 
                                redirect)
-            end
             return self:ret(true, "check challenge redirect : " .. redirect, 
                            nil, redirect)
         end
@@ -458,10 +400,8 @@ function antibot:access()
         return self:ret(true, "displaying challenge to client", OK)
     end
 
-    if debug_mode then
-        self.logger:log(INFO, "Suspicious HTTP method: " .. 
+    debug_log(self.logger, "Suspicious HTTP method: " .. 
                         self.ctx.bw.request_method)
-    end
     
     local data = {}
     data["id"] = "suspicious-method"
@@ -621,18 +561,12 @@ end
 
 -- Check the submitted challenge response
 function antibot:check_challenge()
-    local debug_mode = os.getenv("LOG_LEVEL") == "debug"
-    
-    if debug_mode then
-        self.logger:log(INFO, "check_challenge function started")
-        self.logger:log(INFO, "Challenge type: " .. 
+    debug_log(self.logger, "check_challenge function started")
+    debug_log(self.logger, "Challenge type: " .. 
                         tostring(self.session_data.type))
-    end
     
     if not self.session_data.prepared then
-        if debug_mode then
-            self.logger:log(ERR, "Challenge not prepared")
-        end
+        debug_log(self.logger, "Challenge not prepared")
         return nil, "challenge not prepared"
     end
 
@@ -643,45 +577,33 @@ function antibot:check_challenge()
     self.session_data.prepared = false
     self.session_updated = true
 
-    if debug_mode then
-        self.logger:log(INFO, "Processing " .. self.session_data.type .. 
+    debug_log(self.logger, "Processing " .. self.session_data.type .. 
                         " challenge")
-    end
 
     if self.session_data.type == "javascript" then
-        if debug_mode then
-            self.logger:log(INFO, "Processing JavaScript challenge")
-        end
+        debug_log(self.logger, "Processing JavaScript challenge")
         
         read_body()
         local args, err = get_post_args(1)
         if err == "truncated" or not args or not args["challenge"] then
-            if debug_mode then
-                self.logger:log(ERR, "Missing or truncated challenge arg")
-            end
+            debug_log(self.logger, "Missing or truncated challenge arg")
             return nil, "missing challenge arg"
         end
         
-        if debug_mode then
-            self.logger:log(INFO, "JavaScript challenge response received")
-            self.logger:log(INFO, "Random value: " .. 
+        debug_log(self.logger, "JavaScript challenge response received")
+        debug_log(self.logger, "Random value: " .. 
                            tostring(self.session_data.random))
-        end
         
         local hash = sha256:new()
         hash:update(self.session_data.random .. args["challenge"])
         local digest = hash:final()
         resolved = to_hex(digest):find("^0000") ~= nil
         
-        if debug_mode then
-            self.logger:log(INFO, "Hash result starts with 0000: " .. 
+        debug_log(self.logger, "Hash result starts with 0000: " .. 
                            tostring(resolved))
-        end
         
         if not resolved then
-            if debug_mode then
-                self.logger:log(INFO, "JavaScript challenge failed")
-            end
+            debug_log(self.logger, "JavaScript challenge failed")
             return false, "wrong value"
         end
         
@@ -689,38 +611,28 @@ function antibot:check_challenge()
         self.session_data.time_valid = now()
         self:set_session_data()
         
-        if debug_mode then
-            self.logger:log(INFO, "JavaScript challenge passed")
-        end
+        debug_log(self.logger, "JavaScript challenge passed")
         
         return true, "resolved", self.session_data.original_uri
     end
 
     if self.session_data.type == "captcha" then
-        if debug_mode then
-            self.logger:log(INFO, "Processing CAPTCHA challenge")
-        end
+        debug_log(self.logger, "Processing CAPTCHA challenge")
         
         read_body()
         local args, err = get_post_args(1)
         if err == "truncated" or not args or not args["captcha"] then
-            if debug_mode then
-                self.logger:log(ERR, "Missing or truncated captcha arg")
-            end
+            debug_log(self.logger, "Missing or truncated captcha arg")
             return nil, "missing challenge arg", nil
         end
         
-        if debug_mode then
-            self.logger:log(INFO, "Expected CAPTCHA: " .. 
+        debug_log(self.logger, "Expected CAPTCHA: " .. 
                            tostring(self.session_data.captcha))
-            self.logger:log(INFO, "Received CAPTCHA: " .. 
+        debug_log(self.logger, "Received CAPTCHA: " .. 
                            tostring(args["captcha"]))
-        end
         
         if self.session_data.captcha ~= args["captcha"] then
-            if debug_mode then
-                self.logger:log(INFO, "CAPTCHA challenge failed")
-            end
+            debug_log(self.logger, "CAPTCHA challenge failed")
             return false, "wrong value, expected " .. 
                    self.session_data.captcha, nil
         end
@@ -729,36 +641,26 @@ function antibot:check_challenge()
         self.session_data.time_valid = now()
         self:set_session_data()
         
-        if debug_mode then
-            self.logger:log(INFO, "CAPTCHA challenge passed")
-        end
+        debug_log(self.logger, "CAPTCHA challenge passed")
         
         return true, "resolved", self.session_data.original_uri
     end
 
     if self.session_data.type == "recaptcha" then
-        if debug_mode then
-            self.logger:log(INFO, "Processing reCAPTCHA challenge")
-        end
+        debug_log(self.logger, "Processing reCAPTCHA challenge")
         
         read_body()
         local args, err = get_post_args(1)
         if err == "truncated" or not args or not args["token"] then
-            if debug_mode then
-                self.logger:log(ERR, "Missing or truncated reCAPTCHA token")
-            end
+            debug_log(self.logger, "Missing or truncated reCAPTCHA token")
             return nil, "missing challenge arg", nil
         end
         
-        if debug_mode then
-            self.logger:log(INFO, "Verifying reCAPTCHA token with Google API")
-        end
+        debug_log(self.logger, "Verifying reCAPTCHA token with Google API")
         
         local httpc, err = get_http_client()
         if not httpc then
-            if debug_mode then
-                self.logger:log(ERR, "Failed to create HTTP client: " .. err)
-            end
+            debug_log(self.logger, "Failed to create HTTP client: " .. err)
             return nil, err, nil, nil
         end
         
@@ -775,48 +677,36 @@ function antibot:check_challenge()
         httpc:close()
         
         if not res then
-            if debug_mode then
-                self.logger:log(ERR, "reCAPTCHA API request failed: " .. err)
-            end
+            debug_log(self.logger, "reCAPTCHA API request failed: " .. err)
             return nil, "can't send request to reCAPTCHA API : " .. err, nil
         end
         
-        if debug_mode then
-            self.logger:log(INFO, "reCAPTCHA API response status: " .. 
+        debug_log(self.logger, "reCAPTCHA API response status: " .. 
                            tostring(res.status))
-        end
         
         local ok, rdata = pcall(decode, res.body)
         if not ok then
-            if debug_mode then
-                self.logger:log(ERR, "Failed to decode reCAPTCHA response")
-            end
+            debug_log(self.logger, "Failed to decode reCAPTCHA response")
             return nil, "error while decoding JSON from reCAPTCHA API : " .. 
                    rdata, nil
         end
         
-        if debug_mode then
-            self.logger:log(INFO, "reCAPTCHA success: " .. 
+        debug_log(self.logger, "reCAPTCHA success: " .. 
                            tostring(rdata.success))
-            if rdata.score then
-                self.logger:log(INFO, "reCAPTCHA score: " .. 
+        if rdata.score then
+            debug_log(self.logger, "reCAPTCHA score: " .. 
                                tostring(rdata.score))
-            end
         end
         
         if not rdata.success then
-            if debug_mode then
-                self.logger:log(INFO, "reCAPTCHA challenge failed")
-            end
+            debug_log(self.logger, "reCAPTCHA challenge failed")
             return false, "client failed challenge", nil
         end
         
         if rdata.score and rdata.score < tonumber(
                self.variables["ANTIBOT_RECAPTCHA_SCORE"]) then
-            if debug_mode then
-                self.logger:log(INFO, "reCAPTCHA score too low: " .. 
+            debug_log(self.logger, "reCAPTCHA score too low: " .. 
                                tostring(rdata.score))
-            end
             return false, "client failed challenge with score " .. 
                    tostring(rdata.score), nil
         end
@@ -825,19 +715,15 @@ function antibot:check_challenge()
         self.session_data.time_valid = now()
         self:set_session_data()
         
-        if debug_mode then
-            self.logger:log(INFO, "reCAPTCHA challenge passed")
-        end
+        debug_log(self.logger, "reCAPTCHA challenge passed")
         
         return true, "resolved", self.session_data.original_uri
     end
 
     -- Similar debug patterns for other challenge types...
     
-    if debug_mode then
-        self.logger:log(ERR, "Unknown challenge type: " .. 
+    debug_log(self.logger, "Unknown challenge type: " .. 
                         tostring(self.session_data.type))
-    end
     
     return nil, "unknown", nil
 end

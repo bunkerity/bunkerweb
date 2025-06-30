@@ -9,71 +9,59 @@ local os = os
 
 local mt = { __index = {} }
 
+-- Log debug messages only when LOG_LEVEL environment variable is set to "debug"
+local function debug_log(message)
+    if os.getenv("LOG_LEVEL") == "debug" then
+        print("[DEBUG] " .. message)
+    end
+end
+
 -- Create a new captcha generator instance
 function _M.new()
     local cap = {}
     local f = setmetatable({ cap = cap }, mt)
-    local debug_mode = os.getenv("LOG_LEVEL") == "debug"
     
-    if debug_mode then
-        print("DEBUG: Creating new captcha instance")
-    end
+    debug_log("Creating new captcha instance")
     
     return f
 end
 
 -- Generate random seed from /dev/urandom
 local function urandom()
-    local debug_mode = os.getenv("LOG_LEVEL") == "debug"
-    
-    if debug_mode then
-        print("DEBUG: Reading from /dev/urandom")
-    end
+    debug_log("Reading from /dev/urandom")
     
     local seed = 1
     local devurandom = io.open("/dev/urandom", "r")
     if not devurandom then
-        if debug_mode then
-            print("DEBUG: Failed to open /dev/urandom")
-        end
+        debug_log("Failed to open /dev/urandom")
         return os.time()  -- Fallback to current time
     end
     
     local urandom = devurandom:read(32)
     devurandom:close()
 
-    if debug_mode then
-        print("DEBUG: Read " .. string.len(urandom) .. " bytes from urandom")
-    end
+    debug_log("Read " .. string.len(urandom) .. " bytes from urandom")
 
     for i = 1, string.len(urandom) do
         local s = string.byte(urandom, i)
         seed = seed + s
     end
     
-    if debug_mode then
-        print("DEBUG: Generated seed: " .. seed)
-    end
+    debug_log("Generated seed: " .. seed)
     
     return seed
 end
 
 -- Generate random character string of specified length
 local function random_char(length)
-    local debug_mode = os.getenv("LOG_LEVEL") == "debug"
-    
-    if debug_mode then
-        print("DEBUG: Generating random characters, length: " .. length)
-    end
+    debug_log("Generating random characters, length: " .. length)
     
     local set, char, uid
     local set = [[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]]
     local captcha_t = {}
 
     local seed = urandom()
-    if debug_mode then
-        print("DEBUG: Random seed: " .. seed)
-    end
+    debug_log("Random seed: " .. seed)
     
     math.randomseed(seed)
 
@@ -82,16 +70,12 @@ local function random_char(length)
         local char = string.sub(set, i, i)
         table.insert(captcha_t, char)
         
-        if debug_mode then
-            print("DEBUG: Character " .. c .. ": " .. char .. 
+        debug_log("Character " .. c .. ": " .. char .. 
                  " (index " .. i .. ")")
-        end
     end
 
-    if debug_mode then
-        print("DEBUG: Generated character array: " .. 
+    debug_log("Generated character array: " .. 
              table.concat(captcha_t))
-    end
 
     return captcha_t
 end
@@ -147,13 +131,9 @@ end
 
 -- Generate the captcha image
 function mt.__index:generate()
-    local debug_mode = os.getenv("LOG_LEVEL") == "debug"
-    
-    if debug_mode then
-        print("DEBUG: Starting captcha generation")
-        print("DEBUG: Captcha string: " .. tostring(self.cap.string))
-        print("DEBUG: Captcha length: " .. tostring(self.cap.length))
-    end
+    debug_log("Starting captcha generation")
+    debug_log("Captcha string: " .. tostring(self.cap.string))
+    debug_log("Captcha length: " .. tostring(self.cap.length))
     
     local captcha_t = {}
 
@@ -162,21 +142,15 @@ function mt.__index:generate()
             self.cap.length = 6
         end
         
-        if debug_mode then
-            print("DEBUG: Generating random characters, length: " .. 
+        debug_log("Generating random characters, length: " .. 
                  self.cap.length)
-        end
         
         captcha_t = random_char(self.cap.length)
         self:string(table.concat(captcha_t))
         
-        if debug_mode then
-            print("DEBUG: Generated string: " .. self.cap.string)
-        end
+        debug_log("Generated string: " .. self.cap.string)
     else
-        if debug_mode then
-            print("DEBUG: Using provided string: " .. self.cap.string)
-        end
+        debug_log("Using provided string: " .. self.cap.string)
         
         for i = 1, #self.cap.string do
             table.insert(captcha_t, string.sub(self.cap.string, i, i))
@@ -186,9 +160,7 @@ function mt.__index:generate()
     local image_width = #captcha_t * 40
     local image_height = 45
     
-    if debug_mode then
-        print("DEBUG: Creating image: " .. image_width .. "x" .. image_height)
-    end
+    debug_log("Creating image: " .. image_width .. "x" .. image_height)
 
     self.im = gd.createTrueColor(image_width, image_height)
     local black = self.im:colorAllocate(0, 0, 0)
@@ -196,52 +168,40 @@ function mt.__index:generate()
     local bgcolor
     if not self.cap.bgcolor then
         bgcolor = white
-        if debug_mode then
-            print("DEBUG: Using default white background")
-        end
+        debug_log("Using default white background")
     else
         bgcolor = self.im:colorAllocate(self.cap.bgcolor.r, 
                                        self.cap.bgcolor.g, 
                                        self.cap.bgcolor.b)
-        if debug_mode then
-            print("DEBUG: Using custom background color: " .. 
+        debug_log("Using custom background color: " .. 
                  self.cap.bgcolor.r .. "," .. self.cap.bgcolor.g .. "," .. 
                  self.cap.bgcolor.b)
-        end
     end
 
     local fgcolor
     if not self.cap.fgcolor then
         fgcolor = black
-        if debug_mode then
-            print("DEBUG: Using default black foreground")
-        end
+        debug_log("Using default black foreground")
     else
         fgcolor = self.im:colorAllocate(self.cap.fgcolor.r, 
                                        self.cap.fgcolor.g, 
                                        self.cap.fgcolor.b)
-        if debug_mode then
-            print("DEBUG: Using custom foreground color: " .. 
+        debug_log("Using custom foreground color: " .. 
                  self.cap.fgcolor.r .. "," .. self.cap.fgcolor.g .. "," .. 
                  self.cap.fgcolor.b)
-        end
     end
 
     self.im:filledRectangle(0, 0, image_width, image_height, bgcolor)
 
     local offset_left = 10
 
-    if debug_mode then
-        print("DEBUG: Drawing characters")
-    end
+    debug_log("Drawing characters")
 
     for i = 1, #captcha_t do
         local angle = random_angle()
         
-        if debug_mode then
-            print("DEBUG: Drawing character '" .. captcha_t[i] .. 
+        debug_log("Drawing character '" .. captcha_t[i] .. 
                  "' at angle " .. angle)
-        end
         
         local llx, lly, lrx, lry, urx, ury, ulx, uly = 
             self.im:stringFT(fgcolor, self.cap.font, 25, 
@@ -252,9 +212,7 @@ function mt.__index:generate()
     end
 
     if self.cap.line then
-        if debug_mode then
-            print("DEBUG: Drawing line decorations")
-        end
+        debug_log("Drawing line decorations")
         
         self.im:line(10, 10, image_width - 10, 40, fgcolor)
         self.im:line(11, 11, image_width - 11, 41, fgcolor)
@@ -262,9 +220,7 @@ function mt.__index:generate()
     end
 
     if self.cap.scribble then
-        if debug_mode then
-            print("DEBUG: Drawing scribbles, count: " .. self.cap.scribble)
-        end
+        debug_log("Drawing scribbles, count: " .. self.cap.scribble)
         
         for i = 1, self.cap.scribble do
             local x1, x2 = scribble(image_width, image_height)
@@ -272,9 +228,7 @@ function mt.__index:generate()
         end
     end
     
-    if debug_mode then
-        print("DEBUG: Captcha generation completed")
-    end
+    debug_log("Captcha generation completed")
 end
 
 -- Write the generated image to a JPEG file
