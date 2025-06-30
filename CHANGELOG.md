@@ -6,6 +6,7 @@
 - [FEATURE] Refactor download scripts to canonicalize and deduplicate URLs before fetching and implement smarter cache management for improved efficiency
 - [FEATURE] Implement Redis-backed metrics storage and optimize retrieval workflows for faster, more reliable performance
 - [ALL-IN-ONE] Update CrowdSec to version v1.6.9
+- [UI] Add "Go Back" button functionality in unauthorized page
 - [DEPS] Update coreruleset-v4 version to v4.16.0
 
 ## v1.6.2-rc7 - 2025/06/25
