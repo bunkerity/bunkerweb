@@ -11,21 +11,24 @@ if deps_path not in sys_path:
 
 from backup import BACKUP_DIR, LOGGER
 
-# Check if debug logging is enabled
-DEBUG_MODE = getenv("LOG_LEVEL", "").lower() == "debug"
+
+def debug_log(logger, message):
+    # Log debug messages only when LOG_LEVEL environment variable is set to
+    # "debug"
+    if getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
+
 
 try:
-    if DEBUG_MODE:
-        LOGGER.debug(f"Listing backups in directory: {BACKUP_DIR}")
-        LOGGER.debug(f"Directory exists: {BACKUP_DIR.exists()}")
+    debug_log(LOGGER, f"Listing backups in directory: {BACKUP_DIR}")
+    debug_log(LOGGER, f"Directory exists: {BACKUP_DIR.exists()}")
     
     # Find and sort backup files by date (newest first)
     backups = sorted(BACKUP_DIR.glob("*.zip"), reverse=True)
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Found {len(backups)} backup files")
-        for i, backup in enumerate(backups):
-            LOGGER.debug(f"Backup {i+1}: {backup.name}")
+    debug_log(LOGGER, f"Found {len(backups)} backup files")
+    for i, backup in enumerate(backups):
+        debug_log(LOGGER, f"Backup {i+1}: {backup.name}")
     
     message = ""
     
@@ -54,9 +57,8 @@ try:
             formatted_date = date.strftime('%Y/%m/%d %H:%M:%S %Z')
             message += (f"\n| {database:<10} | {formatted_date:<24} |")
             
-            if DEBUG_MODE:
-                LOGGER.debug(f"Backup: {backup.name}, Database: {database}, "
-                           f"Date: {formatted_date}")
+            debug_log(LOGGER, f"Backup: {backup.name}, Database: {database}, "
+                     f"Date: {formatted_date}")
         
         # Table footer
         message += "\n+------------+--------------------------+"
@@ -64,25 +66,21 @@ try:
         # No backups found message
         message = f"No backup found in {BACKUP_DIR}"
         
-        if DEBUG_MODE:
-            LOGGER.debug("No backup files found")
+        debug_log(LOGGER, "No backup files found")
     
     # Log the formatted message
     LOGGER.info(message)
     
-    if DEBUG_MODE:
-        LOGGER.debug("List command completed successfully")
+    debug_log(LOGGER, "List command completed successfully")
 
 except SystemExit as se:
-    if DEBUG_MODE:
-        LOGGER.debug(f"SystemExit caught with code: {se.code}")
+    debug_log(LOGGER, f"SystemExit caught with code: {se.code}")
     sys_exit(se.code)
     
 except BaseException as e:
     LOGGER.error(f"Error while executing backup list command: {e}")
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"BaseException caught: {type(e).__name__}")
-        LOGGER.debug(f"Exception details: {str(e)}")
+    debug_log(LOGGER, f"BaseException caught: {type(e).__name__}")
+    debug_log(LOGGER, f"Exception details: {str(e)}")
     
     sys_exit(1)

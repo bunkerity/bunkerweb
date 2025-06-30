@@ -14,8 +14,13 @@ if deps_path not in sys_path:
 from backup import (acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, 
                     LOGGER, restore_database)
 
-# Check if debug logging is enabled
-DEBUG_MODE = getenv("LOG_LEVEL", "").lower() == "debug"
+
+def debug_log(logger, message):
+    # Log debug messages only when LOG_LEVEL environment variable is set to
+    # "debug"
+    if getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
+
 
 status = 0
 
@@ -23,8 +28,7 @@ try:
     # Acquire database lock to prevent concurrent access
     acquire_db_lock()
     
-    if DEBUG_MODE:
-        LOGGER.debug("Database lock acquired for restore command")
+    debug_log(LOGGER, "Database lock acquired for restore command")
 
     # Global parser for command line arguments
     parser = ArgumentParser(
@@ -35,10 +39,9 @@ try:
     backups = sorted(BACKUP_DIR.glob("*.zip"), reverse=True)
     backup_file = backups[0] if backups else None
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Found {len(backups)} backup files in {BACKUP_DIR}")
-        if backups:
-            LOGGER.debug(f"Latest backup: {backup_file}")
+    debug_log(LOGGER, f"Found {len(backups)} backup files in {BACKUP_DIR}")
+    if backups:
+        debug_log(LOGGER, f"Latest backup: {backup_file}")
 
     # Optional backup file argument with default to latest backup
     parser.add_argument(
@@ -53,14 +56,12 @@ try:
     # Parse command line arguments
     args = parser.parse_args()
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Parsed arguments: {vars(args)}")
+    debug_log(LOGGER, f"Parsed arguments: {vars(args)}")
 
     # Validate backup file selection
     backup_file = Path(args.backup_file) if args.backup_file else None
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Selected backup file: {backup_file}")
+    debug_log(LOGGER, f"Selected backup file: {backup_file}")
     
     if not backup_file:
         if backup_file == BACKUP_DIR and not BACKUP_DIR.is_dir():
@@ -92,9 +93,8 @@ try:
     current_time = datetime.now().astimezone()
     tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Creating temporary backup in: {tmp_backup_dir}")
-        LOGGER.debug(f"Safety backup timestamp: {current_time}")
+    debug_log(LOGGER, f"Creating temporary backup in: {tmp_backup_dir}")
+    debug_log(LOGGER, f"Safety backup timestamp: {current_time}")
     
     tmp_backup_dir.mkdir(parents=True, exist_ok=True)
     db = backup_database(current_time, backup_dir=tmp_backup_dir)
@@ -102,33 +102,28 @@ try:
     # Perform the restore operation
     LOGGER.info(f"Restoring backup {backup_file} ...")
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Backup file size: {backup_file.stat().st_size} bytes")
-        LOGGER.debug(f"Backup file modified: "
-                    f"{datetime.fromtimestamp(backup_file.stat().st_mtime)}")
+    debug_log(LOGGER, f"Backup file size: {backup_file.stat().st_size} bytes")
+    debug_log(LOGGER, f"Backup file modified: "
+             f"{datetime.fromtimestamp(backup_file.stat().st_mtime)}")
     
     restore_database(backup_file, db)
     
-    if DEBUG_MODE:
-        LOGGER.debug("Restore command completed successfully")
+    debug_log(LOGGER, "Restore command completed successfully")
 
 except SystemExit as se:
     status = se.code
-    if DEBUG_MODE:
-        LOGGER.debug(f"SystemExit caught with code: {status}")
+    debug_log(LOGGER, f"SystemExit caught with code: {status}")
         
 except BaseException as e:
     LOGGER.error(f"Error while executing backup restore command: {e}")
     status = 1
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"BaseException caught: {type(e).__name__}")
-        LOGGER.debug(f"Exception details: {str(e)}")
+    debug_log(LOGGER, f"BaseException caught: {type(e).__name__}")
+    debug_log(LOGGER, f"Exception details: {str(e)}")
 
 finally:
     # Always release database lock
-    if DEBUG_MODE:
-        LOGGER.debug("Releasing database lock")
+    debug_log(LOGGER, "Releasing database lock")
     DB_LOCK_FILE.unlink(missing_ok=True)
 
 sys_exit(status)

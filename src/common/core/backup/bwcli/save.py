@@ -14,8 +14,13 @@ if deps_path not in sys_path:
 from backup import (acquire_db_lock, backup_database, BACKUP_DIR, DB_LOCK_FILE, 
                     LOGGER, update_cache_file)
 
-# Check if debug logging is enabled
-DEBUG_MODE = getenv("LOG_LEVEL", "").lower() == "debug"
+
+def debug_log(logger, message):
+    # Log debug messages only when LOG_LEVEL environment variable is set to
+    # "debug"
+    if getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
+
 
 status = 0
 
@@ -23,8 +28,7 @@ try:
     # Acquire database lock to prevent concurrent access
     acquire_db_lock()
     
-    if DEBUG_MODE:
-        LOGGER.debug("Database lock acquired for save command")
+    debug_log(LOGGER, "Database lock acquired for save command")
 
     # Global parser for command line arguments
     parser = ArgumentParser(
@@ -44,16 +48,14 @@ try:
     # Parse command line arguments
     args = parser.parse_args()
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Parsed arguments: {vars(args)}")
+    debug_log(LOGGER, f"Parsed arguments: {vars(args)}")
 
     directory = Path(args.directory)
 
     LOGGER.debug(f"Backup directory: {directory}")
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Directory exists: {directory.exists()}")
-        LOGGER.debug(f"Directory is dir: {directory.is_dir()}")
+    debug_log(LOGGER, f"Directory exists: {directory.exists()}")
+    debug_log(LOGGER, f"Directory is dir: {directory.is_dir()}")
 
     # Validate and create backup directory if needed
     if not directory.is_dir():
@@ -63,45 +65,38 @@ try:
 
         LOGGER.info(f"Creating directory {directory} as it does not exist")
         
-        if DEBUG_MODE:
-            LOGGER.debug(f"Creating directory with parents=True: {directory}")
+        debug_log(LOGGER, f"Creating directory with parents=True: {directory}")
         
         directory.mkdir(parents=True, exist_ok=True)
 
     # Create backup with current timestamp
     current_time = datetime.now().astimezone()
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Starting backup at: {current_time}")
+    debug_log(LOGGER, f"Starting backup at: {current_time}")
     
     db = backup_database(current_time, backup_dir=directory)
 
     # Update cache file if using default backup directory
     if directory == BACKUP_DIR:
-        if DEBUG_MODE:
-            LOGGER.debug("Updating cache file for default backup directory")
+        debug_log(LOGGER, "Updating cache file for default backup directory")
         update_cache_file(db, directory)
     
-    if DEBUG_MODE:
-        LOGGER.debug("Save command completed successfully")
+    debug_log(LOGGER, "Save command completed successfully")
 
 except SystemExit as se:
     status = se.code
-    if DEBUG_MODE:
-        LOGGER.debug(f"SystemExit caught with code: {status}")
+    debug_log(LOGGER, f"SystemExit caught with code: {status}")
         
 except BaseException as e:
     LOGGER.error(f"Error while executing backup save command: {e}")
     status = 1
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"BaseException caught: {type(e).__name__}")
-        LOGGER.debug(f"Exception details: {str(e)}")
+    debug_log(LOGGER, f"BaseException caught: {type(e).__name__}")
+    debug_log(LOGGER, f"Exception details: {str(e)}")
 
 finally:
     # Always release database lock
-    if DEBUG_MODE:
-        LOGGER.debug("Releasing database lock")
+    debug_log(LOGGER, "Releasing database lock")
     DB_LOCK_FILE.unlink(missing_ok=True)
 
 sys_exit(status)

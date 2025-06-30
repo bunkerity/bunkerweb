@@ -28,17 +28,19 @@ LOGGER = setup_logger("BACKUP")
 BACKUP_DIR = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 
-# Check if debug logging is enabled
-DEBUG_MODE = getenv("LOG_LEVEL", "").lower() == "debug"
+def debug_log(logger, message):
+    # Log debug messages only when LOG_LEVEL environment variable is set to
+    # "debug"
+    if getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
 
 
 def acquire_db_lock():
     # Acquire the database lock to prevent concurrent access to the database
     current_time = datetime.now().astimezone()
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Attempting to acquire database lock at {current_time}")
-        LOGGER.debug(f"Lock file path: {DB_LOCK_FILE}")
+    debug_log(LOGGER, f"Attempting to acquire database lock at {current_time}")
+    debug_log(LOGGER, f"Lock file path: {DB_LOCK_FILE}")
     
     while (DB_LOCK_FILE.is_file() and 
            DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp()):
@@ -46,23 +48,20 @@ def acquire_db_lock():
             "Database is locked, waiting for it to be unlocked "
             "(timeout: 30s) ..."
         )
-        if DEBUG_MODE:
-            LOGGER.debug(f"Lock file exists, waiting... Current time: "
-                        f"{current_time.timestamp()}, Lock time: "
-                        f"{DB_LOCK_FILE.stat().st_ctime}")
+        debug_log(LOGGER, f"Lock file exists, waiting... Current time: "
+                 f"{current_time.timestamp()}, Lock time: "
+                 f"{DB_LOCK_FILE.stat().st_ctime}")
         sleep(1)
     
     DB_LOCK_FILE.unlink(missing_ok=True)
     DB_LOCK_FILE.touch()
     
-    if DEBUG_MODE:
-        LOGGER.debug("Database lock acquired successfully")
+    debug_log(LOGGER, "Database lock acquired successfully")
 
 
 def update_cache_file(db: Database, backup_dir: Path) -> str:
     # Update the cache file in the database with current backup information
-    if DEBUG_MODE:
-        LOGGER.debug(f"Updating cache file for backup directory: {backup_dir}")
+    debug_log(LOGGER, f"Updating cache file for backup directory: {backup_dir}")
     
     backup_data = loads(
         db.get_job_cache_file("backup-data", "backup.json") or "{}"
@@ -72,9 +71,8 @@ def update_cache_file(db: Database, backup_dir: Path) -> str:
     backup_data["files"] = backup_files
     backup_data["date"] = datetime.now().astimezone().isoformat()
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Found {len(backup_files)} backup files")
-        LOGGER.debug(f"Backup files: {backup_files}")
+    debug_log(LOGGER, f"Found {len(backup_files)} backup files")
+    debug_log(LOGGER, f"Backup files: {backup_files}")
     
     content = dumps(backup_data, indent=2).encode()
     checksum = bytes_hash(content)
@@ -89,8 +87,7 @@ def update_cache_file(db: Database, backup_dir: Path) -> str:
         return err
 
     LOGGER.info("Backup cache file updated successfully")
-    if DEBUG_MODE:
-        LOGGER.debug(f"Cache content checksum: {checksum}")
+    debug_log(LOGGER, f"Cache content checksum: {checksum}")
     
     return ""
 
@@ -108,10 +105,9 @@ def backup_database(current_time: datetime, db: Database = None,
         f"backup-{database}-{current_time.strftime('%Y-%m-%d_%H-%M-%S')}.zip"
     )
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Database type: {database}")
-        LOGGER.debug(f"Database URL: {database_url}")
-        LOGGER.debug(f"Backup file path: {backup_file}")
+    debug_log(LOGGER, f"Database type: {database}")
+    debug_log(LOGGER, f"Database URL: {database_url}")
+    debug_log(LOGGER, f"Backup file path: {backup_file}")
     
     stderr = "Table 'db.test_"
     start_time = datetime.now().astimezone()
@@ -120,8 +116,7 @@ def backup_database(current_time: datetime, db: Database = None,
     model_tables = list(Base.metadata.tables.keys())
     LOGGER.info(f"Backing up {len(model_tables)} tables defined in the model")
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Tables to backup: {model_tables}")
+    debug_log(LOGGER, f"Tables to backup: {model_tables}")
 
     while ("Table 'db.test_" in stderr and 
            (datetime.now().astimezone() - start_time).total_seconds() < 10):
@@ -129,8 +124,7 @@ def backup_database(current_time: datetime, db: Database = None,
         if database == "sqlite":
             db_path = Path(database_url.database)
             
-            if DEBUG_MODE:
-                LOGGER.debug(f"SQLite database path: {db_path}")
+            debug_log(LOGGER, f"SQLite database path: {db_path}")
 
             LOGGER.info("Creating a backup for the SQLite database ...")
 
@@ -138,8 +132,7 @@ def backup_database(current_time: datetime, db: Database = None,
             dump_commands = "\n".join([f".dump {table}" 
                                      for table in model_tables])
             
-            if DEBUG_MODE:
-                LOGGER.debug(f"SQLite dump commands: {dump_commands}")
+            debug_log(LOGGER, f"SQLite dump commands: {dump_commands}")
             
             proc = run(
                 ["sqlite3", db_path.as_posix()],
@@ -158,11 +151,10 @@ def backup_database(current_time: datetime, db: Database = None,
             db_database_name = url.database or ""
             db_query_args = url.query if hasattr(url, "query") else {}
             
-            if DEBUG_MODE:
-                LOGGER.debug(f"Database connection details - Host: {db_host}, "
-                           f"Port: {db_port}, Database: {db_database_name}, "
-                           f"User: {db_user}")
-                LOGGER.debug(f"Query args: {db_query_args}")
+            debug_log(LOGGER, f"Database connection details - Host: {db_host}, "
+                     f"Port: {db_port}, Database: {db_database_name}, "
+                     f"User: {db_user}")
+            debug_log(LOGGER, f"Query args: {db_query_args}")
 
             if database in ("mariadb", "mysql"):
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
@@ -197,8 +189,7 @@ def backup_database(current_time: datetime, db: Database = None,
                 # Add specific tables to backup
                 cmd.extend(model_tables)
                 
-                if DEBUG_MODE:
-                    LOGGER.debug(f"MySQL/MariaDB dump command: {' '.join(cmd)}")
+                debug_log(LOGGER, f"MySQL/MariaDB dump command: {' '.join(cmd)}")
 
                 proc = run(
                     cmd,
@@ -240,9 +231,8 @@ def backup_database(current_time: datetime, db: Database = None,
                 for table in model_tables:
                     cmd.extend(["-t", table])
                 
-                if DEBUG_MODE:
-                    LOGGER.debug(f"PostgreSQL dump command: {' '.join(cmd)}")
-                    LOGGER.debug(f"PostgreSQL environment: {pg_env}")
+                debug_log(LOGGER, f"PostgreSQL dump command: {' '.join(cmd)}")
+                debug_log(LOGGER, f"PostgreSQL environment: {pg_env}")
 
                 proc = run(
                     cmd, 
@@ -261,11 +251,10 @@ def backup_database(current_time: datetime, db: Database = None,
         stderr = (proc.stderr.decode() 
                  if hasattr(proc, "stderr") and proc.stderr else "")
         
-        if DEBUG_MODE:
-            LOGGER.debug(f"Process return code: {proc.returncode}")
-            LOGGER.debug(f"Process stderr: {stderr}")
-            if proc.stdout:
-                LOGGER.debug(f"Process stdout length: {len(proc.stdout)}")
+        debug_log(LOGGER, f"Process return code: {proc.returncode}")
+        debug_log(LOGGER, f"Process stderr: {stderr}")
+        if proc.stdout:
+            debug_log(LOGGER, f"Process stdout length: {len(proc.stdout)}")
         
         if "Table 'db.test_" not in stderr and proc.returncode != 0:
             LOGGER.error(f"Failed to dump the database: {stderr}")
@@ -276,9 +265,8 @@ def backup_database(current_time: datetime, db: Database = None,
         sys_exit(1)
 
     # Create compressed backup file
-    if DEBUG_MODE:
-        LOGGER.debug(f"Creating compressed backup file: {backup_file}")
-        LOGGER.debug(f"Backup data size: {len(proc.stdout)} bytes")
+    debug_log(LOGGER, f"Creating compressed backup file: {backup_file}")
+    debug_log(LOGGER, f"Backup data size: {len(proc.stdout)} bytes")
     
     with ZipFile(backup_file, "w", compression=ZIP_DEFLATED) as zipf:
         zipf.writestr(backup_file.with_suffix(".sql").name, proc.stdout)
@@ -289,9 +277,8 @@ def backup_database(current_time: datetime, db: Database = None,
         f"💾 Backup {backup_file.name} created successfully in {backup_dir}"
     )
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Backup file size: {backup_file.stat().st_size} bytes")
-        LOGGER.debug(f"Backup file permissions: {oct(backup_file.stat().st_mode)}")
+    debug_log(LOGGER, f"Backup file size: {backup_file.stat().st_size} bytes")
+    debug_log(LOGGER, f"Backup file permissions: {oct(backup_file.stat().st_mode)}")
     
     return db
 
@@ -300,10 +287,9 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
     # Restore the database from a compressed backup file
     db = db or Database(LOGGER)
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Starting database restore from: {backup_file}")
-        LOGGER.debug(f"Backup file exists: {backup_file.exists()}")
-        LOGGER.debug(f"Backup file size: {backup_file.stat().st_size} bytes")
+    debug_log(LOGGER, f"Starting database restore from: {backup_file}")
+    debug_log(LOGGER, f"Backup file exists: {backup_file.exists()}")
+    debug_log(LOGGER, f"Backup file size: {backup_file.stat().st_size} bytes")
     
     # Drop all existing tables
     Base.metadata.drop_all(db.sql_engine)
@@ -312,14 +298,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
     database: Literal["sqlite", "mariadb", "mysql", "postgresql", 
                       "oracle"] = database_url.drivername.split("+")[0]
     
-    if DEBUG_MODE:
-        LOGGER.debug(f"Database type for restore: {database}")
+    debug_log(LOGGER, f"Database type for restore: {database}")
 
     if database == "sqlite":
         db_path = Path(database_url.database)
         
-        if DEBUG_MODE:
-            LOGGER.debug(f"SQLite database path: {db_path}")
+        debug_log(LOGGER, f"SQLite database path: {db_path}")
 
         # Clear the database
         proc = run(
@@ -337,8 +321,7 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             backup_file.with_suffix(".sql").name
         )
         
-        if DEBUG_MODE:
-            LOGGER.debug(f"Temporary SQL file: {tmp_file}")
+        debug_log(LOGGER, f"Temporary SQL file: {tmp_file}")
         
         with ZipFile(backup_file, "r") as zipf:
             zipf.extractall(path=tmp_file.parent)
@@ -361,10 +344,9 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         db_database_name = url.database or ""
         db_query_args = url.query if hasattr(url, "query") else {}
         
-        if DEBUG_MODE:
-            LOGGER.debug(f"Database connection details - Host: {db_host}, "
-                        f"Port: {db_port}, Database: {db_database_name}, "
-                        f"User: {db_user}")
+        debug_log(LOGGER, f"Database connection details - Host: {db_host}, "
+                 f"Port: {db_port}, Database: {db_database_name}, "
+                 f"User: {db_user}")
 
         if database in ("mariadb", "mysql"):
             LOGGER.info("Restoring the MariaDB/MySQL database ...")
@@ -380,14 +362,12 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
                 elif key == "charset":
                     cmd.extend(["--default-character-set", value])
             
-            if DEBUG_MODE:
-                LOGGER.debug(f"MySQL/MariaDB restore command: {' '.join(cmd)}")
+            debug_log(LOGGER, f"MySQL/MariaDB restore command: {' '.join(cmd)}")
 
             with ZipFile(backup_file, "r") as zipf:
                 sql_content = zipf.read(backup_file.with_suffix(".sql").name)
                 
-                if DEBUG_MODE:
-                    LOGGER.debug(f"SQL content size: {len(sql_content)} bytes")
+                debug_log(LOGGER, f"SQL content size: {len(sql_content)} bytes")
                 
                 proc = run(
                     cmd,
@@ -414,15 +394,13 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
                 elif key == "sslrootcert":
                     pg_env["PGSSLROOTCERT"] = value
             
-            if DEBUG_MODE:
-                LOGGER.debug(f"PostgreSQL restore command: {' '.join(cmd)}")
-                LOGGER.debug(f"PostgreSQL environment: {pg_env}")
+            debug_log(LOGGER, f"PostgreSQL restore command: {' '.join(cmd)}")
+            debug_log(LOGGER, f"PostgreSQL environment: {pg_env}")
 
             with ZipFile(backup_file, "r") as zipf:
                 sql_content = zipf.read(backup_file.with_suffix(".sql").name)
                 
-                if DEBUG_MODE:
-                    LOGGER.debug(f"SQL content size: {len(sql_content)} bytes")
+                debug_log(LOGGER, f"SQL content size: {len(sql_content)} bytes")
                 
                 proc = run(
                     cmd,
@@ -439,10 +417,9 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
             )
             return db
 
-    if DEBUG_MODE:
-        LOGGER.debug(f"Restore process return code: {proc.returncode}")
-        if proc.stderr:
-            LOGGER.debug(f"Restore process stderr: {proc.stderr.decode()}")
+    debug_log(LOGGER, f"Restore process return code: {proc.returncode}")
+    if proc.stderr:
+        debug_log(LOGGER, f"Restore process stderr: {proc.stderr.decode()}")
 
     if proc.returncode != 0:
         LOGGER.error(f"Failed to restore the database: {proc.stderr.decode()}")
@@ -458,7 +435,6 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
 
     LOGGER.info(f"💾 Database restored successfully from {backup_file}")
     
-    if DEBUG_MODE:
-        LOGGER.debug("Database restore completed successfully")
+    debug_log(LOGGER, "Database restore completed successfully")
     
     return db

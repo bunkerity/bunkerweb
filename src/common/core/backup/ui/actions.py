@@ -3,17 +3,20 @@ from logging import getLogger
 from os import getenv
 from traceback import format_exc
 
-# Check if debug logging is enabled
-DEBUG_MODE = getenv("LOG_LEVEL", "").lower() == "debug"
+
+def debug_log(logger, message):
+    # Log debug messages only when LOG_LEVEL environment variable is set to
+    # "debug"
+    if getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
 
 
 def pre_render(**kwargs):
     # Prepare backup metrics and file list for UI rendering
     logger = getLogger("UI")
     
-    if DEBUG_MODE:
-        logger.debug("Starting pre_render function for backup plugin")
-        logger.debug(f"Received kwargs keys: {list(kwargs.keys())}")
+    debug_log(logger, "Starting pre_render function for backup plugin")
+    debug_log(logger, f"Received kwargs keys: {list(kwargs.keys())}")
     
     # Initialize return structure with default values
     ret = {
@@ -33,20 +36,17 @@ def pre_render(**kwargs):
         # Retrieve backup cache file from database
         backup_file = kwargs["db"].get_job_cache_file("backup-data", "backup.json")
         
-        if DEBUG_MODE:
-            logger.debug(f"backup_file content: {backup_file}")
+        debug_log(logger, f"backup_file content: {backup_file}")
         
         # Parse backup data from cache
         data = loads(backup_file or "{}")
         
-        if DEBUG_MODE:
-            logger.debug(f"Parsed backup data: {data}")
+        debug_log(logger, f"Parsed backup data: {data}")
 
         # Populate backup file list for UI display
         backup_files = data.get("files", [])
         
-        if DEBUG_MODE:
-            logger.debug(f"Found {len(backup_files)} backup files")
+        debug_log(logger, f"Found {len(backup_files)} backup files")
         
         for backup_file_name in backup_files:
             if "file name" not in ret["list_backup_files"]["data"]:
@@ -57,21 +57,18 @@ def pre_render(**kwargs):
         if data.get("date"):
             ret["date_last_backup"]["value"] = data["date"]
             
-            if DEBUG_MODE:
-                logger.debug(f"Last backup date: {data['date']}")
+            debug_log(logger, f"Last backup date: {data['date']}")
         
-        if DEBUG_MODE:
-            logger.debug("pre_render completed successfully")
-            logger.debug(f"Return data structure: {ret}")
+        debug_log(logger, "pre_render completed successfully")
+        debug_log(logger, f"Return data structure: {ret}")
             
     except BaseException as e:
         logger.debug(format_exc())
         logger.error(f"Failed to get backup metrics: {e}")
         ret["error"] = str(e)
         
-        if DEBUG_MODE:
-            logger.debug(f"Exception in pre_render: {type(e).__name__}")
-            logger.debug(f"Exception details: {str(e)}")
+        debug_log(logger, f"Exception in pre_render: {type(e).__name__}")
+        debug_log(logger, f"Exception details: {str(e)}")
 
     return ret
 
@@ -80,9 +77,8 @@ def backup(**kwargs):
     # Handle backup-related UI actions (placeholder for future implementation)
     logger = getLogger("UI")
     
-    if DEBUG_MODE:
-        logger.debug("backup function called")
-        logger.debug(f"Received kwargs keys: {list(kwargs.keys())}")
+    debug_log(logger, "backup function called")
+    debug_log(logger, f"Received kwargs keys: {list(kwargs.keys())}")
     
     # This function is currently a placeholder for backup UI actions
     # Future implementations might include manual backup triggers,
