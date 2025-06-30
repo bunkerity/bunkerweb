@@ -1,29 +1,45 @@
-The Blacklist plugin provides robust protection for your website by blocking access based on various client attributes. This feature defends against known malicious entities, scanners, and suspicious visitors by denying access based on IP addresses, networks, reverse DNS entries, ASNs, user agents, and specific URI patterns.
+# Blacklist Plugin
 
-**How it works:**
+The Blacklist plugin provides robust protection for your website by blocking
+access based on various client attributes. This feature defends against known
+malicious entities, scanners, and suspicious visitors by denying access based
+on IP addresses, networks, reverse DNS entries, ASNs, user agents, and
+specific URI patterns.
 
-1. The plugin checks incoming requests against multiple blacklist criteria (IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns).
-2. Blacklists can be specified directly in your configuration or loaded from external URLs.
-3. If a visitor matches any blacklist rule (and does not match any ignore rule), access is denied.
-4. Blacklists are automatically updated on a regular schedule from configured URLs.
-5. You can customize exactly which criteria are checked and ignored based on your specific security needs.
+## How it works
 
-### How to Use
+1. The plugin checks incoming requests against multiple blacklist criteria
+   (IP addresses, networks, rDNS, ASN, User-Agent, or URI patterns).
+2. Blacklists can be specified directly in your configuration or loaded from
+   external URLs.
+3. If a visitor matches any blacklist rule (and does not match any ignore
+   rule), access is denied.
+4. Blacklists are automatically updated on a regular schedule from configured
+   URLs.
+5. You can customize exactly which criteria are checked and ignored based on
+   your specific security needs.
+
+## How to Use
 
 Follow these steps to configure and use the Blacklist feature:
 
-1. **Enable the feature:** The Blacklist feature is enabled by default. If needed, you can control this with the `USE_BLACKLIST` setting.
-2. **Configure block rules:** Define which IPs, networks, rDNS patterns, ASNs, User-Agents, or URIs should be blocked.
-3. **Set up ignore rules:** Specify any exceptions that should bypass the blacklist checks.
-4. **Add external sources:** Configure URLs for automatically downloading and updating blacklist data.
-5. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics on blocked requests.
+1. **Enable the feature:** The Blacklist feature is enabled by default. If
+   needed, you can control this with the `USE_BLACKLIST` setting.
+2. **Configure block rules:** Define which IPs, networks, rDNS patterns,
+   ASNs, User-Agents, or URIs should be blocked.
+3. **Set up ignore rules:** Specify any exceptions that should bypass the
+   blacklist checks.
+4. **Add external sources:** Configure URLs for automatically downloading and
+   updating blacklist data.
+5. **Monitor effectiveness:** Check the [web UI](web-ui.md) to see statistics
+   on blocked requests.
 
 !!! info "stream mode"
     When using stream mode, only IP, rDNS, and ASN checks will be performed.
 
-### Configuration Settings
+## Configuration Settings
 
-**General**
+### General
 
 | Setting                     | Default                                                 | Context   | Multiple | Description                                                                                             |
 | --------------------------- | ------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
@@ -31,9 +47,11 @@ Follow these steps to configure and use the Blacklist feature:
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Community Blacklists:** Select pre-configured community-maintained blacklists to include in blocking. |
 
 === "Community Blacklists"
-    **What this does:** Enables you to quickly add well-maintained, community-sourced blacklists without having to manually configure URLs.
+    **What this does:** Enables you to quickly add well-maintained,
+    community-sourced blacklists without having to manually configure URLs.
 
-    The `BLACKLIST_COMMUNITY_LISTS` setting allows you to select from curated blacklist sources. Available options include:
+    The `BLACKLIST_COMMUNITY_LISTS` setting allows you to select from curated
+    blacklist sources. Available options include:
 
     | ID                                  | Description                                                                                                                                                                                                              | Source                                                                                                                          |
     | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -47,7 +65,9 @@ Follow these steps to configure and use the Blacklist feature:
     ```
 
     !!! tip "Community vs Manual Configuration"
-        Community blacklists provide a convenient way to get started with proven blacklist sources. You can use them alongside manual URL configurations for maximum flexibility.
+        Community blacklists provide a convenient way to get started with
+        proven blacklist sources. You can use them alongside manual URL
+        configurations for maximum flexibility.
 
 === "IP Address"
     **What this does:** Blocks visitors based on their IP address or network.
@@ -59,10 +79,14 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | no       | **IP Blacklist URLs:** List of URLs containing IP addresses or networks to block, separated by spaces. |
     | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | no       | **IP Ignore List URLs:** List of URLs containing IP addresses or networks to ignore.                   |
 
-    The default `BLACKLIST_IP_URLS` setting includes a URL that provides a **list of known Tor exit nodes**. This is a common source of malicious traffic and is a good starting point for many sites.
+    The default `BLACKLIST_IP_URLS` setting includes a URL that provides a
+    **list of known Tor exit nodes**. This is a common source of malicious
+    traffic and is a good starting point for many sites.
 
 === "Reverse DNS"
-    **What this does:** Blocks visitors based on their reverse domain name. This is useful for blocking known scanners and crawlers based on their organization domains.
+    **What this does:** Blocks visitors based on their reverse domain name.
+    This is useful for blocking known scanners and crawlers based on their
+    organization domains.
 
     | Setting                      | Default                 | Context   | Multiple | Description                                                                                          |
     | ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
@@ -72,10 +96,14 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_RDNS_URLS`        |                         | multisite | no       | **rDNS Blacklist URLs:** List of URLs containing reverse DNS suffixes to block, separated by spaces. |
     | `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | no       | **rDNS Ignore List URLs:** List of URLs containing reverse DNS suffixes to ignore.                   |
 
-    The default `BLACKLIST_RDNS` setting includes common scanner domains like **Shodan** and **Censys**. These are often used by security researchers and scanners to identify vulnerable sites.
+    The default `BLACKLIST_RDNS` setting includes common scanner domains like
+    **Shodan** and **Censys**. These are often used by security researchers
+    and scanners to identify vulnerable sites.
 
 === "ASN"
-    **What this does:** Blocks visitors from specific network providers. ASNs are like ZIP codes for the Internet—they identify which provider or organization an IP belongs to.
+    **What this does:** Blocks visitors from specific network providers. ASNs
+    are like ZIP codes for the Internet—they identify which provider or
+    organization an IP belongs to.
 
     | Setting                     | Default | Context   | Multiple | Description                                                                         |
     | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------- |
@@ -85,7 +113,9 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_IGNORE_ASN_URLS` |         | multisite | no       | **ASN Ignore List URLs:** List of URLs containing ASNs to ignore.                   |
 
 === "User Agent"
-    **What this does:** Blocks visitors based on the browser or tool they claim to be using. This is effective against bots that honestly identify themselves (such as "ScannerBot" or "WebHarvestTool").
+    **What this does:** Blocks visitors based on the browser or tool they
+    claim to be using. This is effective against bots that honestly identify
+    themselves (such as "ScannerBot" or "WebHarvestTool").
 
     | Setting                            | Default                                                                                                                        | Context   | Multiple | Description                                                                                             |
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
@@ -94,10 +124,14 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | no       | **User-Agent Blacklist URLs:** List of URLs containing User-Agent patterns to block.                    |
     | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | no       | **User-Agent Ignore List URLs:** List of URLs containing User-Agent patterns to ignore.                 |
 
-    The default `BLACKLIST_USER_AGENT_URLS` setting includes a URL that provides a **list of known bad user agents**. These are often used by malicious bots and scanners to identify vulnerable sites.
+    The default `BLACKLIST_USER_AGENT_URLS` setting includes a URL that
+    provides a **list of known bad user agents**. These are often used by
+    malicious bots and scanners to identify vulnerable sites.
 
 === "URI"
-    **What this does:** Blocks requests to specific URLs on your site. This is helpful for blocking attempts to access admin pages, login forms, or other sensitive areas that might be targeted.
+    **What this does:** Blocks requests to specific URLs on your site. This is
+    helpful for blocking attempts to access admin pages, login forms, or other
+    sensitive areas that might be targeted.
 
     | Setting                     | Default | Context   | Multiple | Description                                                                                 |
     | --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
@@ -107,16 +141,20 @@ Follow these steps to configure and use the Blacklist feature:
     | `BLACKLIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                   |
 
 !!! info "URL Format Support"
-    All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
+    All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths
+    using the `file:///` prefix. Basic authentication is supported using the
+    `http://user:pass@url` format.
 
 !!! tip "Regular Updates"
-    Blacklists from URLs are automatically downloaded and updated hourly to ensure your protection remains current against the latest threats.
+    Blacklists from URLs are automatically downloaded and updated hourly to
+    ensure your protection remains current against the latest threats.
 
-### Example Configurations
+## Example Configurations
 
 === "Basic IP and User-Agent Protection"
 
-    A simple configuration that blocks known Tor exit nodes and common bad user agents using community blacklists:
+    A simple configuration that blocks known Tor exit nodes and common bad
+    user agents using community blacklists:
 
     ```yaml
     USE_BLACKLIST: "yes"
@@ -133,7 +171,8 @@ Follow these steps to configure and use the Blacklist feature:
 
 === "Advanced Protection with Custom Rules"
 
-    A more comprehensive configuration with custom blacklist entries and exceptions:
+    A more comprehensive configuration with custom blacklist entries and
+    exceptions:
 
     ```yaml
     USE_BLACKLIST: "yes"

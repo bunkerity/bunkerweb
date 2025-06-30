@@ -1,8 +1,23 @@
 from logging import getLogger
+import os
+from os import getenv
 from traceback import format_exc
 
 
+def debug_log(logger, message):
+    # Log debug messages only when LOG_LEVEL environment variable is set to
+    # "debug"
+    if os.getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
+
+
 def pre_render(**kwargs):
+    # Prepare data for rendering blacklist metrics in the UI.
+    # Args:
+    #   **kwargs: Keyword arguments containing bw_instances_utils for 
+    #            getting metrics data
+    # Returns:
+    #   Dictionary containing formatted counter data for UI display
     logger = getLogger("UI")
     ret = {
         "counter_failed_url": {
@@ -44,16 +59,29 @@ def pre_render(**kwargs):
 
     try:
         data = kwargs["bw_instances_utils"].get_metrics("blacklist")
-        logger.debug(f"Blacklist metrics: {data}")
+        debug_log(logger, f"Blacklist metrics: {data}")
         for key in data:
-            ret[key]["value"] = data.get(key, 0)
+            if key in ret:
+                ret[key]["value"] = data.get(key, 0)
     except BaseException as e:
-        logger.debug(format_exc())
+        debug_log(logger, format_exc())
         logger.error(f"Failed to get blacklist metrics: {e}")
-        ret["error"] = str(e)
+        # Store error message in a separate field with proper structure
+        ret["error_info"] = {
+            "value": 0,
+            "title": "Error",
+            "subtitle": str(e),
+            "subtitle_color": "error",
+            "svg_color": "danger",
+        }
 
     return ret
 
 
 def blacklist(**kwargs):
+    # Handle blacklist-specific actions in the UI.
+    # Args:
+    #   **kwargs: Keyword arguments for blacklist action handling
+    # Returns:
+    #   None - placeholder function for future blacklist actions
     pass
