@@ -12,7 +12,7 @@ local get_deny_status = utils.get_deny_status
 -- Log debug messages only when LOG_LEVEL environment variable is set to "debug"
 local function debug_log(logger, message)
     if os.getenv("LOG_LEVEL") == "debug" then
-        logger:log(ngx.NOTICE, "[DEBUG] " .. message)
+        logger:log(NOTICE, "[DEBUG] " .. message)
     end
 end
 
