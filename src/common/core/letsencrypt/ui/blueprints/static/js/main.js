@@ -1,3 +1,13 @@
+// Log debug messages only when LOG_LEVEL environment variable is set to
+// "debug"
+function debugLog(message) {
+    if (process.env.LOG_LEVEL === "debug") {
+        console.debug(`[DEBUG] ${message}`);
+    }
+}
+
+// Main initialization function that waits for all dependencies to load
+// before initializing the Let's Encrypt certificate management interface
 (async function waitForDependencies() {
     // Wait for jQuery
     while (typeof jQuery === "undefined") {
@@ -18,12 +28,10 @@
         const logLevel = process.env.LOG_LEVEL;
         const isDebug = logLevel === "debug";
 
-        if (isDebug) {
-            console.debug("Initializing Let's Encrypt certificate management");
-            console.debug("Log level:", logLevel);
-            console.debug("jQuery version:", $.fn.jquery);
-            console.debug("DataTables version:", $.fn.DataTable.version);
-        }
+        debugLog("Initializing Let's Encrypt certificate management");
+        debugLog(`Log level: ${logLevel}`);
+        debugLog(`jQuery version: ${$.fn.jquery}`);
+        debugLog(`DataTables version: ${$.fn.DataTable.version}`);
 
         // Ensure i18next is loaded before using it
         const t =
@@ -35,13 +43,11 @@
         const isReadOnly = $("#is-read-only").val()?.trim() === "True";
         const userReadOnly = $("#user-read-only").val()?.trim() === "True";
 
-        if (isDebug) {
-            console.debug("Application state initialized:");
-            console.debug("- Read-only mode:", isReadOnly);
-            console.debug("- User read-only:", userReadOnly);
-            console.debug("- Action lock:", actionLock);
-            console.debug("- CSRF token available:", !!$("#csrf_token").val());
-        }
+        debugLog("Application state initialized:");
+        debugLog(`- Read-only mode: ${isReadOnly}`);
+        debugLog(`- User read-only: ${userReadOnly}`);
+        debugLog(`- Action lock: ${actionLock}`);
+        debugLog(`- CSRF token available: ${!!$("#csrf_token").val()}`);
 
         const headers = [
             {
@@ -82,33 +88,30 @@
             },
         ];
 
-        // Set up the delete confirmation modal for certificates
+        // Configure the delete confirmation modal for certificate deletion
+        // operations, supporting both single and multiple certificate
+        // deletion workflows
         const setupDeleteCertModal = (certs) => {
-            if (isDebug) {
-                console.debug("Setting up delete modal for certificates:",
-                             certs);
-                console.debug("Modal setup - certificate count:", certs.length);
-            }
+            debugLog(`Setting up delete modal for certificates: ${
+                certs.map(c => c.domain).join(", ")}`);
+            debugLog(`Modal setup - certificate count: ${certs.length}`);
 
             const $modalBody = $("#deleteCertContent");
             $modalBody.empty();
 
             if (certs.length === 1) {
-                if (isDebug) {
-                    console.debug("Configuring modal for single certificate:",
-                                  certs[0].domain);
-                }
+                debugLog(`Configuring modal for single certificate: ${
+                    certs[0].domain}`);
 
                 $modalBody.html(
                     `<p>You are about to delete the certificate for: ` +
                     `<strong>${certs[0].domain}</strong></p>`
                 );
-                $("#confirmDeleteCertBtn").data("cert-name", certs[0].domain);
+                $("#confirmDeleteCertBtn").data("cert-name", 
+                                                 certs[0].domain);
             } else {
-                if (isDebug) {
-                    console.debug("Configuring modal for multiple certificates:",
-                                  certs.map(c => c.domain));
-                }
+                debugLog(`Configuring modal for multiple certificates: ${
+                    certs.map(c => c.domain).join(", ")}`);
 
                 const certList = certs
                     .map((cert) => `<li>${cert.domain}</li>`)
@@ -123,34 +126,30 @@
                 );
             }
 
-            if (isDebug) {
-                console.debug("Modal configuration completed");
-            }
+            debugLog("Modal configuration completed");
         };
 
-        // Show error modal with title and message
+        // Display error modal with specified title and message for user
+        // feedback during certificate management operations
         const showErrorModal = (title, message) => {
-            if (isDebug) {
-                console.debug("Showing error modal:", title, message);
-            }
+            debugLog(`Showing error modal: ${title} - ${message}`);
 
             $("#errorModalLabel").text(title);
-            $("#errorModalContent").html(message);
+            $("#errorModalContent").text(message);
             const errorModal = new bootstrap.Modal(
                 document.getElementById("errorModal")
             );
             errorModal.show();
         };
 
-        // Handle delete button click events
+        // Handle delete button click events for certificate deletion
+        // confirmation modal
         $("#confirmDeleteCertBtn").on("click", function () {
             const certName = $(this).data("cert-name");
             const certNames = $(this).data("cert-names");
 
-            if (isDebug) {
-                console.debug("Delete button clicked:",
-                              { certName, certNames });
-            }
+            debugLog(`Delete button clicked: certName=${certName}, ` +
+                    `certNames=${certNames}`);
 
             if (certName) {
                 deleteCertificate(certName);
@@ -172,23 +171,20 @@
             $("#deleteCertModal").modal("hide");
         });
 
-        // Delete a single certificate with optional callback
+        // Delete a single certificate via AJAX request with optional callback
+        // for sequential deletion operations
         function deleteCertificate(certName, callback) {
-            if (isDebug) {
-                console.debug("Starting certificate deletion process:");
-                console.debug("- Certificate name:", certName);
-                console.debug("- Has callback:", !!callback);
-                console.debug("- Request URL:", 
-                              `${window.location.pathname}/delete`);
-            }
+            debugLog("Starting certificate deletion process:");
+            debugLog(`- Certificate name: ${certName}`);
+            debugLog(`- Has callback: ${!!callback}`);
+            debugLog(`- Request URL: ${
+                window.location.pathname}/delete`);
 
             const requestData = { cert_name: certName };
             const csrfToken = $("#csrf_token").val();
 
-            if (isDebug) {
-                console.debug("Request payload:", requestData);
-                console.debug("CSRF token:", csrfToken ? "present" : "missing");
-            }
+            debugLog(`Request payload: ${JSON.stringify(requestData)}`);
+            debugLog(`CSRF token: ${csrfToken ? "present" : "missing"}`);
 
             $.ajax({
                 url: `${window.location.pathname}/delete`,
@@ -199,88 +195,72 @@
                     "X-CSRFToken": csrfToken,
                 },
                 beforeSend: function(xhr) {
-                    if (isDebug) {
-                        console.debug("AJAX request starting for:", certName);
-                        console.debug("Request headers:", xhr.getAllResponseHeaders());
-                    }
+                    debugLog(`AJAX request starting for: ${certName}`);
+                    debugLog(`Request headers: ${
+                        xhr.getAllResponseHeaders()}`);
                 },
                 success: function (response) {
-                    if (isDebug) {
-                        console.debug("Delete response received:");
-                        console.debug("- Status:", response.status);
-                        console.debug("- Message:", response.message);
-                        console.debug("- Full response:", response);
-                    }
+                    debugLog("Delete response received:");
+                    debugLog(`- Status: ${response.status}`);
+                    debugLog(`- Message: ${response.message}`);
+                    debugLog(`- Full response: ${
+                        JSON.stringify(response)}`);
 
                     if (response.status === "ok") {
-                        if (isDebug) {
-                            console.debug("Certificate deletion successful:",
-                                          certName);
-                        }
+                        debugLog(`Certificate deletion successful: ${
+                            certName}`);
 
                         if (callback) {
-                            if (isDebug) {
-                                console.debug("Executing callback function");
-                            }
+                            debugLog("Executing callback function");
                             callback();
                         } else {
-                            if (isDebug) {
-                                console.debug("Reloading DataTable data");
-                            }
+                            debugLog("Reloading DataTable data");
                             $("#letsencrypt").DataTable().ajax.reload();
                         }
                     } else {
-                        if (isDebug) {
-                            console.debug("Certificate deletion failed:",
-                                          response.message);
-                        }
+                        debugLog(`Certificate deletion failed: ${
+                            response.message}`);
 
                         showErrorModal(
                             "Certificate Deletion Error",
-                            `<p>Error deleting certificate ` +
-                            `<strong>${certName}</strong>:</p>` +
-                            `<p>${response.message || "Unknown error"}</p>`
+                            `Error deleting certificate ${certName}: ${
+                                response.message || "Unknown error"}`
                         );
                         if (callback) callback();
                         else $("#letsencrypt").DataTable().ajax.reload();
                     }
                 },
                 error: function (xhr, status, error) {
-                    if (isDebug) {
-                        console.debug("AJAX error details:");
-                        console.debug("- XHR status:", xhr.status);
-                        console.debug("- Status text:", status);
-                        console.debug("- Error:", error);
-                        console.debug("- Response text:", xhr.responseText);
-                        console.debug("- Response JSON:", xhr.responseJSON);
-                    }
+                    debugLog("AJAX error details:");
+                    debugLog(`- XHR status: ${xhr.status}`);
+                    debugLog(`- Status text: ${status}`);
+                    debugLog(`- Error: ${error}`);
+                    debugLog(`- Response text: ${xhr.responseText}`);
+                    debugLog(`- Response JSON: ${
+                        JSON.stringify(xhr.responseJSON)}`);
 
                     console.error("Error deleting certificate:", error, xhr);
 
-                    let errorMessage = `<p>Failed to delete certificate ` +
-                                     `<strong>${certName}</strong>:</p>`;
+                    let errorMessage = `Failed to delete certificate ` +
+                                     `${certName}: `;
 
                     if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage += `<p>${xhr.responseJSON.message}</p>`;
+                        errorMessage += xhr.responseJSON.message;
                     } else if (xhr.responseText) {
                         try {
                             const parsedError = JSON.parse(xhr.responseText);
                             errorMessage += 
-                                `<p>${parsedError.message || error}</p>`;
+                                parsedError.message || error;
                         } catch (e) {
-                            if (isDebug) {
-                                console.debug("Failed to parse error response:",
-                                              e);
-                            }
+                            debugLog(`Failed to parse error response: ${e}`);
                             if (xhr.responseText.length < 200) {
-                                errorMessage += `<p>${xhr.responseText}</p>`;
+                                errorMessage += xhr.responseText;
                             } else {
-                                errorMessage += `<p>${error || 
-                                                "Unknown error"}</p>`;
+                                errorMessage += error || "Unknown error";
                             }
                         }
                     } else {
-                        errorMessage += `<p>${error || "Unknown error"}</p>`;
+                        errorMessage += error || "Unknown error";
                     }
 
                     showErrorModal("Certificate Deletion Failed",
@@ -290,11 +270,9 @@
                     else $("#letsencrypt").DataTable().ajax.reload();
                 },
                 complete: function(xhr, status) {
-                    if (isDebug) {
-                        console.debug("AJAX request completed:");
-                        console.debug("- Final status:", status);
-                        console.debug("- Certificate:", certName);
-                    }
+                    debugLog("AJAX request completed:");
+                    debugLog(`- Final status: ${status}`);
+                    debugLog(`- Certificate: ${certName}`);
                 }
             });
         }
@@ -337,13 +315,13 @@
             },
         };
 
-        if (isDebug) {
-            console.debug("DataTable layout configuration:");
-            console.debug("- Search panes columns:", layout.top1.searchPanes.columns);
-            console.debug("- Page length options:", layout.bottomStart.pageLength.menu);
-            console.debug("- Layout structure:", layout);
-            console.debug("- Headers count:", headers.length);
-        }
+        debugLog("DataTable layout configuration:");
+        debugLog(`- Search panes columns: ${
+            layout.top1.searchPanes.columns.join(", ")}`);
+        debugLog(`- Page length options: ${
+            JSON.stringify(layout.bottomStart.pageLength.menu)}`);
+        debugLog(`- Layout structure: ${JSON.stringify(layout)}`);
+        debugLog(`- Headers count: ${headers.length}`);
 
         layout.topStart.buttons = [
             {
@@ -458,14 +436,13 @@
         const sessionAutoRefresh = 
             sessionStorage.getItem("letsencryptAutoRefresh");
 
-        // Toggle auto-refresh functionality
+        // Toggle auto-refresh functionality for DataTable data with
+        // visual feedback and interval management
         function toggleAutoRefresh() {
             autoRefresh = !autoRefresh;
             sessionStorage.setItem("letsencryptAutoRefresh", autoRefresh);
 
-            if (isDebug) {
-                console.debug("Auto-refresh toggled:", autoRefresh);
-            }
+            debugLog(`Auto-refresh toggled: ${autoRefresh}`);
 
             if (autoRefresh) {
                 $(".bx-loader")
@@ -481,7 +458,8 @@
                         clearInterval(autoRefreshInterval);
                         autoRefreshInterval = null;
                     } else {
-                        $("#letsencrypt").DataTable().ajax.reload(null, false);
+                        $("#letsencrypt").DataTable().ajax.reload(null, 
+                                                                  false);
                     }
                 }, 10000);
             } else {
@@ -502,7 +480,8 @@
             toggleAutoRefresh();
         }
 
-        // Get currently selected certificates from DataTable
+        // Extract currently selected certificates from DataTable rows
+        // and return their domain information for bulk operations
         const getSelectedCertificates = () => {
             const certs = [];
             $("tr.selected").each(function () {
@@ -511,14 +490,13 @@
                 certs.push({ domain: domain });
             });
 
-            if (isDebug) {
-                console.debug("Selected certificates:", certs);
-            }
+            debugLog(`Selected certificates: ${
+                certs.map(c => c.domain).join(", ")}`);
 
             return certs;
         };
 
-        // Custom DataTable button for auto-refresh
+        // Custom DataTable button for auto-refresh functionality
         $.fn.dataTable.ext.buttons.auto_refresh = {
             text: (
                 '<span class="bx bx-loader bx-18px lh-1"></span>' +
@@ -530,7 +508,8 @@
             },
         };
 
-        // Custom DataTable button for certificate deletion
+        // Custom DataTable button for certificate deletion with
+        // read-only mode checks and selection validation
         $.fn.dataTable.ext.buttons.delete_cert = {
             text: (
                 `<span class="tf-icons bx bx-trash bx-18px me-2"></span>` +
@@ -568,7 +547,8 @@
             },
         };
 
-        // Build column definitions for DataTable
+        // Build column definitions for DataTable configuration with
+        // responsive controls, selection, and search pane settings
         function buildColumnDefs() {
             return [
                 { 
@@ -639,7 +619,8 @@
             ];
         }
 
-        // Define the columns for the DataTable
+        // Define the columns for the DataTable with data mappings
+        // and display configurations for certificate information
         function buildColumns() {
             return [
                 {
@@ -664,7 +645,8 @@
             ];
         }
 
-        // Manage header tooltips for DataTable columns
+        // Manage header tooltips for DataTable columns by applying
+        // Bootstrap tooltip attributes to table headers
         function updateHeaderTooltips(selector, headers) {
             $(selector)
                 .find("th")
@@ -684,7 +666,8 @@
             $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
         }
 
-        // Initialize the DataTable with complete configuration
+        // Initialize the DataTable with complete configuration including
+        // server-side processing, AJAX data loading, and UI components
         const letsencrypt_config = {
             tableSelector: "#letsencrypt",
             tableName: "letsencrypt",
@@ -706,28 +689,25 @@
                     url: `${window.location.pathname}/fetch`,
                     type: "POST",
                     data: function (d) {
-                        if (isDebug) {
-                            console.debug("DataTable AJAX request data:", d);
-                            console.debug("Request parameters:");
-                            console.debug("- Draw:", d.draw);
-                            console.debug("- Start:", d.start);
-                            console.debug("- Length:", d.length);
-                            console.debug("- Search value:", d.search?.value);
-                        }
+                        debugLog(`DataTable AJAX request data: ${
+                            JSON.stringify(d)}`);
+                        debugLog("Request parameters:");
+                        debugLog(`- Draw: ${d.draw}`);
+                        debugLog(`- Start: ${d.start}`);
+                        debugLog(`- Length: ${d.length}`);
+                        debugLog(`- Search value: ${d.search?.value}`);
 
                         d.csrf_token = $("#csrf_token").val();
                         return d;
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
-                        if (isDebug) {
-                            console.debug("DataTable AJAX error details:");
-                            console.debug("- Status:", jqXHR.status);
-                            console.debug("- Status text:", textStatus);
-                            console.debug("- Error:", errorThrown);
-                            console.debug("- Response text:", jqXHR.responseText);
-                            console.debug("- Response headers:", 
-                                          jqXHR.getAllResponseHeaders());
-                        }
+                        debugLog("DataTable AJAX error details:");
+                        debugLog(`- Status: ${jqXHR.status}`);
+                        debugLog(`- Status text: ${textStatus}`);
+                        debugLog(`- Error: ${errorThrown}`);
+                        debugLog(`- Response text: ${jqXHR.responseText}`);
+                        debugLog(`- Response headers: ${
+                            jqXHR.getAllResponseHeaders()}`);
 
                         console.error("DataTables AJAX error:", 
                                       textStatus, errorThrown);
@@ -742,21 +722,18 @@
                         $(".dataTables_processing").hide();
                     },
                     success: function(data, textStatus, jqXHR) {
-                        if (isDebug) {
-                            console.debug("DataTable AJAX success:");
-                            console.debug("- Records total:", data.recordsTotal);
-                            console.debug("- Records filtered:", data.recordsFiltered);
-                            console.debug("- Data length:", data.data?.length);
-                            console.debug("- Draw number:", data.draw);
-                        }
+                        debugLog("DataTable AJAX success:");
+                        debugLog(`- Records total: ${data.recordsTotal}`);
+                        debugLog(`- Records filtered: ${
+                            data.recordsFiltered}`);
+                        debugLog(`- Data length: ${data.data?.length}`);
+                        debugLog(`- Draw number: ${data.draw}`);
                     }
                 },
                 columns: buildColumns(),
                 initComplete: function (settings, json) {
-                    if (isDebug) {
-                        console.debug("DataTable initialized with settings:",
-                                      settings);
-                    }
+                    debugLog(`DataTable initialized with settings: ${
+                        JSON.stringify(settings)}`);
 
                     $("#letsencrypt_wrapper .btn-secondary")
                         .removeClass("btn-secondary");
@@ -791,14 +768,12 @@
             $(".tooltip").remove();
         });
 
-        // Toggle action button based on selection
+        // Toggle action button based on row selection state
         dt.on("select.dt deselect.dt", function () {
             const count = dt.rows({ selected: true }).count();
             $(".action-button").toggleClass("disabled", count === 0);
             
-            if (isDebug) {
-                console.debug("Selection changed, count:", count);
-            }
+            debugLog(`Selection changed, count: ${count}`);
         });
     });
 })();
