@@ -28,7 +28,7 @@ local decode = cjson.decode
 local execute = os.execute
 local remove = os.remove
 
--- Log debug messages only when LOG_LEVEL environment variable is set to
+-- Log debug messages only when LOG_LEVEL environment variable is set to 
 -- "debug"
 local function debug_log(logger, message)
     if os.getenv("LOG_LEVEL") == "debug" then
@@ -37,12 +37,14 @@ local function debug_log(logger, message)
 end
 
 -- Initialize the letsencrypt plugin with the given context
+-- @param ctx The context object containing plugin configuration
 function letsencrypt:initialize(ctx)
-    # Call parent initialize
+    -- Call parent initialize
     plugin.initialize(self, "letsencrypt", ctx)
 end
 
 -- Set the https_configured flag based on AUTO_LETS_ENCRYPT variable
+-- Configures HTTPS settings for the plugin
 function letsencrypt:set()
     local https_configured = self.variables["AUTO_LETS_ENCRYPT"]
     if https_configured == "yes" then
@@ -53,6 +55,8 @@ function letsencrypt:set()
 end
 
 -- Initialize SSL certificates and load them into the datastore
+-- Handles both multisite and single-site configurations, processes wildcard
+-- certificates, and loads certificate data from filesystem
 function letsencrypt:init()
     local ret_ok, ret_err = true, "success"
     local wildcard_servers = {}
@@ -119,7 +123,8 @@ function letsencrypt:init()
                             == "yes"
                     then
                         debug_log(self.logger, 
-                            "Using wildcard configuration for " .. server_name)
+                            "Using wildcard configuration for " .. 
+                            server_name)
                         
                         for part in server_name:gmatch("%S+") do
                             wildcard_servers[part] = true
@@ -141,7 +146,7 @@ function letsencrypt:init()
                         debug_log(self.logger, 
                             "Loading certificate files for " .. server_name)
                         
-                        # Load certificate
+                        -- Load certificate
                         local check
                         check, data = read_files({
                             "/var/cache/bunkerweb/letsencrypt/etc/live/" .. 
@@ -265,6 +270,8 @@ function letsencrypt:init()
 end
 
 -- Handle SSL certificate selection based on SNI
+-- Determines which certificate to use based on server name indication and
+-- wildcard configuration
 function letsencrypt:ssl_certificate()
     debug_log(self.logger, "SSL certificate phase started")
     
@@ -308,16 +315,20 @@ function letsencrypt:ssl_certificate()
 end
 
 -- Load certificate and private key data into the datastore
+-- Parses PEM certificate and private key files and caches them in the
+-- datastore for quick retrieval
+-- @param data Table containing certificate and key file contents
+-- @param server_name The server name to associate with the certificate
 function letsencrypt:load_data(data, server_name)
     debug_log(self.logger, "Loading certificate data for " .. server_name)
     
-    # Load certificate
+    -- Load certificate
     local cert_chain, err = parse_pem_cert(data[1])
     if not cert_chain then
         return false, "error while parsing pem cert : " .. err
     end
     
-    # Load key
+    -- Load key
     local priv_key
     priv_key, err = parse_pem_priv_key(data[2])
     if not priv_key then
@@ -326,7 +337,7 @@ function letsencrypt:load_data(data, server_name)
     
     debug_log(self.logger, "Certificate and key parsed successfully")
     
-    # Cache data
+    -- Cache data
     for key in server_name:gmatch("%S+") do
         debug_log(self.logger, "Caching certificate data for " .. key)
         
@@ -344,6 +355,7 @@ function letsencrypt:load_data(data, server_name)
 end
 
 -- Handle ACME challenge requests during certificate generation
+-- Allows Let's Encrypt to access challenge files for domain validation
 function letsencrypt:access()
     debug_log(self.logger, "Access phase started")
     
@@ -363,6 +375,8 @@ function letsencrypt:access()
 end
 
 -- Handle API requests for certificate challenge management
+-- Provides endpoints for creating and removing ACME challenge validation
+-- tokens during the certificate issuance process
 function letsencrypt:api()
     debug_log(self.logger, "API endpoint called")
     
