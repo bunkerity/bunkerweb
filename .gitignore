@@ -17,3 +17,4 @@ src/ui/templates
 src/ui/builder
 src/ui/client/builder/*.json
 src/ui/client/builder/*.txt
+.vscode/settings.json
