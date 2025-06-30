@@ -1,3 +1,5 @@
+# Backup Plugin
+
 The Backup plugin provides an automated backup solution to protect your BunkerWeb data. This feature ensures the safety and availability of your important database by creating regular backups according to your preferred schedule. Backups are stored in a designated location and can be easily managed through both automated processes and manual commands.
 
 **How it works:**
@@ -8,7 +10,7 @@ The Backup plugin provides an automated backup solution to protect your BunkerWe
 4. You can manually create backups, list existing backups, or restore from a backup at any time.
 5. Before any restore operation, the current state is automatically backed up as a safety measure.
 
-### How to Use
+## How to Use
 
 Follow these steps to configure and use the Backup feature:
 
@@ -18,7 +20,7 @@ Follow these steps to configure and use the Backup feature:
 4. **Define storage location:** Choose where backups will be stored using the `BACKUP_DIRECTORY` setting.
 5. **Use CLI commands:** Manage backups manually with the `bwcli plugin backup` commands when needed.
 
-### Configuration Settings
+## Configuration Settings
 
 | Setting            | Default                      | Context | Multiple | Description                                                                                                               |
 | ------------------ | ---------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -27,7 +29,7 @@ Follow these steps to configure and use the Backup feature:
 | `BACKUP_ROTATION`  | `7`                          | global  | no       | **Backup Retention:** The number of backup files to keep. Older backups beyond this number will be automatically deleted. |
 | `BACKUP_DIRECTORY` | `/var/lib/bunkerweb/backups` | global  | no       | **Backup Location:** The directory where backup files will be stored.                                                     |
 
-### Command Line Interface
+## Command Line Interface
 
 The Backup plugin provides several CLI commands to manage your backups:
 
@@ -54,37 +56,37 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
 !!! warning "Database Compatibility"
     The Backup plugin supports SQLite, MySQL/MariaDB, and PostgreSQL databases. Oracle databases are not currently supported for backup and restore operations.
 
-### Example Configurations
+## Example Configurations
 
-=== "Daily Backups with 7-Day Retention"
+### Daily Backups with 7-Day Retention
 
-    Default configuration that creates daily backups and keeps the most recent 7 files:
+Default configuration that creates daily backups and keeps the most recent 7 files:
 
-    ```yaml
-    USE_BACKUP: "yes"
-    BACKUP_SCHEDULE: "daily"
-    BACKUP_ROTATION: "7"
-    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
-    ```
+```yaml
+USE_BACKUP: "yes"
+BACKUP_SCHEDULE: "daily"
+BACKUP_ROTATION: "7"
+BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+```
 
-=== "Weekly Backups with Extended Retention"
+### Weekly Backups with Extended Retention
 
-    Configuration for less frequent backups with longer retention:
+Configuration for less frequent backups with longer retention:
 
-    ```yaml
-    USE_BACKUP: "yes"
-    BACKUP_SCHEDULE: "weekly"
-    BACKUP_ROTATION: "12"
-    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
-    ```
+```yaml
+USE_BACKUP: "yes"
+BACKUP_SCHEDULE: "weekly"
+BACKUP_ROTATION: "12"
+BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+```
 
-=== "Monthly Backups to Custom Location"
+### Monthly Backups to Custom Location
 
-    Configuration for monthly backups stored in a custom location:
+Configuration for monthly backups stored in a custom location:
 
-    ```yaml
-    USE_BACKUP: "yes"
-    BACKUP_SCHEDULE: "monthly"
-    BACKUP_ROTATION: "24"
-    BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
-    ```
+```yaml
+USE_BACKUP: "yes"
+BACKUP_SCHEDULE: "monthly"
+BACKUP_ROTATION: "24"
+BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
+```
