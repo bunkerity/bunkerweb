@@ -19,25 +19,27 @@ COLUMNS_PREFERENCES_DEFAULTS = {
 }
 
 
+def debug_log(logger, message):
+    # Log debug messages only when LOG_LEVEL environment variable is set to
+    # "debug"
+    if getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
+
+
 def context_processor():
     # Flask context processor to inject variables into templates.
     #
     # Provides template context data for the Let's Encrypt certificate
     # management interface. Injects column preferences and other UI
     # configuration data that templates need for proper rendering.
-    # 
-    # Returns:
-    #     dict: Dictionary containing template context variables including
-    #           column preferences for DataTables and page visibility settings.
-    #           Returns None for excluded paths that don't need context injection.
     logger = getLogger("UI")
     is_debug = getenv("LOG_LEVEL") == "debug"
     
-    if is_debug:
-        logger.debug("Context processor called")
-        logger.debug(f"Request path: {request.path}")
-        logger.debug(f"Request method: {request.method}")
-        logger.debug(f"Request endpoint: {getattr(request, 'endpoint', 'unknown')}")
+    debug_log(logger, "Context processor called")
+    debug_log(logger, f"Request path: {request.path}")
+    debug_log(logger, f"Request method: {request.method}")
+    debug_log(logger, 
+        f"Request endpoint: {getattr(request, 'endpoint', 'unknown')}")
     
     # Skip context processing for system/auth pages that don't need it
     excluded_paths = [
@@ -49,35 +51,37 @@ def context_processor():
     path_excluded = request.path.startswith(tuple(excluded_paths))
     
     if path_excluded:
-        if is_debug:
-            logger.debug(f"Path {request.path} is excluded from context processing")
-            for excluded_path in excluded_paths:
-                if request.path.startswith(excluded_path):
-                    logger.debug(f"  Matched exclusion pattern: {excluded_path}")
-                    break
+        debug_log(logger, 
+            f"Path {request.path} is excluded from context processing")
+        for excluded_path in excluded_paths:
+            if request.path.startswith(excluded_path):
+                debug_log(logger, 
+                    f"  Matched exclusion pattern: {excluded_path}")
+                break
         return None
 
-    if is_debug:
-        logger.debug(f"Processing context for path: {request.path}")
-        logger.debug(f"Column preferences to inject:")
-        column_names = {
-            "3": "Common Name", "4": "Issuer", "5": "Valid From", 
-            "6": "Valid To", "7": "Preferred Profile", "8": "Challenge",
-            "9": "Key Type", "10": "OCSP Support", "11": "Serial Number",
-            "12": "Fingerprint", "13": "Version"
-        }
-        for col_id, visible in COLUMNS_PREFERENCES_DEFAULTS.items():
-            col_name = column_names.get(col_id, f"Column {col_id}")
-            logger.debug(f"  {col_name} (#{col_id}): {'visible' if visible else 'hidden'}")
+    debug_log(logger, f"Processing context for path: {request.path}")
+    debug_log(logger, "Column preferences to inject:")
+    column_names = {
+        "3": "Common Name", "4": "Issuer", "5": "Valid From", 
+        "6": "Valid To", "7": "Preferred Profile", "8": "Challenge",
+        "9": "Key Type", "10": "OCSP Support", "11": "Serial Number",
+        "12": "Fingerprint", "13": "Version"
+    }
+    for col_id, visible in COLUMNS_PREFERENCES_DEFAULTS.items():
+        col_name = column_names.get(col_id, f"Column {col_id}")
+        debug_log(logger, 
+            f"  {col_name} (#{col_id}): {'visible' if visible else 'hidden'}")
 
     # Prepare context data for templates
     data = {
         "columns_preferences_defaults_letsencrypt": COLUMNS_PREFERENCES_DEFAULTS
     }
 
-    if is_debug:
-        logger.debug(f"Context processor returning {len(data)} variables")
-        logger.debug(f"Context data keys: {list(data.keys())}")
-        logger.debug(f"Let's Encrypt preferences: {len(COLUMNS_PREFERENCES_DEFAULTS)} columns configured")
+    debug_log(logger, f"Context processor returning {len(data)} variables")
+    debug_log(logger, f"Context data keys: {list(data.keys())}")
+    debug_log(logger, 
+        f"Let's Encrypt preferences: {len(COLUMNS_PREFERENCES_DEFAULTS)} "
+        f"columns configured")
 
     return data

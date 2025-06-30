@@ -15,27 +15,27 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 
 
+def debug_log(logger, message):
+    # Log debug messages only when LOG_LEVEL environment variable is set to
+    # "debug"
+    if getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
+
+
 def extract_cache(folder_path, cache_files):
     # Extract Let's Encrypt cache files to specified folder path.
-    # 
-    # Args:
-    #     folder_path (Path): Destination folder path for extraction
-    #     cache_files (list): List of cache file dictionaries containing
-    #                        file data to extract
     logger = getLogger("UI")
     is_debug = getenv("LOG_LEVEL") == "debug"
     
-    if is_debug:
-        logger.debug(f"Starting cache extraction to {folder_path}")
-        logger.debug(f"Processing {len(cache_files)} cache files")
-        logger.debug(f"Target folder exists: {folder_path.exists()}")
+    debug_log(logger, f"Starting cache extraction to {folder_path}")
+    debug_log(logger, f"Processing {len(cache_files)} cache files")
+    debug_log(logger, f"Target folder exists: {folder_path.exists()}")
     
     folder_path.mkdir(parents=True, exist_ok=True)
     
-    if is_debug:
-        logger.debug(f"Created directory structure: {folder_path}")
-        logger.debug(f"Directory permissions: "
-                    f"{oct(folder_path.stat().st_mode)}")
+    debug_log(logger, f"Created directory structure: {folder_path}")
+    debug_log(logger, 
+        f"Directory permissions: {oct(folder_path.stat().st_mode)}")
 
     extracted_files = 0
     total_bytes = 0
@@ -44,92 +44,84 @@ def extract_cache(folder_path, cache_files):
         file_name = cache_file.get("file_name", "unknown")
         file_data = cache_file.get("data", b"")
         
-        if is_debug:
-            logger.debug(f"Examining cache file {i+1}/{len(cache_files)}: "
-                        f"{file_name}")
-            logger.debug(f"File size: {len(file_data)} bytes")
+        debug_log(logger, f"Examining cache file {i+1}/{len(cache_files)}: "
+                          f"{file_name}")
+        debug_log(logger, f"File size: {len(file_data)} bytes")
         
         if (cache_file["file_name"].endswith(".tgz") and 
                 cache_file["file_name"].startswith("folder:")):
             
-            if is_debug:
-                logger.debug(f"Processing archive: {cache_file['file_name']}")
-                logger.debug(f"Archive size: {len(cache_file['data'])} bytes")
+            debug_log(logger, 
+                f"Processing archive: {cache_file['file_name']}")
+            debug_log(logger, 
+                f"Archive size: {len(cache_file['data'])} bytes")
             
             try:
                 with tar_open(fileobj=BytesIO(cache_file["data"]), 
                               mode="r:gz") as tar:
                     
                     members = tar.getmembers()
-                    if is_debug:
-                        logger.debug(f"Archive contains {len(members)} "
-                                    f"members")
-                        # Show first few members
-                        for j, member in enumerate(members[:5]):
-                            logger.debug(
-                                f"  Member {j+1}: {member.name} "
-                                f"({member.size} bytes, "
-                                f"{'dir' if member.isdir() else 'file'})"
-                            )
-                        if len(members) > 5:
-                            logger.debug(f"  ... and {len(members) - 5} "
-                                        f"more members")
+                    debug_log(logger, 
+                        f"Archive contains {len(members)} members")
+                    # Show first few members
+                    for j, member in enumerate(members[:5]):
+                        debug_log(logger, 
+                            f"  Member {j+1}: {member.name} "
+                            f"({member.size} bytes, "
+                            f"{'dir' if member.isdir() else 'file'})")
+                    if len(members) > 5:
+                        debug_log(logger, 
+                            f"  ... and {len(members) - 5} more members")
                     
                     try:
                         tar.extractall(folder_path, filter="fully_trusted")
-                        if is_debug:
-                            logger.debug("Extraction completed with "
-                                        "fully_trusted filter")
+                        debug_log(logger, 
+                            "Extraction completed with fully_trusted filter")
                     except TypeError:
                         # Fallback for older Python versions without filter
-                        if is_debug:
-                            logger.debug("Using fallback extraction without "
-                                        "filter")
+                        debug_log(logger, 
+                            "Using fallback extraction without filter")
                         tar.extractall(folder_path)
                     
                     extracted_files += 1
                     total_bytes += len(cache_file['data'])
                     
-                    if is_debug:
-                        logger.debug(f"Successfully extracted "
-                                    f"{cache_file['file_name']}")
-                        logger.debug(f"Extracted {len(members)} items from "
-                                    f"archive")
+                    debug_log(logger, 
+                        f"Successfully extracted {cache_file['file_name']}")
+                    debug_log(logger, 
+                        f"Extracted {len(members)} items from archive")
                         
             except Exception as e:
                 logger.error(f"Failed to extract {cache_file['file_name']}: "
                            f"{e}")
-                if is_debug:
-                    logger.debug(f"Extraction error details: "
-                                f"{format_exc()}")
+                debug_log(logger, f"Extraction error details: {format_exc()}")
         else:
-            if is_debug:
-                logger.debug(f"Skipping non-archive file: {file_name}")
+            debug_log(logger, f"Skipping non-archive file: {file_name}")
 
-    if is_debug:
-        logger.debug(f"Cache extraction completed:")
-        logger.debug(f"  - Files processed: {len(cache_files)}")
-        logger.debug(f"  - Archives extracted: {extracted_files}")
-        logger.debug(f"  - Total bytes processed: {total_bytes}")
+    debug_log(logger, "Cache extraction completed:")
+    debug_log(logger, f"  - Files processed: {len(cache_files)}")
+    debug_log(logger, f"  - Archives extracted: {extracted_files}")
+    debug_log(logger, f"  - Total bytes processed: {total_bytes}")
+    
+    # List final directory contents
+    if folder_path.exists():
+        all_items = list(folder_path.rglob("*"))
+        files = [item for item in all_items if item.is_file()]
+        dirs = [item for item in all_items if item.is_dir()]
         
-        # List final directory contents
-        if folder_path.exists():
-            all_items = list(folder_path.rglob("*"))
-            files = [item for item in all_items if item.is_file()]
-            dirs = [item for item in all_items if item.is_dir()]
-            
-            logger.debug(f"Final directory structure:")
-            logger.debug(f"  - Total items: {len(all_items)}")
-            logger.debug(f"  - Files: {len(files)}")
-            logger.debug(f"  - Directories: {len(dirs)}")
-            
-            # Show some example files
-            for i, file_item in enumerate(files[:5]):
-                rel_path = file_item.relative_to(folder_path)
-                logger.debug(f"    File {i+1}: {rel_path} "
-                           f"({file_item.stat().st_size} bytes)")
-            if len(files) > 5:
-                logger.debug(f"    ... and {len(files) - 5} more files")
+        debug_log(logger, "Final directory structure:")
+        debug_log(logger, f"  - Total items: {len(all_items)}")
+        debug_log(logger, f"  - Files: {len(files)}")
+        debug_log(logger, f"  - Directories: {len(dirs)}")
+        
+        # Show some example files
+        for i, file_item in enumerate(files[:5]):
+            rel_path = file_item.relative_to(folder_path)
+            debug_log(logger, 
+                f"    File {i+1}: {rel_path} "
+                f"({file_item.stat().st_size} bytes)")
+        if len(files) > 5:
+            debug_log(logger, f"    ... and {len(files) - 5} more files")
 
 
 def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
@@ -138,21 +130,11 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
     # Parses Let's Encrypt certificate files and renewal configurations
     # to extract detailed certificate information including validity dates,
     # issuer information, and configuration details.
-    # 
-    # Args:
-    #     folder_paths (Tuple[Path, ...]): Tuple of folder paths containing
-    #                                     certificate data to process
-    #                                     
-    # Returns:
-    #     dict: Dictionary containing lists of certificate information
-    #           with keys for domain, common_name, issuer, validity dates,
-    #           and other certificate metadata
     logger = getLogger("UI")
     is_debug = getenv("LOG_LEVEL") == "debug"
     
-    if is_debug:
-        logger.debug(f"Retrieving certificate info from "
-                    f"{len(folder_paths)} folder paths")
+    debug_log(logger, 
+        f"Retrieving certificate info from {len(folder_paths)} folder paths")
     
     certificates = {
         "domain": [],
@@ -173,24 +155,22 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
     total_certs_processed = 0
     
     for folder_idx, folder_path in enumerate(folder_paths):
-        if is_debug:
-            logger.debug(f"Processing folder {folder_idx + 1}/"
-                        f"{len(folder_paths)}: {folder_path}")
+        debug_log(logger, 
+            f"Processing folder {folder_idx + 1}/{len(folder_paths)}: "
+            f"{folder_path}")
         
         cert_files = list(folder_path.joinpath("live").glob("*/fullchain.pem"))
         
-        if is_debug:
-            logger.debug(f"Found {len(cert_files)} certificate files in "
-                        f"{folder_path}")
+        debug_log(logger, f"Found {len(cert_files)} certificate files in "
+                          f"{folder_path}")
         
         for cert_file in cert_files:
             domain = cert_file.parent.name
             certificates["domain"].append(domain)
             total_certs_processed += 1
             
-            if is_debug:
-                logger.debug(f"Processing certificate "
-                           f"{total_certs_processed}: {domain}")
+            debug_log(logger, 
+                f"Processing certificate {total_certs_processed}: {domain}")
 
             # Initialize default certificate information
             cert_info = {
@@ -211,28 +191,25 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
 
             # Parse the certificate file
             try:
-                if is_debug:
-                    logger.debug(f"Loading X.509 certificate from "
-                                f"{cert_file}")
-                    logger.debug(f"Certificate file size: "
-                                f"{cert_file.stat().st_size} bytes")
+                debug_log(logger, 
+                    f"Loading X.509 certificate from {cert_file}")
+                debug_log(logger, 
+                    f"Certificate file size: {cert_file.stat().st_size} bytes")
                 
                 cert_bytes = cert_file.read_bytes()
-                if is_debug:
-                    logger.debug(f"Read {len(cert_bytes)} bytes from "
-                                f"certificate file")
-                    logger.debug(f"Certificate data preview: "
-                                f"{cert_bytes[:100]}...")
+                debug_log(logger, 
+                    f"Read {len(cert_bytes)} bytes from certificate file")
+                debug_log(logger, 
+                    f"Certificate data preview: {cert_bytes[:100]}...")
                 
                 cert = x509.load_pem_x509_certificate(
                     cert_bytes, default_backend()
                 )
                 
-                if is_debug:
-                    logger.debug(f"Successfully loaded certificate for "
-                                f"{domain}")
-                    logger.debug(f"Certificate version: {cert.version}")
-                    logger.debug(f"Certificate serial: {cert.serial_number}")
+                debug_log(logger, 
+                    f"Successfully loaded certificate for {domain}")
+                debug_log(logger, f"Certificate version: {cert.version}")
+                debug_log(logger, f"Certificate serial: {cert.serial_number}")
 
                 # Extract subject (Common Name)
                 subject = cert.subject.get_attributes_for_oid(
@@ -240,14 +217,12 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                 )
                 if subject:
                     cert_info["common_name"] = subject[0].value
-                    if is_debug:
-                        logger.debug(f"Certificate CN: "
-                                    f"{cert_info['common_name']}")
+                    debug_log(logger, 
+                        f"Certificate CN: {cert_info['common_name']}")
                 else:
-                    if is_debug:
-                        logger.debug("No Common Name found in certificate "
-                                    "subject")
-                        logger.debug(f"Full subject: {cert.subject}")
+                    debug_log(logger, 
+                        "No Common Name found in certificate subject")
+                    debug_log(logger, f"Full subject: {cert.subject}")
 
                 # Extract issuer (Certificate Authority)
                 issuer = cert.issuer.get_attributes_for_oid(
@@ -255,14 +230,12 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                 )
                 if issuer:
                     cert_info["issuer"] = issuer[0].value
-                    if is_debug:
-                        logger.debug(f"Certificate issuer: "
-                                    f"{cert_info['issuer']}")
+                    debug_log(logger, 
+                        f"Certificate issuer: {cert_info['issuer']}")
                 else:
-                    if is_debug:
-                        logger.debug("No Common Name found in certificate "
-                                    "issuer")
-                        logger.debug(f"Full issuer: {cert.issuer}")
+                    debug_log(logger, 
+                        "No Common Name found in certificate issuer")
+                    debug_log(logger, f"Full issuer: {cert.issuer}")
 
                 # Extract validity period
                 cert_info["valid_from"] = (
@@ -272,16 +245,15 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                     cert.not_valid_after.strftime("%d-%m-%Y %H:%M:%S UTC")
                 )
                 
-                if is_debug:
-                    logger.debug(f"Certificate validity: "
-                               f"{cert_info['valid_from']} to "
-                               f"{cert_info['valid_to']}")
-                    # Check if certificate is currently valid
-                    from datetime import datetime, timezone
-                    now = datetime.now(timezone.utc)
-                    is_valid = (cert.not_valid_before <= now <= 
-                               cert.not_valid_after)
-                    logger.debug(f"Certificate currently valid: {is_valid}")
+                debug_log(logger, 
+                    f"Certificate validity: {cert_info['valid_from']} to "
+                    f"{cert_info['valid_to']}")
+                # Check if certificate is currently valid
+                from datetime import datetime, timezone
+                now = datetime.now(timezone.utc)
+                is_valid = (cert.not_valid_before <= now <= 
+                           cert.not_valid_after)
+                debug_log(logger, f"Certificate currently valid: {is_valid}")
 
                 # Extract serial number
                 cert_info["serial_number"] = str(cert.serial_number)
@@ -290,9 +262,8 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                 fingerprint_bytes = cert.fingerprint(hashes.SHA256())
                 cert_info["fingerprint"] = fingerprint_bytes.hex()
                 
-                if is_debug:
-                    logger.debug(f"Certificate fingerprint: "
-                                f"{cert_info['fingerprint']}")
+                debug_log(logger, 
+                    f"Certificate fingerprint: {cert_info['fingerprint']}")
 
                 # Extract version
                 cert_info["version"] = cert.version.name
@@ -312,48 +283,44 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                     
                     if ocsp_urls:
                         cert_info["ocsp_support"] = "Yes"
-                        if is_debug:
-                            logger.debug(f"OCSP URLs found for {domain}: "
-                                        f"{ocsp_urls}")
+                        debug_log(logger, 
+                            f"OCSP URLs found for {domain}: {ocsp_urls}")
                     else:
                         cert_info["ocsp_support"] = "No"
-                        if is_debug:
-                            logger.debug(f"AIA extension found for {domain} "
-                                        f"but no OCSP URLs")
+                        debug_log(logger, 
+                            f"AIA extension found for {domain} but no OCSP URLs")
                             
                 except x509.ExtensionNotFound:
                     cert_info["ocsp_support"] = "No"
-                    if is_debug:
-                        logger.debug(f"No Authority Information Access "
-                                    f"extension found for {domain}")
+                    debug_log(logger, 
+                        f"No Authority Information Access extension found for "
+                        f"{domain}")
                 except Exception as ocsp_error:
                     cert_info["ocsp_support"] = "Unknown"
-                    if is_debug:
-                        logger.debug(f"Error checking OCSP support for "
-                                    f"{domain}: {ocsp_error}")
+                    debug_log(logger, 
+                        f"Error checking OCSP support for {domain}: "
+                        f"{ocsp_error}")
                 
-                if is_debug:
-                    logger.debug(f"Certificate processing completed for "
-                                f"{domain}")
-                    logger.debug(f"  - Serial: {cert_info['serial_number']}")
-                    logger.debug(f"  - Version: {cert_info['version']}")
-                    logger.debug(f"  - Subject: {cert_info['common_name']}")
-                    logger.debug(f"  - Issuer: {cert_info['issuer']}")
-                    logger.debug(f"  - OCSP Support: "
-                                f"{cert_info['ocsp_support']}")
+                debug_log(logger, 
+                    f"Certificate processing completed for {domain}")
+                debug_log(logger, f"  - Serial: {cert_info['serial_number']}")
+                debug_log(logger, f"  - Version: {cert_info['version']}")
+                debug_log(logger, f"  - Subject: {cert_info['common_name']}")
+                debug_log(logger, f"  - Issuer: {cert_info['issuer']}")
+                debug_log(logger, 
+                    f"  - OCSP Support: {cert_info['ocsp_support']}")
                 
             except BaseException as e:
                 error_msg = (f"Error while parsing certificate {cert_file}: "
                            f"{e}")
                 logger.error(error_msg)
-                if is_debug:
-                    logger.debug(f"Certificate parsing error details:")
-                    logger.debug(f"  - Error type: {type(e).__name__}")
-                    logger.debug(f"  - Error message: {str(e)}")
-                    logger.debug(f"  - Full traceback: {format_exc()}")
-                    logger.debug(f"  - Certificate file: {cert_file}")
-                    logger.debug(f"  - File exists: {cert_file.exists()}")
-                    logger.debug(f"  - File readable: {cert_file.is_file()}")
+                debug_log(logger, "Certificate parsing error details:")
+                debug_log(logger, f"  - Error type: {type(e).__name__}")
+                debug_log(logger, f"  - Error message: {str(e)}")
+                debug_log(logger, f"  - Full traceback: {format_exc()}")
+                debug_log(logger, f"  - Certificate file: {cert_file}")
+                debug_log(logger, f"  - File exists: {cert_file.exists()}")
+                debug_log(logger, f"  - File readable: {cert_file.is_file()}")
 
             # Parse the renewal configuration file
             try:
@@ -361,9 +328,8 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                                                    f"{domain}.conf")
                 
                 if renewal_file.exists():
-                    if is_debug:
-                        logger.debug(f"Processing renewal configuration: "
-                                    f"{renewal_file}")
+                    debug_log(logger, 
+                        f"Processing renewal configuration: {renewal_file}")
                     
                     with renewal_file.open("r") as f:
                         for line_num, line in enumerate(f, 1):
@@ -392,40 +358,38 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, ...]) -> dict:
                                     line.split(" = ")[1].strip()
                                 )
                     
-                    if is_debug:
-                        logger.debug(f"Renewal config parsed - Profile: "
-                                    f"{cert_info['preferred_profile']}, "
-                                    f"Challenge: {cert_info['challenge']}, "
-                                    f"Key type: {cert_info['key_type']}")
+                    debug_log(logger, 
+                        f"Renewal config parsed - Profile: "
+                        f"{cert_info['preferred_profile']}, "
+                        f"Challenge: {cert_info['challenge']}, "
+                        f"Key type: {cert_info['key_type']}")
                 else:
-                    if is_debug:
-                        logger.debug(f"No renewal configuration found for "
-                                    f"{domain}")
+                    debug_log(logger, 
+                        f"No renewal configuration found for {domain}")
                         
             except BaseException as e:
                 error_msg = (f"Error while parsing renewal configuration "
                            f"{renewal_file}: {e}")
                 logger.error(error_msg)
-                if is_debug:
-                    logger.debug(f"Renewal config parsing error: "
-                                f"{format_exc()}")
+                debug_log(logger, f"Renewal config parsing error: "
+                                  f"{format_exc()}")
 
             # Append all certificate information to the results
             for key in cert_info:
                 certificates[key].append(cert_info[key])
 
-    if is_debug:
-        logger.debug(f"Certificate retrieval complete. Processed "
-                    f"{total_certs_processed} certificates from "
-                    f"{len(folder_paths)} folders")
-        
-        # Summary of OCSP support
-        ocsp_support_counts = {"Yes": 0, "No": 0, "Unknown": 0}
-        for ocsp_status in certificates.get('ocsp_support', []):
-            ocsp_support_counts[ocsp_status] = (
-                ocsp_support_counts.get(ocsp_status, 0) + 1
-            )
-        logger.debug(f"OCSP support summary: {ocsp_support_counts}")
+    debug_log(logger, 
+        f"Certificate retrieval complete. Processed "
+        f"{total_certs_processed} certificates from {len(folder_paths)} "
+        f"folders")
+    
+    # Summary of OCSP support
+    ocsp_support_counts = {"Yes": 0, "No": 0, "Unknown": 0}
+    for ocsp_status in certificates.get('ocsp_support', []):
+        ocsp_support_counts[ocsp_status] = (
+            ocsp_support_counts.get(ocsp_status, 0) + 1
+        )
+    debug_log(logger, f"OCSP support summary: {ocsp_support_counts}")
 
     return certificates
 
@@ -437,21 +401,10 @@ def pre_render(app, *args, **kwargs):
     # prepares the data structure for rendering in the web interface.
     # Handles extraction of cache files, certificate parsing, and error
     # handling for the certificate management interface.
-    # 
-    # Args:
-    #     app: Flask application instance
-    #     *args: Variable length argument list
-    #     **kwargs: Keyword arguments containing database connection and
-    #              other configuration options
-    #              
-    # Returns:
-    #     dict: Dictionary containing certificate data, display configuration,
-    #           and any error information for the UI template
     logger = getLogger("UI")
     is_debug = getenv("LOG_LEVEL") == "debug"
     
-    if is_debug:
-        logger.debug("Starting pre-render for Let's Encrypt certificates")
+    debug_log(logger, "Starting pre-render for Let's Encrypt certificates")
     
     # Initialize return structure with default values
     ret = {
@@ -485,94 +438,86 @@ def pre_render(app, *args, **kwargs):
     folder_path = None
     
     try:
-        if is_debug:
-            logger.debug("Starting Let's Encrypt data retrieval process")
-            logger.debug(f"Database connection available: "
-                        f"{'db' in kwargs}")
-            logger.debug(f"Root folder: {root_folder}")
+        debug_log(logger, "Starting Let's Encrypt data retrieval process")
+        debug_log(logger, f"Database connection available: {'db' in kwargs}")
+        debug_log(logger, f"Root folder: {root_folder}")
         
         # Retrieve cache files from database
-        if is_debug:
-            logger.debug("Fetching cache files from database for job: "
-                        "certbot-renew")
+        debug_log(logger, 
+            "Fetching cache files from database for job: certbot-renew")
         
         regular_cache_files = kwargs["db"].get_jobs_cache_files(
             job_name="certbot-renew"
         )
         
-        if is_debug:
-            logger.debug(f"Retrieved {len(regular_cache_files)} cache files")
-            for i, cache_file in enumerate(regular_cache_files):
-                file_name = cache_file.get("file_name", "unknown")
-                file_size = len(cache_file.get("data", b""))
-                logger.debug(f"  Cache file {i+1}: {file_name} "
-                           f"({file_size} bytes)")
+        debug_log(logger, f"Retrieved {len(regular_cache_files)} cache files")
+        for i, cache_file in enumerate(regular_cache_files):
+            file_name = cache_file.get("file_name", "unknown")
+            file_size = len(cache_file.get("data", b""))
+            debug_log(logger, 
+                f"  Cache file {i+1}: {file_name} ({file_size} bytes)")
 
         # Create unique temporary folder for extraction
         folder_uuid = str(uuid4())
         folder_path = root_folder.joinpath("letsencrypt", folder_uuid)
         regular_le_folder = folder_path.joinpath("regular")
         
-        if is_debug:
-            logger.debug(f"Using temporary folder UUID: {folder_uuid}")
-            logger.debug(f"Temporary folder path: {folder_path}")
-            logger.debug(f"Regular LE folder: {regular_le_folder}")
+        debug_log(logger, f"Using temporary folder UUID: {folder_uuid}")
+        debug_log(logger, f"Temporary folder path: {folder_path}")
+        debug_log(logger, f"Regular LE folder: {regular_le_folder}")
 
         # Extract cache files to temporary location
-        if is_debug:
-            logger.debug("Starting cache file extraction")
+        debug_log(logger, "Starting cache file extraction")
         
         extract_cache(regular_le_folder, regular_cache_files)
         
-        if is_debug:
-            logger.debug("Cache extraction completed, starting certificate "
-                        "parsing")
+        debug_log(logger, 
+            "Cache extraction completed, starting certificate parsing")
 
         # Parse certificates and retrieve information
         cert_data = retrieve_certificates_info((regular_le_folder,))
         
         cert_count = len(cert_data.get("domain", []))
         
-        if is_debug:
-            logger.debug(f"Certificate parsing completed")
-            logger.debug(f"Total certificates processed: {cert_count}")
-            logger.debug(f"Certificate data keys: {list(cert_data.keys())}")
-            
-            # Log sample certificate data (first certificate if available)
-            if cert_count > 0:
-                logger.debug("Sample certificate data (first certificate):")
-                for key in cert_data:
-                    value = cert_data[key][0] if cert_data[key] else "None"
-                    if key == "ocsp_support":
-                        logger.debug(f"  {key}: {value} (OCSP support "
-                                    f"detected)")
-                    else:
-                        logger.debug(f"  {key}: {value}")
+        debug_log(logger, "Certificate parsing completed")
+        debug_log(logger, f"Total certificates processed: {cert_count}")
+        debug_log(logger, f"Certificate data keys: {list(cert_data.keys())}")
+        
+        # Log sample certificate data (first certificate if available)
+        if cert_count > 0:
+            debug_log(logger, 
+                "Sample certificate data (first certificate):")
+            for key in cert_data:
+                value = cert_data[key][0] if cert_data[key] else "None"
+                if key == "ocsp_support":
+                    debug_log(logger, 
+                        f"  {key}: {value} (OCSP support detected)")
+                else:
+                    debug_log(logger, f"  {key}: {value}")
         
         ret["list_certificates"]["data"] = cert_data
         
         logger.info(f"Pre-render completed successfully with {cert_count} "
                    f"certificates")
         
-        if is_debug:
-            logger.debug(f"Return data structure keys: {list(ret.keys())}")
-            logger.debug(f"Certificate list structure: "
-                        f"{list(ret['list_certificates'].keys())}")
+        debug_log(logger, f"Return data structure keys: {list(ret.keys())}")
+        debug_log(logger, 
+            f"Certificate list structure: "
+            f"{list(ret['list_certificates'].keys())}")
         
     except BaseException as e:
         error_msg = f"Failed to get Let's Encrypt certificates: {e}"
         logger.error(error_msg)
         
-        if is_debug:
-            logger.debug(f"Pre-render error occurred:")
-            logger.debug(f"  - Error type: {type(e).__name__}")
-            logger.debug(f"  - Error message: {str(e)}")
-            logger.debug(f"  - Error traceback: {format_exc()}")
-            logger.debug(f"  - kwargs keys: "
-                        f"{list(kwargs.keys()) if kwargs else 'None'}")
-            if "db" in kwargs:
-                logger.debug(f"  - Database object type: "
-                           f"{type(kwargs['db'])}")
+        debug_log(logger, "Pre-render error occurred:")
+        debug_log(logger, f"  - Error type: {type(e).__name__}")
+        debug_log(logger, f"  - Error message: {str(e)}")
+        debug_log(logger, f"  - Error traceback: {format_exc()}")
+        debug_log(logger, 
+            f"  - kwargs keys: {list(kwargs.keys()) if kwargs else 'None'}")
+        if "db" in kwargs:
+            debug_log(logger, 
+                f"  - Database object type: {type(kwargs['db'])}")
         
         ret["error"] = {"message": str(e)}
         
@@ -580,20 +525,17 @@ def pre_render(app, *args, **kwargs):
         # Clean up temporary files
         if folder_path and folder_path.exists():
             try:
-                if is_debug:
-                    logger.debug(f"Cleaning up temporary folder: "
-                                f"{root_folder}")
+                debug_log(logger, 
+                    f"Cleaning up temporary folder: {root_folder}")
                 
                 rmtree(root_folder, ignore_errors=True)
                 
-                if is_debug:
-                    logger.debug("Temporary folder cleanup completed")
+                debug_log(logger, "Temporary folder cleanup completed")
                     
             except Exception as cleanup_error:
                 logger.warning(f"Failed to clean up temporary folder "
                              f"{root_folder}: {cleanup_error}")
 
-    if is_debug:
-        logger.debug("Pre-render function completed")
+    debug_log(logger, "Pre-render function completed")
 
     return ret
