@@ -1,3 +1,5 @@
+# Country Plugin
+
 The Country plugin enables geo-blocking functionality for your website, allowing you to restrict access based on the geographic location of your visitors. This feature helps you comply with regional regulations, prevent fraudulent activities often associated with high-risk regions, and implement content restrictions based on geographic boundaries.
 
 **How it works:**
