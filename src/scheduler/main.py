@@ -45,6 +45,14 @@ from API import API  # type: ignore
 
 from ApiCaller import ApiCaller  # type: ignore
 
+
+# Log debug messages only when LOG_LEVEL environment variable is set to
+# "debug"
+def debug_log(logger, message):
+    if getenv("LOG_LEVEL") == "debug":
+        logger.debug(f"[DEBUG] {message}")
+
+
 # Initialize logging as early as possible
 LOGGER = setup_logger(
     "Scheduler", 
@@ -57,8 +65,7 @@ HEALTHCHECK_LOGGER = setup_logger(
     getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO"))
 )
 
-if getenv("LOG_LEVEL") == "debug":
-    LOGGER.debug("Logger initialized with debug level")
+debug_log(LOGGER, "Logger initialized with debug level")
 
 # Global synchronization events and threading primitives
 APPLYING_CHANGES = Event()  # Prevents concurrent configuration changes
@@ -72,13 +79,11 @@ SCHEDULER_LOCK = Lock()  # Protects scheduler API list modifications
 # Initialize core directory paths for BunkerWeb configuration
 CACHE_PATH = Path(sep, "var", "cache", "bunkerweb")
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
-if getenv("LOG_LEVEL") == "debug":
-    LOGGER.debug(f"Cache directory initialized: {CACHE_PATH}")
+debug_log(LOGGER, f"Cache directory initialized: {CACHE_PATH}")
 
 CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 CUSTOM_CONFIGS_PATH.mkdir(parents=True, exist_ok=True)
-if getenv("LOG_LEVEL") == "debug":
-    LOGGER.debug(f"Custom configs directory initialized: {CUSTOM_CONFIGS_PATH}")
+debug_log(LOGGER, f"Custom configs directory initialized: {CUSTOM_CONFIGS_PATH}")
 
 # Define all supported custom configuration directory types
 CUSTOM_CONFIGS_DIRS = (
@@ -98,8 +103,7 @@ CUSTOM_CONFIGS_DIRS = (
 for custom_config_dir in CUSTOM_CONFIGS_DIRS:
     dir_path = CUSTOM_CONFIGS_PATH.joinpath(custom_config_dir)
     dir_path.mkdir(parents=True, exist_ok=True)
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Created custom config directory: {dir_path}")
+    debug_log(LOGGER, f"Created custom config directory: {dir_path}")
 
 # Nginx configuration paths
 CONFIG_PATH = Path(sep, "etc", "nginx")
@@ -108,13 +112,11 @@ NGINX_VARIABLES_PATH = CONFIG_PATH.joinpath("variables.env")
 # External and Pro plugins directories
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
-if getenv("LOG_LEVEL") == "debug":
-    LOGGER.debug(f"External plugins directory initialized: {EXTERNAL_PLUGINS_PATH}")
+debug_log(LOGGER, f"External plugins directory initialized: {EXTERNAL_PLUGINS_PATH}")
 
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 PRO_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
-if getenv("LOG_LEVEL") == "debug":
-    LOGGER.debug(f"Pro plugins directory initialized: {PRO_PLUGINS_PATH}")
+debug_log(LOGGER, f"Pro plugins directory initialized: {PRO_PLUGINS_PATH}")
 
 # Temporary files and working directories
 TMP_PATH = Path(sep, "var", "tmp", "bunkerweb")
@@ -123,8 +125,7 @@ NGINX_TMP_VARIABLES_PATH = TMP_PATH.joinpath("variables.env")
 
 FAILOVER_PATH = TMP_PATH.joinpath("failover")
 FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
-if getenv("LOG_LEVEL") == "debug":
-    LOGGER.debug(f"Failover directory initialized: {FAILOVER_PATH}")
+debug_log(LOGGER, f"Failover directory initialized: {FAILOVER_PATH}")
 
 # Health check and status files
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
@@ -140,8 +141,7 @@ if not HEALTHCHECK_INTERVAL.isdigit():
 HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 HEALTHCHECK_EVENT = Event()  # Prevents concurrent healthcheck runs
 
-if getenv("LOG_LEVEL") == "debug":
-    LOGGER.debug(f"Healthcheck interval set to: {HEALTHCHECK_INTERVAL} seconds")
+debug_log(LOGGER, f"Healthcheck interval set to: {HEALTHCHECK_INTERVAL} seconds")
 
 # Parse and validate reload minimum timeout configuration
 RELOAD_MIN_TIMEOUT = getenv("RELOAD_MIN_TIMEOUT", "5")
@@ -151,8 +151,7 @@ if not RELOAD_MIN_TIMEOUT.isdigit():
     RELOAD_MIN_TIMEOUT = 5
 
 RELOAD_MIN_TIMEOUT = int(RELOAD_MIN_TIMEOUT)
-if getenv("LOG_LEVEL") == "debug":
-    LOGGER.debug(f"Reload minimum timeout set to: {RELOAD_MIN_TIMEOUT} seconds")
+debug_log(LOGGER, f"Reload minimum timeout set to: {RELOAD_MIN_TIMEOUT} seconds")
 
 # Parse configuration testing toggle
 DISABLE_CONFIGURATION_TESTING = (
@@ -164,8 +163,7 @@ if DISABLE_CONFIGURATION_TESTING:
         "Configuration testing is disabled, changes will be applied "
         "without testing (we hope you know what you're doing) ..."
     )
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug("Configuration testing disabled via environment variable")
+    debug_log(LOGGER, "Configuration testing disabled via environment variable")
 
 # Parse fail sending config ignore toggle
 IGNORE_FAIL_SENDING_CONFIG = (
@@ -174,8 +172,7 @@ IGNORE_FAIL_SENDING_CONFIG = (
 
 if IGNORE_FAIL_SENDING_CONFIG:
     LOGGER.warning("Ignoring fail sending config to some BunkerWeb instances ...")
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug("Fail sending config errors will be ignored")
+    debug_log(LOGGER, "Fail sending config errors will be ignored")
 
 # Parse regex check ignore toggle
 IGNORE_REGEX_CHECK = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
@@ -185,15 +182,13 @@ if IGNORE_REGEX_CHECK:
         "Ignoring regex check for settings "
         "(we hope you know what you're doing) ..."
     )
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug("Regex validation for settings disabled")
+    debug_log(LOGGER, "Regex validation for settings disabled")
 
 
 # Signal handler for graceful shutdown (SIGINT, SIGTERM)
 # Waits for ongoing changes to complete before stopping
 def handle_stop(signum, frame):
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Received signal {signum}, initiating shutdown")
+    debug_log(LOGGER, f"Received signal {signum}, initiating shutdown")
     
     current_time = datetime.now().astimezone()
     # Wait up to 30 seconds for changes to complete
@@ -209,8 +204,7 @@ def handle_stop(signum, frame):
         )
 
     if SCHEDULER is not None:
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Clearing scheduler jobs before shutdown")
+        debug_log(LOGGER, "Clearing scheduler jobs before shutdown")
         SCHEDULER.clear()
     stop(0)
 
@@ -222,13 +216,11 @@ signal(SIGTERM, handle_stop)
 # Signal handler for configuration reload (SIGHUP)
 # Saves current configuration to database without restarting scheduler
 def handle_reload(signum, frame):
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Received reload signal {signum}")
+    debug_log(LOGGER, f"Received reload signal {signum}")
     
     try:
         if SCHEDULER is not None and RUN:
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Scheduler is running, processing reload request")
+            debug_log(LOGGER, "Scheduler is running, processing reload request")
             
             if SCHEDULER.db.readonly:
                 LOGGER.warning(
@@ -237,8 +229,7 @@ def handle_reload(signum, frame):
                 )
                 return
 
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Running config saver for reload")
+            debug_log(LOGGER, "Running config saver for reload")
             
             proc = subprocess_run(
                 [
@@ -257,16 +248,15 @@ def handle_reload(signum, frame):
                     "Config saver failed, configuration will not work "
                     "as expected..."
                 )
-            elif getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Config saver completed successfully")
+            else:
+                debug_log(LOGGER, "Config saver completed successfully")
         else:
             LOGGER.warning(
                 "Ignored reload operation because scheduler is not running ..."
             )
     except BaseException as e:
         LOGGER.error(f"Exception while reloading scheduler : {e}")
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Reload exception traceback: {format_exc()}")
+        debug_log(LOGGER, f"Reload exception traceback: {format_exc()}")
 
 
 signal(SIGHUP, handle_reload)
@@ -275,17 +265,14 @@ signal(SIGHUP, handle_reload)
 # Clean shutdown function - removes PID file and health check file
 # Called with exit status code to terminate the scheduler process
 def stop(status):
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Stopping scheduler with status {status}")
+    debug_log(LOGGER, f"Stopping scheduler with status {status}")
     
     pid_file = Path(sep, "var", "run", "bunkerweb", "scheduler.pid")
     pid_file.unlink(missing_ok=True)
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Removed PID file: {pid_file}")
+    debug_log(LOGGER, f"Removed PID file: {pid_file}")
     
     HEALTHY_PATH.unlink(missing_ok=True)
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Removed health file: {HEALTHY_PATH}")
+    debug_log(LOGGER, f"Removed health file: {HEALTHY_PATH}")
     
     _exit(status)
 
@@ -302,14 +289,15 @@ def send_file_to_bunkerweb(
 ):
     assert SCHEDULER is not None, "SCHEDULER is not defined"
     
-    if getenv("LOG_LEVEL") == "debug":
-        logger.debug(
-            f"Preparing to send {file_path} to endpoint {endpoint}"
-        )
-        logger.debug(
-            f"File exists: {file_path.exists()}, "
-            f"File size: {file_path.stat().st_size if file_path.exists() else 'N/A'}"
-        )
+    debug_log(
+        logger, 
+        f"Preparing to send {file_path} to endpoint {endpoint}"
+    )
+    debug_log(
+        logger,
+        f"File exists: {file_path.exists()}, "
+        f"File size: {file_path.stat().st_size if file_path.exists() else 'N/A'}"
+    )
     
     logger.info(
         f"Sending {file_path} to "
@@ -322,14 +310,12 @@ def send_file_to_bunkerweb(
     )
     fails = []
 
-    if getenv("LOG_LEVEL") == "debug":
-        logger.debug(f"Send files result: success={success}, responses={responses}")
+    debug_log(logger, f"Send files result: success={success}, responses={responses}")
 
     # Process responses and update instance status if not ignoring failures
     if not IGNORE_FAIL_SENDING_CONFIG:
         for db_instance in SCHEDULER.db.get_instances():
-            if getenv("LOG_LEVEL") == "debug":
-                logger.debug(f"Processing response for instance: {db_instance['hostname']}")
+            debug_log(logger, f"Processing response for instance: {db_instance['hostname']}")
             
             index = -1
             # Find matching API in scheduler's list
@@ -347,11 +333,11 @@ def send_file_to_bunkerweb(
                 db_instance["hostname"], {"status": "down"}
             ).get("status", "down")
 
-            if getenv("LOG_LEVEL") == "debug":
-                logger.debug(
-                    f"Instance {db_instance['hostname']} status: {status}, "
-                    f"API index: {index}"
-                )
+            debug_log(
+                logger,
+                f"Instance {db_instance['hostname']} status: {status}, "
+                f"API index: {index}"
+            )
 
             # Update instance status in database
             ret = SCHEDULER.db.update_instance(
@@ -370,12 +356,12 @@ def send_file_to_bunkerweb(
                     success = True
                     # Add instance to reachable list if not already present
                     if index == -1:
-                        if getenv("LOG_LEVEL") == "debug":
-                            logger.debug(
-                                f"Adding {db_instance['hostname']}:"
-                                f"{db_instance['port']} to the list of "
-                                f"reachable instances"
-                            )
+                        debug_log(
+                            logger,
+                            f"Adding {db_instance['hostname']}:"
+                            f"{db_instance['port']} to the list of "
+                            f"reachable instances"
+                        )
                         SCHEDULER.apis.append(
                             API(
                                 f"http://{db_instance['hostname']}:"
@@ -388,12 +374,12 @@ def send_file_to_bunkerweb(
                     fails.append(
                         f"{db_instance['hostname']}:{db_instance['port']}"
                     )
-                    if getenv("LOG_LEVEL") == "debug":
-                        logger.debug(
-                            f"Removing {db_instance['hostname']}:"
-                            f"{db_instance['port']} from the list of "
-                            f"reachable instances"
-                        )
+                    debug_log(
+                        logger,
+                        f"Removing {db_instance['hostname']}:"
+                        f"{db_instance['port']} from the list of "
+                        f"reachable instances"
+                    )
                     del SCHEDULER.apis[index]
 
     # Log final results
@@ -411,8 +397,7 @@ def send_file_to_bunkerweb(
             f"{', '.join(fails)}"
         )
 
-    if getenv("LOG_LEVEL") == "debug":
-        logger.debug(f"File send operation completed for {file_path}")
+    debug_log(logger, f"File send operation completed for {file_path}")
 
 
 # Generate custom configuration files from database entries
@@ -427,8 +412,7 @@ def generate_custom_configs(
     # Convert to Path object immediately to ensure type safety
     config_path: Path = Path(original_path)
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Generating custom configs at {config_path}")
+    debug_log(LOGGER, f"Generating custom configs at {config_path}")
 
     # Remove old custom configs files
     LOGGER.info("Removing old custom configs files ...")
@@ -443,16 +427,14 @@ def generate_custom_configs(
                 rmtree(file, ignore_errors=True)
                 removed_count += 1
     
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Removed {removed_count} old custom config files/directories")
+    debug_log(LOGGER, f"Removed {removed_count} old custom config files/directories")
 
     # Get configs from database if not provided
     if configs is None:
         assert SCHEDULER is not None
         configs = SCHEDULER.db.get_custom_configs()
-        if getenv("LOG_LEVEL") == "debug":
-            config_count = len(configs) if configs is not None else 0
-            LOGGER.debug(f"Retrieved {config_count} custom configs from database")
+        config_count = len(configs) if configs is not None else 0
+        debug_log(LOGGER, f"Retrieved {config_count} custom configs from database")
 
     generated_count = 0
     if configs:
@@ -460,11 +442,11 @@ def generate_custom_configs(
         config_path.mkdir(parents=True, exist_ok=True)
         
         for custom_config in configs:
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(
-                    f"Processing custom config: {custom_config['name']} "
-                    f"for service: {custom_config.get('service_id', 'global')}"
-                )
+            debug_log(
+                LOGGER,
+                f"Processing custom config: {custom_config['name']} "
+                f"for service: {custom_config.get('service_id', 'global')}"
+            )
             
             try:
                 if custom_config["data"]:
@@ -485,11 +467,9 @@ def generate_custom_configs(
                         tmp_path.chmod(desired_perms)
                     
                     generated_count += 1
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Generated custom config: {tmp_path}")
+                    debug_log(LOGGER, f"Generated custom config: {tmp_path}")
             except OSError as e:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(format_exc())
+                debug_log(LOGGER, format_exc())
                 if custom_config["method"] != "manual":
                     LOGGER.error(
                         f"Error while generating custom configs "
@@ -498,8 +478,7 @@ def generate_custom_configs(
                         f"{e}"
                     )
             except BaseException as e:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(format_exc())
+                debug_log(LOGGER, format_exc())
                 LOGGER.error(
                     f"Error while generating custom configs "
                     f"\"{custom_config['name']}\""
@@ -507,13 +486,11 @@ def generate_custom_configs(
                     f"{e}"
                 )
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Generated {generated_count} custom config files")
+    debug_log(LOGGER, f"Generated {generated_count} custom config files")
 
     # Send configs to BunkerWeb instances if requested
     if send and SCHEDULER and SCHEDULER.apis:
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Sending custom configs to BunkerWeb instances")
+        debug_log(LOGGER, "Sending custom configs to BunkerWeb instances")
         send_file_to_bunkerweb(config_path, "/custom_configs")
 
 
@@ -529,11 +506,11 @@ def generate_external_plugins(
     plugins_path: Path = Path(original_path)
     pro = plugins_path.as_posix().endswith("/pro/plugins")
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(
-            f"Generating {'pro ' if pro else ''}external plugins "
-            f"at {plugins_path}"
-        )
+    debug_log(
+        LOGGER,
+        f"Generating {'pro ' if pro else ''}external plugins "
+        f"at {plugins_path}"
+    )
 
     assert SCHEDULER is not None
     plugins = SCHEDULER.db.get_plugins(
@@ -541,12 +518,12 @@ def generate_external_plugins(
     )
     assert plugins is not None, "Couldn't get plugins from database"
 
-    if getenv("LOG_LEVEL") == "debug":
-        plugin_count = len(plugins) if plugins is not None else 0
-        LOGGER.debug(
-            f"Retrieved {plugin_count} {'pro ' if pro else ''}external "
-            f"plugins from database"
-        )
+    plugin_count = len(plugins) if plugins is not None else 0
+    debug_log(
+        LOGGER,
+        f"Retrieved {plugin_count} {'pro ' if pro else ''}external "
+        f"plugins from database"
+    )
 
     # Remove old external/pro plugins files but preserve unchanged ones
     LOGGER.info(
@@ -575,14 +552,13 @@ def generate_external_plugins(
                     
                 if current_checksum == plugins[index]["checksum"]:
                     ignored_plugins.add(file.name)
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Plugin {file.name} unchanged, keeping existing version")
+                    debug_log(LOGGER, f"Plugin {file.name} unchanged, keeping existing version")
                     continue
                     
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(
-                        f"Checksum of {file} has changed, removing it ..."
-                    )
+                debug_log(
+                    LOGGER,
+                    f"Checksum of {file} has changed, removing it ..."
+                )
 
             # Remove outdated or changed plugin files
             if file.is_symlink() or file.is_file():
@@ -593,8 +569,7 @@ def generate_external_plugins(
                 rmtree(file, ignore_errors=True)
                 removed_count += 1
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Removed {removed_count} old/changed plugin files")
+    debug_log(LOGGER, f"Removed {removed_count} old/changed plugin files")
 
     generated_count = 0
     if plugins:
@@ -605,15 +580,14 @@ def generate_external_plugins(
         
         for plugin in plugins:
             if plugin["id"] in ignored_plugins:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Skipping unchanged plugin: {plugin['id']}")
+                debug_log(LOGGER, f"Skipping unchanged plugin: {plugin['id']}")
                 continue
 
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(
-                    f"Processing plugin: {plugin['id']} "
-                    f"(name: {plugin.get('name', 'unknown')})"
-                )
+            debug_log(
+                LOGGER,
+                f"Processing plugin: {plugin['id']} "
+                f"(name: {plugin.get('name', 'unknown')})"
+            )
 
             try:
                 if plugin["data"]:
@@ -645,38 +619,32 @@ def generate_external_plugins(
                                 if (executable_file.stat().st_mode & 0o777 != 
                                     desired_perms):
                                     executable_file.chmod(desired_perms)
-                                    if getenv("LOG_LEVEL") == "debug":
-                                        LOGGER.debug(f"Set permissions on: {executable_file}")
+                                    debug_log(LOGGER, f"Set permissions on: {executable_file}")
                     
                     generated_count += 1
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Generated plugin: {plugin_path}")
+                    debug_log(LOGGER, f"Generated plugin: {plugin_path}")
             except OSError as e:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(format_exc())
+                debug_log(LOGGER, format_exc())
                 if plugin["method"] != "manual":
                     LOGGER.error(
                         f"Error while generating {'pro ' if pro else ''}"
                         f"external plugins \"{plugin['name']}\": {e}"
                     )
             except BaseException as e:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(format_exc())
+                debug_log(LOGGER, format_exc())
                 LOGGER.error(
                     f"Error while generating {'pro ' if pro else ''}"
                     f"external plugins \"{plugin['name']}\": {e}"
                 )
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Generated {generated_count} new plugin installations")
+    debug_log(LOGGER, f"Generated {generated_count} new plugin installations")
 
     # Send plugins to BunkerWeb instances if requested
     if send and SCHEDULER and SCHEDULER.apis:
         LOGGER.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
         endpoint = ("/pro_plugins" if plugins_path.as_posix().endswith("/pro/plugins") 
                    else "/plugins")
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Using endpoint: {endpoint}")
+        debug_log(LOGGER, f"Using endpoint: {endpoint}")
         send_file_to_bunkerweb(plugins_path, endpoint)
 
 
@@ -686,15 +654,13 @@ def generate_external_plugins(
 def generate_caches():
     assert SCHEDULER is not None
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug("Generating cache files from database")
+    debug_log(LOGGER, "Generating cache files from database")
 
     job_cache_files = SCHEDULER.db.get_jobs_cache_files()
     plugin_cache_files = set()
     ignored_dirs = set()
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Retrieved {len(job_cache_files)} cache files from database")
+    debug_log(LOGGER, f"Retrieved {len(job_cache_files)} cache files from database")
 
     restored_files = 0
     restored_dirs = 0
@@ -709,11 +675,11 @@ def generate_caches():
         )
         plugin_cache_files.add(cache_path)
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(
-                f"Processing cache file: {job_cache_file['file_name']} "
-                f"for plugin: {job_cache_file['plugin_id']}"
-            )
+        debug_log(
+            LOGGER,
+            f"Processing cache file: {job_cache_file['file_name']} "
+            f"for plugin: {job_cache_file['plugin_id']}"
+        )
 
         try:
             # Handle tar.gz archive extraction
@@ -743,12 +709,10 @@ def generate_caches():
                             tar.extractall(extract_path)
                     except Exception as e:
                         LOGGER.error(f"Error extracting tar file: {e}")
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(f"Extraction error details: {format_exc()}")
+                        debug_log(LOGGER, f"Extraction error details: {format_exc()}")
                 
                 restored_dirs += 1
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Restored cache directory {extract_path}")
+                debug_log(LOGGER, f"Restored cache directory {extract_path}")
                 continue
                 
             # Handle regular cache files
@@ -761,23 +725,22 @@ def generate_caches():
                 cache_path.chmod(desired_perms)
                 
             restored_files += 1
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(
-                    f"Restored cache file {job_cache_file['file_name']}"
-                )
+            debug_log(
+                LOGGER,
+                f"Restored cache file {job_cache_file['file_name']}"
+            )
         except BaseException as e:
             LOGGER.error(
                 f"Exception while restoring cache file "
                 f"{job_cache_file['file_name']} :\n{e}"
             )
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Cache restoration error: {format_exc()}")
+            debug_log(LOGGER, f"Cache restoration error: {format_exc()}")
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(
-            f"Cache restoration complete: {restored_files} files, "
-            f"{restored_dirs} directories"
-        )
+    debug_log(
+        LOGGER,
+        f"Cache restoration complete: {restored_files} files, "
+        f"{restored_dirs} directories"
+    )
 
     # Clean up obsolete cache files that are no longer in database
     removed_files = 0
@@ -787,32 +750,29 @@ def generate_caches():
             if resource_path.as_posix().startswith(tuple(ignored_dirs)):
                 continue
 
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Checking if {resource_path} should be removed")
+            debug_log(LOGGER, f"Checking if {resource_path} should be removed")
                 
             # Remove files not in current cache file list
             if (resource_path not in plugin_cache_files and 
                 resource_path.is_file()):
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Removing non-cached file {resource_path}")
+                debug_log(LOGGER, f"Removing non-cached file {resource_path}")
                 resource_path.unlink(missing_ok=True)
                 removed_files += 1
                 
                 # Clean up empty parent directories
                 if (resource_path.parent.is_dir() and 
                     not list(resource_path.parent.iterdir())):
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(
-                            f"Removing empty directory {resource_path.parent}"
-                        )
+                    debug_log(
+                        LOGGER,
+                        f"Removing empty directory {resource_path.parent}"
+                    )
                     rmtree(resource_path.parent, ignore_errors=True)
                     if resource_path.parent == job_path:
                         break
                 continue
             elif (resource_path.is_dir() and 
                   not list(resource_path.iterdir())):
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Removing empty directory {resource_path}")
+                debug_log(LOGGER, f"Removing empty directory {resource_path}")
                 rmtree(resource_path, ignore_errors=True)
                 continue
 
@@ -823,16 +783,14 @@ def generate_caches():
             if resource_path.stat().st_mode & 0o777 != desired_perms:
                 resource_path.chmod(desired_perms)
 
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug(f"Cache cleanup complete: removed {removed_files} obsolete files")
+    debug_log(LOGGER, f"Cache cleanup complete: removed {removed_files} obsolete files")
 
 
 # Generate nginx configuration files using the BunkerWeb config generator
 # Runs the main.py generator script and copies variables file to temp location
 # Returns True on success, False on failure
 def generate_configs(logger: Logger = LOGGER) -> bool:
-    if getenv("LOG_LEVEL") == "debug":
-        logger.debug("Starting config generation")
+    debug_log(logger, "Starting config generation")
     
     # Run the BunkerWeb configuration generator
     generator_cmd = [
@@ -845,8 +803,7 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
         CONFIG_PATH.as_posix(),
     ]
     
-    if getenv("LOG_LEVEL") == "debug":
-        logger.debug(f"Running config generator: {' '.join(generator_cmd)}")
+    debug_log(logger, f"Running config generator: {' '.join(generator_cmd)}")
     
     proc = subprocess_run(
         generator_cmd,
@@ -860,32 +817,30 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
             "Config generator failed, configuration will not work "
             "as expected..."
         )
-        if getenv("LOG_LEVEL") == "debug":
-            logger.debug(f"Config generator exit code: {proc.returncode}")
+        debug_log(logger, f"Config generator exit code: {proc.returncode}")
         return False
 
     # Copy nginx variables file to temporary location
-    if getenv("LOG_LEVEL") == "debug":
-        logger.debug(
-            f"Copying {NGINX_VARIABLES_PATH} to {NGINX_TMP_VARIABLES_PATH}"
-        )
+    debug_log(
+        logger,
+        f"Copying {NGINX_VARIABLES_PATH} to {NGINX_TMP_VARIABLES_PATH}"
+    )
     
     try:
         copy(NGINX_VARIABLES_PATH.as_posix(), NGINX_TMP_VARIABLES_PATH.as_posix())
     except Exception as e:
         logger.error(f"Failed to copy variables file: {e}")
-        if getenv("LOG_LEVEL") == "debug":
-            logger.debug(f"Variables copy error: {format_exc()}")
+        debug_log(logger, f"Variables copy error: {format_exc()}")
         return False
     
-    if getenv("LOG_LEVEL") == "debug":
-        logger.debug("Config generation completed successfully")
+    debug_log(logger, "Config generation completed successfully")
     return True
 
 
-# Perform health checks on BunkerWeb instances and send configs to loading instances
-# Checks instance health via API, updates database status, and manages reachable instances list
-# Automatically sends full configuration to instances in "loading" state
+# Perform health checks on BunkerWeb instances and send configs to loading
+# instances. Checks instance health via API, updates database status, and
+# manages reachable instances list. Automatically sends full configuration to
+# instances in "loading" state
 def healthcheck_job():
     if HEALTHCHECK_EVENT.is_set():
         HEALTHCHECK_LOGGER.warning(
@@ -896,19 +851,16 @@ def healthcheck_job():
     try:
         assert SCHEDULER is not None
     except AssertionError:
-        if getenv("LOG_LEVEL") == "debug":
-            HEALTHCHECK_LOGGER.debug("Scheduler not initialized, skipping healthcheck")
+        debug_log(HEALTHCHECK_LOGGER, "Scheduler not initialized, skipping healthcheck")
         return
 
-    if getenv("LOG_LEVEL") == "debug":
-        HEALTHCHECK_LOGGER.debug("Starting healthcheck job")
+    debug_log(HEALTHCHECK_LOGGER, "Starting healthcheck job")
 
     HEALTHCHECK_EVENT.set()
 
     # Skip healthcheck if configuration changes are being applied
     if APPLYING_CHANGES.is_set():
-        if getenv("LOG_LEVEL") == "debug":
-            HEALTHCHECK_LOGGER.debug("Changes being applied, skipping healthcheck")
+        debug_log(HEALTHCHECK_LOGGER, "Changes being applied, skipping healthcheck")
         HEALTHCHECK_EVENT.clear()
         return
 
@@ -923,8 +875,7 @@ def healthcheck_job():
         instance_endpoint = f"http://{db_instance['hostname']}:{db_instance['port']}"
         bw_instance = API(instance_endpoint, db_instance["server_name"])
         
-        if getenv("LOG_LEVEL") == "debug":
-            HEALTHCHECK_LOGGER.debug(f"Checking health of instance: {instance_endpoint}")
+        debug_log(HEALTHCHECK_LOGGER, f"Checking health of instance: {instance_endpoint}")
         
         try:
             # Send health check request to instance
@@ -935,13 +886,12 @@ def healthcheck_job():
                 sent = False
                 status = 500
                 resp = {"status": "down", "msg": err}
-                if getenv("LOG_LEVEL") == "debug":
-                    HEALTHCHECK_LOGGER.debug(
-                        f"Health check request failed for {instance_endpoint}: {e}"
-                    )
+                debug_log(
+                    HEALTHCHECK_LOGGER,
+                    f"Health check request failed for {instance_endpoint}: {e}"
+                )
 
-            if getenv("LOG_LEVEL") == "debug":
-                HEALTHCHECK_LOGGER.debug(f"Health response from {instance_endpoint}: {resp}")
+            debug_log(HEALTHCHECK_LOGGER, f"Health response from {instance_endpoint}: {resp}")
 
             success = True
             # Validate health check response
@@ -975,11 +925,11 @@ def healthcheck_job():
                 # Remove from reachable instances list
                 for i, api in enumerate(SCHEDULER.apis):
                     if api.endpoint == bw_instance.endpoint:
-                        if getenv("LOG_LEVEL") == "debug":
-                            HEALTHCHECK_LOGGER.debug(
-                                f"Removing {bw_instance.endpoint} from the "
-                                f"list of reachable instances"
-                            )
+                        debug_log(
+                            HEALTHCHECK_LOGGER,
+                            f"Removing {bw_instance.endpoint} from the "
+                            f"list of reachable instances"
+                        )
                         del SCHEDULER.apis[i]
                         break
                 continue
@@ -1006,8 +956,7 @@ def healthcheck_job():
 
                 # Get environment configuration if not already loaded
                 if env is None:
-                    if getenv("LOG_LEVEL") == "debug":
-                        HEALTHCHECK_LOGGER.debug("Loading environment configuration")
+                    debug_log(HEALTHCHECK_LOGGER, "Loading environment configuration")
                     env = SCHEDULER.db.get_config()
                     env["DATABASE_URI"] = SCHEDULER.db.database_uri
                     tz = getenv("TZ")
@@ -1015,8 +964,7 @@ def healthcheck_job():
                         env["TZ"] = tz
 
                 # Generate fresh nginx configuration
-                if getenv("LOG_LEVEL") == "debug":
-                    HEALTHCHECK_LOGGER.debug("Generating configs for loading instance")
+                debug_log(HEALTHCHECK_LOGGER, "Generating configs for loading instance")
                 generate_configs(HEALTHCHECK_LOGGER)
 
                 # Send all configuration components to loading instance
@@ -1068,8 +1016,7 @@ def healthcheck_job():
                     ),
                 ]
                 
-                if getenv("LOG_LEVEL") == "debug":
-                    HEALTHCHECK_LOGGER.debug(f"Starting {len(config_threads)} config send threads")
+                debug_log(HEALTHCHECK_LOGGER, f"Starting {len(config_threads)} config send threads")
                 
                 # Start all config sending threads
                 for thread in config_threads:
@@ -1079,8 +1026,7 @@ def healthcheck_job():
                 for thread in config_threads:
                     thread.join()
 
-                if getenv("LOG_LEVEL") == "debug":
-                    HEALTHCHECK_LOGGER.debug("All config threads completed, triggering reload")
+                debug_log(HEALTHCHECK_LOGGER, "All config threads completed, triggering reload")
 
                 # Trigger instance reload with appropriate timeout
                 reload_timeout = max(
@@ -1129,36 +1075,35 @@ def healthcheck_job():
                     found = True
                     break
             if not found:
-                if getenv("LOG_LEVEL") == "debug":
-                    HEALTHCHECK_LOGGER.debug(
-                        f"Adding {bw_instance.endpoint} to the list of "
-                        f"reachable instances"
-                    )
+                debug_log(
+                    HEALTHCHECK_LOGGER,
+                    f"Adding {bw_instance.endpoint} to the list of "
+                    f"reachable instances"
+                )
                 SCHEDULER.apis.append(bw_instance)
                 
         except BaseException as e:
             HEALTHCHECK_LOGGER.error(
                 f"Exception while checking instance {bw_instance.endpoint}: {e}"
             )
-            if getenv("LOG_LEVEL") == "debug":
-                HEALTHCHECK_LOGGER.debug(f"Healthcheck exception: {format_exc()}")
+            debug_log(HEALTHCHECK_LOGGER, f"Healthcheck exception: {format_exc()}")
             
             # Remove failed instance from reachable list
             for i, api in enumerate(SCHEDULER.apis):
                 if api.endpoint == bw_instance.endpoint:
-                    if getenv("LOG_LEVEL") == "debug":
-                        HEALTHCHECK_LOGGER.debug(
-                            f"Removing {bw_instance.endpoint} from the list "
-                            f"of reachable instances"
-                        )
+                    debug_log(
+                        HEALTHCHECK_LOGGER,
+                        f"Removing {bw_instance.endpoint} from the list "
+                        f"of reachable instances"
+                    )
                     del SCHEDULER.apis[i]
                     break
 
-    if getenv("LOG_LEVEL") == "debug":
-        HEALTHCHECK_LOGGER.debug(
-            f"Healthcheck completed: {checked_instances} checked, "
-            f"{healthy_instances} healthy, {loading_instances} loading"
-        )
+    debug_log(
+        HEALTHCHECK_LOGGER,
+        f"Healthcheck completed: {checked_instances} checked, "
+        f"{healthy_instances} healthy, {loading_instances} loading"
+    )
 
     HEALTHCHECK_EVENT.clear()
 
@@ -1167,8 +1112,7 @@ def healthcheck_job():
 # Copies config, custom_configs, and cache directories to failover location
 # Compresses the backup using job caching system for later restoration
 def backup_failover():
-    if getenv("LOG_LEVEL") == "debug":
-        LOGGER.debug("Starting failover backup")
+    debug_log(LOGGER, "Starting failover backup")
     
     BACKING_UP_FAILOVER.set()
     backup_success = True
@@ -1178,8 +1122,7 @@ def backup_failover():
         rmtree(FAILOVER_PATH, ignore_errors=True)
         FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
         
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Cleaned and recreated failover directory: {FAILOVER_PATH}")
+        debug_log(LOGGER, f"Cleaned and recreated failover directory: {FAILOVER_PATH}")
 
         # Define source and destination pairs for backup
         backup_items = [
@@ -1192,59 +1135,51 @@ def backup_failover():
         for src, dst_name in backup_items:
             try:
                 dst_path = FAILOVER_PATH / dst_name
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Copying {src} to {dst_path}")
+                debug_log(LOGGER, f"Copying {src} to {dst_path}")
                 
                 copytree(src, dst_path, dirs_exist_ok=True)
                 copied_items += 1
                 
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Successfully backed up {src} to failover path")
+                debug_log(LOGGER, f"Successfully backed up {src} to failover path")
             except Exception as e:
                 LOGGER.error(f"Error copying {src} to failover path: {e}")
                 backup_success = False
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Backup copy error for {src}: {format_exc()}")
+                debug_log(LOGGER, f"Backup copy error for {src}: {format_exc()}")
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Copied {copied_items} out of {len(backup_items)} backup items")
+        debug_log(LOGGER, f"Copied {copied_items} out of {len(backup_items)} backup items")
 
         # Cache the failover backup for persistence
         if backup_success:
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Caching failover backup")
+            debug_log(LOGGER, "Caching failover backup")
             
             success, err = JOB.cache_dir(FAILOVER_PATH, job_name="failover-backup")
             if not success:
                 LOGGER.error(f"Error while caching failover backup: {err}")
                 backup_success = False
-            elif getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Failover backup cached successfully")
+            else:
+                debug_log(LOGGER, "Failover backup cached successfully")
         
     except Exception as e:
         LOGGER.error(f"Failed to initialize failover backup: {e}")
         backup_success = False
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Failover backup initialization error: {format_exc()}")
+        debug_log(LOGGER, f"Failover backup initialization error: {format_exc()}")
     finally:
         BACKING_UP_FAILOVER.clear()
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Failover backup completed: {'success' if backup_success else 'failed'}")
+        debug_log(LOGGER, f"Failover backup completed: {'success' if backup_success else 'failed'}")
 
 
 # Main scheduler execution block
-# Handles initialization, Docker secrets, database setup, and main scheduler loop
+# Handles initialization, Docker secrets, database setup, and main scheduler
+# loop
 if __name__ == "__main__":
     try:
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Starting BunkerWeb Scheduler main execution")
+        debug_log(LOGGER, "Starting BunkerWeb Scheduler main execution")
         
         # Handle Docker secrets first
         docker_secrets = handle_docker_secrets()
         if docker_secrets:
             LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Docker secrets keys: {list(docker_secrets.keys())}")
+            debug_log(LOGGER, f"Docker secrets keys: {list(docker_secrets.keys())}")
             # Update environment with secrets
             environ.update(docker_secrets)
 
@@ -1254,16 +1189,14 @@ if __name__ == "__main__":
             LOGGER.error(
                 "Scheduler is already running, skipping execution ..."
             )
-            if getenv("LOG_LEVEL") == "debug":
-                existing_pid = pid_path.read_text(encoding="utf-8").strip()
-                LOGGER.debug(f"Existing PID file contains: {existing_pid}")
+            existing_pid = pid_path.read_text(encoding="utf-8").strip()
+            debug_log(LOGGER, f"Existing PID file contains: {existing_pid}")
             _exit(1)
 
         # Write current process PID to file
         current_pid = str(getpid())
         pid_path.write_text(current_pid, encoding="utf-8")
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Created PID file with PID: {current_pid}")
+        debug_log(LOGGER, f"Created PID file with PID: {current_pid}")
 
         del pid_path
 
@@ -1276,8 +1209,7 @@ if __name__ == "__main__":
         )
         args = parser.parse_args()
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Command line arguments: {args}")
+        debug_log(LOGGER, f"Command line arguments: {args}")
 
         # Determine variables file path
         tmp_variables_path = (
@@ -1285,14 +1217,12 @@ if __name__ == "__main__":
             else NGINX_TMP_VARIABLES_PATH
         )
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Using variables file: {tmp_variables_path}")
+        debug_log(LOGGER, f"Using variables file: {tmp_variables_path}")
 
         # Load environment variables from dotenv file
         dotenv_env = {}
         if tmp_variables_path.is_file():
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Loading environment from: {tmp_variables_path}")
+            debug_log(LOGGER, f"Loading environment from: {tmp_variables_path}")
             
             with tmp_variables_path.open() as f:
                 dotenv_env = dict(
@@ -1301,30 +1231,25 @@ if __name__ == "__main__":
                         "=" in line)
                 )
             
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Loaded {len(dotenv_env)} environment variables from file")
+            debug_log(LOGGER, f"Loaded {len(dotenv_env)} environment variables from file")
         else:
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("No variables file found, using system environment only")
+            debug_log(LOGGER, "No variables file found, using system environment only")
 
         # Initialize scheduler with database connection
         database_uri = dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Database URI source: {'dotenv' if database_uri in dotenv_env.values() else 'environment'}")
+        debug_log(LOGGER, f"Database URI source: {'dotenv' if database_uri in dotenv_env.values() else 'environment'}")
         
         SCHEDULER = JobScheduler(
             LOGGER, 
             db=Database(LOGGER, sqlalchemy_string=database_uri)
         )  # type: ignore
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("JobScheduler initialized successfully")
+        debug_log(LOGGER, "JobScheduler initialized successfully")
 
         # Initialize job handler
         JOB = Job(LOGGER, __file__, SCHEDULER.db)
         
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Job handler initialized")
+        debug_log(LOGGER, "Job handler initialized")
 
         # Set flag to indicate configuration changes are being applied
         APPLYING_CHANGES.set()
@@ -1335,11 +1260,9 @@ if __name__ == "__main__":
                 "The database is read-only, no need to save the changes "
                 "in the configuration as they will not be saved"
             )
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Database is in read-only mode, skipping config save")
+            debug_log(LOGGER, "Database is in read-only mode, skipping config save")
         else:
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Running initial config saver")
+            debug_log(LOGGER, "Running initial config saver")
             
             # Run the initial configuration saver
             config_saver_cmd = [
@@ -1353,8 +1276,7 @@ if __name__ == "__main__":
             if args.variables:
                 config_saver_cmd.extend(["--variables", tmp_variables_path.as_posix()])
             
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Config saver command: {' '.join(config_saver_cmd)}")
+            debug_log(LOGGER, f"Config saver command: {' '.join(config_saver_cmd)}")
             
             proc = subprocess_run(
                 config_saver_cmd,
@@ -1367,31 +1289,27 @@ if __name__ == "__main__":
                     "Config saver failed, configuration will not work "
                     "as expected..."
                 )
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Config saver exit code: {proc.returncode}")
-            elif getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Initial config saver completed successfully")
+                debug_log(LOGGER, f"Config saver exit code: {proc.returncode}")
+            else:
+                debug_log(LOGGER, "Initial config saver completed successfully")
 
         # Wait for database to be initialized
         ready = False
         db_check_attempts = 0
         while not ready:
             db_check_attempts += 1
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Database initialization check attempt #{db_check_attempts}")
+            debug_log(LOGGER, f"Database initialization check attempt #{db_check_attempts}")
             
             db_metadata = SCHEDULER.db.get_metadata()
             if (isinstance(db_metadata, str) or 
                 not isinstance(db_metadata, dict) or 
                 not db_metadata.get("is_initialized", False)):
                 LOGGER.warning("Database is not initialized, retrying in 5s ...")
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Database metadata: {db_metadata}")
+                debug_log(LOGGER, f"Database metadata: {db_metadata}")
                 sleep(5)
             else:
                 ready = True
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("Database is initialized and ready")
+                debug_log(LOGGER, "Database is initialized and ready")
                 continue
 
         # Load and setup environment configuration
@@ -1401,8 +1319,7 @@ if __name__ == "__main__":
         if tz:
             env["TZ"] = tz
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Loaded {len(env)} configuration parameters")
+        debug_log(LOGGER, f"Loaded {len(env)} configuration parameters")
 
         # Configure scheduler environment with reload timeout
         SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
@@ -1416,29 +1333,26 @@ if __name__ == "__main__":
             SCHEDULER.apis.append(
                 API(api_endpoint, db_instance["server_name"])
             )
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Added API endpoint: {api_endpoint}")
+            debug_log(LOGGER, f"Added API endpoint: {api_endpoint}")
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Initialized {len(SCHEDULER.apis)} API connections")
+        debug_log(LOGGER, f"Initialized {len(SCHEDULER.apis)} API connections")
 
         # Get scheduler first start flag from metadata
         scheduler_first_start = False
         if isinstance(db_metadata, dict):
             scheduler_first_start = db_metadata.get("scheduler_first_start", False)
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Scheduler first start: {scheduler_first_start}")
+        debug_log(LOGGER, f"Scheduler first start: {scheduler_first_start}")
 
         LOGGER.info("Scheduler started ...")
 
         # Define function to check for changes in custom configuration files
-        # Scans filesystem for manually created configs and saves them to database
+        # Scans filesystem for manually created configs and saves them to
+        # database
         def check_configs_changes():
             assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info("Checking if there are any changes in custom configs ...")
             
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Scanning custom configs directory: {CUSTOM_CONFIGS_PATH}")
+            debug_log(LOGGER, f"Scanning custom configs directory: {CUSTOM_CONFIGS_PATH}")
             
             custom_configs = []
             db_configs = SCHEDULER.db.get_custom_configs()
@@ -1457,8 +1371,7 @@ if __name__ == "__main__":
                     )
                     continue
 
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Processing custom config file: {file}")
+                debug_log(LOGGER, f"Processing custom config file: {file}")
 
                 content = file.read_text(encoding="utf-8")
                 
@@ -1500,14 +1413,13 @@ if __name__ == "__main__":
                             "exploded": (service_id, config_type, file.stem)
                         }
                     )
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Marked for saving: {file.stem}")
+                    debug_log(LOGGER, f"Marked for saving: {file.stem}")
 
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(
-                    f"Scanned {scanned_files} files, "
-                    f"{len(custom_configs)} marked for database save"
-                )
+            debug_log(
+                LOGGER,
+                f"Scanned {scanned_files} files, "
+                f"{len(custom_configs)} marked for database save"
+            )
 
             # Check if there are actual changes to save
             changes = (
@@ -1518,8 +1430,7 @@ if __name__ == "__main__":
 
             # Save changes to database if detected
             if changes:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("Changes detected, saving to database")
+                debug_log(LOGGER, "Changes detected, saving to database")
                 
                 try:
                     err = SCHEDULER.db.save_custom_configs(
@@ -1530,23 +1441,22 @@ if __name__ == "__main__":
                             f"Couldn't save some manually created custom "
                             f"configs to database: {err}"
                         )
-                    elif getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Custom configs saved successfully")
+                    else:
+                        debug_log(LOGGER, "Custom configs saved successfully")
                 except BaseException as e:
                     LOGGER.error(
                         f"Error while saving custom configs to database: {e}"
                     )
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Save error: {format_exc()}")
+                    debug_log(LOGGER, f"Save error: {format_exc()}")
             else:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("No changes detected in custom configs")
+                debug_log(LOGGER, "No changes detected in custom configs")
 
             # Generate updated custom configs
             generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
         # Define function to check for changes in external or pro plugin files
-        # Scans filesystem for manually added plugins and saves them to database
+        # Scans filesystem for manually added plugins and saves them to
+        # database
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info(
@@ -1554,8 +1464,7 @@ if __name__ == "__main__":
             )
             
             plugin_path = PRO_PLUGINS_PATH if _type == "pro" else EXTERNAL_PLUGINS_PATH
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Scanning {_type} plugins directory: {plugin_path}")
+            debug_log(LOGGER, f"Scanning {_type} plugins directory: {plugin_path}")
             
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
             external_plugins = []
@@ -1565,8 +1474,7 @@ if __name__ == "__main__":
             # Scan for plugin.json files in plugin directories
             for file in plugin_path.glob("*/plugin.json"):
                 scanned_plugins += 1
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Processing plugin config: {file}")
+                debug_log(LOGGER, f"Processing plugin config: {file}")
                 
                 # Create tar.gz archive of entire plugin directory
                 with BytesIO() as plugin_content:
@@ -1588,8 +1496,7 @@ if __name__ == "__main__":
 
                     # Skip letsencrypt_dns plugin (special handling)
                     if plugin_data["id"] == "letsencrypt_dns":
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug("Skipping letsencrypt_dns plugin")
+                        debug_log(LOGGER, "Skipping letsencrypt_dns plugin")
                         continue
 
                     # Calculate plugin checksum for change detection
@@ -1601,10 +1508,10 @@ if __name__ == "__main__":
                     }
                     jobs = common_data.pop("jobs", [])
 
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(
-                            f"Plugin {plugin_data['id']} checksum: {checksum[:16]}..."
-                        )
+                    debug_log(
+                        LOGGER,
+                        f"Plugin {plugin_data['id']} checksum: {checksum[:16]}..."
+                    )
 
                     # Check if plugin already exists with same checksum
                     with suppress(StopIteration, IndexError):
@@ -1615,8 +1522,7 @@ if __name__ == "__main__":
 
                         if (checksum == db_plugins[index]["checksum"] or 
                             db_plugins[index]["method"] != "manual"):
-                            if getenv("LOG_LEVEL") == "debug":
-                                LOGGER.debug(f"Plugin {plugin_data['id']} unchanged, skipping")
+                            debug_log(LOGGER, f"Plugin {plugin_data['id']} unchanged, skipping")
                             continue
 
                     tmp_external_plugins.append(common_data.copy())
@@ -1630,14 +1536,13 @@ if __name__ == "__main__":
                         }
                         | ({"jobs": jobs} if jobs else {})
                     )
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Marked plugin {plugin_data['id']} for database save")
+                    debug_log(LOGGER, f"Marked plugin {plugin_data['id']} for database save")
 
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(
-                    f"Scanned {scanned_plugins} plugins, "
-                    f"{len(external_plugins)} marked for database save"
-                )
+            debug_log(
+                LOGGER,
+                f"Scanned {scanned_plugins} plugins, "
+                f"{len(external_plugins)} marked for database save"
+            )
 
             changes = False
             if tmp_external_plugins:
@@ -1648,8 +1553,7 @@ if __name__ == "__main__":
                 )
 
                 if changes:
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Changes detected in {_type} plugins, saving to database")
+                    debug_log(LOGGER, f"Changes detected in {_type} plugins, saving to database")
                     
                     try:
                         err = SCHEDULER.db.update_external_plugins(
@@ -1660,17 +1564,15 @@ if __name__ == "__main__":
                                 f"Couldn't save some manually added {_type} "
                                 f"plugins to database: {err}"
                             )
-                        elif getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(f"{_type} plugins saved successfully")
+                        else:
+                            debug_log(LOGGER, f"{_type} plugins saved successfully")
                     except BaseException as e:
                         LOGGER.error(
                             f"Error while saving {_type} plugins to database: {e}"
                         )
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(f"Plugin save error: {format_exc()}")
+                        debug_log(LOGGER, f"Plugin save error: {format_exc()}")
                 else:
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"No changes detected in {_type} plugins")
+                    debug_log(LOGGER, f"No changes detected in {_type} plugins")
                     # No changes, just send existing plugins to BunkerWeb
                     return send_file_to_bunkerweb(
                         plugin_path, 
@@ -1681,8 +1583,7 @@ if __name__ == "__main__":
             generate_external_plugins(plugin_path)
 
         # Run initial configuration and plugin checks
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Starting initial configuration and plugin checks")
+        debug_log(LOGGER, "Starting initial configuration and plugin checks")
         
         check_configs_changes()
         threads.extend([
@@ -1690,8 +1591,7 @@ if __name__ == "__main__":
             Thread(target=check_plugin_changes, args=("pro",))
         ])
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug(f"Starting {len(threads)} plugin check threads")
+        debug_log(LOGGER, f"Starting {len(threads)} plugin check threads")
 
         for thread in threads:
             thread.start()
@@ -1699,13 +1599,11 @@ if __name__ == "__main__":
         for thread in threads:
             thread.join()
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Initial plugin checks completed")
+        debug_log(LOGGER, "Initial plugin checks completed")
 
         # Run initial plugin download jobs
         LOGGER.info("Running plugins download jobs ...")
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Running scheduler jobs for misc and pro plugins")
+        debug_log(LOGGER, "Running scheduler jobs for misc and pro plugins")
         
         SCHEDULER.run_once(["misc", "pro"])
 
@@ -1715,12 +1613,12 @@ if __name__ == "__main__":
             (db_metadata.get("pro_plugins_changed", False) or 
              db_metadata.get("external_plugins_changed", False))):
             
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(
-                    f"Plugins changed during download: "
-                    f"pro={db_metadata.get('pro_plugins_changed', False)}, "
-                    f"external={db_metadata.get('external_plugins_changed', False)}"
-                )
+            debug_log(
+                LOGGER,
+                f"Plugins changed during download: "
+                f"pro={db_metadata.get('pro_plugins_changed', False)}, "
+                f"external={db_metadata.get('external_plugins_changed', False)}"
+            )
             
             threads.clear()
 
@@ -1732,8 +1630,7 @@ if __name__ == "__main__":
                 if db_metadata.get("external_plugins_changed", False):
                     threads.append(Thread(target=generate_external_plugins))
 
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Starting {len(threads)} plugin regeneration threads")
+            debug_log(LOGGER, f"Starting {len(threads)} plugin regeneration threads")
 
             for thread in threads:
                 thread.start()
@@ -1762,8 +1659,7 @@ if __name__ == "__main__":
                 if args.variables:
                     config_saver_cmd.extend(["--variables", tmp_variables_path.as_posix()])
                 
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Plugin settings saver command: {' '.join(config_saver_cmd)}")
+                debug_log(LOGGER, f"Plugin settings saver command: {' '.join(config_saver_cmd)}")
                 
                 proc = subprocess_run(
                     config_saver_cmd,
@@ -1776,12 +1672,11 @@ if __name__ == "__main__":
                         "Config saver failed, configuration will not work "
                         "as expected..."
                     )
-                elif getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("Plugin settings saver completed successfully")
+                else:
+                    debug_log(LOGGER, "Plugin settings saver completed successfully")
 
             # Update scheduler jobs with new plugin configurations
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Updating scheduler jobs after plugin changes")
+            debug_log(LOGGER, "Updating scheduler jobs after plugin changes")
             SCHEDULER.update_jobs()
             
             # Reload environment configuration
@@ -1806,8 +1701,7 @@ if __name__ == "__main__":
         old_changes = {}
         healthcheck_job_run = False
 
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Entering main scheduler loop")
+        debug_log(LOGGER, "Entering main scheduler loop")
 
         # Main scheduler execution loop
         # Handles configuration changes, job execution, and instance management
@@ -1817,17 +1711,14 @@ if __name__ == "__main__":
             # Wait for any ongoing failover backup to complete
             while BACKING_UP_FAILOVER.is_set():
                 LOGGER.warning("Waiting for the failover backup to finish ...")
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("Failover backup in progress, waiting...")
+                debug_log(LOGGER, "Failover backup in progress, waiting...")
                 sleep(1)
 
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug(f"Scheduler loop iteration: run_jobs_once={RUN_JOBS_ONCE}")
+            debug_log(LOGGER, f"Scheduler loop iteration: run_jobs_once={RUN_JOBS_ONCE}")
 
             # Execute jobs once if needed (startup or after changes)
             if RUN_JOBS_ONCE:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("Running scheduler jobs once")
+                debug_log(LOGGER, "Running scheduler jobs once")
                 
                 # Reload scheduler with current environment and changed plugins
                 reload_env = env | {
@@ -1836,8 +1727,7 @@ if __name__ == "__main__":
                 }
                 
                 ignore_plugins = ["misc", "pro"] if FIRST_START else []
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Reload parameters: ignore_plugins={ignore_plugins}")
+                debug_log(LOGGER, f"Reload parameters: ignore_plugins={ignore_plugins}")
                 
                 reload_success = SCHEDULER.reload(
                     reload_env,
@@ -1851,21 +1741,18 @@ if __name__ == "__main__":
                     LOGGER.info("All jobs in run_once() were successful")
                     # Generate caches if database is read-only
                     if SCHEDULER.db.readonly:
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug("Database is read-only, generating caches")
+                        debug_log(LOGGER, "Database is read-only, generating caches")
                         generate_caches()
                 
                 healthcheck_job_run = False
 
             # Generate nginx configuration if needed
             if CONFIG_NEED_GENERATION:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("Generating nginx configuration")
+                debug_log(LOGGER, "Generating nginx configuration")
                 
                 config_gen_success = generate_configs()
                 if config_gen_success and SCHEDULER.apis:
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Starting nginx config send thread")
+                    debug_log(LOGGER, "Starting nginx config send thread")
                     # Send nginx configs to BunkerWeb instances
                     threads.append(
                         Thread(
@@ -1881,8 +1768,7 @@ if __name__ == "__main__":
                 reachable = True
                 
                 if SCHEDULER.apis:
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Starting cache send thread")
+                    debug_log(LOGGER, "Starting cache send thread")
                     # Send cache files to BunkerWeb instances
                     threads.append(
                         Thread(
@@ -1893,8 +1779,7 @@ if __name__ == "__main__":
                     threads[-1].start()
 
                     # Wait for all file sending threads to complete
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Waiting for {len(threads)} file send threads to complete")
+                    debug_log(LOGGER, f"Waiting for {len(threads)} file send threads to complete")
                     
                     for thread in threads:
                         thread.join()
@@ -1906,11 +1791,11 @@ if __name__ == "__main__":
                         3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))
                     )
                     
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(
-                            f"Sending reload command: {reload_endpoint}, "
-                            f"timeout: {reload_timeout}"
-                        )
+                    debug_log(
+                        LOGGER,
+                        f"Sending reload command: {reload_endpoint}, "
+                        f"timeout: {reload_timeout}"
+                    )
                     
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
@@ -1921,13 +1806,12 @@ if __name__ == "__main__":
                     
                     if not success:
                         reachable = False
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(
-                                "Error while reloading all bunkerweb instances"
-                            )
+                        debug_log(
+                            LOGGER,
+                            "Error while reloading all bunkerweb instances"
+                        )
 
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"Reload responses: {responses}")
+                    debug_log(LOGGER, f"Reload responses: {responses}")
 
                     # Process responses from each instance
                     successful_instances = 0
@@ -1937,10 +1821,10 @@ if __name__ == "__main__":
                         metadata = responses.get(db_instance["hostname"], {})
                         status = metadata.get("status", "down")
 
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(
-                                f"Instance {db_instance['hostname']} reload status: {status}"
-                            )
+                        debug_log(
+                            LOGGER,
+                            f"Instance {db_instance['hostname']} reload status: {status}"
+                        )
 
                         if status == "success":
                             success = True
@@ -1990,12 +1874,12 @@ if __name__ == "__main__":
                                     found = True
                                     break
                             if not found:
-                                if getenv("LOG_LEVEL") == "debug":
-                                    LOGGER.debug(
-                                        f"Adding {db_instance['hostname']}:"
-                                        f"{db_instance['port']} to the list of "
-                                        f"reachable instances"
-                                    )
+                                debug_log(
+                                    LOGGER,
+                                    f"Adding {db_instance['hostname']}:"
+                                    f"{db_instance['port']} to the list of "
+                                    f"reachable instances"
+                                )
                                 SCHEDULER.apis.append(
                                     API(
                                         f"http://{db_instance['hostname']}:"
@@ -2011,20 +1895,20 @@ if __name__ == "__main__":
                                 f"http://{db_instance['hostname']}:"
                                 f"{db_instance['port']}/"
                             ):
-                                if getenv("LOG_LEVEL") == "debug":
-                                    LOGGER.debug(
-                                        f"Removing {db_instance['hostname']}:"
-                                        f"{db_instance['port']} from the list of "
-                                        f"reachable instances"
-                                    )
+                                debug_log(
+                                    LOGGER,
+                                    f"Removing {db_instance['hostname']}:"
+                                    f"{db_instance['port']} from the list of "
+                                    f"reachable instances"
+                                )
                                 del SCHEDULER.apis[i]
                                 break
 
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(
-                            f"Reload results: {successful_instances} successful, "
-                            f"{failed_instances} failed"
-                        )
+                    debug_log(
+                        LOGGER,
+                        f"Reload results: {successful_instances} successful, "
+                        f"{failed_instances} failed"
+                    )
                 else:
                     # No BunkerWeb instances available
                     for thread in threads:
@@ -2033,21 +1917,18 @@ if __name__ == "__main__":
                     LOGGER.warning(
                         "No BunkerWeb instance found, skipping bunkerweb reload ..."
                     )
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("No API instances configured")
+                    debug_log(LOGGER, "No API instances configured")
                         
             except BaseException as e:
                 LOGGER.error(
                     f"Exception while reloading after running jobs once "
                     f"scheduling : {e}"
                 )
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Reload exception: {format_exc()}")
+                debug_log(LOGGER, f"Reload exception: {format_exc()}")
 
             # Update failover status in database
             try:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Setting failover status: {not success}")
+                debug_log(LOGGER, f"Setting failover status: {not success}")
                 
                 SCHEDULER.db.set_metadata(
                     {"failover": not success, "failover_message": failover_message}
@@ -2056,10 +1937,10 @@ if __name__ == "__main__":
                 LOGGER.error(
                     f"Error while setting failover to true in the database: {e}"
                 )
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Failover metadata update error: {format_exc()}")
+                debug_log(LOGGER, f"Failover metadata update error: {format_exc()}")
 
-            # Handle failover logic - attempt to restore last working configuration
+            # Handle failover logic - attempt to restore last working
+            # configuration
             try:
                 if not success and reachable:
                     LOGGER.error(
@@ -2080,11 +1961,9 @@ if __name__ == "__main__":
                         LOGGER.error(
                             "No failover configuration found, ignoring failover ..."
                         )
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(f"Missing failover paths: {missing_paths}")
+                        debug_log(LOGGER, f"Missing failover paths: {missing_paths}")
                     else:
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug("Initiating failover to last working configuration")
+                        debug_log(LOGGER, "Initiating failover to last working configuration")
                         
                         # Send failover configuration to BunkerWeb instances
                         if SCHEDULER.apis:
@@ -2106,8 +1985,7 @@ if __name__ == "__main__":
                                 ),
                             ]
                             
-                            if getenv("LOG_LEVEL") == "debug":
-                                LOGGER.debug(f"Starting {len(failover_threads)} failover threads")
+                            debug_log(LOGGER, f"Starting {len(failover_threads)} failover threads")
                             
                             for thread in failover_threads:
                                 thread.start()
@@ -2130,30 +2008,26 @@ if __name__ == "__main__":
                                 "Error while reloading bunkerweb with failover "
                                 "configuration, skipping ..."
                             )
-                        elif getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug("Failover configuration loaded successfully")
+                        else:
+                            debug_log(LOGGER, "Failover configuration loaded successfully")
                             
                 elif not reachable:
                     LOGGER.warning(
                         "No BunkerWeb instance is reachable, skipping failover ..."
                     )
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("All instances unreachable, cannot perform failover")
+                    debug_log(LOGGER, "All instances unreachable, cannot perform failover")
                 else:
                     LOGGER.info("Successfully reloaded bunkerweb")
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Starting failover backup thread")
+                    debug_log(LOGGER, "Starting failover backup thread")
                     # Create backup of successful configuration for future failover
                     Thread(target=backup_failover).start()
             except BaseException as e:
                 LOGGER.error(f"Exception while executing failover logic : {e}")
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Failover logic exception: {format_exc()}")
+                debug_log(LOGGER, f"Failover logic exception: {format_exc()}")
 
             # Mark configuration changes as processed in database
             try:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Marking changes as checked: {CHANGES}")
+                debug_log(LOGGER, f"Marking changes as checked: {CHANGES}")
                 
                 ret = SCHEDULER.db.checked_changes(CHANGES, plugins_changes="all")
                 if ret:
@@ -2165,8 +2039,7 @@ if __name__ == "__main__":
                 LOGGER.error(
                     f"Error while setting changes to checked in the database: {e}"
                 )
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Changes check error: {format_exc()}")
+                debug_log(LOGGER, f"Changes check error: {format_exc()}")
 
             # Reset control flags for next iteration
             FIRST_START = False
@@ -2179,13 +2052,11 @@ if __name__ == "__main__":
             INSTANCES_NEED_GENERATION = False
             changed_plugins.clear()
 
-            if getenv("LOG_LEVEL") == "debug":
-                LOGGER.debug("Reset scheduler flags for next iteration")
+            debug_log(LOGGER, "Reset scheduler flags for next iteration")
 
             # Handle scheduler first start flag
             if scheduler_first_start:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("Clearing scheduler first start flag")
+                debug_log(LOGGER, "Clearing scheduler first start flag")
                 
                 try:
                     ret = SCHEDULER.db.set_metadata({"scheduler_first_start": False})
@@ -2202,14 +2073,13 @@ if __name__ == "__main__":
                             f"An error occurred when setting the scheduler "
                             f"first start : {ret}"
                         )
-                    elif getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Scheduler first start flag cleared successfully")
+                    else:
+                        debug_log(LOGGER, "Scheduler first start flag cleared successfully")
                 except BaseException as e:
                     LOGGER.error(
                         f"Error while setting the scheduler first start : {e}"
                     )
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(f"First start flag error: {format_exc()}")
+                    debug_log(LOGGER, f"First start flag error: {format_exc()}")
                 finally:
                     scheduler_first_start = False
 
@@ -2217,14 +2087,12 @@ if __name__ == "__main__":
             if not HEALTHY_PATH.is_file():
                 timestamp = datetime.now().astimezone().isoformat()
                 HEALTHY_PATH.write_text(timestamp, encoding="utf-8")
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Created health file with timestamp: {timestamp}")
+                debug_log(LOGGER, f"Created health file with timestamp: {timestamp}")
 
             # Clear configuration changes flag and schedule healthcheck
             APPLYING_CHANGES.clear()
             if not healthcheck_job_run:
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug("Scheduling healthcheck job ...")
+                debug_log(LOGGER, "Scheduling healthcheck job ...")
                 schedule_every(HEALTHCHECK_INTERVAL).seconds.do(healthcheck_job)
                 healthcheck_job_run = True
 
@@ -2237,7 +2105,7 @@ if __name__ == "__main__":
             while RUN and not NEED_RELOAD:
                 loop_iterations += 1
                 if getenv("LOG_LEVEL") == "debug" and loop_iterations % 100 == 0:
-                    LOGGER.debug(f"Scheduler monitoring loop iteration: {loop_iterations}")
+                    debug_log(LOGGER, f"Scheduler monitoring loop iteration: {loop_iterations}")
                 
                 try:
                     # Sleep based on database mode (read-only vs writable)
@@ -2251,11 +2119,11 @@ if __name__ == "__main__":
                     # Wait for database lock to be released (30 second timeout)
                     while (DB_LOCK_FILE.is_file() and 
                            DB_LOCK_FILE.stat().st_ctime + 30 > current_time.timestamp()):
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(
-                                "Database is locked, waiting for it to be "
-                                "unlocked (timeout: 30s) ..."
-                            )
+                        debug_log(
+                            LOGGER,
+                            "Database is locked, waiting for it to be "
+                            "unlocked (timeout: 30s) ..."
+                        )
                         sleep(1)
 
                     # Clean up stale lock file
@@ -2271,8 +2139,7 @@ if __name__ == "__main__":
                         )
                     
                     if not isinstance(db_metadata, dict):
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(f"Invalid db_metadata type: {type(db_metadata)}")
+                        debug_log(LOGGER, f"Invalid db_metadata type: {type(db_metadata)}")
                         continue
 
                     # Extract change tracking information
@@ -2293,7 +2160,7 @@ if __name__ == "__main__":
                         continue
 
                     if getenv("LOG_LEVEL") == "debug" and changes != old_changes:
-                        LOGGER.debug(f"Changes detected: {changes}")
+                        debug_log(LOGGER, f"Changes detected: {changes}")
 
                     # Check for pro plugins changes
                     if changes["pro_plugins_changed"] and (
@@ -2349,8 +2216,7 @@ if __name__ == "__main__":
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
                         changed_plugins = list(changes["plugins_config_changed"])
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(f"Changed plugins: {changed_plugins}")
+                        debug_log(LOGGER, f"Changed plugins: {changed_plugins}")
 
                     # Check for instances changes
                     if changes["instances_changed"] and (
@@ -2372,8 +2238,7 @@ if __name__ == "__main__":
                     old_changes = changes.copy()
                     
                 except BaseException:
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug(format_exc())
+                    debug_log(LOGGER, format_exc())
                     errors += 1
                     if errors > 5:
                         LOGGER.error(
@@ -2387,8 +2252,7 @@ if __name__ == "__main__":
             # This section handles the actual regeneration of changed components
             if NEED_RELOAD:
                 APPLYING_CHANGES.set()
-                if getenv("LOG_LEVEL") == "debug":
-                    LOGGER.debug(f"Processing detected changes: {changes}")
+                debug_log(LOGGER, f"Processing detected changes: {changes}")
                 
                 # Force database readonly check
                 SCHEDULER.try_database_readonly(force=True)
@@ -2397,8 +2261,7 @@ if __name__ == "__main__":
                 # Regenerate instances API list if instances changed
                 if INSTANCES_NEED_GENERATION:
                     CHANGES.append("instances")
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Regenerating instances API list")
+                    debug_log(LOGGER, "Regenerating instances API list")
                     
                     SCHEDULER.apis = []
                     for db_instance in SCHEDULER.db.get_instances():
@@ -2409,37 +2272,32 @@ if __name__ == "__main__":
                         SCHEDULER.apis.append(
                             API(api_endpoint, db_instance["server_name"])
                         )
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug(f"Added API instance: {api_endpoint}")
+                        debug_log(LOGGER, f"Added API instance: {api_endpoint}")
 
                 # Regenerate custom configurations if changed
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Regenerating custom configurations")
+                    debug_log(LOGGER, "Regenerating custom configurations")
                     generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
                 # Regenerate external plugins if changed
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Regenerating external plugins")
+                    debug_log(LOGGER, "Regenerating external plugins")
                     generate_external_plugins()
                     SCHEDULER.update_jobs()
 
                 # Regenerate pro plugins if changed
                 if PRO_PLUGINS_NEED_GENERATION:
                     CHANGES.append("pro_plugins")
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Regenerating pro plugins")
+                    debug_log(LOGGER, "Regenerating pro plugins")
                     generate_external_plugins(PRO_PLUGINS_PATH)
                     SCHEDULER.update_jobs()
 
                 # Regenerate main configuration if changed
                 if CONFIG_NEED_GENERATION:
                     CHANGES.append("config")
-                    if getenv("LOG_LEVEL") == "debug":
-                        LOGGER.debug("Regenerating main configuration")
+                    debug_log(LOGGER, "Regenerating main configuration")
                     
                     old_env = env.copy()
                     env = SCHEDULER.db.get_config()
@@ -2450,8 +2308,7 @@ if __name__ == "__main__":
                         old_env.get("API_SERVER_NAME", "bwapi") != 
                         env.get("API_SERVER_NAME", "bwapi")):
                         
-                        if getenv("LOG_LEVEL") == "debug":
-                            LOGGER.debug("API settings changed, updating instances")
+                        debug_log(LOGGER, "API settings changed, updating instances")
                         
                         # Update all instances with new API settings
                         err = SCHEDULER.db.update_instances(
@@ -2487,6 +2344,5 @@ if __name__ == "__main__":
     # Logs any unhandled exceptions and exits with error status
     except:
         LOGGER.error(f"Exception while executing scheduler : {format_exc()}")
-        if getenv("LOG_LEVEL") == "debug":
-            LOGGER.debug("Fatal scheduler exception occurred, stopping with status 1")
+        debug_log(LOGGER, "Fatal scheduler exception occurred, stopping with status 1")
         stop(1)
