@@ -1,3 +1,5 @@
+# Auth Basic
+
 The Auth Basic plugin provides HTTP basic authentication to protect your website or specific resources. This feature adds an extra layer of security by requiring users to enter a username and password before accessing protected content. This type of authentication is simple to implement and widely supported by browsers.
 
 **How it works:**
@@ -8,7 +10,7 @@ The Auth Basic plugin provides HTTP basic authentication to protect your website
 4. If the credentials are valid, the user is granted access to the requested content.
 5. If the credentials are invalid, the user is served an error message with the 401 Unauthorized status code.
 
-### How to Use
+## How to Use
 
 Follow these steps to enable and configure Auth Basic authentication:
 
@@ -17,7 +19,7 @@ Follow these steps to enable and configure Auth Basic authentication:
 3. **Define credentials:** Set up at least one username and password pair using the `AUTH_BASIC_USER` and `AUTH_BASIC_PASSWORD` settings.
 4. **Customize the message:** Optionally change the `AUTH_BASIC_TEXT` to display a custom message in the login prompt.
 
-### Configuration Settings
+## Configuration Settings
 
 | Setting               | Default           | Context   | Multiple | Description                                                                                                                                |
 | --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -33,7 +35,7 @@ Follow these steps to enable and configure Auth Basic authentication:
 !!! tip "Using Multiple Credentials"
     You can configure multiple username/password pairs for access. Each `AUTH_BASIC_USER` setting should have a corresponding `AUTH_BASIC_PASSWORD` setting.
 
-### Example Configurations
+## Example Configurations
 
 === "Site-wide Protection"
 
