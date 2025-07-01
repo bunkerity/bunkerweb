@@ -9,7 +9,7 @@
 
 BunkerWeb is a next-generation, open-source Web Application Firewall (WAF).
 
-As a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it protects your web services to make them "secure by default." BunkerWeb integrates seamlessly into your existing environments ([Linux](integrations.md#linux), [Docker](integrations.md#docker), [Swarm](integrations.md#swarm), [Kubernetes](integrations.md#kubernetes), …) and is fully configurable (don't panic, there is an [awesome web UI](web-ui.md) if you don't like the CLI) to meet your specific use cases. In other words, cybersecurity is no longer a hassle.
+As a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it protects your web services to make them "secure by default." BunkerWeb integrates seamlessly into your existing environments ([Linux](integrations.md#linux), [Docker](integrations.md#docker), [Swarm](integrations.md#swarm), [Kubernetes](integrations.md#kubernetes), …) as a reverse proxy and is fully configurable (don't panic, there is an [awesome web UI](web-ui.md) if you don't like the CLI) to meet your specific use cases. In other words, cybersecurity is no longer a hassle.
 
 BunkerWeb includes primary [security features](advanced.md#security-tuning) as part of the core but can be easily extended with additional ones thanks to a [plugin system](plugins.md).
 
@@ -31,7 +31,7 @@ BunkerWeb includes primary [security features](advanced.md#security-tuning) as p
 
 - **Free as in "freedom"**: BunkerWeb is licensed under the free [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.en.html), embracing the principles of freedom and openness. Enjoy the freedom to use, modify, and distribute the software, backed by a supportive community.
 
-- **Professional services**: Get technical support, tailored consulting, and custom development directly from the maintainers of BunkerWeb. Visit the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro) for more information.
+- **Professional services**: Get technical support, tailored consulting, and custom development directly from the maintainers of BunkerWeb. Visit the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) for more information.
 
 ## Security features
 
@@ -73,18 +73,26 @@ BunkerWeb offers an optional [user interface](web-ui.md) to manage your instance
 
 ## BunkerWeb Cloud
 
+<figure markdown>
+  ![Overview](assets/img/bunkerweb-cloud.webp){ align=center, width="600" }
+  <figcaption>BunkerWeb Cloud</figcaption>
+</figure>
+
 Don't want to self-host and manage your own BunkerWeb instance(s)? You might be interested in BunkerWeb Cloud, our fully managed SaaS offering for BunkerWeb.
 
-Try our [BunkerWeb Cloud beta offer for free](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_source=doc&utm_campaign=self) and get access to:
+Try our [BunkerWeb Cloud offer](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) and get access to:
 
 - A fully managed BunkerWeb instance hosted in our cloud
 - All BunkerWeb features, including PRO ones
 - A monitoring platform with dashboards and alerts
 - Technical support to assist you with configuration
 
-You will find more information about BunkerWeb Cloud on the [FAQ page](https://panel.bunkerweb.io/knowledgebase/55/BunkerWeb-Cloud?utm_source=doc&utm_campaign=self) of the BunkerWeb panel.
+If you are interested in the BunkerWeb Cloud offering, don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) so we can discuss your needs.
 
 ## PRO version
+
+!!! tip "BunkerWeb PRO free trial"
+    Want to quickly test BunkerWeb PRO for one month? Use the code `freetrial` when placing your order on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) or by clicking [here](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) to directly to apply the promo code (will be effective at checkout).
 
 When using BunkerWeb, you have the choice of the version you want to use: open-source or PRO.
 
@@ -94,7 +102,7 @@ In the documentation or the user interface, PRO features are annotated with a cr
 
 You can upgrade from the open-source version to the PRO one easily and at any time. The process is straightforward:
 
-- Claim your [free trial on the BunkerWeb panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
+- Claim your [free trial on the BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) by using the `freetrial` promo code at checkout
 - Once connected to the client area, copy your PRO license key
 - Paste your private key into BunkerWeb using the [web UI](web-ui.md#upgrade-to-pro) or [specific setting](features.md#pro)
 
@@ -117,7 +125,6 @@ Official websites, tools, and resources about BunkerWeb:
 - [**Documentation**](https://docs.bunkerweb.io): Technical documentation of the BunkerWeb solution.
 - [**Demo**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc): Demonstration website of BunkerWeb. Don't hesitate to attempt attacks to test the robustness of the solution.
 - [**Web UI**](https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=doc): Online read-only demo of the web UI of BunkerWeb.
-- [**Configurator**](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc): A user-friendly tool to help you configure BunkerWeb.
 - [**Threatmap**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=doc): Live cyberattacks blocked by BunkerWeb instances all around the world.
 
 Community and social networks:
