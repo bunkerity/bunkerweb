@@ -195,7 +195,6 @@ def get_redis_client():
         redis_sentinel_username=db_config.get("REDIS_SENTINEL_USERNAME") or None,
         redis_sentinel_password=db_config.get("REDIS_SENTINEL_PASSWORD") or None,
         redis_sentinel_master=db_config.get("REDIS_SENTINEL_MASTER", ""),
-        logger=LOGGER,
     )
 
     if use_redis and not redis_client:
