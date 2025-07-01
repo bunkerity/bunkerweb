@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from datetime import datetime
+from json import loads
 from operator import itemgetter
 from os import getenv
 from typing import Any, List, Literal, Optional, Tuple, Union
@@ -346,26 +347,54 @@ class InstancesUtils:
                         # Extract metric name from key (remove prefix and worker suffix)
                         metric_name = key_str.replace(f"metrics:{plugin_id}_", "").split(":")[0]
 
-                        # Get the value from Redis
-                        value = redis_client.get(key)
-                        if value is None:
+                        # Determine Redis data type and get value accordingly
+                        key_type = redis_client.type(key)
+                        if isinstance(key_type, bytes):
+                            key_type = key_type.decode("utf-8")
+
+                        decoded_value = None
+
+                        if key_type == "string":
+                            # Handle string values (counters and simple metrics)
+                            value = redis_client.get(key)
+                            if value is None:
+                                continue
+
+                            # Decode value based on its content
+                            try:
+                                decoded_value = loads(value.decode("utf-8"))
+                            except (ValueError, UnicodeDecodeError):
+                                # Try as number
+                                try:
+                                    decoded_value = float(value.decode("utf-8"))
+                                    if decoded_value.is_integer():
+                                        decoded_value = int(decoded_value)
+                                except ValueError:
+                                    # Fall back to string
+                                    decoded_value = value.decode("utf-8")
+
+                        elif key_type == "list":
+                            # Handle list values (table metrics)
+                            list_values = redis_client.lrange(key, 0, -1)
+                            decoded_value = []
+                            for item in list_values:
+                                try:
+                                    decoded_item = loads(item.decode("utf-8"))
+                                    decoded_value.append(decoded_item)
+                                except (ValueError, UnicodeDecodeError):
+                                    # Fall back to string
+                                    decoded_value.append(item.decode("utf-8"))
+
+                        elif key_type == "none":
+                            # Key doesn't exist
+                            continue
+                        else:
+                            # Unsupported Redis data type, skip
+                            self.__db.logger.warning(f"Unsupported Redis data type {key_type} for key {key_str}")
                             continue
 
-                        # Decode value based on its type
-                        try:
-                            # First try as JSON
-                            from json import loads
-
-                            decoded_value = loads(value.decode("utf-8"))
-                        except (ValueError, UnicodeDecodeError):
-                            # Try as number
-                            try:
-                                decoded_value = float(value.decode("utf-8"))
-                                if decoded_value.is_integer():
-                                    decoded_value = int(decoded_value)
-                            except ValueError:
-                                # Fall back to string
-                                decoded_value = value.decode("utf-8")
+                        if decoded_value is None:
+                            continue
 
                         # Aggregate values for the same metric name across workers
                         if metric_name in redis_metrics:
