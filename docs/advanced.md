@@ -952,11 +952,11 @@ You will need to increase the `max_allowed_packet` on your database server.
 
 ### Persistence of bans and reports
 
-By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote Redis server.
+By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote [Redis](https://redis.io/) or [Valkey](https://valkey.io/) server.
 
-**Why Use Redis?**
+**Why Use Redis/Valkey?**
 
-Redis is a powerful, in-memory data store commonly used as a database, cache, and message broker. It is highly scalable and supports a variety of data structures, including:
+Redis and Valkey are powerful, in-memory data stores commonly used as databases, caches, and message brokers. They are highly scalable and support a variety of data structures, including:
 
 - **Strings**: Basic key-value pairs.
 - **Hashes**: Field-value pairs within a single key.
@@ -964,30 +964,30 @@ Redis is a powerful, in-memory data store commonly used as a database, cache, an
 - **Sets**: Unordered collections of unique strings.
 - **Sorted Sets**: Ordered collections with scores.
 
-By leveraging Redis, BunkerWeb can persistently store bans, reports, and cache data, ensuring durability and scalability.
+By leveraging Redis or Valkey, BunkerWeb can persistently store bans, reports, and cache data, ensuring durability and scalability.
 
-**Enabling Redis Support**
+**Enabling Redis/Valkey Support**
 
-To enable Redis support, configure the following settings in your BunkerWeb configuration file:
+To enable Redis or Valkey support, configure the following settings in your BunkerWeb configuration file:
 
 ```conf
-# Enable Redis support
+# Enable Redis/Valkey support
 USE_REDIS=yes
 
-# Redis server hostname or IP address
+# Redis/Valkey server hostname or IP address
 REDIS_HOST=<hostname>
 
-# Redis server port number (default: 6379)
+# Redis/Valkey server port number (default: 6379)
 REDIS_PORT=6379
 
-# Redis database number (default: 0)
+# Redis/Valkey database number (default: 0)
 REDIS_DATABASE=0
 ```
 
-- **`USE_REDIS`**: Set to `yes` to enable Redis integration.
-- **`REDIS_HOST`**: Specify the hostname or IP address of the Redis server.
-- **`REDIS_PORT`**: Specify the port number for the Redis server. Defaults to `6379`.
-- **`REDIS_DATABASE`**: Specify the Redis database number to use. Defaults to `0`.
+- **`USE_REDIS`**: Set to `yes` to enable Redis/Valkey integration.
+- **`REDIS_HOST`**: Specify the hostname or IP address of the Redis/Valkey server.
+- **`REDIS_PORT`**: Specify the port number for the Redis/Valkey server. Defaults to `6379`.
+- **`REDIS_DATABASE`**: Specify the Redis/Valkey database number to use. Defaults to `0`.
 
 If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](features.md#redis) for detailed guidance.
 

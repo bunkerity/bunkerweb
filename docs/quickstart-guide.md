@@ -242,6 +242,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7
           SERVER_NAME: ""
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
         volumes:
           - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
@@ -271,9 +273,24 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7
         networks:
           - bw-db
 
+      redis: # Redis service for the persistence of reports/bans/stats
+        image: redis:7-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
     volumes:
       bw-data:
       bw-storage:
+      redis-data:
 
     networks:
       bw-universe:
@@ -324,6 +341,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
           MULTISITE: "yes"
           UI_HOST: "http://bw-ui:7000" # Change it if needed
+          USE_REDIS: "yes"
+          REDIS_HOST: "redis"
         volumes:
           - bw-storage:/data # This is used to persist the cache and other data like the backups
         restart: "unless-stopped"
@@ -377,9 +396,24 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7
         networks:
           - bw-db
 
+      redis: # Redis service for the persistence of reports/bans/stats
+        image: redis:7-alpine
+        command: >
+          redis-server
+          --maxmemory 256mb
+          --maxmemory-policy allkeys-lru
+          --save 60 1000
+          --appendonly yes
+        volumes:
+          - redis-data:/data
+        restart: "unless-stopped"
+        networks:
+          - bw-universe
+
     volumes:
       bw-data:
       bw-storage:
+      redis-data:
 
     networks:
       bw-universe:

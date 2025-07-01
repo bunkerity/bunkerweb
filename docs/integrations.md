@@ -1078,7 +1078,7 @@ To automate the configuration of BunkerWeb instances in a Kubernetes environment
 
 For an optimal setup, it is recommended to define BunkerWeb as a **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**, which ensures that a pod is created on all nodes, while the **autoconf and scheduler** are defined as **single replicated [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**.
 
-Given the presence of multiple BunkerWeb instances, it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) service. This Redis service will be utilized by the instances to cache and share data among themselves. Further information about the Redis settings can be found [here](features.md#redis).
+Given the presence of multiple BunkerWeb instances, it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service. This service will be utilized by the instances to cache and share data among themselves. Further information about the Redis/Valkey settings can be found [here](features.md#redis).
 
 !!! info "Database backend"
     Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/misc/integrations) of the repository for more information.
@@ -1475,7 +1475,7 @@ Similar to the [Docker autoconf integration](#docker-autoconf), configuration fo
 
 For an optimal setup, it is recommended to schedule the **BunkerWeb service** as a ***global service*** on all nodes, while the **autoconf, scheduler, and Docker API proxy services** should be scheduled as ***single replicated services***. Please note that the Docker API proxy service needs to be scheduled on a manager node unless you configure it to use a remote API (which is not covered in the documentation).
 
-Since multiple instances of BunkerWeb are running, a shared data store implemented as a [Redis](https://redis.io/) service must be created. These instances will utilize the Redis service to cache and share data. Further details regarding the Redis settings can be found [here](features.md#redis).
+Since multiple instances of BunkerWeb are running, a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service must be created. These instances will utilize the Redis/Valkey service to cache and share data. Further details regarding the Redis/Valkey settings can be found [here](features.md#redis).
 
 As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
 
