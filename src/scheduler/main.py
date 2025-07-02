@@ -797,12 +797,11 @@ if __name__ == "__main__":
                         else:
                             # Only generate plugins if the database update was successful
                             generate_external_plugins(plugin_path)
-                except BaseException as e:
-                    LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
-            else:
-                # If no changes, send the file and then stop execution for this block
-                return send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
-
+                    except BaseException as e:
+                        LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
+                else:
+                    # If no changes, send the file and then stop execution for this block
+                    return send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
 
 
         check_configs_changes()
