@@ -14,6 +14,7 @@
 - [DOCS] Add documentation about [Valkey](https://valkey.io/) support alongside [Redis](https://redis.io/) for data persistence and caching in BunkerWeb
 - [MISC] Enhance logging to differentiate between allowed and denied access based on whitelist status
 - [DEPS] Update coreruleset-v4 version to v4.16.0
+- [DEPS] Update Mbed TLS version to v3.6.4
 
 ## v1.6.2-rc7 - 2025/06/25
 
