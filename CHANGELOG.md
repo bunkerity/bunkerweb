@@ -16,9 +16,11 @@
 - [MISC] Enhance logging to differentiate between allowed and denied access based on whitelist status
 - [DEPS] Update coreruleset-v4 version to v4.16.0
 - [DEPS] Update Mbed TLS version to v3.6.4
+- [DEPS] Update Ace editor version to 1.43.1
 - [DEPS] Update i18next version to v25.3.0
 - [DEPS] Update i18next browser languageDetector extension version to v8.2.0
 - [DEPS] Update DOMPurify version to 3.2.6
+- [DEPS] Update ApexCharts.js version to v4.7.0
 
 ## v1.6.2-rc7 - 2025/06/25
 
