@@ -8,6 +8,7 @@
 - [ALL-IN-ONE] Update CrowdSec to version v1.6.9
 - [UI] Add "Go Back" button functionality in unauthorized page
 - [DOCS] Add documentation about [Valkey](https://valkey.io/) support alongside [Redis](https://redis.io/) for data persistence and caching in BunkerWeb
+- [MISC] Enhance logging to differentiate between allowed and denied access based on whitelist status
 - [DEPS] Update coreruleset-v4 version to v4.16.0
 
 ## v1.6.2-rc7 - 2025/06/25
