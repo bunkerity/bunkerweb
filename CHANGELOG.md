@@ -7,6 +7,7 @@
 - [FEATURE] Implement Redis-backed metrics storage and optimize retrieval workflows for faster, more reliable performance
 - [ALL-IN-ONE] Update CrowdSec to version v1.6.9
 - [UI] Add "Go Back" button functionality in unauthorized page
+- [UI] Improve dynamic translation handling and update chart rendering on theme and language changes
 - [DOCS] Add documentation about [Valkey](https://valkey.io/) support alongside [Redis](https://redis.io/) for data persistence and caching in BunkerWeb
 - [MISC] Enhance logging to differentiate between allowed and denied access based on whitelist status
 - [DEPS] Update coreruleset-v4 version to v4.16.0
