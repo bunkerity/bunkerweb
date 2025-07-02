@@ -65,13 +65,18 @@
                                             {% endif %}
                                         </p>
                                     {% endif %}
-                                    {% if next %}
-                                        <div class="mt-3">
-                                            <a href="{{ next }}" class="btn btn-primary d-grid w-100">
-                                                <i class="bx bx-arrow-back me-2"></i><span data-i18n="button.return_to_safety">Return to Safety</span>
-                                            </a>
+                                    <div class="mt-3">
+                                        <div class="d-flex gap-2">
+                                            <button id="go-back-btn" class="btn btn-outline-secondary flex-fill">
+                                                <i class="bx bx-chevron-left me-2"></i><span data-i18n="button.go_back">Go Back</span>
+                                            </button>
+                                            {% if next %}
+                                                <a href="{{ next }}" class="btn btn-primary flex-fill">
+                                                    <i class="bx bx-home me-2"></i><span data-i18n="button.return_to_safety">Return to Safety</span>
+                                                </a>
+                                            {% endif %}
                                         </div>
-                                    {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -90,4 +95,10 @@
         });
         </script>
     {% endif %}
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/pages/unauthorized.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

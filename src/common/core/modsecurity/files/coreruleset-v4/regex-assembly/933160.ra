@@ -8,7 +8,7 @@
 ##!^ ['\"]*
 
 ##! match comments: `/*...*/`, `//...`, `#...`
-##!$ (?:/\*.*\*/|//.*|#.*
+##!$ (?:/\*.*?\*/|//[^\r\n]*|#[^\r\n]*
 ##! match white space and quotes
 ##!$ |\s|\")*
 
@@ -42,6 +42,7 @@ mkdir
 opendir
 passthru
 popen
+printf
 readfile
 rtrim
 strip_tags

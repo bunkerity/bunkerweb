@@ -70,6 +70,17 @@ disable=locally-disabled,locally-enabled,logging-format-interpolation,no-else-re
 # Don't diplay statistics. Just the facts.
 reports=no
 
+[STRING]
+# Complain about
+# ```
+# list_of_strings = [
+#    'foo' # <-- missing comma
+#    'bar',
+#    'corge',
+# ]
+# ```
+check-str-concat-over-line-jumps=yes
+
 [VARIABLES]
 # Allow unused variables if their name starts with an underscore.
 # [unused-argument]

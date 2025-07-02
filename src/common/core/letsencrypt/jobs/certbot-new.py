@@ -488,6 +488,16 @@ try:
                 continue
 
             letsencrypt_provider = getenv(f"{original_first_server}_LETS_ENCRYPT_DNS_PROVIDER", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROVIDER", "")
+            letsencrypt_profile = (
+                getenv(f"{original_first_server}_LETS_ENCRYPT_PROFILE", "classic") if IS_MULTISITE else getenv("LETS_ENCRYPT_PROFILE", "classic")
+            )
+
+            # Override profile if custom profile is set
+            custom_profile = (
+                getenv(f"{original_first_server}_LETS_ENCRYPT_CUSTOM_PROFILE", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_CUSTOM_PROFILE", "")
+            ).strip()
+            if custom_profile:
+                letsencrypt_profile = custom_profile
 
             renewal_file = DATA_PATH.joinpath("renewal", f"{first_server}.conf")
             if not renewal_file.is_file():
@@ -496,17 +506,28 @@ try:
                 continue
 
             current_provider = None
+            current_profile = "classic"
             with renewal_file.open("r") as file:
                 for line in file:
                     if line.startswith("authenticator"):
                         key, value = line.strip().split("=", 1)
                         current_provider = value.strip().replace("dns-", "")
-                        break
+                    elif line.startswith("preferred_profile"):
+                        key, value = line.strip().split("=", 1)
+                        current_profile = value.strip()
 
             if letsencrypt_challenge == "dns":
                 if letsencrypt_provider and current_provider != letsencrypt_provider:
                     domains_to_ask[first_server] = 2
                     LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
+                    continue
+
+                # Check if profile has changed
+                if current_profile != letsencrypt_profile:
+                    domains_to_ask[first_server] = 2
+                    LOGGER.warning(
+                        f"[{original_first_server}] Profile for {first_server} changed from {current_profile} to {letsencrypt_profile}, asking new certificate..."
+                    )
                     continue
 
                 # Check if DNS credentials have changed

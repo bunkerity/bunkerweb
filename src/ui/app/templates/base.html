@@ -151,6 +151,9 @@
                 nonce="{{ script_nonce }}"></script>
         <!-- Page Specific JS -->
         {% block scripts %}{% endblock %}
+        {% for extra_script in extra_scripts %}
+            <script src="{{ extra_script }}" nonce="{{ script_nonce }}" defer></script>
+        {% endfor %}
         <!-- Buttons plugin -->
         <script src="{{ url_for('static', filename='js/buttons.js') }}"
                 nonce="{{ script_nonce }}"

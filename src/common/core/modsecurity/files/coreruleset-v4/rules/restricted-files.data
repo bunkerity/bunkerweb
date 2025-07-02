@@ -20,6 +20,7 @@
 .cshrc
 .cups/
 .dbus/
+.deployment-secrets.txt
 .docker/
 .drush/
 .env
@@ -113,6 +114,163 @@
 .zsh_history
 .zshrc
 
+# Generic config filenames and common permutations
+config.asp
+config_dev.asp
+config-dev.asp
+config.dev.asp
+config_prod.asp
+config-prod.asp
+config.prod.asp
+config.sample.asp
+config-sample.asp
+config_sample.asp
+config_test.asp
+config-test.asp
+config.test.asp
+config.ini
+config_dev.ini
+config-dev.ini
+config.dev.ini
+config_prod.ini
+config-prod.ini
+config.prod.ini
+config.sample.ini
+config-sample.ini
+config_sample.ini
+config_test.ini
+config-test.ini
+config.test.ini
+config.json
+config_dev.json
+config-dev.json
+config.dev.json
+config_prod.json
+config-prod.json
+config.prod.json
+config.sample.json
+config-sample.json
+config_sample.json
+config_test.json
+config-test.json
+config.test.json
+config.php
+config_dev.php
+config-dev.php
+config.dev.php
+config_prod.php
+config-prod.php
+config.prod.php
+config.sample.php
+config-sample.php
+config_sample.php
+config_test.php
+config-test.php
+config.test.php
+config.pl
+config_dev.pl
+config-dev.pl
+config.dev.pl
+config_prod.pl
+config-prod.pl
+config.prod.pl
+config.sample.pl
+config-sample.pl
+config_sample.pl
+config_test.pl
+config-test.pl
+config.test.pl
+config.py
+config_dev.py
+config-dev.py
+config.dev.py
+config_prod.py
+config-prod.py
+config.prod.py
+config.sample.py
+config-sample.py
+config_sample.py
+config_test.py
+config-test.py
+config.test.py
+config.rb
+config_dev.rb
+config-dev.rb
+config.dev.rb
+config_prod.rb
+config-prod.rb
+config.prod.rb
+config.sample.rb
+config-sample.rb
+config_sample.rb
+config_test.rb
+config-test.rb
+config.test.rb
+config.toml
+config_dev.toml
+config-dev.toml
+config.dev.toml
+config_prod.toml
+config-prod.toml
+config.prod.toml
+config.sample.toml
+config-sample.toml
+config_sample.toml
+config_test.toml
+config-test.toml
+config.test.toml
+config.txt
+config_dev.txt
+config-dev.txt
+config.dev.txt
+config_prod.txt
+config-prod.txt
+config.prod.txt
+config.sample.txt
+config-sample.txt
+config_sample.txt
+config_test.txt
+config-test.txt
+config.test.txt
+config.xml
+config_dev.xml
+config-dev.xml
+config.dev.xml
+config_prod.xml
+config-prod.xml
+config.prod.xml
+config.sample.xml
+config-sample.xml
+config_sample.xml
+config_test.xml
+config-test.xml
+config.test.xml
+config.yaml
+config_dev.yaml
+config-dev.yaml
+config.dev.yaml
+config_prod.yaml
+config-prod.yaml
+config.prod.yaml
+config.sample.yaml
+config-sample.yaml
+config_sample.yaml
+config_test.yaml
+config-test.yaml
+config.test.yaml
+config.yml
+config_dev.yml
+config-dev.yml
+config.dev.yml
+config_prod.yml
+config-prod.yml
+config.prod.yml
+config.sample.yml
+config-sample.yml
+config_sample.yml
+config_test.yml
+config-test.yml
+config.test.yml
 # Compressed database dumps
 .sql.001
 .sql.7z
@@ -154,18 +312,10 @@ aws-key.yml
 # October CMS credentials file
 /auth.json
 # Wordpress
-wp-config.copy
-wp-config.php
-wp-config.bak
-wp-config.old
-wp-config.temp
-wp-config.tmp
-wp-config.txt
+wp-config.
+wp-config-
+wp-config_
 # Symfony
-/config/config.yml
-/config/config_dev.yml
-/config/config_prod.yml
-/config/config_test.yml
 /config/parameters.yml
 /config/routing.yml
 /config/security.yml
@@ -174,15 +324,11 @@ wp-config.txt
 /sites/default/default.settings.php
 /sites/default/settings.php
 /sites/default/settings.local.php
-# NextCloud
-/config/config.php
 # PrestaShop configuration files
 /config/settings.inc.php
 /app/config/parameters.php
 # Magento
 /app/etc/local.xml
-# Sublime Text
-/sftp-config.json
 # ASP.NET
 /Web.config
 # Node
@@ -191,8 +337,6 @@ wp-config.txt
 /npm-shrinkwrap.json
 /gruntfile.js
 /npm-debug.log
-/ormconfig.json
-/tsconfig.json
 /webpack.config.js
 /yarn.lock
 # Composer
@@ -230,8 +374,6 @@ Thumbs.db
 php.ini
 # Oracle WebLogic Server configuration file
 weblogic.xml
-# Oracle SOAP Request Handler configuration file
-soapConfig.xml
 # Common names for local PHP error logs
 php_error.log
 php_errors.log
@@ -262,8 +404,8 @@ secrets.json
 #docker-compose.yaml
 compose.yml
 compose.yaml
-# cloud-init definition file
-cloud-config.yml
+# CVE-2023-49103
+phpinfo.php
 
 # /proc entries (keep in sync with lfi-os-files.data)
 # grep -E "^proc/" lfi-os-files.data

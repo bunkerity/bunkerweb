@@ -1,5 +1,115 @@
 Mbed TLS ChangeLog (Sorted per branch, date)
 
+= Mbed TLS 3.6.4 branch released 2025-06-30
+
+Features
+   * Add the function mbedtls_ssl_export_keying_material() which allows the
+     client and server to extract additional shared symmetric keys from an SSL
+     session, according to the TLS-Exporter specification in RFC 8446 and 5705.
+     This requires MBEDTLS_SSL_KEYING_MATERIAL_EXPORT to be defined in
+     mbedtls_config.h.
+
+Security
+   * Fix a buffer overread in mbedtls_lms_import_public_key() when the input is
+     less than 3 bytes. Reported by Linh Le and Ngan Nguyen from Calif.
+     CVE-2025-49601
+   * Fix a vulnerability in LMS verification through which an adversary could
+     get an invalid signature accepted if they could cause a hash accelerator
+     to fail. Found and reported by Linh Le and Ngan Nguyen from Calif.
+     CVE-2025-49600
+   * On x86/amd64 platforms, with some compilers, when the library is
+     compiled with support for both AESNI and software AES and AESNI is
+     available in hardware, an adversary with fine control over which
+     threads make progress in a multithreaded program could force software
+     AES to be used for some time when the program starts. This could allow
+     the adversary to conduct timing attacks and potentially recover the
+     key. In particular, this attacker model may be possible against an SGX
+     enclave.
+     The same vulnerability affects GCM acceleration, which could allow
+     a similarly powerful adversary to craft GCM forgeries.
+     CVE-2025-52496
+   * Fix possible use-after-free or double-free in code calling
+     mbedtls_x509_string_to_names(). This was caused by the function calling
+     mbedtls_asn1_free_named_data_list() on its head argument, while the
+     documentation did no suggest it did, making it likely for callers relying
+     on the documented behaviour to still hold pointers to memory blocks after
+     they were free()d, resulting in high risk of use-after-free or double-free,
+     with consequences ranging up to arbitrary code execution.
+     In particular, the two sample programs x509/cert_write and x509/cert_req
+     were affected (use-after-free if the san string contains more than one DN).
+     Code that does not call mbedtls_string_to_names() directly is not affected.
+     Found by Linh Le and Ngan Nguyen from Calif.
+     CVE-2025-47917
+   * Fix a bug in mbedtls_asn1_store_named_data() where it would sometimes leave
+     an item in the output list in an inconsistent state with val.p == NULL but
+     val.len > 0. This impacts applications that call this function directly,
+     or indirectly via mbedtls_x509_string_to_names() or one of the
+     mbedtls_x509write_{crt,csr}_set_{subject,issuer}_name() functions. The
+     inconsistent state of the output could then cause a NULL dereference either
+     inside the same call to mbedtls_x509_string_to_names(), or in subsequent
+     users of the output structure, such as mbedtls_x509_write_names(). This
+     only affects applications that create (as opposed to consume) X.509
+     certificates, CSRs or CRLs, or that call mbedtls_asn1_store_named_data()
+     directly. Found by Linh Le and Ngan Nguyen from Calif.
+     CVE-2025-48965
+   * Fix an integer underflow that could occur when parsing malformed PEM
+     keys, which could be used by an attacker capable of feeding encrypted
+     PEM keys to a user. This could cause a crash or information disclosure.
+     Found and reported by Linh Le and Ngan Nguyen from Calif.
+     CVE-2025-52497
+   * Fix a timing side channel in the implementation of PKCS#7 padding
+     which would allow an attacker who can request decryption of arbitrary
+     ciphertexts to recover the plaintext through a timing oracle attack.
+     Reported by Ka Lok Wu from Stony Brook University and Doria Tang from
+     The Chinese University of Hong Kong.
+     CVE-2025-49087
+
+Bugfix
+   * Fix failures of PSA multipart or interruptible operations when the
+     library or the application is built with a compiler where
+     "union foo x = {0}" does not initialize non-default members of the
+     union, such as GCC 15 and some versions of Clang 18. This affected MAC
+     multipart operations, MAC-based key derivation operations, interruptible
+     signature, interruptible verification, and potentially other operations
+     when using third-party drivers. This also affected one-shot MAC
+     operations using the built-in implementation. Fixes #9814.
+   * On entry to PSA driver entry points that set up a multipart operation
+     ("xxx_setup"), the operation object is supposed to be all-bits-zero.
+     This was sometimes not the case when an operation object is reused,
+     or with compilers where "union foo x = {0}" does not initialize
+     non-default members of the union. The PSA core now ensures that this
+     guarantee is met in all cases. Fixes #9975.
+   * Resolved build issue with C++ projects using Mbed TLS 3.6 when compiling
+     with the MSVC toolset v142 and earlier. Fixes mbedtls issue #7087.
+   * Silence spurious -Wunterminated-string-initialization warnings introduced
+     by GCC 15. Fixes #9944.
+   * Fix a sloppy check in LMS public key import, which could lead to accepting
+     keys with a different LMS or LM-OTS types on some platforms. Specifically,
+     this could happen on platforms where enum types are smaller than 32 bits
+     and compiler optimization is enabled. Found and reported by Linh Le and
+     Ngan Nguyen from Calif.
+   * Fix a race condition on x86/amd64 platforms in AESNI support detection
+     that could lead to using software AES in some threads at the very
+     beginning of a multithreaded program. Reported by Solar Designer.
+     Fixes #9840.
+   * Fix mbedtls_base64_decode() on inputs that did not have the correct
+     number of trailing equal signs, or had 4*k+1 digits. They were accepted
+     as long as they had at most two trailing equal signs. They are now
+     rejected. Furthermore, before, on inputs with too few equal signs, the
+     function reported the correct size in *olen when it returned
+     MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL, but truncated the output to the
+     last multiple of 3 bytes.
+   * When calling mbedtls_asn1_write_raw_buffer() with NULL, 0 as the last two
+     arguments, undefined behaviour would be triggered, in the form of a call to
+     memcpy(..., NULL, 0). This was harmless in practice, but could trigger
+     complains from sanitizers or static analyzers.
+
+Changes
+   * The function mbedtls_x509_string_to_names() now requires its head argument
+     to point to NULL on entry. This makes it likely that existing risky uses of
+     this function (see the entry in the Security section) will be detected and
+     fixed.
+
 = Mbed TLS 3.6.3 branch released 2025-03-24
 
 Default behavior changes
@@ -35,6 +145,7 @@ Security
      The library will now prevent the handshake and return
      MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME
      if mbedtls_ssl_set_hostname() has not been called.
+     Reported by Daniel Stenberg.
      CVE-2025-27809
    * Zeroize a temporary heap buffer used in psa_key_derivation_output_key()
      when deriving an ECC key pair.

@@ -1,9 +1,5 @@
 # Features
 
-!!! info "Settings generator tool"
-
-    To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc).
-
 This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](concepts.md) section of the documentation. Please follow the instructions for your own [integration](integrations.md) on how to apply the settings.
 
 ## Global settings
@@ -56,91 +52,91 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 ### Configuration Settings
 
-=== "Core Settings"
+**Core Settings**
 
-    | Setting               | Default           | Context   | Multiple | Description                                                                                         |
-    | --------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
-    | `SERVER_NAME`         | `www.example.com` | multisite | No       | **Primary Domain:** The main domain name for this site. Required in multisite mode.                 |
-    | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **BunkerWeb Instances:** List of BunkerWeb instances separated with spaces.                         |
-    | `MULTISITE`           | `no`              | global    | No       | **Multiple Sites:** Set to `yes` to enable hosting multiple websites with different configurations. |
-    | `SECURITY_MODE`       | `block`           | multisite | No       | **Security Level:** Controls the level of security enforcement. Options: `detect` or `block`.       |
-    | `SERVER_TYPE`         | `http`            | multisite | No       | **Server Type:** Defines if the server is `http` or `stream` type.                                  |
+| Setting               | Default           | Context   | Multiple | Description                                                                                         |
+| --------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `SERVER_NAME`         | `www.example.com` | multisite | No       | **Primary Domain:** The main domain name for this site. Required in multisite mode.                 |
+| `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | No       | **BunkerWeb Instances:** List of BunkerWeb instances separated with spaces.                         |
+| `MULTISITE`           | `no`              | global    | No       | **Multiple Sites:** Set to `yes` to enable hosting multiple websites with different configurations. |
+| `SECURITY_MODE`       | `block`           | multisite | No       | **Security Level:** Controls the level of security enforcement. Options: `detect` or `block`.       |
+| `SERVER_TYPE`         | `http`            | multisite | No       | **Server Type:** Defines if the server is `http` or `stream` type.                                  |
 
-=== "API Settings"
+**API Settings**
 
-    | Setting            | Default       | Context | Multiple | Description                                                          |
-    | ------------------ | ------------- | ------- | -------- | -------------------------------------------------------------------- |
-    | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.             |
-    | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                        |
-    | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                    |
-    | `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.         |
-    | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API. |
+| Setting            | Default       | Context | Multiple | Description                                                          |
+| ------------------ | ------------- | ------- | -------- | -------------------------------------------------------------------- |
+| `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.             |
+| `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                        |
+| `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                    |
+| `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.         |
+| `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API. |
 
-=== "Network & Port Settings"
+**Network & Port Settings**
 
-    | Setting         | Default      | Context | Multiple | Description                                           |
-    | --------------- | ------------ | ------- | -------- | ----------------------------------------------------- |
-    | `HTTP_PORT`     | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic.          |
-    | `HTTPS_PORT`    | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic.        |
-    | `USE_IPV6`      | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.           |
-    | `DNS_RESOLVERS` | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use. |
+| Setting         | Default      | Context | Multiple | Description                                           |
+| --------------- | ------------ | ------- | -------- | ----------------------------------------------------- |
+| `HTTP_PORT`     | `8080`       | global  | Yes      | **HTTP Port:** Port number for HTTP traffic.          |
+| `HTTPS_PORT`    | `8443`       | global  | Yes      | **HTTPS Port:** Port number for HTTPS traffic.        |
+| `USE_IPV6`      | `no`         | global  | No       | **IPv6 Support:** Enable IPv6 connectivity.           |
+| `DNS_RESOLVERS` | `127.0.0.11` | global  | No       | **DNS Resolvers:** DNS addresses of resolvers to use. |
 
-=== "Stream Server Settings"
+**Stream Server Settings**
 
-    | Setting                  | Default | Context   | Multiple | Description                                                    |
-    | ------------------------ | ------- | --------- | -------- | -------------------------------------------------------------- |
-    | `LISTEN_STREAM`          | `yes`   | multisite | No       | **Listen Stream:** Enable listening for non-ssl (passthrough). |
-    | `LISTEN_STREAM_PORT`     | `1337`  | multisite | Yes      | **Stream Port:** Listening port for non-ssl (passthrough).     |
-    | `LISTEN_STREAM_PORT_SSL` | `4242`  | multisite | Yes      | **Stream SSL Port:** Listening port for ssl (passthrough).     |
-    | `USE_TCP`                | `yes`   | multisite | No       | **TCP Listen:** Enable TCP listening (stream).                 |
-    | `USE_UDP`                | `no`    | multisite | No       | **UDP Listen:** Enable UDP listening (stream).                 |
+| Setting                  | Default | Context   | Multiple | Description                                                    |
+| ------------------------ | ------- | --------- | -------- | -------------------------------------------------------------- |
+| `LISTEN_STREAM`          | `yes`   | multisite | No       | **Listen Stream:** Enable listening for non-ssl (passthrough). |
+| `LISTEN_STREAM_PORT`     | `1337`  | multisite | Yes      | **Stream Port:** Listening port for non-ssl (passthrough).     |
+| `LISTEN_STREAM_PORT_SSL` | `4242`  | multisite | Yes      | **Stream SSL Port:** Listening port for ssl (passthrough).     |
+| `USE_TCP`                | `yes`   | multisite | No       | **TCP Listen:** Enable TCP listening (stream).                 |
+| `USE_UDP`                | `no`    | multisite | No       | **UDP Listen:** Enable UDP listening (stream).                 |
 
-=== "Worker Settings"
+**Worker Settings**
 
-    | Setting                | Default | Context | Multiple | Description                                                                             |
-    | ---------------------- | ------- | ------- | -------- | --------------------------------------------------------------------------------------- |
-    | `WORKER_PROCESSES`     | `auto`  | global  | No       | **Worker Processes:** Number of worker processes. Set to `auto` to use available cores. |
-    | `WORKER_CONNECTIONS`   | `1024`  | global  | No       | **Worker Connections:** Maximum number of connections per worker.                       |
-    | `WORKER_RLIMIT_NOFILE` | `2048`  | global  | No       | **File Descriptors Limit:** Maximum number of open files per worker.                    |
+| Setting                | Default | Context | Multiple | Description                                                                             |
+| ---------------------- | ------- | ------- | -------- | --------------------------------------------------------------------------------------- |
+| `WORKER_PROCESSES`     | `auto`  | global  | No       | **Worker Processes:** Number of worker processes. Set to `auto` to use available cores. |
+| `WORKER_CONNECTIONS`   | `1024`  | global  | No       | **Worker Connections:** Maximum number of connections per worker.                       |
+| `WORKER_RLIMIT_NOFILE` | `2048`  | global  | No       | **File Descriptors Limit:** Maximum number of open files per worker.                    |
 
-=== "Memory Settings"
+**Memory Settings**
 
-    | Setting                        | Default | Context | Multiple | Description                                                                     |
-    | ------------------------------ | ------- | ------- | -------- | ------------------------------------------------------------------------------- |
-    | `WORKERLOCK_MEMORY_SIZE`       | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers. |
-    | `DATASTORE_MEMORY_SIZE`        | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore.                      |
-    | `CACHESTORE_MEMORY_SIZE`       | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore.                    |
-    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc).          |
-    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss).        |
-    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks).      |
+| Setting                        | Default | Context | Multiple | Description                                                                     |
+| ------------------------------ | ------- | ------- | -------- | ------------------------------------------------------------------------------- |
+| `WORKERLOCK_MEMORY_SIZE`       | `48k`   | global  | No       | **Workerlock Memory Size:** Size of lua_shared_dict for initialization workers. |
+| `DATASTORE_MEMORY_SIZE`        | `64m`   | global  | No       | **Datastore Memory Size:** Size of the internal datastore.                      |
+| `CACHESTORE_MEMORY_SIZE`       | `64m`   | global  | No       | **Cachestore Memory Size:** Size of the internal cachestore.                    |
+| `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`   | global  | No       | **Cachestore IPC Memory Size:** Size of the internal cachestore (ipc).          |
+| `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`   | global  | No       | **Cachestore Miss Memory Size:** Size of the internal cachestore (miss).        |
+| `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`   | global  | No       | **Cachestore Locks Memory Size:** Size of the internal cachestore (locks).      |
 
-=== "Logging Settings"
+**Logging Settings**
 
-    | Setting            | Default                                                                                                                        | Context | Multiple | Description                                                                                                                   |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
-    | `LOG_LEVEL`        | `notice`                                                                                                                       | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                        | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
+| Setting            | Default                                                                                                                        | Context | Multiple | Description                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `LOG_FORMAT`       | `$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
+| `LOG_LEVEL`        | `notice`                                                                                                                       | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
+| `TIMERS_LOG_LEVEL` | `debug`                                                                                                                        | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
 
-    !!! tip "Logging Best Practices"
-        - For production environments, use the `notice`, `warn`, or `error` log levels to minimize log volume.
-        - For debugging issues, temporarily set the log level to `debug` to get more detailed information.
+!!! tip "Logging Best Practices"
+    - For production environments, use the `notice`, `warn`, or `error` log levels to minimize log volume.
+    - For debugging issues, temporarily set the log level to `debug` to get more detailed information.
 
-=== "Integration Settings"
+**Integration Settings**
 
-    | Setting           | Default | Context   | Multiple | Description                                                                                          |
-    | ----------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
-    | `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                               |
-    | `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                     |
-    | `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                  |
-    | `USE_TEMPLATE`    | ``      | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
+| Setting           | Default | Context   | Multiple | Description                                                                                          |
+| ----------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                               |
+| `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                     |
+| `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                  |
+| `USE_TEMPLATE`    | ``      | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
 
-=== "Nginx Settings"
+**Nginx Settings**
 
-    | Setting                         | Default       | Context | Multiple | Description                                                                               |
-    | ------------------------------- | ------------- | ------- | -------- | ----------------------------------------------------------------------------------------- |
-    | `NGINX_PREFIX`                  | `/etc/nginx/` | global  | No       | **Nginx Prefix:** Where nginx will search for configurations.                             |
-    | `SERVER_NAMES_HASH_BUCKET_SIZE` | ``            | global  | No       | **Server Names Hash Bucket Size:** Value for the server_names_hash_bucket_size directive. |
+| Setting                         | Default       | Context | Multiple | Description                                                                               |
+| ------------------------------- | ------------- | ------- | -------- | ----------------------------------------------------------------------------------------- |
+| `NGINX_PREFIX`                  | `/etc/nginx/` | global  | No       | **Nginx Prefix:** Where nginx will search for configurations.                             |
+| `SERVER_NAMES_HASH_BUCKET_SIZE` | ``            | global  | No       | **Server Names Hash Bucket Size:** Value for the server_names_hash_bucket_size directive. |
 
 ### Example Configurations
 
@@ -846,81 +842,87 @@ Follow these steps to configure and use the Blacklist feature:
 | `USE_BLACKLIST`             | `yes`                                                   | multisite | no       | **Enable Blacklist:** Set to `yes` to enable the blacklist feature.                                     |
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Community Blacklists:** Select pre-configured community-maintained blacklists to include in blocking. |
 
-=== "Community Blacklists"
-    **What this does:** Enables you to quickly add well-maintained, community-sourced blacklists without having to manually configure URLs.
+**Community Blacklists**
 
-    The `BLACKLIST_COMMUNITY_LISTS` setting allows you to select from curated blacklist sources. Available options include:
+**What this does:** Enables you to quickly add well-maintained, community-sourced blacklists without having to manually configure URLs.
 
-    | ID                                  | Description                                                                                                                                                                                                              | Source                                                                                                                          |
-    | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-    | `ip:laurent-minne-fr-be-agressive`  | Intelligence Blocklist (IPv4): Botnets, RaT, CVE's RCE, Scanners. DST = FR - BE                                                                                                                                          | `https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt` |
-    | `ip:danmeuk-tor-exit`               | Tor Exit Nodes IPs (dan.me.uk)                                                                                                                                                                                           | `https://www.dan.me.uk/torlist/?exit`                                                                                           |
-    | `ua:mitchellkrogza-bad-user-agents` | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`  |
+The `BLACKLIST_COMMUNITY_LISTS` setting allows you to select from curated blacklist sources. Available options include:
 
-    **Configuration:** Specify multiple lists separated by spaces. For example:
-    ```yaml
-    BLACKLIST_COMMUNITY_LISTS: "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents"
-    ```
+| ID                                  | Description                                                                                                                                                                                                              | Source                                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `ip:laurent-minne-fr-be-agressive`  | Intelligence Blocklist (IPv4): Botnets, RaT, CVE's RCE, Scanners. DST = FR - BE                                                                                                                                          | `https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt` |
+| `ip:danmeuk-tor-exit`               | Tor Exit Nodes IPs (dan.me.uk)                                                                                                                                                                                           | `https://www.dan.me.uk/torlist/?exit`                                                                                           |
+| `ua:mitchellkrogza-bad-user-agents` | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`  |
 
-    !!! tip "Community vs Manual Configuration"
-        Community blacklists provide a convenient way to get started with proven blacklist sources. You can use them alongside manual URL configurations for maximum flexibility.
+**Configuration:** Specify multiple lists separated by spaces. For example:
+```yaml
+BLACKLIST_COMMUNITY_LISTS: "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents"
+```
 
-=== "IP Address"
-    **What this does:** Blocks visitors based on their IP address or network.
+!!! tip "Community vs Manual Configuration"
+    Community blacklists provide a convenient way to get started with proven blacklist sources. You can use them alongside manual URL configurations for maximum flexibility.
 
-    | Setting                    | Default                               | Context   | Multiple | Description                                                                                            |
-    | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
-    | `BLACKLIST_IP`             |                                       | multisite | no       | **IP Blacklist:** List of IP addresses or networks (CIDR notation) to block, separated by spaces.      |
-    | `BLACKLIST_IGNORE_IP`      |                                       | multisite | no       | **IP Ignore List:** List of IP addresses or networks that should bypass IP blacklist checks.           |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | no       | **IP Blacklist URLs:** List of URLs containing IP addresses or networks to block, separated by spaces. |
-    | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | no       | **IP Ignore List URLs:** List of URLs containing IP addresses or networks to ignore.                   |
+**IP Address**
 
-    The default `BLACKLIST_IP_URLS` setting includes a URL that provides a **list of known Tor exit nodes**. This is a common source of malicious traffic and is a good starting point for many sites.
+**What this does:** Blocks visitors based on their IP address or network.
 
-=== "Reverse DNS"
-    **What this does:** Blocks visitors based on their reverse domain name. This is useful for blocking known scanners and crawlers based on their organization domains.
+| Setting                    | Default                               | Context   | Multiple | Description                                                                                            |
+| -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `BLACKLIST_IP`             |                                       | multisite | no       | **IP Blacklist:** List of IP addresses or networks (CIDR notation) to block, separated by spaces.      |
+| `BLACKLIST_IGNORE_IP`      |                                       | multisite | no       | **IP Ignore List:** List of IP addresses or networks that should bypass IP blacklist checks.           |
+| `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | no       | **IP Blacklist URLs:** List of URLs containing IP addresses or networks to block, separated by spaces. |
+| `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | no       | **IP Ignore List URLs:** List of URLs containing IP addresses or networks to ignore.                   |
 
-    | Setting                      | Default                 | Context   | Multiple | Description                                                                                          |
-    | ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
-    | `BLACKLIST_RDNS`             | `.shodan.io .censys.io` | multisite | no       | **rDNS Blacklist:** List of reverse DNS suffixes to block, separated by spaces.                      |
-    | `BLACKLIST_RDNS_GLOBAL`      | `yes`                   | multisite | no       | **rDNS Global Only:** Only perform rDNS checks on global IP addresses when set to `yes`.             |
-    | `BLACKLIST_IGNORE_RDNS`      |                         | multisite | no       | **rDNS Ignore List:** List of reverse DNS suffixes that should bypass rDNS blacklist checks.         |
-    | `BLACKLIST_RDNS_URLS`        |                         | multisite | no       | **rDNS Blacklist URLs:** List of URLs containing reverse DNS suffixes to block, separated by spaces. |
-    | `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | no       | **rDNS Ignore List URLs:** List of URLs containing reverse DNS suffixes to ignore.                   |
+The default `BLACKLIST_IP_URLS` setting includes a URL that provides a **list of known Tor exit nodes**. This is a common source of malicious traffic and is a good starting point for many sites.
 
-    The default `BLACKLIST_RDNS` setting includes common scanner domains like **Shodan** and **Censys**. These are often used by security researchers and scanners to identify vulnerable sites.
+**Reverse DNS**
 
-=== "ASN"
-    **What this does:** Blocks visitors from specific network providers. ASNs are like ZIP codes for the Internet—they identify which provider or organization an IP belongs to.
+**What this does:** Blocks visitors based on their reverse domain name. This is useful for blocking known scanners and crawlers based on their organization domains.
 
-    | Setting                     | Default | Context   | Multiple | Description                                                                         |
-    | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------- |
-    | `BLACKLIST_ASN`             |         | multisite | no       | **ASN Blacklist:** List of Autonomous System Numbers to block, separated by spaces. |
-    | `BLACKLIST_IGNORE_ASN`      |         | multisite | no       | **ASN Ignore List:** List of ASNs that should bypass ASN blacklist checks.          |
-    | `BLACKLIST_ASN_URLS`        |         | multisite | no       | **ASN Blacklist URLs:** List of URLs containing ASNs to block, separated by spaces. |
-    | `BLACKLIST_IGNORE_ASN_URLS` |         | multisite | no       | **ASN Ignore List URLs:** List of URLs containing ASNs to ignore.                   |
+| Setting                      | Default                 | Context   | Multiple | Description                                                                                          |
+| ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `BLACKLIST_RDNS`             | `.shodan.io .censys.io` | multisite | no       | **rDNS Blacklist:** List of reverse DNS suffixes to block, separated by spaces.                      |
+| `BLACKLIST_RDNS_GLOBAL`      | `yes`                   | multisite | no       | **rDNS Global Only:** Only perform rDNS checks on global IP addresses when set to `yes`.             |
+| `BLACKLIST_IGNORE_RDNS`      |                         | multisite | no       | **rDNS Ignore List:** List of reverse DNS suffixes that should bypass rDNS blacklist checks.         |
+| `BLACKLIST_RDNS_URLS`        |                         | multisite | no       | **rDNS Blacklist URLs:** List of URLs containing reverse DNS suffixes to block, separated by spaces. |
+| `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | no       | **rDNS Ignore List URLs:** List of URLs containing reverse DNS suffixes to ignore.                   |
 
-=== "User Agent"
-    **What this does:** Blocks visitors based on the browser or tool they claim to be using. This is effective against bots that honestly identify themselves (such as "ScannerBot" or "WebHarvestTool").
+The default `BLACKLIST_RDNS` setting includes common scanner domains like **Shodan** and **Censys**. These are often used by security researchers and scanners to identify vulnerable sites.
 
-    | Setting                            | Default                                                                                                                        | Context   | Multiple | Description                                                                                             |
-    | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
-    | `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | no       | **User-Agent Blacklist:** List of User-Agent patterns (PCRE regex) to block, separated by spaces.       |
-    | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | no       | **User-Agent Ignore List:** List of User-Agent patterns that should bypass User-Agent blacklist checks. |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | no       | **User-Agent Blacklist URLs:** List of URLs containing User-Agent patterns to block.                    |
-    | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | no       | **User-Agent Ignore List URLs:** List of URLs containing User-Agent patterns to ignore.                 |
+**ASN**
 
-    The default `BLACKLIST_USER_AGENT_URLS` setting includes a URL that provides a **list of known bad user agents**. These are often used by malicious bots and scanners to identify vulnerable sites.
+**What this does:** Blocks visitors from specific network providers. ASNs are like ZIP codes for the Internet—they identify which provider or organization an IP belongs to.
 
-=== "URI"
-    **What this does:** Blocks requests to specific URLs on your site. This is helpful for blocking attempts to access admin pages, login forms, or other sensitive areas that might be targeted.
+| Setting                     | Default | Context   | Multiple | Description                                                                         |
+| --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------- |
+| `BLACKLIST_ASN`             |         | multisite | no       | **ASN Blacklist:** List of Autonomous System Numbers to block, separated by spaces. |
+| `BLACKLIST_IGNORE_ASN`      |         | multisite | no       | **ASN Ignore List:** List of ASNs that should bypass ASN blacklist checks.          |
+| `BLACKLIST_ASN_URLS`        |         | multisite | no       | **ASN Blacklist URLs:** List of URLs containing ASNs to block, separated by spaces. |
+| `BLACKLIST_IGNORE_ASN_URLS` |         | multisite | no       | **ASN Ignore List URLs:** List of URLs containing ASNs to ignore.                   |
 
-    | Setting                     | Default | Context   | Multiple | Description                                                                                 |
-    | --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
-    | `BLACKLIST_URI`             |         | multisite | no       | **URI Blacklist:** List of URI patterns (PCRE regex) to block, separated by spaces.         |
-    | `BLACKLIST_IGNORE_URI`      |         | multisite | no       | **URI Ignore List:** List of URI patterns that should bypass URI blacklist checks.          |
-    | `BLACKLIST_URI_URLS`        |         | multisite | no       | **URI Blacklist URLs:** List of URLs containing URI patterns to block, separated by spaces. |
-    | `BLACKLIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                   |
+**User Agent**
+
+**What this does:** Blocks visitors based on the browser or tool they claim to be using. This is effective against bots that honestly identify themselves (such as "ScannerBot" or "WebHarvestTool").
+
+| Setting                            | Default                                                                                                                        | Context   | Multiple | Description                                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | no       | **User-Agent Blacklist:** List of User-Agent patterns (PCRE regex) to block, separated by spaces.       |
+| `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | no       | **User-Agent Ignore List:** List of User-Agent patterns that should bypass User-Agent blacklist checks. |
+| `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | no       | **User-Agent Blacklist URLs:** List of URLs containing User-Agent patterns to block.                    |
+| `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | no       | **User-Agent Ignore List URLs:** List of URLs containing User-Agent patterns to ignore.                 |
+
+The default `BLACKLIST_USER_AGENT_URLS` setting includes a URL that provides a **list of known bad user agents**. These are often used by malicious bots and scanners to identify vulnerable sites.
+
+**URI**
+
+**What this does:** Blocks requests to specific URLs on your site. This is helpful for blocking attempts to access admin pages, login forms, or other sensitive areas that might be targeted.
+
+| Setting                     | Default | Context   | Multiple | Description                                                                                 |
+| --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
+| `BLACKLIST_URI`             |         | multisite | no       | **URI Blacklist:** List of URI patterns (PCRE regex) to block, separated by spaces.         |
+| `BLACKLIST_IGNORE_URI`      |         | multisite | no       | **URI Ignore List:** List of URI patterns that should bypass URI blacklist checks.          |
+| `BLACKLIST_URI_URLS`        |         | multisite | no       | **URI Blacklist URLs:** List of URLs containing URI patterns to block, separated by spaces. |
+| `BLACKLIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                   |
 
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
@@ -1440,18 +1442,18 @@ Follow these steps to configure and use the Country feature:
 
 === "Whitelist Only"
 
-    Allow access only from the United States, Canada, and the United Kingdom:
+    Allow access only from the United States, France, and Russia:
 
     ```yaml
-    WHITELIST_COUNTRY: "US CA GB"
+    WHITELIST_COUNTRY: "US FR RU"
     ```
 
 === "Blacklist Only"
 
-    Block access from specific countries while allowing all others:
+    Block access from United States, France and Russia while allowing all others:
 
     ```yaml
-    BLACKLIST_COUNTRY: "RU CN KP"
+    BLACKLIST_COUNTRY: "US FR RU"
     ```
 
 === "EU Access Only"
@@ -1460,14 +1462,6 @@ Follow these steps to configure and use the Country feature:
 
     ```yaml
     WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
-    ```
-
-=== "High-Risk Countries Blocked"
-
-    Block access from countries often associated with certain cyber threats:
-
-    ```yaml
-    BLACKLIST_COUNTRY: "RU CN KP IR SY"
     ```
 
 ## CrowdSec
@@ -1563,7 +1557,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1580,7 +1574,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+        image: bunkerity/bunkerweb-scheduler:1.6.2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2136,46 +2130,51 @@ Follow these steps to configure and use the Greylist feature:
 | -------------- | ------- | --------- | -------- | -------------------------------------------------------- |
 | `USE_GREYLIST` | `no`    | multisite | no       | **Enable Greylist:** Set to `yes` to enable greylisting. |
 
-=== "IP Address"
-    **What this does:** Greylist visitors based on their IP address or network. These visitors gain access but remain subject to security checks.
+**IP Address**
 
-    | Setting            | Default | Context   | Multiple | Description                                                                                              |
-    | ------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_IP`      |         | multisite | no       | **IP Greylist:** List of IP addresses or networks (in CIDR notation) to greylist, separated by spaces.   |
-    | `GREYLIST_IP_URLS` |         | multisite | no       | **IP Greylist URLs:** List of URLs containing IP addresses or networks to greylist, separated by spaces. |
+**What this does:** Greylist visitors based on their IP address or network. These visitors gain access but remain subject to security checks.
 
-=== "Reverse DNS"
-    **What this does:** Greylist visitors based on their domain name (in reverse). Useful for allowing conditional access to visitors from specific organizations or networks.
+| Setting            | Default | Context   | Multiple | Description                                                                                              |
+| ------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `GREYLIST_IP`      |         | multisite | no       | **IP Greylist:** List of IP addresses or networks (in CIDR notation) to greylist, separated by spaces.   |
+| `GREYLIST_IP_URLS` |         | multisite | no       | **IP Greylist URLs:** List of URLs containing IP addresses or networks to greylist, separated by spaces. |
 
-    | Setting                | Default | Context   | Multiple | Description                                                                                            |
-    | ---------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
-    | `GREYLIST_RDNS`        |         | multisite | no       | **rDNS Greylist:** List of reverse DNS suffixes to greylist, separated by spaces.                      |
-    | `GREYLIST_RDNS_GLOBAL` | `yes`   | multisite | no       | **rDNS Global Only:** Only perform rDNS greylist checks on global IP addresses when set to `yes`.      |
-    | `GREYLIST_RDNS_URLS`   |         | multisite | no       | **rDNS Greylist URLs:** List of URLs containing reverse DNS suffixes to greylist, separated by spaces. |
+**Reverse DNS**
 
-=== "ASN"
-    **What this does:** Greylist visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.
+**What this does:** Greylist visitors based on their domain name (in reverse). Useful for allowing conditional access to visitors from specific organizations or networks.
 
-    | Setting             | Default | Context   | Multiple | Description                                                                           |
-    | ------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------- |
-    | `GREYLIST_ASN`      |         | multisite | no       | **ASN Greylist:** List of Autonomous System Numbers to greylist, separated by spaces. |
-    | `GREYLIST_ASN_URLS` |         | multisite | no       | **ASN Greylist URLs:** List of URLs containing ASNs to greylist, separated by spaces. |
+| Setting                | Default | Context   | Multiple | Description                                                                                            |
+| ---------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `GREYLIST_RDNS`        |         | multisite | no       | **rDNS Greylist:** List of reverse DNS suffixes to greylist, separated by spaces.                      |
+| `GREYLIST_RDNS_GLOBAL` | `yes`   | multisite | no       | **rDNS Global Only:** Only perform rDNS greylist checks on global IP addresses when set to `yes`.      |
+| `GREYLIST_RDNS_URLS`   |         | multisite | no       | **rDNS Greylist URLs:** List of URLs containing reverse DNS suffixes to greylist, separated by spaces. |
 
-=== "User Agent"
-    **What this does:** Greylist visitors based on the browser or tool they claim to be using. This allows controlled access for specific tools while maintaining security checks.
+**ASN**
 
-    | Setting                    | Default | Context   | Multiple | Description                                                                                         |
-    | -------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
-    | `GREYLIST_USER_AGENT`      |         | multisite | no       | **User-Agent Greylist:** List of User-Agent patterns (PCRE regex) to greylist, separated by spaces. |
-    | `GREYLIST_USER_AGENT_URLS` |         | multisite | no       | **User-Agent Greylist URLs:** List of URLs containing User-Agent patterns to greylist.              |
+**What this does:** Greylist visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.
 
-=== "URI"
-    **What this does:** Greylist requests to specific URLs on your site. This allows conditional access to certain endpoints while maintaining security checks.
+| Setting             | Default | Context   | Multiple | Description                                                                           |
+| ------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------- |
+| `GREYLIST_ASN`      |         | multisite | no       | **ASN Greylist:** List of Autonomous System Numbers to greylist, separated by spaces. |
+| `GREYLIST_ASN_URLS` |         | multisite | no       | **ASN Greylist URLs:** List of URLs containing ASNs to greylist, separated by spaces. |
 
-    | Setting             | Default | Context   | Multiple | Description                                                                                   |
-    | ------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------- |
-    | `GREYLIST_URI`      |         | multisite | no       | **URI Greylist:** List of URI patterns (PCRE regex) to greylist, separated by spaces.         |
-    | `GREYLIST_URI_URLS` |         | multisite | no       | **URI Greylist URLs:** List of URLs containing URI patterns to greylist, separated by spaces. |
+**User Agent**
+
+**What this does:** Greylist visitors based on the browser or tool they claim to be using. This allows controlled access for specific tools while maintaining security checks.
+
+| Setting                    | Default | Context   | Multiple | Description                                                                                         |
+| -------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `GREYLIST_USER_AGENT`      |         | multisite | no       | **User-Agent Greylist:** List of User-Agent patterns (PCRE regex) to greylist, separated by spaces. |
+| `GREYLIST_USER_AGENT_URLS` |         | multisite | no       | **User-Agent Greylist URLs:** List of URLs containing User-Agent patterns to greylist.              |
+
+**URI**
+
+**What this does:** Greylist requests to specific URLs on your site. This allows conditional access to certain endpoints while maintaining security checks.
+
+| Setting             | Default | Context   | Multiple | Description                                                                                   |
+| ------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------------- |
+| `GREYLIST_URI`      |         | multisite | no       | **URI Greylist:** List of URI patterns (PCRE regex) to greylist, separated by spaces.         |
+| `GREYLIST_URI_URLS` |         | multisite | no       | **URI Greylist URLs:** List of URLs containing URI patterns to greylist, separated by spaces. |
 
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.
@@ -2438,78 +2437,72 @@ Follow these steps to configure and use the Headers feature:
 
 ### Configuration Guide
 
-=== "Security Headers"
+**Security Headers**
 
-    **Overview**
+Security headers enforce secure communication, restrict resource loading, and prevent attacks like clickjacking and injection. Properly configured headers create a robust defensive layer for your website.
 
-    Security headers enforce secure communication, restrict resource loading, and prevent attacks like clickjacking and injection. Properly configured headers create a robust defensive layer for your website.
+!!! success "Benefits of Security Headers"
+    - **HSTS:** Ensures all connections are encrypted, protecting against protocol downgrade attacks.
+    - **CSP:** Prevents malicious scripts from executing, reducing the risk of XSS attacks.
+    - **X-Frame-Options:** Blocks clickjacking attempts by controlling iframe embedding.
+    - **Referrer Policy:** Limits sensitive information leakage through referrer headers.
 
-    !!! success "Benefits of Security Headers"
-        - **HSTS:** Ensures all connections are encrypted, protecting against protocol downgrade attacks.
-        - **CSP:** Prevents malicious scripts from executing, reducing the risk of XSS attacks.
-        - **X-Frame-Options:** Blocks clickjacking attempts by controlling iframe embedding.
-        - **Referrer Policy:** Limits sensitive information leakage through referrer headers.
+| Setting                               | Default                                                                                             | Context   | Multiple | Description                                                                                                                  |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | no       | **HSTS:** Enforces secure HTTPS connections, reducing risks of man-in-the-middle attacks.                                    |
+| `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | no       | **CSP:** Restricts resource loading to trusted sources, mitigating cross-site scripting and data injection attacks.          |
+| `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | no       | **CSP Report Mode:** Reports violations without blocking content, helping in testing security policies while capturing logs. |
+| `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Prevents clickjacking by controlling whether your site can be framed.                                   |
+| `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing, protecting against drive-by download attacks.              |
+| `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regulates DNS prefetching to reduce unintentional network requests and enhance privacy.          |
+| `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Referrer Policy:** Controls the amount of referrer information sent, safeguarding user privacy.                            |
+| `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | no       | **Permissions Policy:** Restricts browser feature access, reducing potential attack vectors.                                 |
+| `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                        | multisite | no       | **Keep Headers:** Preserves selected upstream headers, aiding legacy integration while maintaining security.                 |
 
-    | Setting                               | Default                                                                                             | Context   | Multiple | Description                                                                                                                  |
-    | ------------------------------------- | --------------------------------------------------------------------------------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-    | `STRICT_TRANSPORT_SECURITY`           | `max-age=63072000; includeSubDomains; preload`                                                      | multisite | no       | **HSTS:** Enforces secure HTTPS connections, reducing risks of man-in-the-middle attacks.                                    |
-    | `CONTENT_SECURITY_POLICY`             | `object-src 'none'; form-action 'self'; frame-ancestors 'self';`                                    | multisite | no       | **CSP:** Restricts resource loading to trusted sources, mitigating cross-site scripting and data injection attacks.          |
-    | `CONTENT_SECURITY_POLICY_REPORT_ONLY` | `no`                                                                                                | multisite | no       | **CSP Report Mode:** Reports violations without blocking content, helping in testing security policies while capturing logs. |
-    | `X_FRAME_OPTIONS`                     | `SAMEORIGIN`                                                                                        | multisite | no       | **X-Frame-Options:** Prevents clickjacking by controlling whether your site can be framed.                                   |
-    | `X_CONTENT_TYPE_OPTIONS`              | `nosniff`                                                                                           | multisite | no       | **X-Content-Type-Options:** Prevents browsers from MIME-sniffing, protecting against drive-by download attacks.              |
-    | `X_DNS_PREFETCH_CONTROL`              | `off`                                                                                               | multisite | no       | **X-DNS-Prefetch-Control:** Regulates DNS prefetching to reduce unintentional network requests and enhance privacy.          |
-    | `REFERRER_POLICY`                     | `strict-origin-when-cross-origin`                                                                   | multisite | no       | **Referrer Policy:** Controls the amount of referrer information sent, safeguarding user privacy.                            |
-    | `PERMISSIONS_POLICY`                  | `accelerometer=(), ambient-light-sensor=(), attribution-reporting=(), autoplay=(), battery=(), ...` | multisite | no       | **Permissions Policy:** Restricts browser feature access, reducing potential attack vectors.                                 |
-    | `KEEP_UPSTREAM_HEADERS`               | `Content-Security-Policy Permissions-Policy X-Frame-Options`                                        | multisite | no       | **Keep Headers:** Preserves selected upstream headers, aiding legacy integration while maintaining security.                 |
+!!! tip "Best Practices"
+    - Regularly review and update your security headers to align with evolving security standards.
+    - Use tools like [Mozilla Observatory](https://observatory.mozilla.org/) to validate your header configuration.
+    - Test CSP in `Report-Only` mode before enforcing it to avoid breaking functionality.
 
-    !!! tip "Best Practices"
-        - Regularly review and update your security headers to align with evolving security standards.
-        - Use tools like [Mozilla Observatory](https://observatory.mozilla.org/) to validate your header configuration.
-        - Test CSP in `Report-Only` mode before enforcing it to avoid breaking functionality.
+**Cookie Settings**
 
-=== "Cookie Settings"
+Proper cookie settings ensure secure user sessions by preventing hijacking, fixation, and cross-site scripting. Secure cookies maintain session integrity over HTTPS and enhance overall user data protection.
 
-    **Overview**
+!!! success "Benefits of Secure Cookies"
+    - **HttpOnly Flag:** Prevents client-side scripts from accessing cookies, mitigating XSS risks.
+    - **SameSite Flag:** Reduces CSRF attacks by restricting cross-origin cookie usage.
+    - **Secure Flag:** Ensures cookies are transmitted only over encrypted HTTPS connections.
 
-    Proper cookie settings ensure secure user sessions by preventing hijacking, fixation, and cross-site scripting. Secure cookies maintain session integrity over HTTPS and enhance overall user data protection.
+| Setting                   | Default                   | Context   | Multiple | Description                                                                                                                                            |
+| ------------------------- | ------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `COOKIE_FLAGS`            | `* HttpOnly SameSite=Lax` | multisite | yes      | **Cookie Flags:** Automatically adds security flags such as HttpOnly and SameSite, protecting cookies from client-side script access and CSRF attacks. |
+| `COOKIE_AUTO_SECURE_FLAG` | `yes`                     | multisite | no       | **Auto Secure Flag:** Ensures cookies are only sent over secure HTTPS connections by appending the Secure flag automatically.                          |
 
-    !!! success "Benefits of Secure Cookies"
-        - **HttpOnly Flag:** Prevents client-side scripts from accessing cookies, mitigating XSS risks.
-        - **SameSite Flag:** Reduces CSRF attacks by restricting cross-origin cookie usage.
-        - **Secure Flag:** Ensures cookies are transmitted only over encrypted HTTPS connections.
+!!! tip "Best Practices"
+    - Use `SameSite=Strict` for sensitive cookies to prevent cross-origin access.
+    - Regularly audit your cookie settings to ensure compliance with security and privacy regulations.
+    - Avoid setting cookies without the Secure flag in production environments.
 
-    | Setting                   | Default                   | Context   | Multiple | Description                                                                                                                                            |
-    | ------------------------- | ------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-    | `COOKIE_FLAGS`            | `* HttpOnly SameSite=Lax` | multisite | yes      | **Cookie Flags:** Automatically adds security flags such as HttpOnly and SameSite, protecting cookies from client-side script access and CSRF attacks. |
-    | `COOKIE_AUTO_SECURE_FLAG` | `yes`                     | multisite | no       | **Auto Secure Flag:** Ensures cookies are only sent over secure HTTPS connections by appending the Secure flag automatically.                          |
+**Custom Headers**
 
-    !!! tip "Best Practices"
-        - Use `SameSite=Strict` for sensitive cookies to prevent cross-origin access.
-        - Regularly audit your cookie settings to ensure compliance with security and privacy regulations.
-        - Avoid setting cookies without the Secure flag in production environments.
+Custom headers allow you to add specific HTTP headers to meet application or performance requirements. They offer flexibility but must be carefully configured to avoid exposing sensitive server details.
 
-=== "Custom Headers"
+!!! success "Benefits of Custom Headers"
+    - Enhance security by removing unnecessary headers that may leak server details.
+    - Add application-specific headers to improve functionality or debugging.
 
-    **Overview**
+| Setting          | Default                                                                              | Context   | Multiple | Description                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CUSTOM_HEADER`  |                                                                                      | multisite | yes      | **Custom Header:** Provides a means to add user-defined headers in the format HeaderName: HeaderValue for specialized security or performance enhancements. |
+| `REMOVE_HEADERS` | `Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins` | multisite | no       | **Remove Headers:** Specifies headers to remove, decreasing the chance of exposing internal server details and known vulnerabilities.                       |
 
-    Custom headers allow you to add specific HTTP headers to meet application or performance requirements. They offer flexibility but must be carefully configured to avoid exposing sensitive server details.
+!!! warning "Security Considerations"
+    - Avoid exposing sensitive information through custom headers.
+    - Regularly review and update custom headers to align with your application's requirements.
 
-    !!! success "Benefits of Custom Headers"
-        - Enhance security by removing unnecessary headers that may leak server details.
-        - Add application-specific headers to improve functionality or debugging.
-
-    | Setting          | Default                                                                              | Context   | Multiple | Description                                                                                                                                                 |
-    | ---------------- | ------------------------------------------------------------------------------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `CUSTOM_HEADER`  |                                                                                      | multisite | yes      | **Custom Header:** Provides a means to add user-defined headers in the format HeaderName: HeaderValue for specialized security or performance enhancements. |
-    | `REMOVE_HEADERS` | `Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version Public-Key-Pins` | multisite | no       | **Remove Headers:** Specifies headers to remove, decreasing the chance of exposing internal server details and known vulnerabilities.                       |
-
-    !!! warning "Security Considerations"
-        - Avoid exposing sensitive information through custom headers.
-        - Regularly review and update custom headers to align with your application's requirements.
-
-    !!! tip "Best Practices"
-        - Use `REMOVE_HEADERS` to strip out headers like `Server` and `X-Powered-By` to reduce fingerprinting risks.
-        - Test custom headers in a staging environment before deploying them to production.
+!!! tip "Best Practices"
+    - Use `REMOVE_HEADERS` to strip out headers like `Server` and `X-Powered-By` to reduce fingerprinting risks.
+    - Test custom headers in a staging environment before deploying them to production.
 
 ### Example Configurations
 
@@ -2770,33 +2763,33 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 
 ### Configuration Settings
 
-=== "Request Rate Limiting"
+**Request Rate Limiting**
 
-    | Setting          | Default | Context   | Multiple | Description                                                                                                                                                        |
-    | ---------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-    | `USE_LIMIT_REQ`  | `yes`   | multisite | no       | **Enable Request Limiting:** Set to `yes` to enable the request rate limiting feature.                                                                             |
-    | `LIMIT_REQ_URL`  | `/`     | multisite | yes      | **URL Pattern:** URL pattern (PCRE regex) to which the rate limit will be applied; use `/` to apply for all requests.                                              |
-    | `LIMIT_REQ_RATE` | `2r/s`  | multisite | yes      | **Rate Limit:** Maximum request rate in the format `Nr/t`, where N is the number of requests and t is the time unit: s (second), m (minute), h (hour), or d (day). |
+| Setting          | Default | Context   | Multiple | Description                                                                                                                                                        |
+| ---------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_LIMIT_REQ`  | `yes`   | multisite | no       | **Enable Request Limiting:** Set to `yes` to enable the request rate limiting feature.                                                                             |
+| `LIMIT_REQ_URL`  | `/`     | multisite | yes      | **URL Pattern:** URL pattern (PCRE regex) to which the rate limit will be applied; use `/` to apply for all requests.                                              |
+| `LIMIT_REQ_RATE` | `2r/s`  | multisite | yes      | **Rate Limit:** Maximum request rate in the format `Nr/t`, where N is the number of requests and t is the time unit: s (second), m (minute), h (hour), or d (day). |
 
-    !!! tip "Rate Limiting Format"
-        The rate limit format is specified as `Nr/t` where:
+!!! tip "Rate Limiting Format"
+    The rate limit format is specified as `Nr/t` where:
 
-        - `N` is the number of requests allowed
-        - `r` is a literal 'r' (for 'requests')
-        - `/` is a literal slash
-        - `t` is the time unit: `s` (second), `m` (minute), `h` (hour), or `d` (day)
+    - `N` is the number of requests allowed
+    - `r` is a literal 'r' (for 'requests')
+    - `/` is a literal slash
+    - `t` is the time unit: `s` (second), `m` (minute), `h` (hour), or `d` (day)
 
-        For example, `5r/m` means that 5 requests per minute are allowed from each IP address.
+    For example, `5r/m` means that 5 requests per minute are allowed from each IP address.
 
-=== "Connection Limiting"
+**Connection Limiting**
 
-    | Setting                 | Default | Context   | Multiple | Description                                                                                 |
-    | ----------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
-    | `USE_LIMIT_CONN`        | `yes`   | multisite | no       | **Enable Connection Limiting:** Set to `yes` to enable the connection limiting feature.     |
-    | `LIMIT_CONN_MAX_HTTP1`  | `10`    | multisite | no       | **HTTP/1.X Connections:** Maximum number of concurrent HTTP/1.X connections per IP address. |
-    | `LIMIT_CONN_MAX_HTTP2`  | `100`   | multisite | no       | **HTTP/2 Streams:** Maximum number of concurrent HTTP/2 streams per IP address.             |
-    | `LIMIT_CONN_MAX_HTTP3`  | `100`   | multisite | no       | **HTTP/3 Streams:** Maximum number of concurrent HTTP/3 streams per IP address.             |
-    | `LIMIT_CONN_MAX_STREAM` | `10`    | multisite | no       | **Stream Connections:** Maximum number of concurrent stream connections per IP address.     |
+| Setting                 | Default | Context   | Multiple | Description                                                                                 |
+| ----------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
+| `USE_LIMIT_CONN`        | `yes`   | multisite | no       | **Enable Connection Limiting:** Set to `yes` to enable the connection limiting feature.     |
+| `LIMIT_CONN_MAX_HTTP1`  | `10`    | multisite | no       | **HTTP/1.X Connections:** Maximum number of concurrent HTTP/1.X connections per IP address. |
+| `LIMIT_CONN_MAX_HTTP2`  | `100`   | multisite | no       | **HTTP/2 Streams:** Maximum number of concurrent HTTP/2 streams per IP address.             |
+| `LIMIT_CONN_MAX_HTTP3`  | `100`   | multisite | no       | **HTTP/3 Streams:** Maximum number of concurrent HTTP/3 streams per IP address.             |
+| `LIMIT_CONN_MAX_STREAM` | `10`    | multisite | no       | **Stream Connections:** Maximum number of concurrent stream connections per IP address.     |
 
 !!! info "Connection vs. Request Limiting"
     - **Connection limiting** restricts the number of simultaneous connections that a single IP address can maintain.
@@ -3003,12 +2996,13 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ### Configuration Settings
 
-| Setting                              | Default  | Context   | Multiple | Description                                                                           |
-| ------------------------------------ | -------- | --------- | -------- | ------------------------------------------------------------------------------------- |
-| `USE_METRICS`                        | `yes`    | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.       |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `16m`, `32m`).       |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker.     |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. |
+| Setting                              | Default  | Context   | Multiple | Description                                                                                                          |
+| ------------------------------------ | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`    | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                      |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `16m`, `32m`).                                      |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker.                                    |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis.                                |
+| `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation. |
 
 !!! tip "Sizing Memory Allocation"
     The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
@@ -3033,6 +3027,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "16m"
     METRICS_MAX_BLOCKED_REQUESTS: "1000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_SAVE_TO_REDIS: "yes"
     ```
 
 === "Low-Resource Environment"
@@ -3044,6 +3039,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    METRICS_SAVE_TO_REDIS: "no"
     ```
 
 === "High-Traffic Environment"
@@ -3055,6 +3051,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    METRICS_SAVE_TO_REDIS: "yes"
     ```
 
 === "Metrics Disabled"
@@ -3102,209 +3099,193 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
 ### Configuration Guide
 
-=== "Default Server Security"
+**Default Server Security**
 
-    **Default Server Controls**
+In HTTP, the `Host` header specifies the target server, but it may be missing or unknown, often due to bots scanning for vulnerabilities.
 
-    In HTTP, the `Host` header specifies the target server, but it may be missing or unknown, often due to bots scanning for vulnerabilities.
+To block such requests:
 
-    To block such requests:
+- Set `DISABLE_DEFAULT_SERVER` to `yes` to silently deny such requests using [NGINX's `444` status code](https://http.dev/444).
+- For stricter security, enable `DISABLE_DEFAULT_SERVER_STRICT_SNI` to reject SSL/TLS connections without valid SNI.
 
-    - Set `DISABLE_DEFAULT_SERVER` to `yes` to silently deny such requests using [NGINX's `444` status code](https://http.dev/444).
-    - For stricter security, enable `DISABLE_DEFAULT_SERVER_STRICT_SNI` to reject SSL/TLS connections without valid SNI.
+!!! success "Security Benefits"
+    - Blocks Host header manipulation and virtual host scanning
+    - Mitigates HTTP request smuggling risks
+    - Removes the default server as an attack vector
 
-    !!! success "Security Benefits"
-        - Blocks Host header manipulation and virtual host scanning
-        - Mitigates HTTP request smuggling risks
-        - Removes the default server as an attack vector
+| Setting                             | Default | Context | Multiple | Description                                                                                                      |
+| ----------------------------------- | ------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `DISABLE_DEFAULT_SERVER`            | `no`    | global  | no       | **Default Server:** Set to `yes` to disable the default server when no hostname matches the request.             |
+| `DISABLE_DEFAULT_SERVER_STRICT_SNI` | `no`    | global  | no       | **Strict SNI:** When set to `yes`, requires SNI for HTTPS connections and rejects connections without valid SNI. |
 
-    | Setting                             | Default | Context | Multiple | Description                                                                                                      |
-    | ----------------------------------- | ------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-    | `DISABLE_DEFAULT_SERVER`            | `no`    | global  | no       | **Default Server:** Set to `yes` to disable the default server when no hostname matches the request.             |
-    | `DISABLE_DEFAULT_SERVER_STRICT_SNI` | `no`    | global  | no       | **Strict SNI:** When set to `yes`, requires SNI for HTTPS connections and rejects connections without valid SNI. |
+!!! warning "SNI Enforcement"
+    Enabling strict SNI validation provides stronger security but may cause issues if BunkerWeb is behind a reverse proxy that forwards HTTPS requests without preserving SNI information. Test thoroughly before enabling in production environments.
 
-    !!! warning "SNI Enforcement"
-        Enabling strict SNI validation provides stronger security but may cause issues if BunkerWeb is behind a reverse proxy that forwards HTTPS requests without preserving SNI information. Test thoroughly before enabling in production environments.
+**Deny HTTP Status**
 
-=== "Deny HTTP Status"
+The first step in handling denied client access is defining the appropriate action. This can be configured using the `DENY_HTTP_STATUS` setting. When BunkerWeb denies a request, you can control its response using this setting. By default, it returns a `403 Forbidden` status, displaying a web page or custom content to the client.
 
-    **HTTP Status Control**
+Alternatively, setting it to `444` closes the connection immediately without sending any response. This [non-standard status code](https://http.dev/444), specific to NGINX, is useful for silently dropping unwanted requests.
 
-    The first step in handling denied client access is defining the appropriate action. This can be configured using the `DENY_HTTP_STATUS` setting. When BunkerWeb denies a request, you can control its response using this setting. By default, it returns a `403 Forbidden` status, displaying a web page or custom content to the client.
+| Setting            | Default | Context | Multiple | Description                                                                                                         |
+| ------------------ | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `DENY_HTTP_STATUS` | `403`   | global  | no       | **Deny HTTP Status:** HTTP status code to send when request is denied (403 or 444). Code 444 closes the connection. |
 
-    Alternatively, setting it to `444` closes the connection immediately without sending any response. This [non-standard status code](https://http.dev/444), specific to NGINX, is useful for silently dropping unwanted requests.
+!!! warning "444 Status Code considerations"
+    Since clients receive no feedback, troubleshooting can be more challenging. Setting `444` is recommended only if you have thoroughly addressed false positives, are experienced with BunkerWeb, and require a higher level of security.
 
-    | Setting            | Default | Context | Multiple | Description                                                                                                         |
-    | ------------------ | ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-    | `DENY_HTTP_STATUS` | `403`   | global  | no       | **Deny HTTP Status:** HTTP status code to send when request is denied (403 or 444). Code 444 closes the connection. |
+!!! info "Stream mode"
+    In **stream mode**, this setting is always enforced as `444`, meaning the connection will be closed, regardless of the configured value.
 
-    !!! warning "444 Status Code considerations"
-        Since clients receive no feedback, troubleshooting can be more challenging. Setting `444` is recommended only if you have thoroughly addressed false positives, are experienced with BunkerWeb, and require a higher level of security.
+**HTTP Methods**
 
-    !!! info "Stream mode"
-        In **stream mode**, this setting is always enforced as `444`, meaning the connection will be closed, regardless of the configured value.
+Restricting HTTP methods to only those required by your application is a fundamental security measure that adheres to the principle of least privilege. By explicitly defining acceptable HTTP methods, you can minimize the risk of exploitation through unused or dangerous methods.
 
-=== "HTTP Methods"
+This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
 
-    **HTTP Method Control**
+For most websites, the default `GET|POST|HEAD` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`.
 
-    Restricting HTTP methods to only those required by your application is a fundamental security measure that adheres to the principle of least privilege. By explicitly defining acceptable HTTP methods, you can minimize the risk of exploitation through unused or dangerous methods.
+!!! success "Security Benefits"
+    - Prevents exploitation of unused or unnecessary HTTP methods
+    - Reduces the attack surface by disabling potentially harmful methods
+    - Blocks HTTP method enumeration techniques used by attackers
 
-    This feature is configured using the `ALLOWED_METHODS` setting, where methods are listed and separated by a `|` (default: `GET|POST|HEAD`). If a client attempts to use a method not listed, the server will respond with a **405 - Method Not Allowed** status.
+| Setting           | Default | Context | Multiple | Description |
+| ----------------- | ------- | ------- | -------- | ----------- |
+| `ALLOWED_METHODS` | `GET    | POST    | HEAD`    | multisite   | no | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. |
 
-    For most websites, the default `GET|POST|HEAD` is sufficient. If your application uses RESTful APIs, you may need to include methods like `PUT` and `DELETE`.
+!!! abstract "CORS and Pre-flight Requests"
+    If your application supports [Cross-Origin Resource Sharing (CORS)](#cors), you should include the `OPTIONS` method in the `ALLOWED_METHODS` setting to handle pre-flight requests. This ensures proper functionality for browsers making cross-origin requests.
 
-    !!! success "Security Benefits"
-        - Prevents exploitation of unused or unnecessary HTTP methods
-        - Reduces the attack surface by disabling potentially harmful methods
-        - Blocks HTTP method enumeration techniques used by attackers
+!!! danger "Security Considerations"
+    - **Avoid enabling `TRACE` or `CONNECT`:** These methods are rarely needed and can introduce significant security risks, such as enabling Cross-Site Tracing (XST) or tunneling attacks.
+    - **Regularly review allowed methods:** Periodically audit the `ALLOWED_METHODS` setting to ensure it aligns with your application's current requirements.
+    - **Test thoroughly before deployment:** Changes to HTTP method restrictions can impact application functionality. Validate your configuration in a staging environment before applying it to production.
 
-    | Setting           | Default | Context | Multiple | Description |
-    | ----------------- | ------- | ------- | -------- | ----------- |
-    | `ALLOWED_METHODS` | `GET    | POST    | HEAD`    | multisite   | no | **HTTP Methods:** List of HTTP methods that are allowed, separated by pipe characters. |
+**Request Size Limits**
 
-    !!! abstract "CORS and Pre-flight Requests"
-        If your application supports [Cross-Origin Resource Sharing (CORS)](#cors), you should include the `OPTIONS` method in the `ALLOWED_METHODS` setting to handle pre-flight requests. This ensures proper functionality for browsers making cross-origin requests.
+The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
 
-    !!! danger "Security Considerations"
-        - **Avoid enabling `TRACE` or `CONNECT`:** These methods are rarely needed and can introduce significant security risks, such as enabling Cross-Site Tracing (XST) or tunneling attacks.
-        - **Regularly review allowed methods:** Periodically audit the `ALLOWED_METHODS` setting to ensure it aligns with your application's current requirements.
-        - **Test thoroughly before deployment:** Changes to HTTP method restrictions can impact application functionality. Validate your configuration in a staging environment before applying it to production.
+!!! success "Security Benefits"
+    - Protects against denial-of-service attacks caused by excessive payload sizes
+    - Mitigates buffer overflow vulnerabilities
+    - Prevents file upload attacks
+    - Reduces the risk of server resource exhaustion
 
-=== "Request Size Limits"
+| Setting           | Default | Context   | Multiple | Description                                                                                        |
+| ----------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
+| `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads). |
 
-    **Request Size Limits**
+!!! tip "Request Size Configuration Best Practices"
+    If you need to allow a request body of unlimited size, you can set the `MAX_CLIENT_SIZE` value to `0`. However, this is **not recommended** due to potential security and performance risks.
 
-    The maximum request body size can be controlled using the `MAX_CLIENT_SIZE` setting (default: `10m`). Accepted values follow the syntax described [here](https://nginx.org/en/docs/syntax.html).
+    **Best Practices:**
 
-    !!! success "Security Benefits"
-        - Protects against denial-of-service attacks caused by excessive payload sizes
-        - Mitigates buffer overflow vulnerabilities
-        - Prevents file upload attacks
-        - Reduces the risk of server resource exhaustion
+    - Always configure `MAX_CLIENT_SIZE` to the smallest value that meets your application's legitimate requirements.
+    - Regularly review and adjust this setting to align with your application's evolving needs.
+    - Avoid setting `0` unless absolutely necessary, as it can expose your server to denial-of-service attacks and resource exhaustion.
 
-    | Setting           | Default | Context   | Multiple | Description                                                                                        |
-    | ----------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
-    | `MAX_CLIENT_SIZE` | `10m`   | multisite | no       | **Maximum Request Size:** The maximum allowed size for client request bodies (e.g., file uploads). |
+    By carefully managing this setting, you can ensure optimal security and performance for your application.
 
-    !!! tip "Request Size Configuration Best Practices"
-        If you need to allow a request body of unlimited size, you can set the `MAX_CLIENT_SIZE` value to `0`. However, this is **not recommended** due to potential security and performance risks.
+**Protocol Support**
 
-        **Best Practices:**
+Modern HTTP protocols like HTTP/2 and HTTP/3 improve performance and security. BunkerWeb allows easy configuration of these protocols.
 
-        - Always configure `MAX_CLIENT_SIZE` to the smallest value that meets your application's legitimate requirements.
-        - Regularly review and adjust this setting to align with your application's evolving needs.
-        - Avoid setting `0` unless absolutely necessary, as it can expose your server to denial-of-service attacks and resource exhaustion.
+!!! success "Security and Performance Benefits"
+    - **Security Advantages:** Modern protocols like HTTP/2 and HTTP/3 enforce TLS/HTTPS by default, reduce susceptibility to certain attacks, and improve privacy through encrypted headers (HTTP/3).
+    - **Performance Benefits:** Features like multiplexing, header compression, server push, and binary data transfer enhance speed and efficiency.
 
-        By carefully managing this setting, you can ensure optimal security and performance for your application.
+| Setting              | Default | Context   | Multiple | Description                                                             |
+| -------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------- |
+| `LISTEN_HTTP`        | `yes`   | multisite | no       | **HTTP Listen:** Respond to (insecure) HTTP requests when set to `yes`. |
+| `HTTP2`              | `yes`   | multisite | no       | **HTTP2:** Support HTTP2 protocol when HTTPS is enabled.                |
+| `HTTP3`              | `yes`   | multisite | no       | **HTTP3:** Support HTTP3 protocol when HTTPS is enabled.                |
+| `HTTP3_ALT_SVC_PORT` | `443`   | multisite | no       | **HTTP3 Alt-Svc Port:** Port to use in the Alt-Svc header for HTTP3.    |
 
-=== "Protocol Support"
+!!! example "About HTTP/3"
+    HTTP/3, the latest version of the Hypertext Transfer Protocol, uses QUIC over UDP instead of TCP, addressing issues like head-of-line blocking for faster, more reliable connections.
 
-    **HTTP Protocol Settings**
+    NGINX introduced experimental support for HTTP/3 and QUIC starting with version 1.25.0. However, this feature is still experimental, and caution is advised for production use. For more details, see [NGINX's official documentation](https://nginx.org/en/docs/quic.html).
 
-    Modern HTTP protocols like HTTP/2 and HTTP/3 improve performance and security. BunkerWeb allows easy configuration of these protocols.
+    Thorough testing is recommended before enabling HTTP/3 in production environments.
 
-    !!! success "Security and Performance Benefits"
-        - **Security Advantages:** Modern protocols like HTTP/2 and HTTP/3 enforce TLS/HTTPS by default, reduce susceptibility to certain attacks, and improve privacy through encrypted headers (HTTP/3).
-        - **Performance Benefits:** Features like multiplexing, header compression, server push, and binary data transfer enhance speed and efficiency.
+**Static File Serving**
 
-    | Setting              | Default | Context   | Multiple | Description                                                             |
-    | -------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------- |
-    | `LISTEN_HTTP`        | `yes`   | multisite | no       | **HTTP Listen:** Respond to (insecure) HTTP requests when set to `yes`. |
-    | `HTTP2`              | `yes`   | multisite | no       | **HTTP2:** Support HTTP2 protocol when HTTPS is enabled.                |
-    | `HTTP3`              | `yes`   | multisite | no       | **HTTP3:** Support HTTP3 protocol when HTTPS is enabled.                |
-    | `HTTP3_ALT_SVC_PORT` | `443`   | multisite | no       | **HTTP3 Alt-Svc Port:** Port to use in the Alt-Svc header for HTTP3.    |
+BunkerWeb can serve static files directly or act as a reverse proxy to an application server. By default, files are served from `/var/www/html/{server_name}`.
 
-    !!! example "About HTTP/3"
-        HTTP/3, the latest version of the Hypertext Transfer Protocol, uses QUIC over UDP instead of TCP, addressing issues like head-of-line blocking for faster, more reliable connections.
+| Setting       | Default                       | Context   | Multiple | Description                                                                                            |
+| ------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `SERVE_FILES` | `yes`                         | multisite | no       | **Serve Files:** When set to `yes`, BunkerWeb will serve static files from the configured root folder. |
+| `ROOT_FOLDER` | `/var/www/html/{server_name}` | multisite | no       | **Root Folder:** The directory from which to serve static files. Empty means use the default location. |
 
-        NGINX introduced experimental support for HTTP/3 and QUIC starting with version 1.25.0. However, this feature is still experimental, and caution is advised for production use. For more details, see [NGINX's official documentation](https://nginx.org/en/docs/quic.html).
+!!! tip "Best Practices for Static File Serving"
+    - **Direct Serving:** Enable file serving (`SERVE_FILES=yes`) when BunkerWeb is responsible for serving static files directly.
+    - **Reverse Proxy:** If BunkerWeb acts as a reverse proxy, **deactivate file serving** (`SERVE_FILES=no`) to reduce the attack surface and avoid exposing unnecessary directories.
+    - **Permissions:** Ensure proper file permissions and path configurations to prevent unauthorized access.
+    - **Security:** Avoid exposing sensitive directories or files through misconfigurations.
 
-        Thorough testing is recommended before enabling HTTP/3 in production environments.
+    By carefully managing static file serving, you can optimize performance while maintaining a secure environment.
 
-=== "Static File Serving"
+**System Settings**
 
-    **File Serving Configuration**
+These settings manage BunkerWeb's interaction with external systems and contribute to improving the product through optional anonymous usage statistics.
 
-    BunkerWeb can serve static files directly or act as a reverse proxy to an application server. By default, files are served from `/var/www/html/{server_name}`.
+**Anonymous Reporting**
 
-    | Setting       | Default                       | Context   | Multiple | Description                                                                                            |
-    | ------------- | ----------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------ |
-    | `SERVE_FILES` | `yes`                         | multisite | no       | **Serve Files:** When set to `yes`, BunkerWeb will serve static files from the configured root folder. |
-    | `ROOT_FOLDER` | `/var/www/html/{server_name}` | multisite | no       | **Root Folder:** The directory from which to serve static files. Empty means use the default location. |
+Anonymous reporting provides the BunkerWeb team with insights into how the software is being used. This helps identify areas for improvement and prioritize feature development. The reports are strictly statistical and do not include any sensitive or personally identifiable information. They cover:
 
-    !!! tip "Best Practices for Static File Serving"
-        - **Direct Serving:** Enable file serving (`SERVE_FILES=yes`) when BunkerWeb is responsible for serving static files directly.
-        - **Reverse Proxy:** If BunkerWeb acts as a reverse proxy, **deactivate file serving** (`SERVE_FILES=no`) to reduce the attack surface and avoid exposing unnecessary directories.
-        - **Permissions:** Ensure proper file permissions and path configurations to prevent unauthorized access.
-        - **Security:** Avoid exposing sensitive directories or files through misconfigurations.
+- Enabled features
+- General configuration patterns
 
-        By carefully managing static file serving, you can optimize performance while maintaining a secure environment.
+You can disable this feature if desired by setting `SEND_ANONYMOUS_REPORT` to `no`.
 
-=== "System Settings"
+**External Plugins**
 
-    **Plugin and System Management**
+External plugins enable you to extend BunkerWeb's functionality by integrating third-party modules. This allows for additional customization and advanced use cases.
 
-    These settings manage BunkerWeb's interaction with external systems and contribute to improving the product through optional anonymous usage statistics.
+!!! danger "External Plugin Security"
+    **External plugins can introduce security risks if not properly vetted.** Follow these best practices to minimize potential threats:
 
-    **Anonymous Reporting**
+    - Only use plugins from trusted sources.
+    - Verify plugin integrity using checksums when available.
+    - Regularly review and update plugins to ensure security and compatibility.
 
-    Anonymous reporting provides the BunkerWeb team with insights into how the software is being used. This helps identify areas for improvement and prioritize feature development. The reports are strictly statistical and do not include any sensitive or personally identifiable information. They cover:
+    For more details, refer to the [Plugins documentation](plugins.md).
 
-    - Enabled features
-    - General configuration patterns
+| Setting                 | Default | Context | Multiple | Description                                                                    |
+| ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
+| `SEND_ANONYMOUS_REPORT` | `yes`   | global  | no       | **Anonymous Reports:** Send anonymous usage reports to BunkerWeb maintainers.  |
+| `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). |
 
-    You can disable this feature if desired by setting `SEND_ANONYMOUS_REPORT` to `no`.
+**File Caching**
 
-    **External Plugins**
+The open file cache improves performance by storing file descriptors and metadata in memory, reducing the need for repeated file system operations.
 
-    External plugins enable you to extend BunkerWeb's functionality by integrating third-party modules. This allows for additional customization and advanced use cases.
+!!! success "Benefits of File Caching"
+    - **Performance:** Reduces filesystem I/O, decreases latency, and lowers CPU usage for file operations.
+    - **Security:** Mitigates timing attacks by caching error responses and reduces the impact of DoS attacks targeting the filesystem.
 
-    !!! danger "External Plugin Security"
-        **External plugins can introduce security risks if not properly vetted.** Follow these best practices to minimize potential threats:
+| Setting                    | Default                 | Context   | Multiple | Description                                                                                          |
+| -------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `USE_OPEN_FILE_CACHE`      | `no`                    | multisite | no       | **Enable Cache:** Enable caching of file descriptors and metadata to improve performance.            |
+| `OPEN_FILE_CACHE`          | `max=1000 inactive=20s` | multisite | no       | **Cache Configuration:** Configure the open file cache (e.g., maximum entries and inactive timeout). |
+| `OPEN_FILE_CACHE_ERRORS`   | `yes`                   | multisite | no       | **Cache Errors:** Cache file descriptor lookup errors as well as successful lookups.                 |
+| `OPEN_FILE_CACHE_MIN_USES` | `2`                     | multisite | no       | **Minimum Uses:** Minimum number of accesses during the inactive period for a file to remain cached. |
+| `OPEN_FILE_CACHE_VALID`    | `30s`                   | multisite | no       | **Cache Validity:** Time after which cached elements are revalidated.                                |
 
-        - Only use plugins from trusted sources.
-        - Verify plugin integrity using checksums when available.
-        - Regularly review and update plugins to ensure security and compatibility.
+**Configuration Guide**
 
-        For more details, refer to the [Plugins documentation](plugins.md).
+To enable and configure file caching:
+1. Set `USE_OPEN_FILE_CACHE` to `yes` to activate the feature.
+2. Adjust `OPEN_FILE_CACHE` parameters to define the maximum number of cached entries and their inactive timeout.
+3. Use `OPEN_FILE_CACHE_ERRORS` to cache both successful and failed lookups, reducing repeated filesystem operations.
+4. Set `OPEN_FILE_CACHE_MIN_USES` to specify the minimum number of accesses required for a file to remain cached.
+5. Define the cache validity period with `OPEN_FILE_CACHE_VALID` to control how often cached elements are revalidated.
 
-    | Setting                 | Default | Context | Multiple | Description                                                                    |
-    | ----------------------- | ------- | ------- | -------- | ------------------------------------------------------------------------------ |
-    | `SEND_ANONYMOUS_REPORT` | `yes`   | global  | no       | **Anonymous Reports:** Send anonymous usage reports to BunkerWeb maintainers.  |
-    | `EXTERNAL_PLUGIN_URLS`  |         | global  | no       | **External Plugins:** URLs for external plugins to download (space-separated). |
-
-=== "File Caching"
-
-    **File Cache Optimization**
-
-    The open file cache improves performance by storing file descriptors and metadata in memory, reducing the need for repeated file system operations.
-
-    !!! success "Benefits of File Caching"
-        - **Performance:** Reduces filesystem I/O, decreases latency, and lowers CPU usage for file operations.
-        - **Security:** Mitigates timing attacks by caching error responses and reduces the impact of DoS attacks targeting the filesystem.
-
-    | Setting                    | Default                 | Context   | Multiple | Description                                                                                          |
-    | -------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
-    | `USE_OPEN_FILE_CACHE`      | `no`                    | multisite | no       | **Enable Cache:** Enable caching of file descriptors and metadata to improve performance.            |
-    | `OPEN_FILE_CACHE`          | `max=1000 inactive=20s` | multisite | no       | **Cache Configuration:** Configure the open file cache (e.g., maximum entries and inactive timeout). |
-    | `OPEN_FILE_CACHE_ERRORS`   | `yes`                   | multisite | no       | **Cache Errors:** Cache file descriptor lookup errors as well as successful lookups.                 |
-    | `OPEN_FILE_CACHE_MIN_USES` | `2`                     | multisite | no       | **Minimum Uses:** Minimum number of accesses during the inactive period for a file to remain cached. |
-    | `OPEN_FILE_CACHE_VALID`    | `30s`                   | multisite | no       | **Cache Validity:** Time after which cached elements are revalidated.                                |
-
-    **Configuration Guide**
-
-    To enable and configure file caching:
-    1. Set `USE_OPEN_FILE_CACHE` to `yes` to activate the feature.
-    2. Adjust `OPEN_FILE_CACHE` parameters to define the maximum number of cached entries and their inactive timeout.
-    3. Use `OPEN_FILE_CACHE_ERRORS` to cache both successful and failed lookups, reducing repeated filesystem operations.
-    4. Set `OPEN_FILE_CACHE_MIN_USES` to specify the minimum number of accesses required for a file to remain cached.
-    5. Define the cache validity period with `OPEN_FILE_CACHE_VALID` to control how often cached elements are revalidated.
-
-    !!! tip "Best Practices"
-        - Enable file caching for websites with many static files to improve performance.
-        - Regularly review and fine-tune cache settings to balance performance and resource usage.
-        - In dynamic environments where files change frequently, consider reducing the cache validity period or disabling the feature to ensure content freshness.
+!!! tip "Best Practices"
+    - Enable file caching for websites with many static files to improve performance.
+    - Regularly review and fine-tune cache settings to balance performance and resource usage.
+    - In dynamic environments where files change frequently, consider reducing the cache validity period or disabling the feature to ensure content freshness.
 
 ### Example Configurations
 
@@ -3427,7 +3408,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.15.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.15.0) (**default**).
+- **`4`**: Stable [v4.16.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.16.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"
@@ -3723,10 +3704,11 @@ The Pro plugin bundles advanced features and enhancements for enterprise deploym
 
 Follow these steps to configure and use the Pro features:
 
-1. **Obtain a license key:** Purchase a Pro license from the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc).
-2. **Configure your license key:** Use the `PRO_LICENSE_KEY` setting to configure your license.
-3. **Let BunkerWeb handle the rest:** Once configured with a valid license, Pro plugins are automatically downloaded and activated.
-4. **Monitor your Pro status:** Check the health indicators in the [web UI](web-ui.md) to confirm your Pro subscription status.
+- Claim your [free trial on the BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) by using the `freetrial` promo code at checkout
+- Once connected to the client area, copy your PRO license key
+- Paste your private key into BunkerWeb using the [web UI](web-ui.md#upgrade-to-pro) or [specific setting](features.md#pro)
+
+Do not hesitate to visit the [BunkerWeb panel](https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&utm_source=doc) or [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any questions regarding the PRO version.
 
 ### Configuration Settings
 
@@ -3981,45 +3963,45 @@ Follow these steps to configure and use the Redirect feature:
 
 STREAM support :white_check_mark:
 
-The Redis plugin integrates Redis into BunkerWeb for caching and fast data retrieval. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
+The Redis plugin integrates [Redis](https://redis.io/) or [Valkey](https://valkey.io/) into BunkerWeb for caching and fast data retrieval. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
 
 **How it works:**
 
-1. When enabled, BunkerWeb establishes a connection to your configured Redis server.
-2. Critical data such as session information, metrics, and security-related data are stored in Redis.
+1. When enabled, BunkerWeb establishes a connection to your configured Redis or Valkey server.
+2. Critical data such as session information, metrics, and security-related data are stored in Redis/Valkey.
 3. Multiple BunkerWeb instances can share this data, enabling seamless clustering and load balancing.
-4. The plugin supports various Redis deployment options, including standalone servers, password authentication, SSL/TLS encryption, and Redis Sentinel for high availability.
+4. The plugin supports various Redis/Valkey deployment options, including standalone servers, password authentication, SSL/TLS encryption, and Redis Sentinel for high availability.
 5. Automatic reconnection and configurable timeouts ensure robustness in production environments.
 
 ### How to Use
 
 Follow these steps to configure and use the Redis plugin:
 
-1. **Enable the feature:** Set the `USE_REDIS` setting to `yes` to enable Redis integration.
-2. **Configure connection details:** Specify your Redis server's hostname/IP address and port.
-3. **Set security options:** Configure authentication credentials if your Redis server requires them.
+1. **Enable the feature:** Set the `USE_REDIS` setting to `yes` to enable Redis/Valkey integration.
+2. **Configure connection details:** Specify your Redis/Valkey server's hostname/IP address and port.
+3. **Set security options:** Configure authentication credentials if your Redis/Valkey server requires them.
 4. **Configure advanced options:** Set the database selection, SSL options, and timeouts as needed.
 5. **For high availability,** configure Sentinel settings if you're using Redis Sentinel.
 
 ### Configuration Settings
 
-| Setting                   | Default    | Context | Multiple | Description                                                                              |
-| ------------------------- | ---------- | ------- | -------- | ---------------------------------------------------------------------------------------- |
-| `USE_REDIS`               | `no`       | global  | no       | **Enable Redis:** Set to `yes` to enable Redis integration for cluster mode.             |
-| `REDIS_HOST`              |            | global  | no       | **Redis Server:** IP address or hostname of the Redis server.                            |
-| `REDIS_PORT`              | `6379`     | global  | no       | **Redis Port:** Port number of the Redis server.                                         |
-| `REDIS_DATABASE`          | `0`        | global  | no       | **Redis Database:** Database number to use on the Redis server (0-15).                   |
-| `REDIS_SSL`               | `no`       | global  | no       | **Redis SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis connection.       |
-| `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis SSL Verify:** Set to `yes` to verify the Redis server's SSL certificate.         |
-| `REDIS_TIMEOUT`           | `5`        | global  | no       | **Redis Timeout:** Connection timeout in seconds for Redis operations.                   |
-| `REDIS_USERNAME`          |            | global  | no       | **Redis Username:** Username for Redis authentication (Redis 6.0+).                      |
-| `REDIS_PASSWORD`          |            | global  | no       | **Redis Password:** Password for Redis authentication.                                   |
-| `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).        |
-| `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                       |
-| `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                       |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                 |
-| `REDIS_KEEPALIVE_IDLE`    | `300`      | global  | no       | **Keepalive Idle:** Time (in seconds) between TCP keepalive probes for idle connections. |
-| `REDIS_KEEPALIVE_POOL`    | `3`        | global  | no       | **Keepalive Pool:** Maximum number of Redis connections kept in the pool.                |
+| Setting                   | Default    | Context | Multiple | Description                                                                                      |
+| ------------------------- | ---------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `USE_REDIS`               | `no`       | global  | no       | **Enable Redis:** Set to `yes` to enable Redis/Valkey integration for cluster mode.              |
+| `REDIS_HOST`              |            | global  | no       | **Redis/Valkey Server:** IP address or hostname of the Redis/Valkey server.                      |
+| `REDIS_PORT`              | `6379`     | global  | no       | **Redis/Valkey Port:** Port number of the Redis/Valkey server.                                   |
+| `REDIS_DATABASE`          | `0`        | global  | no       | **Redis/Valkey Database:** Database number to use on the Redis/Valkey server (0-15).             |
+| `REDIS_SSL`               | `no`       | global  | no       | **Redis/Valkey SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis/Valkey connection. |
+| `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis/Valkey SSL Verify:** Set to `yes` to verify the Redis/Valkey server's SSL certificate.   |
+| `REDIS_TIMEOUT`           | `5`        | global  | no       | **Redis/Valkey Timeout:** Connection timeout in seconds for Redis/Valkey operations.             |
+| `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                |
+| `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                             |
+| `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).                |
+| `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                               |
+| `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                               |
+| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                         |
+| `REDIS_KEEPALIVE_IDLE`    | `300`      | global  | no       | **Keepalive Idle:** Time (in seconds) between TCP keepalive probes for idle connections.         |
+| `REDIS_KEEPALIVE_POOL`    | `3`        | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool.                 |
 
 !!! tip "High Availability with Redis Sentinel"
     For production environments requiring high availability, configure Redis Sentinel settings. This provides automatic failover capabilities if the primary Redis server becomes unavailable.
@@ -4035,15 +4017,15 @@ Follow these steps to configure and use the Redis plugin:
 !!! info "Cluster Requirements"
     When deploying BunkerWeb in a cluster:
 
-    - All BunkerWeb instances should connect to the same Redis server or Sentinel cluster
+    - All BunkerWeb instances should connect to the same Redis or Valkey server or Sentinel cluster
     - Configure the same database number across all instances
-    - Ensure network connectivity between all BunkerWeb instances and Redis servers
+    - Ensure network connectivity between all BunkerWeb instances and Redis/Valkey servers
 
 ### Example Configurations
 
 === "Basic Configuration"
 
-    A simple configuration for connecting to a Redis server on the local machine:
+    A simple configuration for connecting to a Redis or Valkey server on the local machine:
 
     ```yaml
     USE_REDIS: "yes"
@@ -4093,7 +4075,7 @@ Follow these steps to configure and use the Redis plugin:
 
 ### Redis Best Practices
 
-When using Redis with BunkerWeb, consider these best practices to ensure optimal performance, security, and reliability:
+When using Redis or Valkey with BunkerWeb, consider these best practices to ensure optimal performance, security, and reliability:
 
 #### Memory Management
 - **Monitor memory usage:** Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
@@ -4983,56 +4965,61 @@ Follow these steps to configure and use the Whitelist feature:
 | --------------- | ------- | --------- | -------- | ------------------------------------------------------------------- |
 | `USE_WHITELIST` | `no`    | multisite | no       | **Enable Whitelist:** Set to `yes` to enable the whitelist feature. |
 
-=== "IP Address"
-    **What this does:** Whitelists visitors based on their IP address or network. These visitors will bypass all security checks.
+**IP Address**
 
-    | Setting                    | Default | Context   | Multiple | Description                                                                                                |
-    | -------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_IP`             |         | multisite | no       | **IP Whitelist:** List of IP addresses or networks (CIDR notation) to allow, separated by spaces.          |
-    | `WHITELIST_IGNORE_IP`      |         | multisite | no       | **IP Ignore List:** List of IP addresses or networks that should bypass IP whitelist checks.               |
-    | `WHITELIST_IP_URLS`        |         | multisite | no       | **IP Whitelist URLs:** List of URLs containing IP addresses or networks to whitelist, separated by spaces. |
-    | `WHITELIST_IGNORE_IP_URLS` |         | multisite | no       | **IP Ignore List URLs:** List of URLs containing IP addresses or networks to ignore.                       |
+**What this does:** Whitelists visitors based on their IP address or network. These visitors will bypass all security checks.
 
-=== "Reverse DNS"
-    **What this does:** Whitelists visitors based on their domain name (in reverse). This is useful for allowing access to visitors from specific organizations or networks by their domain.
+| Setting                    | Default | Context   | Multiple | Description                                                                                                |
+| -------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_IP`             |         | multisite | no       | **IP Whitelist:** List of IP addresses or networks (CIDR notation) to allow, separated by spaces.          |
+| `WHITELIST_IGNORE_IP`      |         | multisite | no       | **IP Ignore List:** List of IP addresses or networks that should bypass IP whitelist checks.               |
+| `WHITELIST_IP_URLS`        |         | multisite | no       | **IP Whitelist URLs:** List of URLs containing IP addresses or networks to whitelist, separated by spaces. |
+| `WHITELIST_IGNORE_IP_URLS` |         | multisite | no       | **IP Ignore List URLs:** List of URLs containing IP addresses or networks to ignore.                       |
 
-    | Setting                      | Default | Context   | Multiple | Description                                                                                              |
-    | ---------------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_RDNS`             |         | multisite | no       | **rDNS Whitelist:** List of reverse DNS suffixes to allow, separated by spaces.                          |
-    | `WHITELIST_RDNS_GLOBAL`      | `yes`   | multisite | no       | **rDNS Global Only:** Only perform rDNS whitelist checks on global IP addresses when set to `yes`.       |
-    | `WHITELIST_IGNORE_RDNS`      |         | multisite | no       | **rDNS Ignore List:** List of reverse DNS suffixes that should bypass rDNS whitelist checks.             |
-    | `WHITELIST_RDNS_URLS`        |         | multisite | no       | **rDNS Whitelist URLs:** List of URLs containing reverse DNS suffixes to whitelist, separated by spaces. |
-    | `WHITELIST_IGNORE_RDNS_URLS` |         | multisite | no       | **rDNS Ignore List URLs:** List of URLs containing reverse DNS suffixes to ignore.                       |
+**Reverse DNS**
 
-=== "ASN"
-    **What this does:** Whitelists visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.
+**What this does:** Whitelists visitors based on their domain name (in reverse). This is useful for allowing access to visitors from specific organizations or networks by their domain.
 
-    | Setting                     | Default | Context   | Multiple | Description                                                                             |
-    | --------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------- |
-    | `WHITELIST_ASN`             |         | multisite | no       | **ASN Whitelist:** List of Autonomous System Numbers to allow, separated by spaces.     |
-    | `WHITELIST_IGNORE_ASN`      |         | multisite | no       | **ASN Ignore List:** List of ASNs that should bypass ASN whitelist checks.              |
-    | `WHITELIST_ASN_URLS`        |         | multisite | no       | **ASN Whitelist URLs:** List of URLs containing ASNs to whitelist, separated by spaces. |
-    | `WHITELIST_IGNORE_ASN_URLS` |         | multisite | no       | **ASN Ignore List URLs:** List of URLs containing ASNs to ignore.                       |
+| Setting                      | Default | Context   | Multiple | Description                                                                                              |
+| ---------------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_RDNS`             |         | multisite | no       | **rDNS Whitelist:** List of reverse DNS suffixes to allow, separated by spaces.                          |
+| `WHITELIST_RDNS_GLOBAL`      | `yes`   | multisite | no       | **rDNS Global Only:** Only perform rDNS whitelist checks on global IP addresses when set to `yes`.       |
+| `WHITELIST_IGNORE_RDNS`      |         | multisite | no       | **rDNS Ignore List:** List of reverse DNS suffixes that should bypass rDNS whitelist checks.             |
+| `WHITELIST_RDNS_URLS`        |         | multisite | no       | **rDNS Whitelist URLs:** List of URLs containing reverse DNS suffixes to whitelist, separated by spaces. |
+| `WHITELIST_IGNORE_RDNS_URLS` |         | multisite | no       | **rDNS Ignore List URLs:** List of URLs containing reverse DNS suffixes to ignore.                       |
 
-=== "User Agent"
-    **What this does:** Whitelists visitors based on what browser or tool they claim to be using. This is effective for allowing access to specific known tools or services.
+**ASN**
 
-    | Setting                            | Default | Context   | Multiple | Description                                                                                             |
-    | ---------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
-    | `WHITELIST_USER_AGENT`             |         | multisite | no       | **User-Agent Whitelist:** List of User-Agent patterns (PCRE regex) to allow, separated by spaces.       |
-    | `WHITELIST_IGNORE_USER_AGENT`      |         | multisite | no       | **User-Agent Ignore List:** List of User-Agent patterns that should bypass User-Agent whitelist checks. |
-    | `WHITELIST_USER_AGENT_URLS`        |         | multisite | no       | **User-Agent Whitelist URLs:** List of URLs containing User-Agent patterns to whitelist.                |
-    | `WHITELIST_IGNORE_USER_AGENT_URLS` |         | multisite | no       | **User-Agent Ignore List URLs:** List of URLs containing User-Agent patterns to ignore.                 |
+**What this does:** Whitelists visitors from specific network providers using Autonomous System Numbers. ASNs identify which provider or organization an IP belongs to.
 
-=== "URI"
-    **What this does:** Whitelists requests to specific URLs on your site. This is helpful for allowing access to specific endpoints regardless of other factors.
+| Setting                     | Default | Context   | Multiple | Description                                                                             |
+| --------------------------- | ------- | --------- | -------- | --------------------------------------------------------------------------------------- |
+| `WHITELIST_ASN`             |         | multisite | no       | **ASN Whitelist:** List of Autonomous System Numbers to allow, separated by spaces.     |
+| `WHITELIST_IGNORE_ASN`      |         | multisite | no       | **ASN Ignore List:** List of ASNs that should bypass ASN whitelist checks.              |
+| `WHITELIST_ASN_URLS`        |         | multisite | no       | **ASN Whitelist URLs:** List of URLs containing ASNs to whitelist, separated by spaces. |
+| `WHITELIST_IGNORE_ASN_URLS` |         | multisite | no       | **ASN Ignore List URLs:** List of URLs containing ASNs to ignore.                       |
 
-    | Setting                     | Default | Context   | Multiple | Description                                                                                     |
-    | --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------- |
-    | `WHITELIST_URI`             |         | multisite | no       | **URI Whitelist:** List of URI patterns (PCRE regex) to allow, separated by spaces.             |
-    | `WHITELIST_IGNORE_URI`      |         | multisite | no       | **URI Ignore List:** List of URI patterns that should bypass URI whitelist checks.              |
-    | `WHITELIST_URI_URLS`        |         | multisite | no       | **URI Whitelist URLs:** List of URLs containing URI patterns to whitelist, separated by spaces. |
-    | `WHITELIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                       |
+**User Agent**
+
+**What this does:** Whitelists visitors based on what browser or tool they claim to be using. This is effective for allowing access to specific known tools or services.
+
+| Setting                            | Default | Context   | Multiple | Description                                                                                             |
+| ---------------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `WHITELIST_USER_AGENT`             |         | multisite | no       | **User-Agent Whitelist:** List of User-Agent patterns (PCRE regex) to allow, separated by spaces.       |
+| `WHITELIST_IGNORE_USER_AGENT`      |         | multisite | no       | **User-Agent Ignore List:** List of User-Agent patterns that should bypass User-Agent whitelist checks. |
+| `WHITELIST_USER_AGENT_URLS`        |         | multisite | no       | **User-Agent Whitelist URLs:** List of URLs containing User-Agent patterns to whitelist.                |
+| `WHITELIST_IGNORE_USER_AGENT_URLS` |         | multisite | no       | **User-Agent Ignore List URLs:** List of URLs containing User-Agent patterns to ignore.                 |
+
+**URI**
+
+**What this does:** Whitelists requests to specific URLs on your site. This is helpful for allowing access to specific endpoints regardless of other factors.
+
+| Setting                     | Default | Context   | Multiple | Description                                                                                     |
+| --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `WHITELIST_URI`             |         | multisite | no       | **URI Whitelist:** List of URI patterns (PCRE regex) to allow, separated by spaces.             |
+| `WHITELIST_IGNORE_URI`      |         | multisite | no       | **URI Ignore List:** List of URI patterns that should bypass URI whitelist checks.              |
+| `WHITELIST_URI_URLS`        |         | multisite | no       | **URI Whitelist URLs:** List of URLs containing URI patterns to whitelist, separated by spaces. |
+| `WHITELIST_IGNORE_URI_URLS` |         | multisite | no       | **URI Ignore List URLs:** List of URLs containing URI patterns to ignore.                       |
 
 !!! info "URL Format Support"
     All `*_URLS` settings support HTTP/HTTPS URLs as well as local file paths using the `file:///` prefix. Basic authentication is supported using the `http://user:pass@url` format.

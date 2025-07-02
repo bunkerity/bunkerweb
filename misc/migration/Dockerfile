@@ -1,4 +1,4 @@
-FROM python:3.10-alpine@sha256:db3ca4b1c75f8c27abe19e135ba49e70b3b834716eec65213272f144e1e55e17
+FROM python:3.10-alpine@sha256:8d21601f9f531162bc0c37ae0ac9e7a070e512a6ae0ffc4090118866902c9caa
 
 # Install python dependencies
 RUN apk add --no-cache --virtual .build-deps \

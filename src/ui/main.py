@@ -749,6 +749,7 @@ def before_request():
             supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],
+            extra_scripts=DATA.get("EXTRA_SCRIPTS", []),
             config=DB.get_config(global_only=True, methods=True),
         )
 
@@ -873,6 +874,20 @@ def loading():
 def check():
     # deepcode ignore TooPermissiveCors: We need to allow all origins for the wizard
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
+
+
+if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
+
+    @app.route("/healthcheck", methods=["GET"])
+    def healthcheck():
+        """Simple healthcheck endpoint that returns 200 OK with basic status information"""
+        health_data = {
+            "status": "healthy",
+            "timestamp": datetime.now().astimezone().isoformat(),
+            "service": "bunkerweb-ui",
+        }
+
+        return Response(status=200, response=dumps(health_data), content_type="application/json")
 
 
 @app.route("/check_reloading", methods=["GET"])

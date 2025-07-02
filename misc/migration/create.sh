@@ -70,10 +70,31 @@ version_lt() {
 
 # Fetch and process tags
 log "🌐 Fetching tags from GitHub"
-tags=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/tags |
-  jq -r '.[].name | sub("^v"; "")' |
-  jq -R -s -c 'split("\n")[:-1] | map(select(test("^[1-9]+\\.(5|[6-9]|[1-9][0-9]+)")))' |
-  jq -c 'reverse')
+page=1
+all_tags_json=()
+
+while :; do
+  resp=$(curl -s "https://api.github.com/repos/bunkerity/bunkerweb/tags?per_page=100&page=$page")
+  # Stop when an empty array is returned
+  [[ $(jq 'length' <<<"$resp") -eq 0 ]] && break
+  all_tags_json+=( "$resp" )
+  ((page++))
+done
+
+# 2) Extract, normalize, filter and sort
+tags=$(printf '%s\n' "${all_tags_json[@]}" \
+  | jq -r '.[].name | sub("^v"; "")' \
+  | jq -R -s -c '
+      split("\n")[:-1]
+      | map(
+          select(
+            test(
+              "^[1-9]+\\.(?:5(?:\\.\\d+)?(?:-beta)?|[6-9]|[1-9][0-9]+)"
+            )
+          )
+        )
+      | reverse
+    ')
 
 current_dir=$(basename "$(pwd)")
 

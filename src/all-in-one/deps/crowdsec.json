@@ -1,5 +1,5 @@
 {
-  "version": "v1.6.8",
+  "version": "v1.6.9",
   "url": "https://github.com/crowdsecurity/crowdsec.git",
-  "commit": "f209766efcf0b66540a4acbe35c0fc572fc2bb60"
+  "commit": "40b8cfe6e7e7b2a7e29ee09ba077dca8f3189484"
 }
