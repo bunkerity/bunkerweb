@@ -11,6 +11,7 @@
 - [UI] Add "Go Back" button functionality in unauthorized page
 - [UI] Improve dynamic translation handling and update chart rendering on theme and language changes
 - [UI] Add an optional /healthcheck endpoint to the web UI for health monitoring, which can be enabled via the `ENABLE_HEALTHCHECK` setting (default is `no`)
+- [UI] Update ace editor to version 1.43.1
 - [DOCS] Add documentation about [Valkey](https://valkey.io/) support alongside [Redis](https://redis.io/) for data persistence and caching in BunkerWeb
 - [MISC] Enhance logging to differentiate between allowed and denied access based on whitelist status
 - [DEPS] Update coreruleset-v4 version to v4.16.0
