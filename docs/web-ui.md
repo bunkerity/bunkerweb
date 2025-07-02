@@ -521,6 +521,7 @@ The web UI can be deployed and configured without going through the setup wizard
     - `MAX_THREADS`: the number of threads used by the web UI (default is `MAX_WORKERS` * 2).
     - `FORWARDED_ALLOW_IPS`: a list of IP addresses or networks that are allowed to be used in the `X-Forwarded-For` header (default is `*` in **Docker images** and `127.0.0.1` on **Linux installations**).
     - `CHECK_PRIVATE_IP`: set it to `yes` to not disconnect users that have their IP address changed during a session if they are in a private network (default is `yes`). (Non-private IP addresses are always checked).
+    - `ENABLE_HEALTHCHECK`: set it to `yes` to enable the `/healthcheck` endpoint that returns a simple JSON response with status information (default is `no`).
 
     The web UI will use these variables to authenticate you and handle the 2FA feature.
 

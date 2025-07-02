@@ -42,6 +42,7 @@ start() {
             echo "LISTEN_ADDR=127.0.0.1"
             echo "# LISTEN_PORT=7000"
             echo "FORWARDED_ALLOW_IPS=127.0.0.1"
+            echo "# ENABLE_HEALTHCHECK=no"
         } > /etc/bunkerweb/ui.env
         chown root:nginx /etc/bunkerweb/ui.env
         chmod 660 /etc/bunkerweb/ui.env

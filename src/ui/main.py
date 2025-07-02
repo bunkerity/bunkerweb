@@ -876,6 +876,20 @@ def check():
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
+
+    @app.route("/healthcheck", methods=["GET"])
+    def healthcheck():
+        """Simple healthcheck endpoint that returns 200 OK with basic status information"""
+        health_data = {
+            "status": "healthy",
+            "timestamp": datetime.now().astimezone().isoformat(),
+            "service": "bunkerweb-ui",
+        }
+
+        return Response(status=200, response=dumps(health_data), content_type="application/json")
+
+
 @app.route("/check_reloading", methods=["GET"])
 @login_required
 def check_reloading():
