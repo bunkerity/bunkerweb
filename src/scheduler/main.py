@@ -786,6 +786,7 @@ if __name__ == "__main__":
 
             changes = False
             if tmp_external_plugins:
+                # Compare the current plugins with the ones in the database
                 changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
 
                 if changes:
@@ -793,12 +794,16 @@ if __name__ == "__main__":
                         err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
                         if err:
                             LOGGER.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
-                    except BaseException as e:
-                        LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
-                else:
-                    return send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
+                        else:
+                            # Only generate plugins if the database update was successful
+                            generate_external_plugins(plugin_path)
+                except BaseException as e:
+                    LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
+            else:
+                # If no changes, send the file and then stop execution for this block
+                return send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
 
-            generate_external_plugins(plugin_path)
+
 
         check_configs_changes()
         threads.extend([Thread(target=check_plugin_changes, args=("external",)), Thread(target=check_plugin_changes, args=("pro",))])
