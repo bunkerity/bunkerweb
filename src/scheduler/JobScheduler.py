@@ -2,18 +2,17 @@
 
 import os
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, Future
 from contextlib import suppress
 from datetime import datetime
 from functools import partial
 from glob import glob
 from importlib.util import module_from_spec, spec_from_file_location
 from json import loads
-from logging import Logger
 from pathlib import Path
-from re import compile as re_compile
-from typing import Any, Dict, List, Optional
-import schedule
+from re import compile as re_compile, Pattern
+from typing import Any, Dict, List, Optional, Set, Tuple, Callable
+import schedule  # type: ignore
 from sys import path as sys_path
 from threading import Lock
 import threading
@@ -31,7 +30,7 @@ from ApiCaller import ApiCaller  # type: ignore
 
 # Log debug messages only when LOG_LEVEL environment variable is set to
 # "debug"
-def debug_log(logger, message):
+def debug_log(logger: Any, message: str) -> None:
     if os.getenv("LOG_LEVEL", "INFO").upper() == "DEBUG":
         logger.debug(f"[DEBUG] {message}")
 
@@ -39,13 +38,13 @@ def debug_log(logger, message):
 # Set up logger for the job scheduler with appropriate log level
 # Checks both CUSTOM_LOG_LEVEL and LOG_LEVEL environment variables
 # Returns configured logger instance for scheduler operations
-def _setup_scheduler_logger(logger: Optional[Logger] = None) -> Logger:
+def _setup_scheduler_logger(logger: Optional[Any] = None) -> Any:
     log_level = os.getenv("CUSTOM_LOG_LEVEL", 
                           os.getenv("LOG_LEVEL", "INFO"))
-    return logger or setup_logger("Scheduler", log_level)
+    return logger or setup_logger("Scheduler", log_level)  # type: ignore
 
 
-class JobScheduler(ApiCaller):
+class JobScheduler(ApiCaller):  # type: ignore[misc]
     # Initialize the job scheduler with database and API connections.
     # 
     # Creates a threaded job scheduler that can execute plugin jobs on
@@ -53,39 +52,41 @@ class JobScheduler(ApiCaller):
     # initializes all necessary state tracking variables.
     def __init__(
         self,
-        logger: Optional[Logger] = None,
+        logger: Optional[Any] = None,  # Logger type
         *,
-        db: Optional[Database] = None,
+        db: Optional[Any] = None,  # Database type
         lock: Optional[Lock] = None,
-        apis: Optional[list] = None,
-    ):
-        super().__init__(apis or [])
+        apis: Optional[List[Any]] = None,
+    ) -> None:
+        super().__init__(apis or [])  # type: ignore[misc]
         self.__logger = _setup_scheduler_logger(logger)
         
         debug_log(self.__logger, "Starting JobScheduler initialization")
         debug_log(self.__logger, f"Log level set to: {os.getenv('LOG_LEVEL', 'INFO')}")
         debug_log(self.__logger, f"APIs provided: {len(apis or [])}")
         
-        self.db = db or Database(self.__logger)
+        self.db: Any = db or Database(self.__logger)  # Database type
         # Store only essential environment variables to reduce memory usage
-        self.__base_env = os.environ.copy()
-        self.__lock = lock
-        self.__thread_lock = Lock()
-        self.__job_success = True
-        self.__job_reload = False
-        cpu_count = os.cpu_count() or 1
-        max_workers = min(8, cpu_count * 4)
-        self.__executor = ThreadPoolExecutor(max_workers=max_workers)
+        self.__base_env: Dict[str, str] = os.environ.copy()
+        self.__lock: Optional[Lock] = lock
+        self.__thread_lock: Lock = Lock()
+        self.__job_success: bool = True
+        self.__job_reload: bool = False
+        cpu_count: int = os.cpu_count() or 1
+        max_workers: int = min(8, cpu_count * 4)
+        self.__executor: ThreadPoolExecutor = ThreadPoolExecutor(
+            max_workers=max_workers
+        )
         
         debug_log(self.__logger, f"CPU count: {cpu_count}, "
                                 f"calculated max_workers: {max_workers}")
         debug_log(self.__logger, f"Base environment has {len(self.__base_env)} "
                                 "variables")
         
-        self.__compiled_regexes = self.__compile_regexes()
-        self.__module_paths = set()
+        self.__compiled_regexes: Dict[str, Pattern[str]] = self.__compile_regexes()
+        self.__module_paths: Set[str] = set()
         # Dedicated lock for module paths
-        self.__module_paths_lock = Lock()
+        self.__module_paths_lock: Lock = Lock()
         
         debug_log(self.__logger, f"JobScheduler initialized with "
                                 f"max_workers={max_workers}")
@@ -101,14 +102,14 @@ class JobScheduler(ApiCaller):
     # paths to ensure they meet security and naming requirements.
     # Job names must be 1-128 chars of word chars, dots, or dashes.
     # File paths must be 1-256 chars of word chars, dots, slashes, dashes.
-    def __compile_regexes(self):
+    def __compile_regexes(self) -> Dict[str, Pattern[str]]:
         debug_log(self.__logger, "Compiling regex patterns for job validation")
         debug_log(self.__logger, "Name pattern: ^[\\w.-]{1,128}$ (word chars, "
                                 "dots, dashes, 1-128 length)")
         debug_log(self.__logger, "File pattern: ^[\\w./-]{1,256}$ (word chars, "
                                 "dots, slashes, dashes, 1-256 length)")
         
-        patterns = {
+        patterns: Dict[str, Pattern[str]] = {
             "name": re_compile(r"^[\w.-]{1,128}$"),
             "file": re_compile(r"^[\w./-]{1,256}$"),
         }
@@ -135,7 +136,7 @@ class JobScheduler(ApiCaller):
     # Resets the environment to the base state captured during
     # initialization, then applies the provided environment updates.
     # This ensures clean environment state for job execution.
-    def env(self, env: Dict[str, Any]):
+    def env(self, env: Dict[str, Any]) -> None:
         debug_log(self.__logger, f"Setting environment with {len(env)} "
                                 "variables")
         debug_log(self.__logger, f"Base environment has "
@@ -146,7 +147,8 @@ class JobScheduler(ApiCaller):
             debug_log(self.__logger, f"Adding {len(new_vars)} new variables: "
                                     f"{', '.join(sorted(new_vars))}")
         
-        os.environ = self.__base_env.copy()  # Reset to base environment
+        os.environ.clear()
+        os.environ.update(self.__base_env)  # Reset to base environment
         os.environ.update(env)  # Update with new environment
         
         debug_log(self.__logger, f"Environment updated, now has "
@@ -158,12 +160,12 @@ class JobScheduler(ApiCaller):
     # validates job definitions. This method rebuilds the complete
     # job registry from scratch, ensuring all jobs are current and valid.
     # Called during initialization and when configuration changes.
-    def update_jobs(self):
+    def update_jobs(self) -> None:
         debug_log(self.__logger, "Starting job definition update from plugins")
         debug_log(self.__logger, "Clearing existing job cache")
         
         start_time = datetime.now()
-        self.__jobs = self.__get_jobs()
+        self.__jobs: Dict[str, List[Dict[str, Any]]] = self.__get_jobs()
         end_time = datetime.now()
         
         duration = (end_time - start_time).total_seconds()
@@ -182,9 +184,9 @@ class JobScheduler(ApiCaller):
     # loads job definitions in parallel using thread pool, and
     # validates each job against the required schema. Handles
     # file loading errors gracefully and logs warnings for issues.
-    def __get_jobs(self):
-        jobs = {}
-        plugin_files = []
+    def __get_jobs(self) -> Dict[str, List[Dict[str, Any]]]:
+        jobs: Dict[str, List[Dict[str, Any]]] = {}
+        plugin_files: List[str] = []
         plugin_dirs = [
             os.path.join(os.sep, "usr", "share", "bunkerweb", "core", "*", 
                         "plugin.json"),
@@ -216,7 +218,7 @@ class JobScheduler(ApiCaller):
         # 
         # Reads the plugin.json file, extracts job definitions,
         # and validates them against the schema requirements.
-        def load_plugin(plugin_file):
+        def load_plugin(plugin_file: str) -> Tuple[str, List[Dict[str, Any]]]:
             plugin_name = os.path.basename(os.path.dirname(plugin_file))
             
             debug_log(self.__logger, f"Processing plugin file: {plugin_file}")
@@ -296,8 +298,13 @@ class JobScheduler(ApiCaller):
     # reload) and validates their format and values. Job names and files
     # must match regex patterns, schedule values must be valid, and
     # boolean flags must be proper booleans.
-    def __validate_jobs(self, plugin_jobs, plugin_name, plugin_file):
-        valid_jobs = []
+    def __validate_jobs(
+        self, 
+        plugin_jobs: List[Dict[str, Any]], 
+        plugin_name: str, 
+        plugin_file: str
+    ) -> List[Dict[str, Any]]:
+        valid_jobs: List[Dict[str, Any]] = []
         required_keys = ("name", "file", "every", "reload")
         valid_schedules = ("once", "minute", "hour", "day", "week")
         
@@ -343,7 +350,7 @@ class JobScheduler(ApiCaller):
 
             if not all((name_valid, file_valid, every_valid, reload_valid, 
                        async_valid)):
-                validation_details = []
+                validation_details: List[str] = []
                 if not name_valid:
                     validation_details.append(f"invalid name '{job['name']}'")
                 if not file_valid:
@@ -388,12 +395,13 @@ class JobScheduler(ApiCaller):
     # Maps string representations of scheduling frequencies to the
     # corresponding schedule.Job objects used by the schedule library.
     # Supports minute, hour, day, and week intervals.
-    def __str_to_schedule(self, every: str) -> schedule.Job:
-        schedule_map = {
-            "minute": schedule.every().minute,
-            "hour": schedule.every().hour,
-            "day": schedule.every().day,
-            "week": schedule.every().week,
+    def __str_to_schedule(self, every: str) -> Any:  # schedule.Job
+        schedule_any: Any = schedule
+        schedule_map: Dict[str, Any] = {  # Dict[str, schedule.Job]
+            "minute": schedule_any.every().minute,
+            "hour": schedule_any.every().hour,
+            "day": schedule_any.every().day,
+            "week": schedule_any.every().week,
         }
         
         debug_log(self.__logger, f"Converting schedule string '{every}' to "
@@ -431,14 +439,17 @@ class JobScheduler(ApiCaller):
                               "defaulting to 5")
             debug_log(self.__logger, f"Invalid timeout value "
                                     f"'{reload_min_timeout}', using 5")
-            reload_min_timeout = 5
+            reload_min_timeout_int = 5
+        else:
+            reload_min_timeout_int = int(reload_min_timeout)
 
-        disable_config_test = (self.env.get('DISABLE_CONFIGURATION_TESTING', 
-                                          'no').lower() == 'yes')
+        disable_config_test = (
+            self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes'
+        )
         test_param = 'no' if disable_config_test else 'yes'
-        server_names = self.env.get("SERVER_NAME", "www.example.com")
+        server_names = str(self.env.get("SERVER_NAME", "www.example.com"))
         server_name_list = server_names.split(" ")
-        timeout_calc = max(int(reload_min_timeout), 
+        timeout_calc = max(reload_min_timeout_int, 
                           3 * len(server_name_list))
         
         debug_log(self.__logger, f"Configuration testing disabled: "
@@ -446,19 +457,19 @@ class JobScheduler(ApiCaller):
         debug_log(self.__logger, f"Test parameter: {test_param}")
         debug_log(self.__logger, f"Server names: '{server_names}' "
                                 f"({len(server_name_list)} servers)")
-        debug_log(self.__logger, f"Timeout calculation: max({reload_min_timeout}, "
+        debug_log(self.__logger, f"Timeout calculation: max({reload_min_timeout_int}, "
                                 f"3 * {len(server_name_list)}) = {timeout_calc}")
-        debug_log(self.__logger, f"Sending reload request to {len(self.apis)} "
+        debug_log(self.__logger, f"Sending reload request to {len(getattr(self, 'apis', []))} "
                                 "APIs")
 
         reload_url = f"/reload?test={test_param}"
         debug_log(self.__logger, f"Reload URL: {reload_url}")
 
-        reload_success = self.send_to_apis(
+        reload_success: bool = bool(getattr(self, 'send_to_apis')(
             "POST",
             reload_url,
             timeout=timeout_calc,
-        )[0]
+        )[0])
         
         debug_log(self.__logger, f"API response success: {reload_success}")
         
@@ -540,7 +551,8 @@ class JobScheduler(ApiCaller):
         
         debug_log(self.__logger, f"Module created, executing...")
         
-        spec.loader.exec_module(module)
+        if spec.loader is not None:
+            spec.loader.exec_module(module)
         
         debug_log(self.__logger, f"Module '{name}' executed successfully")
 
@@ -649,7 +661,7 @@ class JobScheduler(ApiCaller):
     # and job identification in the database for tracking and auditing
     # purposes. Handles database errors gracefully and logs results.
     def __add_job_run(self, name: str, success: bool, start_date: datetime, 
-                     end_date: datetime):
+                     end_date: datetime) -> None:
         duration = (end_date - start_date).total_seconds()
         debug_log(self.__logger, f"Adding job run record:")
         debug_log(self.__logger, f"  Job name: {name}")
@@ -662,7 +674,7 @@ class JobScheduler(ApiCaller):
         with self.__thread_lock:
             debug_log(self.__logger, f"Acquired thread lock, calling db.add_job_run")
             
-            err = self.db.add_job_run(name, success, start_date, end_date)
+            err = getattr(self.db, 'add_job_run')(name, success, start_date, end_date)
             
             debug_log(self.__logger, f"Database call completed")
             debug_log(self.__logger, f"  Error result: {err}")
@@ -685,7 +697,7 @@ class JobScheduler(ApiCaller):
     # appropriate permissions on all files and directories. Directories
     # get 740 (rwxr-----) and files get 640 (rw-r-----) permissions
     # for security. Handles permission errors gracefully.
-    def __update_cache_permissions(self):
+    def __update_cache_permissions(self) -> None:
         self.__logger.info("Updating /var/cache/bunkerweb permissions...")
         cache_path = Path(os.sep, "var", "cache", "bunkerweb")
 
@@ -741,7 +753,9 @@ class JobScheduler(ApiCaller):
             debug_log(self.__logger, f"  Items updated: {items_updated}")
             debug_log(self.__logger, f"  Directories: {dirs_processed}")
             debug_log(self.__logger, f"  Files: {files_processed}")
-            debug_log(self.__logger, f"  Update rate: {(items_updated/items_processed*100):.1f}%" if items_processed > 0 else "N/A")
+            update_rate = (items_updated/items_processed*100)
+            debug_log(self.__logger, f"  Update rate: {update_rate:.1f}%" 
+                                    if items_processed > 0 else "N/A")
 
         except Exception as e:
             self.__logger.error(f"Error while updating cache permissions: "
@@ -758,7 +772,7 @@ class JobScheduler(ApiCaller):
     # scheduled tasks for jobs that are not set to run "once".
     # Uses the schedule library to register recurring jobs with
     # their specified frequencies (minute, hour, day, week).
-    def setup(self):
+    def setup(self) -> None:
         debug_log(self.__logger, "Setting up scheduled jobs")
         total_jobs = sum(len(jobs) for jobs in self.__jobs.values())
         debug_log(self.__logger, f"Total jobs to process: {total_jobs}")
@@ -787,8 +801,10 @@ class JobScheduler(ApiCaller):
                     
                     if every != "once":
                         schedule_obj = self.__str_to_schedule(every)
-                        schedule_obj.do(self.__job_wrapper, path, plugin, 
-                                      name, file)
+                        if schedule_obj:
+                            getattr(schedule_obj, 'do')(
+                                self.__job_wrapper, path, plugin, name, file
+                            )
                         scheduled_count += 1
                         
                         debug_log(self.__logger, f"    Scheduled job '{name}' "
@@ -801,8 +817,10 @@ class JobScheduler(ApiCaller):
                             
                 except Exception as e:
                     error_count += 1
+                    # Extract name from job if available
+                    job_name = job.get("name", "unknown") if "job" in locals() else "unknown"
                     self.__logger.error(f"Exception while scheduling job "
-                                      f"'{name}' for plugin '{plugin}': {e}")
+                                      f"'{job_name}' for plugin '{plugin}': {e}")
                     debug_log(self.__logger, f"    Scheduling error:")
                     debug_log(self.__logger, f"      Exception type: "
                                             f"{type(e).__name__}")
@@ -814,13 +832,13 @@ class JobScheduler(ApiCaller):
         debug_log(self.__logger, f"  'Once' jobs skipped: {once_count}")
         debug_log(self.__logger, f"  Scheduling errors: {error_count}")
         debug_log(self.__logger, f"  Total schedule library jobs: "
-                                f"{len(schedule.jobs)}")
+                                f"{len(getattr(schedule, 'jobs', []))}")
         
         if scheduled_count > 0:
             debug_log(self.__logger, f"Scheduled job details:")
-            for idx, job in enumerate(schedule.jobs):
+            for idx, job in enumerate(getattr(schedule, 'jobs', [])):
                 debug_log(self.__logger, f"  {idx + 1}. Next run: "
-                                        f"{job.next_run}")
+                                        f"{getattr(job, 'next_run', 'N/A')}")
 
     # Execute all pending scheduled jobs.
     # 
@@ -829,18 +847,21 @@ class JobScheduler(ApiCaller):
     # and cleans up module paths afterwards. Manages database
     # read-only state and file synchronization with APIs.
     def run_pending(self) -> bool:
-        pending_jobs = [job for job in schedule.jobs if job.should_run]
+        pending_jobs: List[Any] = [
+            job for job in getattr(schedule, 'jobs', []) 
+            if getattr(job, 'should_run', False)
+        ]
 
         debug_log(self.__logger, f"Checking for pending jobs:")
-        debug_log(self.__logger, f"  Total scheduled jobs: {len(schedule.jobs)}")
+        debug_log(self.__logger, f"  Total scheduled jobs: {len(getattr(schedule, 'jobs', []))}")
         debug_log(self.__logger, f"  Pending jobs: {len(pending_jobs)}")
         
         if pending_jobs:
             debug_log(self.__logger, f"Pending job details:")
             for idx, job in enumerate(pending_jobs):
                 debug_log(self.__logger, f"  {idx + 1}. Job: {job}")
-                debug_log(self.__logger, f"      Next run: {job.next_run}")
-                debug_log(self.__logger, f"      Should run: {job.should_run}")
+                debug_log(self.__logger, f"      Next run: {getattr(job, 'next_run', 'N/A')}")
+                debug_log(self.__logger, f"      Should run: {getattr(job, 'should_run', 'N/A')}")
 
         if not pending_jobs:
             debug_log(self.__logger, "No pending jobs found, returning True")
@@ -868,8 +889,10 @@ class JobScheduler(ApiCaller):
             debug_log(self.__logger, f"Submitting {len(pending_jobs)} jobs "
                                     "to thread pool")
             
-            futures = [self.__executor.submit(job.run) 
-                      for job in pending_jobs]
+            futures: List[Future[Any]] = [
+                self.__executor.submit(getattr(job, 'run'))
+                for job in pending_jobs
+            ]
 
             debug_log(self.__logger, f"Created {len(futures)} futures")
 
@@ -895,7 +918,7 @@ class JobScheduler(ApiCaller):
                                         "reload operations")
                 
                 try:
-                    if self.apis:
+                    if getattr(self, 'apis', None):
                         cache_path = os.path.join(os.sep, "var", "cache", 
                                                 "bunkerweb")
                         
@@ -911,7 +934,7 @@ class JobScheduler(ApiCaller):
                         
                         self.__logger.info(f"Sending '{cache_path}' "
                                          "folder...")
-                        if not self.send_files(cache_path, "/cache"):
+                        if not getattr(self, 'send_files')(cache_path, "/cache"):
                             success = False
                             self.__logger.error(f"Error while sending "
                                               f"'{cache_path}' folder")
@@ -995,9 +1018,9 @@ class JobScheduler(ApiCaller):
         plugins = plugins or []
 
         try:
-            futures = []
+            futures: List[Future[Any]] = []
             for plugin, jobs in self.__jobs.items():
-                jobs_to_run = []
+                jobs_to_run: List[Callable[[], int]] = []
                 if ((plugins and plugin not in plugins) or 
                     (ignore_plugins and plugin in ignore_plugins)):
                     debug_log(self.__logger, f"Skipping plugin '{plugin}' "
@@ -1075,7 +1098,7 @@ class JobScheduler(ApiCaller):
 
         try:
             job_plugin = ""
-            job_to_run = None
+            job_to_run: Optional[Dict[str, Any]] = None
             
             # Search for the job across all plugins
             for plugin, jobs in self.__jobs.items():
@@ -1093,7 +1116,7 @@ class JobScheduler(ApiCaller):
                 self.__logger.warning(f"Job '{job_name}' not found")
                 debug_log(self.__logger, f"Job '{job_name}' not found in "
                                         f"{len(self.__jobs)} plugins")
-                available_jobs = []
+                available_jobs: List[str] = []
                 for plugin, jobs in self.__jobs.items():
                     for job in jobs:
                         available_jobs.append(f"{plugin}.{job['name']}")
@@ -1140,7 +1163,7 @@ class JobScheduler(ApiCaller):
     # Takes a list of job functions and executes them one by one
     # in the current thread. Used for running synchronous jobs
     # that need to be executed in a specific order or thread.
-    def __run_jobs(self, jobs):
+    def __run_jobs(self, jobs: List[Callable[[], int]]) -> None:
         debug_log(self.__logger, f"Executing {len(jobs)} jobs sequentially")
         debug_log(self.__logger, f"Thread ID: {threading.current_thread().ident}")
         
@@ -1153,14 +1176,14 @@ class JobScheduler(ApiCaller):
     # Removes all jobs from the schedule library's job queue.
     # This is typically called during reload operations to
     # reset the scheduling state before setting up new jobs.
-    def clear(self):
-        jobs_before = len(schedule.jobs)
+    def clear(self) -> None:
+        jobs_before = len(getattr(schedule, 'jobs', []))
         debug_log(self.__logger, f"Clearing {jobs_before} scheduled jobs")
         
-        schedule.clear()
+        getattr(schedule, 'clear')()
         
         debug_log(self.__logger, f"Schedule cleared, now has "
-                                f"{len(schedule.jobs)} jobs")
+                                f"{len(getattr(schedule, 'jobs', []))} jobs")
 
     # Reload the scheduler with new environment and plugin configuration.
     # 
@@ -1169,25 +1192,26 @@ class JobScheduler(ApiCaller):
     # schedules, updates job registry, runs jobs once, and sets up new
     # schedules. Used when configuration changes are detected.
     def reload(
-        self, env: Dict[str, Any], apis: Optional[list] = None, *, 
+        self, env: Dict[str, Any], apis: Optional[List[Any]] = None, *, 
         changed_plugins: Optional[List[str]] = None, 
         ignore_plugins: Optional[List[str]] = None
     ) -> bool:
         debug_log(self.__logger, f"Reloading scheduler with {len(env)} "
                                 f"env vars, changed_plugins: "
                                 f"{changed_plugins}, ignore: {ignore_plugins}")
-        debug_log(self.__logger, f"Current APIs: {len(self.apis)}, "
+        debug_log(self.__logger, f"Current APIs: {len(getattr(self, 'apis', []))}, "
                                 f"new APIs: {len(apis or [])}")
         
         try:
             # Update environment
             debug_log(self.__logger, "Updating environment variables")
-            os.environ = self.__base_env.copy()
+            os.environ.clear()
+            os.environ.update(self.__base_env)
             os.environ.update(env)  # Update with new environment
             
             # Reinitialize APIs
             debug_log(self.__logger, "Reinitializing API connections")
-            super().__init__(apis or self.apis)
+            super().__init__(apis or getattr(self, 'apis', []))  # type: ignore[misc]
             
             # Clear existing schedules
             debug_log(self.__logger, "Clearing existing job schedules")
@@ -1208,7 +1232,7 @@ class JobScheduler(ApiCaller):
             debug_log(self.__logger, f"Scheduler reload completed with "
                                     f"success: {success}")
             debug_log(self.__logger, f"Total scheduled jobs after reload: "
-                                    f"{len(schedule.jobs)}")
+                                    f"{len(getattr(schedule, 'jobs', []))}")
             
             return success
         except Exception as e:
@@ -1228,45 +1252,45 @@ class JobScheduler(ApiCaller):
     # various connection strategies including fallback URLs.
     def try_database_readonly(self, force: bool = False) -> bool:
         debug_log(self.__logger, f"Checking database readonly status:")
-        debug_log(self.__logger, f"  Current readonly: {self.db.readonly}")
+        debug_log(self.__logger, f"  Current readonly: {getattr(self.db, 'readonly', 'unknown')}")
         debug_log(self.__logger, f"  Force retry: {force}")
         debug_log(self.__logger, f"  Has database_uri: "
                                 f"{bool(getattr(self.db, 'database_uri', None))}")
         last_retry = getattr(self.db, 'last_connection_retry', None)
         debug_log(self.__logger, f"  Last retry: {last_retry}")
         
-        if not self.db.readonly:
+        if not getattr(self.db, 'readonly', True):
             debug_log(self.__logger, "Database not in readonly mode, testing write")
             
             try:
-                self.db.test_write()
-                self.db.readonly = False
+                getattr(self.db, 'test_write')()
+                setattr(self.db, 'readonly', False)
                 debug_log(self.__logger, "Write test successful, database is writable")
                 return False
             except Exception as e:
-                self.db.readonly = True
+                setattr(self.db, 'readonly', True)
                 debug_log(self.__logger, f"Write test failed: {e}")
                 debug_log(self.__logger, "Setting database to readonly mode")
                 return True
-        elif (not force and self.db.last_connection_retry and 
+        elif (not force and getattr(self.db, 'last_connection_retry', None) and 
               (datetime.now().astimezone() - 
-               self.db.last_connection_retry).total_seconds() > 30):
+               getattr(self.db, 'last_connection_retry')).total_seconds() > 30):
             last_retry_ago = (datetime.now().astimezone() - 
-                            self.db.last_connection_retry).total_seconds()
+                            getattr(self.db, 'last_connection_retry')).total_seconds()
             debug_log(self.__logger, f"Last retry was {last_retry_ago:.1f}s ago, "
                                     "within 30s limit, skipping retry")
             return True
 
-        if self.db.database_uri and self.db.readonly:
+        if getattr(self.db, 'database_uri', None) and getattr(self.db, 'readonly', True):
             debug_log(self.__logger, "Database has URI and is readonly, "
                                     "attempting reconnection")
             
             try:
                 debug_log(self.__logger, "Trying read-write connection")
                 
-                self.db.retry_connection(pool_timeout=1)
-                self.db.retry_connection(log=False)
-                self.db.readonly = False
+                getattr(self.db, 'retry_connection')(pool_timeout=1)
+                getattr(self.db, 'retry_connection')(log=False)
+                setattr(self.db, 'readonly', False)
                 self.__logger.info("The database is no longer read-only, "
                                  "defaulting to read-write mode")
                 
@@ -1277,31 +1301,31 @@ class JobScheduler(ApiCaller):
                 debug_log(self.__logger, "Trying readonly connection")
                 
                 try:
-                    self.db.retry_connection(readonly=True, pool_timeout=1)
-                    self.db.retry_connection(readonly=True, log=False)
+                    getattr(self.db, 'retry_connection')(readonly=True, pool_timeout=1)
+                    getattr(self.db, 'retry_connection')(readonly=True, log=False)
                     debug_log(self.__logger, "Readonly connection successful")
                 except Exception as e2:
                     debug_log(self.__logger, f"Readonly connection failed: {e2}")
                     
-                    if self.db.database_uri_readonly:
+                    if getattr(self.db, 'database_uri_readonly', None):
                         debug_log(self.__logger, "Trying fallback connection")
                         with suppress(Exception):
-                            self.db.retry_connection(fallback=True, 
+                            getattr(self.db, 'retry_connection')(fallback=True, 
                                                    pool_timeout=1)
-                            self.db.retry_connection(fallback=True, 
+                            getattr(self.db, 'retry_connection')(fallback=True, 
                                                    log=False)
                             debug_log(self.__logger, "Fallback connection successful")
                     else:
                         debug_log(self.__logger, "No fallback URI available")
                 
-                self.db.readonly = True
+                setattr(self.db, 'readonly', True)
                 debug_log(self.__logger, "Database remains in readonly mode")
 
-        final_readonly = self.db.readonly
+        final_readonly = getattr(self.db, 'readonly', True)
         debug_log(self.__logger, f"Database readonly check complete: "
                                 f"{final_readonly}")
         if hasattr(self.db, 'last_connection_retry'):
             debug_log(self.__logger, f"Updated last_connection_retry: "
-                                    f"{self.db.last_connection_retry}")
+                                    f"{getattr(self.db, 'last_connection_retry', None)}")
         
         return final_readonly
