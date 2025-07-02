@@ -5,6 +5,7 @@
 - [SECURITY] Introduce ModSecurity exclusion rules targeting the password input upon login, preventing false-positive blocks on valid complex passwords while preserving strict overall request inspection.
 - [FEATURE] Refactor download scripts to canonicalize and deduplicate URLs before fetching and implement smarter cache management for improved efficiency
 - [FEATURE] Implement Redis-backed metrics storage and optimize retrieval workflows for faster, more reliable performance
+- [FEATURE] Add support for custom Let's Encrypt profiles and log profile changes during renewal
 - [ALL-IN-ONE] Update CrowdSec to version v1.6.9
 - [UI] Add "Go Back" button functionality in unauthorized page
 - [UI] Improve dynamic translation handling and update chart rendering on theme and language changes
