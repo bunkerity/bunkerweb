@@ -16,6 +16,8 @@
 - [MISC] Enhance logging to differentiate between allowed and denied access based on whitelist status
 - [DEPS] Update coreruleset-v4 version to v4.16.0
 - [DEPS] Update Mbed TLS version to v3.6.4
+- [DEPS] Update i18next version to v25.3.0
+- [DEPS] Update i18next browser languageDetector extension version to v8.2.0
 
 ## v1.6.2-rc7 - 2025/06/25
 
