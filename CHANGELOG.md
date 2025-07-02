@@ -18,6 +18,7 @@
 - [DEPS] Update Mbed TLS version to v3.6.4
 - [DEPS] Update i18next version to v25.3.0
 - [DEPS] Update i18next browser languageDetector extension version to v8.2.0
+- [DEPS] Update DOMPurify version to 3.2.6
 
 ## v1.6.2-rc7 - 2025/06/25
 
