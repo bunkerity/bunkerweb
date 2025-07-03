@@ -1,3 +1,5 @@
+from contextlib import suppress
+from os import listdir
 from os.path import isabs, sep
 from pathlib import Path
 
@@ -15,17 +17,42 @@ logs = Blueprint("logs", __name__)
 @login_required
 def logs_page():
     logs_path = Path(sep, "var", "log", "bunkerweb")
+    letsencrypt_path = logs_path / "letsencrypt"
 
-    files = []
-    if logs_path.is_dir():
+    files = {"main": [], "letsencrypt": []}
+
+    # Get main log files
+    if logs_path.is_dir() and listdir(logs_path):
         for file in logs_path.glob("*.log"):
             if file.is_file():
-                files.append(file.name)
+                files["main"].append(file.name)
+
+    if letsencrypt_path.is_dir() and listdir(letsencrypt_path):
+        letsencrypt_files = [file.name for file in letsencrypt_path.glob("*.log*") if file.is_file()]
+
+        # Sort letsencrypt files with proper numerical ordering
+        def sort_key(filename):
+            if filename.endswith(".log"):
+                return (0, filename)  # Files ending with .log come first
+            else:
+                # Extract number from .log.X format
+                with suppress(ValueError, IndexError):
+                    parts = filename.split(".log.")
+                    if len(parts) == 2:
+                        return (int(parts[1]), filename)
+                return (999999, filename)  # Fallback for unexpected formats
+
+        letsencrypt_files.sort(key=sort_key)
+        for file in letsencrypt_files:
+            files["letsencrypt"].append(f"letsencrypt_{file}")
+
+    # Flatten files for compatibility with existing logic
+    all_files = files["main"] + files["letsencrypt"]
 
     current_file = secure_filename(request.args.get("file", ""))
     page = request.args.get("page", 0)
 
-    if current_file and current_file not in files:
+    if current_file and current_file not in all_files:
         return Response("No such file", 404)
 
     if isabs(current_file) or ".." in current_file:
@@ -33,12 +60,17 @@ def logs_page():
 
     raw_logs = (
         "Select a log file to view its contents"
-        if files
+        if all_files
         else "There are no log files to display, check the documentation for more information on how to enable logging"
     )
     page_num = 1
     if current_file:
-        with logs_path.joinpath(current_file).open(encoding="utf-8", errors="replace") as f:
+        if current_file.startswith("letsencrypt_"):
+            file_path = logs_path.joinpath(current_file.replace("letsencrypt_", "letsencrypt/"))
+        else:
+            file_path = logs_path.joinpath(current_file)
+
+        with file_path.open(encoding="utf-8", errors="replace") as f:
             raw_logs = f.read().splitlines()
             page_num = len(raw_logs) // 10000 + 1
             if not page:

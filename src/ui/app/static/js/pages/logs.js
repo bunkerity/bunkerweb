@@ -29,6 +29,34 @@ $(document).ready(function () {
 
   editor.renderer.setScrollMargin(10, 10);
 
+  // Scroll to bottom with smooth animation after content is loaded
+  setTimeout(() => {
+    const totalLines = editor.session.getLength();
+    const startLine = 0;
+    const endLine = totalLines;
+    const duration = 1000; // 1 second animation
+    const startTime = Date.now();
+
+    function smoothScroll() {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Easing function for smooth animation (ease-out)
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+
+      const currentLine = Math.floor(
+        startLine + (endLine - startLine) * easeOut,
+      );
+      editor.gotoLine(currentLine, 0, false);
+
+      if (progress < 1) {
+        requestAnimationFrame(smoothScroll);
+      }
+    }
+
+    smoothScroll();
+  }, 100); // Small delay to ensure editor is fully rendered
+
   editorElement.removeClass("visually-hidden");
   $("#logs-waiting").addClass("visually-hidden");
 

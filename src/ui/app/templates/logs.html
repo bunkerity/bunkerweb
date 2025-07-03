@@ -5,9 +5,9 @@
         <div class="d-flex flex-wrap justify-content-around align-items-center">
             <div class="d-flex justify-content-center">
                 <div class="dropdown btn-group"
-                     {% if not files %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available" data-i18n="tooltip.no_log_files"{% endif %}>
+                     {% if not files.main and not files.letsencrypt %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available" data-i18n="tooltip.no_log_files"{% endif %}>
                     <button type="button"
-                            class="btn btn-outline-primary dropdown-toggle{% if not files %} disabled{% endif %}"
+                            class="btn btn-outline-primary dropdown-toggle{% if not files.main and not files.letsencrypt %} disabled{% endif %}"
                             data-bs-toggle="dropdown"
                             aria-haspopup="true"
                             aria-expanded="false">
@@ -17,15 +17,31 @@
                     <ul id="types-dropdown-menu"
                         class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
                         role="tablist">
-                        {% for file in files %}
-                            <li class="nav-item">
-                                <a role="button"
-                                   href="{{ url_for('logs', file=file) }}"
-                                   class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
-                                    {{ file }}
-                                </a>
-                            </li>
-                        {% endfor %}
+                        {% if files.main %}
+                            <li><h6 class="dropdown-header">Main Logs</h6></li>
+                            {% for file in files.main %}
+                                <li class="nav-item">
+                                    <a role="button"
+                                       href="{{ url_for('logs', file=file) }}"
+                                       class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
+                                        {{ file }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                        {% if files.letsencrypt %}
+                            {% if files.main %}<li><hr class="dropdown-divider"></li>{% endif %}
+                            <li><h6 class="dropdown-header">Let's Encrypt Logs</h6></li>
+                            {% for file in files.letsencrypt %}
+                                <li class="nav-item">
+                                    <a role="button"
+                                       href="{{ url_for('logs', file=file) }}"
+                                       class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
+                                        {{ file.replace('letsencrypt_', '') }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
                     </ul>
                 </div>
                 {% if page_num > 1 %}
