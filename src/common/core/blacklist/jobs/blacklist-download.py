@@ -58,11 +58,17 @@ status = 0
 
 KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT", "IGNORE_URI")
 
+COMMUNITY_LISTS = {
+    "ip:laurent-minne-fr-be-aggressive": "https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt",
+    "ip:danmeuk-tor-exit": "https://www.dan.me.uk/torlist/?exit",
+    "ua:mitchellkrogza-bad-user-agents": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
+}
+
 try:
     # Check if at least a server has Blacklist activated
     blacklist_activated = False
 
-    services = getenv("SERVER_NAME", "").strip()
+    services = getenv("SERVER_NAME", "www.example.com").strip()
 
     if not services:
         LOGGER.warning("No services found, exiting...")
@@ -74,16 +80,42 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in services:
-            if getenv(f"{first_server}_USE_BLACKLIST", getenv("USE_BLACKLIST", "yes")) == "yes":
+            if getenv(f"{first_server}_USE_BLACKLIST", "yes") == "yes":
                 blacklist_activated = True
 
                 # Get services URLs
                 services_blacklist_urls[first_server] = {}
                 for kind in KINDS:
                     services_blacklist_urls[first_server][kind] = set()
-                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", getenv(f"BLACKLIST_{kind}_URLS", "")).strip().split(" "):
+                    for url in getenv(f"{first_server}_BLACKLIST_{kind}_URLS", "").strip().split(" "):
                         if url:
                             services_blacklist_urls[first_server][kind].add(url)
+
+                # Add community blacklist URLs
+                community_lists = getenv(f"{first_server}_BLACKLIST_COMMUNITY_LISTS", "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents").strip()
+                for community_id in community_lists.split(" "):
+                    if not community_id:
+                        continue
+
+                    if community_id in COMMUNITY_LISTS:
+                        url = COMMUNITY_LISTS[community_id]
+                        # Determine kind from prefix
+                        prefix = community_id.split(":", 1)[0].lower()
+                        if prefix == "ip":
+                            kind = "IP"
+                        elif prefix == "ua":
+                            kind = "USER_AGENT"
+                        elif prefix == "rdns":
+                            kind = "RDNS"
+                        elif prefix == "asn":
+                            kind = "ASN"
+                        elif prefix == "uri":
+                            kind = "URI"
+                        else:
+                            kind = "IP"  # Default fallback
+                        services_blacklist_urls[first_server][kind].add(url)
+                    else:
+                        LOGGER.warning(f"Community blacklist {community_id} not found in predefined lists")
     # Singlesite case
     elif getenv("USE_BLACKLIST", "yes") == "yes":
         blacklist_activated = True
@@ -96,6 +128,32 @@ try:
                 if url:
                     services_blacklist_urls[services[0]][kind].add(url)
 
+        # Add community blacklist URLs for singlesite
+        community_lists = getenv("BLACKLIST_COMMUNITY_LISTS", "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents").strip()
+        for community_id in community_lists.split(" "):
+            if not community_id:
+                continue
+
+            if community_id in COMMUNITY_LISTS:
+                url = COMMUNITY_LISTS[community_id]
+                # Determine kind from prefix
+                prefix = community_id.split(":", 1)[0].lower()
+                if prefix == "ip":
+                    kind = "IP"
+                elif prefix == "ua":
+                    kind = "USER_AGENT"
+                elif prefix == "rdns":
+                    kind = "RDNS"
+                elif prefix == "asn":
+                    kind = "ASN"
+                elif prefix == "uri":
+                    kind = "URI"
+                else:
+                    kind = "IP"  # Default fallback
+                services_blacklist_urls[services[0]][kind].add(url)
+            else:
+                LOGGER.warning(f"Community blacklist {community_id} not found in predefined lists")
+
     if not blacklist_activated:
         LOGGER.info("Blacklist is not activated, skipping downloads...")
         sys_exit(0)
@@ -104,7 +162,7 @@ try:
 
     if not any(url for urls in services_blacklist_urls.values() for url in urls.values()):
         LOGGER.warning("No blacklist URL is configured, nothing to do...")
-        for file in JOB.job_path.rglob("*.list"):
+        for file in list(JOB.job_path.rglob("*.list")):
             if file.parent == JOB.job_path:
                 LOGGER.warning(f"Removing no longer used url file {file} ...")
                 deleted, err = JOB.del_cache(file)
@@ -118,6 +176,7 @@ try:
 
     urls = set()
     failed_urls = set()
+    processed_urls = set()  # Track which URLs have been processed globally
     # Initialize aggregation per kind with service tracking
     aggregated_recap = {
         kind: {
@@ -145,24 +204,37 @@ try:
             # Track that this service provided URLs for the current kind
             aggregated_recap[kind]["total_services"].add(service)
 
+            # Use set to avoid duplicate entries
+            unique_entries = set()
             content = b""
             for url in urls_list:
                 url_file = f"{bytes_hash(url, algorithm='sha1')}.list"
                 cached_url = JOB.get_cache(url_file, with_info=True, with_data=True)
                 try:
-                    if url_file not in urls:
+                    # Only count URLs that haven't been processed globally
+                    if url not in processed_urls:
                         aggregated_recap[kind]["total_urls"] += 1
 
                     # If the URL has recently been downloaded, use cache
                     if url in failed_urls:
-                        if url_file not in urls:
+                        if url not in processed_urls:
                             aggregated_recap[kind]["failed_count"] += 1
-                    elif isinstance(cached_url, dict) and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp():
+                    elif (
+                        isinstance(cached_url, dict)
+                        and cached_url.get("last_update")
+                        and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
+                    ):
                         LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
-                        if url_file not in urls:
+                        if url not in processed_urls:
                             aggregated_recap[kind]["skipped_urls"] += 1
-                        # Remove first line (URL) and add to content
-                        content += b"\n".join(cached_url["data"].split(b"\n")[1:]) + b"\n"
+                        # Process cached data and add to unique_entries
+                        cached_data = cached_url.get("data", b"")
+                        if cached_data:
+                            # Skip first line (URL comment) and process entries
+                            for line in cached_data.split(b"\n")[1:]:
+                                line = line.strip()
+                                if line:
+                                    unique_entries.add(line)
                     else:
                         failed = False
                         LOGGER.info(f"Downloading blacklist data from {url} ...")
@@ -203,9 +275,10 @@ try:
                                 iterable = resp.iter_lines()
 
                         if not failed:
-                            if url_file not in urls:
+                            if url not in processed_urls:
                                 aggregated_recap[kind]["downloaded_urls"] += 1
 
+                            url_content = b""
                             count_lines = 0
                             for line in iterable:
                                 line = line.strip()
@@ -215,11 +288,13 @@ try:
                                     line = line.split(b" ")[0]
                                 ok, data = check_line(kind, line)
                                 if ok:
-                                    content += data + b"\n"
+                                    unique_entries.add(data)
+                                    url_content += data + b"\n"
                                     count_lines += 1
-                            aggregated_recap[kind]["total_lines"] += count_lines
+                            if url not in processed_urls:
+                                aggregated_recap[kind]["total_lines"] += count_lines
 
-                            cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + content)
+                            cached, err = JOB.cache_file(url_file, b"# Downloaded from " + url.encode("utf-8") + b"\n" + url_content)
                             if not cached:
                                 LOGGER.error(f"Error while caching url content for {url}: {err}")
                 except BaseException as e:
@@ -227,12 +302,17 @@ try:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Exception while getting {service} blacklist from {url} :\n{e}")
                     failed_urls.add(url)
-                    if url_file not in urls:
+                    if url not in processed_urls:
                         aggregated_recap[kind]["failed_count"] += 1
-                urls.add(url_file)
+                finally:
+                    # Mark URL as processed to avoid double counting
+                    processed_urls.add(url)
+                    urls.add(url_file)
+
+            # Build final content from unique entries, sorted for consistency
+            content = b"\n".join(sorted(unique_entries)) + b"\n" if unique_entries else b""
 
             if not content:
-                LOGGER.warning(f"No data for {service} {kind}, skipping...")
                 continue
 
             # Check if file has changed

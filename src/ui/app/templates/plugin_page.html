@@ -1,19 +1,29 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <div class="card p-1 mb-4 sticky-card text-nowrap">
         <div class="card-header d-flex justify-content-between align-items-center mw-100">
-            <div class="pt-1 flex-grow-1 me-2" style="min-width: 0;">
+            <div class="pt-1 flex-grow-1 me-2" style="min-width: 0">
                 <h5 class="card-title d-inline don-jose{{ plugin_types[plugin['type']].get('text-class', '') }}{{ plugin_types[plugin['type']].get('title-class', '') }}">
-                    {{ plugin["name"] }}&nbsp;－&nbsp;v{{ plugin["version"] }}&nbsp;－&nbsp;{{ plugin_types[plugin["type"]].get('icon', '<img src="' + pro_diamond_url + '"
+                    {{ plugin["name"] }}&nbsp;－&nbsp;v{{ plugin["version"]
+                    }}&nbsp;－&nbsp;{{ plugin_types[plugin["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="18px"
-     height="15.5px">') |safe }}
+     height="15.5px" />') |safe }}
                 </h5>
                 <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin["description"] }}</p>
             </div>
             <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
-                <a href="{% if plugin['type'] == 'core' %}https://docs.bunkerweb.io/latest/settings/?utm_campaign=self&utm_source=ui#{% if plugin['id'] == 'general' %}global-settings{% else %}{{ plugin['id'] }}{% endif %}{% else %}https://docs.bunkerweb.io/latest/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
+                <a href="{% if plugin['type'] == 'core' %}https://docs.bunkerweb.io/{{ bw_version }}/features/?utm_campaign=self&utm_source=ui#{% if plugin['id'] == 'general' %}global-settings{% else %}{{ plugin['id'] }}{% endif %}{% else %}https://docs.bunkerweb.io/{{ bw_version }}/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
                    class="btn btn-sm btn-primary rounded-pill ms-2"
                    target="_blank"
                    rel="noopener">
@@ -25,7 +35,8 @@
     {% if not is_used %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                   data-i18n="plugin.page.status.deactivated">
                     Plugin is deactivated, therefore no information is available.
                 </p>
             </div>
@@ -33,30 +44,38 @@
     {% elif not is_metrics %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
-                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                   data-i18n="plugin.page.status.metrics_deactivated">
                     Metrics plugin isn't activated, therefore no information is available.
                 </p>
             </div>
         </div>
     {% elif plugin_page and "Plugin page uses old template" not in plugin_page %}
-        {{ plugin_page|safe }}
-    {% elif pre_render.get("status", False) and pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {}) or pre_render.get("data") is not mapping %}
+        {{
+        plugin_page|safe }} {% elif pre_render.get("status", False) and
+        pre_render.get("status", False) == "ko" or "error" in pre_render.get("data", {})
+        or pre_render.get("data") is not mapping %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
                 <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
-                    (Pre rendering error) {{ pre_render.get('data', {'error': 'No log to show'}).get("error", "No log to show") }}
+                    (Pre rendering error) {{ pre_render.get('data', {'error': 'No log to
+                     show'}).get("error", "No log to show") }}
                 </p>
             </div>
         </div>
     {% else %}
-        {% if pre_render.get("status", "ko") == "ok" and pre_render.get("data") is mapping and "error" not in pre_render.get("data", {}) %}
+        {% if pre_render.get("status", "ko") == "ok" and
+            pre_render.get("data") is mapping and "error" not in pre_render.get("data", {})
+            %}
             <div class="row g-4">
                 {% for key, value in pre_render.get("data", {}).items() %}
-                    {% if key.startswith("ping_") %}
-                        {% set up = value.get("value") in ('up', 'yes', 'success', 'true') %}
+                    {% if
+                        key.startswith("ping_") %}
+                        {% set up = value.get("value") in ('up', 'yes',
+                                                'success', 'true') %}
                         <div class="{{ value.get('col-size', 'col-12 col-md-4') }}">
                             <div class="card p-4 position-relative shadow-md rounded-3 {{ value.get('card-classes', '') }}">
-                                <i class='bx bx-{% if up %}up{% else %}down{% endif %}-arrow-circle bx-sm position-absolute top-0 end-0 m-3 text-{% if up %}success{% else %}danger{% endif %}'></i>
+                                <i class="bx bx-{% if up %}up{% else %}down{% endif %}-arrow-circle bx-sm position-absolute top-0 end-0 m-3 text-{% if up %}success{% else %}danger{% endif %}"></i>
                                 <div class="card-header p-1">
                                     <div class="card-title mb-0">
                                         <h5 class="mb-1 me-2 don-jose {{ value.get('title-classes', '') }}">{{ value.get('title', 'STATUS') }}</h5>
@@ -89,7 +108,10 @@
                                             <div class="text-center mt-2">
                                                 <p class="card-text mb-1">{{ value.get("value") }}</p>
                                                 {% set description = value.get("description") %}
-                                                {% if description %}<p class="card-text text-muted mb-0">{{ value.get("description") }}</p>{% endif %}
+                                                {% if description
+                                                    %}
+                                                    <p class="card-text text-muted mb-0">{{ value.get("description") }}</p>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     {% elif key.startswith("date_") %}
@@ -99,7 +121,11 @@
                                             </div>
                                         </div>
                                     {% else %}
-                                        <p class="card-text mb-0">{{ human_readable_number(value.get("value") ) }}</p>
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <div class="text-center mt-2">
+                                                <p class="card-text mb-0">{{ human_readable_number(value.get("value") ) }}</p>
+                                            </div>
+                                        </div>
                                     {% endif %}
                                     {% set subtitle = value.get("subtitle") %}
                                     {% if subtitle %}
@@ -108,7 +134,8 @@
                                 </div>
                                 {% if key.startswith("date_") %}
                                     <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-                                        TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                                        TZ:
+                                        <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
                                     </span>
                                 {% endif %}
                             </div>
@@ -126,18 +153,20 @@
                                 <div class="card-body p-0">
                                     {% if value.get("data") %}
                                         {% if key.startswith("top_") %}
-                                            {% set top_order = value.get("order", {"column": "0", "dir": "desc"}) %}
+                                            {% set
+                                            top_order = value.get("order", {"column": "0", "dir": "desc"}) %}
                                             <div id="table-{{ key.replace('_', '-') }}-order" class="visually-hidden">{{ top_order|tojson }}</div>
                                         {% endif %}
                                         <div id="table-{{ key.replace('_', '-') }}-types" class="visually-hidden">{{ value.get('types', {}) |tojson }}</div>
                                         <div class="card table-responsive text-nowrap">
                                             <table id="table-{{ key.replace('_', '-') }}" class="table w-100 d-none">
-                                                {% set ns_list = namespace(size=0) %}
                                                 <thead>
                                                     <tr>
+                                                        {% set ns_list = namespace(size=0) %}
                                                         {% for val_key in value['data'] %}
                                                             <th>{{ val_key|trim }}</th>
-                                                            {% set ns_list.size = value['data'][val_key]|length if value['data'][val_key]|length > ns_list.size else ns_list.size %}
+                                                            {% set ns_list.size = value['data'][val_key]|length if
+                                                                                                                        value['data'][val_key]|length > ns_list.size else ns_list.size %}
                                                         {% endfor %}
                                                     </tr>
                                                 </thead>
@@ -156,11 +185,12 @@
                                         </div>
                                         <input type="hidden"
                                                id="table-{{ key.replace('_', '-') }}-length"
-                                               value="{{ ns_list.size }}">
+                                               value="{{ ns_list.size }}" />
                                     {% else %}
                                         <div class="d-flex align-items-center justify-content-center h-100">
                                             <div class="text-center mt-2">
-                                                <p class="g-3 p-2 text-primary rounded-lg fw-bold">No data to show</p>
+                                                <p class="g-3 p-2 text-primary rounded-lg fw-bold"
+                                                   data-i18n="status.no_data">No data to show</p>
                                             </div>
                                         </div>
                                     {% endif %}
@@ -173,7 +203,8 @@
         {% else %}
             <div class="d-flex align-items-center justify-content-center">
                 <div class="text-center text-primary">
-                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
+                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                       data-i18n="plugin.page.status.not_available">
                         Plugin page not yet available during the beta phase.
                     </p>
                 </div>
@@ -181,4 +212,19 @@
         {% endif %}
     {% endif %}
     <!--/ Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/plugin_page.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

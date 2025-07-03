@@ -1,3 +1,4 @@
+from re import escape
 from Test import Test
 from os.path import isfile
 from os import getenv, mkdir
@@ -28,6 +29,7 @@ class KubernetesTest(Test):
             append_env = {
                 "AUTO_LETS_ENCRYPT": "yes",
                 "USE_LETS_ENCRYPT_STAGING": "yes",
+                "LETS_ENCRYPT_MAX_RETRIES": "3",
                 "USE_REAL_IP": "yes",
                 "USE_PROXY_PROTOCOL": "yes",
                 "REAL_IP_FROM": "100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
@@ -192,9 +194,9 @@ class KubernetesTest(Test):
             super()._setup_test()
             test = f"/tmp/tests/{self._name}"
             for ex_domain, test_domain in self._domains.items():
-                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.replace_in_files(test, escape(ex_domain), test_domain)
                 Test.rename(test, ex_domain, test_domain)
-            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
+            Test.replace_in_files(test, escape("example.com"), getenv("ROOT_DOMAIN"))
             setup = f"{test}/setup-kubernetes.sh"
             if isfile(setup):
                 proc = run("./setup-kubernetes.sh", cwd=test, shell=True)

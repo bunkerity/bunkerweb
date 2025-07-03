@@ -11,17 +11,19 @@
       "help": "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
       "id": "errors",
       "label": "Errors",
-      "regex": "^(?! )( ?([1-5]\\d{2})(?!.*\\2(?![^=]))=([^ ]*)(?!.*\\3(?!.)))*$",
-      "type": "text"
+      "regex": "^( *([1-5]\\d{2})=[^ ]+ *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "INTERCEPTED_ERROR_CODES": {
       "context": "multisite",
       "default": "400 401 403 404 405 413 429 500 501 502 503 504",
-      "help": "List of HTTP error code intercepted by BunkerWeb",
+      "help": "List of HTTP error code intercepted by BunkerWeb, separated with spaces.",
       "id": "intercepted-error-codes",
       "label": "Intercepted error codes",
-      "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)*$",
-      "type": "text"
+      "regex": "^( *([1-5]\\d{2}) *)*$",
+      "type": "multivalue",
+      "separator": " "
     }
   }
 }

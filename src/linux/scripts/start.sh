@@ -112,7 +112,7 @@ function start() {
     chown root:nginx /var/tmp/bunkerweb/tmp.env
     chmod 660 /var/tmp/bunkerweb/tmp.env
 
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload"
+    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env"
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"

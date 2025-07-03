@@ -1,8 +1,8 @@
 from datetime import datetime
 from threading import Thread
 from time import time
-from flask import Blueprint, Response, redirect, render_template, request, url_for
-from flask_login import current_user, login_required
+from flask import Blueprint, redirect, render_template, request, url_for
+from flask_login import login_required
 
 from app.dependencies import BW_CONFIG, DATA, DB
 from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
@@ -45,9 +45,7 @@ def pro_page():
 @pro.route("/pro/key", methods=["POST"])
 @login_required
 def pro_key():
-    if "write" not in current_user.list_permissions:
-        return Response("You don't have the required permissions to update the license key.", 403)
-    elif DB.readonly:
+    if DB.readonly:
         return handle_error("Database is in read-only mode", "pro")
 
     verify_data_in_form(

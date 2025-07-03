@@ -4,12 +4,13 @@
 
 !!! warning "Read me first"
 
-    We often add new features and settings to BunkerWeb. We recommend you read the [settings](settings.md) sections of the documentation or the GitHub releases to see what's new.
+    We often add new features and settings to BunkerWeb. We recommend you read the [settings](features.md) sections of the documentation or the GitHub releases to see what's new.
 
 ### Procedure
 
 1. **Backup the database**:
-      - Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.
+
+      - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.
       - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
 
     === "Docker"
@@ -24,8 +25,8 @@
 
     === "Linux"
 
-        !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
-            If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+        !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
+            If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
             === "MySQL/MariaDB"
 
@@ -74,16 +75,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.1
+                        image: bunkerity/bunkerweb:1.6.2
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.1
+                        image: bunkerity/bunkerweb-scheduler:1.6.2
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.1
+                        image: bunkerity/bunkerweb-autoconf:1.6.2
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.1
+                        image: bunkerity/bunkerweb-ui:1.6.2
                         ...
                 ```
 
@@ -106,7 +107,7 @@
 
                 === "Debian/Ubuntu"
 
-                    First, if you have previously hold the BunkerWeb package, unhold it :
+                    First, if you have previously held the BunkerWeb package, unhold it :
 
                     You can print a list of packages on hold with `apt-mark showhold`
 
@@ -114,13 +115,14 @@
                     sudo apt-mark unhold bunkerweb nginx
                     ```
 
-                    Them, you can update BunkerWeb package :
+                    Then, you can update the BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.1
+                    sudo apt update && \
+                    sudo apt install -y bunkerweb=1.6.2
                     ```
 
-                    To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
+                    To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
 
                     ```shell
                     sudo apt-mark hold bunkerweb nginx
@@ -130,7 +132,7 @@
 
                 === "Fedora/RedHat"
 
-                    First, if you have previously hold the BunkerWeb package, unhold it :
+                    First, if you have previously held the BunkerWeb package, unhold it :
 
                     You can print a list of packages on hold with `dnf versionlock list`
 
@@ -139,13 +141,14 @@
                     sudo dnf versionlock delete package nginx
                     ```
 
-                    Them, you can update BunkerWeb package :
+                    Then, you can update the BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.1
+                    sudo dnf makecache && \
+                    sudo dnf install -y bunkerweb-1.6.2
                     ```
 
-                    To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
+                    To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
 
                     ```shell
                     sudo dnf versionlock add bunkerweb && \
@@ -219,7 +222,7 @@
                 docker exec -u 0 -i <scheduler_container> chmod 770 /var/lib/bunkerweb/db.sqlite3
                 ```
 
-            4. **Stop the Stack.**
+            4. **Stop the stack.**
 
                 ```bash
                 docker compose down
@@ -233,7 +236,7 @@
                 docker exec -e MYSQL_PWD=<your_password> -i <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-            2. **Stop the Stack.**
+            2. **Stop the stack.**
 
                 ```bash
                 docker compose down
@@ -259,7 +262,7 @@
                 docker exec -i <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-            4. **Stop the Stack.**
+            4. **Stop the stack.**
 
                 ```bash
                 docker compose down
@@ -381,7 +384,7 @@ While the settings are now declared on the Scheduler container, **you'll still n
 
 #### Default values and new settings
 
-We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](settings.md) sections of the documentation.
+We tried our best not to change default value but we have added many other settings. It's highly recommended to read the [security tuning](advanced.md#security-tuning) and [settings](features.md) sections of the documentation.
 
 #### Templates
 
@@ -398,7 +401,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 ### Procedure
 
 1. **Backup the database**:
-      - Before proceeding with the database upgrade, ensure to perform a complete backup of the current state of the database.
+      - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.
       - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
 
     === "1\.5\.7 and later"
@@ -415,8 +418,8 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
         === "Linux"
 
-            !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
-                If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
+            !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
+                If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
                 === "MySQL/MariaDB"
 
@@ -531,16 +534,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.1
+                        image: bunkerity/bunkerweb:1.6.2
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.1
+                        image: bunkerity/bunkerweb-scheduler:1.6.2
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.1
+                        image: bunkerity/bunkerweb-autoconf:1.6.2
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.1
+                        image: bunkerity/bunkerweb-ui:1.6.2
                         ...
                 ```
 
@@ -562,7 +565,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                 === "Debian/Ubuntu"
 
-                    First, if you have previously hold the BunkerWeb package, unhold it :
+                    First, if you have previously held the BunkerWeb package, unhold it :
 
                     You can print a list of packages on hold with `apt-mark showhold`
 
@@ -570,13 +573,14 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     sudo apt-mark unhold bunkerweb nginx
                     ```
 
-                    Them, you can update BunkerWeb package :
+                    Then, you can update the BunkerWeb package :
 
                     ```shell
-                    sudo apt install -y bunkerweb=1.6.1
+                    sudo apt update && \
+                    sudo apt install -y bunkerweb=1.6.2
                     ```
 
-                    To prevent upgrading BunkerWeb package when executing `apt upgrade`, you can use the following command :
+                    To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
 
                     ```shell
                     sudo apt-mark hold bunkerweb nginx
@@ -586,7 +590,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                 === "Fedora/RedHat"
 
-                    First, if you have previously hold the BunkerWeb package, unhold it :
+                    First, if you have previously held the BunkerWeb package, unhold it :
 
                     You can print a list of packages on hold with `dnf versionlock list`
 
@@ -595,13 +599,14 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                     sudo dnf versionlock delete package nginx
                     ```
 
-                    Them, you can update BunkerWeb package :
+                    Then, you can update the BunkerWeb package :
 
                     ```shell
-                    sudo dnf install -y bunkerweb-1.6.1
+                    sudo dnf makecache && \
+                    sudo dnf install -y bunkerweb-1.6.2
                     ```
 
-                    To prevent upgrading BunkerWeb package when executing `dnf upgrade`, you can use the following command :
+                    To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
 
                     ```shell
                     sudo dnf versionlock add bunkerweb && \
@@ -673,7 +678,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 docker exec -u 0 -i <scheduler_container> chmod 770 /var/lib/bunkerweb/db.sqlite3
                 ```
 
-            ''. **Stop the Stack.**
+            4. **Stop the stack.**
 
                 ```bash
                 docker compose down
@@ -687,7 +692,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 docker exec -e MYSQL_PWD=<your_password> -i <database_container> mysql -u <username> <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-            2. **Stop the Stack.**
+            2. **Stop the stack.**
 
                 ```bash
                 docker compose down
@@ -713,7 +718,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 docker exec -i <database_container> psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-            4. **Stop the Stack.**
+            4. **Stop the stack.**
 
                 ```bash
                 docker compose down
@@ -748,7 +753,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
     4. **Stop the services**.
 
         ```bash
-        systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
+        sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
         ```
 
     5. **Restore the backup**.
@@ -791,7 +796,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
     6. **Start the services**.
 
         ```bash
-        sudo systemctl start bunkerweb bunkerweb-ui
+        sudo systemctl start bunkerweb bunkerweb-ui bunkerweb-scheduler
         ```
 
     7. **Downgrade BunkerWeb**.

@@ -15,46 +15,25 @@ from threading import Thread
 from time import time
 from traceback import format_exc
 
-from jinja2 import ChoiceLoader, FileSystemLoader
-
-
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from cachelib import FileSystemCache
 from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
-from flask_login import current_user, LoginManager, login_required, logout_user
-from flask_principal import ActionNeed, identity_loaded, Permission, Principal, RoleNeed, TypeNeed, UserNeed
+from flask_login import current_user, LoginManager, login_required
 from flask_session import Session
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from jinja2 import ChoiceLoader, FileSystemLoader
 from werkzeug.routing.exceptions import BuildError
 
+from app.models.biscuit import BiscuitMiddleware
 from app.models.reverse_proxied import ReverseProxied
 
-from app.routes.about import about
-from app.routes.bans import bans
-from app.routes.cache import cache
-from app.routes.configs import configs
-from app.routes.global_config import global_config
-from app.routes.home import home
-from app.routes.instances import instances
-from app.routes.jobs import jobs
-from app.routes.login import login
-from app.routes.logout import logout, logout_page
-from app.routes.logs import logs
-from app.routes.plugins import plugins
-from app.routes.pro import pro
-from app.routes.profile import profile
-from app.routes.reports import reports
-from app.routes.services import services
-from app.routes.setup import setup
-from app.routes.totp import totp
-from app.routes.support import support
-
-from app.dependencies import BW_CONFIG, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
+from app.dependencies import BW_CONFIG, DATA, DB, CORE_PLUGINS_PATH, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH, safe_reload_plugins
 from app.models.models import AnonymousUser
 from app.utils import (
+    BISCUIT_PUBLIC_KEY_FILE,
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
@@ -65,8 +44,10 @@ from app.utils import (
     get_multiples,
     handle_stop,
     human_readable_number,
+    is_plugin_active,
     stop,
 )
+from app.lang_config import SUPPORTED_LANGUAGES
 
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
@@ -89,28 +70,6 @@ HOOKS = {
         "log_prefix": "Context-processor",
     },
 }
-
-BLUEPRINTS = (
-    about,
-    services,
-    profile,
-    jobs,
-    reports,
-    totp,
-    home,
-    logout,
-    instances,
-    plugins,
-    global_config,
-    pro,
-    cache,
-    logs,
-    login,
-    configs,
-    bans,
-    setup,
-    support,
-)
 
 
 class DynamicFlask(Flask):
@@ -197,6 +156,8 @@ with app.app_context():
         stop(1)
     FLASK_SECRET = LIB_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
+    app.config["BISCUIT_PUBLIC_KEY_PATH"] = BISCUIT_PUBLIC_KEY_FILE.as_posix()
+
     app.config["ENV"] = {}
 
     app.config["CHECK_PRIVATE_IP"] = getenv("CHECK_PRIVATE_IP", "yes").lower() == "yes"
@@ -216,18 +177,13 @@ with app.app_context():
 
     # Session management
     app.config["SESSION_TYPE"] = "cachelib"
+    app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_ID_LENGTH"] = 64
     app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, cache_dir=LIB_DIR.joinpath("ui_sessions_cache"))
     sess = Session()
     sess.init_app(app)
 
-    principal = Principal()
-    principal.init_app(app)
-
-    admin_permission = Permission(TypeNeed("super_admin"))
-    manage_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"))
-    edit_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"), ActionNeed("write"))
-    read_permission = Permission(TypeNeed("super_admin"), ActionNeed("manage"), ActionNeed("write"), ActionNeed("read"))
+    biscuit = BiscuitMiddleware(app)
 
     login_manager = LoginManager()
     login_manager.session_protection = "strong"
@@ -261,6 +217,7 @@ with app.app_context():
         get_plugins_settings=BW_CONFIG.get_plugins_settings,
         human_readable_number=human_readable_number,
         url_for=custom_url_for,
+        is_plugin_active=is_plugin_active,
     )
 
     app.config.update({hook_info["key"]: [] for hook_info in HOOKS.values()})
@@ -274,15 +231,18 @@ with app.app_context():
 
 @app.context_processor
 def inject_variables():
+    app_env = app.config["ENV"].copy()
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
         try:
             resp = hook()
             if resp:
-                app.config["ENV"] = {**app.config["ENV"], **resp}
+                app_env = {**app_env, **resp}
         except Exception:
             LOGGER.exception("Error in context_processor hook")
 
-    return app.config["ENV"]
+    app.config["ENV"] = app_env
+
+    return app_env
 
 
 @login_manager.user_loader
@@ -318,24 +278,6 @@ def load_user(username):
     return ui_user
 
 
-@identity_loaded.connect_via(app)
-def on_identity_loaded(sender, identity):
-    # Set the identity user object
-    identity.user = current_user
-
-    # Add the UserNeed to the identity
-    identity.provides.add(UserNeed(current_user.get_id()))
-
-    for role in current_user.list_roles:
-        identity.provides.add(RoleNeed(role))
-
-    for action in current_user.list_permissions:
-        identity.provides.add(ActionNeed(action))
-
-    if current_user.admin:
-        identity.provides.add(TypeNeed("super_admin"))
-
-
 @app.errorhandler(CSRFError)
 def handle_csrf_error(_):
     """
@@ -346,16 +288,15 @@ def handle_csrf_error(_):
     """
     LOGGER.debug(format_exc())
     LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
-    session.clear()
-    logout_user()
-    flask_flash("Wrong CSRF token !", "error")
     if not current_user:
         return redirect(url_for("setup.setup_page")), 403
-    return redirect(url_for("login.login_page")), 403
+    return logout_page(), 403
 
 
 def update_latest_stable_release():
-    DATA["LATEST_VERSION"] = get_latest_stable_release()
+    latest_release = get_latest_stable_release()
+    if latest_release:
+        DATA["LATEST_VERSION"] = latest_release
 
 
 def check_database_state(request_method: str, request_path: str):
@@ -431,8 +372,10 @@ def refresh_app_context():
         app.config[hook_info["key"]] = []
 
     # Find all python files in ui directories
+    core_ui_py_files = list(CORE_PLUGINS_PATH.glob("*/ui/hooks.py"))
     external_ui_py_files = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/hooks.py"))
     pro_ui_py_files = list(PRO_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    core_bp_dirs = list(CORE_PLUGINS_PATH.glob("*/ui/blueprints"))
     external_bp_dirs = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
     pro_bp_dirs = list(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
 
@@ -443,7 +386,7 @@ def refresh_app_context():
     blueprint_registry = {}
 
     # --- LOAD HOOKS ---
-    for py_file in chain(external_ui_py_files, pro_ui_py_files):
+    for py_file in chain(core_ui_py_files, external_ui_py_files, pro_ui_py_files):
         if not py_file.is_file():
             continue
 
@@ -480,6 +423,9 @@ def refresh_app_context():
                     hook_function = getattr(hook_module, hook_type)
                     app.config.setdefault(hook_info["key"], []).append(hook_function)
                     LOGGER.info(f"{hook_info['log_prefix']} hook '{hook_type}' from {py_file} loaded")
+
+            if hook_dir in sys_path:
+                sys_path.remove(hook_dir)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
 
@@ -491,7 +437,7 @@ def refresh_app_context():
             LOGGER.debug(f"Removed {hook_dir} from sys.path for obsolete hook {module_name}")
 
     # --- LOAD BLUEPRINTS ---
-    for bp_dir in chain(pro_bp_dirs, external_bp_dirs):
+    for bp_dir in chain(pro_bp_dirs, external_bp_dirs, core_bp_dirs):
         if not bp_dir.is_dir():
             continue
 
@@ -499,6 +445,7 @@ def refresh_app_context():
         active_plugin_paths.add(bp_dir.parent.parent.parent)
         blueprint_dir = str(bp_dir)
         is_pro = bp_dir in (p.parent for p in pro_bp_dirs)
+        is_external = bp_dir in (p.parent for p in external_bp_dirs)
 
         # Add directory to sys_path
         if blueprint_dir not in sys_path:
@@ -539,7 +486,7 @@ def refresh_app_context():
                         plugin_blueprints.add(bp_name)
 
                         # Set plugin priority and path
-                        bp.plugin_priority = 2 if is_pro else 1
+                        bp.plugin_priority = 2 if is_pro else (1 if is_external else 0)
                         bp.import_path = blueprint_dir
                         app.plugin_sys_paths[bp_name] = blueprint_dir
 
@@ -667,7 +614,7 @@ def before_request():
     metadata = None
     app.config["SCRIPT_NONCE"] = token_urlsafe(32)
 
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")):
+    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/")):
         metadata = DB.get_metadata()
         worker_pid = str(getpid())
 
@@ -732,11 +679,11 @@ def before_request():
                 passed = False
 
             if not passed:
-                return logout_page()
+                return logout_page(), 403
 
     current_endpoint = request.path.split("/")[-1]
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
-        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"])
+        app.config["ENV"] = dict(current_endpoint=current_endpoint, script_nonce=app.config["SCRIPT_NONCE"], supported_languages=SUPPORTED_LANGUAGES)
     else:
         if not metadata:
             metadata = DB.get_metadata()
@@ -795,10 +742,15 @@ def before_request():
             plugins=BW_CONFIG.get_plugins(),
             flash_messages=session.get("flash_messages", []),
             is_readonly=DATA.get("READONLY_MODE", False) or ("write" not in current_user.list_permissions and not request.path.startswith("/profile")),
+            db_readonly=DATA.get("READONLY_MODE", False),
             user_readonly="write" not in current_user.list_permissions,
             theme=current_user.theme if current_user.is_authenticated else "dark",
+            language=current_user.language if current_user.is_authenticated else "en",
+            supported_languages=SUPPORTED_LANGUAGES,
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],
+            extra_scripts=DATA.get("EXTRA_SCRIPTS", []),
+            config=DB.get_config(global_only=True, methods=True),
         )
 
         if current_endpoint in COLUMNS_PREFERENCES_DEFAULTS:
@@ -880,7 +832,11 @@ def set_security_headers(response):
 
 @app.teardown_request
 def teardown_request(teardown):
-    if not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/")) and current_user.is_authenticated and "session_id" in session:
+    if (
+        not request.path.startswith(("/css/", "/img/", "/js/", "/json/", "/fonts/", "/libs/", "/locales/"))
+        and current_user.is_authenticated
+        and "session_id" in session
+    ):
         Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
@@ -920,6 +876,20 @@ def check():
     return Response(status=200, headers={"Access-Control-Allow-Origin": "*"}, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
+
+    @app.route("/healthcheck", methods=["GET"])
+    def healthcheck():
+        """Simple healthcheck endpoint that returns 200 OK with basic status information"""
+        health_data = {
+            "status": "healthy",
+            "timestamp": datetime.now().astimezone().isoformat(),
+            "service": "bunkerweb-ui",
+        }
+
+        return Response(status=200, response=dumps(health_data), content_type="application/json")
+
+
 @app.route("/check_reloading", methods=["GET"])
 @login_required
 def check_reloading():
@@ -949,11 +919,7 @@ def check_reloading():
 @app.route("/set_theme", methods=["POST"])
 @login_required
 def set_theme():
-    if "write" not in current_user.list_permissions:
-        return Response(
-            status=403, response=dumps({"message": "You don't have the required permissions to change the theme."}), content_type="application/json"
-        )
-    elif DB.readonly:
+    if DB.readonly:
         return Response(status=423, response=dumps({"message": "Database is in read-only mode"}), content_type="application/json")
     elif request.form["theme"] not in ("dark", "light"):
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
@@ -965,6 +931,35 @@ def set_theme():
         "totp_secret": current_user.totp_secret,
         "method": current_user.method,
         "theme": request.form["theme"],
+        "language": current_user.language,
+    }
+
+    ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
+    if ret:
+        LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
+        return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
+
+    return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
+
+
+@app.route("/set_language", methods=["POST"])
+@login_required
+def set_language():
+    allowed_languages = {lang["code"] for lang in SUPPORTED_LANGUAGES}
+    lang = request.form["language"].lower()
+    if DB.readonly:
+        return Response(status=423, response=dumps({"message": "Database is in read-only mode"}), content_type="application/json")
+    elif lang not in allowed_languages:
+        return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
+
+    user_data = {
+        "username": current_user.get_id(),
+        "password": current_user.password.encode("utf-8"),
+        "email": current_user.email,
+        "totp_secret": current_user.totp_secret,
+        "method": current_user.method,
+        "theme": current_user.theme,
+        "language": lang,
     }
 
     ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
@@ -987,8 +982,7 @@ def set_columns_preferences():
         return Response(status=400, response=dumps({"message": "Bad request"}), content_type="application/json")
 
     if (
-        "write" not in current_user.list_permissions
-        or DB.readonly
+        DB.readonly
         or table_name not in COLUMNS_PREFERENCES_DEFAULTS
         or any(column not in COLUMNS_PREFERENCES_DEFAULTS[table_name] for column in columns_preferences)
     ):
@@ -1001,6 +995,56 @@ def set_columns_preferences():
 
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
+
+@app.route("/clear_notifications", methods=["POST"])
+@login_required
+def clear_notifications():
+    session["flash_messages"] = []
+    session.modified = True
+    return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
+
+
+from app.routes.about import about
+from app.routes.bans import bans
+from app.routes.cache import cache
+from app.routes.configs import configs
+from app.routes.global_config import global_config
+from app.routes.home import home
+from app.routes.instances import instances
+from app.routes.jobs import jobs
+from app.routes.login import login
+from app.routes.logout import logout, logout_page
+from app.routes.logs import logs
+from app.routes.plugins import plugins
+from app.routes.pro import pro
+from app.routes.profile import profile
+from app.routes.reports import reports
+from app.routes.services import services
+from app.routes.setup import setup
+from app.routes.totp import totp
+from app.routes.support import support
+
+BLUEPRINTS = (
+    about,
+    services,
+    profile,
+    jobs,
+    reports,
+    totp,
+    home,
+    logout,
+    instances,
+    plugins,
+    global_config,
+    pro,
+    cache,
+    logs,
+    login,
+    configs,
+    bans,
+    setup,
+    support,
+)
 
 for blueprint in BLUEPRINTS:
     app.register_blueprint(blueprint)

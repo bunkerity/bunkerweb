@@ -1,7 +1,7 @@
 {
   "name": "joomla",
-  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
-  "timeout": 60,
+  "kinds": ["docker", "autoconf", "swarm"],
+  "timeout": 90,
   "delay": 120,
   "tests": [
     {

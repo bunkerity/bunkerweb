@@ -4,7 +4,7 @@ x-env: &env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.1
+    image: bunkerity/bunkerweb:1.6.2
     ports:
       - 80:8080
       - 443:8443
@@ -18,7 +18,7 @@ services:
       - bw-services
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.1
+    image: bunkerity/bunkerweb-autoconf:1.6.2
     depends_on:
       - bunkerweb
       - bw-docker
@@ -31,7 +31,7 @@ services:
       - bw-db
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.1
+    image: bunkerity/bunkerweb-scheduler:1.6.2
     depends_on:
       - bunkerweb
     volumes:
@@ -47,7 +47,7 @@ services:
       - bw-db
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.6.1
+    image: bunkerity/bunkerweb-ui:1.6.2
     networks:
       - bw-universe
       - bw-db
@@ -57,13 +57,10 @@ services:
       ADMIN_PASSWORD: "changeme"
     labels:
       - "bunkerweb.SERVER_NAME=www.example.com"
-      - "bunkerweb.USE_UI=yes"
+      - "bunkerweb.USE_TEMPLATE=ui"
       - "bunkerweb.USE_REVERSE_PROXY=yes"
       - "bunkerweb.REVERSE_PROXY_URL=/changeme"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-      - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
-      - "bunkerweb.MAX_CLIENT_SIZE=50m"
-      - "bunkerweb.ALLOWED_METHODS=GET|POST|PUT|DELETE"
 
   bw-db:
     image: mysql:9

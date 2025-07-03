@@ -354,22 +354,27 @@ api.global.POST["^/ban$"] = function(self)
 		ban_key = "bans_service_" .. ban["service"] .. "_ip_" .. ban["ip"]
 	end
 
-	-- Always set the ban regardless of other ban scopes that might exist for this IP
-	datastore:set(
-		ban_key,
-		encode({
-			reason = ban["reason"],
-			service = ban["service"],
-			date = os.time(),
-			country = ban["country"],
-			ban_scope = ban["ban_scope"],
-		}),
-		ban["exp"]
-	)
+	-- Set the ban data with permanent flag
+	local ban_data = encode({
+		reason = ban["reason"],
+		service = ban["service"],
+		date = os.time(),
+		country = ban["country"],
+		ban_scope = ban["ban_scope"],
+		permanent = ban["exp"] == -1,
+	})
+
+	-- For permanent bans, don't set expiry
+	if ban["exp"] == -1 then
+		datastore:set(ban_key, ban_data)
+	else
+		datastore:set(ban_key, ban_data, ban["exp"])
+	end
 
 	-- Create a more informative response message
 	local scope_text = ban.ban_scope == "global" and "globally" or ("for service " .. ban.service)
-	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " banned " .. scope_text)
+	local duration_text = ban["exp"] == -1 and "permanently" or ("for " .. ban["exp"] .. " seconds")
+	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " banned " .. scope_text .. " " .. duration_text)
 end
 
 api.global.GET["^/bans$"] = function(self)
@@ -398,6 +403,12 @@ api.global.GET["^/bans$"] = function(self)
 			if not ok then
 				ban_data = { reason = result, service = "unknown", date = -1, ban_scope = "global" }
 			end
+
+			-- Check for permanent ban flag and override TTL if set
+			if ban_data["permanent"] then
+				ttl = -1
+			end
+
 			table.insert(data, {
 				ip = k:sub(9, #k),
 				reason = ban_data["reason"],
@@ -406,6 +417,7 @@ api.global.GET["^/bans$"] = function(self)
 				country = ban_data["country"],
 				ban_scope = ban_data["ban_scope"] or "global",
 				exp = math.floor(ttl),
+				permanent = ban_data["permanent"] or false,
 			})
 		elseif k:find("^bans_service_") then
 			-- Service-specific ban (format: bans_service_<servicename>_ip_<ipaddress>)
@@ -434,6 +446,12 @@ api.global.GET["^/bans$"] = function(self)
 				if not ok then
 					ban_data = { reason = result, service = service, date = -1, ban_scope = "service" }
 				end
+
+				-- Check for permanent ban flag and override TTL if set
+				if ban_data["permanent"] then
+					ttl = -1
+				end
+
 				table.insert(data, {
 					ip = ip,
 					reason = ban_data["reason"],
@@ -442,6 +460,7 @@ api.global.GET["^/bans$"] = function(self)
 					country = ban_data["country"],
 					ban_scope = "service",
 					exp = math.floor(ttl),
+					permanent = ban_data["permanent"] or false,
 				})
 			end
 		end

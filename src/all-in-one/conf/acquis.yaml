@@ -1,0 +1,6 @@
+filenames:
+  - /var/log/bunkerweb/access.log
+  - /var/log/bunkerweb/error.log
+  - /var/log/bunkerweb/modsec_audit.log
+labels:
+  type: nginx

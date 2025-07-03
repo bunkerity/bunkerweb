@@ -29,7 +29,7 @@ local tab_pool_len = 0
 local tab_pool = new_tab(16, 0)
 local _M = new_tab(0, 55)
 
-_M._VERSION = '0.30'
+_M._VERSION = '0.32'
 
 
 local common_cmds = {

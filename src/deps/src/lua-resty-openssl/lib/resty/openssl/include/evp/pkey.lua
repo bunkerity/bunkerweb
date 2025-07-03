@@ -123,6 +123,14 @@ if OPENSSL_3X then
     int EVP_PKEY_set_params(EVP_PKEY *pkey, OSSL_PARAM params[]);
     int EVP_PKEY_get_params(EVP_PKEY *ctx, OSSL_PARAM params[]);
     const OSSL_PARAM *EVP_PKEY_gettable_params(EVP_PKEY *ctx);
+
+    EVP_PKEY_CTX *EVP_PKEY_CTX_new_from_name(OSSL_LIB_CTX *libctx,
+                                         const char *name,
+                                         const char *propquery);
+    int EVP_PKEY_fromdata_init(EVP_PKEY_CTX *ctx);
+    int EVP_PKEY_fromdata(EVP_PKEY_CTX *ctx, EVP_PKEY **ppkey, int selection,
+                          OSSL_PARAM params[]);
+    const OSSL_PARAM *EVP_PKEY_fromdata_settable(EVP_PKEY_CTX *ctx, int selection);
   ]]
 
   _M.EVP_PKEY_CTX_set_ec_paramgen_curve_nid = function(pctx, nid)

@@ -1,0 +1,35 @@
+<div class="form-floating mt-1">
+    <div class="dropdown">
+        <button class="form-control form-select dropdown-toggle multiselect-toggle"
+                type="button"
+                id="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle"
+                aria-expanded="false"
+                {% if disabled %}disabled{% endif %}>
+            <span class="multiselect-text">{{ setting }}</span>
+            <label for="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle"
+                   class="text-truncate small">
+                {% set selected_count = setting_value.split(" ") | length if setting_value else 0 %}
+                ({{ selected_count }} selected)
+            </label>
+        </button>
+        <ul class="dropdown-menu p-2"
+            aria-labelledby="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle">
+            {% for option in setting_data.multiselect %}
+                <li class="dropdown-item" title="{{ option.value }}">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               value="{{ option.id }}"
+                               data-label="{{ option.label }}"
+                               id="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_opt_{{ loop.index }}"
+                               {% if option.id in setting_value %}checked{% endif %}>
+                        <label class="form-check-label"
+                               for="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_opt_{{ loop.index }}">
+                            {{ option.label }}
+                        </label>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

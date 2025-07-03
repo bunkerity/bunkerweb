@@ -56,12 +56,17 @@ fi
 if [ -f /var/run/bunkerweb/ui.pid ]; then
 	rm -f /var/run/bunkerweb/ui.pid
 fi
+if [ -f /var/tmp/bunkerweb/ui.error ]; then
+	rm -f /var/tmp/bunkerweb/ui.error
+fi
 
 # Log the startup of the web UI, including the version being launched.
 log "ENTRYPOINT" "ℹ️" "Starting the web UI v$(cat /usr/share/bunkerweb/VERSION) ..."
 
 # Set up and validate the /data folder, ensuring required configurations are present.
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
+
+handle_docker_secrets
 
 # Determine the deployment mode (Swarm, Kubernetes, Autoconf, or Docker) and record it.
 if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]]; then
@@ -97,6 +102,10 @@ if [ -f "/var/run/bunkerweb/tmp-ui.pid" ]; then
 	while [ -f "/var/run/bunkerweb/tmp-ui.pid" ] && [ $timeout -gt 0 ]; do
 		sleep 1
 		((timeout--))
+	done
+
+	while [ -f "/var/tmp/bunkerweb/ui.error" ]; do
+		sleep 1
 	done
 
 	if [ $timeout -eq 0 ]; then

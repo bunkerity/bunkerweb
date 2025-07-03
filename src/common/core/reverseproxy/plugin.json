@@ -14,42 +14,6 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
-    "REVERSE_PROXY_INTERCEPT_ERRORS": {
-      "context": "multisite",
-      "default": "yes",
-      "help": "Intercept and rewrite errors.",
-      "id": "reverse-proxy-intercept-errors",
-      "label": "Intercept errors",
-      "regex": "^(yes|no)$",
-      "type": "check"
-    },
-    "REVERSE_PROXY_CUSTOM_HOST": {
-      "context": "multisite",
-      "default": "",
-      "help": "Override Host header sent to upstream server.",
-      "id": "reverse-proxy-custom-host",
-      "label": "Reverse proxy custom host",
-      "regex": "^.*$",
-      "type": "text"
-    },
-    "REVERSE_PROXY_SSL_SNI": {
-      "context": "multisite",
-      "default": "no",
-      "help": "Enable or disable sending SNI to upstream server.",
-      "id": "reverse-proxy-ssl-server-name",
-      "label": "SSL SNI",
-      "regex": "^(yes|no)$",
-      "type": "check"
-    },
-    "REVERSE_PROXY_SSL_SNI_NAME": {
-      "context": "multisite",
-      "default": "",
-      "help": "Sets the SNI host to send to upstream server.",
-      "id": "reverse-proxy-ssl-sni-name",
-      "label": "SSL SNI name",
-      "regex": "^.*$",
-      "type": "text"
-    },
     "REVERSE_PROXY_HOST": {
       "context": "multisite",
       "default": "",
@@ -66,7 +30,7 @@
       "help": "Location URL that will be proxied.",
       "id": "reverse-proxy-url",
       "label": "Reverse proxy url",
-      "regex": "^.*$",
+      "regex": "^.+$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -75,29 +39,9 @@
       "default": "no",
       "help": "Enable websocket on the proxied resource.",
       "id": "reverse-proxy-ws",
-      "label": "Reverse proxy WS",
+      "label": "Reverse proxy WebSocket",
       "regex": "^(yes|no)$",
       "type": "check",
-      "multiple": "reverse-proxy"
-    },
-    "REVERSE_PROXY_HEADERS": {
-      "context": "multisite",
-      "default": "",
-      "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
-      "id": "reverse-proxy-headers",
-      "label": "Reverse proxy headers",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
-      "type": "text",
-      "multiple": "reverse-proxy"
-    },
-    "REVERSE_PROXY_HEADERS_CLIENT": {
-      "context": "multisite",
-      "default": "",
-      "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
-      "id": "reverse-proxy-headers-client",
-      "label": "Reverse proxy headers-client",
-      "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
-      "type": "text",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_BUFFERING": {
@@ -120,35 +64,64 @@
       "type": "check",
       "multiple": "reverse-proxy"
     },
-    "REVERSE_PROXY_AUTH_REQUEST": {
+    "REVERSE_PROXY_CUSTOM_HOST": {
       "context": "multisite",
       "default": "",
-      "help": "Enable authentication using an external provider (value of auth_request directive).",
-      "id": "reverse-proxy-auth-request",
-      "label": "Reverse proxy auth request",
-      "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+      "help": "Override Host header sent to upstream server.",
+      "id": "reverse-proxy-custom-host",
+      "label": "Reverse proxy custom host",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "REVERSE_PROXY_HEADERS": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
+      "id": "reverse-proxy-headers",
+      "label": "Reverse proxy headers",
+      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "type": "multivalue",
+      "separator": ";",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_HIDE_HEADERS": {
+      "context": "multisite",
+      "default": "Upgrade",
+      "help": "List of HTTP headers to hide from clients when received from the proxied resource (values for proxy_hide_header directive).",
+      "id": "reverse-proxy-hide-headers",
+      "label": "Reverse proxy hide headers",
+      "regex": "^.*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
-    "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+    "REVERSE_PROXY_HEADERS_CLIENT": {
       "context": "multisite",
       "default": "",
-      "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
-      "id": "reverse-proxy-auth-request-signin-url",
-      "label": "Auth request signin URL",
-      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
-      "type": "text",
+      "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
+      "id": "reverse-proxy-headers-client",
+      "label": "Reverse proxy headers-client",
+      "regex": "^(?![; ])(;? ?([\\w\\-]+) [^;]+)*$",
+      "type": "multivalue",
+      "separator": ";",
       "multiple": "reverse-proxy"
     },
-    "REVERSE_PROXY_AUTH_REQUEST_SET": {
+    "REVERSE_PROXY_UNDERSCORES_IN_HEADERS": {
       "context": "multisite",
-      "default": "",
-      "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
-      "id": "reverse-proxy-auth-request-set",
-      "label": "Reverse proxy auth request set",
-      "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
-      "type": "text",
-      "multiple": "reverse-proxy"
+      "default": "no",
+      "help": "Enable or disable underscores_in_headers directive.",
+      "id": "reverse-proxy-underscores-in-headers",
+      "label": "Allow underscores in headers",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "REVERSE_PROXY_INTERCEPT_ERRORS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Intercept and rewrite errors.",
+      "id": "reverse-proxy-intercept-errors",
+      "label": "Intercept errors",
+      "regex": "^(yes|no)$",
+      "type": "check"
     },
     "REVERSE_PROXY_CONNECT_TIMEOUT": {
       "context": "multisite",
@@ -180,14 +153,64 @@
       "type": "text",
       "multiple": "reverse-proxy"
     },
+    "REVERSE_PROXY_SSL_SNI": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable or disable sending SNI to upstream server.",
+      "id": "reverse-proxy-ssl-server-name",
+      "label": "SSL SNI",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "REVERSE_PROXY_SSL_SNI_NAME": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sets the SNI host to send to upstream server.",
+      "id": "reverse-proxy-ssl-sni-name",
+      "label": "SSL SNI name",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "REVERSE_PROXY_AUTH_REQUEST": {
+      "context": "multisite",
+      "default": "",
+      "help": "Enable authentication using an external provider (value of auth_request directive).",
+      "id": "reverse-proxy-auth-request",
+      "label": "Reverse proxy auth request",
+      "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+      "id": "reverse-proxy-auth-request-signin-url",
+      "label": "Auth request signin URL",
+      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+      "type": "text",
+      "multiple": "reverse-proxy"
+    },
+    "REVERSE_PROXY_AUTH_REQUEST_SET": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
+      "id": "reverse-proxy-auth-request-set",
+      "label": "Reverse proxy auth request set",
+      "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+) [^;]+)*$",
+      "type": "multivalue",
+      "separator": ";",
+      "multiple": "reverse-proxy"
+    },
     "REVERSE_PROXY_INCLUDES": {
       "context": "multisite",
       "default": "",
       "help": "Additional configuration to include in the location block, separated with spaces.",
       "id": "reverse-proxy-includes",
       "label": "Reverse proxy includes",
-      "regex": "^(?! )( ?([^ ])(?!.*\\b\\2\\b))*$",
-      "type": "text",
+      "regex": "^(?! )( ?([^ ]))*$",
+      "type": "multivalue",
+      "separator": " ",
       "multiple": "reverse-proxy"
     },
     "REVERSE_PROXY_PASS_REQUEST_BODY": {
@@ -242,7 +265,7 @@
       "help": "HTTP methods that should trigger a cache operation.",
       "id": "proxy-cache-methods",
       "label": "Reverse proxy cache methods",
-      "regex": "^(?! )( ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
+      "regex": "^(?! )( ?[A-Z]{3,})+$",
       "type": "text"
     },
     "PROXY_CACHE_MIN_USES": {
@@ -252,7 +275,7 @@
       "id": "proxy-cache-min-uses",
       "label": "Reverse proxy cache minimum uses",
       "regex": "^[1-9]\\d*$",
-      "type": "text"
+      "type": "number"
     },
     "PROXY_CACHE_KEY": {
       "context": "multisite",
@@ -260,7 +283,7 @@
       "help": "The key used to uniquely identify a cached response.",
       "id": "proxy-cache-key",
       "label": "Reverse proxy cache key",
-      "regex": "^(?! )( ?(\\$[a-z_]+)(?!.*\\2))+$",
+      "regex": "^(?! )( ?\\$[a-z_]+)+$",
       "type": "text"
     },
     "PROXY_CACHE_VALID": {
@@ -269,8 +292,9 @@
       "help": "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
       "id": "proxy-cache-valid",
       "label": "Reverse proxy cache valid",
-      "regex": "^(?! )( ?([1-5]\\d{2})(?!.*\\2=)=\\d+(ms?|[shdwMy]))*$",
-      "type": "text"
+      "regex": "^(?! )( ?[1-5]\\d{2}=\\d+(ms?|[shdwMy]))*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "PROXY_NO_CACHE": {
       "context": "multisite",

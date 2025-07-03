@@ -29,7 +29,27 @@
       "help": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
       "id": "https-protocols",
       "label": "HTTPS protocols",
-      "regex": "^(?! )( ?TLSv1\\.[0-3])*$",
+      "regex": "^(?! )( ?(?:SSLv[23]|TLSv1(?:\\.[1-3])?))+$",
+      "type": "multivalue",
+      "separator": " "
+    },
+    "SSL_CIPHERS_LEVEL": {
+      "context": "multisite",
+      "default": "modern",
+      "help": "Preset security level for SSL cipher suites. 'Modern' is most secure but may not work with older devices.",
+      "id": "ssl-ciphers-level",
+      "label": "SSL Ciphers Level",
+      "regex": "^(modern|intermediate|old)$",
+      "type": "select",
+      "select": ["modern", "intermediate", "old"]
+    },
+    "SSL_CIPHERS_CUSTOM": {
+      "context": "multisite",
+      "default": "",
+      "help": "Custom SSL cipher suite string. If specified, overrides the SSL Ciphers Level. Leave empty to use level-based configuration.",
+      "id": "ssl-ciphers-custom",
+      "label": "Custom SSL Ciphers",
+      "regex": "^(?!:)(:?[A-Za-z0-9-]+)*$",
       "type": "text"
     }
   }

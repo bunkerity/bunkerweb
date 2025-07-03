@@ -1,4 +1,13 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 min-vh-70">
@@ -13,40 +22,67 @@
                name="csrf_token"
                value="{{ csrf_token() }}" />
         <p id="plugins-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading plugins...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_plugins">Loading plugins...</p>
         <table id="plugins" class="table responsive nowrap w-100 d-none">
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Show the Plugins' details"></th>
+                        data-bs-original-title="Show the Plugins' details"
+                        data-i18n="tooltip.table.plugins.details"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Select all Plugins"></th>
+                        data-bs-original-title="Select all Plugins"
+                        data-i18n="tooltip.table.plugins.select_all"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's ID">ID</th>
+                        data-bs-original-title="The Plugin's ID"
+                        data-i18n="tooltip.table.plugins.id">
+                        <span data-i18n="table.header.id">ID</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's Name">Name</th>
+                        data-bs-original-title="The Plugin's Name"
+                        data-i18n="tooltip.table.plugins.name">
+                        <span data-i18n="table.header.name">Name</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's description">Description</th>
+                        data-bs-original-title="The Plugin's description"
+                        data-i18n="tooltip.table.plugins.description">
+                        <span data-i18n="table.header.description">Description</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's version">Version</th>
+                        data-bs-original-title="The Plugin's version"
+                        data-i18n="tooltip.table.plugins.version">
+                        <span data-i18n="table.header.version">Version</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Does the plugin supports stream?">Stream</th>
+                        data-bs-original-title="Does the plugin supports stream?"
+                        data-i18n="tooltip.table.plugins.stream">
+                        <span data-i18n="table.header.stream">Stream</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Plugin's type">Type</th>
+                        data-bs-original-title="The Plugin's type"
+                        data-i18n="tooltip.table.plugins.type">
+                        <span data-i18n="table.header.type">Type</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The method used to create the plugin">Method</th>
+                        data-bs-original-title="The method used to create the plugin"
+                        data-i18n="tooltip.table.plugins.method">
+                        <span data-i18n="table.header.method">Method</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Plugin">Actions</th>
+                        data-bs-original-title="The actions that can be performed on the Plugin"
+                        data-i18n="tooltip.table.plugins.actions">
+                        <span data-i18n="table.header.actions">Actions</span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -67,12 +103,13 @@
                         <td class="text-center">
                             <div data-bs-toggle="tooltip"
                                  data-bs-placement="top"
-                                 data-bs-original-title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
+                                 data-bs-original-title="..."
+                                 data-i18n="tooltip.stream_support.{{ plugin_data['stream'] }}">
                                 <i class="bx bx-sm bx-{% if plugin_data['stream'] == 'yes' %}check text-success{% elif plugin_data['stream'] == 'partial' %}minus text-warning{% else %}x text-danger{% endif %}"></i>
                             </td>
                         </div>
                         <td id="type-{{ plugin }}">
-                            <div class="d-flex align-items-center" {% if not is_pro_version and plugin_data['type'] == "pro" %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>"
+                            <div class="d-flex align-items-center" {% if not is_pro_version and plugin_data['type'] == "pro" %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="<i class='bx bx-diamond bx-xs'></i><span data-i18n='pro.overlay.pro_feature'>Pro feature</span>"
                             {% endif %}
                             >
                             {% if plugin_data["type"] == "pro" %}
@@ -82,7 +119,7 @@
                                         {{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
                                              alt="Pro plugin"
                                              width="16px"
-                                             height="12.9125px">') |safe }}&nbsp;－&nbsp;{{ plugin_data["type"]|upper }}
+                                             height="12.9125px">') |safe }}&nbsp;－&nbsp;<span data-i18n="plugin.type.{{ plugin_data['type'] }}">{{ plugin_data["type"]|upper }}</span>
                                         {% if plugin_data["type"] == "pro" %}
                                         </a>
                                     {% else %}
@@ -93,20 +130,26 @@
                         <td>{{ plugin_data["method"] }}</td>
                         <td>
                             <div class="d-flex justify-content-evenly">
-                                <div {% if not plugin_data['page'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No page available"{% endif %}>
+                                <div {% if not plugin_data['page'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No page available" data-i18n="tooltip.no_page_available"{% endif %}>
                                     {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
                                     <a role="button"
                                        class="btn btn-outline-primary btn-sm me-1{% if not plugin_data['page'] %} disabled{% endif %}"
                                        href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
                                        data-bs-toggle="tooltip"
                                        data-bs-placement="bottom"
-                                       data-bs-original-title="Access {{ plugin_data['name'] }} page">
+                                       data-bs-original-title="Access {{ plugin_data['name'] }} page"
+                                       data-i18n="tooltip.link.access_plugin_page"
+                                       data-i18n-options='{"name": "{{ plugin_data['name'] }}"}'>
                                         <i class="bx bx-link-external bx-xs"></i>
                                     </a>
                                 </div>
+                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if plugin_data['method'] != 'ui' else 'tooltip.button.delete_plugin')) %}
+                                {% set delete_tooltip_options = '{"method": "' ~ plugin_data['method'] ~ '"}' if plugin_data['method'] != 'ui' and not is_readonly else '{"name": "' ~ plugin_data['name'] ~ '"}' %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="{% if plugin_data['method'] != 'ui' or is_readonly %}Disabled by {% if is_readonly %}readonly{% else %}{{ plugin_data['method'] }}{% endif %}{% else %}Delete plugin {{ plugin_data['name'] }}{% endif %}">
+                                     data-bs-original-title="..."
+                                     data-i18n="{{ delete_tooltip_key }}"
+                                     data-i18n-options='{{ delete_tooltip_options }}'>
                                     <button type="button"
                                             data-plugin-id="{{ plugin }}"
                                             class="btn btn-outline-danger btn-sm me-1 delete-plugin{% if plugin_data['method'] != 'ui' %} disabled{% endif %}">
@@ -130,11 +173,12 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add plugins</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.add_plugins">Add plugins</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <form id="form-add-plugins"
                           action="{{ url_for("plugins") }}/refresh"
@@ -146,7 +190,9 @@
                                  class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
                                 <div class="text-center">
                                     <i class="bx bx-lg bxs-cloud-upload text-primary"></i>
-                                    <p class="mt-3 fs-5">Drag and drop your plugin here or click to select files.</p>
+                                    <p class="mt-3 fs-5" data-i18n="modal.body.add_plugin_dropzone">
+                                        Drag and drop your plugin here or click to select files.
+                                    </p>
                                 </div>
                             </div>
                             <input type="file"
@@ -159,10 +205,12 @@
                         <div class="modal-footer justify-content-center">
                             <button id="add-plugins-submit"
                                     type="submit"
-                                    class="btn btn-bw-green me-2 disabled">Add plugins</button>
+                                    class="btn btn-bw-green me-2 disabled"
+                                    data-i18n="button.add_plugins">Add plugins</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal">Cancel</button>
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -177,11 +225,12 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Confirm deletion</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <form action="{{ url_for("plugins") }}/delete" method="POST">
                         <div class="modal-body">
@@ -190,14 +239,21 @@
                                    id="selected-plugins-input-delete"
                                    name="plugins"
                                    value="" />
-                            <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected plugins?</div>
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.confirm_plugin_deletion">
+                                Are you sure you want to delete the selected plugins?
+                            </div>
                             <div id="selected-plugins-delete" class="mb-3"></div>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-outline-danger me-2">Delete</button>
+                            <button type="submit"
+                                    class="btn btn-outline-danger me-2"
+                                    data-i18n="button.delete">Delete</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal">Cancel</button>
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -205,4 +261,19 @@
         </div>
     {% endif %}
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/plugins.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

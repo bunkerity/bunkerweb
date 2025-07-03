@@ -62,11 +62,21 @@
 <h1>Module <code>resty.session.utils</code></h1>
 <p>Common utilities for session library and storage backends</p>
 <p>
+
 </p>
 
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#table_new">table_new ()</a></td>
+	<td class="summary">Creates a pre-sized table, just like the C API equivalent lua_createtable().</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#table_is_empty">table_is_empty ()</a></td>
+	<td class="summary">Returns <code>true</code> when the given Lua table contains neither non-nil array elements
+ nor non-nil key-value pairs, or false otherwise.</td>
+	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#is_fips_mode">is_fips_mode ()</a></td>
 	<td class="summary">Returns whether OpenSSL is in FIPS-mode.</td>
@@ -141,7 +151,7 @@
 	<td class="summary">Encrypt plain text using AES-256 in GCM-mode.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#decrypt_aes_256_gcm">decrypt_aes_256_gcm (key, iv, plaintext, aad, tag)</a></td>
+	<td class="name" nowrap><a href="#decrypt_aes_256_gcm">decrypt_aes_256_gcm (key, iv, ciphertext, aad, tag)</a></td>
 	<td class="summary">Decrypt ciphertext using AES-256 in GCM-mode.</td>
 	</tr>
 	<tr>
@@ -197,6 +207,55 @@
 
     <dl class="function">
     <dt>
+    <a name = "table_new"></a>
+    <strong>table_new ()</strong>
+    </dt>
+    <dd>
+    Creates a pre-sized table, just like the C API equivalent lua_createtable().
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
+        a pre-sized table
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> tbl = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">table_new</span>(<span class="number">100</span>, <span class="number">0</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "table_is_empty"></a>
+    <strong>table_is_empty ()</strong>
+    </dt>
+    <dd>
+    Returns <code>true</code> when the given Lua table contains neither non-nil array elements
+ nor non-nil key-value pairs, or false otherwise.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> if table is empty, otherwise <code>false</code>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> empty = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">table_is_empty</span>({})</pre>
+    </ul>
+
+</dd>
+    <dt>
     <a name = "is_fips_mode"></a>
     <strong>is_fips_mode ()</strong>
     </dt>
@@ -216,7 +275,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> is_fips = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">is_fips_mode</span>()</pre>
+        <pre class="example"><span class="keyword">local</span> is_fips = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">is_fips_mode</span>()</pre>
     </ul>
 
 </dd>
@@ -225,21 +284,22 @@
     <strong>bpack (size, value)</strong>
     </dt>
     <dd>
-    <p>Binary pack unsigned integer. </p>
+
+<p>Binary pack unsigned integer. </p>
 
 <p> Returns binary packed version of an integer in little endian unsigned format.</p>
 
 <p> Size can be:</p>
 
 <ul>
-<li><code>1</code>, pack input as a little endian unsigned char (<code>&lt;C</code>)</li>
-<li><code>2</code>, pack input as a little endian unsigned short (<code>&lt;S</code>)</li>
-<li><code>3</code>, pack input as a little endian unsigned integer (truncated) (<code>&lt;I</code>)</li>
-<li><code>4</code>, pack input as a little endian unsigned integer (<code>&lt;I</code>)</li>
-<li><code>5</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
-<li><code>6</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
-<li><code>7</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
-<li><code>8</code>, pack input as a little endian unsigned long (<code>&lt;L</code>)</li>
+    <li><code>1</code>, pack input as a little endian unsigned char (<code>&lt;C</code>)</li>
+    <li><code>2</code>, pack input as a little endian unsigned short (<code>&lt;S</code>)</li>
+    <li><code>3</code>, pack input as a little endian unsigned integer (truncated) (<code>&lt;I</code>)</li>
+    <li><code>4</code>, pack input as a little endian unsigned integer (<code>&lt;I</code>)</li>
+    <li><code>5</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
+    <li><code>6</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
+    <li><code>7</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
+    <li><code>8</code>, pack input as a little endian unsigned long (<code>&lt;L</code>)</li>
 </ul>
 
 
@@ -260,7 +320,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         binary packed value
     </ol>
 
@@ -268,8 +328,8 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> packed_128 = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">bpack</span>(<span class="number">1</span>, <span class="number">128</span>)
-<span class="keyword">local</span> packed_now = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">bpack</span>(<span class="number">8</span>, ngx.<span class="function-name">time</span>())</pre>
+        <pre class="example"><span class="keyword">local</span> packed_128 = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">bpack</span>(<span class="number">1</span>, <span class="number">128</span>)
+<span class="keyword">local</span> packed_now = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">bpack</span>(<span class="number">8</span>, ngx.<span class="function-name">time</span>())</pre>
     </ul>
 
 </dd>
@@ -278,21 +338,22 @@
     <strong>bunpack (size, value)</strong>
     </dt>
     <dd>
-    <p>Binary unpack unsigned integer. </p>
+
+<p>Binary unpack unsigned integer. </p>
 
 <p> Returns number from a little endian unsigned binary packed format.</p>
 
 <p> Size can be:</p>
 
 <ul>
-<li><code>1</code>, unpack input from little endian unsigned char (<code>&lt;C</code>)</li>
-<li><code>2</code>, unpack input from little endian unsigned short (<code>&lt;S</code>)</li>
-<li><code>3</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;I</code>)</li>
-<li><code>4</code>, unpack input from little endian unsigned integer (<code>&lt;I</code>)</li>
-<li><code>5</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
-<li><code>6</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
-<li><code>7</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
-<li><code>8</code>, unpack input from little endian unsigned long (<code>&lt;L</code>)</li>
+    <li><code>1</code>, unpack input from little endian unsigned char (<code>&lt;C</code>)</li>
+    <li><code>2</code>, unpack input from little endian unsigned short (<code>&lt;S</code>)</li>
+    <li><code>3</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;I</code>)</li>
+    <li><code>4</code>, unpack input from little endian unsigned integer (<code>&lt;I</code>)</li>
+    <li><code>5</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
+    <li><code>6</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
+    <li><code>7</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
+    <li><code>8</code>, unpack input from little endian unsigned long (<code>&lt;L</code>)</li>
 </ul>
 
 
@@ -334,17 +395,18 @@
     <strong>trim (value)</strong>
     </dt>
     <dd>
-    <p>Trim whitespace from the start and from the end of string. </p>
+
+<p>Trim whitespace from the start and from the end of string. </p>
 
 <p> Characters that are trimmed:</p>
 
 <ul>
-<li>space <code>&quot; &quot;</code></li>
-<li>tab <code>&quot;\t&quot;</code></li>
-<li>carriage return <code>&quot;\r&quot;</code></li>
-<li>line feed <code>&quot;\n&quot;</code></li>
-<li>vertical tab <code>&quot;\v&quot;</code></li>
-<li>form feed <code>&quot;\f&quot;</code></li>
+    <li>space <code>&quot; &quot;</code></li>
+    <li>tab <code>&quot;\t&quot;</code></li>
+    <li>carriage return <code>&quot;\r&quot;</code></li>
+    <li>line feed <code>&quot;\n&quot;</code></li>
+    <li>vertical tab <code>&quot;\v&quot;</code></li>
+    <li>form feed <code>&quot;\f&quot;</code></li>
 </ul>
 
 
@@ -353,7 +415,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">value</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          string to trim
         </li>
     </ul>
@@ -361,7 +423,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         a whitespace trimmed string
     </ol>
 
@@ -369,7 +431,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> trimmed = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">trim</span>(<span class="string">"  hello world  "</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> trimmed = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">trim</span>(<span class="string">"  hello world  "</span>)</pre>
     </ul>
 
 </dd>
@@ -392,7 +454,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         json encoded value
     </ol>
 
@@ -400,7 +462,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> json = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">encode_json</span>({ hello = <span class="string">"world"</span> })</pre>
+        <pre class="example"><span class="keyword">local</span> json = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">encode_json</span>({ hello = <span class="string">"world"</span> })</pre>
     </ul>
 
 </dd>
@@ -415,7 +477,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">value</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          string to json decode
         </li>
     </ul>
@@ -431,7 +493,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> tbl = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">decode_json</span>(<span class="string">'{ "hello": "world" }'</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> tbl = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">decode_json</span>(<span class="string">'{ "hello": "world" }'</span>)</pre>
     </ul>
 
 </dd>
@@ -446,7 +508,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">value</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          string to base64 url encode
         </li>
     </ul>
@@ -454,7 +516,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         base64 url encoded value
     </ol>
 
@@ -462,7 +524,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> encoded = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">encode_base64url</span>(<span class="string">"test"</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> encoded = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">encode_base64url</span>(<span class="string">"test"</span>)</pre>
     </ul>
 
 </dd>
@@ -477,7 +539,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">value</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          string to base64 url decode
         </li>
     </ul>
@@ -485,7 +547,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         base64 url decoded value
     </ol>
 
@@ -527,7 +589,7 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> test = <span class="string">"test"</span>
-<span class="keyword">local</span> b64len = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">base64_size</span>(#test)</pre>
+<span class="keyword">local</span> b64len = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">base64_size</span>(#test)</pre>
     </ul>
 
 </dd>
@@ -542,7 +604,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">data</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          data to deflate
         </li>
     </ul>
@@ -550,7 +612,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         deflated data
     </ol>
 
@@ -559,7 +621,7 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> test = <span class="string">"test"</span>
-<span class="keyword">local</span> deflated = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">deflate</span>((<span class="string">"a"</span>):<span class="function-name">rep</span>(<span class="number">100</span>))</pre>
+<span class="keyword">local</span> deflated = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">deflate</span>((<span class="string">"a"</span>):<span class="function-name">rep</span>(<span class="number">100</span>))</pre>
     </ul>
 
 </dd>
@@ -574,7 +636,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">data</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          data to inflate
         </li>
     </ul>
@@ -582,7 +644,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         inflated data
     </ol>
 
@@ -615,10 +677,10 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         random bytes</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
     </ol>
 
@@ -626,7 +688,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> bytes = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> bytes = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">rand_bytes</span>(<span class="number">32</span>)</pre>
     </ul>
 
 </dd>
@@ -641,7 +703,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">value</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          value from which to calculate hash
         </li>
     </ul>
@@ -649,10 +711,10 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         sha-256 hash (32 bytes)</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
     </ol>
 
@@ -660,7 +722,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> hash, err = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">sha256</span>(<span class="string">"hello world"</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> hash, err = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">sha256</span>(<span class="string">"hello world"</span>)</pre>
     </ul>
 
 </dd>
@@ -675,15 +737,15 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">ikm</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          initial key material
         </li>
         <li><span class="parameter">nonce</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          nonce
         </li>
         <li><span class="parameter">usage</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          e.g. <code>&quot;encryption&quot;</code> or <code>&quot;authentication&quot;</code>
         </li>
         <li><span class="parameter">size</span>
@@ -695,10 +757,10 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         key material</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
     </ol>
 
@@ -724,15 +786,15 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">pass</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          password
         </li>
         <li><span class="parameter">salt</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          salt
         </li>
         <li><span class="parameter">usage</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          e.g. <code>&quot;encryption&quot;</code> or <code>&quot;authentication&quot;</code>
         </li>
         <li><span class="parameter">size</span>
@@ -748,10 +810,10 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         key material</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
     </ol>
 
@@ -774,25 +836,25 @@
     Derive a new AES-256 GCM-mode key and initialization vector. </p>
 
 <p> Safety can be:
- <em> <code>nil</code> or <code>&quot;None&quot;</code>: key and iv will be derived using HKDF with SHA-256, except on FIPS-mode uses PBKDF2 with SHA-256 (single iteration)
- </em> <code>Low</code>: key and iv will be derived using PBKDF2 with SHA-256 (1.000 iterations)
- <em> <code>Medium</code>: key and iv will be derived using PBKDF2 with SHA-256 (10.000 iterations)
- </em> <code>High</code>: key and iv will be derived using PBKDF2 with SHA-256 (100.000 iterations)
+ * <code>nil</code> or <code>&quot;None&quot;</code>: key and iv will be derived using HKDF with SHA-256, except on FIPS-mode uses PBKDF2 with SHA-256 (single iteration)
+ * <code>Low</code>: key and iv will be derived using PBKDF2 with SHA-256 (1.000 iterations)
+ * <code>Medium</code>: key and iv will be derived using PBKDF2 with SHA-256 (10.000 iterations)
+ * <code>High</code>: key and iv will be derived using PBKDF2 with SHA-256 (100.000 iterations)
  * <code>Very High</code>: key and iv will be derived using PBKDF2 with SHA-256 (1.000.000 iterations)
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">ikm</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          initial key material
         </li>
         <li><span class="parameter">nonce</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          nonce
         </li>
         <li><span class="parameter">safety</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          safety of key generation
          (<em>optional</em>)
         </li>
@@ -801,13 +863,13 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         key</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         initialization vector</li>
     </ol>
 
@@ -834,11 +896,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">ikm</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          initial key material
         </li>
         <li><span class="parameter">nonce</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          nonce
         </li>
     </ul>
@@ -846,10 +908,10 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         key</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
     </ol>
 
@@ -875,19 +937,19 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          encryption key
         </li>
         <li><span class="parameter">iv</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          initialization vector
         </li>
         <li><span class="parameter">plaintext</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          plain text
         </li>
         <li><span class="parameter">aad</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          additional authenticated data
         </li>
     </ul>
@@ -895,13 +957,13 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         ciphertext</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         authentication tag</li>
     </ol>
 
@@ -919,7 +981,7 @@
 </dd>
     <dt>
     <a name = "decrypt_aes_256_gcm"></a>
-    <strong>decrypt_aes_256_gcm (key, iv, plaintext, aad, tag)</strong>
+    <strong>decrypt_aes_256_gcm (key, iv, ciphertext, aad, tag)</strong>
     </dt>
     <dd>
     Decrypt ciphertext using AES-256 in GCM-mode.
@@ -928,23 +990,23 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          encryption key
         </li>
         <li><span class="parameter">iv</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          initialization vector
         </li>
-        <li><span class="parameter">plaintext</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        <li><span class="parameter">ciphertext</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          plain text
         </li>
         <li><span class="parameter">aad</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          additional authenticated data
         </li>
         <li><span class="parameter">tag</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          authentication tag
         </li>
     </ul>
@@ -952,10 +1014,10 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
-        ciphertext</li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
+        plaintext</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
     </ol>
 
@@ -983,11 +1045,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          key
         </li>
         <li><span class="parameter">value</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          value
         </li>
     </ul>
@@ -995,10 +1057,10 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         message authentication code (32 bytes)</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
     </ol>
 
@@ -1025,11 +1087,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">storage</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          name of the storage to load
         </li>
         <li><span class="parameter">configuration</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
          session configuration
          (<em>optional</em>)
         </li>
@@ -1038,10 +1100,10 @@
     <h3>Returns:</h3>
     <ol>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a> or <span class="type">nil</span></span>
         instance of session storage</li>
         <li>
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
         error message</li>
     </ol>
 
@@ -1049,7 +1111,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> postgres = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">load_storage</span>(<span class="string">"postgres"</span>, {
+        <pre class="example"><span class="keyword">local</span> postgres = <span class="global">require</span>(<span class="string">"resty.session.utils"</span>).<span class="function-name">load_storage</span>(<span class="string">"postgres"</span>, {
   postgres = {
     host = <span class="string">"127.0.0.1"</span>,
   }
@@ -1068,12 +1130,12 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">err</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
          a possible error coming from underlying library
          (<em>optional</em>)
         </li>
         <li><span class="parameter">msg</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a> or <span class="type">nil</span></span>
          error message
         </li>
         <li><span class="parameter">...</span>
@@ -1085,7 +1147,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         formatted error message
     </ol>
 
@@ -1113,19 +1175,19 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">storage</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
          a storage implementation
         </li>
         <li><span class="parameter">name</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          name
         </li>
         <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          key
         </li>
         <li><span class="parameter">subject</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          subject
         </li>
     </ul>
@@ -1133,7 +1195,7 @@
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         formatted and delimited name
     </ol>
 
@@ -1268,11 +1330,11 @@ flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_BONE)
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          storage key
         </li>
         <li><span class="parameter">exp</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          expiration
         </li>
     </ul>
@@ -1280,7 +1342,7 @@ flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_BONE)
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
         the value to store in the metadata collection
     </ol>
 
@@ -1300,7 +1362,7 @@ flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_BONE)
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">val</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          list of key:exp;
         </li>
         <li><span class="parameter">index</span>
@@ -1341,7 +1403,7 @@ flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_BONE)
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">sessions</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.4">string</a></span>
          list of key:exp;
         </li>
     </ul>
@@ -1349,7 +1411,7 @@ flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_BONE)
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.3/manual.html#6.6">table</a></span>
         valid sessions and their exp
     </ol>
 
@@ -1364,7 +1426,7 @@ flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_BONE)
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-08-16 18:11:28 </i>
+<i style="float:right;">Last updated 2025-06-10 17:17:38 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

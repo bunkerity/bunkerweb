@@ -125,7 +125,7 @@ try:
     use_right_crs_version = False
     use_modsecurity_crs_plugins = False
 
-    services = getenv("SERVER_NAME", "").strip()
+    services = getenv("SERVER_NAME", "www.example.com").strip()
 
     if not services:
         LOGGER.warning("No services found, exiting...")
@@ -136,20 +136,20 @@ try:
 
     if getenv("MULTISITE", "no") == "yes":
         for first_server in services:
-            if getenv(f"{first_server}_MODSECURITY_CRS_VERSION", getenv("MODSECURITY_CRS_VERSION", "4")) != "3":
+            if getenv(f"{first_server}_MODSECURITY_CRS_VERSION", "4") != "3":
                 use_right_crs_version = True
 
-            if getenv(f"{first_server}_USE_MODSECURITY_CRS_PLUGINS", getenv("USE_MODSECURITY_CRS_PLUGINS", "no")) == "yes":
+            if getenv(f"{first_server}_USE_MODSECURITY_CRS_PLUGINS", "yes") == "yes":
                 use_modsecurity_crs_plugins = True
 
-            service_plugins = getenv(f"{first_server}_MODSECURITY_CRS_PLUGINS", getenv("MODSECURITY_CRS_PLUGINS", "")).strip()
+            service_plugins = getenv(f"{first_server}_MODSECURITY_CRS_PLUGINS", "").strip()
             if service_plugins:
                 services_plugins[first_server] = set(service_plugins.split(" "))
     else:
         if getenv("MODSECURITY_CRS_VERSION", "4") != "3":
             use_right_crs_version = True
 
-        if getenv("USE_MODSECURITY_CRS_PLUGINS", "no") == "yes":
+        if getenv("USE_MODSECURITY_CRS_PLUGINS", "yes") == "yes":
             use_modsecurity_crs_plugins = True
 
         plugins = getenv("MODSECURITY_CRS_PLUGINS", "").strip()
@@ -178,11 +178,11 @@ try:
         plugin_registry = JOB.get_cache("plugin_registry.json", with_info=True, with_data=True)
 
         if isinstance(plugin_registry, dict):
-            up_to_date = plugin_registry["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
+            up_to_date = plugin_registry.get("last_update") and plugin_registry["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
 
             if up_to_date:
                 try:
-                    plugin_registry = loads(plugin_registry["data"])
+                    plugin_registry = loads(plugin_registry.get("data"))
                 except BaseException as e:
                     LOGGER.debug(format_exc())
                     LOGGER.error(f"Failed to load the plugin registry data from cache: \n{e}")
@@ -429,7 +429,7 @@ try:
             plugin_id = ""
 
             # Check if the plugins are valid, if they are already installed and if they need to be updated
-            for plugin_config in temp_dir.rglob("**/*-config.conf"):
+            for plugin_config in list(temp_dir.rglob("**/*-config.conf")):
                 try:
                     if plugin_config.is_dir():
                         LOGGER.debug(f"CRS plugin {plugin_config} is a directory, skipping...")
@@ -483,7 +483,11 @@ try:
             # * Patch the rules so we can extract the rule IDs when matching
             try:
                 LOGGER.info(f"Patching Core Rule Set (CRS) plugin {plugin_name}...")
-                result = run([PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()], check=True)
+                result = run(
+                    [PATCH_SCRIPT.as_posix(), NEW_PLUGINS_DIR.joinpath(plugin_id).as_posix()],
+                    check=True,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+                )
             except CalledProcessError as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Failed to patch Core Rule Set (CRS) plugin {plugin_name}: {e}")

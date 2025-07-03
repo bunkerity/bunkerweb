@@ -1,0 +1,39 @@
+services:
+  bunkerweb-all-in-one:
+    image: bunkerity/bunkerweb-all-in-one:1.6.2
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp"
+    volumes:
+      - bw-storage:/data
+    environment:
+      DATABASE_URI: "mysql+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+      API_WHITELIST_IP: "127.0.0.0/8"
+      SERVER_NAME: "www.example.com"
+      SERVICE_UI: "no"
+    networks:
+      - bw-services
+      - bw-db
+
+  bw-db:
+    image: mysql:9
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
+    volumes:
+      - bw-data:/var/lib/mysql
+    networks:
+      - bw-db
+
+volumes:
+  bw-data:
+  bw-storage:
+
+networks:
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db

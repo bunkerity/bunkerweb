@@ -20,8 +20,9 @@
       "help": "List of file extensions, separated with pipes that should be cached.",
       "id": "client-cache-extensions",
       "label": "Extensions that should be cached by the client",
-      "regex": "^(?!\\|)(\\|?([a-z0-9]+)(?!.*\\2(?!.)))+$",
-      "type": "text"
+      "regex": "^(?!\\|)(\\|?[a-z0-9]+)+$",
+      "type": "multivalue",
+      "separator": "|"
     },
     "CLIENT_CACHE_ETAG": {
       "context": "multisite",
@@ -38,7 +39,7 @@
       "help": "Value of the Cache-Control HTTP header.",
       "id": "client-cache-control",
       "label": "Cache-Control header",
-      "regex": "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+(?!.*\\6))|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform))(?!.*\\4))+$",
+      "regex": "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+)|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform)))+$",
       "type": "text"
     }
   }

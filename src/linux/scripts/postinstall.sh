@@ -15,9 +15,33 @@ function do_and_check_cmd() {
     return 0
 }
 
+# Decompress deps directory with pigz for fastest decompression
+echo "Decompressing deps directory with pigz..."
+cd /usr/share/bunkerweb || exit 1
+if [ -f "deps.tar.gz" ]; then
+    # Use pigz if available, fallback to gzip
+    if command -v pigz >/dev/null 2>&1; then
+        tar --use-compress-program="pigz -d -p$(nproc)" -xf deps.tar.gz
+    else
+        tar -xzf deps.tar.gz
+    fi
+    rm -f deps.tar.gz
+    echo "Decompression completed successfully"
+else
+    echo "No compressed deps directory found, skipping decompression"
+fi
+
 # Give all the permissions to the nginx user
 echo "Setting ownership for all necessary directories to nginx user and group..."
-do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
+do_and_check_cmd chown -R root:nginx /usr/share/bunkerweb
+do_and_check_cmd chown -R nginx:nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
+
+chmod 755 /var/log/bunkerweb
+chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/
+chmod 550 -R /usr/share/bunkerweb/
+find . \( -path './scheduler' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
+find scheduler/ ui/ cli/ lua/ core/ db/ gen/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
+chmod 770 -R db/alembic/
 
 # Function to migrate files from old locations to new ones
 function migrate_file() {
@@ -60,6 +84,10 @@ fi
 
 systemctl daemon-reload
 
+# Always stop and disable nginx service
+echo "🛑 Stopping and disabling the nginx service..."
+do_and_check_cmd systemctl disable --now nginx
+
 # Manage the BunkerWeb service
 echo "Configuring BunkerWeb service..."
 
@@ -79,24 +107,13 @@ if {
         fi
     # Fresh installation scenario
     else
-        # Stop nginx if it's running
-        if systemctl is-active --quiet nginx; then
-            echo "🛑 Stopping and disabling the nginx service..."
-            do_and_check_cmd systemctl stop nginx
-            do_and_check_cmd systemctl disable nginx
-        else
-            echo "ℹ️ Nginx service not running, no need to stop it."
-        fi
-
         echo "🚀 Enabling and starting the BunkerWeb service..."
-        do_and_check_cmd systemctl enable bunkerweb
-        do_and_check_cmd systemctl start bunkerweb
+        do_and_check_cmd systemctl enable --now bunkerweb
     fi
 # Disable BunkerWeb if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb; then
     echo "🛑 Disabling and stopping the BunkerWeb service..."
-    do_and_check_cmd systemctl stop bunkerweb
-    do_and_check_cmd systemctl disable bunkerweb
+    do_and_check_cmd systemctl disable --now bunkerweb
 else
     echo "ℹ️ BunkerWeb service is not enabled in the current configuration."
 fi
@@ -114,8 +131,7 @@ if {
     # Fresh installation or explicit scheduler enablement
     if [[ -f /var/tmp/bunkerweb_enable_scheduler || ! -f /var/tmp/bunkerweb_upgrade ]]; then
         echo "🚀 Enabling and starting the BunkerWeb Scheduler service..."
-        do_and_check_cmd systemctl enable bunkerweb-scheduler
-        do_and_check_cmd systemctl start bunkerweb-scheduler
+        do_and_check_cmd systemctl enable --now bunkerweb-scheduler
 
         # Clean up scheduler enablement flag if it exists
         if [ -f /var/tmp/bunkerweb_enable_scheduler ]; then
@@ -133,8 +149,7 @@ if {
 # Disable scheduler if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb-scheduler; then
     echo "🛑 Disabling and stopping the BunkerWeb Scheduler service..."
-    do_and_check_cmd systemctl stop bunkerweb-scheduler
-    do_and_check_cmd systemctl disable bunkerweb-scheduler
+    do_and_check_cmd systemctl disable --now bunkerweb-scheduler
 else
     echo "ℹ️ BunkerWeb Scheduler service is not enabled in the current configuration."
 fi
@@ -178,8 +193,7 @@ EOF
             do_and_check_cmd chmod 660 /etc/bunkerweb/ui.env /etc/bunkerweb/variables.env
 
             echo "🚀 Enabling and starting the BunkerWeb UI service..."
-            do_and_check_cmd systemctl enable bunkerweb-ui
-            do_and_check_cmd systemctl start bunkerweb-ui
+            do_and_check_cmd systemctl enable --now bunkerweb-ui
 
             echo "🧙 The setup wizard has been activated automatically."
             echo "📝 Please complete the initial configuration at: https://your-ip-address-or-fqdn/setup"
@@ -198,8 +212,7 @@ EOF
 # Disable UI if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb-ui; then
     echo "🛑 Disabling and stopping the BunkerWeb UI service..."
-    do_and_check_cmd systemctl stop bunkerweb-ui
-    do_and_check_cmd systemctl disable bunkerweb-ui
+    do_and_check_cmd systemctl disable --now bunkerweb-ui
 else
     echo "ℹ️ BunkerWeb UI service is not enabled in the current configuration."
 fi
@@ -216,5 +229,27 @@ echo "For more information on BunkerWeb, visit:"
 echo "  * Official website: https://www.bunkerweb.io"
 echo "  * Documentation: https://docs.bunkerweb.io"
 echo "  * Community Support: https://discord.bunkerity.com"
-echo "  * Commercial Support: https://panel.bunkerweb.io/order/support"
+echo "  * Commercial Support: https://panel.bunkerweb.io/store/support"
 echo "🛡 Thank you for using BunkerWeb!"
+
+# Detect if OS is RHEL-based for warning
+RHEL_OS=""
+if [ -f /etc/os-release ]; then
+    # shellcheck disable=SC1091
+    . /etc/os-release
+    DISTRO_ID=$(echo "$ID" | tr '[:upper:]' '[:lower:]')
+    case "$DISTRO_ID" in
+        rhel|centos|fedora|rocky|almalinux|redhat)
+            RHEL_OS=1
+            ;;
+    esac
+elif [ -f /etc/redhat-release ]; then
+    RHEL_OS=1
+fi
+
+if [ "$RHEL_OS" = "1" ]; then
+cat << EOF
+⚠️  WARNING for RHEL users:
+If you plan on using an external database (MariaDB, MySQL, or PostgreSQL), you must install the appropriate client package (e.g., mariadb, mysql, or postgresql client) on your system for the BunkerWeb Scheduler to connect properly.
+EOF
+fi

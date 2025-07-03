@@ -10,9 +10,10 @@
            id="selected-mode"
            name="selected_mode"
            value="{{ mode }}">
-    <input type="hidden" id="used-template" name="used_template" value="{% if current_endpoint == "new" and not clone %}low{% else %}{{ config.get('USE_TEMPLATE', {'value': ''})['value'] }}
-    {% endif %}
-    ">
+    <input type="hidden"
+           id="used-template"
+           name="used_template"
+           {% if current_endpoint == "new" and not clone %}value="low"{% else %}value="{{ config.get('USE_TEMPLATE', {'value': 'low'})['value'] }}"{% endif %}>
     <input type="hidden"
            id="selected-template"
            name="selected_template"
@@ -51,13 +52,23 @@
         <div class="toast-header d-flex align-items-center text-warning">
             <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
             <span class="fw-medium me-auto">BunkerWeb Forever</span>
-            <small class="text-body-secondary">just now</small>
+            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="toast"
-                    aria-label="Close"></button>
+                    aria-label="Close"
+                    data-i18n="aria.label.close"></button>
         </div>
-        <div class="toast-body">If you read this, it means that you're curious 👀</div>
+        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
     </div>
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/plugins-settings.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

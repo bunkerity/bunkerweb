@@ -55,6 +55,7 @@ services:
       EXTERNAL_PLUGIN_URLS: "https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/dev.zip"
       CUSTOM_CONF_MODSEC_CRS_reqbody-suppress: "SecRuleRemoveById 200002"
       www.example.com_USE_TEMPLATE: "ui"
+      www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
       www.example.com_USE_REVERSE_PROXY: "yes"
       www.example.com_REVERSE_PROXY_URL: "/admin"
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
@@ -79,6 +80,8 @@ services:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
+      args:
+        SKIP_MINIFY: "yes"
     ports:
       - 7000:7000
     volumes:

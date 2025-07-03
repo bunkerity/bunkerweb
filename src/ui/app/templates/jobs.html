@@ -1,4 +1,13 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 min-vh-70">
@@ -12,37 +21,61 @@
                name="csrf_token"
                value="{{ csrf_token() }}" />
         <p id="jobs-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading jobs...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_jobs">Loading jobs...</p>
         <table id="jobs" class="table responsive nowrap w-100 d-none">
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Show the Jobs' details"></th>
+                        data-bs-original-title="Show the Jobs' details"
+                        data-i18n="tooltip.table.jobs.details"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Select all Jobs"></th>
+                        data-bs-original-title="Select all Jobs"
+                        data-i18n="tooltip.table.jobs.select_all"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Job's name">Name</th>
+                        data-bs-original-title="The Job's name"
+                        data-i18n="tooltip.table.jobs.name">
+                        <span data-i18n="table.header.name">Name</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Job's Plugin">Plugin</th>
+                        data-bs-original-title="The Job's Plugin"
+                        data-i18n="tooltip.table.jobs.plugin">
+                        <span data-i18n="table.header.plugin">Plugin</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Job's interval">Interval</th>
+                        data-bs-original-title="The Job's interval"
+                        data-i18n="tooltip.table.jobs.interval">
+                        <span data-i18n="table.header.interval">Interval</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Does the Job reloads BunkerWeb?">Reload</th>
+                        data-bs-original-title="Does the Job reloads BunkerWeb?"
+                        data-i18n="tooltip.table.jobs.reload">
+                        <span data-i18n="table.header.reload">Reload</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Does the Job run asynchronously?">Async</th>
+                        data-bs-original-title="Does the Job run asynchronously?"
+                        data-i18n="tooltip.table.jobs.async">
+                        <span data-i18n="table.header.async">Async</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Does the last Job's execution was successful?">Last run</th>
+                        data-bs-original-title="Does the last Job's execution was successful?"
+                        data-i18n="tooltip.table.jobs.last_run">
+                        <span data-i18n="table.header.last_run">Last run</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Job">Actions</th>
+                        data-bs-original-title="The actions that can be performed on the Job"
+                        data-i18n="tooltip.table.jobs.actions">
+                        <span data-i18n="table.header.actions">Actions</span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -54,7 +87,7 @@
                         <td>{{ job_data["plugin_id"] }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;{{ job_data["every"] }}
+                                <i class="bx {% if job_data['every'] == 'once' %}bx-revision{% elif job_data['every'] == 'day' %}bx-calendar-event{% elif job_data['every'] == 'week' %}bx-calendar-week{% else %}bxs-hourglass{% endif %}"></i>&nbsp;<span data-i18n="interval.{{ job_data['every'] }}">{{ job_data["every"] }}</span>
                             </div>
                         </td>
                         <td class="text-center">
@@ -67,19 +100,21 @@
                             {% if job_data['history'] %}
                                 <i class="bx bx-sm bx-{% if job_data['history'][0]['success'] %}check text-success{% else %}x text-danger{% endif %}"></i>
                             {% else %}
-                                No history
+                                <span data-i18n="status.no_history">No history</span>
                             {% endif %}
                         </td>
                         <td>
                             <div class="d-flex justify-content-evenly">
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="{% if is_readonly %}Disabled by readonly{% else %}Run the Job{% endif %}">
+                                     data-bs-original-title="..."
+                                     data-i18n="{% if is_readonly %}tooltip.disabled_readonly{% else %}tooltip.button.run_job{% endif %}"
+                                     data-i18n-options='{"job": "{{ job }}"}'>
                                     <button type="button"
                                             data-job="{{ job }}"
                                             data-plugin="{{ job_data['plugin_id'] }}"
                                             class="btn btn-primary btn-sm me-1 run-job{% if is_readonly %} disabled{% endif %}">
-                                        <i class="bx bx-play bx-xs"></i>&nbsp;Run
+                                        <i class="bx bx-play bx-xs"></i>&nbsp;<span data-i18n="button.run">Run</span>
                                     </button>
                                 </div>
                                 {% if job_data['history'] %}
@@ -89,16 +124,16 @@
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
                                                 <div class="ms-2 me-auto">
-                                                    <div class="fw-bold">Start date</div>
+                                                    <div class="fw-bold" data-i18n="job.history.start_date">Start date</div>
                                                 </div>
                                             </li>
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
-                                                <div class="fw-bold">End date</div>
+                                                <div class="fw-bold" data-i18n="job.history.end_date">End date</div>
                                             </li>
                                             <li class="list-group-item align-items-center text-center bg-secondary text-white"
                                                 style="flex: 1 1 0">
-                                                <div class="fw-bold">Success</div>
+                                                <div class="fw-bold" data-i18n="job.history.success">Success</div>
                                             </li>
                                         </ul>
                                         {% for history in job_data['history'] %}
@@ -115,23 +150,23 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                <div {% if not job_data['history'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No history"{% endif %}>
+                                <div {% if not job_data['history'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No history" data-i18n="tooltip.no_history"{% endif %}>
                                     <button type="button"
                                             data-job="{{ job }}"
                                             data-plugin="{{ job_data['plugin_id'] }}"
                                             class="btn btn-outline-primary btn-sm me-1 show-history{% if not job_data['history'] %} disabled{% endif %}">
-                                        <i class="bx bx-history bx-xs"></i>&nbsp;History
+                                        <i class="bx bx-history bx-xs"></i>&nbsp;<span data-i18n="button.history">History</span>
                                     </button>
                                 </div>
                                 <div class="dropdown btn-group"
-                                     {% if not job_data['cache'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No cache"{% endif %}>
+                                     {% if not job_data['cache'] %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="No cache" data-i18n="tooltip.no_cache"{% endif %}>
                                     <button type="button"
                                             class="btn btn-outline-secondary btn-sm dropdown-toggle{% if not job_data['cache'] %} disabled{% endif %}"
                                             data-bs-toggle="dropdown"
                                             aria-haspopup="true"
                                             aria-expanded="false">
                                         <i class="bx bx-data"></i>
-                                        <span class="d-none d-md-inline">&nbsp;Cache</span>
+                                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.cache">Cache</span></span>
                                     </button>
                                     <ul class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0 pb-0"
                                         role="tablist">
@@ -165,11 +200,12 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content position-relative">
                 <div class="modal-header">
-                    <h5 class="modal-title">Last 10 Job's executions</h5>
+                    <h5 class="modal-title" data-i18n="modal.title.job_history">Last 10 Job's executions</h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                            aria-label="Close"
+                            data-i18n="aria.label.close"></button>
                 </div>
                 <div class="modal-body mb-2"></div>
                 <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
@@ -179,4 +215,19 @@
         </div>
     </div>
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/jobs.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

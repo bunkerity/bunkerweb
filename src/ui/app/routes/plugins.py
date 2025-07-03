@@ -15,27 +15,18 @@ from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, url_for
-from flask_login import current_user, login_required
+from flask_login import login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from werkzeug.utils import secure_filename
 
 from common_utils import bytes_hash  # type: ignore
 
 from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
-from app.utils import LOGGER, PLUGIN_NAME_RX, TMP_DIR
+from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
 
 from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
 
 plugins = Blueprint("plugins", __name__)
-
-ALWAYS_USED_PLUGINS = ("errors", "headers", "misc", "php", "pro", "sessions")
-PLUGINS_SPECIFICS = {
-    "COUNTRY": {"BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": ""},
-    "CUSTOMCERT": {"USE_CUSTOM_SSL": "no"},
-    "LETSENCRYPT": {"AUTO_LETS_ENCRYPT": "no"},
-    "LIMIT": {"USE_LIMIT_REQ": "no", "USE_LIMIT_CONN": "no"},
-    "SELFSIGNED": {"GENERATE_SELF_SIGNED_SSL": "no"},
-}
 
 
 @plugins.route("/plugins", methods=["GET"])
@@ -51,9 +42,7 @@ def plugins_page():
 @plugins.route("/plugins/delete", methods=["POST"])
 @login_required
 def delete_plugin():
-    if "write" not in current_user.list_permissions:
-        return Response("You do not have the required permissions to delete plugins", 403)
-    elif DB.readonly:
+    if DB.readonly:
         return Response("Database is in read-only mode", 403)
 
     verify_data_in_form(
@@ -228,9 +217,7 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 @plugins.route("/plugins/refresh", methods=["POST"])
 @login_required
 def plugins_refresh():
-    if "write" not in current_user.list_permissions:
-        return Response("You do not have the required permissions to refresh plugins", 403)
-    elif DB.readonly:
+    if DB.readonly:
         return handle_error("Database is in read-only mode", "plugins")
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
@@ -433,9 +420,7 @@ def plugins_refresh():
 @plugins.route("/plugins/upload", methods=["POST"])
 @login_required
 def upload_plugin():
-    if "write" not in current_user.list_permissions:
-        return {"status": "ko", "message": "You do not have the required permissions to upload plugins"}, 403
-    elif DB.readonly:
+    if DB.readonly:
         return {"status": "ko", "message": "Database is in read-only mode"}, 403
 
     if not request.files:
@@ -620,6 +605,9 @@ def custom_plugin_page(plugin: str):
 </div>"""
 
             try:
+                # Merge globals and ENV with ENV taking precedence
+                template_vars = {**current_app.jinja_env.globals, **current_app.config["ENV"]}
+
                 # deepcode ignore Ssti: We trust the plugin template
                 plugin_page = (
                     Environment(
@@ -627,7 +615,7 @@ def custom_plugin_page(plugin: str):
                         autoescape=select_autoescape(["html"]),
                     )
                     .from_string(page_content)
-                    .render(pre_render=pre_render, **current_app.jinja_env.globals, **current_app.config["ENV"])
+                    .render(pre_render=pre_render, **template_vars)
                 )
             except BaseException:
                 LOGGER.exception("An error occurred while rendering the plugin page")

@@ -3,29 +3,53 @@
     <!-- Content -->
     <div class="card p-1 mb-4 sticky-card">
         <div class="d-flex flex-wrap justify-content-around align-items-center">
-            <div class="d-flex justify-content-center">
+            <div class="d-flex justify-content-start">
                 <div class="dropdown btn-group"
-                     {% if not files %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available"{% endif %}>
+                     {% if not files.main and not files.letsencrypt %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available" data-i18n="tooltip.no_log_files"{% endif %}>
                     <button type="button"
-                            class="btn btn-outline-primary dropdown-toggle{% if not files %} disabled{% endif %}"
+                            class="btn btn-outline-primary dropdown-toggle{% if not files.main and not files.letsencrypt %} disabled{% endif %}"
                             data-bs-toggle="dropdown"
                             aria-haspopup="true"
                             aria-expanded="false">
                         <i class="bx bx-file"></i>
-                        <span class="d-none d-md-inline">&nbsp;Select File</span>
+                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.select_file">Select File</span></span>
                     </button>
                     <ul id="types-dropdown-menu"
                         class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
                         role="tablist">
-                        {% for file in files %}
-                            <li class="nav-item">
-                                <a role="button"
-                                   href="{{ url_for('logs', file=file) }}"
-                                   class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
-                                    {{ file }}
-                                </a>
+                        {% if files.main %}
+                            <li>
+                                <h6 class="dropdown-header">Main Logs</h6>
                             </li>
-                        {% endfor %}
+                            {% for file in files.main %}
+                                <li class="nav-item">
+                                    <a role="button"
+                                       href="{{ url_for('logs', file=file) }}"
+                                       class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
+                                        {{ file }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                        {% if files.letsencrypt %}
+                            {% if files.main %}
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                            {% endif %}
+                            <li>
+                                <h6 class="dropdown-header">Let's Encrypt Logs</h6>
+                            </li>
+                            {% for file in files.letsencrypt %}
+                                <li class="nav-item">
+                                    <a role="button"
+                                       href="{{ url_for('logs', file=file) }}"
+                                       class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
+                                        {{ file.replace('letsencrypt_', '') }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
                     </ul>
                 </div>
                 {% if page_num > 1 %}
@@ -36,7 +60,7 @@
                                 aria-haspopup="true"
                                 aria-expanded="false">
                             <i class="bx bx-file-find"></i>
-                            <span class="d-none d-md-inline">&nbsp;Select Page</span>
+                            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.select_page">Select Page</span></span>
                         </button>
                         <ul id="pages-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -46,7 +70,7 @@
                                     <a role="button"
                                        href="{% if loop.index == 1 %}{{ url_for('logs', file=current_file) }}{% else %}{{ url_for('logs', file=current_file, page=page) }}{% endif %}"
                                        class="dropdown-item{% if current_page == page %} active{% endif %}">
-                                        Page {{ page }}
+                                        <span data-i18n="pagination.page">Page</span> {{ page }}
                                     </a>
                                 </li>
                             {% endfor %}
@@ -54,23 +78,44 @@
                     </div>
                 {% endif %}
             </div>
-            <div {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS"{% endif %}>
-                <button id="copy-logs"
-                        type="button"
-                        class="btn btn-outline-secondary {% if not request.is_secure %}disabled{% endif %}">
-                    <i class="bx bx-copy-alt"></i>
-                    <span class="d-none d-md-inline">&nbsp;Copy</span>
-                </button>
+            <div class="d-flex justify-content-end">
+                <div {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS" data-i18n="tooltip.copy_https_only"{% endif %}>
+                    <button id="copy-logs"
+                            type="button"
+                            class="btn btn-outline-secondary {% if not request.is_secure %}disabled{% endif %}">
+                        <i class="bx bx-copy-alt"></i>
+                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.copy">Copy</span></span>
+                    </button>
+                </div>
+                <div {% if not current_file %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select a log file to follow" data-i18n="tooltip.select_file_to_follow"{% elif page_num > 1 and current_page != page_num %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Follow is only available on the latest page" data-i18n="tooltip.follow_latest_page_only"{% endif %}>
+                    <button id="follow-logs"
+                            type="button"
+                            class="btn btn-outline-primary ms-2"
+                            {% if not current_file or (page_num > 1 and current_page != page_num) %}disabled{% endif %}>
+                        <i class="bx bx-play"></i>
+                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.follow">Follow</span></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     <div class="card p-4 min-vh-70">
         <p id="logs-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading logs...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_logs">Loading logs...</p>
         <div id="raw-logs"
              class="visually-hidden ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0">
             {{ logs }}
         </div>
     </div>
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/logs.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

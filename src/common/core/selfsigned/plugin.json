@@ -14,6 +14,16 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "SELF_SIGNED_SSL_ALGORITHM": {
+      "context": "multisite",
+      "default": "ec-prime256v1",
+      "help": "Algorithm to use for self-signed certificate.",
+      "id": "self-signed-ssl-algorithm",
+      "label": "Certificate algorithm",
+      "regex": "^(ec-(prime256v1|secp384r1)|(rsa-(2048|4096)))$",
+      "type": "select",
+      "select": ["ec-prime256v1", "ec-secp384r1", "rsa-2048", "rsa-4096"]
+    },
     "SELF_SIGNED_SSL_EXPIRY": {
       "context": "multisite",
       "default": "365",
@@ -21,7 +31,7 @@
       "id": "self-signed-ssl-expiry",
       "label": "Certificate expiry",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "SELF_SIGNED_SSL_SUBJ": {
       "context": "multisite",
@@ -29,7 +39,7 @@
       "help": "Self-signed certificate subject.",
       "id": "self-signed-ssl-subj",
       "label": "Certificate subject",
-      "regex": "^/CN=[^,]+$",
+      "regex": "^/[^/]+/$",
       "type": "text"
     }
   },

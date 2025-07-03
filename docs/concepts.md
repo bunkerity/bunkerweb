@@ -6,15 +6,15 @@
   ![Overview](assets/img/concepts.svg){ align=center, width="600" }
 </figure>
 
-Within your infrastructure, BunkerWeb acts as a reverse proxy in front of your web services. The typical architecture consists of accessing BunkerWeb from the Internet, which then forwards requests to the appropriate application service on a secure network.
+Within your infrastructure, BunkerWeb acts as a reverse proxy in front of your web services. The typical architecture involves accessing BunkerWeb from the Internet, which then forwards requests to the appropriate application service on a secure network.
 
-Using BunkerWeb that way (classical reverse proxy architecture) with TLS offloading and centralized security policies enhances performance by reducing encryption overhead on backend servers while ensuring consistent access control, threat mitigation, and compliance enforcement across all services.
+Using BunkerWeb in this way (classical reverse proxy architecture) with TLS offloading and centralized security policies enhances performance by reducing encryption overhead on backend servers while ensuring consistent access control, threat mitigation, and compliance enforcement across all services.
 
 ## Integrations
 
-The first concept is the integration of BunkerWeb into the target environment. We prefer to use the word "integration" instead of "installation" because one of the goals of BunkerWeb is to integrate seamlessly into existing environments.
+The first concept is the integration of BunkerWeb into the target environment. We prefer to use the word "integration" instead of "installation" because one of BunkerWeb's goals is to integrate seamlessly into existing environments.
 
-The following integrations are officially supported :
+The following integrations are officially supported:
 
 - [Docker](integrations.md#docker)
 - [Linux](integrations.md#linux)
@@ -22,7 +22,7 @@ The following integrations are officially supported :
 - [Kubernetes](integrations.md#kubernetes)
 - [Swarm](integrations.md#swarm)
 
-If you think that a new integration should be supported, do not hesitate to open a [new issue](https://github.com/bunkerity/bunkerweb/issues) on the GitHub repository.
+If you think a new integration should be supported, do not hesitate to open a [new issue](https://github.com/bunkerity/bunkerweb/issues) on the GitHub repository.
 
 !!! info "Going further"
 
@@ -30,15 +30,14 @@ If you think that a new integration should be supported, do not hesitate to open
 
 ## Settings
 
-!!! tip "PRO settings"
-
-    Some plugins are reserved for the **PRO version**. [Find out more about the pro version here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
+!!! tip "BunkerWeb PRO settings"
+    Some plugins are reserved for the **PRO version**. Want to quickly test BunkerWeb PRO for one month? Use the code `freetrial` when placing your order on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) or by clicking [here](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) to directly to apply the promo code (will be effective at checkout).
 
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 
-The configuration of BunkerWeb is done by using what we call the "settings" or "variables". Each setting is identified by a name such as `AUTO_LETS_ENCRYPT` or `USE_ANTIBOT`. You can assign values to the settings to configure BunkerWeb.
+The configuration of BunkerWeb is done using what we call "settings" or "variables." Each setting is identified by a name such as `AUTO_LETS_ENCRYPT` or `USE_ANTIBOT`. You can assign values to these settings to configure BunkerWeb.
 
-Here is a dummy example of a BunkerWeb configuration :
+Here is a dummy example of a BunkerWeb configuration:
 
 ```conf
 SERVER_NAME=www.example.com
@@ -50,28 +49,23 @@ USE_GZIP=yes
 USE_BROTLI=no
 ```
 
-Please note that if you are using the web User Interface, the setting names are also displayed in addition to a "human-friendly" label :
+Please note that if you are using the web User Interface, the setting names are also displayed in addition to a "human-friendly" label:
 
 <figure markdown>
   ![Overview](assets/img/settings-ui1.png){ align=center, width="800" }
   <figcaption>Settings name in the web UI</figcaption>
 </figure>
 
-You can also use the search bar and directly specify a setting name :
+You can also use the search bar and directly specify a setting name:
 
 <figure markdown>
   ![Overview](assets/img/settings-ui2.png){ align=center, width="600" }
   <figcaption>Settings search in the web UI</figcaption>
 </figure>
 
-
 !!! info "Going further"
 
-    The complete list of available settings with descriptions and possible values is available in the [settings section](settings.md) of the documentation.
-
-!!! info "Settings generator tool"
-
-    To help you tune BunkerWeb, we offer an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc).
+    The complete list of available settings with descriptions and possible values is available in the [settings section](features.md) of the documentation.
 
 ## Multisite mode
 
@@ -81,13 +75,13 @@ By default, BunkerWeb has the multisite mode disabled. This means that only one 
 
 However, when the multisite mode is enabled, BunkerWeb becomes capable of serving and protecting multiple web applications. Each web application is identified by a unique server name and has its own set of settings. This mode proves beneficial when you have multiple applications to secure, and you prefer to utilize a single instance (or a cluster) of BunkerWeb.
 
-The activation of the multisite mode is controlled by the `MULTISITE` setting, which can be set to `yes` to enable it or `no` to keep it disabled (which is the default value).
+The activation of the multisite mode is controlled by the `MULTISITE` setting, which can be set to `yes` to enable it or `no` to keep it disabled (the default value).
 
 Each setting within BunkerWeb has a specific context that determines where it can be applied. If the context is set to "global," the setting can't be applied per server or site but is instead applied to the entire configuration as a whole. On the other hand, if the context is "multisite," the setting can be applied globally and per server. To define a multisite setting for a specific server, simply add the server name as a prefix to the setting name. For example, `app1.example.com_AUTO_LETS_ENCRYPT` or `app2.example.com_USE_ANTIBOT` are examples of setting names with server name prefixes. When a multisite setting is defined globally without a server prefix, all servers inherit that setting. However, individual servers can still override the setting if the same setting is defined with a server name prefix.
 
 Understanding the intricacies of multisite mode and its associated settings allows you to tailor BunkerWeb's behavior to suit your specific requirements, ensuring optimal protection for your web applications.
 
-Here's a dummy example of a multisite BunkerWeb configuration :
+Here's a dummy example of a multisite BunkerWeb configuration:
 
 ```conf
 MULTISITE=yes
@@ -102,7 +96,7 @@ app2.example.com_WHITELIST_COUNTRY=FR
 app3.example.com_USE_BAD_BEHAVIOR=no
 ```
 
-Please note that multisite mode is implicit when using the web User Interface. You have the option to apply configurations directly to your services or to set a global configuration that will be applied to all your services (you can still apply exceptions directly to specific services) :
+Please note that multisite mode is implicit when using the web User Interface. You have the option to apply configurations directly to your services or to set a global configuration that will be applied to all your services (you can still apply exceptions directly to specific services):
 
 <figure markdown>
   ![Overview](assets/img/ui-multisite.png){ align=center, width="600" }
@@ -111,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.2/examples) directory of the repository.
 
 ## Custom configurations
 
@@ -123,7 +117,7 @@ Another integral component of BunkerWeb is the ModSecurity Web Application Firew
 
 By leveraging custom configurations, you unlock a world of possibilities to tailor BunkerWeb's behavior and security measures precisely to your needs. Whether it's adjusting NGINX configurations or fine-tuning ModSecurity, BunkerWeb provides the flexibility to meet your unique challenges effectively.
 
-Managing custom configurations from the web User Interface is done through the **Configs** menu :
+Managing custom configurations from the web User Interface is done through the **Configs** menu:
 
 <figure markdown>
   ![Overview](assets/img/configs-ui.png){ align=center, width="800" }
@@ -132,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.1/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.2/examples) directory of the repository.
 
 ## Database
 
@@ -182,32 +176,31 @@ Depending on the integration approach, the execution environment of the schedule
 
 By employing the scheduler, BunkerWeb streamlines the automation and coordination of essential tasks, enabling efficient and reliable operation of the entire system.
 
-If you are using the web User Interface, you can manage scheduler jobs by clicking on **Jobs** from the menu :
+If you are using the web User Interface, you can manage scheduler jobs by clicking on **Jobs** from the menu:
 
 <figure markdown>
   ![Overview](assets/img/jobs-ui.png){ align=center, width="800" }
   <figcaption>Manage jobs from the web UI</figcaption>
 </figure>
 
+**Instances health check**
 
-**Instances healthcheck**
+Since version 1.6.0, the scheduler possesses a built-in health check system that monitors the health of instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will resume sending the configuration.
 
-Since the 1.6.0, the Scheduler possess a built-in healthcheck system, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.
-
-The healthcheck interval is set by the `HEALTHCHECK_INTERVAL` environment variable with a default value of `30` which means that the scheduler will check the health of the instances every 30 seconds.
+The health check interval is set by the `HEALTHCHECK_INTERVAL` environment variable, with a default value of `30`, meaning the scheduler will check the health of the instances every 30 seconds.
 
 ## Templates
 
 BunkerWeb leverages the power of templates to simplify the configuration process and enhance flexibility. Templates provide a structured and standardized approach to defining settings and custom configurations, ensuring consistency and ease of use.
 
-- **Predefined templates**: The community version offers three predefined templates that encapsulate common custom  configurations and settings. These templates serve as a starting point for configuring BunkerWeb, enabling quick setup and deployment. The predefined templates are the following:
+- **Predefined templates**: The community version offers three predefined templates that encapsulate common custom configurations and settings. These templates serve as a starting point for configuring BunkerWeb, enabling quick setup and deployment. The predefined templates are the following:
     - **low**: A basic template that provides essential settings for web application protection.
     - **medium**: A balanced template that offers a mix of security features and performance optimizations.
     - **high**: An advanced template that focuses on robust security measures and comprehensive protection.
 
 - **Custom templates**: In addition to predefined templates, BunkerWeb allows users to create custom templates tailored to their specific requirements. Custom templates enable fine-tuning of settings and custom configurations, ensuring that BunkerWeb aligns perfectly with the user's needs.
 
-With the web User Interface, templates are available through **easy mode** when you add or edit a service :
+With the web User Interface, templates are available through **easy mode** when you add or edit a service:
 
 <figure markdown>
   ![Overview](assets/img/templates-ui.png){ align=center, width="800" }
@@ -216,18 +209,18 @@ With the web User Interface, templates are available through **easy mode** when 
 
 **Creating custom templates**
 
-Creating a custom template is a straightforward process that involves defining the desired settings, custom configurations and steps in a structured format.
+Creating a custom template is a straightforward process that involves defining the desired settings, custom configurations, and steps in a structured format.
 
-* **Template structure**: A custom template consists of a name, series of settings, custom configurations and optional steps. The template structure is defined in a JSON file that adheres to the specified format. The key components of a custom template include:
+* **Template structure**: A custom template consists of a name, a series of settings, custom configurations, and optional steps. The template structure is defined in a JSON file that adheres to the specified format. The key components of a custom template include:
     * **Settings**: A setting is defined with a name and corresponding value. This value will override the default value of the setting. **Only multisite settings are supported.**
     * **Configs**: A custom configuration is a path to an NGINX configuration file that will be included as a custom configuration. To know where to place the custom configuration file, refer to the example of a plugin's tree below. **Only multisite configuration types are supported.**
-    * **Steps**: A step contains a title, subtitle, settings and custom configurations. Each step represents a configuration step that the user can follow to set up BunkerWeb according to the custom template in the web UI.
+    * **Steps**: A step contains a title, subtitle, settings, and custom configurations. Each step represents a configuration step that the user can follow to set up BunkerWeb according to the custom template in the web UI.
 
 !!! info "Specifications about steps"
 
-    If steps are declared, **it is not mandatory to include all the settings and custom configurations in the settings and configs sections**. keep in mind that when a setting or a custom configuration is declared in a step, the user will be allowed to make edits to it in the web UI.
+    If steps are declared, **it is not mandatory to include all the settings and custom configurations in the settings and configs sections**. Keep in mind that when a setting or a custom configuration is declared in a step, the user will be allowed to make edits to it in the web UI.
 
-* **Template file**: The custom template is defined in a json file in a `templates` folder inside the plugin directory that adheres to the specified structure. The template file contains a name, the settings, custom configurations, and steps required to configure BunkerWeb according to the user's preferences.
+* **Template file**: The custom template is defined in a JSON file in a `templates` folder inside the plugin directory that adheres to the specified structure. The template file contains a name, the settings, custom configurations, and steps required to configure BunkerWeb according to the user's preferences.
 
 * **Selecting a template**: Once the custom template is defined, users can select it during the easy-mode configuration process of a service in the web UI. A template can also be selected with the `USE_TEMPLATE` setting in the configuration. The name of the template file (without the `.json` extension) should be specified as the value of the `USE_TEMPLATE` setting.
 

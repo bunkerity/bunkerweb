@@ -1,6 +1,172 @@
 # Changelog
 
-## v1.6.1 - ????/??/??
+## v1.6.2 - ????/??/??
+
+- [SECURITY] Introduce ModSecurity exclusion rules targeting the password input upon login, preventing false-positive blocks on valid complex passwords while preserving strict overall request inspection.
+- [SECURITY] Add new ModSecurity exclusion rule to prevent false positives on the `/instances/new` endpoint, specifically for the `hostname` argument, ensuring that legitimate requests are not blocked while maintaining security.
+- [FEATURE] Refactor download scripts to canonicalize and deduplicate URLs before fetching and implement smarter cache management for improved efficiency
+- [FEATURE] Implement Redis-backed metrics storage and optimize retrieval workflows for faster, more reliable performance
+- [FEATURE] Add support for custom Let's Encrypt profiles and log profile changes during renewal
+- [ALL-IN-ONE] Update CrowdSec to version v1.6.9
+- [UI] Add "Go Back" button functionality in unauthorized page
+- [UI] Improve dynamic translation handling and update chart rendering on theme and language changes
+- [UI] Add an optional /healthcheck endpoint to the web UI for health monitoring, which can be enabled via the `ENABLE_HEALTHCHECK` setting (default is `no`)
+- [UI] Enhance log file handling and display Let's Encrypt logs
+- [DOCS] Add documentation about [Valkey](https://valkey.io/) support alongside [Redis](https://redis.io/) for data persistence and caching in BunkerWeb
+- [MISC] Enhance logging to differentiate between allowed and denied access based on whitelist status
+- [DEPS] Update coreruleset-v4 version to v4.16.0
+- [DEPS] Update Mbed TLS version to v3.6.4
+- [DEPS] Update Ace editor version to 1.43.1
+- [DEPS] Update i18next version to v25.3.0
+- [DEPS] Update i18next browser languageDetector extension version to v8.2.0
+- [DEPS] Update DOMPurify version to 3.2.6
+- [DEPS] Update ApexCharts.js version to v4.7.0
+
+## v1.6.2-rc7 - 2025/06/25
+
+- [BUGFIX] Add a conditional `proxy_hide_header` rule for the `Upgrade` header to preserve WebSocket connections in the `Reverse Proxy` plugin, preventing issues with WebSocket connections when the `REVERSE_PROXY_HIDE_HEADERS` setting is used.
+- [BUGFIX] Correct the Logs page copy-to-clipboard button so it reliably copies selected log entries.
+- [BUGFIX] Fix issues with database backup when using MySQL and MariaDB if the database's size is larger than 1GB, ensuring that the backup process can handle larger databases without errors.
+- [FEATURE] Introduce a new `number` setting type with built-in numeric validation and enhanced rendering in the web UI.
+- [FEATURE] Introduce a new `multivalue` setting type with customizable separator and validation, enhancing user experience for multi-value inputs in the web UI.
+- [MISC] Switch the `Bad Behavior` plugin to use the new numeric `BAD_BEHAVIOR_BAN_TIME` setting by updating the permanent ban value from `-1` to `0`.
+- [CONTRIBUTION] Thank you @Michal-Koeckeis-Fresel for the optimizations regarding the web UI fonts and geoip data loading, which significantly improves the performance of the web UI and the new dhparam file to respect the latest security standards.
+
+## v1.6.2-rc6 - 2025/06/20
+
+- [BUGFIX] Ensure template defaults settings are correctly retrieved by jobs and templates.
+- [BUGFIX] No longer completely delete all PRO plugins data upon PRO deactivation, allowing for easier reactivation without losing data.
+- [BUGFIX] Enhance cache robustness by using dict.get() for lookups to avoid KeyError exceptions during cache operations.
+- [SECURITY] Make sure the files/dirs in /usr/share/bunkerweb have the appropriate permissions to prevent unauthorized access to sensitive files on Linux integration
+
+## v1.6.2-rc5 - 2025/06/17
+
+- [BUGFIX] Ensure jobs correctly retrieve multisite settings when a service uses its default value while the global setting is overridden, preventing configuration mismatches.
+- [FEATURE] Add new `LETS_ENCRYPT_PASSTHROUGH` setting to the `Let's Encrypt` plugin to allow passing through the Let's Encrypt challenge requests to the upstream server (default is `no`)
+- [UI] Fix i18n shenanigans in services page and in dataTables
+- [UI] Fix plugins delete button not working
+- [LINUX] Make sure that the NGINX service is disabled every time in the post-install script to avoid issues with the NGINX service being started when it shouldn't be
+- [SECURITY] Refactor permissions in BunkerWeb files to ensure that only the necessary files are readable/writable/executable by the user running the service, enhancing security and preventing unauthorized access to sensitive files.
+
+## v1.6.2-rc4 - 2025/06/12
+
+- [FEATURE] Introduce `multiselect` setting type, enabling users to choose multiple options from a configurable list
+- [FEATURE] Add new `BLACKLIST_COMMUNITY_LISTS` setting to the `blacklist` plugin, allowing users to choose which community blocklists to use for blacklisting
+- [FEATURE] Add new `REVERSE_PROXY_HIDE_HEADERS` setting to the `Reverse Proxy` plugin, allowing users to specify a list of HTTP headers to hide from clients when received from the proxied resource (values for proxy_hide_header directive).
+- [MISC] Greatly improve scheduler's performance by optimizing the way it handles environment variables and settings, reducing the number of database queries and improving overall efficiency
+- [MISC] Optimize variable loading during the init phase to improve startup performance
+- [DEPS] Update coreruleset-v4 version to v4.15.0
+- [DEPS] Update lua-resty-session version to 4.1.2
+- [DEPS] Update LuaJIT version to v2.1-20250529
+- [CONTRIBUTION] Thank you @Ablablab for your contribution to the `Headers` plugin
+- [CONTRIBUTION] Thank you @sachin-vcs for your contribution to the `Let's Encrypt` plugin by helping the implementation of the new `Njalla` DNS provider
+
+## v1.6.2-rc3 - 2025/06/06
+
+- [BUGFIX] Refactor CLI command handling to support additional arguments
+- [DOCS] Update the documentation about the `all-in-one` image to include the new features and improvements, also move it to its own section
+- [FEATURE] Add request ID to error pages, logs and display it in UI reports for easier tracking of issues
+- [FEATURE] Add support for Docker secrets in all services
+- [FEATURE] Add more data to ModSecurity reports
+- [FEATURE] Add new `LETS_ENCRYPT_MAX_RETRIES` setting to the `Let's Encrypt` plugin to configure how many times certificate generation should be retried with Let's Encrypt (default is 0, meaning no retries)
+- [ALL-IN-ONE] Fully integrate CrowdSec in the all-in-one image
+- [ALL-IN-ONE] Fully integrate Redis in the all-in-one image (activated by default)
+- [UI] Add clear notifications feature to both UI and backend for improved notification management
+- [UI] Improve plugin navigation by displaying plugins as a vertical list on the left side of the card, replacing the dropdown combobox
+- [UI] Display a small "enabled/disabled" icon next to each plugin name in the plugin sidebar and menu to indicate whether the plugin is active (e.g., show if Reverse Proxy is enabled)
+- [UI] Update QR code generation to use PilImage and output JPEG format for improved compatibility
+- [UI] Add a modal to update ban durations, with support for localization
+- [UI] Add system memory usage monitoring to the home page dashboard for real-time insights
+- [UI] Add a more robust system when showing reports and bans data to avoid potential XSS vulnerabilities
+- [UI] Refactor the data display on the report page for a more user-friendly experience
+- [UI] Add quick actions for bans back
+- [UI] Enhance reset button visibility and tooltip handling across various settings templates
+- [UI] Add the possibility to delete cache files
+- [MISC] Refactor template rendering for improved performance and efficiency
+- [LINUX] Provide an interactive installer script for BunkerWeb that guides users through setup options
+- [DEPS] Updated NGINX version to 1.28.0 (except for Fedora as it is not yet available)
+- [CONTRIBUTION] Thank you @lenglet-k for your contribution to the Ingress controller
+- [CONTRIBUTION] Thank you @kovacs-andras for your contribution to the PRO urls in the documentation
+- [CONTRIBUTION] Thank you @mevenG for your contribution to the README file
+
+## v1.6.2-rc2 - 2025/05/19
+
+- [BUGFIX] Fix draft services deletion when editing the global config in the web UI
+- [BUGFIX] Enhance the `Let's Encrypt` plugin's Cloudflare Provider with default values and validation for credentials to avoid having to set all of them all the time (`api_token` or `email` and `api_key`)
+- [BUGFIX] Remove settings form input sanitization as it was creating issues when saving settings in the web UI
+- [BUGFIX] Exclude the RFC2136 DNS provider from the base64 encoding validation for credential items in the `letsencrypt` plugin to prevent issues with the `secret` field being detected as base64 encoded
+- [BUGFIX] Avoid redirecting clients when they match an ignore list item in `antibot` plugin
+- [BUGFIX] Avoid always trying to regenerate a Let's Encrypt certificate that was using the staging production over and over at every restart
+- [FEATURE] Add the possibility to choose a profile when generating certificates with Let's Encrypt using the `LETS_ENCRYPT_PROFILE` setting (`classic` (default), `tlsserver` for server-only validation, and `shortlived` for reduced 7-day validity) to provide flexibility in certificate configuration based on security requirements
+- [FEATURE] Add the possibility to declare custom certificates and keys data as plaintext as well as base64-encoded data in the `customcert` plugin using the `CUSTOM_SSL_CERT_DATA` and `CUSTOM_SSL_KEY_DATA` settings
+- [FEATURE] Add `IONOS` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `REVERSE_PROXY_UNDERSCORES_IN_HEADERS` setting to control if underscores in headers should be allowed or not in the `Reverse Proxy` plugin (default is `no`)
+- [FEATURE] Add `LETS_ENCRYPT_CUSTOM_PROFILE` setting to allow setting a custom profile for the `Let's Encrypt` plugin
+- [FEATURE] Add `LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES` setting to allow disabling the public suffixes check in the `Let's Encrypt` plugin (default is `yes`)
+- [FEATURE] Add permanent ban feature to `badbehavior` plugin, web UI and bwcli
+- [UI] Fix shenanigans when editing a service in easy mode
+- [UI] Fix false positive with the newer CRS version (v4.13.0) on the web UI when fetching fonts
+- [UI] Add reset functionality to settings with UI updates for input, checkbox, and select elements
+- [UI] Fix LEDNS credential handling in setup wizard and reset button visibility in settings templates
+- [UI] Update time formatting in requests chart to use 12-hour format in home page
+- [UI] Introduce multi‑language support in the web UI: `ar`, `bn`, `en`, `es`, `fr`, `hi`, `pt`, `ru`, `ur`, `zh`, `de`, `it` — covering the world’s top 10 and Europe’s top 5 languages.
+- [UI] Refactor TOTP Pretty key generation to avoid separating the parts with a `-` character (this was causing issues with some QR code readers)
+- [UI] Add the possibility to manually delete Let's Encrypt certificates in the web UI
+- [UI] Refactor bans management to process the data on the serverSide like done with the reports
+- [UI] Update apexcharts.js to version 4.6.0
+- [UI] Update ace editor to version 1.40.1
+- [UI] Update DOMPurify to version 3.2.5
+- [MISC] Add algorithm normalization for self-signed certificate generation to avoid regenerating the certificate if the algorithm is already the right one but the setting is not set to the same value
+- [MISC] Refactor the way we fetch the entire config from the database to avoid issues with default values and multiple settings in the lua code
+- [MISC] Add new container security using docker scout in CI/CD pipeline
+- [MISC] Add warning for RHEL users regarding external database client installation and remove dependency on `mysql` and `postgresql` packages in the RHEL fpm file (it was causing issues when `mariadb` was installed)
+- [AUTOCONF] (Re) Remove possible infinite loop in Kubernetes integration
+- [UI] Integrate Biscuit authentication and key management
+- [DEPS] Update coreruleset-v4 version to v4.14.0
+- [DEPS] Update lua-resty-openssl version to v1.6.1
+- [DEPS] Update lua-resty-session version to v4.1.1
+- [LINUX] Support Fedora 42
+- [CONTRIBUTION] Thank you @nimro27 for your contribution to the Ingress controller (#2141 and #2143)
+- [CONTRIBUTION] Thank you @TomVivant for your contribution to the `letsencrypt` plugin (#2149)
+- [CONTRIBUTION] Thank you @wiseweb-works for your contribution to the `web UI` by adding the Turkish language (#2204)
+- [CONTRIBUTION] Thank you @HongyiHank for your contribution to the `web UI` by adding the Traditional Chinese language and double checking the Simplified Chinese language (#2226)
+
+## v1.6.2-rc1 - 2025/03/29
+
+- [BUGFIX] Fix database migration issues when upgrading from older versions to v1.6.1-rc1 with a PostgreSQL database
+- [BUGFIX] Fix shenanigans with templates in the web UI when editing/creating a service using the easy mode
+- [BUGFIX] Improve database table existence checks and error handling in scripts to avoid errors when the LANG is not en_US.UTF-8
+- [BUGFIX] Fix `Country` plugin regex to avoid false positives and deduplicate entries in the lua code
+- [BUGFIX] Fix `Let's Encrypt` clear old certificates logic to avoid deleting the wrong certificates
+- [DOCS] Enhance documentation about `all-in-one` image
+- [DOCS] Refactor the settings documentation to make it more consistent and easier to read, it is now renamed to `Features`
+- [FEATURE] Enhance `SSL` plugin configuration with customizable cipher levels `modern`, `intermediate`, and `old` for better control over SSL/TLS settings and the ability to set a custom cipher list
+- [FEATURE] Add the possibility to ignore `URI`, `IP`, `reverse DNS`, `ASN`, and `User-Agent` in the `Antibot` plugin
+- [FEATURE] Add the possibility to configure the algorithm used when generating the `self-signed` certificate in the `Self-signed certificate` plugin (default is `ec-prime256v1`)
+- [FEATURE] Add `Infomaniak` as a DNS provider in the `letsencrypt` plugin
+- [MISC] Add the possibility to use the less secure `dns_cloudflare_email` and `dns_cloudflare_api_key` credentials in the `letsencrypt` plugin for Cloudflare DNS provider
+- [MISC] Update regex in the `Self-signed certificate` plugin for subject validation so we don't have to always start with `/CN=`
+- [MISC] Update regex in the `Security.txt` plugin to support both HTTP and HTTPS URLs and add an helper function to convert HTTP URLs to HTTPS
+- [MISC] Update regex in the `SSL` plugin to support older HTTPS protocols
+- [MISC] Make the default certificate more secure by using the `secp384r1` curve and the `sha384` hash algorithm instead of the `secp256r1` curve and the `sha256` hash algorithm
+- [AUTOCONF] Remove possible infinite loop in Kubernetes integration
+- [UI] The temporary web UI will now accept X-Forwarded-For headers to allow the use of a reverse proxy in front of it
+- [UI] Persist DataTable page length in localStorage for consistent user experience.
+- [UI] Fix 2FA setup page QR code not being scannable when using the dark mode
+- [UI] Update latest stable release only if available to avoid unnecessary updates prompting
+- [UI] Fix correct key retrieval for `Redis` metrics
+- [UI] Enhance report data formatting and error handling in reports module
+- [UI] Templates are now listed in an appropriate order in the web UI when creating a new service in easy mode (`low` -> `medium` -> `high` -> `custom`)
+- [UI] Refactor easy mode to improve the user experience and make it more intuitive
+- [ALL-IN-ONE] Enhance supervisord configuration to ensure proper startup and shutdown of all services in the all-in-one image
+- [ALL-IN-ONE] Improve logging mechanism in the all-in-one image to ensure that logs are properly captured and displayed
+- [LINUX] Fix NGINX service not being disabled correctly in the post-install script
+- [DEPS] Add lua-upstream-nginx-module
+- [DEPS] Update lua-resty-redis version to v0.32
+- [DEPS] Update ngx_devel_kit version to v0.3.4
+- [DEPS] Update mbedtls version to v3.6.3
+
+## v1.6.1 - 2025/03/15
 
 - [BUGFIX] Enhance Alembic configuration to support database URIs args
 - [BUGFIX] Made `SERVER_NAME` setting's regex more permissive (removed the duplication check)

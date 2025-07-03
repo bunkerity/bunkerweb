@@ -58,12 +58,14 @@ function badbehavior:log()
 	-- Add incr operation so timer can manage it
 	local status = tostring(ngx.status)
 	local ban_scope = self.variables["BAD_BEHAVIOR_BAN_SCOPE"]
+	local ban_time = tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"])
+
 	local ok, err = self.datastore.dict:rpush(
 		"plugin_badbehavior_incr",
 		encode({
 			ip = self.ctx.bw.remote_addr,
 			count_time = tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]),
-			ban_time = tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]),
+			ban_time = ban_time,
 			threshold = tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]),
 			use_redis = self.use_redis,
 			server_name = self.ctx.bw.server_name,
@@ -77,7 +79,18 @@ function badbehavior:log()
 	if not ok then
 		return self:ret(false, "can't add incr operation : " .. err)
 	end
-	self:set_metric("counters", status, 1)
+	self:set_metric("counters", "status_" .. status, 1)
+	self:set_metric("counters", "ip_" .. self.ctx.bw.remote_addr, 1)
+	self:set_metric("counters", "url_" .. self.ctx.bw.request_uri, 1)
+	self:set_metric("tables", "increments", {
+		date = self.ctx.bw.start_time,
+		id = self.ctx.bw.request_id,
+		ip = self.ctx.bw.remote_addr,
+		server_name = self.ctx.bw.server_name,
+		status = status,
+		method = self.ctx.bw.request_method,
+		url = self.ctx.bw.request_uri,
+	})
 	return self:ret(true, "success")
 end
 
@@ -226,12 +239,13 @@ function badbehavior:timer()
 					ret = false
 					ret_err = "can't save ban : " .. err
 				else
+					local ban_duration = data.ban_time == 0 and "permanently" or "for " .. data.ban_time .. "s"
 					self.logger:log(
 						WARN,
 						string.format(
-							"IP %s is banned for %ss (%s/%s) on server %s with scope %s",
+							"IP %s is banned %s (%s/%s) on server %s with scope %s",
 							data.ip,
-							data.ban_time,
+							ban_duration,
 							tostring(data.counter),
 							tostring(data.threshold),
 							data.server_name,
@@ -240,12 +254,13 @@ function badbehavior:timer()
 					)
 				end
 			else
+				local detection_msg = data.ban_time == 0 and "permanently" or "for " .. data.ban_time .. "s"
 				self.logger:log(
 					WARN,
 					string.format(
-						"detected IP %s ban for %ss (%s/%s) on server %s with scope %s",
+						"detected IP %s ban %s (%s/%s) on server %s with scope %s",
 						data.ip,
-						data.ban_time,
+						detection_msg,
 						tostring(data.counter),
 						tostring(data.threshold),
 						data.server_name,
@@ -404,10 +419,19 @@ function badbehavior:redis_increase(ip, count_time, ban_time, server_name, ban_s
 			return ret_expire
 		end
 		if ret_incr > tonumber(ARGV[2]) then
-			local ret_set = redis.pcall("SET", KEYS[2], "bad behavior", "EX", ARGV[2])
-			if type(ret_set) == "table" and ret_set["err"] ~= nil then
-				redis.log(redis.LOG_WARNING, "Bad behavior increase SET error : " .. ret_set["err"])
-				return ret_set
+			-- For permanent bans (ban_time = 0), don't set an expiration
+			if tonumber(ARGV[2]) == 0 then
+				local ret_set = redis.pcall("SET", KEYS[2], "bad behavior")
+				if type(ret_set) == "table" and ret_set["err"] ~= nil then
+					redis.log(redis.LOG_WARNING, "Bad behavior increase SET (permanent) error : " .. ret_set["err"])
+					return ret_set
+				end
+			else
+				local ret_set = redis.pcall("SET", KEYS[2], "bad behavior", "EX", ARGV[2])
+				if type(ret_set) == "table" and ret_set["err"] ~= nil then
+					redis.log(redis.LOG_WARNING, "Bad behavior increase SET error : " .. ret_set["err"])
+					return ret_set
+				end
 			end
 		end
 		return ret_incr

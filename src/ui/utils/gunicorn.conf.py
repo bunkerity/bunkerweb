@@ -1,7 +1,7 @@
 from datetime import datetime
 from hashlib import sha256
 from json import JSONDecodeError, dump, dumps, loads
-from os import cpu_count, getenv, sep
+from os import cpu_count, environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from secrets import token_hex
@@ -15,12 +15,14 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from biscuit_auth import KeyPair, PublicKey, PrivateKey
 from passlib.totp import generate_secret
 
+from common_utils import handle_docker_secrets  # type: ignore
 from logger import setup_logger  # type: ignore
 
 from app.models.ui_database import UIDatabase
-from app.utils import USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 TMP_UI_DIR = TMP_DIR.joinpath("ui")
@@ -40,6 +42,8 @@ FLASK_SECRET_FILE = LIB_DIR.joinpath(".flask_secret")
 FLASK_SECRET_HASH_FILE = FLASK_SECRET_FILE.with_suffix(".hash")  # File to store hash of Flask secret
 TOTP_SECRETS_FILE = LIB_DIR.joinpath(".totp_secrets.json")
 TOTP_HASH_FILE = TOTP_SECRETS_FILE.with_suffix(".hash")  # File to store hash of TOTP secrets
+BISCUIT_PUBLIC_KEY_HASH_FILE = BISCUIT_PUBLIC_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit public key
+BISCUIT_PRIVATE_KEY_HASH_FILE = BISCUIT_PRIVATE_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit private key
 
 MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
@@ -97,7 +101,15 @@ def on_starting(server):
 
     ERROR_FILE.unlink(missing_ok=True)
 
+    # Handle Docker secrets first
+    docker_secrets = handle_docker_secrets()
+    if docker_secrets:
+        environ.update(docker_secrets)
+
     LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+
+    if docker_secrets:
+        LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
 
     def set_secure_permissions(file_path: Path):
         """Set file permissions to 600 (owner read/write only)."""
@@ -171,6 +183,7 @@ def on_starting(server):
                 LOGGER.error("Failed to load TOTP secrets from file. Falling back to environment or generating new secrets.")
 
         # * Step 2: Check environment variable if no valid file
+        totp_secrets_env = None
         if not totp_secrets:
             totp_secrets_env = getenv("TOTP_SECRETS", "").strip()
             if totp_secrets_env:
@@ -204,8 +217,12 @@ def on_starting(server):
         if previous_env_hash and current_env_hash == previous_env_hash:
             LOGGER.info("The TOTP_SECRETS environment variable has not changed since the last restart.")
         else:
-            LOGGER.warning("The TOTP_SECRETS environment variable has changed or is being set for the first time.")
-            invalid_totp_secrets = True
+            if not totp_secrets_env:
+                LOGGER.warning("The TOTP_SECRETS environment variable has changed or is being set for the first time.")
+                invalid_totp_secrets = True
+            else:
+                LOGGER.info("We won't reset the TOTP secrets, as the TOTP_SECRETS environment variable is set.")
+
             with TOTP_SECRETS_FILE.open("w", encoding="utf-8") as file:
                 dump(totp_secrets, file, indent=2)
             set_secure_permissions(TOTP_SECRETS_FILE)
@@ -218,6 +235,112 @@ def on_starting(server):
         LOGGER.info("TOTP environment hash securely stored for change detection.")
     except Exception as e:
         message = f"An error occurred while handling TOTP secrets: {e}"
+        LOGGER.debug(format_exc())
+        LOGGER.critical(message)
+        ERROR_FILE.write_text(message, encoding="utf-8")
+        exit(1)
+
+    # * Handle Biscuit keys
+    try:
+        biscuit_public_key_hex = None
+        biscuit_private_key_hex = None
+        keys_loaded = False
+        keys_generated = False
+
+        # * Step 1: Load Biscuit keys from files and validate
+        if BISCUIT_PUBLIC_KEY_FILE.is_file() and BISCUIT_PRIVATE_KEY_FILE.is_file():
+            try:
+                pub_hex = BISCUIT_PUBLIC_KEY_FILE.read_text(encoding="utf-8").strip()
+                priv_hex = BISCUIT_PRIVATE_KEY_FILE.read_text(encoding="utf-8").strip()
+                if not pub_hex or not priv_hex:
+                    raise ValueError("One or both Biscuit key files are empty.")
+
+                # Validate by attempting to load
+                PublicKey.from_hex(pub_hex)
+                PrivateKey.from_hex(priv_hex)
+                biscuit_public_key_hex = pub_hex
+                biscuit_private_key_hex = priv_hex
+                keys_loaded = True
+                LOGGER.info("Valid Biscuit keys successfully loaded from files.")
+            except Exception as e:
+                LOGGER.error(f"Failed to load or validate Biscuit keys from files: {e}. Falling back.")
+                biscuit_public_key_hex = None  # Ensure reset if loading failed
+                biscuit_private_key_hex = None
+
+        # * Step 2: Check environment variables if no valid files loaded
+        if not keys_loaded:
+            pub_hex_env = getenv("BISCUIT_PUBLIC_KEY", "").strip()
+            priv_hex_env = getenv("BISCUIT_PRIVATE_KEY", "").strip()
+            if pub_hex_env and priv_hex_env:
+                try:
+                    # Validate by attempting to load
+                    PublicKey.from_hex(pub_hex_env)
+                    PrivateKey.from_hex(priv_hex_env)
+                    biscuit_public_key_hex = pub_hex_env
+                    biscuit_private_key_hex = priv_hex_env
+                    keys_loaded = True
+                    LOGGER.info("Valid Biscuit keys successfully loaded from environment variables.")
+                except Exception as e:
+                    LOGGER.error(f"Failed to validate Biscuit keys from environment variables: {e}. Falling back.")
+                    biscuit_public_key_hex = None  # Ensure reset if env validation failed
+                    biscuit_private_key_hex = None
+
+        # * Step 3: Generate new keys if none found or loaded/validated successfully
+        if not keys_loaded:
+            LOGGER.warning("No valid Biscuit keys found from files or environment. Generating new random keys...")
+            # Generate new keys using the biscuit library
+            keypair = KeyPair()
+            biscuit_private_key_obj = keypair.private_key
+            biscuit_public_key_obj = keypair.public_key
+            biscuit_private_key_hex = biscuit_private_key_obj.to_hex()
+            biscuit_public_key_hex = biscuit_public_key_obj.to_hex()
+            keys_generated = True
+            LOGGER.info("Generated new Biscuit key pair.")
+
+        # Ensure we have keys before proceeding
+        if not biscuit_public_key_hex or not biscuit_private_key_hex:
+            raise RuntimeError("Failed to load or generate required Biscuit keys.")
+
+        # * Step 4: Hash for change detection
+        current_public_key_hash = sha256(biscuit_public_key_hex.encode("utf-8")).hexdigest()
+        current_private_key_hash = sha256(biscuit_private_key_hex.encode("utf-8")).hexdigest()
+        previous_public_key_hash = BISCUIT_PUBLIC_KEY_HASH_FILE.read_text(encoding="utf-8").strip() if BISCUIT_PUBLIC_KEY_HASH_FILE.is_file() else None
+        previous_private_key_hash = BISCUIT_PRIVATE_KEY_HASH_FILE.read_text(encoding="utf-8").strip() if BISCUIT_PRIVATE_KEY_HASH_FILE.is_file() else None
+
+        # * Step 5: Compare hashes and update if necessary
+        public_key_changed = previous_public_key_hash is None or current_public_key_hash != previous_public_key_hash
+        private_key_changed = previous_private_key_hash is None or current_private_key_hash != previous_private_key_hash
+
+        if public_key_changed or private_key_changed or keys_generated:
+            if keys_generated:
+                LOGGER.warning("Saving newly generated Biscuit keys.")
+            else:
+                LOGGER.warning("The Biscuit keys have changed or are being set for the first time.")
+
+            # Update public key file and hash
+            with BISCUIT_PUBLIC_KEY_FILE.open("w", encoding="utf-8") as file:
+                file.write(biscuit_public_key_hex)
+            set_secure_permissions(BISCUIT_PUBLIC_KEY_FILE)
+
+            with BISCUIT_PUBLIC_KEY_HASH_FILE.open("w", encoding="utf-8") as file:
+                file.write(current_public_key_hash)
+            set_secure_permissions(BISCUIT_PUBLIC_KEY_HASH_FILE)
+
+            # Update private key file and hash
+            with BISCUIT_PRIVATE_KEY_FILE.open("w", encoding="utf-8") as file:
+                file.write(biscuit_private_key_hex)
+            set_secure_permissions(BISCUIT_PRIVATE_KEY_FILE)
+
+            with BISCUIT_PRIVATE_KEY_HASH_FILE.open("w", encoding="utf-8") as file:
+                file.write(current_private_key_hash)
+            set_secure_permissions(BISCUIT_PRIVATE_KEY_HASH_FILE)
+        else:
+            LOGGER.info("The Biscuit keys have not changed since the last restart.")
+
+        LOGGER.info("Biscuit keys securely stored.")
+        LOGGER.info("Biscuit key hashes securely stored for change detection.")
+    except Exception as e:
+        message = f"An error occurred while handling Biscuit keys: {e}"
         LOGGER.debug(format_exc())
         LOGGER.critical(message)
         ERROR_FILE.write_text(message, encoding="utf-8")
@@ -287,7 +410,9 @@ def on_starting(server):
     if ADMIN_USER:
         if invalid_totp_secrets:
             LOGGER.warning("The TOTP secrets have changed, removing admin TOTP secrets ...")
-            err = DB.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], None, method=ADMIN_USER["method"])
+            err = DB.update_ui_user(
+                ADMIN_USER["username"], ADMIN_USER["password"], None, theme=ADMIN_USER["theme"], method=ADMIN_USER["method"], language=ADMIN_USER["language"]
+            )
             if err:
                 LOGGER.error(f"Couldn't update the admin user in the database: {err}")
 
@@ -311,7 +436,14 @@ def on_starting(server):
                 if updated:
                     if override_admin_creds:
                         LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
-                    err = DB.update_ui_user(ADMIN_USER["username"], ADMIN_USER["password"], ADMIN_USER["totp_secret"], method="manual")
+                    err = DB.update_ui_user(
+                        ADMIN_USER["username"],
+                        ADMIN_USER["password"],
+                        ADMIN_USER["totp_secret"],
+                        theme=ADMIN_USER["theme"],
+                        method="manual",
+                        language=ADMIN_USER["language"],
+                    )
                     if err:
                         LOGGER.error(f"Couldn't update the admin user in the database: {err}")
                     else:

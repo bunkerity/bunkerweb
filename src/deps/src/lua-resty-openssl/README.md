@@ -60,6 +60,7 @@ Table of Contents
     + [pkey:set_parameters](#pkeyset_parameters)
     + [pkey:is_private](#pkeyis_private)
     + [pkey:get_key_type](#pkeyget_key_type)
+    + [pkey:get_size](#pkeyget_size)
     + [pkey:get_default_digest_type](#pkeyget_default_digest_type)
     + [pkey:sign](#pkeysign)
     + [pkey:verify](#pkeyverify)
@@ -861,12 +862,13 @@ pkey.new(pem_or_der_text, {
 
 When loading JWK, there are couple of caveats:
 - Make sure the encoded JSON text is passed in, it must have been base64 decoded.
-- Constraint `type` on JWK key is not supported, the parameters
-in provided JSON will decide if a private or public key is loaded.
+- When using OpenSSL 1.1.1 or lua-resty-openssl earlier than 1.6.0, constraint `type`
+on JWK key is only supported on OpenSSL 3.x and lua-resty-openssl 1.6.0.
+Otherwise the parameters in provided JSON will decide if a private or public key is loaded, 
+specifying `type` will result in an error; also public key part for `OKP` keys (the `x` parameter)
+is not honored and derived from private key part (the `d` parameter) if it's specified.
 - Only key type of `RSA`, `P-256`, `P-384` and `P-512` `EC`,
 `Ed25519`, `X25519`, `Ed448` and `X448` `OKP` keys are supported.
-- Public key part for `OKP` keys (the `x` parameter) is always not honored and derived
-from private key part (the `d` parameter) if it's specified.
 - Signatures and verification must use `ecdsa_use_raw` option to work with JWS standards
 for EC keys. See [pkey:sign](#pkeysign) and [pkey.verify](#pkeyverify) for detail.
 - When running outside of OpenResty, needs to install a JSON library (`cjson` or `dkjson`)
@@ -1096,7 +1098,7 @@ private | private key | [bn](#restyopensslbn)
 public | public key | [bn](#restyopensslbn)
 p | prime modulus | [bn](#restyopensslbn)
 q | reference position | [bn](#restyopensslbn)
-p | base generator | [bn](#restyopensslbn)
+g | base generator | [bn](#restyopensslbn)
 
 
 Parameters for Curve25519 and Curve448 keys:
@@ -1119,16 +1121,34 @@ it's a public key.
 
 ### pkey:get_key_type
 
-**syntax**: *obj, err = pk:get_key_type()*
+**syntax**: *obj, err = pk:get_key_type(nid_only?)*
 
 Returns a ASN1_OBJECT of key type of the private key as a table.
+
+Starting from lua-resty-openssl 1.6.0, an optional argument `nid_only` can be set to `true`
+to only return the numeric NID of the key.
 
 ```lua
 local pkey, err = require("resty.openssl.pkey").new({type="X448"})
 
 ngx.say(require("cjson").encode(pkey:get_key_type()))
 -- outputs '{"ln":"X448","nid":1035,"sn":"X448","id":"1.3.101.111"}'
+ngx.say(pkey:get_key_type(true))
+-- outputs 1035
 ```
+
+[Back to TOC](#table-of-contents)
+
+### pkey:get_size
+
+**syntax**: *size, err = pk:get_size()*
+
+Returns the maximum suitable size for the output buffers for almost all
+operations that can be done with pkey.
+
+For RSA key, this is the size of the modulus.
+For EC, Ed25519 and Ed448 keys, this is the size of the private key.
+For DH key, this is the size of the prime modulus.
 
 [Back to TOC](#table-of-contents)
 

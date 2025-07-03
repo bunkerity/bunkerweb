@@ -8,83 +8,57 @@
        value="{{ csrf_token() }}">
 <div class="card p-1 mb-4 sticky-card">
     <div class="d-flex flex-wrap justify-content-around align-items-center">
-        <div class="dropdown btn-group">
-            <button id="select-plugin"
-                    type="button"
-                    class="btn btn-outline-primary dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
-                <i class="bx bx-extension"></i>
-                <span class="d-none d-md-inline">&nbsp;Plugins</span>
-            </button>
-            <ul id="plugins-dropdown-menu"
-                class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
-                role="tablist">
-                <div class="input-group input-group-merge mb-2">
-                    <span class="input-group-text p-2 border-0 border-primary border-bottom shadow-none"><i class="bx fs-6 bx-search"></i></span>
-                    <input id="plugin-search"
-                           type="text"
-                           class="form-control border-0 border-primary border-bottom shadow-none"
-                           placeholder="Search..."
-                           aria-label="Search...">
-                </div>
-                {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
-                    <li class="nav-item" data-type="{{ plugin_data['type'] }}">
-                        <button type="button"
-                                class="dropdown-item{% if loop.index == 1 %} active{% endif %}"
-                                role="tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#navs-plugins-{{ plugin }}"
-                                aria-controls="navs-plugins-{{ plugin }}"
-                                {% if loop.index == 1 %}aria-selected="true"{% endif %}>
-                            {{ plugin_data["name"] }}
-                        </button>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
         <div class="row align-items-center">
             <div class="col form-floating ps-0 pe-0 pe-md-2">
-                <input id="plugin-keyword-search"
+                <input id="plugin-keyword-search-top"
                        type="text"
                        class="form-control form-control-sm border-0 border-primary border-bottom shadow-none"
-                       placeholder="Keywords...">
-                <label for="plugin-keyword-search">Keywords</label>
+                       placeholder="Keywords..."
+                       data-i18n="form.placeholder.keywords">
+                <label for="plugin-keyword-search-top" data-i18n="form.label.keywords">Keywords</label>
             </div>
             <div class="col-auto form-floating ps-0 pe-0 d-none d-md-block">
                 <select id="plugin-type-select"
                         class="form-select form-select-sm border-0 border-primary border-bottom shadow-none">
-                    <option value="all"{% if type == "all" %} selected{% endif %} value="all">All</option>
-                    <option value="core"{% if type == "core" %} selected{% endif %}>Core</option>
-                    <option value="external"{% if type == "external" %} selected{% endif %}>External</option>
-                    <option value="pro"{% if type == "pro" %} selected{% endif %}>Pro</option>
+                    <option value="all"
+                            {% if type == "all" %}selected{% endif %}
+                            value="all"
+                            data-i18n="plugin.type.all">All</option>
+                    <option value="core"
+                            {% if type == "core" %}selected{% endif %}
+                            data-i18n="plugin.type.core">Core</option>
+                    <option value="external"
+                            {% if type == "external" %}selected{% endif %}
+                            data-i18n="plugin.type.external">External</option>
+                    <option value="pro"
+                            {% if type == "pro" %}selected{% endif %}
+                            data-i18n="plugin.type.pro">Pro</option>
                 </select>
-                <label for="plugin-type-select">Type</label>
+                <label for="plugin-type-select" data-i18n="form.label.type">Type</label>
             </div>
         </div>
         <div class="justify-content-center d-none d-sm-flex">
             {% if current_endpoint != "global-config" %}
-                <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services"{% endif %}>
+                <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
                         <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                         <span class="d-none d-md-inline">&nbsp;
                             {% if is_draft == 'yes' %}
-                                Draft
+                                <span data-i18n="status.draft">Draft</span>
                             {% else %}
-                                Online
+                                <span data-i18n="status.online">Online</span>
                             {% endif %}
                         </span>
                     </button>
                 </div>
             {% endif %}
-            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+            <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"  data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
                  {% endif %}>
                 <button type="button"
                         class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
-                    <span class="d-none d-md-inline">&nbsp;Save</span>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
                 </button>
             </div>
         </div>
@@ -93,315 +67,378 @@
 <div class="d-flex justify-content-center position-fixed m-3 d-sm-none"
      id="floating-settings-button">
     {% if current_endpoint != "global-config" %}
-        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services"{% endif %}>
+        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
                     class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
                 <i class="bx bx-xs bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                 &nbsp;
                 {% if is_draft == 'yes' %}
-                    Draft
+                    <span data-i18n="status.draft">Draft</span>
                 {% else %}
-                    Online
+                    <span data-i18n="status.online">Online</span>
                 {% endif %}
             </button>
         </div>
     {% endif %}
-    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
+    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
          {% endif %}>
         <button type="button"
                 class="btn btn-sm btn-bw-green save-settings p-1_5{% if is_readonly %} disabled{% endif %}">
             <i class="bx bx-save bx-xs"></i>
-            &nbsp;Save
+            &nbsp;<span data-i18n="button.save">Save</span>
         </button>
     </div>
 </div>
-<div class="card tab-content p-2 position-relative">
-    {% for plugin, plugin_data in plugins.items() %}
-        {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
-        {% if filtered_settings %}
-            <div id="navs-plugins-{{ plugin }}"
-                 class="tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
-                 role="tabpanel"
-                 aria-labelledby="navs-plugins-{{ plugin }}-tab"
-                 data-type="{{ plugin_data['type'] }}">
-                <div class="card-header d-flex justify-content-between align-items-center mw-100">
-                    <div class="pt-1 flex-grow-1 me-2" style="min-width: 0;">
-                        <h5 class="card-title d-flex align-items-center don-jose{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}">
-                            {{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}&nbsp;－&nbsp;{{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
+<div class="row p-0 m-0 g-0 d-flex flex-row">
+    <div class="steps-nav-container col-12 col-md-3 col-lg-2">
+        <nav class="pe-2 plugin-steps-container align-items-center"
+             aria-label="plugins">
+            <div class="input-group input-group-merge mb-2">
+                <span class="input-group-text p-2 border-0 border-primary border-bottom shadow-none"><i class="bx fs-6 bx-search"></i></span>
+                <input id="plugin-keyword-search"
+                       type="text"
+                       class="form-control border-0 border-primary border-bottom shadow-none"
+                       placeholder="Search for plugins..."
+                       aria-label="Search for plugins..."
+                       data-i18n="form.placeholder.plugin_search">
+            </div>
+            <ol class="list-group step-navigation-list" role="tablist">
+                {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
+                    <li class="list-group-item plugin-navigation-item border-0 d-flex align-items-center p-2 cursor-pointer{% if loop.index == 1 %} show active{% endif %}"
+                        role="tab"
+                        id="plugin-nav-{{ plugin }}"
+                        data-plugin="{{ plugin }}"
+                        data-plugin-id="navs-plugins-{{ plugin }}"
+                        data-type="{{ plugin_data['type'] }}"
+                        aria-controls="navs-plugins-{{ plugin }}"
+                        tabindex="{% if loop.index == 1 %}0{% else %}-1{% endif %}">
+                        <div class="step-number-wrapper me-3">
+                            <span class="btn btn-sm step-number me-0{% if loop.index != 1 %} btn-outline-primary disabled{% else %} btn-primary{% endif %}">{{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
+     alt="Pro plugin"
+     width="18px"
+     height="15.5px"
+     loading="lazy">') |safe }}</span>
+                        </div>
+                        <div class="step-details text-truncate">
+                            <div class="fw-bold text-muted">
+                                {{ plugin_data["name"] }}
+                                {% with plugin_used = (plugin_data['type'] != 'pro' or is_pro_version) and is_plugin_active(plugin, plugin_data['name'], config) %}
+                                    {% if plugin_used %}
+                                        <i class="bx bx-xs align-middle ms-1 bx-check-circle text-success"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="top"
+                                           data-bs-original-title="..."
+                                           data-i18n="navigation.plugin_activated"></i>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                            <small class="text-muted d-none d-sm-inline me-2">v{{ plugin_data["version"] }}</small>
+                            <small class="text-muted d-block text-truncate mt-1"
+                                   data-description="{{ plugin_data['description'] }}">{{ plugin_data["description"] }}</small>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        </nav>
+    </div>
+    <div class="card tab-content p-2 position-relative flex-grow-1 col-12 col-md-9 col-lg-10 h-100">
+        {% for plugin, plugin_data in plugins.items() %}
+            {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
+            {% if filtered_settings %}
+                <div id="navs-plugins-{{ plugin }}"
+                     class="tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
+                     role="tabpanel"
+                     aria-labelledby="plugin-nav-{{ plugin }}"
+                     data-type="{{ plugin_data['type'] }}">
+                    <div class="card-header d-flex justify-content-between align-items-center mw-100">
+                        <div class="pt-1 flex-grow-1 me-2 min-w-0">
+                            <h5 class="card-title d-flex align-items-center don-jose{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}">
+                                {{ plugin_data["name"] }}&nbsp;－&nbsp;v{{ plugin_data["version"] }}&nbsp;－&nbsp;{{ plugin_types[plugin_data["type"]].get('icon', '<img src="' + pro_diamond_url + '"
      alt="Pro plugin"
      width="18px"
      height="15.5px"
      loading="lazy">') |safe }}
-                        </h5>
-                        <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin_data["description"] }}</p>
-                    </div>
-                    <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
-                        <a href="https://docs.bunkerweb.io/latest/quickstart-guide/?utm_campaign=self&utm_source=ui#protect-udptcp-applications"
-                           class="btn btn-sm btn-outline-{% if plugin_data['stream'] == 'yes' %}bw-green{% elif plugin_data['stream'] == 'partial' %}warning{% else %}danger{% endif %} rounded-pill"
-                           target="_blank"
-                           rel="noopener"
-                           data-bs-toggle="tooltip"
-                           data-bs-placement="top"
-                           data-bs-original-title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
-                            <i class="bx bx-{% if plugin_data['stream'] == 'yes' %}badge-check{% elif plugin_data['stream'] == 'partial' %}message-square-detail{% else %}no-entry{% endif %}"></i><span class="d-none d-md-inline">&nbsp;STREAM</span>
-                        </a>
-                        <a href="{% if plugin_data['type'] == 'core' %}https://docs.bunkerweb.io/latest/settings/?utm_campaign=self&utm_source=ui#{% if plugin == 'general' %}global-settings{% else %}{{ plugin }}{% endif %}{% else %}https://docs.bunkerweb.io/latest/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
-                           class="btn btn-sm btn-primary rounded-pill ms-2"
-                           target="_blank"
-                           rel="noopener">
-                            <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;More info</span>
-                        </a>
-                        {% if plugin_data["page"] %}
-                            {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
-                            <a href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
-                               class="btn btn-sm btn-primary rounded-pill ms-2">
-                                <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;Plugin page</span>
-                            </a>
-                        {% endif %}
-                    </div>
-                </div>
-                <div {% if plugin_data["type"] == "pro" and not is_pro_version %}class="blur-overlay"{% endif %}>
-                    {% if plugin_data["type"] == "pro" and not is_pro_version %}
-                        <div class="blur-message">
-                            <i class='bx bx-diamond bx-xs me-1'></i>
-                            <a href="{{ url_for('pro') }}" class="text-white-80 courier-prime">Upgrade to Pro to access this feature</a>
-                        </div>
-                    {% endif %}
-                    <div class="card-body row g-2 gx-6 pb-0">
-                        {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings and (not service_endpoint or setting_data['context'] == "multisite") %}
-                            {% set setting_id_prefix = "setting-" + plugin + "-" %}
-                            {% set setting_config = config.get(setting, {}) %}
-                            {% set setting_default = setting_data.get("default", "") %}
-                            {% set setting_value = setting_config.get("value", setting_default) %}
-                            {% set setting_method = setting_config.get("method", "default") %}
-                            {% set setting_template = setting_config.get("template", "") %}
-                            {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                            {% if current_endpoint == "new" or clone %}
-                                {% set setting_method = "default" %}
-                                {% set disabled = false %}
-                                {% if setting == "SERVER_NAME" %}
-                                    {% set setting_value = "" %}
-                                {% endif %}
-                            {% endif %}
-                            {% if is_readonly %}
-                                {% set disabled = true %}
-                                {% set setting_method = "readonly" %}
-                            {% endif %}
-                            {% if plugin_data["type"] == "pro" and not is_pro_version %}
-                                {% set disabled = true %}
-                                {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
-                            {% endif %}
-                            <div class="col-12 col-sm-6 col-lg-4 pb-3"
-                                 {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <label id="label-setting-{{ plugin }}-{{ setting_data['id'] }}"
-                                           for="setting-{{ plugin }}-{{ setting_data['id'] }}"
-                                           class="form-label fw-semibold text-truncate">
-                                        {{ setting_data["label"] }}
-                                    </label>
-                                    <div class="d-flex align-items-center">
-                                        {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
-                                            <a role="badge"
-                                               href='https://docs.bunkerweb.io/latest/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
-                                               class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
-                                               data-bs-toggle="tooltip"
-                                               data-bs-placement="top"
-                                               data-bs-original-title="Multisite setting"
-                                               target="_blank"
-                                               rel="noopener">
-                                                <span class="bx bx-server bx-xs"></span>
-                                            </a>
-                                        {% endif %}
-                                        {% if setting_template %}
-                                            <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
-                                                  data-bs-toggle="tooltip"
-                                                  data-bs-placement="top"
-                                                  data-bs-original-title="From template: {{ setting_template }}">
-                                                <span class="bx bx-spreadsheet bx-xs"></span>
-                                            </span>
-                                        {% endif %}
-                                        {% if setting_config.get("clone") %}
-                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
-                                                  data-bs-toggle="tooltip"
-                                                  data-bs-placement="top"
-                                                  data-bs-original-title="Cloned from service {{ clone }}">
-                                                <span class="bx bx-copy-alt bx-xs"></span>
-                                            </span>
-                                        {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
-                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
-                                                  data-bs-toggle="tooltip"
-                                                  data-bs-placement="top"
-                                                  data-bs-original-title="From global configuration">
-                                                <span class="bx bx-globe bx-xs"></span>
-                                            </span>
-                                        {% endif %}
-                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                              data-bs-toggle="tooltip"
-                                              data-bs-placement="top"
-                                              data-bs-original-title="{{ setting_data['help'] }}">
-                                            <span class="bx bx-question-mark bx-xs"></span>
-                                        </span>
-                                    </div>
-                                </div>
-                                {% if setting_data["type"] == "select" %}
-                                    {% include "models/select_setting.html" %}
-                                {% elif setting_data["type"] == "check" %}
-                                    {% include "models/checkbox_setting.html" %}
-                                {% else %}
-                                    {% if setting == "SERVER_NAME" and current_endpoint != "global-config" %}
-                                        <input type="hidden"
-                                               id="old-server-name"
-                                               name="OLD_SERVER_NAME"
-                                               value="{{ setting_value }}">
-                                    {% endif %}
-                                    {% include "models/input_setting.html" %}
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    {% set plugin_multiples = get_multiples(filtered_settings, config) %}
-                    {% if plugin_multiples %}
-                        {% set setting_id_prefix = "multiple-setting-" + plugin +"-" %}
-                        <div class="card-header pb-2 mt-6">
-                            <h5 class="card-title d-inline border p-2{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}">
-                                Multiple settings
                             </h5>
-                            <p class="card-subtitle text-muted mt-2">This is where you can configure multiple settings for this plugin.</p>
+                            <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin_data["description"] }}</p>
                         </div>
-                        <div class="card-body row g-2 gx-6 pt-0">
-                            {% for multiple, multiples in plugin_multiples.items() %}
-                                <div id="multiple-{{ plugin }}-{{ multiple }}"
-                                     class="col-12{% if plugin_multiples|length > 1 %} col-md-6{% endif %}{% if plugin_multiples|length > 2 and not settings|length > 1 %} col-lg-4{% endif %}">
-                                    {% for setting_suffix, settings in multiples.items() %}
-                                        <div class="row multiple-container pt-2 pb-2">
-                                            {% set setting_id_suffix = "-" + setting_suffix %}
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <h6 class="mb-0 me-2">
-                                                    {{ multiple.replace('-', ' ') | capitalize }}
-                                                    {% if setting_suffix != "0" %}#{{ setting_suffix }}{% endif %}
-                                                </h6>
-                                                <div class="d-flex align-items-center">
-                                                    {% if setting_suffix == "0" %}
-                                                        <div class="me-1"
-                                                             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled"{% else %}"The database is in readonly, therefore the configuration is locked"{% endif %}
-                                                             {% endif %}>
-                                                            <button id="add-multiple-{{ plugin }}-{{ multiple }}"
-                                                                    type="button"
-                                                                    class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if is_readonly %} disabled{% endif %}">
-                                                                <i class="bx bx-plus-circle bx-sm"></i>&nbsp;ADD
-                                                            </button>
-                                                        </div>
-                                                    {% else %}
-                                                        <button id="remove-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                                type="button"
-                                                                class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
-                                                            <i class="bx bx-trash bx-sm"></i>&nbsp;REMOVE
-                                                        </button>
-                                                    {% endif %}
-                                                    <button id="show-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                            type="button"
-                                                            class="btn btn-xs btn-text-secondary rounded-pill show-multiple p-0"
-                                                            data-bs-toggle="collapse"
-                                                            data-bs-target="#multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                            aria-expanded="true"
-                                                            aria-controls="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}">
-                                                        <i class="bx bx-show-alt bx-sm"></i>&nbsp;HIDE
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div id="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                 class="collapse show multiple-collapse pt-0">
-                                                <div class="row g-2 gx-6 mt-2 pt-2">
-                                                    {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
-                                                        {% set setting_config = config.get(setting, {}) %}
-                                                        {% set setting_default = setting_data.get("default", "") %}
-                                                        {% set setting_value = setting_config.get("value", setting_default) %}
-                                                        {% set setting_method = setting_config.get("method", "default") %}
-                                                        {% set setting_template = setting_config.get("template", "") %}
-                                                        {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                                                        {% if current_endpoint == "new" or clone %}
-                                                            {% set setting_method = "default" %}
-                                                            {% set disabled = false %}
-                                                        {% endif %}
-                                                        {% if is_readonly %}
-                                                            {% set disabled = true %}
-                                                            {% set setting_method = "readonly" %}
-                                                        {% endif %}
-                                                        {% if plugin_data["type"] == "pro" and not is_pro_version %}
-                                                            {% set disabled = true %}
-                                                            {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
-                                                        {% endif %}
-                                                        <div class="col-12{% if settings|length > 1 %} col-md-6{% endif %}{% if settings|length > 2 and not multiple_multiples %} col-lg-4{% endif %} pb-2"
-                                                             {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
-                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                <label id="label-multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
-                                                                       for="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
-                                                                       class="form-label fw-semibold text-truncate">
-                                                                    {{ setting_data["label"] }}
-                                                                </label>
-                                                                <div class="d-flex align-items-center">
-                                                                    {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
-                                                                        <a role="badge"
-                                                                           href='https://docs.bunkerweb.io/latest/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
-                                                                           class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
-                                                                           data-bs-toggle="tooltip"
-                                                                           data-bs-placement="top"
-                                                                           data-bs-original-title="Multisite setting"
-                                                                           target="_blank"
-                                                                           rel="noopener">
-                                                                            <span class="bx bx-server bx-xs"></span>
-                                                                        </a>
-                                                                    {% endif %}
-                                                                    {% if setting_template %}
-                                                                        <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
-                                                                              data-bs-toggle="tooltip"
-                                                                              data-bs-placement="top"
-                                                                              data-bs-original-title="From template: {{ setting_template }}">
-                                                                            <span class="bx bx-spreadsheet bx-xs"></span>
-                                                                        </span>
-                                                                    {% endif %}
-                                                                    {% if setting_config.get("clone") %}
-                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
-                                                                              data-bs-toggle="tooltip"
-                                                                              data-bs-placement="top"
-                                                                              data-bs-original-title="Cloned from service {{ clone }}">
-                                                                            <span class="bx bx-copy-alt bx-xs"></span>
-                                                                        </span>
-                                                                    {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
-                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
-                                                                              data-bs-toggle="tooltip"
-                                                                              data-bs-placement="top"
-                                                                              data-bs-original-title="From global configuration">
-                                                                            <span class="bx bx-globe bx-xs"></span>
-                                                                        </span>
-                                                                    {% endif %}
-                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                                                          data-bs-toggle="tooltip"
-                                                                          data-bs-placement="top"
-                                                                          data-bs-original-title="{{ setting_data['help'] }}">
-                                                                        <span class="bx bx-question-mark bx-xs"></span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            {% if setting_data["type"] == "select" %}
-                                                                {% include "models/select_setting.html" %}
-                                                            {% elif setting_data["type"] == "check" %}
-                                                                {% include "models/checkbox_setting.html" %}
-                                                            {% else %}
-                                                                {% include "models/input_setting.html" %}
-                                                            {% endif %}
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
+                        <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
+                            <a href="https://docs.bunkerweb.io/{{ bw_version }}/advanced/?utm_campaign=self&utm_source=ui#protect-udptcp-applications"
+                               class="btn btn-sm btn-outline-{% if plugin_data['stream'] == 'yes' %}bw-green{% elif plugin_data['stream'] == 'partial' %}warning{% else %}danger{% endif %} rounded-pill"
+                               target="_blank"
+                               rel="noopener"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="top"
+                               data-bs-original-title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
+                                <i class="bx bx-{% if plugin_data['stream'] == 'yes' %}badge-check{% elif plugin_data['stream'] == 'partial' %}message-square-detail{% else %}no-entry{% endif %}"></i><span class="d-none d-md-inline">&nbsp;STREAM</span>
+                            </a>
+                            <a href="{% if plugin_data['type'] == 'core' %}https://docs.bunkerweb.io/{{ bw_version }}/features/?utm_campaign=self&utm_source=ui#{% if plugin == 'general' %}global-settings{% else %}{{ plugin }}{% endif %}{% else %}https://docs.bunkerweb.io/{{ bw_version }}/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
+                               class="btn btn-sm btn-primary rounded-pill ms-2"
+                               target="_blank"
+                               rel="noopener">
+                                <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="link.more_info">More info</span></span>
+                            </a>
+                            {% if plugin_data["page"] %}
+                                {% set plugin_blueprint = "#" if plugin_data["type"] == "core" else url_for(plugin) %}
+                                <a href="{% if plugin_blueprint == '#' %}{{ url_for("plugins") }}/{{ plugin }}{% else %}{{ plugin_blueprint }}{% endif %}"
+                                   class="btn btn-sm btn-primary rounded-pill ms-2">
+                                    <i class="bx bxs-file-html"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="button.plugin_page">Plugin page</span></span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div {% if plugin_data["type"] == "pro" and not is_pro_version %}class="blur-overlay"{% endif %}>
+                        {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                            <div class="blur-message">
+                                <i class='bx bx-diamond bx-xs me-1'></i>
+                                <a href="{{ url_for('pro') }}" class="text-white-80 courier-prime">Upgrade to Pro to access this feature</a>
+                            </div>
+                        {% endif %}
+                        <div class="card-body row g-2 gx-6 pb-0">
+                            {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings and (not service_endpoint or setting_data['context'] == "multisite") %}
+                                {% set setting_id_prefix = "setting-" + plugin + "-" %}
+                                {% set setting_config = config.get(setting, {}) %}
+                                {% set setting_default = setting_data.get("default", "") %}
+                                {% set setting_value = setting_config.get("value", setting_default) %}
+                                {% set setting_method = setting_config.get("method", "default") %}
+                                {% set setting_template = setting_config.get("template", "") %}
+                                {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                {% if current_endpoint == "new" or clone %}
+                                    {% set setting_method = "default" %}
+                                    {% set disabled = false %}
+                                    {% if setting == "SERVER_NAME" %}
+                                        {% set setting_value = "" %}
+                                    {% endif %}
+                                {% endif %}
+                                {% if is_readonly %}
+                                    {% set disabled = true %}
+                                    {% set setting_method = "readonly" %}
+                                {% endif %}
+                                {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                                    {% set disabled = true %}
+                                    {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
+                                {% endif %}
+                                <div class="col-12 col-sm-6 col-lg-4 pb-3"
+                                     {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <label id="label-setting-{{ plugin }}-{{ setting_data['id'] }}"
+                                               for="setting-{{ plugin }}-{{ setting_data['id'] }}"
+                                               class="form-label fw-semibold text-truncate">
+                                            {{ setting_data["label"] }}
+                                        </label>
+                                        <div class="d-flex align-items-center">
+                                            {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
+                                                <a role="badge"
+                                                   href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
+                                                   class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-placement="top"
+                                                   data-bs-original-title="Multisite setting"
+                                                   target="_blank"
+                                                   rel="noopener">
+                                                    <span class="bx bx-server bx-xs"></span>
+                                                </a>
+                                            {% endif %}
+                                            {% if setting_template %}
+                                                <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                      data-bs-toggle="tooltip"
+                                                      data-bs-placement="top"
+                                                      data-bs-original-title="From template: {{ setting_template }}">
+                                                    <span class="bx bx-spreadsheet bx-xs"></span>
+                                                </span>
+                                            {% endif %}
+                                            {% if setting_config.get("clone") %}
+                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                      data-bs-toggle="tooltip"
+                                                      data-bs-placement="top"
+                                                      data-bs-original-title="Cloned from service {{ clone }}">
+                                                    <span class="bx bx-copy-alt bx-xs"></span>
+                                                </span>
+                                            {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                                <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                      data-bs-toggle="tooltip"
+                                                      data-bs-placement="top"
+                                                      data-bs-original-title="From global configuration">
+                                                    <span class="bx bx-globe bx-xs"></span>
+                                                </span>
+                                            {% endif %}
+                                            <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                  data-bs-toggle="tooltip"
+                                                  data-bs-placement="top"
+                                                  data-bs-original-title="{{ setting_data['help'] }}">
+                                                <span class="bx bx-question-mark bx-xs"></span>
+                                            </span>
                                         </div>
-                                    {% endfor %}
+                                    </div>
+                                    {% if setting_data["type"] == "select" %}
+                                        {% include "models/select_setting.html" %}
+                                    {% elif setting_data["type"] == "multiselect" %}
+                                        {% include "models/multiselect_setting.html" %}
+                                    {% elif setting_data["type"] == "multivalue" %}
+                                        {% include "models/multivalue_setting.html" %}
+                                    {% elif setting_data["type"] == "check" %}
+                                        {% include "models/checkbox_setting.html" %}
+                                    {% else %}
+                                        {% if setting == "SERVER_NAME" and current_endpoint != "global-config" %}
+                                            <input type="hidden"
+                                                   id="old-server-name"
+                                                   name="OLD_SERVER_NAME"
+                                                   value="{{ setting_value }}">
+                                        {% endif %}
+                                        {% include "models/input_setting.html" %}
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         </div>
-                    {% endif %}
+                        {% set plugin_multiples = get_multiples(filtered_settings, config) %}
+                        {% if plugin_multiples %}
+                            {% set setting_id_prefix = "multiple-setting-" + plugin +"-" %}
+                            <div class="card-header pb-2 mt-6">
+                                <h5 class="card-title d-inline border p-2{{ plugin_types[plugin_data['type']].get('text-class', '') }}{{ plugin_types[plugin_data['type']].get('title-class', '') }}"
+                                    data-i18n="settings.multiple.title">Multiple settings</h5>
+                                <p class="card-subtitle text-muted mt-2"
+                                   data-i18n="settings.multiple.description">
+                                    This is where you can configure multiple settings for this plugin.
+                                </p>
+                            </div>
+                            <div class="card-body row g-2 gx-6 pt-0">
+                                {% for multiple, multiples in plugin_multiples.items() %}
+                                    <div id="multiple-{{ plugin }}-{{ multiple }}"
+                                         class="col-12{% if plugin_multiples|length > 1 %} col-md-6{% endif %}{% if plugin_multiples|length > 2 and not settings|length > 1 %} col-lg-4{% endif %}">
+                                        {% for setting_suffix, settings in multiples.items() %}
+                                            <div class="row multiple-container pt-2 pb-2">
+                                                {% set setting_id_suffix = "-" + setting_suffix %}
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <h6 class="mb-0 me-2">
+                                                        {{ multiple.replace('-', ' ') | capitalize }}
+                                                        {% if setting_suffix != "0" %}#{{ setting_suffix }}{% endif %}
+                                                    </h6>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if setting_suffix == "0" %}
+                                                            <div class="me-1"
+                                                                 {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+                                                                 {% endif %}>
+                                                                <button id="add-multiple-{{ plugin }}-{{ multiple }}"
+                                                                        type="button"
+                                                                        class="btn btn-xs btn-text-bw-green rounded-pill add-multiple p-0 pe-2{% if is_readonly %} disabled{% endif %}">
+                                                                    <i class="bx bx-plus-circle bx-sm"></i>&nbsp;<span data-i18n="button.multiple_add">ADD</span>
+                                                                </button>
+                                                            </div>
+                                                        {% else %}
+                                                            <button id="remove-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                                                    type="button"
+                                                                    class="btn btn-xs btn-text-danger rounded-pill remove-multiple p-0 pe-2">
+                                                                <i class="bx bx-trash bx-sm"></i>&nbsp;<span data-i18n="button.multiple_remove">REMOVE</span>
+                                                            </button>
+                                                        {% endif %}
+                                                        <button id="show-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                                                type="button"
+                                                                class="btn btn-xs btn-text-secondary rounded-pill show-multiple p-0"
+                                                                data-bs-toggle="collapse"
+                                                                data-bs-target="#multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                                                aria-expanded="true"
+                                                                aria-controls="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}">
+                                                            <i class="bx bx-show-alt bx-sm"></i>&nbsp;<span data-i18n="button.multiple_hide">HIDE</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div id="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                                     class="collapse show multiple-collapse pt-0">
+                                                    <div class="row g-2 gx-6 mt-2 pt-2">
+                                                        {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
+                                                            {% set setting_config = config.get(setting, {}) %}
+                                                            {% set setting_default = setting_data.get("default", "") %}
+                                                            {% set setting_value = setting_config.get("value", setting_default) %}
+                                                            {% set setting_method = setting_config.get("method", "default") %}
+                                                            {% set setting_template = setting_config.get("template", "") %}
+                                                            {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                                            {% if current_endpoint == "new" or clone %}
+                                                                {% set setting_method = "default" %}
+                                                                {% set disabled = false %}
+                                                            {% endif %}
+                                                            {% if is_readonly %}
+                                                                {% set disabled = true %}
+                                                                {% set setting_method = "readonly" %}
+                                                            {% endif %}
+                                                            {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                                                                {% set disabled = true %}
+                                                                {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
+                                                            {% endif %}
+                                                            <div class="col-12{% if settings|length > 1 %} col-md-6{% endif %}{% if settings|length > 2 and not multiple_multiples %} col-lg-4{% endif %} pb-2"
+                                                                 {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <label id="label-multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
+                                                                           for="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
+                                                                           class="form-label fw-semibold text-truncate">
+                                                                        {{ setting_data["label"] }}
+                                                                    </label>
+                                                                    <div class="d-flex align-items-center">
+                                                                        {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
+                                                                            <a role="badge"
+                                                                               href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
+                                                                               class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                               data-bs-toggle="tooltip"
+                                                                               data-bs-placement="top"
+                                                                               data-bs-original-title="Multisite setting"
+                                                                               target="_blank"
+                                                                               rel="noopener">
+                                                                                <span class="bx bx-server bx-xs"></span>
+                                                                            </a>
+                                                                        {% endif %}
+                                                                        {% if setting_template %}
+                                                                            <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="From template: {{ setting_template }}">
+                                                                                <span class="bx bx-spreadsheet bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        {% if setting_config.get("clone") %}
+                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Cloned from service {{ clone }}">
+                                                                                <span class="bx bx-copy-alt bx-xs"></span>
+                                                                            </span>
+                                                                        {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="From global configuration">
+                                                                                <span class="bx bx-globe bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="{{ setting_data['help'] }}">
+                                                                            <span class="bx bx-question-mark bx-xs"></span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                {% if setting_data["type"] == "select" %}
+                                                                    {% include "models/select_setting.html" %}
+                                                                {% elif setting_data["type"] == "multiselect" %}
+                                                                    {% include "models/multiselect_setting.html" %}
+                                                                {% elif setting_data["type"] == "multivalue" %}
+                                                                    {% include "models/multivalue_setting.html" %}
+                                                                {% elif setting_data["type"] == "check" %}
+                                                                    {% include "models/checkbox_setting.html" %}
+                                                                {% else %}
+                                                                    {% include "models/input_setting.html" %}
+                                                                {% endif %}
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-        {% endif %}
-    {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </div>
 </div>

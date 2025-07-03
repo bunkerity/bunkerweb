@@ -42,6 +42,7 @@ start() {
             echo "LISTEN_ADDR=127.0.0.1"
             echo "# LISTEN_PORT=7000"
             echo "FORWARDED_ALLOW_IPS=127.0.0.1"
+            echo "# ENABLE_HEALTHCHECK=no"
         } > /etc/bunkerweb/ui.env
         chown root:nginx /etc/bunkerweb/ui.env
         chmod 660 /etc/bunkerweb/ui.env
@@ -74,6 +75,9 @@ start() {
     fi
     if [ -f "/var/run/bunkerweb/ui.pid" ]; then
         rm -f /var/run/bunkerweb/ui.pid
+    fi
+    if [ -f "/var/tmp/bunkerweb/ui.error" ]; then
+        rm -f /var/tmp/bunkerweb/ui.error
     fi
 
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.TmpUiLogger --config /usr/share/bunkerweb/ui/utils/tmp-gunicorn.conf.py"

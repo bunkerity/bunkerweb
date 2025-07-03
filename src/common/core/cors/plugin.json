@@ -29,8 +29,9 @@
       "help": "Value of the Access-Control-Allow-Methods header.",
       "id": "cors-allow-methods",
       "label": "Access-Control-Allow-Methods value",
-      "regex": "^(\\*|(?![, ])(,? ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\3))*)?$",
-      "type": "text"
+      "regex": "^(\\*|(?![, ])(,? ?[A-Z]{3,})*)?$",
+      "type": "multivalue",
+      "separator": ", "
     },
     "CORS_ALLOW_HEADERS": {
       "context": "multisite",
@@ -38,8 +39,9 @@
       "help": "Value of the Access-Control-Allow-Headers header.",
       "id": "cors-allow-headers",
       "label": "Access-Control-Allow-Headers value",
-      "regex": "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
-      "type": "text"
+      "regex": "^(\\*|(?![, ])(,? ?([\\w\\-]+))*)?$",
+      "type": "multivalue",
+      "separator": ","
     },
     "CORS_ALLOW_CREDENTIALS": {
       "context": "multisite",
@@ -56,8 +58,9 @@
       "help": "Value of the Access-Control-Expose-Headers header.",
       "id": "cors-expose-headers",
       "label": "Access-Control-Expose-Headers value",
-      "regex": "^(\\*|(?![, ]+)(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
-      "type": "text"
+      "regex": "^(\\*|(?![, ]+)(,? ?([\\w\\-]+))*)?$",
+      "type": "multivalue",
+      "separator": ","
     },
     "CROSS_ORIGIN_OPENER_POLICY": {
       "context": "multisite",
@@ -96,7 +99,7 @@
       "id": "cors-max-age",
       "label": "Access-Control-Max-Age value",
       "regex": "^\\d+$",
-      "type": "text"
+      "type": "number"
     },
     "CORS_DENY_REQUEST": {
       "context": "multisite",

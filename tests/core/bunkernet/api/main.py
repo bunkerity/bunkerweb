@@ -34,13 +34,11 @@ async def db(_: Request):
 
 @app.get("/instance_id")
 async def get_instance_id(_: Request):
-    global instance_id
     return JSONResponse(status_code=200, content={"result": "ok", "data": instance_id})
 
 
 @app.get("/report_num")
 async def get_report_num(_: Request):
-    global report_num
     return JSONResponse(status_code=200, content={"result": "ok", "data": report_num})
 
 

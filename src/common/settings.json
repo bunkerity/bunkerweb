@@ -24,7 +24,7 @@
     "id": "http-port",
     "label": "HTTP port",
     "regex": "^\\d+$",
-    "type": "text",
+    "type": "number",
     "multiple": "listen-http-ports"
   },
   "HTTPS_PORT": {
@@ -34,7 +34,7 @@
     "id": "https-port",
     "label": "HTTPS port",
     "regex": "^\\d+$",
-    "type": "text",
+    "type": "number",
     "multiple": "listen-https-ports"
   },
   "MULTISITE": {
@@ -71,7 +71,7 @@
     "id": "worker-rlimit-nofile",
     "label": "Open files per worker",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "number"
   },
   "WORKER_CONNECTIONS": {
     "context": "global",
@@ -80,11 +80,11 @@
     "id": "worker-connections",
     "label": "Connections per worker",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "number"
   },
   "LOG_FORMAT": {
     "context": "global",
-    "default": "$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
+    "default": "$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
     "help": "The format to use for access logs.",
     "id": "log-format",
     "label": "Log format",
@@ -189,7 +189,7 @@
     "id": "api-http-listen",
     "label": "API port number",
     "regex": "^\\d+$",
-    "type": "text"
+    "type": "number"
   },
   "API_LISTEN_IP": {
     "context": "global",

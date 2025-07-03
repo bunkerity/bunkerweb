@@ -1,4 +1,13 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 min-vh-70">
@@ -18,39 +27,61 @@
                name="csrf_token"
                value="{{ csrf_token() }}" />
         <p id="configs-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading custom configurations...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_custom_configs">Loading custom configurations...</p>
         <table id="configs" class="table responsive nowrap w-100 d-none">
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Show the Custom configs' details"></th>
+                        data-bs-original-title="Show the Custom configs' details"
+                        data-i18n="tooltip.table.configs.details"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Select all Custom configs"></th>
+                        data-bs-original-title="Select all Custom configs"
+                        data-i18n="tooltip.table.configs.select_all"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The user defined Custom config's name">Name</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Custom config's type">Type</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The creation method of the Custom config">Method</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Service associated with the Custom configuration">Service</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="Indication if the custom config is from a template or not">
-                        Template
+                        data-bs-original-title="The user defined Custom config's name"
+                        data-i18n="tooltip.table.configs.name">
+                        <span data-i18n="table.header.name">Name</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Custom config's checksum">Checksum</th>
+                        data-bs-original-title="The Custom config's type"
+                        data-i18n="tooltip.table.configs.type">
+                        <span data-i18n="table.header.type">Type</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Custom config">Actions</th>
+                        data-bs-original-title="The creation method of the Custom config"
+                        data-i18n="tooltip.table.configs.method">
+                        <span data-i18n="table.header.method">Method</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Service associated with the Custom configuration"
+                        data-i18n="tooltip.table.configs.service">
+                        <span data-i18n="table.header.service">Service</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Indication if the custom config is from a template or not"
+                        data-i18n="tooltip.table.configs.template">
+                        <span data-i18n="table.header.template">Template</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Custom config's checksum"
+                        data-i18n="tooltip.table.configs.checksum">
+                        <span data-i18n="table.header.checksum">Checksum</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Custom config"
+                        data-i18n="tooltip.table.configs.actions">
+                        <span data-i18n="table.header.actions">Actions</span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -82,7 +113,9 @@
                                class="d-flex align-items-center"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
-                               data-bs-original-title="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}"><i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ config["name"] }}</a>
+                               data-bs-original-title="..."
+                               data-i18n="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}tooltip.link.view_config{% else %}tooltip.link.edit_config{% endif %}"
+                               data-i18n-options='{"name": "{{ config['name'] }}"}'><i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ config["name"] }}</a>
                         </td>
                         <td id="type-{{ config['type'] }}-{{ service_id.replace('.', '_') }}-{{ config['name'] }}">
                             <div class="d-flex align-items-center">
@@ -97,16 +130,20 @@
                                    class="d-flex align-items-center"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="Edit service {{ config['service_id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config["service_id"] }}</a>
+                                   data-bs-original-title="Edit service {{ config['service_id'] }}"
+                                   data-i18n="tooltip.link.edit_service"
+                                   data-i18n-options='{"service": "{{ config['service_id'] }}"}'><i class="bx bx-edit bx-xs"></i>&nbsp;{{ config["service_id"] }}</a>
                             {% else %}
-                                <span class="badge rounded-pill bg-label-secondary">global</span>
+                                <span class="badge rounded-pill bg-label-secondary"
+                                      data-i18n="scope.global">Global</span>
                             {% endif %}
                         </td>
                         <td>
                             {% if config["template"] %}
                                 <span class="badge rounded-pill bg-label-primary">{{ config["template"] }}</span>
                             {% else %}
-                                <span class="badge rounded-pill bg-label-secondary">no template</span>
+                                <span class="badge rounded-pill bg-label-secondary"
+                                      data-i18n="badge.no_template">No template</span>
                             {% endif %}
                         </td>
                         <td>{{ config["checksum"] }}</td>
@@ -117,22 +154,30 @@
                                    href="{{ url_for("configs") }}/{{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}View{% else %}Edit{% endif %} custom config {{ config['name'] }}">
+                                   data-bs-original-title="..."
+                                   data-i18n="{% if config['method'] != 'ui' and not config['template'] or is_readonly %}tooltip.link.view_config{% else %}tooltip.link.edit_config{% endif %}"
+                                   data-i18n-options='{"name": "{{ config['name'] }}"}'>
                                     <i class="bx bx-{% if config['method'] != 'ui' and not config['template'] or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
                                 </a>
-                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
                                     <a role="button"
                                        class="btn btn-outline-secondary btn-sm me-1{% if is_readonly %} disabled{% endif %}"
                                        href="{{ url_for("configs") }}/new?clone={{ service_id }}/{{ config['type'] }}/{{ config['name'] }}"
                                        data-bs-toggle="tooltip"
                                        data-bs-placement="bottom"
-                                       data-bs-original-title="Clone custom config {{ config['name'] }}">
+                                       data-bs-original-title="Clone custom config {{ config['name'] }}"
+                                       data-i18n="tooltip.link.clone_config"
+                                       data-i18n-options='{"name": "{{ config['name'] }}"}'>
                                         <i class="bx bx-copy-alt bx-xs"></i>
                                     </a>
                                 </div>
+                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config['method'] != 'ui' else 'tooltip.button.delete_config')) %}
+                                {% set delete_tooltip_options = '{"method": "' ~ config['method'] ~ '"}' if config['method'] != 'ui' and not is_readonly else '{"name": "' ~ config['name'] ~ '"}' %}
                                 <div data-bs-toggle="tooltip"
                                      data-bs-placement="bottom"
-                                     data-bs-original-title="{% if config['method'] != 'ui' or is_readonly %}Disabled by {% if is_readonly %}readonly{% else %}{{ config['method'] }}{% endif %}{% else %}Delete custom config {{ config['name'] }}{% endif %}">
+                                     data-bs-original-title="..."
+                                     data-i18n="{{ delete_tooltip_key }}"
+                                     data-i18n-options='{{ delete_tooltip_options }}'>
                                     <button type="button"
                                             data-config-name="{{ config['name'] }}"
                                             data-config-type="{{ config['type'] }}"
@@ -158,11 +203,12 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Confirm deletion</h5>
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <form action="{{ url_for("configs") }}/delete" method="POST">
                         <div class="modal-body">
@@ -171,14 +217,21 @@
                                    id="selected-configs-input-delete"
                                    name="configs"
                                    value="" />
-                            <div class="alert alert-danger text-center" role="alert">Are you sure you want to delete the selected configs?</div>
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.confirm_configs_deletion_alert">
+                                Are you sure you want to delete the selected configs?
+                            </div>
                             <div id="selected-configs-delete" class="mb-3"></div>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="submit" class="btn btn-outline-danger me-2">Delete</button>
+                            <button type="submit"
+                                    class="btn btn-outline-danger me-2"
+                                    data-i18n="button.delete">Delete</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
-                                    data-bs-dismiss="modal">Cancel</button>
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -186,4 +239,19 @@
         </div>
     {% endif %}
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/configs.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

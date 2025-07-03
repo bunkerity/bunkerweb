@@ -31,6 +31,7 @@ local bytes = random.bytes
 local char = string.char
 local session_start = session.start
 local tonumber = tonumber
+local getenv = os.getenv
 
 local utils = {}
 
@@ -306,19 +307,60 @@ utils.get_reason = function(ctx)
 		end
 		return var_reason, reason_data, security_mode
 	end
-	-- os.getenv
-	if os.getenv("REASON") == "modsecurity" then
-		local env_reason_data = os.getenv("REASON_DATA")
+	-- os.getenv / modsecurity
+	if getenv("REASON") == "modsecurity" then
 		local reason_data = {}
-		if env_reason_data and env_reason_data ~= "" and env_reason_data ~= "none" then
-			if env_reason_data:sub(1, 1) == " " then
-				env_reason_data = env_reason_data:sub(2)
+
+		-- Handle IDs
+		local env_reason_data_ids = getenv("REASON_DATA_RULES")
+		if env_reason_data_ids and env_reason_data_ids ~= "" and env_reason_data_ids ~= "none" then
+			if env_reason_data_ids:sub(1, 1) == " " then
+				env_reason_data_ids = env_reason_data_ids:sub(2)
 			end
 			reason_data["ids"] = {}
-			for rule_id in env_reason_data:gmatch("%S+") do
+			for rule_id in env_reason_data_ids:gmatch("%S+") do
 				table.insert(reason_data["ids"], rule_id)
 			end
 		end
+
+		-- Handle messages, matched_vars, and matched_var_names
+		local env_unique_id_separator = getenv("REASON_DATA_UNIQUE_ID")
+		local data_types = {
+			{ key = "msgs", env_var = "REASON_DATA_MSGS" },
+			{ key = "matched_vars", env_var = "REASON_DATA_MATCHED_VARS" },
+			{ key = "matched_var_names", env_var = "REASON_DATA_MATCHED_VAR_NAMES" },
+		}
+
+		for _, data_type in ipairs(data_types) do
+			local env_data = getenv(data_type.env_var)
+			if env_data and env_data ~= "" and env_data ~= "none" and env_unique_id_separator then
+				-- Remove leading |separator| if present
+				local separator_pattern = "|" .. env_unique_id_separator .. "|"
+				if env_data:sub(1, #separator_pattern) == separator_pattern then
+					env_data = env_data:sub(#separator_pattern + 1)
+				end
+				reason_data[data_type.key] = {}
+				-- Split by |separator| pattern
+				local remaining = env_data
+				while remaining and remaining ~= "" do
+					local separator_pos = remaining:find("|" .. env_unique_id_separator .. "|", 1, true)
+					if separator_pos then
+						local item = remaining:sub(1, separator_pos - 1)
+						if item and item ~= "" then
+							table.insert(reason_data[data_type.key], item)
+						end
+						remaining = remaining:sub(separator_pos + #separator_pattern)
+					else
+						-- Last item (no separator after)
+						if remaining and remaining ~= "" then
+							table.insert(reason_data[data_type.key], remaining)
+						end
+						break
+					end
+				end
+			end
+		end
+
 		return "modsecurity", reason_data, security_mode
 	end
 	-- datastore ban
@@ -347,7 +389,7 @@ utils.set_reason = function(reason, reason_data, ctx, security_mode)
 	if ctx and ctx.bw then
 		ctx.bw.reason = reason or "unknown"
 		ctx.bw.reason_data = reason_data or {}
-		ctx.bw.security_mode = security_mode
+		ctx.bw.security_mode = security_mode or utils.get_security_mode(ctx)
 	end
 	if var.reason then
 		var.reason = reason
@@ -697,6 +739,18 @@ utils.is_banned = function(ip, server_name)
 			local ttl
 			-- luacheck: ignore 311
 			ok, ttl = datastore:ttl(key)
+
+			-- Check if this is a permanent ban (ttl = -1)
+			local is_permanent = false
+			if ok and ban_data and ban_data.permanent then
+				is_permanent = ban_data.permanent
+			end
+
+			-- If permanent, override ttl to -1 for consistency
+			if is_permanent then
+				ttl = -1
+			end
+
 			return true, result, ttl or -1
 		elseif err ~= "not found" then
 			return nil, "datastore:get() error: " .. tostring(result)
@@ -785,8 +839,13 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
 		date = os.time(),
 		country = country or "local",
 		ban_scope = ban_scope or "global",
+		permanent = ttl == -1,
 	})
-	local ok, err = datastore:set(ban_key, ban_data, ttl)
+
+	-- Convert -1 TTL to nil for permanent bans in local datastore
+	local effective_ttl = ttl == -1 and nil or ttl
+
+	local ok, err = datastore:set(ban_key, ban_data, effective_ttl)
 	if not ok then
 		return false, "datastore:set() error : " .. err
 	end
@@ -805,8 +864,14 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
 	if not ok then
 		return false, "can't connect to redis server : " .. err
 	end
-	-- SET call
-	ok, err = clusterstore:call("set", ban_key, ban_data, "EX", ttl)
+
+	-- For Redis, set without expiration if permanent, otherwise with EX and ttl
+	if ttl == -1 then
+		ok, err = clusterstore:call("set", ban_key, ban_data)
+	else
+		ok, err = clusterstore:call("set", ban_key, ban_data, "EX", ttl)
+	end
+
 	if not ok then
 		clusterstore:close()
 		return false, "redis SET failed : " .. err
@@ -906,6 +971,18 @@ utils.read_files = function(files)
 		f:close()
 	end
 	return true, data
+end
+
+utils.deduplicate_list = function(list)
+	local seen = {}
+	local deduped = {}
+	for _, v in ipairs(list) do
+		if not seen[v] then
+			seen[v] = true
+			table.insert(deduped, v)
+		end
+	end
+	return deduped
 end
 
 return utils

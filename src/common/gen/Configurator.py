@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
 from functools import cache
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import listdir, sep
+from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
 from re import compile as re_compile, error as RegexError, search as re_search
@@ -31,11 +31,60 @@ class Configurator:
         logger: Logger,
     ):
         self.__logger = logger
+        self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
         self.__plugin_id_rx = re_compile(r"^[\w.-]{1,64}$")
         self.__plugin_version_rx = re_compile(r"^\d+\.\d+(\.\d+)?$")
         self.__setting_id_rx = re_compile(r"^[A-Z0-9_]{1,256}$")
         self.__name_rx = re_compile(r"^[\w.-]{1,128}$")
         self.__job_file_rx = re_compile(r"^[\w./-]{1,256}$")
+
+        # Pre-compile sets for O(1) membership testing
+        self.__mandatory_plugin_keys = frozenset(("id", "name", "description", "version", "stream", "settings"))
+        self.__mandatory_setting_keys = frozenset(("context", "default", "help", "id", "label", "regex", "type"))
+        self.__mandatory_job_keys = frozenset(("name", "file", "every", "reload"))
+        self.__valid_stream_values = frozenset(("yes", "no", "partial"))
+        self.__valid_contexts = frozenset(("global", "multisite"))
+        self.__valid_setting_types = frozenset(("password", "text", "number", "check", "select", "multiselect", "multivalue"))
+        self.__valid_job_every_values = frozenset(("once", "minute", "hour", "day", "week"))
+
+        # Pre-compile regex patterns cache
+        self.__compiled_regexes = {}
+
+        # Pre-defined exclusion sets for config processing
+        self.__excluded_prefixes = ("_", "PYTHON", "KUBERNETES_", "SVC_", "LB_", "SUPERVISOR_")
+        self.__excluded_vars = frozenset(
+            {
+                "DOCKER_HOST",
+                "SLAVE_MODE",
+                "MASTER_MODE",
+                "CUSTOM_LOG_LEVEL",
+                "HEALTHCHECK_INTERVAL",
+                "DATABASE_RETRY_TIMEOUT",
+                "RELOAD_MIN_TIMEOUT",
+                "DISABLE_CONFIGURATION_TESTING",
+                "IGNORE_FAIL_SENDING_CONFIG",
+                "GPG_KEY",
+                "HOME",
+                "HOSTNAME",
+                "LANG",
+                "PATH",
+                "NGINX_VERSION",
+                "NJS_VERSION",
+                "PKG_RELEASE",
+                "PWD",
+                "SHLVL",
+                "SERVER_SOFTWARE",
+                "NAMESPACE",
+                "TZ",
+                "DYNPKG_RELEASE",
+                "OLDPWD",
+                "SERVICE_SCHEDULER",
+                "SERVICE_UI",
+                "IGNORE_REGEX_CHECK",
+                "CROWDSEC_EXTRA_COLLECTIONS",
+            }
+        )
+
         self.__settings = self.__load_settings(Path(settings))
         self.__core_plugins = []
         self.__load_plugins(Path(core))
@@ -64,7 +113,13 @@ class Configurator:
         return self.__settings.copy()
 
     def get_plugins(self, _type: Literal["core", "external", "pro"]) -> List[Dict[str, str]]:
-        return {"core": deepcopy(self.__core_plugins), "external": deepcopy(self.__external_plugins), "pro": deepcopy(self.__pro_plugins)}.get(_type, [])
+        if _type == "core":
+            return deepcopy(self.__core_plugins)
+        elif _type == "external":
+            return deepcopy(self.__external_plugins)
+        elif _type == "pro":
+            return deepcopy(self.__pro_plugins)
+        return []
 
     @cache
     def get_plugins_settings(self, _type: Literal["core", "external", "pro"]) -> Dict[str, str]:
@@ -76,24 +131,29 @@ class Configurator:
             return {}
 
         servers = {}
-        server_regex = re_compile(self.__settings["SERVER_NAME"]["regex"])
-        server_names = [s for s in self.__variables["SERVER_NAME"].strip().split(" ") if s]
+        server_regex = self.__get_compiled_regex(self.__settings["SERVER_NAME"]["regex"])
+        if not server_regex:
+            return {}
+
+        # Split once and filter empty strings
+        server_names = [s for s in self.__variables["SERVER_NAME"].split() if s]
 
         for server_name in server_names:
-            if not server_regex.search(server_name):
+            if not self.__ignore_regex_check and not server_regex.search(server_name):
                 self.__logger.warning(f"Ignoring server name {server_name} because regex is not valid")
                 continue
 
+            # Use get() with default instead of 'in' check
             server_name_var = f"{server_name}_SERVER_NAME"
-            if server_name_var in self.__variables:
-                names_str = self.__variables[server_name_var].strip()
-                if not server_regex.search(names_str):
-                    self.__logger.warning(f"Ignoring {server_name_var} because regex is not valid")
-                    servers[server_name] = [server_name]
-                else:
-                    servers[server_name] = [n for n in names_str.split(" ") if n]
-            else:
+            names_str = self.__variables.get(server_name_var, server_name).strip()
+
+            if names_str == server_name:
                 servers[server_name] = [server_name]
+            elif not self.__ignore_regex_check and not server_regex.search(names_str):
+                self.__logger.warning(f"Ignoring {server_name_var} because regex is not valid")
+                servers[server_name] = [server_name]
+            else:
+                servers[server_name] = [n for n in names_str.split() if n]
 
         return servers
 
@@ -101,14 +161,22 @@ class Configurator:
         return loads(path.read_text())
 
     def __load_plugins(self, path: Path, _type: Literal["core", "external", "pro"] = "core"):
-
         plugin_files = list(path.glob("*/plugin.json"))
 
-        with ThreadPoolExecutor() as executor:
-            futures = [executor.submit(self.__load_plugin, file, _type) for file in plugin_files]
-            for file, future in zip(plugin_files, futures):
-                self.__logger.debug(f"Loading {_type} plugin {file}")
-                future.result()
+        # Use optimal number of threads for I/O operations
+        max_workers = min(len(plugin_files), 4) if plugin_files else 1
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_file = {executor.submit(self.__load_plugin, file, _type): file for file in plugin_files}
+
+            # Process completed futures as they finish
+            for future in as_completed(future_to_file):
+                file = future_to_file[future]
+                try:
+                    self.__logger.debug(f"Loading {_type} plugin {file}")
+                    future.result()
+                except Exception as e:
+                    self.__logger.error(f"Failed to load plugin {file}: {e}")
 
         count = len(plugin_files)
         self.__logger.info(f"Computed {count} {_type} plugin{'s' if count > 1 else ''}")
@@ -187,6 +255,10 @@ class Configurator:
 
         # Override with variables
         for variable, value in self.__variables.items():
+            # Use optimized exclusion checks
+            if variable.startswith(self.__excluded_prefixes) or variable in self.__excluded_vars or "CUSTOM_CONF" in variable:
+                continue
+
             ret, err = self.__check_var(variable)
             if ret:
                 config[variable] = value
@@ -198,41 +270,7 @@ class Configurator:
                 or variable in self.get_settings()
                 or variable in self.get_plugins_settings("core")
                 or not self.__variables.get("EXTERNAL_PLUGIN_URLS")
-            ) and (
-                variable == "KUBERNETES_MODE"
-                or (
-                    "CUSTOM_CONF" not in variable
-                    and not variable.startswith(("_", "PYTHON", "KUBERNETES_", "SVC_", "LB_"))
-                    and variable
-                    not in (
-                        "DOCKER_HOST",
-                        "SLAVE_MODE",
-                        "MASTER_MODE",
-                        "CUSTOM_LOG_LEVEL",
-                        "HEALTHCHECK_INTERVAL",
-                        "DATABASE_RETRY_TIMEOUT",
-                        "RELOAD_MIN_TIMEOUT",
-                        "DISABLE_CONFIGURATION_TESTING",
-                        "IGNORE_FAIL_SENDING_CONFIG",
-                        "GPG_KEY",
-                        "HOME",
-                        "HOSTNAME",
-                        "LANG",
-                        "PATH",
-                        "NGINX_VERSION",
-                        "NJS_VERSION",
-                        "PATH",
-                        "PKG_RELEASE",
-                        "PWD",
-                        "SHLVL",
-                        "SERVER_SOFTWARE",
-                        "NAMESPACE",
-                        "TZ",
-                        "DYNPKG_RELEASE",
-                        "OLDPWD",
-                    )
-                )
-            ):
+            ) or variable == "KUBERNETES_MODE":
                 self.__logger.warning(f"Ignoring variable {variable} : {err} - {value = !r}")
 
         # Expand variables to each sites if MULTISITE=yes and if not present
@@ -270,7 +308,7 @@ class Configurator:
                 return False, f"variable name {variable} doesn't exist"
 
             try:
-                if re_search(where[real_var]["regex"], value) is None:
+                if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value) is None:
                     return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
             except RegexError:
                 self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
@@ -285,7 +323,7 @@ class Configurator:
             return False, f"context of {variable} isn't multisite"
 
         try:
-            if not re_search(where[real_var]["regex"], value):
+            if not self.__ignore_regex_check and re_search(where[real_var]["regex"], value) is None:
                 return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
         except RegexError:
             self.__logger.warning(f"Invalid regex for {variable} : {where[real_var]['regex']}, ignoring regex check")
@@ -314,7 +352,7 @@ class Configurator:
         return False, variable
 
     def __validate_plugin(self, plugin: dict) -> Tuple[bool, str]:
-        if not all(key in plugin for key in ("id", "name", "description", "version", "stream", "settings")):
+        if not all(key in plugin for key in self.__mandatory_plugin_keys):
             return (False, f"Missing mandatory keys for plugin {plugin.get('id', 'unknown')} (id, name, description, version, stream, settings)")
 
         if not self.__plugin_id_rx.match(plugin["id"]):
@@ -325,11 +363,11 @@ class Configurator:
             return (False, f"Invalid description for plugin {plugin['id']} (Max 256 characters)")
         elif not self.__plugin_version_rx.match(plugin["version"]):
             return (False, f"Invalid version for plugin {plugin['id']} (Must be in format \\d+\\.\\d+(\\.\\d+)?)")
-        elif plugin["stream"] not in ("yes", "no", "partial"):
+        elif plugin["stream"] not in self.__valid_stream_values:
             return (False, f"Invalid stream for plugin {plugin['id']} (Must be yes, no or partial)")
 
         for setting, data in plugin.get("settings", {}).items():
-            if not all(key in data.keys() for key in ("context", "default", "help", "id", "label", "regex", "type")):
+            if not all(key in data.keys() for key in self.__mandatory_setting_keys):
                 return (False, f"missing keys for setting {setting} in plugin {plugin['id']}, must have context, default, help, id, label, regex and type")
 
             if not self.__setting_id_rx.match(setting):
@@ -337,7 +375,7 @@ class Configurator:
                     False,
                     f"Invalid setting name for setting {setting} in plugin {plugin['id']} (Can only contain capital letters and underscores (min 1 characters and max 256))",
                 )
-            elif data["context"] not in ("global", "multisite"):
+            elif data["context"] not in self.__valid_contexts:
                 return (False, f"Invalid context for setting {setting} in plugin {plugin['id']} (Must be global or multisite)")
             elif len(data["default"]) > 4096:
                 return (False, f"Invalid default for setting {setting} in plugin {plugin['id']} (Max 4096 characters)")
@@ -347,8 +385,11 @@ class Configurator:
                 return (False, f"Invalid label for setting {setting} in plugin {plugin['id']} (Max 256 characters)")
             elif len(data["regex"]) > 1024:
                 return (False, f"Invalid regex for setting {setting} in plugin {plugin['id']} (Max 1024 characters)")
-            elif data["type"] not in ("password", "text", "check", "select"):
-                return (False, f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, check or select)")
+            elif data["type"] not in self.__valid_setting_types:
+                return (
+                    False,
+                    f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, number, check, select, multiselect or multivalue)",
+                )
 
             if "multiple" in data:
                 if not self.__name_rx.match(data["multiple"]):
@@ -357,12 +398,22 @@ class Configurator:
                         f"Invalid multiple for setting {setting} in plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128))",
                     )
 
+            if data["type"] == "multivalue":
+                if "separator" in data:
+                    if len(data["separator"]) > 10:
+                        return (False, f"Invalid separator for setting {setting} in plugin {plugin['id']} (Max 10 characters)")
+                    if not data["separator"]:
+                        return (False, f"Empty separator for multivalue setting {setting} in plugin {plugin['id']} (Must have at least 1 character)")
+                else:
+                    # Set default separator if not provided
+                    data["separator"] = " "
+
             for select in data.get("select", []):
                 if len(select) > 256:
                     return (False, f"Invalid select value {select} for setting {setting} in plugin {plugin['id']} (Max 256 characters)")
 
         for job in plugin.get("jobs", []):
-            if not all(key in job.keys() for key in ("name", "file", "every", "reload")):
+            if not all(key in job.keys() for key in self.__mandatory_job_keys):
                 return (False, f"missing keys for job {job['name']} in plugin {plugin['id']}, must have name, file, every and reload")
 
             if not self.__name_rx.match(job["name"]):
@@ -372,7 +423,7 @@ class Configurator:
                     False,
                     f"Invalid file for job {job['name']} in plugin {plugin['id']} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256))",
                 )
-            elif job["every"] not in ("once", "minute", "hour", "day", "week"):
+            elif job["every"] not in self.__valid_job_every_values:
                 return (False, f"Invalid every for job {job['name']} in plugin {plugin['id']} (Must be once, minute, hour, day or week)")
             elif job.get("reload", False) is not True and job.get("reload", False) is not False:
                 return (False, f"Invalid reload for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
@@ -380,3 +431,13 @@ class Configurator:
                 return (False, f"Invalid async for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
 
         return True, "ok"
+
+    def __get_compiled_regex(self, pattern: str):
+        """Get or compile a regex pattern with caching to avoid recompilation."""
+        if pattern not in self.__compiled_regexes:
+            try:
+                self.__compiled_regexes[pattern] = re_compile(pattern)
+            except RegexError as e:
+                self.__logger.warning(f"Invalid regex pattern {pattern}: {e}")
+                return None
+        return self.__compiled_regexes[pattern]

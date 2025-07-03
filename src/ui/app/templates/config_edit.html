@@ -19,11 +19,11 @@
                 {% if not config_template and config_method and config_method != "ui" or is_readonly %}
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
                         <i class="bx bx-xs bx-cube"></i>
-                        &nbsp;Service: {{ config_service or "global" }}
+                        &nbsp;<span data-i18n="button.service">Service</span>: {{ config_service or "Global" }}
                     </button>
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
                         <i class="bx bx-xs bx-window"></i>
-                        &nbsp;Config Type: {{ type }}
+                        &nbsp;<span data-i18n="form.label.config_type">Config Type</span>: {{ type }}
                     </button>
                 {% else %}
                     <div class="dropdown btn-group me-2">
@@ -34,7 +34,7 @@
                                 aria-haspopup="true"
                                 aria-expanded="false">
                             <i class="bx bx-cube"></i>
-                            <span class="d-none d-md-inline">&nbsp;Service</span>
+                            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.service">Service</span></span>
                         </button>
                         <ul id="services-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -45,14 +45,16 @@
                                        type="text"
                                        class="form-control border-0 border-primary border-bottom shadow-none"
                                        placeholder="Search..."
-                                       aria-label="Search...">
+                                       aria-label="Search..."
+                                       data-i18n="form.placeholder.search">
                             </div>
                             <li class="nav-item">
                                 <button type="button"
                                         class="dropdown-item{% if not config_service or config_service == 'global' %} active{% endif %}"
                                         role="tab"
                                         data-bs-toggle="tab"
-                                        {% if not config_service %}aria-selected="true"{% endif %}>global</button>
+                                        {% if not config_service %}aria-selected="true"{% endif %}
+                                        data-i18n="scope.global">Global</button>
                             </li>
                             {% for service in services %}
                                 <li class="nav-item">
@@ -75,7 +77,7 @@
                                 aria-haspopup="true"
                                 aria-expanded="false">
                             <i class="bx bx-window"></i>
-                            <span class="d-none d-md-inline">&nbsp;Config Type</span>
+                            <span class="d-none d-md-inline">&nbsp;<span data-i18n="form.label.config_type">Config Type</span></span>
                         </button>
                         <ul id="types-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -86,7 +88,8 @@
                                     data-context="{{ data['context'] }}"
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="top"
-                                    data-bs-original-title="{{ data['description'] }}">
+                                    data-bs-original-title="{{ data['description'] }}"
+                                    data-i18n="tooltip.config_type.{{ config_type | lower }}">
                                     <button type="button"
                                             class="dropdown-item{% if config_type == type or not type and loop.index == 1 %} active{% endif %}"
                                             role="tab"
@@ -102,7 +105,7 @@
                 {% if config_template %}
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
                         <i class="bx bx-xs bx-spreadsheet"></i>
-                        &nbsp;From template: {{ config_template }}
+                        &nbsp;<span data-i18n="badge.from_template">From template</span>: {{ config_template }}
                     </button>
                 {% endif %}
             </div>
@@ -112,37 +115,34 @@
                            type="text"
                            class="form-control form-control-sm border-0 border-primary border-bottom shadow-none"
                            placeholder="Configuration Name"
+                           data-i18n="form.placeholder.config_name"
                            value="{{ name }}"
                            pattern="^[a-zA-Z0-9_\-]{1,64}$"
                            required
                            {% if not config_template and config_method and config_method != "ui" or is_readonly %}disabled{% endif %}>
-                    <label for="config-name">Configuration Name</label>
+                    <label for="config-name" data-i18n="form.label.configuration_name">Configuration Name</label>
                     <span class="input-group-text border-0 border-primary border-bottom mt-2 pb-0 shadow-none"
                           id="config-name-suffix">.conf</span>
                 </div>
             </div>
-            <div {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{% if user_readonly %}Readonly mode enabled{% else %}{% if is_readonly %}The database is in readonly{% else %}The custom config was created using the {{ config_method }} method{% endif %}
-                 therefore
-                 it
-                 is
-                 locked
-                 {% endif %}
-                 "
-                 {% endif %}>
+            {% set save_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config_method and config_method != "ui" else '')) %}
+            {% set save_tooltip_options = '{"method": "' ~ config_method ~ '"}' if config_method and config_method != "ui" and not is_readonly else '{}' %}
+            <div {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ save_tooltip_key }}" data-i18n-options='{{ save_tooltip_options }}' {% endif %}>
                 <button type="button"
                         class="btn btn-sm btn-bw-green save-config{% if not config_template and config_method and config_method != "ui" or is_readonly %} disabled{% endif %}">
                     <i class="bx bx-save bx-sm"></i>
-                    <span class="d-none d-md-inline">&nbsp;Save</span>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
                 </button>
             </div>
         </div>
     </div>
+    {% set editor_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if config_method and config_method != "ui" else '')) %}
+    {% set editor_tooltip_options = '{"method": "' ~ config_method ~ '"}' if config_method and config_method != "ui" and not is_readonly else '{}' %}
     <div class="card position-relative p-4 min-vh-70"
-         {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {% if is_readonly %}readonly{% else %}{{ config_method }}{% endif %}
-         "
-         {% endif %}>
+         {% if not config_template and config_method and config_method != "ui" or is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="..." data-i18n="{{ editor_tooltip_key }}" data-i18n-options='{{ editor_tooltip_options }}' {% endif %}>
         <p id="config-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading custom configuration...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_custom_config">Loading custom configuration...</p>
         <div id="config-value"
              data-language="{% if type and type.startswith(('CRS', 'MODSEC')) %}ModSecurity{% else %}NGINX{% endif %}"
              data-method="{{ config_method or 'ui' }}"
@@ -152,4 +152,13 @@
         </div>
     </div>
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/config_edit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

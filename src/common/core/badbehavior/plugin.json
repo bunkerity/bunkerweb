@@ -20,8 +20,9 @@
       "help": "List of HTTP status codes considered as 'bad'.",
       "id": "bad-behavior-status-code",
       "label": "Bad status codes",
-      "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
-      "type": "text"
+      "regex": "^( *[1-5]\\d{2} *)+$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BAD_BEHAVIOR_THRESHOLD": {
       "context": "multisite",
@@ -39,16 +40,16 @@
       "id": "bad-behavior-period",
       "label": "Period (in seconds)",
       "regex": "^\\d+",
-      "type": "text"
+      "type": "number"
     },
     "BAD_BEHAVIOR_BAN_TIME": {
       "context": "multisite",
       "default": "86400",
-      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.",
+      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold. (Set to 0 to ban permanently)",
       "id": "bad-behavior-ban-time",
       "label": "Ban duration (in seconds)",
-      "regex": "^\\d+",
-      "type": "text"
+      "regex": "^\\d+$",
+      "type": "number"
     },
     "BAD_BEHAVIOR_BAN_SCOPE": {
       "context": "multisite",

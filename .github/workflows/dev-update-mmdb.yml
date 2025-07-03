@@ -52,7 +52,7 @@ jobs:
           rm -f asn.mmdb country.mmdb
           gunzip asn.mmdb.gz country.mmdb.gz
       - name: Commit and push changes
-        uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # v5.1.0
+        uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
         with:
           branch: dev
           commit_message: "Monthly mmdb update"

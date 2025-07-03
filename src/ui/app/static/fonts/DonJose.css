@@ -1,6 +1,8 @@
 @font-face {
   font-family: "Don Jose";
   font-style: normal;
-  font-display: swap;
-  src: url(../fonts/DonJose_Black.otf), format("truetype");
+  font-weight: normal;
+  src:
+    url(../fonts/DonJose/DonJose_Black.woff) format("woff"),
+    url(../fonts/DonJose/DonJose_Black.otf) format("opentype");
 }

@@ -36,7 +36,6 @@ if __name__ == "__main__":
         parser.add_argument("--output", default=join(sep, "etc", "nginx"), type=str, help="where to write the rendered files")
         parser.add_argument("--target", default=join(sep, "etc", "nginx"), type=str, help="where nginx will search for configurations files")
         parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
-        parser.add_argument("--no-linux-reload", action="store_true", help="disable linux reload")
         args = parser.parse_args()
 
         settings_path = Path(args.settings)
@@ -120,8 +119,13 @@ if __name__ == "__main__":
                 variables_path.as_posix(),
                 LOGGER,
             ).get_config(db)
+            full_config = config.copy()
+            default_config = config.copy()
         else:
-            config: Dict[str, Any] = db.get_config()
+            config: Dict[str, Any] = db.get_non_default_settings() | {"DATABASE_URI": db.database_uri}
+            full_config = db.get_config(methods=True) | {"DATABASE_URI": {"default": "sqlite:////var/lib/bunkerweb/db.sqlite3", "value": db.database_uri}}
+            default_config = {setting: data["default"] for setting, data in full_config.items()}
+            full_config = {setting: data["value"] for setting, data in full_config.items()}
 
         # Remove old files
         LOGGER.info("Removing old files ...")
@@ -143,6 +147,8 @@ if __name__ == "__main__":
             output_path.as_posix(),
             target_path.as_posix(),
             config,
+            default_config,
+            full_config,
         )
         templator.render()
     except SystemExit as e:

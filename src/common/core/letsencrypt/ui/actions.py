@@ -58,6 +58,7 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
                 "serial_number": "Unknown",
                 "fingerprint": "Unknown",
                 "version": "Unknown",
+                "preferred_profile": "classic",
                 "challenge": "Unknown",
                 "authenticator": "Unknown",
                 "key_type": "Unknown",
@@ -98,7 +99,9 @@ def retrieve_certificates_info(folder_paths: Tuple[Path, Path]) -> dict:
                 if renewal_file.exists():
                     with renewal_file.open("r") as f:
                         for line in f:
-                            if line.startswith("pref_challs = "):
+                            if line.startswith("preferred_profile = "):
+                                cert_info["preferred_profile"] = line.split(" = ")[1].strip()
+                            elif line.startswith("pref_challs = "):
                                 cert_info["challenge"] = line.split(" = ")[1].strip().split(",")[0]
                             elif line.startswith("authenticator = "):
                                 cert_info["authenticator"] = line.split(" = ")[1].strip()
@@ -130,6 +133,7 @@ def pre_render(app, *args, **kwargs):
                 "serial_number": [],
                 "fingerprint": [],
                 "version": [],
+                "preferred_profile": [],
                 "challenge": [],
                 "authenticator": [],
                 "key_type": [],

@@ -5,9 +5,11 @@ __pycache__
 env/
 tmp_venv/
 node_modules
+package-lock.json
 /src/ui/*.txt
 .mypy_cache
 .cache/
+.env
 /package*.json
 src/ui/client/static
 src/ui/client/templates

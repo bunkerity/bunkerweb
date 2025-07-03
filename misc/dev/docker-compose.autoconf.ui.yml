@@ -100,6 +100,8 @@ services:
     build:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
+      args:
+        SKIP_MINIFY: "yes"
     ports:
       - 7000:7000
     volumes:
@@ -126,6 +128,7 @@ services:
     labels:
       - "bunkerweb.SERVER_NAME=www.example.com"
       - "bunkerweb.USE_TEMPLATE=ui"
+      - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
       - "bunkerweb.USE_REVERSE_PROXY=yes"
       - "bunkerweb.REVERSE_PROXY_URL=/admin"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"

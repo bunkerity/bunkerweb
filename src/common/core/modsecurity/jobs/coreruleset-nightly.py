@@ -37,8 +37,8 @@ try:
     use_nightly_crs = False
 
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split(" "):
-            if first_server and getenv(f"{first_server}_MODSECURITY_CRS_VERSION", getenv("MODSECURITY_CRS_VERSION", "4")) == "nightly":
+        for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
+            if first_server and getenv(f"{first_server}_MODSECURITY_CRS_VERSION", "4") == "nightly":
                 use_nightly_crs = True
                 break
     elif getenv("MODSECURITY_CRS_VERSION", "4") == "nightly":
@@ -58,7 +58,7 @@ try:
     retry_count = 0
     while retry_count < max_retries:
         try:
-            resp = get("https://github.com/coreruleset/coreruleset/releases/tag/nightly", timeout=5)
+            resp = get("https://github.com/coreruleset/coreruleset/releases/tag/nightly", timeout=7)
             break
         except ConnectionError as e:
             retry_count += 1
@@ -143,7 +143,11 @@ try:
     # * Patch the rules so we can extract the rule IDs when matching
     try:
         LOGGER.info("Patching Core Rule Set (CRS) nightly rules...")
-        result = run([PATCH_SCRIPT.as_posix(), CRS_NIGHTLY_PATH.as_posix()], check=True)
+        result = run(
+            [PATCH_SCRIPT.as_posix(), CRS_NIGHTLY_PATH.as_posix()],
+            check=True,
+            env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
+        )
     except CalledProcessError as e:
         LOGGER.debug(format_exc())
         LOGGER.error(f"Failed to patch Core Rule Set (CRS) nightly rules: \n{e}")

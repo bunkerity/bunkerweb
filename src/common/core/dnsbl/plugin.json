@@ -20,8 +20,9 @@
       "help": "List of DNSBL servers.",
       "id": "dnsbl-list",
       "label": "DNSBL list",
-      "regex": "^(?! )( ?((?!\\.)[\\w.]+)(?!.*\\2(?!.)))*$",
-      "type": "text"
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": " "
     }
   }
 }

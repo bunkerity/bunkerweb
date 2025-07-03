@@ -1,0 +1,51 @@
+services:
+  bunkerweb-all-in-one:
+    image: bunkerity/bunkerweb-all-in-one:1.6.2
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp"
+    volumes:
+      - bw-storage:/data
+    environment:
+      DATABASE_URI: "postgresql://bunkerweb:changeme@bw-db:5432/db" # Remember to set a stronger password for the database
+      API_WHITELIST_IP: "127.0.0.0/8"
+      SERVER_NAME: "www.example.com"
+      MULTISITE: "yes"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      www.example.com_USE_TEMPLATE: "ui"
+      www.example.com_USE_REVERSE_PROXY: "yes"
+      www.example.com_REVERSE_PROXY_URL: "/changeme"
+      www.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:7000"
+
+      # UI
+      ADMIN_USERNAME: "changeme"
+      ADMIN_PASSWORD: "changeme"
+    networks:
+      - bw-services
+      - bw-db
+
+  bw-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: "bunkerweb"
+      POSTGRES_PASSWORD: "changeme" # Remember to set a stronger password for the database
+      POSTGRES_DB: "db"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - bw-data:/var/lib/postgresql/data
+    networks:
+      - bw-db
+
+volumes:
+  bw-data:
+  bw-storage:
+
+networks:
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db

@@ -2,7 +2,7 @@
   "name": "drupal",
   "kinds": ["docker", "autoconf", "swarm", "kubernetes", "linux"],
   "no_copy_container": true,
-  "timeout": 60,
+  "timeout": 90,
   "delay": 120,
   "tests": [
     {

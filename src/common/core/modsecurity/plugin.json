@@ -49,7 +49,8 @@
       "id": "modsecurity-crs-plugins",
       "label": "Core Rule Set Plugins",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "USE_MODSECURITY_GLOBAL_CRS": {
       "context": "global",
@@ -86,7 +87,7 @@
       "help": "SecAuditLogParts directive of ModSecurity.",
       "id": "modsecurity-sec-audit-log-parts",
       "label": "SecAuditLogParts",
-      "regex": "^A(([B-K])(?!.*\\2))+Z$",
+      "regex": "^A[B-K]+Z$",
       "type": "text"
     },
     "MODSECURITY_REQ_BODY_NO_FILES_LIMIT": {

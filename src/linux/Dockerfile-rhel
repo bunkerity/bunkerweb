@@ -1,7 +1,7 @@
-FROM redhat/ubi8:8.10@sha256:5993454fa14164449539110099944e04cc76912cfc2220f1e8762ffcb19b5289 AS builder
+FROM redhat/ubi8:8.10@sha256:19eae3d00adb37538a62b9bd093fd1e01dc6197f1925e960224244a1ed52bfb5 AS builder
 
 ENV OS=rhel
-ENV NGINX_VERSION=1.26.3
+ENV NGINX_VERSION=1.28.0
 
 # Copy rocky repo
 COPY src/linux/rocky-8.repo /etc/yum.repos.d/rocky.repo
@@ -46,6 +46,10 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
     pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
+RUN dnf install -y pigz && \
+    tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
+    rm -rf deps
+
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
 COPY src/bw/loading loading
@@ -64,7 +68,17 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM redhat/ubi8:8.10@sha256:5993454fa14164449539110099944e04cc76912cfc2220f1e8762ffcb19b5289
+# Minify JS files (can be skipped with SKIP_MINIFY=yes)
+ARG SKIP_MINIFY=no
+RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+    dnf install -y nodejs npm parallel && \
+    npm install -g uglify-js && \
+    find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
+
+FROM redhat/ubi8:8.10@sha256:19eae3d00adb37538a62b9bd093fd1e01dc6197f1925e960224244a1ed52bfb5
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -89,15 +103,7 @@ RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
     echo "Linux" > INTEGRATION && \
     mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
     for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
-    find . -path ./deps -prune -o -type f -print0 | xargs -0 chmod 0740 && \
-    find . -path ./deps -prune -o -type d -print0 | xargs -0 chmod 0750 && \
-    chmod 755 /var/log/bunkerweb && \
-    touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log && \
-    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ db/alembic db/alembic/alembic.ini db/alembic/env.py && \
-    chmod 750 gen/*.py scheduler/*.py cli/*.py ui/*.sh helpers/*.sh /var/www/ && \
-    find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-    find core/ ui/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-    chmod 755 .
+    touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb

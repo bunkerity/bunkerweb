@@ -7,7 +7,7 @@
 ##! # select words of length <= 3
 ##! original="$(grep -vE '^[#$]' regex-assembly/include/unix-shell-upto3.ra)"
 ##! source=$(awk '/^[^#$]/ {split($0,x,"/"); y=x[length(x)]} length(y) <= 3 {print y}' \
-##!   rules/unix-shell.data | \
+##!   rules/unix-{shell,shell-builtins}.data | \
 ##!   sort | uniq)
 ##! result=""
 ##! # retain all unmodified entries in this list and skip removed ones; ignore the manually added suffixes
@@ -41,16 +41,16 @@
 ##! done <<<"${source}"
 
 ##! # Add `@` suffix to all words, except those suffixed with `~`
-##! original="$(grep -vE '^[#$]' regex-assembly/include/unix-shell-upto3.ra)"
+##! original="${result}"
 ##! result=""
 ##! while read -r oword; do
 ##!   oword_raw="${oword/%@/}"
 ##!   if [ -n "${oword}" ]; then
 ##!     oword_raw="${oword/%@/}"
 ##!     if [[ "${oword_raw}" == "${oword_raw/%\~/}" ]]; then
-##!       result="${result}${oward_raw}@${NL}"
+##!       result="${result}${oword_raw}@${NL}"
 ##!     else
-##!       result="${result}${oward_raw}${NL}"
+##!       result="${result}${oword_raw}${NL}"
 ##!     fi
 ##!   fi
 ##! done <<<"${original}"
@@ -67,7 +67,6 @@
 7za@
 7zr@
 7zx@
-GET@
 ab@
 apt@
 ar@
@@ -109,6 +108,7 @@ ftp@
 gcc~
 gdb@
 gem@
+GET@
 ghc@
 git@
 go@
@@ -128,8 +128,8 @@ ln@
 lp@
 ls@
 lua@
-lz4@
 lz@
+lz4@
 man@
 mtr@
 mv@
@@ -181,8 +181,8 @@ udp@
 ul@
 vi@
 vim@
-w3m@
 w@
+w3m@
 wc@
 who@
 xxd@

@@ -22,7 +22,13 @@
 
 body {
   font-family: var(--bs-body-font-family), "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    Arial, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Heiti SC",
+    "WenQuanYi Micro Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+}
+
+.tooltip {
+  --bs-tooltip-zindex: 1101;
 }
 
 .offcanvas,
@@ -221,7 +227,7 @@ button.list-group-item-secondary.active {
 }
 
 .toast-container {
-  z-index: 1100;
+  z-index: 1089;
 }
 
 /*
@@ -543,7 +549,7 @@ a.badge:hover {
   background-color: rgba(255, 255, 255, 0.88) !important;
   backdrop-filter: saturate(200%) blur(6px);
   top: 85px;
-  z-index: 1000;
+  z-index: 1070;
 }
 
 #floating-modes-menu {
@@ -1055,6 +1061,535 @@ div.dtsp-panesContainer
   transition: all 0.2s ease;
 }
 
+.qr-code {
+  background-color: #fff;
+}
+
+/* Template Steps Navigation Styles */
+.step-navigation-list {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  border-radius: 0.375rem;
+}
+
+.step-navigation-item {
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.step-navigation-item.active {
+  border-left-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  box-shadow: 0 0 0 1px rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.step-navigation-item:hover:not(.active) {
+  background-color: rgba(var(--bs-primary-rgb), 0.03);
+  border-left-color: rgba(var(--bs-primary-rgb), 0.3);
+}
+
+.step-navigation-item .step-number {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.step-navigation-item:not(.active) .step-number:hover {
+  opacity: 0.8;
+}
+
+.step-content-wrapper {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding-right: 0.5rem;
+}
+
+/* Ensure proper Bootstrap tab behavior */
+.template-steps-content .tab-pane {
+  display: none;
+}
+
+.template-steps-content .tab-pane.active {
+  display: block;
+}
+
+.template-steps-content .tab-pane.show.active {
+  display: block;
+}
+
+/* Always hide inactive tab panes regardless of fade classes */
+.template-steps-content .tab-pane:not(.active) {
+  display: none !important;
+}
+
+/* Step validation styles */
+.step-navigation-item.has-validation-error {
+  border-left-color: var(--bs-danger);
+  background-color: rgba(var(--bs-danger-rgb), 0.05);
+}
+
+.step-navigation-item.has-validation-error .fw-bold {
+  color: var(--bs-danger) !important;
+}
+
+.step-navigation-item.has-validation-error:hover {
+  background-color: rgba(var(--bs-danger-rgb), 0.1);
+}
+
+.step-number.btn-danger {
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+}
+
+/* Subtle animation for validation errors */
+@keyframes pulse-error {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--bs-danger-rgb), 0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 4px rgba(var(--bs-danger-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--bs-danger-rgb), 0);
+  }
+}
+
+.step-number.btn-danger,
+.step-number.btn-outline-danger {
+  animation: pulse-error 1.5s 1;
+}
+
+.steps-nav-container {
+  top: 95px;
+}
+
+/* Reset setting button styling */
+.reset-setting {
+  position: absolute !important;
+  right: 2.5rem;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 2;
+  margin: 0 !important;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease !important;
+  border-radius: 0.25rem;
+  color: #ff7f50 !important;
+}
+
+span.cursor-pointer ~ .reset-setting {
+  right: 3rem !important;
+}
+
+/* Show reset button on parent container hover */
+.form-floating:hover .reset-setting:not(.text-muted),
+.form-check:hover .reset-setting:not(.text-muted) {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Adjust position when near validation feedback */
+.is-invalid ~ .reset-setting:where(.invalid-feedback ~ *) {
+  top: calc(50% - 10px) !important;
+}
+
+.reset-setting.text-muted {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.reset-setting:hover:not(.text-muted) {
+  transform: translateY(-50%) scale(1.05) !important;
+  color: #ff4500 !important;
+}
+
+/* Add more space for select arrows and reset button */
+.form-select.plugin-setting,
+.form-select.plugin-setting:focus {
+  background-position: right 0.75rem center;
+  padding-right: 4rem !important;
+  transition: background-position 0.2s ease;
+}
+
+/* Move arrow when reset button is visible (on hover) */
+.form-floating:hover .form-select.plugin-setting:not(.text-muted) {
+  background-position: right 3rem center;
+}
+
+.was-validated .form-select.plugin-setting:valid,
+.form-select.plugin-setting.is-valid {
+  background-position:
+    right 0.75rem center,
+    center right 1.5rem;
+  padding-right: 4rem !important;
+  transition: background-position 0.2s ease;
+}
+
+/* Move arrow and validation icon when reset button is visible (on hover) */
+.form-floating:hover
+  .was-validated
+  .form-select.plugin-setting:valid:not(.text-muted),
+.form-floating:hover .form-select.plugin-setting.is-valid:not(.text-muted) {
+  background-position:
+    right 3rem center,
+    center right 4.5rem;
+}
+
+/* Adjust input text padding to avoid overlap with reset button */
+.form-control.plugin-setting {
+  padding-right: 3.5rem !important;
+}
+
+.form-check .form-check-label {
+  padding-right: 3rem !important;
+}
+
+.was-validated .form-check-input:valid:checked,
+.form-check-input.is-valid:checked {
+  background-color: #0b354a;
+}
+
+#data-notifications-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+}
+#notifications-toast-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.newsletter-signup {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Plugin navigation item styles */
+.plugin-navigation-item {
+  border-left: 3px solid transparent;
+  transition: all 0.25s ease;
+  margin-bottom: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.plugin-navigation-item.active {
+  border-left-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+  box-shadow: 0 2px 6px rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.plugin-navigation-item:hover:not(.active) {
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  border-left-color: rgba(var(--bs-primary-rgb), 0.4);
+}
+
+.plugin-navigation-item .step-number {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.plugin-navigation-item.active .step-number {
+  transform: scale(1.1);
+}
+
+.plugin-navigation-item:hover .step-number:not(.active) {
+  transform: scale(1.05);
+}
+
+.plugin-navigation-item .step-details {
+  transition: all 0.25s ease;
+}
+
+.plugin-navigation-item.active .step-details .fw-bold {
+  color: var(--bs-primary) !important;
+}
+
+.plugin-navigation-item small.text-muted {
+  transition: opacity 0.2s ease;
+  opacity: 0.7;
+}
+
+.plugin-navigation-item:hover small.text-muted,
+.plugin-navigation-item.active small.text-muted {
+  opacity: 1;
+}
+
+/* Fade effect for plugin tab panes */
+.plugin-tab-pane {
+  opacity: 0;
+  transition: opacity 0.2s;
+  display: none;
+}
+.plugin-tab-pane.show {
+  display: block;
+}
+.plugin-tab-pane.fade-in {
+  opacity: 1;
+}
+
+/*
+* Multiselect dropdown styling to match form-select
+******************************************************************************/
+
+.multiselect-toggle {
+  text-align: left !important;
+  position: relative;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  color: var(--bs-body-color);
+  cursor: pointer;
+}
+
+.multiselect-toggle:hover:not([disabled]):not([focus]) {
+  border-color: var(--bs-primary);
+}
+
+.multiselect-toggle:focus {
+  border-color: var(--bs-primary) !important;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.multiselect-toggle:disabled {
+  background-color: var(--bs-secondary-bg);
+  opacity: var(--bs-btn-disabled-opacity);
+  cursor: not-allowed;
+}
+
+.multiselect-toggle::after {
+  display: none; /* Hide the default dropdown arrow */
+}
+
+/* Remove default dropdown arrow for multiselect */
+.multiselect-toggle.dropdown-toggle::before {
+  display: none;
+}
+
+/* Ensure text doesn't overlap with arrow */
+.multiselect-text {
+  padding-right: 2rem;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dark mode styles for multiselect */
+.dark-style .multiselect-toggle {
+  background-color: #0c283a;
+  border-color: #384551;
+  color: #fff;
+}
+
+.dark-style .multiselect-toggle:hover:not([disabled]):not([focus]) {
+  border-color: #fff;
+}
+
+.dark-style .multiselect-toggle:focus {
+  border-color: #fff !important;
+}
+
+.dark-style .multiselect-toggle:disabled {
+  background-color: #133044;
+}
+
+/* Multivalue setting styles */
+.multivalue-container {
+  width: 100%;
+}
+
+.multivalue-inputs {
+  width: 100%;
+}
+
+.multivalue-input-group {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.multivalue-input-group:last-child {
+  margin-bottom: 0;
+}
+
+.multivalue-input-group .form-control {
+  flex: 1;
+  border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
+}
+
+.multivalue-input-group .btn {
+  border-left: 0;
+  min-width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0;
+}
+
+.multivalue-input-group .btn:last-child {
+  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+}
+
+.multivalue-input-group .btn:only-of-type {
+  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+}
+
+.multivalue-input-group .btn i {
+  font-size: 16px;
+}
+
+.multivalue-input-group .btn-outline-success {
+  color: var(--bs-success);
+  border-color: var(--bs-border-color);
+}
+
+.multivalue-input-group .btn-outline-success:hover {
+  background-color: var(--bs-success);
+  border-color: var(--bs-success);
+  color: white;
+}
+
+.multivalue-input-group .btn-outline-danger {
+  color: var(--bs-danger);
+  border-color: var(--bs-border-color);
+}
+
+.multivalue-input-group .btn-outline-danger:hover {
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+  color: white;
+}
+
+/* Focus styles for multivalue inputs */
+.multivalue-input:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+  z-index: 3;
+}
+
+.multivalue-input-group:focus-within .btn {
+  border-color: var(--bs-primary);
+}
+
+/* Animation for adding/removing multivalue items */
+.multivalue-input-group {
+  animation: fadeInUp 0.3s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Disabled state for multivalue containers */
+.multivalue-container .multivalue-input:disabled {
+  background-color: var(--bs-secondary-bg);
+  opacity: 0.65;
+}
+
+.multivalue-container .btn:disabled {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+/* Help text styling */
+.multivalue-container .text-muted {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.multivalue-container .text-muted code {
+  background-color: var(--bs-gray-100);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.8em;
+}
+
+/* Responsive design for multivalue buttons */
+@media (max-width: 576px) {
+  .multivalue-input-group .btn {
+    min-width: 34px;
+    padding: 0.375rem 0.375rem;
+  }
+
+  .multivalue-input-group .btn i {
+    font-size: 14px;
+  }
+}
+
+/* Multivalue toggle button */
+.multivalue-toggle {
+  text-align: center;
+}
+
+.multivalue-toggle-btn {
+  transition: all 0.2s ease;
+  border-radius: 0.375rem;
+}
+
+.multivalue-toggle-btn:hover {
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+  color: white;
+}
+
+.multivalue-toggle-btn .bx {
+  transition: transform 0.2s ease;
+}
+
+.multivalue-toggle-btn.expanded .bx {
+  transform: rotate(180deg);
+}
+
+/* Hide overflow when collapsed */
+.multivalue-inputs {
+  position: relative;
+}
+
+/* Dark mode styles for multivalue */
+.dark-style .multivalue-container .text-muted code {
+  background-color: var(--bs-gray-800);
+}
+
+.dark-style .multivalue-input-group .btn-outline-success {
+  color: var(--bs-success);
+  border-color: var(--bs-border-color);
+}
+
+.dark-style .multivalue-input-group .btn-outline-danger {
+  color: var(--bs-danger);
+  border-color: var(--bs-border-color);
+}
+
 /*
 * Dark mode overrides
 ******************************************************************************/
@@ -1190,7 +1725,6 @@ div.dtsp-panesContainer
   color: #fff;
 }
 
-.dark-style .img-fluid.qr-code,
 .dark-style .x-logo {
   filter: brightness(0) invert(1);
 }
@@ -1525,4 +2059,29 @@ html.dark-style div.dts div.dataTables_scrollBody table {
 /* Ensure the ban items have proper spacing */
 #bans-container .ban-item {
   margin-bottom: 8px;
+}
+
+/* Adjust dark mode styles for validation */
+.dark-style .step-navigation-item.has-validation-error {
+  background-color: rgba(var(--bs-danger-rgb), 0.15);
+}
+
+.dark-style .step-navigation-item.has-validation-error:hover {
+  background-color: rgba(var(--bs-danger-rgb), 0.2);
+}
+
+.dark-style .list-group-item.active,
+.dark-style .list-group-item.active:hover,
+.dark-style .list-group-item.active:focus {
+  background-color: #0a4b69 !important;
+  color: #fff !important;
+}
+
+/* Dark mode reset button styling */
+.dark-style .reset-setting {
+  color: #ff7f50 !important;
+}
+
+.dark-style .reset-setting:hover:not(.text-muted) {
+  color: #ff4500 !important;
 }

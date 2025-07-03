@@ -10,8 +10,6 @@
 local require = require
 
 
-local table_new = require "table.new"
-local isempty = require "table.isempty"
 local buffer = require "string.buffer"
 local utils = require "resty.session.utils"
 
@@ -44,6 +42,7 @@ local encrypt_aes_256_gcm = utils.encrypt_aes_256_gcm
 local decrypt_aes_256_gcm = utils.decrypt_aes_256_gcm
 local encode_base64url = utils.encode_base64url
 local decode_base64url = utils.decode_base64url
+local table_is_empty = utils.is_empty_table
 local load_storage = utils.load_storage
 local encode_json = utils.encode_json
 local decode_json = utils.decode_json
@@ -51,6 +50,7 @@ local base64_size = utils.base64_size
 local hmac_sha256 = utils.hmac_sha256
 local rand_bytes = utils.rand_bytes
 local unset_flag = utils.unset_flag
+local table_new = utils.table_new
 local set_flag = utils.set_flag
 local has_flag = utils.has_flag
 local inflate = utils.inflate
@@ -103,57 +103,55 @@ local MAX_ROLLING_OFFSET = 2 ^ (ROLLING_OFFSET_SIZE * 8) - 1 --     ~136 years
 local MAX_IDLING_OFFSET  = 2 ^ (IDLING_OFFSET_SIZE  * 8) - 1 --     ~194 days
 local MAX_DATA_SIZE      = 2 ^ (DATA_SIZE           * 8) - 1 -- 16777215 bytes
 local MAX_TTL            = 34560000                          --      400 days
--- see: https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-11#section-4.1.2.1
+-- see: https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-20#section-5.5
 
 
-local FLAGS_NONE   = 0x0000
-local FLAG_STORAGE = 0x0001
-local FLAG_FORGET  = 0x0002
-local FLAG_DEFLATE = 0x0010
+local FLAGS_NONE           = 0x0000 -- 0000 0000 0000 0000
+local FLAG_STORAGE         = 0x0001 -- 0000 0000 0000 0001
+local FLAG_FORGET          = 0x0002 -- 0000 0000 0000 0010
+local FLAG_DEFLATE         = 0x0010 -- 0000 0000 0001 0000
+local FLAG_BIND_IP         = 0x0100 -- 0000 0001 0000 0000
+local FLAG_BIND_SCHEME     = 0x0200 -- 0000 0010 0000 0000
+local FLAG_BIND_USER_AGENT = 0x0400 -- 0000 0100 0000 0000
 
 
-local DEFAULT_AUDIENCE = "default"
-local DEFAULT_SUBJECT
-local DEFAULT_ENFORCE_SAME_SUBJECT = false
-local DEFAULT_META = {}
 local DEFAULT_IKM
 local DEFAULT_IKM_FALLBACKS
-local DEFAULT_HASH_STORAGE_KEY = false
-local DEFAULT_HASH_SUBJECT = false
-local DEFAULT_STORE_METADATA = false
-local DEFAULT_TOUCH_THRESHOLD = 60 -- 1 minute
-local DEFAULT_COMPRESSION_THRESHOLD = 1024 -- 1 kB
+local DEFAULT_COOKIE_PREFIX
+local DEFAULT_COOKIE_NAME
+local DEFAULT_COOKIE_PATH
+local DEFAULT_COOKIE_DOMAIN
+local DEFAULT_COOKIE_HTTP_ONLY
+local DEFAULT_COOKIE_SECURE
+local DEFAULT_COOKIE_PRIORITY
+local DEFAULT_COOKIE_SAME_SITE
+local DEFAULT_COOKIE_SAME_PARTY
+local DEFAULT_COOKIE_PARTITIONED
+local DEFAULT_REMEMBER
+local DEFAULT_REMEMBER_SAFETY
+local DEFAULT_REMEMBER_COOKIE_NAME
+local DEFAULT_AUDIENCE
+local DEFAULT_SUBJECT
+local DEFAULT_ENFORCE_SAME_SUBJECT
+local DEFAULT_STALE_TTL
+local DEFAULT_IDLING_TIMEOUT
+local DEFAULT_ROLLING_TIMEOUT
+local DEFAULT_ABSOLUTE_TIMEOUT
+local DEFAULT_REMEMBER_ROLLING_TIMEOUT
+local DEFAULT_REMEMBER_ABSOLUTE_TIMEOUT
+local DEFAULT_HASH_STORAGE_KEY
+local DEFAULT_HASH_SUBJECT
+local DEFAULT_STORE_METADATA
+local DEFAULT_TOUCH_THRESHOLD
+local DEFAULT_COMPRESSION_THRESHOLD
+local DEFAULT_FLAGS
 local DEFAULT_REQUEST_HEADERS
 local DEFAULT_RESPONSE_HEADERS
-
-
-local DEFAULT_COOKIE_NAME = "session"
-local DEFAULT_COOKIE_PATH = "/"
-local DEFAULT_COOKIE_SAME_SITE = "Lax"
-local DEFAULT_COOKIE_SAME_PARTY
-local DEFAULT_COOKIE_PRIORITY
-local DEFAULT_COOKIE_PARTITIONED
-local DEFAULT_COOKIE_HTTP_ONLY = true
-local DEFAULT_COOKIE_PREFIX
-local DEFAULT_COOKIE_DOMAIN
-local DEFAULT_COOKIE_SECURE
-
-
-local DEFAULT_REMEMBER_COOKIE_NAME = "remember"
-local DEFAULT_REMEMBER_SAFETY = "Medium"
-local DEFAULT_REMEMBER_META = false
-local DEFAULT_REMEMBER = false
-
-
-local DEFAULT_STALE_TTL                 = 10      -- 10 seconds
-local DEFAULT_IDLING_TIMEOUT            = 900     -- 15 minutes
-local DEFAULT_ROLLING_TIMEOUT           = 3600    --  1 hour
-local DEFAULT_ABSOLUTE_TIMEOUT          = 86400   --  1 day
-local DEFAULT_REMEMBER_ROLLING_TIMEOUT  = 604800  --  1 week
-local DEFAULT_REMEMBER_ABSOLUTE_TIMEOUT = 2592000 -- 30 days
-
-
 local DEFAULT_STORAGE
+
+
+local DUMMY_META = {}
+local DUMMY_REMEMBER_META = false
 
 
 local STATE_NEW    = "new"
@@ -173,9 +171,18 @@ local HEADER_BUFFER = buffer.new(HEADER_SIZE)
 local FLAGS_BUFFER  = buffer.new(128)
 local DATA_BUFFER   = buffer.new(MAX_COOKIES_SIZE)
 local HIDE_BUFFER   = buffer.new(256)
+local BIND_BUFFER   = buffer.new(HEADER_SIZE + 256)
 
 
 local DATA = table_new(2, 0)
+
+
+local BINDS = {
+  ip                 = FLAG_BIND_IP,
+  scheme             = FLAG_BIND_SCHEME,
+  user_agent         = FLAG_BIND_USER_AGENT,
+  ["user-agent"]     = FLAG_BIND_USER_AGENT,
+}
 
 
 local HEADERS = {
@@ -228,6 +235,41 @@ local function sha256_subject(subject)
   end
 
   return hashed_subject
+end
+
+
+local function bind_append(value, bound)
+  if value and value ~= "" then
+    if not bound then
+      BIND_BUFFER:set(value)
+    else
+      BIND_BUFFER:put("|", value)
+    end
+    return true
+  end
+  return bound
+end
+
+
+local function bind(msg, flags)
+  if not flags then
+    return msg
+  end
+
+  local bind_ip = has_flag(flags, FLAG_BIND_IP)
+  local bind_scheme = has_flag(flags, FLAG_BIND_SCHEME)
+  local bind_user_agent = has_flag(flags, FLAG_BIND_USER_AGENT)
+  if bind_ip or bind_scheme or bind_user_agent then
+    local bound = false
+    if bind_ip         then bound = bind_append(var.remote_addr,     bound) end
+    if bind_scheme     then bound = bind_append(var.scheme,          bound) end
+    if bind_user_agent then bound = bind_append(var.http_user_agent, bound) end
+    if bound then
+      return msg .. "#" .. sha256(BIND_BUFFER:get())
+    end
+  end
+
+  return msg
 end
 
 
@@ -307,6 +349,28 @@ local function merge_cookies(cookies, cookie_name_size, cookie_name, cookie_data
     end
   end
 end
+
+
+local function get_store_ttl(self, remember, current_time, creation_time, rolling_offset)
+  local ttl = MAX_TTL
+
+  local rolling_timeout = remember and self.remember_rolling_timeout or self.rolling_timeout
+  if rolling_timeout > 0 and rolling_timeout < MAX_TTL then
+    ttl = rolling_timeout
+  end
+
+  if rolling_offset then
+    ttl = ttl - (current_time - creation_time - rolling_offset)
+  end
+
+  local absolute_timeout = remember and self.remember_absolute_timeout or self.absolute_timeout
+  if absolute_timeout > 0 and absolute_timeout < MAX_TTL then
+    ttl = min(absolute_timeout - (current_time - creation_time), ttl)
+  end
+
+  return max(ttl, 1)
+end
+
 
 
 local function get_store_metadata(self)
@@ -429,6 +493,15 @@ local function get_property(self, name)
 
   else
     return self.meta[name]
+  end
+end
+
+
+local function derive_aes_key(ikm, sid, remember_safety)
+  if remember_safety then
+    return derive_aes_gcm_256_key_and_iv(ikm, sid, remember_safety)
+  else
+    return derive_aes_gcm_256_key_and_iv(ikm, sid)
   end
 end
 
@@ -614,7 +687,7 @@ local function open(self, remember, meta_only)
       return nil, "invalid session message authentication code"
     end
 
-    local msg = sub(header_decoded, 1, HEADER_MAC_SIZE)
+    local msg = bind(sub(header_decoded, 1, HEADER_MAC_SIZE), flags)
     local expected_mac, err = calculate_mac(ikm, sid, msg)
     if mac ~= expected_mac then
       local fallback_keys = self.ikm_fallbacks
@@ -753,13 +826,7 @@ local function open(self, remember, meta_only)
     return true
   end
 
-  local aes_key, err, iv
-  if remember then
-    aes_key, err, iv = derive_aes_gcm_256_key_and_iv(ikm, sid, self.remember_safety)
-  else
-    aes_key, err, iv = derive_aes_gcm_256_key_and_iv(ikm, sid)
-  end
-
+  local aes_key, err, iv = derive_aes_key(ikm, sid, remember and self.remember_safety)
   if not aes_key then
     return nil, errmsg(err, "unable to derive session decryption key")
   end
@@ -933,13 +1000,8 @@ local function save(self, state, remember)
   HEADER_BUFFER:put(COOKIE_TYPE, packed_flags, sid, packed_creation_time, packed_rolling_offset, packed_data_size)
 
   local ikm = self.ikm
-  local aes_key, iv
-  if remember then
-    aes_key, err, iv = derive_aes_gcm_256_key_and_iv(ikm, sid, self.remember_safety)
-  else
-    aes_key, err, iv = derive_aes_gcm_256_key_and_iv(ikm, sid)
-  end
 
+  local aes_key, err, iv = derive_aes_key(ikm, sid, remember and self.remember_safety)
   if not aes_key then
     return nil, errmsg(err, "unable to derive session encryption key")
   end
@@ -951,7 +1013,8 @@ local function save(self, state, remember)
 
   HEADER_BUFFER:put(tag, packed_idling_offset)
 
-  local mac, err = calculate_mac(ikm, sid, HEADER_BUFFER:tostring())
+  local msg = bind(HEADER_BUFFER:tostring(), flags)
+  local mac, err = calculate_mac(ikm, sid, msg)
   if not mac then
     return nil, err
   end
@@ -1080,14 +1143,10 @@ local function save(self, state, remember)
       end
     end
 
-    local ttl = remember and self.remember_rolling_timeout or self.rolling_timeout
-    if ttl == 0 or ttl > MAX_TTL then
-      ttl = MAX_TTL
-    end
-
+    local store_ttl = get_store_ttl(self, remember, creation_time, current_time)
     local store_metadata = get_store_metadata(self)
 
-    local ok, err = storage:set(cookie_name, key, data, ttl, current_time, old_key, self.stale_ttl, store_metadata, remember)
+    local ok, err = storage:set(cookie_name, key, data, store_ttl, current_time, old_key, self.stale_ttl, store_metadata, remember)
     if not ok then
       return nil, errmsg(err, "unable to store session data")
     end
@@ -1172,13 +1231,8 @@ local function save_info(self, data, remember)
   end
 
   local current_time = time()
-
-  local ttl = self.rolling_timeout
-  if ttl == 0 or ttl > MAX_TTL then
-    ttl = MAX_TTL
-  end
-  ttl = max(ttl - (current_time - meta.creation_time - meta.rolling_offset), 1)
-  local ok, err = self.storage:set(cookie_name, key, data, ttl, current_time)
+  local store_ttl = get_store_ttl(self, false, current_time, meta.creation_time, meta.rolling_offset)
+  local ok, err = self.storage:set(cookie_name, key, data, store_ttl, current_time)
   if not ok then
     return nil, errmsg(err, "unable to store session info")
   end
@@ -1460,7 +1514,10 @@ end
 
 function fake_info_mt:save()
   local session = self.session
-  assert(session.state == STATE_OPEN, "unable to save session info on nonexistent or closed session")
+  assert(session.state ~= STATE_CLOSED, "unable to save session info on closed session")
+  if session.state ~= STATE_OPEN then
+    return nil, "unable to save session info on nonexistent session"
+  end
   return session:save()
 end
 
@@ -1550,7 +1607,11 @@ end
 -- @treturn string error message
 function info_mt:save()
   local session = self.session
-  assert(session.state == STATE_OPEN, "unable to save session info on nonexistent or closed session")
+  assert(session.state ~= STATE_CLOSED, "unable to save session info on closed session")
+  if session.state ~= STATE_OPEN then
+    return nil, "unable to save session info on nonexistent session"
+  end
+
   local data = self.data
   if not data then
     return true
@@ -1616,7 +1677,7 @@ end
 -- @tparam table data data
 --
 -- @usage
--- local session, err, exists = require "resty.session".open()
+-- local session, err, exists = require("resty.session").open()
 -- if not exists then
 --   session:set_data({
 --     cart = {},
@@ -1637,7 +1698,7 @@ end
 -- @treturn table value
 --
 -- @usage
--- local session, err, exists = require "resty.session".open()
+-- local session, err, exists = require("resty.session").open()
 -- if exists then
 --   local data = session:get_data()
 --   ngx.req.set_header("Authorization", "Bearer " .. data.access_token)
@@ -1655,7 +1716,7 @@ end
 -- @tparam string key key
 -- @param value value
 --
--- local session, err, exists = require "resty.session".open()
+-- local session, err, exists = require("resty.session").open()
 -- if not exists then
 --   session:set("access-token", "eyJ...")
 --   session:save()
@@ -1678,7 +1739,7 @@ end
 -- @return value
 --
 -- @usage
--- local session, err, exists = require "resty.session".open()
+-- local session, err, exists = require("resty.session").open()
 -- if exists then
 --   local access_token = session:get("access-token")
 --   ngx.req.set_header("Authorization", "Bearer " .. access_token)
@@ -1700,7 +1761,7 @@ end
 -- @tparam string audience audience
 --
 -- @usage
--- local session = require "resty.session".new()
+-- local session = require("resty.session").new()
 -- session.set_audience("my-service")
 function metatable:set_audience(audience)
   assert(self.state ~= STATE_CLOSED, "unable to set audience on closed session")
@@ -1764,7 +1825,7 @@ end
 -- @tparam string subject subject
 --
 -- @usage
--- local session = require "resty.session".new()
+-- local session = require("resty.session").new()
 -- session.set_subject("john@doe.com")
 function metatable:set_subject(subject)
   assert(self.state ~= STATE_CLOSED, "unable to set subject on closed session")
@@ -1779,7 +1840,7 @@ end
 -- @treturn string subject
 --
 -- @usage
--- local session, err, exists = require "resty.session".open()
+-- local session, err, exists = require("resty.session").open()
 -- if exists then
 --   local subject = session.get_subject()
 -- end
@@ -1806,7 +1867,7 @@ end
 -- @treturn string|number metadata
 --
 -- @usage
--- local session, err, exists = require "resty.session".open()
+-- local session, err, exists = require("resty.session").open()
 -- if exists then
 --   local timeout = session.get_property("timeout")
 -- end
@@ -1828,9 +1889,9 @@ function metatable:set_remember(value)
   assert(self.state ~= STATE_CLOSED, "unable to set remember on closed session")
   assert(type(value) == "boolean", "invalid remember value")
   if value == false then
-    set_flag(self.flags, FLAG_FORGET)
+    self.flags = set_flag(self.flags, FLAG_FORGET)
   else
-    unset_flag(self.flags, FLAG_FORGET)
+    self.flags = unset_flag(self.flags, FLAG_FORGET)
   end
 
   self.remember = value
@@ -1881,9 +1942,9 @@ function metatable:open()
   end
 
   self.state = STATE_NEW
-  self.meta = DEFAULT_META
+  self.meta = DUMMY_META
 
-  local ok, err = save(self, STATE_OPEN)
+  ok, err = save(self, STATE_OPEN)
   if not ok then
     return nil, err
   end
@@ -1936,7 +1997,10 @@ end
 -- @treturn true|nil ok
 -- @treturn string error message
 function metatable:touch()
-  assert(self.state == STATE_OPEN, "unable to touch nonexistent or closed session")
+  assert(self.state ~= STATE_CLOSED, "unable to touch closed session")
+  if self.state ~= STATE_OPEN then
+    return nil, "unable to touch nonexistent session"
+  end
 
   local meta = self.meta
   local idling_offset = min(time() - meta.creation_time - meta.rolling_offset, MAX_IDLING_OFFSET)
@@ -1944,7 +2008,8 @@ function metatable:touch()
   HEADER_BUFFER:reset():put(sub(meta.header, 1, HEADER_TOUCH_SIZE),
                             bpack(IDLING_OFFSET_SIZE, idling_offset))
 
-  local mac, err = calculate_mac(meta.ikm, meta.sid, HEADER_BUFFER:tostring())
+  local msg = bind(HEADER_BUFFER:tostring(), meta.flags)
+  local mac, err = calculate_mac(meta.ikm, meta.sid, msg)
   if not mac then
     return nil, err
   end
@@ -1987,7 +2052,10 @@ end
 -- @treturn true|nil ok
 -- @treturn string error message
 function metatable:refresh()
-  assert(self.state == STATE_OPEN, "unable to refresh nonexistent or closed session")
+  assert(self.state ~= STATE_CLOSED, "unable to refresh closed session")
+  if self.state ~= STATE_OPEN then
+    return nil, "unable to refresh nonexistent session"
+  end
 
   local rolling_timeout = self.rolling_timeout
   local idling_timeout = self.idling_timeout
@@ -2026,7 +2094,10 @@ end
 -- @treturn true|nil ok
 -- @treturn string error message
 function metatable:logout()
-  assert(self.state == STATE_OPEN, "unable to logout nonexistent or closed session")
+  assert(self.state ~= STATE_CLOSED, "unable to logout closed session")
+  if self.state ~= STATE_OPEN then
+    return nil, "unable to logout nonexistent session"
+  end
 
   local data = self.data
   if #data == 1 then
@@ -2039,7 +2110,7 @@ function metatable:logout()
   if info_data then
     local audience = data[data_index][2]
     info_data[audience] = nil
-    if isempty(info_data) then
+    if table_is_empty(info_data) then
       info_store.data = false
     end
   end
@@ -2074,7 +2145,10 @@ end
 -- @treturn true|nil ok
 -- @treturn string error message
 function metatable:destroy()
-  assert(self.state == STATE_OPEN, "unable to destroy nonexistent or closed session")
+  assert(self.state ~= STATE_CLOSED, "unable to destroy closed session")
+  if self.state ~= STATE_OPEN then
+    return nil, "unable to destroy nonexistent session"
+  end
 
   local ok, err = destroy(self)
   if not ok then
@@ -2119,20 +2193,27 @@ end
 -- to the upstream service.
 --
 -- @function instance:clear_request_cookie
+-- @treturn true|nil ok
+-- @treturn string error message
 function metatable:clear_request_cookie()
-  assert(self.state == STATE_OPEN, "unable to hide nonexistent or closed session")
+  assert(self.state ~= STATE_CLOSED, "unable to clear session request cookie on closed session")
+  if self.state ~= STATE_OPEN then
+    return nil, "unable to clear session request cookie on nonexistent session"
+  end
 
   local ok = clear_request_cookie(self)
   if not ok then
-    log(NOTICE, "[session] unable to clear session request cookie")
+    return nil, "unable to clear session request cookie"
   end
 
   if get_remember(self) then
     ok = clear_request_cookie(self, true)
     if not ok then
-      log(NOTICE, "[session] unable to clear persistent session request cookie")
+      return nil, "unable to clear persistent session request cookie"
     end
   end
+
+  return true
 end
 
 
@@ -2141,18 +2222,25 @@ end
 --
 -- @function instance:set_headers
 -- @tparam[opt] string ...
+-- @treturn true|nil ok
+-- @treturn string error message
 function metatable:set_headers(...)
-  assert(self.state == STATE_OPEN, "unable to set request/response headers of nonexistent or closed session")
+  assert(self.state ~= STATE_CLOSED, "unable to set request/response headers on closed session")
+  if self.state ~= STATE_OPEN then
+    return nil, "unable to set request/response headers on nonexistent session"
+  end
 
   local count = select("#", ...)
   if count == 0 then
     set_property_headers(self, self.request_headers, set_request_header)
     set_property_headers(self, self.response_headers, set_response_header)
-    return
+    return true
   end
 
   set_property_headers_vararg(self, set_request_header, count, ...)
   set_property_headers_vararg(self, set_response_header, count, ...)
+
+  return true
 end
 
 
@@ -2161,16 +2249,22 @@ end
 --
 -- @function instance:set_request_headers
 -- @tparam[opt] string ...
+-- @treturn true|nil ok
+-- @treturn string error message
 function metatable:set_request_headers(...)
-  assert(self.state == STATE_OPEN, "unable to set request headers of nonexistent or closed session")
+  assert(self.state ~= STATE_CLOSED, "unable to set request headers on closed session")
+  if self.state ~= STATE_OPEN then
+    return nil, "unable to set request headers on nonexistent session"
+  end
 
   local count = select("#", ...)
   if count == 0 then
     set_property_headers(self, self.request_headers, set_request_header)
-    return
+    return true
   end
 
   set_property_headers_vararg(self, set_request_header, count, ...)
+  return true
 end
 
 
@@ -2179,22 +2273,28 @@ end
 --
 -- @function instance:set_response_headers
 -- @tparam[opt] string ...
+-- @treturn true|nil ok
+-- @treturn string error message
 function metatable:set_response_headers(...)
-  assert(self.state == STATE_OPEN, "unable to set response headers of nonexistent or closed session")
+  assert(self.state ~= STATE_CLOSED, "unable to set response headers on closed session")
+  if self.state ~= STATE_OPEN then
+    return nil, "unable to set response headers on nonexistent session"
+  end
 
   local count = select("#", ...)
   if count == 0 then
     set_property_headers(self, self.response_headers, set_response_header)
-    return
+    return true
   end
 
   set_property_headers_vararg(self, set_response_header, count, ...)
+  return true
 end
 
 
 
 local session = {
-  _VERSION = "4.0.5",
+  _VERSION = "4.1.2",
   metatable = metatable,
 }
 
@@ -2237,6 +2337,7 @@ local session = {
 -- @field store_metadata Whether to also store metadata of sessions, such as collecting data of sessions for a specific audience belonging to a specific subject (defaults to `false`).
 -- @field touch_threshold Touch threshold controls how frequently or infrequently the `session:refresh` touches the cookie, e.g. `60` (defaults to `60`, or a minute) (in seconds)
 -- @field compression_threshold Compression threshold controls when the data is deflated, e.g. `1024` (defaults to `1024`, or a kilobyte) (in bytes)
+-- @field bind Bind the session to data acquired from the HTTP request or connection, use `ip`, `scheme`, `user-agent`. E.g. `{ "scheme", "user-agent" }` will calculate MAC utilizing also HTTP request `Scheme` and `User-Agent` header.
 -- @field request_headers Set of headers to send to upstream, use `id`, `audience`, `subject`, `timeout`, `idling-timeout`, `rolling-timeout`, `absolute-timeout`. E.g. `{ "id", "timeout" }` will set `Session-Id` and `Session-Timeout` request headers when `set_headers` is called.
 -- @field response_headers Set of headers to send to downstream, use `id`, `audience`, `subject`, `timeout`, `idling-timeout`, `rolling-timeout`, `absolute-timeout`. E.g. `{ "id", "timeout" }` will set `Session-Id` and `Session-Timeout` response headers when `set_headers` is called.
 -- @field storage Storage is responsible of storing session data, use `nil` or `"cookie"` (data is stored in cookie), `"dshm"`, `"file"`, `"memcached"`, `"mysql"`, `"postgres"`, `"redis"`, or `"shm"`, or give a name of custom module (`"custom-storage"`), or a `table` that implements session storage interface (defaults to `nil`)
@@ -2267,7 +2368,7 @@ local session = {
 -- @tparam[opt] table configuration session @{configuration} overrides
 --
 -- @usage
--- require "resty.session".init({
+-- require("resty.session").init({
 --   audience = "my-application",
 --   storage = "redis",
 --   redis = {
@@ -2275,140 +2376,128 @@ local session = {
 --     password = "storage",
 --   },
 -- })
-function session.init(configuration)
-  if configuration then
-    local ikm = configuration.ikm
-    if ikm then
-      assert(#ikm == KEY_SIZE, "invalid ikm size")
-      DEFAULT_IKM = ikm
 
-    else
-      local secret = configuration.secret
-      if secret then
-        DEFAULT_IKM = assert(sha256(secret))
-      end
-    end
 
-    local ikm_fallbacks = configuration.ikm_fallbacks
-    if ikm_fallbacks then
-      local count = #ikm_fallbacks
-      for i = 1, count do
-        assert(#ikm_fallbacks[i] == KEY_SIZE, "invalid ikm size in ikm_fallbacks")
+local function opt(configuration, name, default)
+  if not configuration then
+    return default
+  end
+
+  local value = configuration[name]
+  if value == nil then
+    if name == "ikm" then
+      if configuration.secret then
+        value = assert(sha256(configuration.secret))
       end
 
-      DEFAULT_IKM_FALLBACKS = ikm_fallbacks
-
-    else
+    elseif name == "ikm_fallbacks" then
       local secret_fallbacks = configuration.secret_fallbacks
       if secret_fallbacks then
         local count = #secret_fallbacks
         if count > 0 then
-          DEFAULT_IKM_FALLBACKS = table_new(count, 0)
+          value = table_new(count, 0)
           for i = 1, count do
-            DEFAULT_IKM_FALLBACKS[i] = assert(sha256(secret_fallbacks[i]))
+            value[i] = assert(sha256(secret_fallbacks[i]))
           end
-
-        else
-          DEFAULT_IKM_FALLBACKS = nil
         end
       end
     end
 
-    local request_headers = configuration.request_headers
-    if request_headers then
-      local count = #request_headers
-      for i = 1, count do
-        assert(HEADERS[request_headers[i]], "invalid request header")
+  else
+    if name == "ikm" then
+      assert(#value == KEY_SIZE, "invalid ikm size")
+
+    elseif name == "ikm_fallbacks" then
+      local count = #value
+      if count > 0 then
+        for i = 1, count do
+          assert(#value[i] == KEY_SIZE, "invalid ikm size in ikm_fallbacks")
+        end
       end
 
-      DEFAULT_REQUEST_HEADERS = request_headers
-    end
+    elseif name == "hash_storage_key" then
+      value = value and sha256_storage_key or encode_base64url
 
-    local response_headers = configuration.response_headers
-    if response_headers then
-      local count = #response_headers
-      for i = 1, count do
-        assert(HEADERS[response_headers[i]], "invalid response header")
+    elseif name == "hash_subject" then
+      value = value and sha256_subject or encode_base64url
+
+    elseif name == "bind" then
+      local count = #value
+      if count > 0 then
+        local flags = FLAGS_NONE
+        for i = 1, count do
+          flags = set_flag(flags, assert(BINDS[value[i]], "invalid bind"))
+        end
+        value = flags
       end
 
-      DEFAULT_RESPONSE_HEADERS = response_headers
-    end
+    elseif name == "request_headers" or name == "response_headers" then
+      local count = #value
+      if count > 0 then
+        for i = 1, count do
+          assert(HEADERS[value[i]], "invalid header name")
+        end
+      end
 
-    DEFAULT_COOKIE_NAME               = configuration.cookie_name               or DEFAULT_COOKIE_NAME
-    DEFAULT_COOKIE_PATH               = configuration.cookie_path               or DEFAULT_COOKIE_PATH
-    DEFAULT_COOKIE_DOMAIN             = configuration.cookie_domain             or DEFAULT_COOKIE_DOMAIN
-    DEFAULT_COOKIE_SAME_SITE          = configuration.cookie_same_site          or DEFAULT_COOKIE_SAME_SITE
-    DEFAULT_COOKIE_PRIORITY           = configuration.cookie_priority           or DEFAULT_COOKIE_PRIORITY
-    DEFAULT_COOKIE_PREFIX             = configuration.cookie_prefix             or DEFAULT_COOKIE_PREFIX
-    DEFAULT_REMEMBER_SAFETY           = configuration.remember_safety           or DEFAULT_REMEMBER_SAFETY
-    DEFAULT_REMEMBER_COOKIE_NAME      = configuration.remember_cookie_name      or DEFAULT_REMEMBER_COOKIE_NAME
-    DEFAULT_AUDIENCE                  = configuration.audience                  or DEFAULT_AUDIENCE
-    DEFAULT_SUBJECT                   = configuration.subject                   or DEFAULT_SUBJECT
-    DEFAULT_STALE_TTL                 = configuration.stale_ttl                 or DEFAULT_STALE_TTL
-    DEFAULT_IDLING_TIMEOUT            = configuration.idling_timeout            or DEFAULT_IDLING_TIMEOUT
-    DEFAULT_ROLLING_TIMEOUT           = configuration.rolling_timeout           or DEFAULT_ROLLING_TIMEOUT
-    DEFAULT_ABSOLUTE_TIMEOUT          = configuration.absolute_timeout          or DEFAULT_ABSOLUTE_TIMEOUT
-    DEFAULT_REMEMBER_ROLLING_TIMEOUT  = configuration.remember_rolling_timeout  or DEFAULT_REMEMBER_ROLLING_TIMEOUT
-    DEFAULT_REMEMBER_ABSOLUTE_TIMEOUT = configuration.remember_absolute_timeout or DEFAULT_REMEMBER_ABSOLUTE_TIMEOUT
-    DEFAULT_TOUCH_THRESHOLD           = configuration.touch_threshold           or DEFAULT_TOUCH_THRESHOLD
-    DEFAULT_COMPRESSION_THRESHOLD     = configuration.compression_threshold     or DEFAULT_COMPRESSION_THRESHOLD
-    DEFAULT_STORAGE                   = configuration.storage                   or DEFAULT_STORAGE
+    elseif name == "storage" then
+      if value == false then
+        value = nil
 
-    local cookie_http_only = configuration.cookie_http_only
-    if cookie_http_only ~= nil then
-      DEFAULT_COOKIE_HTTP_ONLY = cookie_http_only
-    end
-
-    local cookie_same_party = configuration.cookie_same_party
-    if cookie_same_party ~= nil then
-      DEFAULT_COOKIE_SAME_PARTY = cookie_same_party
-    end
-
-    local cookie_partitioned = configuration.cookie_partitioned
-    if cookie_partitioned ~= nil then
-      DEFAULT_COOKIE_PARTITIONED = cookie_partitioned
-    end
-
-    local cookie_secure = configuration.cookie_secure
-    if cookie_secure ~= nil then
-      DEFAULT_COOKIE_SECURE = cookie_secure
-    end
-
-    local remember = configuration.remember
-    if remember ~= nil then
-      DEFAULT_REMEMBER = remember
-    end
-
-    local hash_storage_key = configuration.hash_storage_key
-    if hash_storage_key ~= nil then
-      DEFAULT_HASH_STORAGE_KEY = hash_storage_key
-    end
-
-    local hash_subject = configuration.hash_subject
-    if hash_subject ~= nil then
-      DEFAULT_HASH_SUBJECT = hash_subject
-    end
-
-    local store_metadate = configuration.store_metadata
-    if store_metadate ~= nil then
-      DEFAULT_STORE_METADATA = store_metadate
-    end
-
-    local enforce_same_subject = configuration.enforce_same_subject
-    if enforce_same_subject ~= nil then
-      DEFAULT_ENFORCE_SAME_SUBJECT = enforce_same_subject
+      else
+        local t = type(value)
+        if t == "string" then
+          value = load_storage(value, configuration)
+        else
+          assert(t == "table", "invalid session storage")
+        end
+      end
     end
   end
 
-  if not DEFAULT_IKM then
-    DEFAULT_IKM = assert(sha256(assert(rand_bytes(KEY_SIZE))))
+  if value == nil then
+    return default
   end
 
-  if type(DEFAULT_STORAGE) == "string" then
-    DEFAULT_STORAGE = load_storage(DEFAULT_STORAGE, configuration)
-  end
+  return value
 end
 
+
+function session.init(configuration)
+  DEFAULT_IKM                       = opt(configuration, "ikm", DEFAULT_IKM)
+                                   or assert(sha256(assert(rand_bytes(KEY_SIZE))))
+  DEFAULT_IKM_FALLBACKS             = opt(configuration, "ikm_fallbacks")
+  DEFAULT_COOKIE_PREFIX             = opt(configuration, "cookie_prefix")
+  DEFAULT_COOKIE_NAME               = opt(configuration, "cookie_name", "session")
+  DEFAULT_COOKIE_PATH               = opt(configuration, "cookie_path", "/")
+  DEFAULT_COOKIE_DOMAIN             = opt(configuration, "cookie_domain")
+  DEFAULT_COOKIE_HTTP_ONLY          = opt(configuration, "cookie_http_only", true)
+  DEFAULT_COOKIE_SECURE             = opt(configuration, "cookie_secure")
+  DEFAULT_COOKIE_PRIORITY           = opt(configuration, "cookie_priority")
+  DEFAULT_COOKIE_SAME_SITE          = opt(configuration, "cookie_same_site", "Lax")
+  DEFAULT_COOKIE_SAME_PARTY         = opt(configuration, "cookie_same_party")
+  DEFAULT_COOKIE_PARTITIONED        = opt(configuration, "cookie_partitioned")
+  DEFAULT_REMEMBER                  = opt(configuration, "remember", false)
+  DEFAULT_REMEMBER_SAFETY           = opt(configuration, "remember_safety", "Medium")
+  DEFAULT_REMEMBER_COOKIE_NAME      = opt(configuration, "remember_cookie_name", "remember")
+  DEFAULT_AUDIENCE                  = opt(configuration, "audience", "default")
+  DEFAULT_SUBJECT                   = opt(configuration, "subject")
+  DEFAULT_ENFORCE_SAME_SUBJECT      = opt(configuration, "enforce_same_subject", false)
+  DEFAULT_STALE_TTL                 = opt(configuration, "stale_ttl", 10)                      -- 10 seconds
+  DEFAULT_IDLING_TIMEOUT            = opt(configuration, "idling_timeout", 900)                -- 15 minutes
+  DEFAULT_ROLLING_TIMEOUT           = opt(configuration, "rolling_timeout", 3600)              --  1 hour
+  DEFAULT_ABSOLUTE_TIMEOUT          = opt(configuration, "absolute_timeout", 86400)            --  1 day
+  DEFAULT_REMEMBER_ROLLING_TIMEOUT  = opt(configuration, "remember_rolling_timeout", 604800)   --  1 week
+  DEFAULT_REMEMBER_ABSOLUTE_TIMEOUT = opt(configuration, "remember_absolute_timeout", 2592000) -- 30 days
+  DEFAULT_HASH_STORAGE_KEY          = opt(configuration, "hash_storage_key", encode_base64url)
+  DEFAULT_HASH_SUBJECT              = opt(configuration, "hash_subject", encode_base64url)
+  DEFAULT_STORE_METADATA            = opt(configuration, "store_metadata", false)
+  DEFAULT_TOUCH_THRESHOLD           = opt(configuration, "touch_threshold", 60)                --  1 minute
+  DEFAULT_COMPRESSION_THRESHOLD     = opt(configuration, "compression_threshold", 1024)        --  1 kB
+  DEFAULT_FLAGS                     = opt(configuration, "bind", FLAGS_NONE)
+  DEFAULT_REQUEST_HEADERS           = opt(configuration, "request_headers")
+  DEFAULT_RESPONSE_HEADERS          = opt(configuration, "response_headers")
+  DEFAULT_STORAGE                   = opt(configuration, "storage")
+end
 
 ---
 -- Constructors
@@ -2425,85 +2514,50 @@ end
 -- @treturn table session instance
 --
 -- @usage
--- local session = require "resty.session".new()
+-- local session = require("resty.session").new()
 -- -- OR
--- local session = require "resty.session".new({
+-- local session = require("resty.session").new({
 --   audience = "my-application",
 -- })
 function session.new(configuration)
-  local cookie_name               = configuration and configuration.cookie_name               or DEFAULT_COOKIE_NAME
-  local cookie_path               = configuration and configuration.cookie_path               or DEFAULT_COOKIE_PATH
-  local cookie_domain             = configuration and configuration.cookie_domain             or DEFAULT_COOKIE_DOMAIN
-  local cookie_same_site          = configuration and configuration.cookie_same_site          or DEFAULT_COOKIE_SAME_SITE
-  local cookie_priority           = configuration and configuration.cookie_priority           or DEFAULT_COOKIE_PRIORITY
-  local cookie_prefix             = configuration and configuration.cookie_prefix             or DEFAULT_COOKIE_PREFIX
-  local remember_safety           = configuration and configuration.remember_safety           or DEFAULT_REMEMBER_SAFETY
-  local remember_cookie_name      = configuration and configuration.remember_cookie_name      or DEFAULT_REMEMBER_COOKIE_NAME
-  local audience                  = configuration and configuration.audience                  or DEFAULT_AUDIENCE
-  local subject                   = configuration and configuration.subject                   or DEFAULT_SUBJECT
-  local stale_ttl                 = configuration and configuration.stale_ttl                 or DEFAULT_STALE_TTL
-  local idling_timeout            = configuration and configuration.idling_timeout            or DEFAULT_IDLING_TIMEOUT
-  local rolling_timeout           = configuration and configuration.rolling_timeout           or DEFAULT_ROLLING_TIMEOUT
-  local absolute_timeout          = configuration and configuration.absolute_timeout          or DEFAULT_ABSOLUTE_TIMEOUT
-  local remember_rolling_timeout  = configuration and configuration.remember_rolling_timeout  or DEFAULT_REMEMBER_ROLLING_TIMEOUT
-  local remember_absolute_timeout = configuration and configuration.remember_absolute_timeout or DEFAULT_REMEMBER_ABSOLUTE_TIMEOUT
-  local touch_threshold           = configuration and configuration.touch_threshold           or DEFAULT_TOUCH_THRESHOLD
-  local compression_threshold     = configuration and configuration.compression_threshold     or DEFAULT_COMPRESSION_THRESHOLD
-  local storage                   = configuration and configuration.storage                   or DEFAULT_STORAGE
-  local ikm                       = configuration and configuration.ikm
-  local ikm_fallbacks             = configuration and configuration.ikm_fallbacks
-  local request_headers           = configuration and configuration.request_headers
-  local response_headers          = configuration and configuration.response_headers
-
-  local cookie_http_only = configuration and configuration.cookie_http_only
-  if cookie_http_only == nil then
-    cookie_http_only = DEFAULT_COOKIE_HTTP_ONLY
-  end
-
-  local cookie_secure = configuration and configuration.cookie_secure
-  if cookie_secure == nil then
-    cookie_secure = DEFAULT_COOKIE_SECURE
-  end
-
-  local cookie_same_party = configuration and configuration.cookie_same_party
-  if cookie_same_party == nil then
-    cookie_same_party = DEFAULT_COOKIE_SAME_PARTY
-  end
-
-  local cookie_partitioned = configuration and configuration.cookie_partitioned
-  if cookie_partitioned == nil then
-    cookie_partitioned = DEFAULT_COOKIE_PARTITIONED
-  end
-
-  local remember = configuration and configuration.remember
-  if remember == nil then
-    remember = DEFAULT_REMEMBER
-  end
-
-  local hash_storage_key = configuration and configuration.hash_storage_key
-  if hash_storage_key == nil then
-    hash_storage_key = DEFAULT_HASH_STORAGE_KEY
-  end
-
-  local hash_subject = configuration and configuration.hash_subject
-  if hash_subject == nil then
-    hash_subject = DEFAULT_HASH_SUBJECT
-  end
-
-  local store_metadata = configuration and configuration.store_metadata
-  if store_metadata == nil then
-    store_metadata = DEFAULT_STORE_METADATA
-  end
-
-  local enforce_same_subject = configuration and configuration.enforce_same_subject
-  if enforce_same_subject == nil then
-    enforce_same_subject = DEFAULT_ENFORCE_SAME_SUBJECT
-  end
+  local ikm                       = opt(configuration, "ikm",                       DEFAULT_IKM)
+  local ikm_fallbacks             = opt(configuration, "ikm_fallbacks",             DEFAULT_IKM_FALLBACKS)
+  local cookie_prefix             = opt(configuration, "cookie_prefix",             DEFAULT_COOKIE_PREFIX)
+  local cookie_name               = opt(configuration, "cookie_name",               DEFAULT_COOKIE_NAME)
+  local cookie_path               = opt(configuration, "cookie_path",               DEFAULT_COOKIE_PATH)
+  local cookie_domain             = opt(configuration, "cookie_domain",             DEFAULT_COOKIE_DOMAIN)
+  local cookie_http_only          = opt(configuration, "cookie_http_only",          DEFAULT_COOKIE_HTTP_ONLY)
+  local cookie_secure             = opt(configuration, "cookie_secure",             DEFAULT_COOKIE_SECURE)
+  local cookie_priority           = opt(configuration, "cookie_priority",           DEFAULT_COOKIE_PRIORITY)
+  local cookie_same_site          = opt(configuration, "cookie_same_site",          DEFAULT_COOKIE_SAME_SITE)
+  local cookie_same_party         = opt(configuration, "cookie_same_party",         DEFAULT_COOKIE_SAME_PARTY)
+  local cookie_partitioned        = opt(configuration, "cookie_partitioned",        DEFAULT_COOKIE_PARTITIONED)
+  local remember                  = opt(configuration, "remember",                  DEFAULT_REMEMBER)
+  local remember_safety           = opt(configuration, "remember_safety",           DEFAULT_REMEMBER_SAFETY)
+  local remember_cookie_name      = opt(configuration, "remember_cookie_name",      DEFAULT_REMEMBER_COOKIE_NAME)
+  local audience                  = opt(configuration, "audience",                  DEFAULT_AUDIENCE)
+  local subject                   = opt(configuration, "subject",                   DEFAULT_SUBJECT)
+  local enforce_same_subject      = opt(configuration, "enforce_same_subject",      DEFAULT_ENFORCE_SAME_SUBJECT)
+  local stale_ttl                 = opt(configuration, "stale_ttl",                 DEFAULT_STALE_TTL)
+  local idling_timeout            = opt(configuration, "idling_timeout",            DEFAULT_IDLING_TIMEOUT)
+  local rolling_timeout           = opt(configuration, "rolling_timeout",           DEFAULT_ROLLING_TIMEOUT)
+  local absolute_timeout          = opt(configuration, "absolute_timeout",          DEFAULT_ABSOLUTE_TIMEOUT)
+  local remember_rolling_timeout  = opt(configuration, "remember_rolling_timeout",  DEFAULT_REMEMBER_ROLLING_TIMEOUT)
+  local remember_absolute_timeout = opt(configuration, "remember_absolute_timeout", DEFAULT_REMEMBER_ABSOLUTE_TIMEOUT)
+  local hash_storage_key          = opt(configuration, "hash_storage_key",          DEFAULT_HASH_STORAGE_KEY)
+  local hash_subject              = opt(configuration, "hash_subject",              DEFAULT_HASH_SUBJECT)
+  local store_metadata            = opt(configuration, "store_metadata",            DEFAULT_STORE_METADATA)
+  local touch_threshold           = opt(configuration, "touch_threshold",           DEFAULT_TOUCH_THRESHOLD)
+  local compression_threshold     = opt(configuration, "compression_threshold",     DEFAULT_COMPRESSION_THRESHOLD)
+  local flags                     = opt(configuration, "bind",                      DEFAULT_FLAGS)
+  local request_headers           = opt(configuration, "request_headers",           DEFAULT_REQUEST_HEADERS)
+  local response_headers          = opt(configuration, "response_headers",          DEFAULT_RESPONSE_HEADERS)
+  local storage                   = opt(configuration, "storage",                   DEFAULT_STORAGE)
 
   if cookie_prefix == "__Host-" then
     cookie_name          = cookie_prefix .. cookie_name
     remember_cookie_name = cookie_prefix .. remember_cookie_name
-    cookie_path          = DEFAULT_COOKIE_PATH
+    cookie_path          = "/"
     cookie_domain        = nil
     cookie_secure        = true
 
@@ -2551,73 +2605,6 @@ function session.new(configuration)
 
   local cookie_flags = FLAGS_BUFFER:get()
 
-  if ikm then
-    assert(#ikm == KEY_SIZE, "invalid ikm size")
-
-  else
-    local secret = configuration and configuration.secret
-    if secret then
-      ikm = assert(sha256(secret))
-
-    else
-      if not DEFAULT_IKM then
-        DEFAULT_IKM = assert(sha256(assert(rand_bytes(KEY_SIZE))))
-      end
-
-      ikm = DEFAULT_IKM
-    end
-  end
-
-  if ikm_fallbacks then
-    local count = #ikm_fallbacks
-    for i = 1, count do
-      assert(#ikm_fallbacks[i] == KEY_SIZE, "invalid ikm size in ikm_fallbacks")
-    end
-
-  else
-    local secret_fallbacks = configuration and configuration.secret_fallbacks
-    if secret_fallbacks then
-      local count = #secret_fallbacks
-      if count > 0 then
-        ikm_fallbacks = table_new(count, 0)
-        for i = 1, count do
-          ikm_fallbacks[i] = assert(sha256(secret_fallbacks[i]))
-        end
-      end
-
-    else
-      ikm_fallbacks = DEFAULT_IKM_FALLBACKS
-    end
-  end
-
-  if request_headers then
-    local count = #request_headers
-    for i = 1, count do
-      assert(HEADERS[request_headers[i]], "invalid request header")
-    end
-
-  else
-    request_headers = DEFAULT_REQUEST_HEADERS
-  end
-
-  if response_headers then
-    local count = #response_headers
-    for i = 1, count do
-      assert(HEADERS[response_headers[i]], "invalid response header")
-    end
-
-  else
-    response_headers = DEFAULT_RESPONSE_HEADERS
-  end
-
-  local t = type(storage)
-  if t == "string" then
-    storage = load_storage(storage, configuration)
-
-  elseif t ~= "table" then
-    assert(storage == nil, "invalid session storage")
-  end
-
   local self = setmetatable({
     stale_ttl                 = stale_ttl,
     idling_timeout            = idling_timeout,
@@ -2627,8 +2614,8 @@ function session.new(configuration)
     remember_absolute_timeout = remember_absolute_timeout,
     touch_threshold           = touch_threshold,
     compression_threshold     = compression_threshold,
-    hash_storage_key          = hash_storage_key and sha256_storage_key or encode_base64url,
-    hash_subject              = hash_subject and sha256_subject or encode_base64url,
+    hash_storage_key          = hash_storage_key,
+    hash_subject              = hash_subject,
     store_metadata            = store_metadata,
     enforce_same_subject      = enforce_same_subject,
     cookie_name               = cookie_name,
@@ -2636,15 +2623,15 @@ function session.new(configuration)
     remember_cookie_name      = remember_cookie_name,
     remember_safety           = remember_safety,
     remember                  = remember,
-    flags                     = FLAGS_NONE,
+    flags                     = flags,
     storage                   = storage,
     ikm                       = ikm,
     ikm_fallbacks             = ikm_fallbacks,
     request_headers           = request_headers,
     response_headers          = response_headers,
     state                     = STATE_NEW,
-    meta                      = DEFAULT_META,
-    remember_meta             = DEFAULT_REMEMBER_META,
+    meta                      = DUMMY_META,
+    remember_meta             = DUMMY_REMEMBER_META,
     info                      = info,
     data_index                = 1,
     data                      = {
@@ -2684,9 +2671,9 @@ end
 -- @treturn boolean `true`, if session existed, otherwise `false`
 --
 -- @usage
--- local session = require "resty.session".open()
+-- local session = require("resty.session").open()
 -- -- OR
--- local session, err, exists = require "resty.session".open({
+-- local session, err, exists = require("resty.session").open({
 --   audience = "my-application",
 -- })
 function session.open(configuration)
@@ -2715,9 +2702,9 @@ end
 -- @treturn boolean `true`, if session was refreshed, otherwise `false`
 --
 -- @usage
--- local session = require "resty.session".start()
+-- local session = require("resty.session").start()
 -- -- OR
--- local session, err, exists, refreshed = require "resty.session".start({
+-- local session, err, exists, refreshed = require("resty.session").start({
 --   audience = "my-application",
 -- })
 function session.start(configuration)
@@ -2759,9 +2746,9 @@ end
 -- @treturn boolean `true` if session was logged out, otherwise `false`
 --
 -- @usage
--- require "resty.session".logout()
+-- require("resty.session").logout()
 -- -- OR
--- local ok, err, exists, logged_out = require "resty.session".logout({
+-- local ok, err, exists, logged_out = require("resty.session").logout({
 --   audience = "my-application",
 -- })
 function session.logout(configuration)
@@ -2791,9 +2778,9 @@ end
 -- @treturn boolean `true` if session was destroyed, otherwise `false`
 --
 -- @usage
--- require "resty.session".destroy()
+-- require("resty.session").destroy()
 -- -- OR
--- local ok, err, exists, destroyed = require "resty.session".destroy({
+-- local ok, err, exists, destroyed = require("resty.session").destroy({
 --   cookie_name = "auth",
 -- })
 function session.destroy(configuration)
@@ -2834,6 +2821,9 @@ end
 function session.__set_ngx_req_set_header(set_header)
   set_request_header = set_header
 end
+
+
+session.init() -- initialize default values
 
 
 return session

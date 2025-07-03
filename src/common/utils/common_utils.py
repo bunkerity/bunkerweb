@@ -7,6 +7,36 @@ from typing import Dict, List, Optional, Union, Any
 import logging
 
 
+def handle_docker_secrets() -> Dict[str, str]:
+    """Handle Docker secrets by reading from /run/secrets directory (Alpine only)"""
+    secrets = {}
+
+    # Only check for Docker secrets on Alpine Linux
+    os_release_path = Path("/etc/os-release")
+    if not os_release_path.is_file():
+        return secrets
+
+    try:
+        os_release_content = os_release_path.read_text(encoding="utf-8")
+        if "alpine" not in os_release_content.casefold():
+            return secrets
+    except Exception:
+        return secrets
+
+    secrets_dir = Path("/run/secrets")
+    if secrets_dir.is_dir():
+        for secret_file in secrets_dir.glob("*"):
+            if secret_file.is_file():
+                try:
+                    secret_name = secret_file.name.upper()
+                    secret_value = secret_file.read_text(encoding="utf-8").strip()
+                    secrets[secret_name] = secret_value
+                except Exception as e:
+                    print(f"Warning: Failed to read Docker secret {secret_file.name}: {e}")
+
+    return secrets
+
+
 def dict_to_frozenset(d):
     if isinstance(d, list):
         return tuple(sorted(d))

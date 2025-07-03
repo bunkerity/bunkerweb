@@ -3,6 +3,8 @@ local plugin = require "bunkerweb.plugin"
 local utils = require "bunkerweb.utils"
 
 local ngx = ngx
+local date = os.date
+local time = os.time
 local rand = utils.rand
 local subsystem = ngx.config.subsystem
 local tostring = tostring
@@ -111,7 +113,33 @@ function errors:render_template(code)
 	-- Override HSTS header
 	local ssl
 
-	if self.ctx.bw and self.ctx.bw.scheme == "https" then
+	local ctx_bw = nil
+	if self.ctx and self.ctx.bw then
+		ctx_bw = self.ctx.bw
+	end
+
+	local request_id = nil
+	if ctx_bw and ctx_bw.request_id then
+		request_id = ctx_bw.request_id
+	elseif ngx.var and ngx.var.request_id then
+		request_id = ngx.var.request_id
+	end
+
+	local client_ip = nil
+	if ctx_bw and ctx_bw.remote_addr then
+		client_ip = ctx_bw.remote_addr
+	elseif ngx.var and ngx.var.remote_addr then
+		client_ip = ngx.var.remote_addr
+	end
+
+	local request_time
+	if ctx_bw and ctx_bw.start_time then
+		request_time = date("%Y-%m-%d %H:%M:%S UTC", ctx_bw.start_time)
+	else
+		request_time = date("%Y-%m-%d %H:%M:%S UTC", time(date("!*t")))
+	end
+
+	if ctx_bw and ctx_bw.scheme == "https" then
 		ssl = true
 	else
 		ssl = ngx.var.scheme == "https"
@@ -156,6 +184,9 @@ function errors:render_template(code)
 		error_solution = self.default_errors[code].solution or self.default_solution,
 		nonce_script = nonce_script,
 		nonce_style = nonce_style,
+		request_id = request_id,
+		client_ip = client_ip,
+		request_time = request_time,
 	})
 end
 

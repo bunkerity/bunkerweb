@@ -1,3 +1,4 @@
+from re import escape
 from Test import Test
 from os.path import isfile
 from os import getenv
@@ -11,7 +12,7 @@ class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro, domains={}):
         super().__init__(name, "linux", timeout, tests, delay=20)
         self._domains = domains
-        if distro not in ("ubuntu", "debian", "fedora", "fedora-41", "centos", "ubuntu-jammy") and not distro.startswith("rhel"):
+        if distro not in ("ubuntu", "debian", "fedora-40", "fedora-41", "fedora-42", "centos", "ubuntu-jammy") and not distro.startswith("rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
 
@@ -109,9 +110,9 @@ class LinuxTest(Test):
             super()._setup_test()
             test = f"/tmp/tests/{self._name}"
             for ex_domain, test_domain in self._domains.items():
-                Test.replace_in_files(test, ex_domain, test_domain)
+                Test.replace_in_files(test, escape(ex_domain), test_domain)
                 Test.rename(test, ex_domain, test_domain)
-            Test.replace_in_files(test, "example.com", getenv("ROOT_DOMAIN"))
+            Test.replace_in_files(test, escape("example.com"), getenv("ROOT_DOMAIN"))
             proc = self.docker_cp(self.__distro, test, f"/opt/{self._name}")
             if proc.returncode != 0:
                 raise Exception("docker cp failed (test)")
@@ -128,7 +129,7 @@ class LinuxTest(Test):
                 raise Exception("docker exec cp variables.env failed (test)")
             proc = self.docker_exec(
                 self.__distro,
-                "echo '' >> /etc/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /etc/bunkerweb/variables.env ; echo 'LOG_LEVEL=info' >> /etc/bunkerweb/variables.env ; echo 'USE_BUNKERNET=no' >> /etc/bunkerweb/variables.env ; echo 'SEND_ANONYMOUS_REPORT=no' >> /etc/bunkerweb/variables.env ; echo 'USE_DNSBL=no' >> /etc/bunkerweb/variables.env",
+                "echo '' >> /etc/bunkerweb/variables.env ; echo 'USE_LETS_ENCRYPT_STAGING=yes' >> /etc/bunkerweb/variables.env ; echo 'LETS_ENCRYPT_MAX_RETRIES=3' >> /etc/bunkerweb/variables.env ; echo 'LOG_LEVEL=info' >> /etc/bunkerweb/variables.env ; echo 'USE_BUNKERNET=no' >> /etc/bunkerweb/variables.env ; echo 'SEND_ANONYMOUS_REPORT=no' >> /etc/bunkerweb/variables.env ; echo 'USE_DNSBL=no' >> /etc/bunkerweb/variables.env",
             )
             if proc.returncode != 0:
                 raise (Exception("docker exec append variables.env failed (test)"))

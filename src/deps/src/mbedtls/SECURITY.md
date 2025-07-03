@@ -144,3 +144,22 @@ Policy](https://github.com/hacl-star/hacl-star/blob/main/SECURITY.md).)
 
 The Everest variant is only used when `MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED`
 configuration option is defined. This option is off by default.
+
+#### Formatting of X.509 certificates and certificate signing requests
+
+When parsing X.509 certificates and certificate signing requests (CSRs),
+Mbed TLS does not check that they are strictly compliant with X.509 and other
+relevant standards. In the case of signed certificates, the signing party is
+assumed to have performed this validation (and the certificate is trusted to
+be correctly formatted as long as the signature is correct).
+Similarly, CSRs are implicitly trusted by Mbed TLS to be standards-compliant.
+
+**Warning!** Mbed TLS must not be used to sign untrusted CSRs unless extra
+validation is performed separately to ensure that they are compliant to the
+relevant specifications. This makes Mbed TLS on its own unsuitable for use in
+a Certificate Authority (CA).
+
+However, Mbed TLS aims to protect against memory corruption and other
+undefined behavior when parsing certificates and CSRs. If a CSR or signed
+certificate causes undefined behavior when it is parsed by Mbed TLS, that
+is considered a security vulnerability.

@@ -125,9 +125,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.5.2",
+      "name": "lua-resty-openssl v1.6.1",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "e901ea8c98f6e159482611952891d3418ab893e0",
+      "commit": "e0f52762fef5c31532e60c7d58c7a6d9ae5a6905",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -138,9 +138,9 @@
     },
     {
       "id": "lua-resty-redis",
-      "name": "lua-resty-redis v0.31",
+      "name": "lua-resty-redis v0.32",
       "url": "https://github.com/openresty/lua-resty-redis.git",
-      "commit": "193fbd42e9b7953f5157550eb5253c04c081b143",
+      "commit": "11609088f4265a111d42203c6631e5fd0e86baf0",
       "post_install": "rm -r src/deps/src/lua-resty-redis/t"
     },
     {
@@ -152,9 +152,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.0.5",
+      "name": "lua-resty-session v4.1.2",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "5f2aed616d16fa7ca04dc40e23d6941740cd634d",
+      "commit": "f4b773244f7841bbc4065ffe15c422a1bd67efaa",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {
@@ -185,10 +185,17 @@
       "post_install": "rm -r src/deps/src/lua-resty-upload/t"
     },
     {
+      "id": "lua-upstream-nginx-module",
+      "name": "lua-upstream-nginx-module v0.07",
+      "url": "https://github.com/openresty/lua-upstream-nginx-module.git",
+      "commit": "a84fbbb3d3b07684c232f642eccbc5334bafcbfe",
+      "post_install": "rm -r src/deps/src/lua-upstream-nginx-module/t"
+    },
+    {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20250117",
+      "name": "LuaJIT v2.1-20250529",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "93162f34e7424cd0ea3c4046a9ffacce621626bc",
+      "commit": "afc74313c6f919f713e2a25003cf0066852bb24a",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {
@@ -220,9 +227,9 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v3.6.2",
+      "name": "Mbed TLS v3.6.4",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "107ea89daaefb9867ea9121002fbbdf926780e98",
+      "commit": "c765c831e5c2a0971410692f92f7a81d6ec65ec2",
       "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
     },
     {
@@ -240,11 +247,18 @@
       "post_install": "rm -r src/deps/src/modsecurity-nginx/tests && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.rej && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch || rm src/deps/src/modsecurity-nginx/config.orig src/deps/src/modsecurity-nginx/config.rej"
     },
     {
-      "id": "nginx",
+      "id": "nginx-1.26",
       "name": "Nginx v1.26.3",
       "url": "https://github.com/nginx/nginx.git",
       "commit": "1be0fb0c9f9bc3489c7b40576efd6afe6b2eccd5",
-      "post_install": "rm -r src/deps/src/nginx/docs"
+      "post_install": "rm -r src/deps/src/nginx-1.26/docs"
+    },
+    {
+      "id": "nginx-1.28",
+      "name": "Nginx v1.28.0",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "481d28cb4e04c8096b9b6134856891dc52ecc68f",
+      "post_install": "rm -r src/deps/src/nginx-1.28/docs"
     },
     {
       "id": "nginx_cookie_flag_module",
@@ -261,9 +275,9 @@
     },
     {
       "id": "ngx_devel_kit",
-      "name": "Nginx devel kit v0.3.3",
+      "name": "Nginx devel kit v0.3.4",
       "url": "https://github.com/vision5/ngx_devel_kit.git",
-      "commit": "91e30eb05085e7f9762f130cbb883a0e753cf74d",
+      "commit": "bd44d16302273052d6005d7bdb55f74e23813de3",
       "post_install": "rm -r src/deps/src/ngx_devel_kit/examples"
     },
     {

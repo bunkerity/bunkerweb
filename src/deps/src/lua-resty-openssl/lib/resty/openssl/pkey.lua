@@ -65,8 +65,8 @@ local function load_pem_der(txt, opts, funcs)
     return nil, "expecting 'pr', 'pu' or '*' as \"type\""
   end
 
-  if fmt == "JWK" and (typ == "pu" or type == "pr") then
-    return nil, "explictly load private or public key from JWK format is not supported"
+  if fmt == "JWK" and (typ == "pu" or type == "pr") and not OPENSSL_3X then
+    return nil, "explictly load private or public key from JWK format is not supported on OpenSSL 1.1.1"
   end
 
   log_debug("load key using fmt: ", fmt, ", type: ", typ)
@@ -85,7 +85,7 @@ local function load_pem_der(txt, opts, funcs)
     -- don't need BIO when loading JWK key: we parse it in Lua land
     if f == "load_jwk" then
       local err
-      ctx, err = jwk_lib[f](txt)
+      ctx, err = jwk_lib[f](txt, typ, opts and opts.properties)
       if ctx == nil then
         -- if fmt is explictly set to JWK, we should return an error now
         if fmt == "JWK" then
@@ -484,6 +484,7 @@ local load_key_try_funcs = {} do
     },
     JWK = {
       pr = { ['load_jwk'] = {}, },
+      pu = { ['load_jwk'] = {}, },
     }
   }
   -- populate * funcs
@@ -624,8 +625,12 @@ function _M.istype(l)
   return l and l.ctx and ffi.istype(evp_pkey_ptr_ct, l.ctx)
 end
 
-function _M:get_key_type()
-  return objects_lib.nid2table(self.key_type)
+function _M:get_key_type(nid_only)
+  return nid_only and self.key_type or objects_lib.nid2table(self.key_type)
+end
+
+function _M:get_size()
+  return OPENSSL_3X and C.EVP_PKEY_get_size(self.ctx) or C.EVP_PKEY_size(self.ctx)
 end
 
 function _M:get_default_digest_type()

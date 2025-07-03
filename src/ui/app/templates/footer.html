@@ -4,33 +4,38 @@
         <div class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
             <div class="text-body">
                 ©
-                <script nonce="{{ script_nonce }}">document.write(new Date().getFullYear());</script>, made by
+                <script nonce="{{ script_nonce }}">document.write(new Date().getFullYear());</script>, <span data-i18n="footer.made_by">made by</span>
                 <a href="https://www.bunkerity.com/?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
                    class="footer-link">Bunkerity</a>
             </div>
             <div class="d-none d-md-inline-block">
-                <a href="https://docs.bunkerweb.io/latest/?utm_campaign=self&utm_source=ui"
+                <a href="https://docs.bunkerweb.io/{{ bw_version }}/?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
-                   class="footer-link me-4">Documentation</a>
+                   class="footer-link me-4"
+                   data-i18n="footer.documentation">Documentation</a>
                 <a href="https://www.bunkerweb.io/privacy-policy?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
-                   class="footer-link me-4">Privacy</a>
+                   class="footer-link me-4"
+                   data-i18n="footer.privacy">Privacy</a>
                 <a href="https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
-                   class="footer-link me-4">Blog</a>
-                <a href="https://panel.bunkerweb.io/order/support?utm_campaign=self&utm_source=ui"
+                   class="footer-link me-4"
+                   data-i18n="footer.blog">Blog</a>
+                <a href="https://panel.bunkerweb.io/store/support?utm_campaign=self&utm_source=ui"
                    target="_blank"
                    rel="noopener"
-                   class="footer-link me-4">Support</a>
+                   class="footer-link me-4"
+                   data-i18n="footer.support">Support</a>
                 <a href="https://github.com/bunkerity/bunkerweb/blob/{% if bw_version != 'dev' and bw_version != 'testing' %}v{% endif %}{{ bw_version }}/LICENSE.md"
                    class="footer-link"
                    target="_blank"
-                   rel="noreferrer">License</a>
+                   rel="noreferrer"
+                   data-i18n="footer.license">License</a>
             </div>
         </div>
     </div>

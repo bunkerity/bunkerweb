@@ -11,7 +11,7 @@
     },
     "type": {
       "type": "string",
-      "const": ["opaque"]
+      "const": "opaque"
     },
     "location": {
       "type": ["integer","string"],

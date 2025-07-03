@@ -13,16 +13,26 @@
                    target="_blank"
                    rel="noreferrer">
                     <i class="bx bx-download bx-xs"></i>
-                    <span class="d-none d-md-inline">&nbsp;Download</span>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.download">Download</span></span>
                 </a>
             </div>
         </div>
         <p id="cache-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading cache file...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_cache_file">Loading cache file...</p>
         <div id="cache-value"
              class="visually-hidden ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0 courier-prime">
             {{ cache_file }}
         </div>
     </div>
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/cache_view.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

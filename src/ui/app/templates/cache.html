@@ -1,4 +1,13 @@
 {% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block content %}
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
@@ -20,37 +29,62 @@
                   class="visually-hidden">{{ columns_preferences_defaults['cache']|tojson }}</textarea>
         <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
         <p id="cache-waiting"
-           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">Loading cache files...</p>
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_cache_files">Loading cache files...</p>
         <table id="cache"
                class="table responsive nowrap position-relative w-100 d-none">
             <thead>
                 <tr>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="Show the Cache files' details"></th>
+                        data-bs-original-title="Show the Cache files' details"
+                        data-i18n="tooltip.table.cache.details"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Cache file's name">File name</th>
+                        data-bs-original-title="Select all Cache files"
+                        data-i18n="tooltip.table.cache.select_all"></th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Cache file's job name">Job name</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Cache file's job's Plugin">Plugin</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The Service associated with the Cache file">Service</th>
-                    <th data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-original-title="The date and time when the Cache file was last updated">
-                        Last Update
+                        data-bs-original-title="The Cache file's name"
+                        data-i18n="tooltip.table.cache.file_name">
+                        <span data-i18n="table.header.file_name">File name</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Cache file's checksum">Checksum</th>
+                        data-bs-original-title="The Cache file's job name"
+                        data-i18n="tooltip.table.cache.job_name">
+                        <span data-i18n="table.header.job_name">Job name</span>
+                    </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The actions that can be performed on the Cache file">Actions</th>
+                        data-bs-original-title="The Cache file's job's Plugin"
+                        data-i18n="tooltip.table.cache.plugin">
+                        <span data-i18n="table.header.plugin">Plugin</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Service associated with the Cache file"
+                        data-i18n="tooltip.table.cache.service">
+                        <span data-i18n="table.header.service">Service</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The date and time when the Cache file was last updated"
+                        data-i18n="tooltip.table.cache.last_update">
+                        <span data-i18n="table.header.last_update">Last Update</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Cache file's checksum"
+                        data-i18n="tooltip.table.cache.checksum">
+                        <span data-i18n="table.header.checksum">Checksum</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Cache file"
+                        data-i18n="tooltip.table.cache.actions">
+                        <span data-i18n="table.header.actions">Actions</span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -58,12 +92,15 @@
                     {% set service_id = cache['service_id'] if cache['service_id'] else 'global' %}
                     <tr>
                         <td></td>
+                        <td></td>
                         <td>
                             <a href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
                                class="d-flex align-items-center"
                                data-bs-toggle="tooltip"
                                data-bs-placement="bottom"
-                               data-bs-original-title="View {{ cache['file_name'] }}"><i class="bx bx-show bx-xs"></i>&nbsp;{{ cache['file_name'] }}</a>
+                               data-bs-original-title="View {{ cache['file_name'] }}"
+                               data-i18n="tooltip.link.view_file"
+                               data-i18n-options='{"filename": "{{ cache['file_name'] }}"}'><i class="bx bx-show bx-xs"></i>&nbsp;{{ cache['file_name'] }}</a>
                         </td>
                         <td>{{ cache['job_name'] }}</td>
                         <td>{{ cache['plugin_id'] }}</td>
@@ -73,9 +110,12 @@
                                    class="d-flex align-items-center"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="Edit service {{ cache['service_id'] }}"><i class="bx bx-edit bx-xs"></i>&nbsp;{{ cache["service_id"] }}</a>
+                                   data-bs-original-title="Edit service {{ cache['service_id'] }}"
+                                   data-i18n="tooltip.link.edit_service"
+                                   data-i18n-options='{"service": "{{ cache['service_id'] }}"}'><i class="bx bx-edit bx-xs"></i>&nbsp;{{ cache["service_id"] }}</a>
                             {% else %}
-                                <span class="badge rounded-pill bg-label-secondary">global</span>
+                                <span class="badge rounded-pill bg-label-secondary"
+                                      data-i18n="scope.global">Global</span>
                             {% endif %}
                         </td>
                         <td class="cache-last-update-date">
@@ -89,19 +129,38 @@
                                    href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
-                                   data-bs-original-title="View {{ cache['file_name'] }}">
+                                   data-bs-original-title="View {{ cache['file_name'] }}"
+                                   data-i18n="tooltip.link.view_file"
+                                   data-i18n-options='{"filename": "{{ cache['file_name'] }}"}'>
                                     <i class="bx bx-show bx-xs"></i>
                                 </a>
                                 <a role="button"
-                                   class="btn btn-outline-secondary btn-sm"
+                                   class="btn btn-outline-secondary btn-sm me-1"
                                    href="{{ url_for("cache") }}/{{ service_id }}/{{ cache['plugin_id'] }}/{{ cache['job_name'] }}/{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}?download=true"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="bottom"
                                    data-bs-original-title="Download {{ cache['file_name'] }}"
+                                   data-i18n="tooltip.link.download_file"
+                                   data-i18n-options='{"filename": "{{ cache['file_name'] }}"}'
                                    target="_blank"
                                    rel="noreferrer">
                                     <i class="bx bx-download bx-xs"></i>
                                 </a>
+                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly" data-i18n="tooltip.disabled_readonly"{% endif %}>
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm cache-delete-btn{% if is_readonly %} disabled{% endif %}"
+                                            data-service="{{ service_id }}"
+                                            data-plugin="{{ cache['plugin_id'] }}"
+                                            data-job="{{ cache['job_name'] }}"
+                                            data-file="{{ cache['file_name'].replace('/', '_') if cache['file_name'].startswith('folder:') else cache['file_name'] }}"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="bottom"
+                                            data-bs-original-title="Delete Cache File: {{ cache['file_name'] }}"
+                                            data-i18n="tooltip.button.delete_file"
+                                            data-i18n-options='{"filename": "{{ cache['file_name'] }}"}'>
+                                        <i class="bx bx-trash bx-xs"></i>
+                                    </button>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -112,5 +171,65 @@
             </span>
         </table>
     </div>
+    {% if not is_readonly %}
+        <div class="modal modal-xl fade"
+             id="modal-delete-cache"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.confirm_deletion">Confirm deletion</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <form action="{{ url_for("cache") }}/delete" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden"
+                                   id="selected-cache-input-delete"
+                                   name="cache_files"
+                                   value="" />
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.delete_cache_confirmation_alert">
+                                Are you sure you want to delete the selected cache files?
+                            </div>
+                            <div id="selected-cache-delete" class="mb-3"></div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit"
+                                    class="btn btn-outline-danger me-2"
+                                    data-i18n="button.delete">Delete</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/datatables/plugins/ip-address.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/cache.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
 {% endblock %}

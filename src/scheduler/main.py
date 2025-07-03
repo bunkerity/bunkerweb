@@ -28,7 +28,7 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
@@ -83,9 +83,6 @@ FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
 
 HEALTHY_PATH = TMP_PATH.joinpath("scheduler.healthy")
 
-SCHEDULER_TMP_ENV_PATH = TMP_PATH.joinpath("scheduler.env")
-SCHEDULER_TMP_ENV_PATH.touch()
-
 DB_LOCK_FILE = Path(sep, "var", "lib", "bunkerweb", "db.lock")
 LOGGER = setup_logger("Scheduler", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
@@ -116,6 +113,11 @@ IGNORE_FAIL_SENDING_CONFIG = getenv("IGNORE_FAIL_SENDING_CONFIG", "no").lower() 
 
 if IGNORE_FAIL_SENDING_CONFIG:
     LOGGER.warning("Ignoring fail sending config to some BunkerWeb instances ...")
+
+IGNORE_REGEX_CHECK = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
+
+if IGNORE_REGEX_CHECK:
+    LOGGER.warning("Ignoring regex check for settings (we hope you know what you're doing) ...")
 
 
 def handle_stop(signum, frame):
@@ -375,7 +377,7 @@ def generate_caches():
             LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
 
     if job_path.is_dir():
-        for resource_path in job_path.rglob("*"):
+        for resource_path in list(job_path.rglob("*")):
             if resource_path.as_posix().startswith(tuple(ignored_dirs)):
                 continue
 
@@ -399,11 +401,7 @@ def generate_caches():
                 resource_path.chmod(desired_perms)
 
 
-def generate_configs(env: Dict[str, str], logger: Logger = LOGGER) -> bool:
-    content = ""
-    for k, v in env.items():
-        content += f"{k}={v}\n"
-    SCHEDULER_TMP_ENV_PATH.write_text(content)
+def generate_configs(logger: Logger = LOGGER) -> bool:
     # run the generator
     proc = subprocess_run(
         [
@@ -414,8 +412,6 @@ def generate_configs(env: Dict[str, str], logger: Logger = LOGGER) -> bool:
             BUNKERWEB_PATH.joinpath("confs").as_posix(),
             "--output",
             CONFIG_PATH.as_posix(),
-            "--variables",
-            SCHEDULER_TMP_ENV_PATH.as_posix(),
         ],
         stdin=DEVNULL,
         stderr=STDOUT,
@@ -499,7 +495,7 @@ def healthcheck_job():
                     if tz:
                         env["TZ"] = tz
 
-                generate_configs(env, HEALTHCHECK_LOGGER)
+                generate_configs(HEALTHCHECK_LOGGER)
 
                 tmp_threads = [
                     Thread(
@@ -557,7 +553,7 @@ def healthcheck_job():
                 if not api_caller.send_to_apis(
                     "POST",
                     f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
+                    timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
                 )[0]:
                     HEALTHCHECK_LOGGER.error(f"Error while reloading instance {bw_instance.endpoint}")
                     ret = SCHEDULER.db.update_instance(db_instance["hostname"], "loading")
@@ -616,6 +612,13 @@ def backup_failover():
 
 if __name__ == "__main__":
     try:
+        # Handle Docker secrets first
+        docker_secrets = handle_docker_secrets()
+        if docker_secrets:
+            LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
+            # Update environment with secrets
+            environ.update(docker_secrets)
+
         # Don't execute if pid file exists
         pid_path = Path(sep, "var", "run", "bunkerweb", "scheduler.pid")
         if pid_path.is_file():
@@ -639,7 +642,7 @@ if __name__ == "__main__":
             with tmp_variables_path.open() as f:
                 dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
 
-        SCHEDULER = JobScheduler(environ, LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
+        SCHEDULER = JobScheduler(LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
         JOB = Job(LOGGER, __file__, SCHEDULER.db)
 
@@ -700,7 +703,7 @@ if __name__ == "__main__":
             custom_configs = []
             db_configs = SCHEDULER.db.get_custom_configs()
             changes = False
-            for file in CUSTOM_CONFIGS_PATH.rglob("*.conf"):
+            for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
                 if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
                     LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
 
@@ -807,20 +810,7 @@ if __name__ == "__main__":
             thread.join()
 
         LOGGER.info("Running plugins download jobs ...")
-
-        threads.clear()
-        threads.extend(
-            [
-                Thread(target=SCHEDULER.run_single, args=("download-plugins",)),
-                Thread(target=SCHEDULER.run_single, args=("download-pro-plugins",)),
-            ]
-        )
-
-        for thread in threads:
-            thread.start()
-
-        for thread in threads:
-            thread.join()
+        SCHEDULER.run_once(("misc", "pro"))
 
         db_metadata = SCHEDULER.db.get_metadata()
         if db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]:
@@ -867,6 +857,7 @@ if __name__ == "__main__":
 
         del dotenv_env
 
+        FIRST_START = True
         CONFIG_NEED_GENERATION = True
         RUN_JOBS_ONCE = True
         CHANGES = []
@@ -887,6 +878,7 @@ if __name__ == "__main__":
                 if not SCHEDULER.reload(
                     env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
                     changed_plugins=changed_plugins,
+                    ignore_plugins=("misc", "pro") if FIRST_START else (),
                 ):
                     LOGGER.error("At least one job in run_once() failed")
                 else:
@@ -896,7 +888,7 @@ if __name__ == "__main__":
                 healthcheck_job_run = False
 
             if CONFIG_NEED_GENERATION:
-                ret = generate_configs(env)
+                ret = generate_configs()
                 if ret and SCHEDULER.apis:
                     # send nginx configs
                     threads.append(Thread(target=send_file_to_bunkerweb, args=(CONFIG_PATH, "/confs")))
@@ -917,7 +909,7 @@ if __name__ == "__main__":
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
+                        timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
                         response=True,
                     )
                     if not success:
@@ -1007,7 +999,7 @@ if __name__ == "__main__":
                         if not SCHEDULER.send_to_apis(
                             "POST",
                             f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
-                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env["SERVER_NAME"].split(" "))),
+                            timeout=max(RELOAD_MIN_TIMEOUT, 3 * len(env.get("SERVER_NAME", "www.example.com").split(" "))),
                         )[0]:
                             LOGGER.error("Error while reloading bunkerweb with failover configuration, skipping ...")
                 elif not reachable:
@@ -1025,6 +1017,7 @@ if __name__ == "__main__":
             except BaseException as e:
                 LOGGER.error(f"Error while setting changes to checked in the database: {e}")
 
+            FIRST_START = False
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False
             CONFIG_NEED_GENERATION = False
@@ -1151,6 +1144,8 @@ if __name__ == "__main__":
                     ):
                         LOGGER.info("Instances changed, generating ...")
                         INSTANCES_NEED_GENERATION = True
+                        PRO_PLUGINS_NEED_GENERATION = True
+                        PLUGINS_NEED_GENERATION = True
                         CONFIGS_NEED_GENERATION = True
                         CONFIG_NEED_GENERATION = True
                         NEED_RELOAD = True
@@ -1194,15 +1189,17 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     old_env = env.copy()
                     env = SCHEDULER.db.get_config()
-                    if old_env["API_HTTP_PORT"] != env["API_HTTP_PORT"] or old_env["API_SERVER_NAME"] != env["API_SERVER_NAME"]:
+                    if old_env.get("API_HTTP_PORT", "5000") != env.get("API_HTTP_PORT", "5000") or old_env.get("API_SERVER_NAME", "bwapi") != env.get(
+                        "API_SERVER_NAME", "bwapi"
+                    ):
                         err = SCHEDULER.db.update_instances(
                             [
                                 {
                                     "hostname": db_instance["hostname"],
                                     "name": db_instance["name"],
                                     "env": {
-                                        "API_HTTP_PORT": env["API_HTTP_PORT"],
-                                        "API_SERVER_NAME": env["API_SERVER_NAME"],
+                                        "API_HTTP_PORT": env.get("API_HTTP_PORT", "5000"),
+                                        "API_SERVER_NAME": env.get("API_SERVER_NAME", "bwapi"),
                                     },
                                     "type": db_instance["type"],
                                     "status": db_instance["status"],

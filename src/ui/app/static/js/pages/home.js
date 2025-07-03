@@ -1,4 +1,12 @@
 $(function () {
+  // Dynamic translation function that always uses the latest i18next state
+  const t = (key, options = {}) => {
+    if (typeof i18next !== "undefined" && i18next.isInitialized) {
+      return i18next.t(key, options);
+    }
+    return key; // Fallback to key if i18next is not ready
+  };
+
   var headingColor = config.colors.headingColor;
   var legendColor = config.colors.bodyColor;
 
@@ -49,13 +57,15 @@ $(function () {
                   <h5 class="card-title mb-0">${props.ADMIN}</h5>
               </div>
               <div class="card-body p-1 pt-1">
-                  <p class="card-text">Blocked Requests: ${props.blocked}</p>
+                  <p class="card-text">${t(
+                    "dashboard.map.blocked_requests",
+                  )}: ${props.blocked}</p>
               </div>
           </div>
       `
       : `
           <div class="alert alert-primary" role="alert">
-              Hover over a country
+              ${t("dashboard.map.hover_info")}
           </div>
       `;
   };
@@ -162,8 +172,173 @@ $(function () {
 
   let geojson;
 
-  // Load GeoJSON data and add to map
-  $.getJSON(`${baseUrl}/json/countries.geojson`, (geojsonData) => {
+  // Cache for geo data
+  const geoDataCache = {
+    topojson: null,
+    geojson: null,
+  };
+
+  // IndexedDB helper functions
+  const dbName = "BunkerWebGeoData";
+  const dbVersion = 1;
+  const storeName = "geoData";
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(dbName, dbVersion);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(storeName)) {
+          db.createObjectStore(storeName, { keyPath: "key" });
+        }
+      };
+    });
+  }
+
+  async function getFromIndexedDB(key) {
+    try {
+      const db = await openDB();
+      const transaction = db.transaction([storeName], "readonly");
+      const store = transaction.objectStore(storeName);
+      const request = store.get(key);
+
+      return new Promise((resolve, reject) => {
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result?.data);
+      });
+    } catch (e) {
+      console.warn("IndexedDB get failed:", e);
+      return null;
+    }
+  }
+
+  async function setToIndexedDB(key, data) {
+    try {
+      const db = await openDB();
+      const transaction = db.transaction([storeName], "readwrite");
+      const store = transaction.objectStore(storeName);
+      const request = store.put({ key, data });
+
+      return new Promise((resolve, reject) => {
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(true);
+      });
+    } catch (e) {
+      console.warn("IndexedDB set failed:", e);
+      return false;
+    }
+  }
+
+  async function getCachedData(key) {
+    // Try localStorage first (faster)
+    try {
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      console.warn("localStorage get failed, trying IndexedDB:", e);
+      localStorage.removeItem(key);
+    }
+
+    // Fallback to IndexedDB
+    return await getFromIndexedDB(key);
+  }
+
+  async function setCachedData(key, data) {
+    const dataString = JSON.stringify(data);
+    const dataSize = new Blob([dataString]).size;
+
+    // Try localStorage first for smaller data (< 1MB)
+    if (dataSize < 1024 * 1024) {
+      try {
+        localStorage.setItem(key, dataString);
+        return true;
+      } catch (e) {
+        console.warn("localStorage quota exceeded, using IndexedDB:", e);
+      }
+    }
+
+    // Use IndexedDB for larger data or when localStorage fails
+    return await setToIndexedDB(key, data);
+  }
+
+  // Generic helper function to load and cache geo data
+  async function loadAndCacheGeoData(
+    cacheKey,
+    memoryCache,
+    url,
+    processFn,
+    fallbackFn = null,
+  ) {
+    // Check if data is already in memory cache
+    if (memoryCache) {
+      processFn(memoryCache);
+      return;
+    }
+
+    // Try to load from persistent cache first
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+      try {
+        // Update memory cache
+        if (cacheKey.includes("topojson")) {
+          geoDataCache.topojson = cachedData;
+        } else {
+          geoDataCache.geojson = cachedData;
+        }
+        processFn(cachedData);
+        return;
+      } catch (e) {
+        console.warn(`Failed to parse cached ${cacheKey} data`);
+      }
+    }
+
+    // Load data from server
+    $.getJSON(url, async (data) => {
+      // Update memory cache
+      if (cacheKey.includes("topojson")) {
+        geoDataCache.topojson = data;
+      } else {
+        geoDataCache.geojson = data;
+      }
+
+      // Cache the data
+      const cached = await setCachedData(cacheKey, data);
+      if (!cached) {
+        console.warn(`Failed to cache ${cacheKey} data`);
+      }
+      processFn(data);
+    }).fail(function () {
+      if (fallbackFn) {
+        fallbackFn();
+      }
+    });
+  }
+
+  // Function to load and cache geo data
+  async function loadGeoData() {
+    await loadAndCacheGeoData(
+      "bunkerweb_topojson_data",
+      geoDataCache.topojson,
+      `${baseUrl}/json/countries.topojson`,
+      processTopoJSONData,
+      loadGeoJSONFallback,
+    );
+  }
+
+  // Function to process TopoJSON data
+  function processTopoJSONData(topojsonData) {
+    // Convert TopoJSON to GeoJSON
+    const geojsonData = topojson.feature(
+      topojsonData,
+      topojsonData.objects.countries,
+    );
+
     // Assign value to each country from requestsMapData
     geojsonData.features.forEach((feature) => {
       const isoCode = feature.properties.ISO_A2;
@@ -178,7 +353,37 @@ $(function () {
       style: style,
       onEachFeature: onEachFeature,
     }).addTo(map);
-  });
+  }
+
+  // Function to load GeoJSON as fallback
+  async function loadGeoJSONFallback() {
+    console.warn("Failed to load TopoJSON, falling back to GeoJSON");
+    await loadAndCacheGeoData(
+      "bunkerweb_geojson_data",
+      geoDataCache.geojson,
+      `${baseUrl}/json/countries.geojson`,
+      processGeoJSONData,
+    );
+  }
+
+  // Function to process GeoJSON data
+  function processGeoJSONData(geojsonData) {
+    geojsonData.features.forEach((feature) => {
+      const isoCode = feature.properties.ISO_A2;
+      feature.properties.value =
+        (requestsMapData[isoCode] || {})["request"] || 0;
+      feature.properties.blocked =
+        (requestsMapData[isoCode] || {})["blocked"] || 0;
+    });
+
+    geojson = L.geoJson(geojsonData, {
+      style: style,
+      onEachFeature: onEachFeature,
+    }).addTo(map);
+  }
+
+  // Initialize geo data loading
+  loadGeoData();
 
   // Add a legend to the map
   const legend = L.control({ position: "bottomright" });
@@ -186,10 +391,14 @@ $(function () {
   legend.onAdd = function () {
     const div = L.DomUtil.create("div", "legend shadow"),
       grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-      labels = ['<i style="background:transparent"></i> No data'];
+      labels = [
+        `<i style="background:transparent"></i> ${t("dashboard.map.no_data")}`,
+      ];
 
     div.innerHTML =
-      '<div class="card mb-1"><div class="card-body text-center p-1"><strong>Legend</strong><br>';
+      '<div class="card mb-1"><div class="card-body text-center p-1"><strong>' +
+      t("dashboard.map.legend") +
+      "</strong><br>";
 
     for (let i = 0; i < grades.length; i++) {
       const from = grades[i];
@@ -221,7 +430,7 @@ $(function () {
   );
 
   const blockedRequests = Object.keys(requestsData).reduce((acc, key) => {
-    if (["403", "444"].includes(key)) {
+    if (["403", "429", "444"].includes(key)) {
       acc += parseInt(requestsData[key], 10); // Parse blocked requests as integer
     }
     return acc;
@@ -304,7 +513,7 @@ $(function () {
                 show: true,
                 fontSize: "13px",
                 color: legendColor,
-                label: "Blocked",
+                label: t("dashboard.chart.request_status.blocked"),
                 formatter: function (w) {
                   return blockedRequestsPercent + "%";
                 },
@@ -413,7 +622,7 @@ $(function () {
                 show: true,
                 fontSize: "13px",
                 color: legendColor,
-                label: "Most blocked IP",
+                label: t("dashboard.chart.top_blocked_ips.most_blocked"),
                 formatter: function () {
                   const topIP = Object.keys(topIpsData)[0];
                   return `${topIP}`;
@@ -448,9 +657,9 @@ $(function () {
   );
   const categories = Object.keys(blockingData).map((key) =>
     new Date(key).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
+      hour: "numeric",
+      minute: undefined,
+      hour12: true,
     }),
   );
 
@@ -483,7 +692,7 @@ $(function () {
         fontFamily: "Public Sans, sans-serif",
       },
       title: {
-        text: "Blocked Requests per Hour",
+        text: t("dashboard.chart.blocking_status.subtitle"),
         align: "center",
         style: {
           color: headingColor,
@@ -492,7 +701,7 @@ $(function () {
       },
       series: [
         {
-          name: "Blocked Requests",
+          name: t("dashboard.chart.blocking_status.blocked_requests"),
           data: dataValues,
         },
       ],
@@ -519,7 +728,7 @@ $(function () {
           },
         },
         title: {
-          text: "Time",
+          text: t("dashboard.chart.blocking_status.time"),
           style: {
             color: headingColor,
             fontFamily: "Public Sans, sans-serif",
@@ -528,7 +737,7 @@ $(function () {
       },
       yaxis: {
         title: {
-          text: "Number of Blocked Requests",
+          text: t("dashboard.chart.blocking_status.count"),
           style: {
             color: headingColor,
             fontFamily: "Public Sans, sans-serif",
@@ -586,24 +795,101 @@ $(function () {
 
   renderBlockingStatus();
 
-  $("#dark-mode-toggle").on("change", function () {
-    setTimeout(() => {
-      theme = $("#theme").val();
-      headingColor = config.colors.headingColor;
-      legendColor = config.colors.bodyColor;
-      if (theme === "dark") {
-        headingColor = config.colors.white;
-        legendColor = config.colors.white;
-      }
+  // Handle theme changes and language changes for charts
+  function updateChartsWithTranslations() {
+    // Update theme colors first
+    theme = $("#theme").val();
+    headingColor = config.colors.headingColor;
+    legendColor = config.colors.bodyColor;
+    if (theme === "dark") {
+      headingColor = config.colors.white;
+      legendColor = config.colors.white;
+    }
 
-      requestsChart.destroy();
+    // Safely destroy and recreate charts with updated translations
+    try {
+      if (requestsChart) {
+        requestsChart.destroy();
+        requestsChart = null;
+      }
       renderStatsChart();
-      if ($ipsData.length) {
+    } catch (error) {
+      console.warn("Error updating requests chart:", error);
+    }
+
+    try {
+      if ($ipsData.length && ipsChart) {
         ipsChart.destroy();
+        ipsChart = null;
+      }
+      if ($ipsData.length) {
         renderIpsChart();
       }
-      blockingChart.destroy();
+    } catch (error) {
+      console.warn("Error updating IPs chart:", error);
+    }
+
+    try {
+      if (blockingChart) {
+        blockingChart.destroy();
+        blockingChart = null;
+      }
       renderBlockingStatus();
+    } catch (error) {
+      console.warn("Error updating blocking chart:", error);
+    }
+
+    // Update map labels
+    if (map) {
+      try {
+        info.update();
+        // Remove and re-add legend to update translations
+        if (legend) {
+          map.removeControl(legend);
+          legend.addTo(map);
+        }
+      } catch (error) {
+        console.warn("Error updating map labels:", error);
+      }
+    }
+  }
+
+  // Create debounced version of the update function
+  const debouncedUpdateCharts = debounce(updateChartsWithTranslations, 100);
+
+  $("#dark-mode-toggle").on("change", function () {
+    setTimeout(() => {
+      debouncedUpdateCharts();
     }, 30);
   });
+
+  // Listen for language changes and update charts
+  function setupLanguageChangeListener() {
+    if (typeof i18next !== "undefined" && i18next.isInitialized) {
+      i18next.off("languageChanged", debouncedUpdateCharts); // Remove existing listener to prevent duplicates
+      i18next.on("languageChanged", () => {
+        debouncedUpdateCharts();
+      });
+    }
+  }
+
+  // Setup language change listener immediately if i18next is ready
+  setupLanguageChangeListener();
+
+  // Wait for window.i18nextReady = true before continuing
+  if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
+    const waitForI18next = (resolve) => {
+      if (window.i18nextReady) {
+        resolve();
+      } else {
+        setTimeout(() => waitForI18next(resolve), 50);
+      }
+    };
+    new Promise((resolve) => {
+      waitForI18next(resolve);
+    }).then(() => {
+      setupLanguageChangeListener();
+      debouncedUpdateCharts();
+    });
+  }
 });

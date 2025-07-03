@@ -11,7 +11,11 @@ local bn_lib = require "resty.openssl.bn"
 local digest_lib = require "resty.openssl.digest"
 local encode_base64url = require "resty.openssl.auxiliary.compat".encode_base64url
 local decode_base64url = require "resty.openssl.auxiliary.compat".decode_base64url
+local param_lib = require "resty.openssl.param"
 local json = require "resty.openssl.auxiliary.compat".json
+local format_error = require "resty.openssl.err".format_error
+
+local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
 
 local _M = {}
 
@@ -264,6 +268,165 @@ function _M.dump_jwk(pkey, is_priv)
   jwk.kid = encode_base64url(d)
 
   return json.encode(jwk)
+end
+
+
+-- 3.x load_jwk
+
+local settable_schema = {}
+
+local function get_settable_schema(type, selection, properties)
+  -- the pctx can't be reused after EVP_PKEY_fromdata_settable, so we create a new here
+  local pctx = C.EVP_PKEY_CTX_new_from_name(nil, type, properties)
+  if pctx == nil then
+    return nil, "EVP_PKEY_CTX_new_from_name() failed"
+  end
+  ffi.gc(pctx, C.EVP_PKEY_CTX_free)
+
+  if C.EVP_PKEY_fromdata_init(pctx) ~= 1 then
+    return nil, "EVP_PKEY_fromdata_init() failed"
+  end
+
+  if settable_schema[type] then
+    return settable_schema[type]
+  end
+
+  local settable = C.EVP_PKEY_fromdata_settable(pctx, selection)
+  if settable == nil then
+    return nil, "EVP_PKEY_fromdata_settable() failed"
+  end
+
+  local schema = {}
+  param_lib.parse_params_schema(settable, schema, nil)
+
+  settable_schema[type] = schema
+  return schema
+end
+
+local ossl_params_jwk_mapping = {
+  RSA = {
+    n = "n",
+    e = "e",
+    d = "d",
+    p = "rsa-factor1",
+    q = "rsa-factor2",
+    dp = "rsa-exponent1",
+    dq = "rsa-exponent2",
+    qi = "rsa-coefficient1",
+  },
+  EC = {
+    x = "x",
+    y = "y",
+    d = "priv",
+    crv = "group",
+  },
+  OKP = {
+    x = "pub",
+    d = "priv",
+  },
+}
+
+local jwk_params_required_mapping = {
+  RSA = {
+    n = true,
+    e = true,
+  },
+  EC = {
+    crv = true,
+    x = true,
+    y = true,
+  },
+  OKP = {
+    -- crv = true, handled earlier
+    x = true,
+  },
+}
+
+function _M.load_jwk_ex(txt, ptyp, properties)
+  local tbl, err = json.decode(txt)
+  if err then
+    return nil, "jwk:load_jwk: error decoding JSON from JWK: " .. err
+  elseif type(tbl) ~= "table" then
+    return nil, "jwk:load_jwk: except input to be decoded as a table, got " .. type(tbl)
+  elseif not tbl["kty"] then
+    return nil, "jwk:load_jwk: missing \"kty\" parameter from JWK"
+  end
+
+  local kty = tbl["kty"]
+  tbl["kty"] = nil
+  local selection = ptyp == "pu" and evp_macro.EVP_PKEY_PUBLIC_KEY or evp_macro.EVP_PKEY_KEYPAIR
+
+  local pkey_name = kty
+  if kty == "OKP" then
+    pkey_name = tbl["crv"]
+    if not pkey_name then
+      return nil, "jwk:load_jwk: missing \"crv\" parameter from OKP JWK"
+    end
+    tbl["crv"] = nil
+  end
+
+  local ctx = ffi.new("EVP_PKEY*[1]")
+  local pctx = C.EVP_PKEY_CTX_new_from_name(nil, pkey_name, nil)
+  if pctx == nil then
+    return nil, "jwk:load_jwk: EVP_PKEY_CTX_new_from_name() failed"
+  end
+  ffi.gc(pctx, C.EVP_PKEY_CTX_free)
+
+  if C.EVP_PKEY_fromdata_init(pctx) ~= 1 then
+    return nil, "jwk:load_jwk: EVP_PKEY_fromdata_init() failed"
+  end
+
+  local schema, err = get_settable_schema(pkey_name, selection, properties)
+  if not schema then
+    return nil, "jwk:load_jwk: failed to get key schema for " .. pkey_name .. " key: " .. err
+  end
+
+  local mapping = ossl_params_jwk_mapping[kty]
+  if not mapping then
+    return nil, "jwk:load_jwk: not yet supported jwk type \"" .. (tbl["kty"] or "nil") .. "\""
+  end
+  local required = jwk_params_required_mapping[kty]
+
+  local params_t = {}
+
+  for kfrom, kto in pairs(mapping) do
+    local v = tbl[kfrom]
+    if type(v) == "string" and (selection == evp_macro.EVP_PKEY_KEYPAIR or required[kfrom]) then
+      if kfrom ~= "crv" then
+        v = decode_base64url(v)
+        if not v then
+          return nil, "jwk:load_jwk: cannot decode parameter \"" .. kfrom .. "\" from base64 " .. tbl[kfrom]
+        end
+        v = v:reverse() -- endian switch
+      end
+
+      params_t[kto] = v
+    elseif required[kfrom] then
+      return nil, "jwk:load_jwk: missing required parameter \"" .. kfrom .. "\""
+    end
+  end
+
+  if kty == "EC" then
+    if params_t["x"] and params_t["y"] then
+      params_t["pub"] = "\x04" .. params_t["x"]:reverse() .. params_t["y"]:reverse()
+      params_t["x"], params_t["y"] = nil, nil
+    end
+  end
+
+  local params, err = param_lib.construct(params_t, nil, schema)
+  if params == nil then
+    return nil, "jwk:load_jwk: failed to construct parameters for " .. kty .. " key: " .. err
+  end
+
+  if C.EVP_PKEY_fromdata(pctx, ctx, selection, params) ~= 1 then
+    return nil, format_error("jwk:load_jwk: EVP_PKEY_fromdata()")
+  end
+
+  return ctx[0]
+end
+
+if OPENSSL_3X then
+  _M.load_jwk = _M.load_jwk_ex
 end
 
 return _M

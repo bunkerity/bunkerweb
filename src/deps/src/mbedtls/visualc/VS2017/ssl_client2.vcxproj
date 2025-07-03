@@ -99,7 +99,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -117,7 +117,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,7 +137,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,7 +156,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

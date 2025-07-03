@@ -86,6 +86,6 @@ See [existing entries](../ChangeLog) for examples.
 
 ## How `ChangeLog` is updated
 
-Run [`../scripts/assemble_changelog.py`](../scripts/assemble_changelog.py)
-from a Git working copy
+Run [`../framework/scripts/assemble_changelog.py`]
+(../framework/scripts/assemble_changelog.py) from a Git working copy
 to move the entries from files in `ChangeLog.d` to the main `ChangeLog` file.

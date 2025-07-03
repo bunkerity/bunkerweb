@@ -14,14 +14,41 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "BLACKLIST_COMMUNITY_LISTS": {
+      "context": "multisite",
+      "default": "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents",
+      "help": "Select community-maintained blacklists to include in blocking.",
+      "id": "blacklist-community-lists",
+      "label": "Community Blacklists",
+      "regex": "^.*$",
+      "type": "multiselect",
+      "multiselect": [
+        {
+          "id": "ip:laurent-minne-fr-be-aggressive",
+          "label": "Laurent Minne's FR/BE aggressive IPs",
+          "value": "https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt"
+        },
+        {
+          "id": "ip:danmeuk-tor-exit",
+          "label": "Tor Exit Nodes IPs (dan.me.uk)",
+          "value": "https://www.dan.me.uk/torlist/?exit"
+        },
+        {
+          "id": "ua:mitchellkrogza-bad-user-agents",
+          "label": "Mitchell Krogza's Bad User-Agents",
+          "value": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list"
+        }
+      ]
+    },
     "BLACKLIST_IP": {
       "context": "multisite",
       "default": "",
       "help": "List of IP/network, separated with spaces, to block.",
       "id": "blacklist-ip",
       "label": "Blacklist IP/network",
-      "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
-      "type": "text"
+      "regex": "^( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_RDNS": {
       "context": "multisite",
@@ -29,8 +56,9 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to block.",
       "id": "blacklist-rdns",
       "label": "Blacklist reverse DNS",
-      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
-      "type": "text"
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_RDNS_GLOBAL": {
       "context": "multisite",
@@ -47,8 +75,9 @@
       "help": "List of ASN numbers, separated with spaces, to block.",
       "id": "blacklist-asn",
       "label": "Blacklist ASN",
-      "regex": "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
-      "type": "text"
+      "regex": "^( *(ASN?)?\\d+ *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_USER_AGENT": {
       "context": "multisite",
@@ -57,7 +86,8 @@
       "id": "blacklist-user-agent",
       "label": "Blacklist User-Agent",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_URI": {
       "context": "multisite",
@@ -65,8 +95,9 @@
       "help": "List of URI (PCRE regex), separated with spaces, to block.",
       "id": "blacklist-uri",
       "label": "Blacklist URI",
-      "regex": "^( *(.*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_IP": {
       "context": "multisite",
@@ -74,8 +105,9 @@
       "help": "List of IP/network, separated with spaces, to ignore in the blacklist.",
       "id": "blacklist-ignore-ip",
       "label": "Blacklist ignore IP/network",
-      "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
-      "type": "text"
+      "regex": "^( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_RDNS": {
       "context": "multisite",
@@ -83,8 +115,9 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.",
       "id": "blacklist-ignore-rdns",
       "label": "Blacklist ignore reverse DNS",
-      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
-      "type": "text"
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_ASN": {
       "context": "multisite",
@@ -92,8 +125,9 @@
       "help": "List of ASN numbers, separated with spaces, to ignore in the blacklist.",
       "id": "blacklist-ignore-asn",
       "label": "Blacklist ignore ASN",
-      "regex": "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
-      "type": "text"
+      "regex": "^( *(ASN?)?\\d+ *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_USER_AGENT": {
       "context": "multisite",
@@ -102,7 +136,8 @@
       "id": "blacklist-ignore-user-agent",
       "label": "Blacklist ignore User-Agent",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_URI": {
       "context": "multisite",
@@ -110,17 +145,19 @@
       "help": "List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.",
       "id": "blacklist-ignore-uri",
       "label": "Blacklist ignore URI",
-      "regex": "^( *(.*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IP_URLS": {
       "context": "multisite",
-      "default": "https://www.dan.me.uk/torlist/?exit",
+      "default": "",
       "help": "List of URLs, separated with spaces, containing bad IP/network to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ip-urls",
       "label": "Blacklist IP/network URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_RDNS_URLS": {
       "context": "multisite",
@@ -128,8 +165,9 @@
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-rdns-urls",
       "label": "Blacklist reverse DNS URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_ASN_URLS": {
       "context": "multisite",
@@ -137,17 +175,19 @@
       "help": "List of URLs, separated with spaces, containing ASN to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-asn-urls",
       "label": "Blacklist ASN URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_USER_AGENT_URLS": {
       "context": "multisite",
-      "default": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
+      "default": "",
       "help": "List of URLs, separated with spaces, containing bad User-Agent to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-user-agent-urls",
       "label": "Blacklist User-Agent URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_URI_URLS": {
       "context": "multisite",
@@ -155,8 +195,9 @@
       "help": "List of URLs, separated with spaces, containing bad URI to block. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-uri-urls",
       "label": "Blacklist URI URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_IP_URLS": {
       "context": "multisite",
@@ -164,8 +205,9 @@
       "help": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-ip-urls",
       "label": "Blacklist ignore IP/network URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_RDNS_URLS": {
       "context": "multisite",
@@ -173,8 +215,9 @@
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-rdns-urls",
       "label": "Blacklist ignore reverse DNS URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_ASN_URLS": {
       "context": "multisite",
@@ -182,8 +225,9 @@
       "help": "List of URLs, separated with spaces, containing ASN to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-asn-urls",
       "label": "Blacklist ignore ASN URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_USER_AGENT_URLS": {
       "context": "multisite",
@@ -191,8 +235,9 @@
       "help": "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-user-agent-urls",
       "label": "Blacklist ignore User-Agent URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BLACKLIST_IGNORE_URI_URLS": {
       "context": "multisite",
@@ -200,8 +245,9 @@
       "help": "List of URLs, separated with spaces, containing URI to ignore in the blacklist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "blacklist-ignore-uri-urls",
       "label": "Blacklist ignore URI URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     }
   },
   "jobs": [

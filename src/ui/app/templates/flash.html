@@ -22,18 +22,19 @@
                      {% if category == 'message' %}data-bs-delay="5000"{% else %}data-bs-autohide="false"{% endif %}>
                     <div class="toast-header d-flex align-items-center{% if category == 'error' %} text-danger{% elif category == 'warning' %} text-warning{% else %} text-primary{% endif %}">
                         <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
-                        <span class="fw-medium me-auto">
+                        <span class="fw-medium me-auto" data-i18n="flash.{{ category }}">
                             {% if category != 'message' %}
                                 {{ category|capitalize }}
                             {% else %}
                                 Info
                             {% endif %}
                         </span>
-                        <small class="text-body-secondary">just now</small>
+                        <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
                         <button type="button"
                                 class="btn-close"
                                 data-bs-dismiss="toast"
-                                aria-label="Close"></button>
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
                     </div>
                     <div class="toast-body">{{ message|safe }}</div>
                 </div>

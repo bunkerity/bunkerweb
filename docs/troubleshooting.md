@@ -1,13 +1,13 @@
 # Troubleshooting
 
 !!! info "BunkerWeb Panel"
-	If you are unable to resolve your problems, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralises all requests relating to the BunkerWeb solution.
+	If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
 
 ## Logs
 
 When troubleshooting, logs are your best friends. We try our best to provide user-friendly logs to help you understand what's happening.
 
-Please note that you can set `LOG_LEVEL` setting to `info` (default : `notice`) to increase the verbosity of BunkerWeb.
+Please note that you can set the `LOG_LEVEL` to `info` (default: `notice`) to increase BunkerWeb’s verbosity.
 
 Here is how you can access the logs, depending on your integration :
 
@@ -49,6 +49,16 @@ Here is how you can access the logs, depending on your integration :
     docker-compose logs myautoconf
     ```
 
+=== "All-in-one"
+
+    !!! tip "Container name"
+        The default container name for the All-in-one image is `bunkerweb-aio`. If you've used a different name, please adjust the command accordingly.
+
+    You can use the `docker logs` command:
+    ```shell
+    docker logs bunkerweb-aio
+    ```
+
 === "Swarm"
 
     !!! warning "Deprecated"
@@ -83,7 +93,7 @@ Here is how you can access the logs, depending on your integration :
 
 === "Linux"
 
-    For errors related to BunkerWeb services (e.g. not starting), you can use `journalctl` :
+    For errors related to BunkerWeb services (e.g., not starting), you can use `journalctl` :
     ```shell
     journalctl -u bunkerweb --no-pager
     ```
@@ -100,7 +110,7 @@ Don't forget that BunkerWeb runs as an unprivileged user for obvious security re
 
 ## IP unban
 
-You can manually unban an IP which can be useful when doing some tests so you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
+You can manually unban an IP, which is useful when performing tests so that you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
 
 === "Docker"
 
@@ -124,6 +134,16 @@ You can manually unban an IP which can be useful when doing some tests so you ca
     Here is the docker-compose equivalent (replace `myautoconf` with the name of the services declared in the docker-compose.yml file) :
     ```shell
     docker-compose exec myautoconf bwcli unban 1.2.3.4
+    ```
+
+=== "All-in-one"
+
+    !!! tip "Container name"
+        The default container name for the All-in-one image is `bunkerweb-aio`. If you've used a different name, please adjust the command accordingly.
+
+    You can use the `docker exec` command:
+    ```shell
+    docker exec bunkerweb-aio bwcli unban 1.2.3.4
     ```
 
 === "Swarm"
@@ -251,11 +271,11 @@ If it's a false-positive, you should then focus on both **930120** and **932160*
 
 ### Bad Behavior
 
-A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](advanced.md#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
+A common false-positive case is when the client is banned because of the "bad behavior" feature which means that too many suspicious HTTP status codes were generated within a time period (more info [here](features.md#bad-behavior)). You should start by reviewing the settings and then edit them according to your web application(s) like removing a suspicious HTTP code, decreasing the count time, increasing the threshold, ...
 
 ### Whitelisting
 
-If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](advanced.md#blacklisting-whitelisting-and-greylisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
+If you have bots (or admins) that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](features.md#whitelist). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
 
 - Healthcheck / status bot
 - Callback like IPN or webhook
@@ -266,6 +286,7 @@ If you have bots (or admins) that need to access your website, the recommended w
 ### Upstream sent too big header
 
 If you see the following error `upstream sent too big header while reading response header from upstream` in the logs, you will need to tweak the various proxy buffers size using the following settings :
+
 - `PROXY_BUFFERS`
 - `PROXY_BUFFER_SIZE`
 - `PROXY_BUSY_BUFFERS_SIZE`
@@ -276,11 +297,11 @@ If you see the following error `could not build server_names_hash, you should in
 
 ## Timezone
 
-When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
+When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
 ## Web UI
 
-In case you lost your UI credentials or have 2FA issues, you can connect to the database to retrieve access.
+In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
 
 **Access database**
 
@@ -288,13 +309,13 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
 
     === "Linux"
 
-        Install SQLite (Debian/Ubuntu) :
+        Install SQLite (Debian/Ubuntu):
 
         ```shell
         sudo apt install sqlite3
         ```
 
-        Install SQLite (Fedora/RedHat) :
+        Install SQLite (Fedora/RedHat):
 
         ```shell
         sudo dnf install sqlite
@@ -319,10 +340,24 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
         apk add sqlite
         ```
 
+    === "All-in-one"
+
+        Get a shell into your All-in-one container:
+
+        !!! note "Docker arguments"
+            - the `-u 0` option is to run the command as root (mandatory).
+            - the `-it` options are to run the command interactively (mandatory).
+            - `bunkerweb-aio` is the default container name; adjust if you used a custom name.
+
+        ```shell
+        docker exec -u 0 -it bunkerweb-aio bash
+        ```
+
     Access your database :
 
     !!! note "Database path"
         We assume that you are using the default database path. If you are using a custom path, you will need to adapt the command.
+        For All-in-one, we assume the database is `db.sqlite3` located in the persistent `/data` volume (`/data/db.sqlite3`).
 
     ```bash
     sqlite3 /var/lib/bunkerweb/db.sqlite3
@@ -352,7 +387,7 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
         mysql -u <user> -p <database>
         ```
 
-        Then enter your password of the database user and you should be able to access your database.
+        Then enter the database user’s password and you should be able to access your database.
 
     === "Docker"
 
@@ -369,7 +404,13 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
         docker exec -u 0 -it <bunkerweb_db_container> mysql -u <user> -p <database>
         ```
 
-        Then enter your password of the database user and you should be able to access your database.
+        Then enter the database user’s password and you should be able to access your database.
+
+    === "All-in-one"
+
+        The All-in-One image does not include a MariaDB/MySQL server. If you have configured the AIO to use an external MariaDB/MySQL database (by setting the `DATABASE_URI` environment variable), you should connect to that database directly using standard MySQL client tools.
+
+        The connection method would be similar to the "Linux" tab (if connecting from the host where AIO runs or another machine) or by running a MySQL client in a separate Docker container if preferred, targeting your external database's host and credentials.
 
 **Troubleshooting actions**
 

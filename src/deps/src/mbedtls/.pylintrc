@@ -1,5 +1,5 @@
 [MASTER]
-init-hook='import sys; sys.path.append("scripts")'
+init-hook='import sys; sys.path.append("scripts"); sys.path.append("framework/scripts")'
 min-similarity-lines=10
 
 [BASIC]
@@ -69,6 +69,17 @@ disable=locally-disabled,locally-enabled,logging-format-interpolation,no-else-re
 [REPORTS]
 # Don't diplay statistics. Just the facts.
 reports=no
+
+[STRING]
+# Complain about
+# ```
+# list_of_strings = [
+#    'foo' # <-- missing comma
+#    'bar',
+#    'corge',
+# ]
+# ```
+check-str-concat-over-line-jumps=yes
 
 [VARIABLES]
 # Allow unused variables if their name starts with an underscore.

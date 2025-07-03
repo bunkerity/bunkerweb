@@ -1,4 +1,4 @@
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e AS builder
+FROM fedora:41@sha256:bf42d5bd976fcad0134ddca3929e5056297464d7cde0d3bd06cc3c04fd03ccf1 AS builder
 
 ENV OS=fedora
 ENV NGINX_VERSION=1.26.3
@@ -6,7 +6,7 @@ ENV NGINX_VERSION=1.26.3
 # Install Nginx, fpm and dependencies
 RUN dnf update -y && \
     dnf install -y curl gnupg2 ca-certificates redhat-lsb-core make gcc && \
-    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
+    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
     dnf install --enablerepo=updates-testing nginx-${NGINX_VERSION} -y
 
 WORKDIR /tmp/bunkerweb/deps
@@ -35,6 +35,10 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
     pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
+RUN dnf install -y pigz && \
+    tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
+    rm -rf deps
+
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
 COPY src/bw/loading loading
@@ -53,7 +57,17 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-FROM fedora:41@sha256:3ec60eb34fa1a095c0c34dd37cead9fd38afb62612d43892fcf1d3425c32bc1e
+# Minify JS files (can be skipped with SKIP_MINIFY=yes)
+ARG SKIP_MINIFY=no
+RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+    dnf install -y nodejs npm parallel && \
+    npm install -g uglify-js && \
+    find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
+
+FROM fedora:41@sha256:bf42d5bd976fcad0134ddca3929e5056297464d7cde0d3bd06cc3c04fd03ccf1
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -77,15 +91,7 @@ RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
     echo "Linux" > INTEGRATION && \
     mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
     for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
-    find . -path ./deps -prune -o -type f -print0 | xargs -0 chmod 0740 && \
-    find . -path ./deps -prune -o -type d -print0 | xargs -0 chmod 0750 && \
-    chmod 755 /var/log/bunkerweb && \
-    touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log && \
-    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ db/alembic db/alembic/alembic.ini db/alembic/env.py && \
-    chmod 750 gen/*.py scheduler/*.py cli/*.py ui/*.sh helpers/*.sh /var/www/ && \
-    find core/ -type f -name "*.sh" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-    find core/ ui/ -type f -name "*.py" ! -path "core/modsecurity/files/*" -print0 | xargs -0 chmod 750 && \
-    chmod 755 .
+    touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
 
 COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
@@ -93,7 +99,7 @@ COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 # Copy Linux files
 COPY --chmod=740 src/linux/scripts scripts
 COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
-COPY src/linux/fpm-fedora /usr/share/.fpm
+COPY src/linux/fpm-fedora-41 /usr/share/.fpm
 COPY --chmod=644 src/linux/*.service /lib/systemd/system/
 COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 

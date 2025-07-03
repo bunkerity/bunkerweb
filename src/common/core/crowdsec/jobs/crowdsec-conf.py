@@ -12,7 +12,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from jinja2 import Environment, FileSystemLoader
-from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
@@ -25,8 +24,8 @@ try:
     cs_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").strip().split(" "):
-            if getenv(f"{first_server}_USE_CROWDSEC", getenv("USE_CROWDSEC", "no")) == "yes":
+        for first_server in getenv("SERVER_NAME", "www.example.com").strip().split(" "):
+            if getenv(f"{first_server}_USE_CROWDSEC", "no") == "yes":
                 cs_activated = True
                 break
     # Singlesite case
@@ -37,11 +36,7 @@ try:
         LOGGER.info("CrowdSec is not activated, skipping job...")
         sys_exit(status)
 
-    bunkerweb_version_split = get_version().split(".")
-    if len(bunkerweb_version_split) > 1 and int(bunkerweb_version_split[1]) < 6:
-        JOB = Job(LOGGER)
-    else:
-        JOB = Job(LOGGER, __file__)
+    JOB = Job(LOGGER, __file__)
 
     # Generate content
     jinja_env = Environment(loader=FileSystemLoader(PLUGIN_PATH.joinpath("misc")))
@@ -51,12 +46,12 @@ try:
             CROWDSEC_API=getenv("CROWDSEC_API", "http://crowdsec:8080"),
             CROWDSEC_API_KEY=getenv("CROWDSEC_API_KEY", ""),
             CROWDSEC_MODE=getenv("CROWDSEC_MODE", "live"),
-            CROWDSEC_REQUEST_TIMEOUT=getenv("CROWDSEC_REQUEST_TIMEOUT", "1000"),
             CROWDSEC_ENABLE_INTERNAL=("true" if getenv("CROWDSEC_ENABLE_INTERNAL", "no") == "yes" else "false"),
+            CROWDSEC_REQUEST_TIMEOUT=getenv("CROWDSEC_REQUEST_TIMEOUT", "1000"),
             CROWDSEC_EXCLUDE_LOCATION=getenv("CROWDSEC_EXCLUDE_LOCATION", ""),
             CROWDSEC_CACHE_EXPIRATION=getenv("CROWDSEC_CACHE_EXPIRATION", "1"),
             CROWDSEC_UPDATE_FREQUENCY=getenv("CROWDSEC_UPDATE_FREQUENCY", "10"),
-            CROWDSEC_APPSEC_URL=getenv("CROWDSEC_APPSEC_URL", "http://crowdsec:7422"),
+            CROWDSEC_APPSEC_URL=getenv("CROWDSEC_APPSEC_URL", ""),
             CROWDSEC_APPSEC_FAILURE_ACTION=getenv("CROWDSEC_APPSEC_FAILURE_ACTION", "passthrough"),
             CROWDSEC_APPSEC_CONNECT_TIMEOUT=getenv("CROWDSEC_APPSEC_CONNECT_TIMEOUT", "100"),
             CROWDSEC_APPSEC_SEND_TIMEOUT=getenv("CROWDSEC_APPSEC_SEND_TIMEOUT", "100"),

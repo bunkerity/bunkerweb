@@ -45,7 +45,7 @@ def clean_pro_plugins(db) -> None:
     for plugin in PRO_PLUGINS_DIR.glob("*"):
         rmtree(plugin, ignore_errors=True)
     # Update database
-    db.update_external_plugins([], _type="pro")
+    db.update_external_plugins([], _type="pro", only_clear_metadata=True)
 
 
 def install_plugin(plugin_path: Path, db, preview: bool = True) -> bool:
@@ -113,7 +113,7 @@ try:
         "integration": get_integration(),
         "version": get_version(),
         "os": get_os_info(),
-        "service_number": str(len(getenv("SERVER_NAME", "").split(" "))),
+        "service_number": str(len(getenv("SERVER_NAME", "www.example.com").split(" "))),
     }
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
     default_metadata = {

@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/pages/login.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
 {% block page %}
     <!-- Content -->
     <!-- Dark Mode Toggle - Enhanced Floating Button -->
@@ -6,7 +11,8 @@
          style="z-index: 1030">
         <div class="toggle-container d-flex align-items-center bg-{% if theme == 'light' %}white{% else %}dark{% endif %} p-3 rounded-pill shadow-lg">
             <label class="setting-checkbox-label pe-2 mb-0 fw-bold text-secondary"
-                   for="dark-mode-toggle">Light</label>
+                   for="dark-mode-toggle"
+                   data-i18n="theme.light">Light</label>
             <div class="form-switch">
                 <input id="dark-mode-toggle"
                        name="dark-mode-toggle"
@@ -16,7 +22,8 @@
                        {% if theme == "dark" %}checked{% endif %} />
             </div>
             <label class="setting-checkbox-label mb-0 fw-bold text-secondary"
-                   for="dark-mode-toggle">Dark</label>
+                   for="dark-mode-toggle"
+                   data-i18n="theme.dark">Dark</label>
         </div>
     </div>
     <!-- /Dark Mode Toggle -->
@@ -29,7 +36,7 @@
                         <div class="card px-sm-6 px-0">
                             <a href="{{ url_for('login') }}">
                                 <i class="bx bx-arrow-back me-1"></i>
-                                <span>back to login</span></a>
+                                <span data-i18n="link.back_to_login">back to login</span></a>
                             <div class="card-body">
                                 <!-- Logo -->
                                 <div class="app-brand justify-content-center">
@@ -45,27 +52,30 @@
                                     </a>
                                 </div>
                                 <!-- /Logo -->
-                                <p class="mb-6">Please enter your TOTP code</p>
+                                <p class="mb-6" data-i18n="totp.prompt">Please enter your TOTP code</p>
                                 <form id="formAuthentication" class="mb-6" method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden"
                                            name="next"
                                            value="{{ request.values.get('next', '') }}" />
-                                    <div class="mb-6 form-password-toggle">
-                                        <label class="form-label" for="totp_token">2FA Code</label>
+                                    <div class="mb-6">
+                                        <label class="form-label" for="totp_token" data-i18n="form.label.2fa_code">2FA Code</label>
                                         <div class="input-group input-group-merge">
-                                            <input type="password"
+                                            <input type="text"
                                                    id="totp_token"
                                                    class="form-control"
                                                    name="totp_token"
                                                    placeholder="2FA Code"
+                                                   data-i18n="form.placeholder.2fa_code"
                                                    aria-describedby="2FA Code"
+                                                   autocomplete="one-time-code"
                                                    required />
-                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
                                     </div>
                                     <div class="mb-6">
-                                        <button class="btn btn-primary d-grid w-100 don-jose" type="submit">Submit</button>
+                                        <button class="btn btn-primary d-grid w-100 don-jose"
+                                                type="submit"
+                                                data-i18n="button.submit">Submit</button>
                                     </div>
                                 </form>
                             </div>

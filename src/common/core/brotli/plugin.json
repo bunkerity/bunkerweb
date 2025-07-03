@@ -20,8 +20,9 @@
       "help": "List of MIME types that will be compressed with brotli.",
       "id": "brotli-types",
       "label": "MIME types",
-      "regex": "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
-      "type": "text"
+      "regex": "^( *[\\-\\w.]+/[\\-\\w.+]+ *)+$",
+      "type": "multivalue",
+      "separator": " "
     },
     "BROTLI_MIN_LENGTH": {
       "context": "multisite",
@@ -30,7 +31,7 @@
       "id": "brotli-min-length",
       "label": "Minimum length",
       "regex": "^\\d+",
-      "type": "text"
+      "type": "number"
     },
     "BROTLI_COMP_LEVEL": {
       "context": "multisite",

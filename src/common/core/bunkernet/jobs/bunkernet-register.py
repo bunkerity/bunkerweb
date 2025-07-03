@@ -21,8 +21,8 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split(" "):
-            if getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes")) == "yes":
+        for first_server in getenv("SERVER_NAME", "www.example.com").split(" "):
+            if getenv(f"{first_server}_USE_BUNKERNET", "yes") == "yes":
                 bunkernet_activated = True
                 break
     # Singlesite case

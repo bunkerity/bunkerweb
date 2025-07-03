@@ -20,8 +20,9 @@
       "help": "List of IP/network, separated with spaces, to put into the greylist.",
       "id": "greylist-ip",
       "label": "Greylist IP/network",
-      "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
-      "type": "text"
+      "regex": "^( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_RDNS": {
       "context": "multisite",
@@ -29,8 +30,9 @@
       "help": "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
       "id": "greylist-rdns",
       "label": "Greylist reverse DNS",
-      "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
-      "type": "text"
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_RDNS_GLOBAL": {
       "context": "multisite",
@@ -47,8 +49,9 @@
       "help": "List of ASN numbers, separated with spaces, to put into the greylist.",
       "id": "greylist-asn",
       "label": "Greylist ASN",
-      "regex": "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
-      "type": "text"
+      "regex": "^( *(ASN?)?\\d+ *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_USER_AGENT": {
       "context": "multisite",
@@ -57,7 +60,8 @@
       "id": "greylist-user-agent",
       "label": "Greylist User-Agent",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_URI": {
       "context": "multisite",
@@ -66,7 +70,8 @@
       "id": "greylist-uri",
       "label": "Greylist URI",
       "regex": "^.*$",
-      "type": "text"
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_IP_URLS": {
       "context": "multisite",
@@ -74,8 +79,9 @@
       "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-ip-urls",
       "label": "Greylist IP/network URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_RDNS_URLS": {
       "context": "multisite",
@@ -83,8 +89,9 @@
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-rdns-urls",
       "label": "Greylist reverse DNS URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_ASN_URLS": {
       "context": "multisite",
@@ -92,8 +99,9 @@
       "help": "List of URLs, separated with spaces, containing ASN to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-asn-urls",
       "label": "Greylist ASN URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_USER_AGENT_URLS": {
       "context": "multisite",
@@ -101,8 +109,9 @@
       "help": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-user-agent-urls",
       "label": "Greylist User-Agent URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     },
     "GREYLIST_URI_URLS": {
       "context": "multisite",
@@ -110,8 +119,9 @@
       "help": "List of URLs, separated with spaces, containing bad URI to put into the greylist. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "greylist-uri-urls",
       "label": "Greylist URI URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
-      "type": "text"
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
     }
   },
   "jobs": [

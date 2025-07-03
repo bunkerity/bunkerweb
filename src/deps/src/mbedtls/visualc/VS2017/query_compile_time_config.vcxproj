@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\programs\test\query_compile_time_config.c" />
+    <ClCompile Include="..\..\framework\tests\programs\query_compile_time_config.c" />
     <ClCompile Include="..\..\programs\test\query_config.c" />
   </ItemGroup>
   <ItemGroup>
@@ -98,7 +98,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,7 +116,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,7 +136,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,7 +155,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
-../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include      </AdditionalIncludeDirectories>
+../../library;../../include;../../3rdparty/everest/include/;../../3rdparty/everest/include/everest;../../3rdparty/everest/include/everest/vs2013;../../3rdparty/everest/include/everest/kremlib;../../tests/include;../../framework/tests/include;../../framework/tests/programs      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

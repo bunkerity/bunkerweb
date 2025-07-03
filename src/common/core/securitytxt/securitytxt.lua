@@ -18,6 +18,20 @@ end
 
 local securitytxt = class("securitytxt", plugin)
 
+-- Helper function to convert HTTP URLs to HTTPS
+local function convert_http_to_https(urls)
+	if type(urls) == "table" then
+		local result = {}
+		for i, url in ipairs(urls) do
+			result[i] = string.gsub(url, "^http://", "https://")
+		end
+		return result
+	elseif type(urls) == "string" then
+		return string.gsub(urls, "^http://", "https://")
+	end
+	return urls
+end
+
 function securitytxt:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "securitytxt", ctx)
@@ -138,7 +152,12 @@ function securitytxt:content()
 	}
 
 	for k, v in pairs(self.security_policies) do
-		data[k] = v
+		-- Convert HTTP URLs to HTTPS for URL fields
+		if k == "canonical" or k == "contact" or k == "encryption" or k == "hiring" or k == "policy" or k == "csaf" then
+			data[k] = convert_http_to_https(v)
+		else
+			data[k] = v
+		end
 	end
 
 	-- If expires isn't set, set it to 1 year in the future and make it a ISO.8601-1 and ISO.8601-2 date
