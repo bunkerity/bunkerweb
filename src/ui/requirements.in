@@ -6,7 +6,7 @@ Flask-Login==0.6.3
 Flask-Session[cachelib]==0.8.0
 Flask-WTF==1.2.2
 gunicorn[gthread]==23.0.0
-pillow==11.2.1
+pillow==11.3.0
 psutil==7.0.0
 python_dateutil==2.9.0.post0
 qrcode==8.2
