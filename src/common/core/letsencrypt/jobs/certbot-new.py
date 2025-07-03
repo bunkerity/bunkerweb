@@ -516,18 +516,18 @@ try:
                         key, value = line.strip().split("=", 1)
                         current_profile = value.strip()
 
+            # Check if profile has changed
+            if current_profile != letsencrypt_profile:
+                domains_to_ask[first_server] = 2
+                LOGGER.warning(
+                    f"[{original_first_server}] Profile for {first_server} changed from {current_profile} to {letsencrypt_profile}, asking new certificate..."
+                )
+                continue
+
             if letsencrypt_challenge == "dns":
                 if letsencrypt_provider and current_provider != letsencrypt_provider:
                     domains_to_ask[first_server] = 2
                     LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
-                    continue
-
-                # Check if profile has changed
-                if current_profile != letsencrypt_profile:
-                    domains_to_ask[first_server] = 2
-                    LOGGER.warning(
-                        f"[{original_first_server}] Profile for {first_server} changed from {current_profile} to {letsencrypt_profile}, asking new certificate..."
-                    )
                     continue
 
                 # Check if DNS credentials have changed

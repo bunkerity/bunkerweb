@@ -605,6 +605,9 @@ def custom_plugin_page(plugin: str):
 </div>"""
 
             try:
+                # Merge globals and ENV with ENV taking precedence
+                template_vars = {**current_app.jinja_env.globals, **current_app.config["ENV"]}
+
                 # deepcode ignore Ssti: We trust the plugin template
                 plugin_page = (
                     Environment(
@@ -612,7 +615,7 @@ def custom_plugin_page(plugin: str):
                         autoescape=select_autoescape(["html"]),
                     )
                     .from_string(page_content)
-                    .render(pre_render=pre_render, **current_app.jinja_env.globals, **current_app.config["ENV"])
+                    .render(pre_render=pre_render, **template_vars)
                 )
             except BaseException:
                 LOGGER.exception("An error occurred while rendering the plugin page")
