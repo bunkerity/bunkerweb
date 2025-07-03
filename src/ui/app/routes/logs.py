@@ -2,6 +2,8 @@ from contextlib import suppress
 from os import listdir
 from os.path import isabs, sep
 from pathlib import Path
+import json
+import time
 
 from flask import Blueprint, Response, render_template, request
 from flask_login import login_required
@@ -78,3 +80,100 @@ def logs_page():
             raw_logs = "\n".join(raw_logs[int(page) * 10000 - 10000 : int(page) * 10000])  # noqa: E203
 
     return render_template("logs.html", logs=raw_logs, files=files, current_file=current_file, current_page=int(page) or page_num, page_num=page_num)
+
+
+@logs.route("/logs/stream", methods=["GET"])
+@login_required
+def stream_logs():
+    logs_path = Path(sep, "var", "log", "bunkerweb")
+
+    requested_file = request.args.get("file", "")
+
+    # Handle letsencrypt files with underscore prefix (as used in main route)
+    if requested_file.startswith("letsencrypt_"):
+        filename_part = requested_file.replace("letsencrypt_", "")
+        current_file = f"letsencrypt_{secure_filename(filename_part)}"
+        file_path = logs_path.joinpath("letsencrypt", secure_filename(filename_part))
+    else:
+        current_file = secure_filename(requested_file)
+        file_path = logs_path.joinpath(current_file)
+
+    if not current_file:
+        return Response("No file specified", 400)
+
+    if isabs(requested_file) or ".." in requested_file:
+        return Response("Invalid file path", 400)
+
+    if not file_path.exists():
+        return Response("File not found", 404)
+
+    def generate():
+        last_size = 0
+        last_mtime = 0
+        heartbeat_counter = 0
+
+        try:
+            # Send initial file content to ensure we're up to date
+            with file_path.open(encoding="utf-8", errors="replace") as f:
+                initial_content = f.read()
+            initial_size = file_path.stat().st_size
+            yield f"data: {json.dumps({'type': 'refresh', 'content': initial_content, 'size': initial_size})}\n\n"
+            last_size = initial_size
+            last_mtime = file_path.stat().st_mtime
+
+            while True:
+                content_sent = False
+
+                try:
+                    current_stat = file_path.stat()
+                    current_size = current_stat.st_size
+                    current_mtime = current_stat.st_mtime
+
+                    # Check if file was modified
+                    if current_mtime != last_mtime or current_size != last_size:
+                        # File was rotated (new file, smaller size)
+                        if current_size < last_size:
+                            with file_path.open(encoding="utf-8", errors="replace") as f:
+                                content = f.read()
+                            yield f"data: {json.dumps({'type': 'rotated', 'content': content, 'size': current_size})}\n\n"
+                            last_size = current_size
+                            content_sent = True
+
+                        # File grew (new content)
+                        elif current_size > last_size:
+                            with file_path.open(encoding="utf-8", errors="replace") as f:
+                                f.seek(last_size)
+                                new_content = f.read()
+                            yield f"data: {json.dumps({'type': 'append', 'content': new_content, 'size': current_size})}\n\n"
+                            last_size = current_size
+                            content_sent = True
+
+                        last_mtime = current_mtime
+                        heartbeat_counter = 0  # Reset heartbeat counter when content is sent
+
+                    # Send heartbeat every 10 seconds (10 iterations of 1 second sleep)
+                    heartbeat_counter += 1
+                    if heartbeat_counter >= 10 and not content_sent:
+                        yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
+                        heartbeat_counter = 0
+
+                except FileNotFoundError:
+                    yield f"data: {json.dumps({'type': 'error', 'message': 'File was deleted'})}\n\n"
+                    break
+                except Exception as e:
+                    yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+                    break
+
+                time.sleep(1)  # Check every second
+
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+    return Response(
+        generate(),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        },
+    )
