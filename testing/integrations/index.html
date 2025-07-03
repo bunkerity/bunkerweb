@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -73,7 +73,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1402,12 +1402,15 @@
   </p>
 <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
-<div class="admonition example">
-<p class="admonition-title">Coming soon</p>
-<p>After a successful beta phase, we are working hard on the BunkerWeb Cloud offering to release it to the public.</p>
-</div>
 <p>BunkerWeb Cloud will be the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of it as a BunkerWeb-as-a-Service!</p>
-<p>If you are interested in the BunkerWeb Cloud offering, don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=docs">contact us</a> so we can discuss your needs.</p>
+<p>Try our <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">BunkerWeb Cloud offer</a> and get access to:</p>
+<ul>
+<li>A fully managed BunkerWeb instance hosted in our cloud</li>
+<li>All BunkerWeb features, including PRO ones</li>
+<li>A monitoring platform with dashboards and alerts</li>
+<li>Technical support to assist you with configuration</li>
+</ul>
+<p>If you are interested in the BunkerWeb Cloud offering, don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> so we can discuss your needs.</p>
 <h2 id="all-in-one-aio-image">All-In-One (AIO) Image</h2>
 <figure>
 <p><img align="center," alt="AIO Architecture Graph Placeholder" src="../assets/img/aio-graph-placeholder.png" width="600" />
@@ -2302,7 +2305,7 @@ MY_SETTING_2=value2
 </figure>
 <p>To automate the configuration of BunkerWeb instances in a Kubernetes environment, the autoconf service serves as an <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress controller</a>. It configures the BunkerWeb instances based on <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress resources</a> and also monitors other Kubernetes objects, such as <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>, for custom configurations.</p>
 <p>For an optimal setup, it is recommended to define BunkerWeb as a <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a></strong>, which ensures that a pod is created on all nodes, while the <strong>autoconf and scheduler</strong> are defined as <strong>single replicated <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a></strong>.</p>
-<p>Given the presence of multiple BunkerWeb instances, it is necessary to establish a shared data store implemented as a <a href="https://redis.io/">Redis</a> service. This Redis service will be utilized by the instances to cache and share data among themselves. Further information about the Redis settings can be found <a href="../features/#redis">here</a>.</p>
+<p>Given the presence of multiple BunkerWeb instances, it is necessary to establish a shared data store implemented as a <a href="https://redis.io/">Redis</a> or <a href="https://valkey.io/">Valkey</a> service. This service will be utilized by the instances to cache and share data among themselves. Further information about the Redis/Valkey settings can be found <a href="../features/#redis">here</a>.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
 <p>Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the <code>DATABASE_URI</code> setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a> of the repository for more information.</p>
@@ -2627,7 +2630,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <p>To enable automatic configuration of BunkerWeb instances, the <strong>autoconf</strong> service requires access to the Docker API. This service listens for Docker Swarm events, such as service creation or deletion, and seamlessly configures the <strong>BunkerWeb instances</strong> in real-time without any downtime. It also monitors other Swarm objects, such as <a href="https://docs.docker.com/engine/swarm/configs/">configs</a>, for custom configurations.</p>
 <p>Similar to the <a href="#docker-autoconf">Docker autoconf integration</a>, configuration for web services is defined using labels that start with the <strong>bunkerweb</strong>  prefix.</p>
 <p>For an optimal setup, it is recommended to schedule the <strong>BunkerWeb service</strong> as a <strong><em>global service</em></strong> on all nodes, while the <strong>autoconf, scheduler, and Docker API proxy services</strong> should be scheduled as <strong><em>single replicated services</em></strong>. Please note that the Docker API proxy service needs to be scheduled on a manager node unless you configure it to use a remote API (which is not covered in the documentation).</p>
-<p>Since multiple instances of BunkerWeb are running, a shared data store implemented as a <a href="https://redis.io/">Redis</a> service must be created. These instances will utilize the Redis service to cache and share data. Further details regarding the Redis settings can be found <a href="../features/#redis">here</a>.</p>
+<p>Since multiple instances of BunkerWeb are running, a shared data store implemented as a <a href="https://redis.io/">Redis</a> or <a href="https://valkey.io/">Valkey</a> service must be created. These instances will utilize the Redis/Valkey service to cache and share data. Further details regarding the Redis/Valkey settings can be found <a href="../features/#redis">here</a>.</p>
 <p>As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
@@ -3005,7 +3008,7 @@ To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write an
       <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
