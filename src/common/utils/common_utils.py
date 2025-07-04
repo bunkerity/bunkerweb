@@ -3,7 +3,7 @@ from io import BytesIO
 from os import getenv, sep
 from pathlib import Path
 from platform import machine
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Union, Any, Hashable
 import logging
 
 
@@ -37,10 +37,14 @@ def handle_docker_secrets() -> Dict[str, str]:
     return secrets
 
 
-def dict_to_frozenset(d):
+def dict_to_frozenset(d: JsonValue) -> Hashable:
     if isinstance(d, list):
-        return tuple(sorted(d))
+        # Recursively call the function on each item in the list.
+        # The result of the generator is sorted and converted to a tuple.
+        return tuple(sorted(dict_to_frozenset(item) for item in d))
     elif isinstance(d, dict):
+        # Recursively call the function on each value in the dictionary.
+        # The key-value pairs are turned into a frozenset.
         return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
     return d
 
