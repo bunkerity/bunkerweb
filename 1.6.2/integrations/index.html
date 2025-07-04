@@ -1855,13 +1855,16 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p>For a simplified installation experience, BunkerWeb provides an easy install script that automatically handles the entire setup process, including NGINX installation, repository configuration, and service setup.</p>
 <h4 id="quick-start">Quick start</h4>
 <p>Download and run the installation script:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://github.com/bunkerity/bunkerweb/raw/v1.6.2/misc/install-bunkerweb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash
-</code></pre></div>
-<p>Or download first and then execute:</p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/raw/v1.6.2/misc/install-bunkerweb.sh
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.2/misc/install-bunkerweb.sh
 chmod<span class="w"> </span>+x<span class="w"> </span>install-bunkerweb.sh
 sudo<span class="w"> </span>./install-bunkerweb.sh
 </code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Security Notice</p>
+<p>Before running any installation script, especially with elevated privileges, it's recommended to review the script content first.</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>install-bunkerweb.sh
+</code></pre></div>
+</div>
 <h4 id="interactive-installation">Interactive installation</h4>
 <p>By default, the script runs in interactive mode and will:</p>
 <ol>
@@ -1947,7 +1950,7 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 </code></pre></div>
 <p>You should now be able to install NGINX 1.28.0:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Testing/dev version</p>
@@ -1964,7 +1967,7 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <p>And finally install BunkerWeb 1.6.2:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.2
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.2
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -1981,7 +1984,7 @@ curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class=
 </code></pre></div>
 <p>You should now be able to install NGINX 1.28.0:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Testing/dev version</p>
@@ -1998,7 +2001,7 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <p>And finally install BunkerWeb 1.6.2:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.2
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.2
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -2022,7 +2025,7 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 </div>
 </div>
 <p>Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.26.3
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.26.3
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>
@@ -2033,7 +2036,7 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <p>And finally install BunkerWeb 1.6.2:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-1.6.2
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.2
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2059,7 +2062,7 @@ gpgkey=https://nginx.org/keys/nginx_signing.key
 module_hotfixes=true
 </code></pre></div>
 <p>You should now be able to install NGINX 1.28.0:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.28.0
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.0
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>
@@ -2070,7 +2073,7 @@ module_hotfixes=true
 <p>And finally install BunkerWeb 1.6.2:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-1.6.2
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.2
 </code></pre></div>
 <p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
