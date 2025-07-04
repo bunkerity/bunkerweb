@@ -527,13 +527,7 @@ For a simplified installation experience, BunkerWeb provides an easy install scr
 Download and run the installation script:
 
 ```bash
-curl -fsSL https://github.com/bunkerity/bunkerweb/raw/v1.6.2/misc/install-bunkerweb.sh | sudo bash
-```
-
-Or download first and then execute:
-
-```bash
-wget https://github.com/bunkerity/bunkerweb/raw/v1.6.2/misc/install-bunkerweb.sh
+wget https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.2/misc/install-bunkerweb.sh
 chmod +x install-bunkerweb.sh
 sudo ./install-bunkerweb.sh
 ```
