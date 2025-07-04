@@ -43,12 +43,12 @@ SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@endsWith /login" \
-    "id:1007778,ctl:ruleRemoveTargetByTag=attack-sqli;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rce;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-lfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-protocol;ARGS:password,ctl:ruleRemoveTargetByTag=attack-ssrf;ARGS:password,ctl:ruleRemoveTargetByTag=attack-xss;ARGS:password,nolog"
+    "id:1007778,ctl:ruleRemoveTargetByTag=attack-sqli;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rce;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-lfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-protocol;ARGS:password,ctl:ruleRemoveTargetByTag=attack-ssrf;ARGS:password,ctl:ruleRemoveTargetByTag=attack-xss;ARGS:password,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@endsWith /instances/new" \
-    "id:1007779,ctl:ruleRemoveTargetById=931100;ARGS:hostname,nolog"
+    "id:1007779,ctl:ruleRemoveTargetById=931100;ARGS:hostname,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
 
