@@ -532,6 +532,13 @@ chmod +x install-bunkerweb.sh
 sudo ./install-bunkerweb.sh
 ```
 
+!!! warning "Security Notice"
+    Before running any installation script, especially with elevated privileges, it's recommended to review the script content first.
+
+    ```bash
+    cat install-bunkerweb.sh
+    ```
+
 #### Interactive installation
 
 By default, the script runs in interactive mode and will:
