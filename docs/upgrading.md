@@ -119,7 +119,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y bunkerweb=1.6.2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.2
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -145,7 +145,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y bunkerweb-1.6.2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.2
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -577,7 +577,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y bunkerweb=1.6.2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.2
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -603,7 +603,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y bunkerweb-1.6.2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.2
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :

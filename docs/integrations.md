@@ -641,7 +641,7 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.28.0-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.28.0-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -663,7 +663,7 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y bunkerweb=1.6.2
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.2
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -689,7 +689,7 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
 
     ```shell
     sudo apt update && \
-    sudo apt install -y nginx=1.28.0-1~$(lsb_release -cs)
+    sudo apt install -y --allow-downgrades nginx=1.28.0-1~$(lsb_release -cs)
     ```
 
     !!! warning "Testing/dev version"
@@ -711,7 +711,7 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y bunkerweb=1.6.2
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.2
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -737,7 +737,7 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
     Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):
 
     ```shell
-    sudo dnf install -y nginx-1.26.3
+    sudo dnf install -y --allowerasing nginx-1.26.3
     ```
 
     !!! example "Disable the setup wizard"
@@ -752,7 +752,7 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
-  	sudo -E dnf install -y bunkerweb-1.6.2
+  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.2
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -787,7 +787,7 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
     You should now be able to install NGINX 1.28.0:
 
     ```shell
-    sudo dnf install nginx-1.28.0
+    sudo dnf install --allowerasing nginx-1.28.0
     ```
 
     !!! example "Disable the setup wizard"
@@ -802,7 +802,7 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y bunkerweb-1.6.2
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.2
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
