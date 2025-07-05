@@ -120,7 +120,9 @@ if IGNORE_REGEX_CHECK:
     LOGGER.warning("Ignoring regex check for settings (we hope you know what you're doing) ...")
 
 
+# Handle SIGINT/SIGTERM signals to gracefully stop the scheduler
 def handle_stop(signum, frame):
+    LOGGER.debug(f"Received signal {signum}, preparing to stop...")
     current_time = datetime.now().astimezone()
     while APPLYING_CHANGES.is_set() and (datetime.now().astimezone() - current_time).seconds < 30:
         LOGGER.warning("Waiting for the changes to be applied before stopping ...")
@@ -138,14 +140,16 @@ signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
 
-# Function to catch SIGHUP and reload the scheduler
+# Handle SIGHUP signal to reload configuration
 def handle_reload(signum, frame):
+    LOGGER.debug(f"Received SIGHUP signal, reloading configuration...")
     try:
         if SCHEDULER is not None and RUN:
             if SCHEDULER.db.readonly:
                 LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
                 return
 
+            LOGGER.debug("Running save_config.py to persist configuration...")
             proc = subprocess_run(
                 [
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
@@ -160,24 +164,30 @@ def handle_reload(signum, frame):
             )
             if proc.returncode != 0:
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
+            else:
+                LOGGER.debug("Configuration saved successfully")
         else:
             LOGGER.warning("Ignored reload operation because scheduler is not running ...")
-    except BaseException as e:
-        LOGGER.error(f"Exception while reloading scheduler : {e}")
+    except BaseException:
+        LOGGER.exception("Exception while reloading scheduler")
 
 
 signal(SIGHUP, handle_reload)
 
 
+# Clean up and exit the scheduler
 def stop(status):
+    LOGGER.debug(f"Stopping scheduler with status {status}")
     Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
     HEALTHY_PATH.unlink(missing_ok=True)
     _exit(status)
 
 
+# Send a file to BunkerWeb instances via API
 def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGGER, *, api_caller: Optional[ApiCaller] = None):
     assert SCHEDULER is not None, "SCHEDULER is not defined"
     logger.info(f"Sending {file_path} to {'specific' if api_caller else 'all reachable'} BunkerWeb instances ...")
+    logger.debug(f"Using endpoint: {endpoint}")
     success, responses = (api_caller or SCHEDULER).send_files(file_path.as_posix(), endpoint, response=True)
     fails = []
 
@@ -191,6 +201,7 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
                         break
 
             status = responses.get(db_instance["hostname"], {"status": "down"}).get("status", "down")
+            logger.debug(f"Instance {db_instance['hostname']} status: {status}")
 
             ret = SCHEDULER.db.update_instance(db_instance["hostname"], "up" if status == "success" else "down")
             if ret:
@@ -215,6 +226,7 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
         logger.warning(f"Error while sending {file_path} to some BunkerWeb instances, removing them from the list of reachable instances: {', '.join(fails)}")
 
 
+# Generate custom configuration files from database
 def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH, send: bool = True):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
@@ -222,12 +234,15 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
     # Remove old custom configs files
     LOGGER.info("Removing old custom configs files ...")
     if original_path.is_dir():
+        LOGGER.debug(f"Cleaning up directory: {original_path}")
         for file in original_path.glob("*/*"):
             if file.is_symlink() or file.is_file():
                 with suppress(OSError):
                     file.unlink()
+                    LOGGER.debug(f"Removed file: {file}")
             elif file.is_dir():
                 rmtree(file, ignore_errors=True)
+                LOGGER.debug(f"Removed directory: {file}")
 
     if configs is None:
         assert SCHEDULER is not None
@@ -235,6 +250,7 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
 
     if configs:
         LOGGER.info("Generating new custom configs ...")
+        LOGGER.debug(f"Processing {len(configs)} custom configs")
         original_path.mkdir(parents=True, exist_ok=True)
         for custom_config in configs:
             try:
@@ -244,27 +260,29 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                         custom_config["service_id"] or "",
                         f"{Path(custom_config['name']).stem}.conf",
                     )
+                    LOGGER.debug(f"Writing custom config to: {tmp_path}")
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
                     tmp_path.write_bytes(custom_config["data"])
                     desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
                     if tmp_path.stat().st_mode & 0o777 != desired_perms:
                         tmp_path.chmod(desired_perms)
-            except OSError as e:
-                LOGGER.debug(format_exc())
-                if custom_config["method"] != "manual":
-                    LOGGER.error(
-                        f"Error while generating custom configs \"{custom_config['name']}\"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}: {e}"
-                    )
-            except BaseException as e:
-                LOGGER.debug(format_exc())
-                LOGGER.error(
-                    f"Error while generating custom configs \"{custom_config['name']}\"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}: {e}"
+                        LOGGER.debug(f"Set permissions for {tmp_path} to 0o640")
+            except OSError:
+                LOGGER.exception(
+                    f"OS error while generating custom configs \"{custom_config['name']}\"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}"
+                )
+                if custom_config["method"] == "manual":
+                    continue
+            except BaseException:
+                LOGGER.exception(
+                    f"Error while generating custom configs \"{custom_config['name']}\"{' for service ' + custom_config['service_id'] if custom_config['service_id'] else ''}"
                 )
 
     if send and SCHEDULER and SCHEDULER.apis:
         send_file_to_bunkerweb(original_path, "/custom_configs")
 
 
+# Generate external and pro plugins from database
 def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH, *, send: bool = True):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
@@ -278,6 +296,7 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
     LOGGER.info(f"Removing old/changed {'pro ' if pro else ''}external plugins files ...")
     ignored_plugins = set()
     if original_path.is_dir():
+        LOGGER.debug(f"Checking existing plugins in {original_path}")
         for file in original_path.glob("*"):
             with suppress(StopIteration, IndexError):
                 index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
@@ -288,24 +307,30 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                     plugin_content.seek(0, 0)
                     if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
                         ignored_plugins.add(file.name)
+                        LOGGER.debug(f"Plugin {file.name} unchanged, keeping it")
                         continue
                     LOGGER.debug(f"Checksum of {file} has changed, removing it ...")
 
             if file.is_symlink() or file.is_file():
                 with suppress(OSError):
                     file.unlink()
+                    LOGGER.debug(f"Removed file: {file}")
             elif file.is_dir():
                 rmtree(file, ignore_errors=True)
+                LOGGER.debug(f"Removed directory: {file}")
 
     if plugins:
         LOGGER.info(f"Generating new {'pro ' if pro else ''}external plugins ...")
+        LOGGER.debug(f"Processing {len(plugins)} plugins")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
             if plugin["id"] in ignored_plugins:
+                LOGGER.debug(f"Skipping unchanged plugin: {plugin['id']}")
                 continue
 
             try:
                 if plugin["data"]:
+                    LOGGER.debug(f"Extracting plugin {plugin['id']} to {original_path}")
                     with tar_open(fileobj=BytesIO(plugin["data"]), mode="r:gz") as tar:
                         try:
                             tar.extractall(original_path, filter="fully_trusted")
@@ -323,25 +348,28 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
                         for executable_file in plugin_path.joinpath(subdir).rglob(pattern):
                             if executable_file.stat().st_mode & 0o777 != desired_perms:
                                 executable_file.chmod(desired_perms)
-            except OSError as e:
-                LOGGER.debug(format_exc())
-                if plugin["method"] != "manual":
-                    LOGGER.error(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\": {e}")
-            except BaseException as e:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\": {e}")
+                                LOGGER.debug(f"Set executable permissions for {executable_file}")
+            except OSError:
+                LOGGER.exception(f"OS error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\"")
+                if plugin["method"] == "manual":
+                    continue
+            except BaseException:
+                LOGGER.exception(f"Error while generating {'pro ' if pro else ''}external plugins \"{plugin['name']}\"")
 
     if send and SCHEDULER and SCHEDULER.apis:
         LOGGER.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
         send_file_to_bunkerweb(original_path, "/pro_plugins" if original_path.as_posix().endswith("/pro/plugins") else "/plugins")
 
 
+# Restore cache files from database
 def generate_caches():
     assert SCHEDULER is not None
 
     job_cache_files = SCHEDULER.db.get_jobs_cache_files()
     plugin_cache_files = set()
     ignored_dirs = set()
+
+    LOGGER.debug(f"Restoring {len(job_cache_files)} cache files from database")
 
     for job_cache_file in job_cache_files:
         job_path = Path(sep, "var", "cache", "bunkerweb", job_cache_file["plugin_id"])
@@ -356,6 +384,7 @@ def generate_caches():
                 ignored_dirs.add(extract_path.as_posix())
                 rmtree(extract_path, ignore_errors=True)
                 extract_path.mkdir(parents=True, exist_ok=True)
+                LOGGER.debug(f"Extracting tar file to {extract_path}")
                 with tar_open(fileobj=BytesIO(job_cache_file["data"]), mode="r:gz") as tar:
                     assert isinstance(tar, TarFile)
                     try:
@@ -363,8 +392,8 @@ def generate_caches():
                             tar.extractall(extract_path, filter="fully_trusted")
                         except TypeError:
                             tar.extractall(extract_path)
-                    except Exception as e:
-                        LOGGER.error(f"Error extracting tar file: {e}")
+                    except Exception:
+                        LOGGER.exception("Error extracting tar file")
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
             cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -373,8 +402,8 @@ def generate_caches():
             if cache_path.stat().st_mode & 0o777 != desired_perms:
                 cache_path.chmod(desired_perms)
             LOGGER.debug(f"Restored cache file {job_cache_file['file_name']}")
-        except BaseException as e:
-            LOGGER.error(f"Exception while restoring cache file {job_cache_file['file_name']} :\n{e}")
+        except BaseException:
+            LOGGER.exception(f"Exception while restoring cache file {job_cache_file['file_name']}")
 
     if job_path.is_dir():
         for resource_path in list(job_path.rglob("*")):
@@ -401,8 +430,10 @@ def generate_caches():
                 resource_path.chmod(desired_perms)
 
 
+# Generate nginx configuration files
 def generate_configs(logger: Logger = LOGGER) -> bool:
     # run the generator
+    logger.debug("Running configuration generator...")
     proc = subprocess_run(
         [
             BUNKERWEB_PATH.joinpath("gen", "main.py").as_posix(),
@@ -422,10 +453,12 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
         logger.error("Config generator failed, configuration will not work as expected...")
         return False
 
+    logger.debug(f"Copying {NGINX_VARIABLES_PATH} to {NGINX_TMP_VARIABLES_PATH}")
     copy(NGINX_VARIABLES_PATH.as_posix(), NGINX_TMP_VARIABLES_PATH.as_posix())
     return True
 
 
+# Periodic health check for BunkerWeb instances
 def healthcheck_job():
     if HEALTHCHECK_EVENT.is_set():
         HEALTHCHECK_LOGGER.warning("Healthcheck job is already running, skipping execution ...")
@@ -437,14 +470,17 @@ def healthcheck_job():
         return
 
     HEALTHCHECK_EVENT.set()
+    HEALTHCHECK_LOGGER.debug("Starting healthcheck job")
 
     if APPLYING_CHANGES.is_set():
+        HEALTHCHECK_LOGGER.debug("Changes are being applied, skipping healthcheck")
         return
 
     env = None
 
     for db_instance in SCHEDULER.db.get_instances():
         bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
+        HEALTHCHECK_LOGGER.debug(f"Checking health of {bw_instance.endpoint}")
         try:
             try:
                 sent, err, status, resp = bw_instance.request("GET", "health")
@@ -574,8 +610,8 @@ def healthcheck_job():
             if not found:
                 HEALTHCHECK_LOGGER.debug(f"Adding {bw_instance.endpoint} to the list of reachable instances")
                 SCHEDULER.apis.append(bw_instance)
-        except BaseException as e:
-            HEALTHCHECK_LOGGER.error(f"Exception while checking instance {bw_instance.endpoint}: {e}")
+        except BaseException:
+            HEALTHCHECK_LOGGER.exception(f"Exception while checking instance {bw_instance.endpoint}")
             for i, api in enumerate(SCHEDULER.apis):
                 if api.endpoint == bw_instance.endpoint:
                     HEALTHCHECK_LOGGER.debug(f"Removing {bw_instance.endpoint} from the list of reachable instances")
@@ -583,10 +619,13 @@ def healthcheck_job():
                     break
 
     HEALTHCHECK_EVENT.clear()
+    HEALTHCHECK_LOGGER.debug("Healthcheck job completed")
 
 
+# Backup current configuration for failover purposes
 def backup_failover():
     BACKING_UP_FAILOVER.set()
+    LOGGER.debug("Starting failover backup")
     try:
         rmtree(FAILOVER_PATH, ignore_errors=True)
         FAILOVER_PATH.mkdir(parents=True, exist_ok=True)
@@ -597,15 +636,18 @@ def backup_failover():
             (CACHE_PATH, "cache"),
         ):
             try:
+                LOGGER.debug(f"Copying {src} to {FAILOVER_PATH / dst_name}")
                 copytree(src, FAILOVER_PATH / dst_name, dirs_exist_ok=True)
-            except Exception as e:
-                LOGGER.error(f"Error copying {src} to failover path: {e}")
+            except Exception:
+                LOGGER.exception(f"Error copying {src} to failover path")
 
         success, err = JOB.cache_dir(FAILOVER_PATH, job_name="failover-backup")
         if not success:
             LOGGER.error(f"Error while caching failover backup: {err}")
-    except Exception as e:
-        LOGGER.error(f"Failed to initialize failover backup: {e}")
+        else:
+            LOGGER.debug("Failover backup completed successfully")
+    except Exception:
+        LOGGER.exception("Failed to initialize failover backup")
     finally:
         BACKING_UP_FAILOVER.clear()
 
@@ -627,6 +669,7 @@ if __name__ == "__main__":
 
         # Write pid to file
         pid_path.write_text(str(getpid()), encoding="utf-8")
+        LOGGER.debug(f"Written PID {getpid()} to {pid_path}")
 
         del pid_path
 
@@ -636,11 +679,13 @@ if __name__ == "__main__":
         args = parser.parse_args()
 
         tmp_variables_path = Path(args.variables) if args.variables else NGINX_TMP_VARIABLES_PATH
+        LOGGER.debug(f"Using variables file: {tmp_variables_path}")
 
         dotenv_env = {}
         if tmp_variables_path.is_file():
             with tmp_variables_path.open() as f:
                 dotenv_env = dict(line.strip().split("=", 1) for line in f if line.strip() and not line.startswith("#") and "=" in line)
+            LOGGER.debug(f"Loaded {len(dotenv_env)} variables from {tmp_variables_path}")
 
         SCHEDULER = JobScheduler(LOGGER, db=Database(LOGGER, sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None))))  # type: ignore
 
@@ -652,6 +697,7 @@ if __name__ == "__main__":
             LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
         else:
             # run the config saver
+            LOGGER.debug("Running initial config saver...")
             proc = subprocess_run(
                 [
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
@@ -674,6 +720,7 @@ if __name__ == "__main__":
                 LOGGER.warning("Database is not initialized, retrying in 5s ...")
             else:
                 ready = True
+                LOGGER.debug("Database is initialized and ready")
                 continue
             sleep(5)
 
@@ -685,17 +732,20 @@ if __name__ == "__main__":
 
         # Instantiate scheduler environment
         SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
+        LOGGER.debug(f"Scheduler environment initialized with {len(env)} variables")
 
         threads = []
 
         SCHEDULER.apis = []
         for db_instance in SCHEDULER.db.get_instances():
             SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+        LOGGER.debug(f"Initialized {len(SCHEDULER.apis)} API instances")
 
         scheduler_first_start = db_metadata["scheduler_first_start"]
 
         LOGGER.info("Scheduler started ...")
 
+        # Check for manually created custom configs
         def check_configs_changes():
             # Checking if any custom config has been created by the user
             assert SCHEDULER is not None, "SCHEDULER is not defined"
@@ -703,6 +753,8 @@ if __name__ == "__main__":
             custom_configs = []
             db_configs = SCHEDULER.db.get_custom_configs()
             changes = False
+            LOGGER.debug(f"Found {len(db_configs)} custom configs in database")
+            
             for file in list(CUSTOM_CONFIGS_PATH.rglob("*.conf")):
                 if len(file.parts) > len(CUSTOM_CONFIGS_PATH.parts) + 3:
                     LOGGER.warning(f"Custom config file {file} is not in the correct path, skipping ...")
@@ -726,28 +778,34 @@ if __name__ == "__main__":
 
                 if saving:
                     custom_configs.append({"value": content, "exploded": (service_id, config_type, file.stem)})
+                    LOGGER.debug(f"Found custom config to save: {file.stem}")
 
             changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
             if changes:
+                LOGGER.debug(f"Detected changes in custom configs, saving {len(custom_configs)} configs")
                 try:
                     err = SCHEDULER.db.save_custom_configs(custom_configs, "manual")
                     if err:
                         LOGGER.error(f"Couldn't save some manually created custom configs to database: {err}")
-                except BaseException as e:
-                    LOGGER.error(f"Error while saving custom configs to database: {e}")
+                except BaseException:
+                    LOGGER.exception("Error while saving custom configs to database")
 
             generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
+        # Check for manually added plugins
         def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
             # Check if any external or pro plugin has been added by the user
             assert SCHEDULER is not None, "SCHEDULER is not defined"
             LOGGER.info(f"Checking if there are any changes in {_type} plugins ...")
             plugin_path = PRO_PLUGINS_PATH if _type == "pro" else EXTERNAL_PLUGINS_PATH
             db_plugins = SCHEDULER.db.get_plugins(_type=_type)
+            LOGGER.debug(f"Found {len(db_plugins)} {_type} plugins in database")
             external_plugins = []
             tmp_external_plugins = []
+            
             for file in plugin_path.glob("*/plugin.json"):
+                LOGGER.debug(f"Checking plugin: {file.parent.name}")
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
                         tar.add(file.parent, arcname=file.parent.name, recursive=True)
@@ -789,12 +847,13 @@ if __name__ == "__main__":
                 changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in db_plugins}
 
                 if changes:
+                    LOGGER.debug(f"Detected changes in {_type} plugins, updating {len(external_plugins)} plugins")
                     try:
                         err = SCHEDULER.db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
                         if err:
                             LOGGER.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
-                    except BaseException as e:
-                        LOGGER.error(f"Error while saving {_type} plugins to database: {e}")
+                    except BaseException:
+                        LOGGER.exception(f"Error while saving {_type} plugins to database")
                 else:
                     return send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
 
@@ -875,6 +934,7 @@ if __name__ == "__main__":
 
             if RUN_JOBS_ONCE:
                 # Only run jobs once
+                LOGGER.debug("Running jobs once...")
                 if not SCHEDULER.reload(
                     env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
                     changed_plugins=changed_plugins,
@@ -888,6 +948,7 @@ if __name__ == "__main__":
                 healthcheck_job_run = False
 
             if CONFIG_NEED_GENERATION:
+                LOGGER.debug("Generating configuration...")
                 ret = generate_configs()
                 if ret and SCHEDULER.apis:
                     # send nginx configs
@@ -906,6 +967,7 @@ if __name__ == "__main__":
                     for thread in threads:
                         thread.join()
 
+                    LOGGER.debug("Sending reload command to all instances...")
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
                         f"/reload?test={'no' if DISABLE_CONFIGURATION_TESTING else 'yes'}",
@@ -965,13 +1027,13 @@ if __name__ == "__main__":
                         thread.join()
 
                     LOGGER.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
-            except BaseException as e:
-                LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")
+            except BaseException:
+                LOGGER.exception("Exception while reloading after running jobs once scheduling")
 
             try:
                 SCHEDULER.db.set_metadata({"failover": not success, "failover_message": failover_message})
-            except BaseException as e:
-                LOGGER.error(f"Error while setting failover to true in the database: {e}")
+            except BaseException:
+                LOGGER.exception("Error while setting failover to true in the database")
 
             try:
                 if not success and reachable:
@@ -984,6 +1046,7 @@ if __name__ == "__main__":
                         LOGGER.error("No failover configuration found, ignoring failover ...")
                     else:
                         # Failover to last working configuration
+                        LOGGER.debug("Restoring failover configuration...")
                         if SCHEDULER.apis:
                             tmp_threads = [
                                 Thread(target=send_file_to_bunkerweb, args=(FAILOVER_PATH.joinpath("config"), "/confs")),
@@ -1007,15 +1070,15 @@ if __name__ == "__main__":
                 else:
                     LOGGER.info("Successfully reloaded bunkerweb")
                     Thread(target=backup_failover).start()
-            except BaseException as e:
-                LOGGER.error(f"Exception while executing failover logic : {e}")
+            except BaseException:
+                LOGGER.exception("Exception while executing failover logic")
 
             try:
                 ret = SCHEDULER.db.checked_changes(CHANGES, plugins_changes="all")
                 if ret:
                     LOGGER.error(f"An error occurred when setting the changes to checked in the database : {ret}")
-            except BaseException as e:
-                LOGGER.error(f"Error while setting changes to checked in the database: {e}")
+            except BaseException:
+                LOGGER.exception("Error while setting changes to checked in the database")
 
             FIRST_START = False
             NEED_RELOAD = False
@@ -1035,8 +1098,8 @@ if __name__ == "__main__":
                         LOGGER.warning("The database is read-only, the scheduler first start will not be saved")
                     elif ret:
                         LOGGER.error(f"An error occurred when setting the scheduler first start : {ret}")
-                except BaseException as e:
-                    LOGGER.error(f"Error while setting the scheduler first start : {e}")
+                except BaseException:
+                    LOGGER.exception("Error while setting the scheduler first start")
                 finally:
                     scheduler_first_start = False
 
@@ -1134,6 +1197,7 @@ if __name__ == "__main__":
                         RUN_JOBS_ONCE = True
                         NEED_RELOAD = True
                         changed_plugins = list(changes["plugins_config_changed"])
+                        LOGGER.debug(f"Changed plugins: {changed_plugins}")
 
                     # check if the instances have changed since last time
                     if changes["instances_changed"] and (
@@ -1152,9 +1216,9 @@ if __name__ == "__main__":
 
                     old_changes = changes.copy()
                 except BaseException:
-                    LOGGER.debug(format_exc())
+                    LOGGER.exception("Exception in scheduler main loop")
                     if errors > 5:
-                        LOGGER.error(f"An error occurred when executing the scheduler : {format_exc()}")
+                        LOGGER.error("Too many errors in scheduler main loop, exiting...")
                         stop(1)
                     errors += 1
                     sleep(5)
@@ -1170,6 +1234,7 @@ if __name__ == "__main__":
                     SCHEDULER.apis = []
                     for db_instance in SCHEDULER.db.get_instances():
                         SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                    LOGGER.debug(f"Updated API instances list, now {len(SCHEDULER.apis)} instances")
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")
@@ -1189,9 +1254,11 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     old_env = env.copy()
                     env = SCHEDULER.db.get_config()
+                    LOGGER.debug("Reloaded configuration from database")
                     if old_env.get("API_HTTP_PORT", "5000") != env.get("API_HTTP_PORT", "5000") or old_env.get("API_SERVER_NAME", "bwapi") != env.get(
                         "API_SERVER_NAME", "bwapi"
                     ):
+                        LOGGER.debug("API configuration changed, updating instances...")
                         err = SCHEDULER.db.update_instances(
                             [
                                 {
@@ -1218,5 +1285,5 @@ if __name__ == "__main__":
                         env["TZ"] = tz
 
     except:
-        LOGGER.error(f"Exception while executing scheduler : {format_exc()}")
+        LOGGER.exception("Exception while executing scheduler")
         stop(1)
