@@ -52,6 +52,8 @@ from app.lang_config import SUPPORTED_LANGUAGES
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
+LOGGER.debug("Signal handlers registered for SIGINT and SIGTERM")
+
 HOOKS = {
     "before_request": {
         "key": "BEFORE_REQUEST_HOOKS",
@@ -73,6 +75,8 @@ HOOKS = {
 
 
 class DynamicFlask(Flask):
+    # Override Flask's default template loader to prioritize blueprint
+    # templates over global templates
     def create_global_jinja_loader(self):
         """
         Override Flask's default template loader creation so that
@@ -114,6 +118,8 @@ class DynamicFlask(Flask):
         LOGGER.debug("Global jinja loader created successfully")
         return final_loader
 
+    # Register blueprint with priority support, allowing higher priority
+    # blueprints to override lower priority ones
     def register_blueprint(self, blueprint, **options):
         # Check if a blueprint with this name is already registered.
         if blueprint.name in self.blueprints:
@@ -122,10 +128,12 @@ class DynamicFlask(Flask):
             new_priority = getattr(blueprint, "plugin_priority", 0)
             if new_priority > existing_priority:
                 LOGGER.info(f"Overriding blueprint '{blueprint.name}': new priority {new_priority} over {existing_priority}")
+                LOGGER.debug(f"Removing existing blueprint '{blueprint.name}' and its URL rules")
                 # Remove the existing blueprint.
                 del self.blueprints[blueprint.name]
                 # Also remove all URL rules associated with the existing blueprint.
                 rules_to_remove = [rule for rule in list(self.url_map.iter_rules()) if rule.endpoint.startswith(blueprint.name + ".")]
+                LOGGER.debug(f"Found {len(rules_to_remove)} URL rules to remove for blueprint '{blueprint.name}'")
                 for rule in rules_to_remove:
                     self.url_map._rules.remove(rule)
                     self.url_map._rules_by_endpoint.pop(rule.endpoint, None)
@@ -148,15 +156,19 @@ app = DynamicFlask(__name__, static_url_path="/", static_folder="app/static", te
 app.logger = LOGGER
 
 with app.app_context():
+    LOGGER.debug("Initializing Flask app context")
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
+    LOGGER.debug(f"PROXY_NUMBERS set to {PROXY_NUMBERS}")
     app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
 
     if not LIB_DIR.joinpath(".flask_secret").is_file():
         LOGGER.error("The .flask_secret file is missing, exiting ...")
         stop(1)
     FLASK_SECRET = LIB_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
+    LOGGER.debug(f"Flask secret loaded from {LIB_DIR.joinpath('.flask_secret')}")
 
     app.config["BISCUIT_PUBLIC_KEY_PATH"] = BISCUIT_PUBLIC_KEY_FILE.as_posix()
+    LOGGER.debug(f"Biscuit public key path set to {app.config['BISCUIT_PUBLIC_KEY_PATH']}")
 
     app.config["ENV"] = {}
 
@@ -180,16 +192,20 @@ with app.app_context():
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_ID_LENGTH"] = 64
     app.config["SESSION_CACHELIB"] = FileSystemCache(threshold=500, cache_dir=LIB_DIR.joinpath("ui_sessions_cache"))
+    LOGGER.debug(f"Session cache directory: {LIB_DIR.joinpath('ui_sessions_cache')}")
     sess = Session()
     sess.init_app(app)
+    LOGGER.debug("Session management initialized")
 
     biscuit = BiscuitMiddleware(app)
+    LOGGER.debug("Biscuit middleware initialized")
 
     login_manager = LoginManager()
     login_manager.session_protection = "strong"
     login_manager.init_app(app)
     login_manager.login_view = "login.login_page"
     login_manager.anonymous_user = AnonymousUser
+    LOGGER.debug("Login manager initialized with strong session protection")
 
     # CSRF protection
     app.config["WTF_CSRF_METHODS"] = ("POST",)
@@ -199,6 +215,8 @@ with app.app_context():
 
     app.config["EXTRA_PAGES"] = []
 
+    # Custom URL building function that appends _page suffix for
+    # non-special endpoints
     def custom_url_for(endpoint, **values):
         if endpoint:
             try:
@@ -225,41 +243,57 @@ with app.app_context():
     DATA.load_from_file()
     if "WORKERS" not in DATA:
         DATA["WORKERS"] = {}
+        LOGGER.debug("Initialized WORKERS in DATA")
     DATA["FORCE_RELOAD_PLUGIN"] = True
     DB.checked_changes(["ui_plugins"], value=True)
+    LOGGER.debug("Initial data and database setup complete")
 
 
+# Context processor to inject common variables into all templates
 @app.context_processor
 def inject_variables():
     app_env = app.config["ENV"].copy()
+    LOGGER.debug(f"Processing {len(app.config['CONTEXT_PROCESSOR_HOOKS'])} context processor hooks")
+    
     for hook in app.config["CONTEXT_PROCESSOR_HOOKS"]:
         try:
+            LOGGER.debug(f"Executing context_processor hook: {hook.__name__}")
             resp = hook()
             if resp:
+                LOGGER.debug(f"Context_processor hook {hook.__name__} returned {len(resp)} variables")
                 app_env = {**app_env, **resp}
         except Exception:
             LOGGER.exception("Error in context_processor hook")
 
     app.config["ENV"] = app_env
 
+    LOGGER.debug(f"Injected {len(app_env)} variables into template context")
+
     return app_env
 
 
+# Load user from database by username for Flask-Login
 @login_manager.user_loader
 def load_user(username):
+    LOGGER.debug(f"Loading user: {username}")
     ui_user = DB.get_ui_user(username=username)
     if not ui_user:
         LOGGER.warning(f"Couldn't get the user {username} from the database.")
         return None
 
     ui_user.list_roles = [role.role_name for role in ui_user.roles]
+    LOGGER.debug(f"User {username} has roles: {ui_user.list_roles}")
+    
     ui_user.list_permissions = []
     for role in ui_user.list_roles:
-        ui_user.list_permissions.extend(DB.get_ui_role_permissions(role))
+        role_permissions = DB.get_ui_role_permissions(role)
+        ui_user.list_permissions.extend(role_permissions)
+        LOGGER.debug(f"Role '{role}' has permissions: {role_permissions}")
     ui_user.list_permissions = set(ui_user.list_permissions)
 
     if ui_user.totp_secret:
         ui_user.list_recovery_codes = [recovery_code.code for recovery_code in ui_user.recovery_codes]
+        LOGGER.debug(f"User {username} has TOTP enabled with {len(ui_user.list_recovery_codes)} recovery codes")
 
         if (
             "totp-disable" not in request.path
@@ -267,6 +301,7 @@ def load_user(username):
             and session.get("totp_validated", False)
             and not ui_user.list_recovery_codes
         ):
+            LOGGER.debug(f"User {username} has TOTP enabled but no recovery codes available")
             flask_flash(
                 f"""The two-factor authentication is enabled but no recovery codes are available, please refresh them:
 <div class="mt-2 pt-2 border-top border-white">
@@ -275,9 +310,12 @@ def load_user(username):
                 "error",
             )
 
+    LOGGER.debug(f"Loaded user {username} with {len(ui_user.list_permissions)} permissions")
+
     return ui_user
 
 
+# Handle CSRF errors by logging and redirecting to appropriate page
 @app.errorhandler(CSRFError)
 def handle_csrf_error(_):
     """
@@ -286,26 +324,33 @@ def handle_csrf_error(_):
     :param e: The exception object
     :return: A template with the error message and a 401 status code.
     """
-    LOGGER.debug(format_exc())
-    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
+    LOGGER.exception(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
     if not current_user:
         return redirect(url_for("setup.setup_page")), 403
     return logout_page(), 403
 
 
+# Update the cached latest stable release version from GitHub
 def update_latest_stable_release():
+    LOGGER.debug("Checking for latest stable release from GitHub")
     latest_release = get_latest_stable_release()
     if latest_release:
         DATA["LATEST_VERSION"] = latest_release
+        LOGGER.debug(f"Latest stable release is {latest_release}")
 
 
+# Check database connection state and switch to readonly mode if needed
 def check_database_state(request_method: str, request_path: str):
     DATA.load_from_file()
+    LOGGER.debug(f"Checking database state for {request_method} {request_path}")
+    LOGGER.debug(f"Current DB readonly state: {DB.readonly}")
+    
     if (
         DB.database_uri
         and DB.readonly
         and (datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LAST_DATABASE_RETRY", "1970-01-01T00:00:00")).astimezone() > timedelta(minutes=1))
     ):
+        LOGGER.debug("Database is readonly, attempting to retry connection")
         failed = False
         try:
             DB.retry_connection(pool_timeout=1)
@@ -313,30 +358,38 @@ def check_database_state(request_method: str, request_path: str):
             LOGGER.info("The database is no longer read-only, defaulting to read-write mode")
         except BaseException:
             failed = True
+            LOGGER.exception("Primary database connection failed")
             try:
                 DB.retry_connection(readonly=True, pool_timeout=1)
                 DB.retry_connection(readonly=True, log=False)
+                LOGGER.debug("Successfully connected to readonly database")
             except BaseException:
+                LOGGER.exception("Readonly database connection failed")
                 if DB.database_uri_readonly:
                     with suppress(BaseException):
                         DB.retry_connection(fallback=True, pool_timeout=1)
                         DB.retry_connection(fallback=True, log=False)
+                        LOGGER.debug("Connected to fallback database")
         DATA.update(
             {
                 "READONLY_MODE": failed,
                 "LAST_DATABASE_RETRY": DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat(),
             }
         )
+        LOGGER.debug(f"Database readonly mode set to: {failed}")
     elif (
         DB.database_uri
         and not DATA.get("READONLY_MODE", False)
         and request_method == "POST"
         and not ("/totp" in request_path or "/login" in request_path or request_path.startswith("/plugins/upload"))
     ):
+        LOGGER.debug("Testing database write capability for POST request")
         try:
             DB.test_write()
             DATA["READONLY_MODE"] = False
+            LOGGER.debug("Database write test successful")
         except BaseException:
+            LOGGER.exception("Database write test failed")
             DATA.update(
                 {
                     "READONLY_MODE": True,
@@ -346,10 +399,13 @@ def check_database_state(request_method: str, request_path: str):
     else:
         try:
             DB.test_read()
+            LOGGER.debug("Database read test successful")
         except BaseException:
+            LOGGER.exception("Database read test failed")
             DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat()
 
 
+# Refresh Flask app context by reloading hooks and blueprints from plugins
 def refresh_app_context():
     """Refresh Flask app context by loading hooks and blueprints from plugins."""
     worker_pid = str(getpid())
@@ -378,6 +434,13 @@ def refresh_app_context():
     core_bp_dirs = list(CORE_PLUGINS_PATH.glob("*/ui/blueprints"))
     external_bp_dirs = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
     pro_bp_dirs = list(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
+    
+    LOGGER.debug(f"Found {len(core_ui_py_files)} core hook files")
+    LOGGER.debug(f"Found {len(external_ui_py_files)} external hook files")
+    LOGGER.debug(f"Found {len(pro_ui_py_files)} pro hook files")
+    LOGGER.debug(f"Found {len(core_bp_dirs)} core blueprint directories")
+    LOGGER.debug(f"Found {len(external_bp_dirs)} external blueprint directories")
+    LOGGER.debug(f"Found {len(pro_bp_dirs)} pro blueprint directories")
 
     # Track active plugin paths and blueprints
     active_plugin_paths = set()
@@ -399,11 +462,13 @@ def refresh_app_context():
             # Check for a proxy file first
             proxy_file = py_file.parent / "hooks_proxy.py"
             target_file = proxy_file if proxy_file.exists() else py_file
+            LOGGER.debug(f"Loading hooks from {target_file} (proxy: {proxy_file.exists()})")
 
             # Add to sys.path if not already there
             if hook_dir not in sys_path:
                 sys_path.append(hook_dir)
                 app.hook_sys_paths[module_name] = hook_dir
+                LOGGER.debug(f"Added {hook_dir} to sys.path")
 
             # Load the module
             spec = spec_from_file_location(module_name, target_file)
@@ -414,8 +479,8 @@ def refresh_app_context():
             hook_module = module_from_spec(spec)
             try:
                 spec.loader.exec_module(hook_module)
-            except Exception as exec_err:
-                LOGGER.warning(f"Error executing module {target_file}: {exec_err}")
+            except Exception:
+                LOGGER.exception(f"Error executing module {target_file}")
                 continue
 
             for hook_type, hook_info in HOOKS.items():
@@ -426,8 +491,8 @@ def refresh_app_context():
 
             if hook_dir in sys_path:
                 sys_path.remove(hook_dir)
-        except Exception as exc:
-            LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+        except Exception:
+            LOGGER.exception(f"Error loading potential hooks from {py_file}")
 
     # --- CLEAN UP OBSOLETE HOOK PATHS ---
     for module_name, hook_dir in list(app.hook_sys_paths.items()):
@@ -460,16 +525,19 @@ def refresh_app_context():
                 # Check for a proxy file first
                 proxy_file = bp_file.parent / f"{bp_file.stem}_proxy.py"
                 module_name = f"blueprint_{bp_dir.parent.name}_{bp_file.stem}"
-
+                
                 # Use the proxy file if it exists, otherwise use the original file
                 target_file = proxy_file if proxy_file.exists() else bp_file
+                LOGGER.debug(f"Loading blueprint from {target_file} (proxy: {proxy_file.exists()})")
 
                 spec = spec_from_file_location(module_name, target_file)
                 if not spec or not spec.loader:
+                    LOGGER.debug(f"Could not create spec for {target_file}")
                     continue
 
                 bp_module = module_from_spec(spec)
                 spec.loader.exec_module(bp_module)
+                LOGGER.debug(f"Successfully loaded module {module_name}")
 
                 # Look for a blueprint object with the same name as the file
                 bp_name = bp_file.stem
@@ -502,13 +570,15 @@ def refresh_app_context():
                         LOGGER.warning(f"Object '{bp_name}' in {bp_file} is not a valid Blueprint")
                 else:
                     LOGGER.debug(f"No blueprint named '{bp_name}' found in {bp_file}")
-            except Exception as exc:
-                LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
+            except Exception:
+                LOGGER.exception(f"Error loading blueprint from {bp_file}")
 
     # --- HANDLE BLUEPRINT CHANGES ---
     # Remove blueprints for deleted plugins
+    LOGGER.debug(f"Checking for blueprints to remove. Current: {list(app.blueprints.keys())}")
     for bp_name in list(app.blueprints.keys()):
         if bp_name not in plugin_blueprints and bp_name not in app.original_blueprints:
+            LOGGER.debug(f"Removing blueprint '{bp_name}' - not in plugin or original blueprints")
             # Remove blueprint and clean up
             app.blueprints.pop(bp_name, None)
 
@@ -588,24 +658,32 @@ def refresh_app_context():
         del DATA["NEEDS_CONTEXT_REFRESH"]
 
     LOGGER.debug(f"Worker {worker_pid} completed context refresh to generation {current_generation}")
+    LOGGER.debug(f"Total active plugins: {len(active_plugin_paths)}")
+    LOGGER.debug(f"Total registered blueprints: {len(blueprint_registry)}")
 
 
+# Run before each request to check auth, database state, and refresh context
 @app.before_request
 def before_request():
+    LOGGER.debug(f"Processing request: {request.method} {request.path}")
     DATA.load_from_file()
+    
     if DATA.get("SERVER_STOPPING", False):
+        LOGGER.debug("Server is stopping, returning 503")
         response = make_response(jsonify({"message": "Server is shutting down, try again later."}), 503)
         response.headers["Retry-After"] = 30  # Clients should retry after 30 seconds # type: ignore
         return response
 
     if request.environ.get("HTTP_X_FORWARDED_FOR") is not None:
         # Requests from the reverse proxy
+        LOGGER.debug(f"Request from reverse proxy, X-Forwarded-For: {request.environ.get('HTTP_X_FORWARDED_FOR')}")
         app.config["SESSION_COOKIE_NAME"] = "__Host-bw_ui_session"
         app.config["SESSION_COOKIE_SECURE"] = True
         app.config["REMEMBER_COOKIE_NAME"] = "__Host-bw_ui_remember_token"
         app.config["REMEMBER_COOKIE_SECURE"] = True
     else:
         # Requests from other sources
+        LOGGER.debug("Direct request, not from reverse proxy")
         app.config["SESSION_COOKIE_NAME"] = "bw_ui_session"
         app.config["SESSION_COOKIE_SECURE"] = False
         app.config["REMEMBER_COOKIE_NAME"] = "bw_ui_remember_token"
@@ -633,6 +711,7 @@ def before_request():
         if DATA.get("FORCE_RELOAD_PLUGIN", False) or (
             not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False) and not DATA.get("IS_RELOADING_PLUGINS", False)
         ):
+            LOGGER.debug(f"Plugin reload triggered - FORCE_RELOAD_PLUGIN: {DATA.get('FORCE_RELOAD_PLUGIN', False)}, reload_ui_plugins: {metadata.get('reload_ui_plugins', False)}")
             safe_reload_plugins()
             # Increment refresh generation to trigger refresh for all workers
             DATA["REFRESH_GENERATION"] = current_generation + 1
@@ -656,30 +735,40 @@ def before_request():
             flask_flash("Database connection is in read-only mode : no modifications possible.", "error")
 
         if current_user.is_authenticated:
+            LOGGER.debug(f"User {current_user.get_id()} is authenticated")
             passed = True
 
             if "ip" not in session:
                 session["ip"] = request.remote_addr
+                LOGGER.debug(f"Setting session IP to {request.remote_addr}")
             if "user_agent" not in session:
                 session["user_agent"] = request.headers.get("User-Agent")
+                LOGGER.debug(f"Setting session User-Agent")
 
             # Case not login page, keep on 2FA before any other access
             if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
+                LOGGER.debug(f"User {current_user.get_id()} needs TOTP validation")
                 if not request.path.endswith("/login"):
                     return redirect(url_for("totp.totp_page", next=request.form.get("next")))
                 passed = False
             elif (app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private) and session["ip"] != request.remote_addr:
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
+                LOGGER.debug(f"Session IP: {session['ip']}, Request IP: {request.remote_addr}")
                 passed = False
             elif session["user_agent"] != request.headers.get("User-Agent"):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
+                LOGGER.debug(f"Session UA: {session['user_agent'][:50]}..., Request UA: {request.headers.get('User-Agent', '')[:50]}...")
                 passed = False
             elif "session_id" in session and session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
                 LOGGER.warning(f"User {current_user.get_id()} tried to access a revoked session.")
+                LOGGER.debug(f"Session ID: {session['session_id']}")
                 passed = False
 
             if not passed:
+                LOGGER.debug(f"Authentication check failed for user {current_user.get_id()}")
                 return logout_page(), 403
+            else:
+                LOGGER.debug(f"Authentication check passed for user {current_user.get_id()}")
 
     current_endpoint = request.path.split("/")[-1]
     if request.path.startswith(("/check", "/setup", "/loading", "/login", "/totp")):
@@ -721,6 +810,7 @@ def before_request():
 
         if not is_cors:
             seen = set()
+            LOGGER.debug(f"Processing {len(DATA.get('TO_FLASH', []))} pending flash messages")
             for f in DATA.get("TO_FLASH", []):
                 content = f["content"]
                 if content in seen:
@@ -760,15 +850,20 @@ def before_request():
 
     for hook in app.config["BEFORE_REQUEST_HOOKS"]:
         try:
+            LOGGER.debug(f"Executing before_request hook: {hook.__name__}")
             resp = hook()
             if resp:
+                LOGGER.debug(f"Before_request hook {hook.__name__} returned response")
                 return resp
         except Exception:
             LOGGER.exception("Error in before_request hook")
 
 
+# Mark user access time in database asynchronously
 def mark_user_access(user, session_id):
+    LOGGER.debug(f"Marking user access for session {session_id}")
     if user and "write" not in user.list_permissions or DB.readonly:
+        LOGGER.debug(f"Skipping user access marking - user write permission: {'write' in user.list_permissions if user else 'N/A'}, DB readonly: {DB.readonly}")
         return
 
     ret = DB.mark_ui_user_access(session_id, datetime.now().astimezone())
@@ -777,6 +872,7 @@ def mark_user_access(user, session_id):
     LOGGER.debug(f"Marked the user access for session {session_id}")
 
 
+# Set security headers on all responses to prevent common attacks
 @app.after_request
 def set_security_headers(response):
     """Set the security headers."""
@@ -821,8 +917,10 @@ def set_security_headers(response):
 
     for hook in app.config["AFTER_REQUEST_HOOKS"]:
         try:
+            LOGGER.debug(f"Executing after_request hook: {hook.__name__}")
             resp = hook(response)
             if resp:
+                LOGGER.debug(f"After_request hook {hook.__name__} returned response")
                 return resp
         except Exception:
             LOGGER.exception("Error in after_request hook")
@@ -830,6 +928,7 @@ def set_security_headers(response):
     return response
 
 
+# Clean up after request and mark user access asynchronously
 @app.teardown_request
 def teardown_request(teardown):
     if (
@@ -841,6 +940,7 @@ def teardown_request(teardown):
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:
+            LOGGER.debug(f"Executing teardown_request hook: {hook.__name__}")
             hook(teardown)
         except Exception:
             LOGGER.exception("Error in teardown_request hook")
@@ -849,15 +949,21 @@ def teardown_request(teardown):
 ### * MISC ROUTES * ###
 
 
+# Root route - redirect to appropriate page based on auth state
 @app.route("/", strict_slashes=False, methods=["GET"])
 def index():
+    LOGGER.debug("Root route accessed")
     if DB.get_ui_user():
         if current_user.is_authenticated:  # type: ignore
+            LOGGER.debug("Authenticated user, redirecting to home page")
             return redirect(url_for("home.home_page"))
+        LOGGER.debug("User exists but not authenticated, redirecting to login page")
         return redirect(url_for("login.login_page"), 301)
+    LOGGER.debug("No users in database, redirecting to setup page")
     return redirect(url_for("setup.setup_page"), 301)
 
 
+# Loading page displayed during system operations
 @app.route("/loading", methods=["GET"])
 @login_required
 def loading():
@@ -870,6 +976,7 @@ def loading():
     return render_template("loading.html", message=request.values.get("message", "Loading..."), next=next_url)
 
 
+# Health check endpoint for wizard/external monitoring
 @app.route("/check", methods=["GET"])
 def check():
     # deepcode ignore TooPermissiveCors: We need to allow all origins for the wizard
@@ -877,7 +984,7 @@ def check():
 
 
 if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
-
+    # Simple healthcheck endpoint for container orchestration systems
     @app.route("/healthcheck", methods=["GET"])
     def healthcheck():
         """Simple healthcheck endpoint that returns 200 OK with basic status information"""
@@ -890,6 +997,7 @@ if getenv("ENABLE_HEALTHCHECK", "no").lower() == "yes":
         return Response(status=200, response=dumps(health_data), content_type="application/json")
 
 
+# Check if system is reloading configuration
 @app.route("/check_reloading", methods=["GET"])
 @login_required
 def check_reloading():
@@ -913,9 +1021,12 @@ def check_reloading():
             flask_flash("Forced the status to be reloaded", "error")
             DATA["RELOADING"] = False
 
+    LOGGER.debug(f"Reloading check: {DATA.get('RELOADING', False)}")
+
     return jsonify({"reloading": DATA.get("RELOADING", False)})
 
 
+# Update user theme preference
 @app.route("/set_theme", methods=["POST"])
 @login_required
 def set_theme():
@@ -939,9 +1050,12 @@ def set_theme():
         LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
         return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
 
+    LOGGER.debug(f"Updated theme to {request.form['theme']} for user {current_user.get_id()}")
+
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+# Update user language preference
 @app.route("/set_language", methods=["POST"])
 @login_required
 def set_language():
@@ -967,9 +1081,12 @@ def set_language():
         LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
         return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
 
+    LOGGER.debug(f"Updated language to {lang} for user {current_user.get_id()}")
+
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+# Update user table column preferences
 @app.route("/set_columns_preferences", methods=["POST"])
 @login_required
 def set_columns_preferences():
@@ -993,14 +1110,18 @@ def set_columns_preferences():
         LOGGER.error(f"Couldn't update the user {current_user.get_id()}'s columns preferences: {ret}")
         return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
 
+    LOGGER.debug(f"Updated column preferences for table {table_name} for user {current_user.get_id()}")
+
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 
+# Clear all flash notifications from session
 @app.route("/clear_notifications", methods=["POST"])
 @login_required
 def clear_notifications():
     session["flash_messages"] = []
     session.modified = True
+    LOGGER.debug(f"Cleared notifications for user {current_user.get_id()}")
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
 
 
@@ -1046,5 +1167,8 @@ BLUEPRINTS = (
     support,
 )
 
+LOGGER.debug(f"Registering {len(BLUEPRINTS)} default blueprints")
 for blueprint in BLUEPRINTS:
+    LOGGER.debug(f"Registering blueprint: {blueprint.name}")
     app.register_blueprint(blueprint)
+LOGGER.debug("Default blueprint registration complete")

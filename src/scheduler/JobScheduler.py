@@ -28,6 +28,7 @@ from ApiCaller import ApiCaller  # type: ignore
 
 
 class JobScheduler(ApiCaller):
+    # Initialize the job scheduler with database and API connections
     def __init__(
         self,
         logger: Optional[Logger] = None,
@@ -38,6 +39,7 @@ class JobScheduler(ApiCaller):
     ):
         super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", os.getenv("CUSTOM_LOG_LEVEL", os.getenv("LOG_LEVEL", "INFO")))
+        self.__logger.debug("Initializing JobScheduler")
         self.db = db or Database(self.__logger)
         # Store only essential environment variables to reduce memory usage
         self.__base_env = os.environ.copy()
@@ -46,30 +48,40 @@ class JobScheduler(ApiCaller):
         self.__job_success = True
         self.__job_reload = False
         self.__executor = ThreadPoolExecutor(max_workers=min(8, (os.cpu_count() or 1) * 4))
+        self.__logger.debug(f"ThreadPoolExecutor initialized with {min(8, (os.cpu_count() or 1) * 4)} workers")
         self.__compiled_regexes = self.__compile_regexes()
         self.__module_paths = set()
         self.__module_paths_lock = Lock()  # Dedicated lock for module paths
         self.update_jobs()
 
+    # Precompile regular expressions for job validation
     def __compile_regexes(self):
         """Precompile regular expressions for job validation."""
+        self.__logger.debug("Compiling job validation regexes")
         return {
             "name": re_compile(r"^[\w.-]{1,128}$"),
             "file": re_compile(r"^[\w./-]{1,256}$"),
         }
 
+    # Get current environment variables
     @property
     def env(self) -> Dict[str, Any]:
         return os.environ.copy()
 
+    # Set environment variables
     @env.setter
     def env(self, env: Dict[str, Any]):
+        self.__logger.debug(f"Updating environment with {len(env)} variables")
         os.environ = self.__base_env.copy()  # Reset to base environment
         os.environ.update(env)  # Update with new environment
 
+    # Update the jobs list from plugins
     def update_jobs(self):
+        self.__logger.debug("Updating jobs list")
         self.__jobs = self.__get_jobs()
+        self.__logger.debug(f"Updated jobs list with {sum(len(jobs) for jobs in self.__jobs.values())} total jobs")
 
+    # Discover and load jobs from all plugins
     def __get_jobs(self):
         jobs = {}
         plugin_files = []
@@ -80,18 +92,25 @@ class JobScheduler(ApiCaller):
         ]
 
         for pattern in plugin_dirs:
-            plugin_files.extend(glob(pattern))
+            found_files = glob(pattern)
+            plugin_files.extend(found_files)
+            self.__logger.debug(f"Found {len(found_files)} plugin files in {pattern}")
 
+        self.__logger.debug(f"Total plugin files found: {len(plugin_files)}")
+
+        # Load a single plugin and extract its jobs
         def load_plugin(plugin_file):
             plugin_name = os.path.basename(os.path.dirname(plugin_file))
+            self.__logger.debug(f"Loading plugin: {plugin_name} from {plugin_file}")
             try:
                 plugin_data = loads(Path(plugin_file).read_text(encoding="utf-8"))
                 plugin_jobs = plugin_data.get("jobs", [])
+                self.__logger.debug(f"Plugin {plugin_name} has {len(plugin_jobs)} jobs")
                 return plugin_name, self.__validate_jobs(plugin_jobs, plugin_name, plugin_file)
             except FileNotFoundError:
                 self.__logger.warning(f"Plugin file not found: {plugin_file}")
-            except Exception as e:
-                self.__logger.warning(f"Exception while getting jobs for plugin {plugin_name}: {e}")
+            except Exception:
+                self.__logger.exception(f"Exception while getting jobs for plugin {plugin_name}")
             return plugin_name, []
 
         # Load/validate plugins in parallel:
@@ -99,11 +118,16 @@ class JobScheduler(ApiCaller):
 
         for plugin_name, valid_jobs in results:
             jobs[plugin_name] = valid_jobs
+            if valid_jobs:
+                self.__logger.debug(f"Plugin {plugin_name} has {len(valid_jobs)} valid jobs")
         return jobs
 
+    # Validate job definitions from a plugin
     def __validate_jobs(self, plugin_jobs, plugin_name, plugin_file):
         valid_jobs = []
         for job in plugin_jobs:
+            self.__logger.debug(f"Validating job {job.get('name', 'unnamed')} from plugin {plugin_name}")
+            
             if not all(k in job for k in ("name", "file", "every", "reload")):
                 self.__logger.warning(f"Missing keys in job definition in plugin {plugin_name}. Required keys: name, file, every, reload. Job: {job}")
                 continue
@@ -116,13 +140,17 @@ class JobScheduler(ApiCaller):
 
             if not all((name_valid, file_valid, every_valid, reload_valid, async_valid)):
                 self.__logger.warning(f"Invalid job definition in plugin {plugin_name}. Job: {job}")
+                self.__logger.debug(f"Validation results - name: {name_valid}, file: {file_valid}, every: {every_valid}, reload: {reload_valid}, async: {async_valid}")
                 continue
 
             job["path"] = os.path.dirname(plugin_file)
             valid_jobs.append(job)
+            self.__logger.debug(f"Job {job['name']} validated successfully")
         return valid_jobs
 
+    # Convert string schedule to schedule object
     def __str_to_schedule(self, every: str) -> schedule.Job:
+        self.__logger.debug(f"Converting schedule string '{every}' to schedule object")
         schedule_map = {
             "minute": schedule.every().minute,
             "hour": schedule.every().hour,
@@ -134,6 +162,7 @@ class JobScheduler(ApiCaller):
         except KeyError:
             raise ValueError(f"Can't convert string '{every}' to schedule")
 
+    # Reload nginx configuration
     def __reload(self) -> bool:
         self.__logger.info("Reloading nginx...")
         reload_min_timeout = self.env.get("RELOAD_MIN_TIMEOUT", "5")
@@ -142,6 +171,7 @@ class JobScheduler(ApiCaller):
             self.__logger.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
             reload_min_timeout = 5
 
+        self.__logger.debug(f"Using reload timeout: {reload_min_timeout} seconds")
         reload_success = self.send_to_apis(
             "POST",
             f"/reload?test={'no' if self.env.get('DISABLE_CONFIGURATION_TESTING', 'no').lower() == 'yes' else 'yes'}",
@@ -153,8 +183,10 @@ class JobScheduler(ApiCaller):
         self.__logger.error("Error while reloading nginx")
         return False
 
+    # Dynamically import and execute a plugin module
     def __exec_plugin_module(self, path: str, name: str) -> None:
         """Dynamically import a plugin module with thread-local environment."""
+        self.__logger.debug(f"Loading plugin module: {name} from {path}")
         # Convert to absolute path using Path
         abs_path = Path(path).resolve()
         module_dir = abs_path.parent
@@ -168,13 +200,16 @@ class JobScheduler(ApiCaller):
             if module_dir_str not in sys_path and module_dir_str not in self.__module_paths:
                 self.__module_paths.add(module_dir.as_posix())
                 sys_path.insert(0, module_dir.as_posix())
+                self.__logger.debug(f"Added {module_dir_str} to sys.path")
 
         spec = spec_from_file_location(name, abs_path.as_posix())
         if spec is None:
             raise ImportError(f"Failed to create module spec for {abs_path}")
         module = module_from_spec(spec)
         spec.loader.exec_module(module)
+        self.__logger.debug(f"Successfully loaded module {name}")
 
+    # Execute a job with error handling and logging
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
         success = True
@@ -183,16 +218,19 @@ class JobScheduler(ApiCaller):
         try:
             self.__exec_plugin_module(os.path.join(path, "jobs", file), name)
             ret = 1
+            self.__logger.debug(f"Job '{name}' from plugin '{plugin}' executed successfully")
         except SystemExit as e:
             ret = e.code if isinstance(e.code, int) else 1
-        except Exception as e:
+            self.__logger.debug(f"Job '{name}' from plugin '{plugin}' exited with code {ret}")
+        except Exception:
             success = False
-            self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
+            self.__logger.exception(f"Exception while executing job '{name}' from plugin '{plugin}'")
             with self.__thread_lock:
                 self.__job_success = False
         end_date = datetime.now().astimezone()
 
         if ret == 1:
+            self.__logger.debug(f"Job '{name}' requested reload")
             with self.__thread_lock:
                 self.__job_reload = True
 
@@ -207,7 +245,9 @@ class JobScheduler(ApiCaller):
 
         return ret
 
+    # Record job execution in database
     def __add_job_run(self, name: str, success: bool, start_date: datetime, end_date: datetime = None):
+        self.__logger.debug(f"Adding job run for '{name}' - success: {success}")
         with self.__thread_lock:
             err = self.db.add_job_run(name, success, start_date, end_date)
 
@@ -216,6 +256,7 @@ class JobScheduler(ApiCaller):
         else:
             self.__logger.warning(f"Failed to add job run for the job '{name}': {err}")
 
+    # Update permissions for cache files and directories
     def __update_cache_permissions(self):
         """Update permissions for cache files and directories."""
         self.__logger.info("Updating /var/cache/bunkerweb permissions...")
@@ -225,6 +266,8 @@ class JobScheduler(ApiCaller):
         FILE_MODE = 0o640
 
         try:
+            updated_dirs = 0
+            updated_files = 0
             # Process directories and files in a single pass
             for item in cache_path.rglob("*"):
                 current_mode = item.stat().st_mode & 0o777
@@ -232,10 +275,19 @@ class JobScheduler(ApiCaller):
 
                 if current_mode != target_mode:
                     item.chmod(target_mode)
-        except Exception as e:
-            self.__logger.error(f"Error while updating cache permissions: {e}")
+                    if item.is_dir():
+                        updated_dirs += 1
+                    else:
+                        updated_files += 1
+            
+            self.__logger.debug(f"Updated permissions: {updated_dirs} directories, {updated_files} files")
+        except Exception:
+            self.__logger.exception("Error while updating cache permissions")
 
+    # Schedule all jobs according to their frequency
     def setup(self):
+        self.__logger.debug("Setting up job schedules")
+        scheduled_count = 0
         for plugin, jobs in self.__jobs.items():
             for job in jobs:
                 try:
@@ -244,15 +296,22 @@ class JobScheduler(ApiCaller):
                     file = job["file"]
                     every = job["every"]
                     if every != "once":
+                        self.__logger.debug(f"Scheduling job '{name}' from plugin '{plugin}' to run every {every}")
                         self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
-                except Exception as e:
-                    self.__logger.error(f"Exception while scheduling job '{name}' for plugin '{plugin}': {e}")
+                        scheduled_count += 1
+                except Exception:
+                    self.__logger.exception(f"Exception while scheduling job '{name}' for plugin '{plugin}'")
+        
+        self.__logger.debug(f"Scheduled {scheduled_count} jobs")
 
+    # Run all pending scheduled jobs
     def run_pending(self) -> bool:
         pending_jobs = [job for job in schedule.jobs if job.should_run]
 
         if not pending_jobs:
             return True
+
+        self.__logger.debug(f"Found {len(pending_jobs)} pending jobs to run")
 
         if self.try_database_readonly():
             self.__logger.error("Database is in read-only mode, pending jobs will not be executed")
@@ -273,6 +332,7 @@ class JobScheduler(ApiCaller):
             self.__job_success = True
 
             if self.__job_reload:
+                self.__logger.debug("Jobs requested reload, sending cache and reloading")
                 try:
                     if self.apis:
                         cache_path = os.path.join(os.sep, "var", "cache", "bunkerweb")
@@ -285,9 +345,9 @@ class JobScheduler(ApiCaller):
 
                     if not self.__reload():
                         success = False
-                except Exception as e:
+                except Exception:
                     success = False
-                    self.__logger.error(f"Exception while reloading after job scheduling: {e}")
+                    self.__logger.exception("Exception while reloading after job scheduling")
                 self.__job_reload = False
 
             if pending_jobs:
@@ -297,14 +357,21 @@ class JobScheduler(ApiCaller):
         finally:
             # Clean up module paths thread-safely
             with self.__module_paths_lock:
+                cleaned_paths = 0
                 for module_path in self.__module_paths.copy():
                     if module_path in sys_path:
                         sys_path.remove(module_path)
+                        cleaned_paths += 1
                     self.__module_paths.remove(module_path)
+                if cleaned_paths:
+                    self.__logger.debug(f"Cleaned up {cleaned_paths} module paths from sys.path")
 
             self.__update_cache_permissions()
 
+    # Run all jobs once
     def run_once(self, plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None) -> bool:
+        self.__logger.debug(f"Running jobs once - plugins: {plugins}, ignore_plugins: {ignore_plugins}")
+        
         if self.try_database_readonly():
             self.__logger.error("Database is in read-only mode, jobs will not be executed")
             return True
@@ -316,12 +383,16 @@ class JobScheduler(ApiCaller):
 
         try:
             futures = []
+            total_jobs = 0
             for plugin, jobs in self.__jobs.items():
                 jobs_to_run = []
                 if (plugins and plugin not in plugins) or (ignore_plugins and plugin in ignore_plugins):
+                    self.__logger.debug(f"Skipping plugin {plugin}")
                     continue
                 for job in jobs:
+                    total_jobs += 1
                     if job.get("async", False):
+                        self.__logger.debug(f"Running job {job['name']} asynchronously")
                         futures.append(self.__executor.submit(self.__job_wrapper, job["path"], plugin, job["name"], job["file"]))
                         continue
 
@@ -336,8 +407,10 @@ class JobScheduler(ApiCaller):
                     )
 
                 if jobs_to_run:
+                    self.__logger.debug(f"Running {len(jobs_to_run)} synchronous jobs for plugin {plugin}")
                     futures.append(self.__executor.submit(self.__run_jobs, jobs_to_run))
 
+            self.__logger.debug(f"Waiting for {len(futures)} job futures to complete (total jobs: {total_jobs})")
             # Wait for all jobs to complete
             for future in futures:
                 future.result()
@@ -345,14 +418,21 @@ class JobScheduler(ApiCaller):
             return self.__job_success
         finally:
             with self.__module_paths_lock:
+                cleaned_paths = 0
                 for module_path in self.__module_paths.copy():
                     if module_path in sys_path:
                         sys_path.remove(module_path)
+                        cleaned_paths += 1
                     self.__module_paths.remove(module_path)
+                if cleaned_paths:
+                    self.__logger.debug(f"Cleaned up {cleaned_paths} module paths from sys.path")
 
             self.__update_cache_permissions()
 
+    # Run a single job by name
     def run_single(self, job_name: str) -> bool:
+        self.__logger.debug(f"Running single job: {job_name}")
+        
         if self.try_database_readonly():
             self.__logger.error(f"Database is in read-only mode, single job '{job_name}' will not be executed")
             return True
@@ -368,6 +448,7 @@ class JobScheduler(ApiCaller):
                     if job["name"] == job_name:
                         job_plugin = plugin
                         job_to_run = job
+                        self.__logger.debug(f"Found job '{job_name}' in plugin '{plugin}'")
                         break
 
             if not job_plugin or not job_to_run:
@@ -383,10 +464,14 @@ class JobScheduler(ApiCaller):
                 )
             finally:
                 with self.__module_paths_lock:
+                    cleaned_paths = 0
                     for module_path in self.__module_paths.copy():
                         if module_path in sys_path:
                             sys_path.remove(module_path)
+                            cleaned_paths += 1
                         self.__module_paths.remove(module_path)
+                    if cleaned_paths:
+                        self.__logger.debug(f"Cleaned up {cleaned_paths} module paths from sys.path")
 
                 self.__update_cache_permissions()
 
@@ -395,16 +480,22 @@ class JobScheduler(ApiCaller):
             if self.__lock:
                 self.__lock.release()
 
+    # Run a list of jobs sequentially
     def __run_jobs(self, jobs):
+        self.__logger.debug(f"Running {len(jobs)} jobs sequentially")
         for job in jobs:
             job()
 
+    # Clear all scheduled jobs
     def clear(self):
+        self.__logger.debug("Clearing all scheduled jobs")
         schedule.clear()
 
+    # Reload scheduler with new environment and plugins
     def reload(
         self, env: Dict[str, Any], apis: Optional[list] = None, *, changed_plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None
     ) -> bool:
+        self.__logger.debug(f"Reloading scheduler - changed_plugins: {changed_plugins}, ignore_plugins: {ignore_plugins}")
         try:
             os.environ = self.__base_env.copy()
             os.environ.update(env)  # Update with new environment
@@ -414,37 +505,48 @@ class JobScheduler(ApiCaller):
             success = self.run_once(changed_plugins, ignore_plugins)
             self.setup()
             return success
-        except Exception as e:
-            self.__logger.error(f"Exception while reloading scheduler: {e}")
+        except Exception:
+            self.__logger.exception("Exception while reloading scheduler")
             return False
 
+    # Check and retry database connection if readonly
     def try_database_readonly(self, force: bool = False) -> bool:
+        self.__logger.debug(f"Checking database readonly state - force: {force}")
+        
         if not self.db.readonly:
             try:
                 self.db.test_write()
                 self.db.readonly = False
+                self.__logger.debug("Database is writable")
                 return False
             except Exception:
+                self.__logger.exception("Database write test failed, setting to readonly")
                 self.db.readonly = True
                 return True
         elif not force and self.db.last_connection_retry and (datetime.now().astimezone() - self.db.last_connection_retry).total_seconds() > 30:
+            self.__logger.debug("Skipping database retry (last retry was less than 30s ago)")
             return True
 
         if self.db.database_uri and self.db.readonly:
+            self.__logger.debug("Attempting to restore database write access")
             try:
                 self.db.retry_connection(pool_timeout=1)
                 self.db.retry_connection(log=False)
                 self.db.readonly = False
                 self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
             except Exception:
+                self.__logger.exception("Failed to restore write access, trying readonly connection")
                 try:
                     self.db.retry_connection(readonly=True, pool_timeout=1)
                     self.db.retry_connection(readonly=True, log=False)
+                    self.__logger.debug("Connected to database in readonly mode")
                 except Exception:
+                    self.__logger.exception("Failed to connect in readonly mode")
                     if self.db.database_uri_readonly:
                         with suppress(Exception):
                             self.db.retry_connection(fallback=True, pool_timeout=1)
                             self.db.retry_connection(fallback=True, log=False)
+                            self.__logger.debug("Connected to fallback database")
                 self.db.readonly = True
 
         return self.db.readonly
