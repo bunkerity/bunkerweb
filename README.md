@@ -394,6 +394,7 @@ BunkerWeb UI supports multiple languages. Translations are managed in the `src/u
 - Chinese (zh)
 - German (de)
 - Italian (it)
+- Turkish (tr)
 
 See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.2/src/ui/app/static/locales/README.md) for details on translation provenance and review status.
 
