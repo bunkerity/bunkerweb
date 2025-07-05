@@ -1,7 +1,7 @@
 from logging import (
     CRITICAL, DEBUG, ERROR, INFO, WARNING,
     FileHandler, Formatter, Logger, StreamHandler,
-    addLevelName, getLogger, setLoggerClass, getLevelName
+    addLevelName, getLogger, setLoggerClass
 )
 from os import getenv
 from typing import Dict, Optional, Set, Tuple, Union
