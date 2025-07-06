@@ -25,8 +25,8 @@ from bw_logger import setup_logger as bwlog
 
 # Initialize bw_logger module
 logger = bwlog(
-    title="SCHEDULER: ",
-    log_file_path="/var/log/bunkerweb/scheduler.log"
+    title="UI: ",
+    log_file_path="/var/log/bunkerweb/ui.log"
 )
 
 from cachelib import FileSystemCache

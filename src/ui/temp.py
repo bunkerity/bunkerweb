@@ -23,8 +23,8 @@ from app.models.reverse_proxied import ReverseProxied
 
 # Initialize bw_logger module
 logger = bwlog(
-    title="SCHEDULER-TMP: ",
-    log_file_path="/var/log/bunkerweb/scheduler.log"
+    title="UI-TMP: ",
+    log_file_path="/var/log/bunkerweb/ui.log"
 )
 
 # Check if debug logging is enabled
