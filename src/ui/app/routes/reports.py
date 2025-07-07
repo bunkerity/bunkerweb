@@ -2,30 +2,65 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import chain
 from json import dumps, loads
-from traceback import format_exc
 from html import escape
+from os import getenv, sep
+from os.path import join
+from sys import path as sys_path
+
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+# Import the setup_logger function from bw_logger module and give it the
+# shorter alias 'bwlog' for convenience.
+from bw_logger import setup_logger as bwlog
+
+# Initialize bw_logger module
+logger = bwlog(
+    title="UI",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+# Check if debug logging is enabled
+DEBUG_MODE = getenv("LOG_LEVEL", "INFO").upper() == "DEBUG"
+
+if DEBUG_MODE:
+    logger.debug("Debug mode enabled for reports module")
 
 from flask import Blueprint, flash, jsonify, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_INSTANCES_UTILS
-from app.utils import LOGGER
 
 from app.routes.utils import cors_required, get_redis_client
 
 reports = Blueprint("reports", __name__)
 
 
+# Display reports page with security event analytics interface.
+# Renders the main reports dashboard for viewing and analyzing
+# security events and access logs from BunkerWeb instances.
 @reports.route("/reports", methods=["GET"])
 @login_required
 def reports_page():
+    if DEBUG_MODE:
+        logger.debug("reports_page() called")
     return render_template("reports.html")
 
 
+# Fetch and process security reports data for DataTables display.
+# Retrieves reports from Redis and instances, applies filtering and sorting,
+# and returns formatted JSON response for the reports table interface.
 @reports.route("/reports/fetch", methods=["POST"])
 @login_required
 @cors_required
 def reports_fetch():
+    if DEBUG_MODE:
+        logger.debug("reports_fetch() called")
+    
     redis_client = get_redis_client()
 
     # Fetch reports
@@ -35,8 +70,8 @@ def reports_fetch():
                 redis_reports = redis_client.lrange("requests", 0, -1)
                 redis_reports = (loads(report_raw.decode("utf-8", "replace")) for report_raw in redis_reports)
             except BaseException as e:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Failed to fetch reports from Redis: {e}")
+                logger.exception("Failed to fetch reports from Redis")
+                logger.error(f"Failed to fetch reports from Redis: {e}")
                 flash("Failed to fetch reports from Redis, see logs for more information.", "error")
                 redis_reports = []
         else:
@@ -124,7 +159,7 @@ def reports_fetch():
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
             }
         except Exception as e:
-            LOGGER.error(f"Error formatting report: {e}")
+            logger.error(f"Error formatting report: {e}")
             # Return a safe fallback if formatting fails
             return {
                 "date": "N/A",
