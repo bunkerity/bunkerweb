@@ -101,7 +101,6 @@ class Totp:
         except Exception as e:
             logger.exception("Failed to generate pretty TOTP key")
             return ""
-        return self._totp.from_source(totp_secret).pretty_key(sep=False)
 
     # Generate recovery codes for TOTP backup authentication.
     # Creates 6 hex-based recovery codes with dash separation for improved readability.
