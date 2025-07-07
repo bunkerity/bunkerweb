@@ -40,9 +40,8 @@ from app.routes.utils import cors_required, get_redis_client
 reports = Blueprint("reports", __name__)
 
 
-# Display reports page with security event analytics interface.
-# Renders the main reports dashboard for viewing and analyzing
-# security events and access logs from BunkerWeb instances.
+# Display the main security reports analytics dashboard interface.
+# Renders reports.html template with DataTables for viewing BunkerWeb security events.
 @reports.route("/reports", methods=["GET"])
 @login_required
 def reports_page():
@@ -51,9 +50,8 @@ def reports_page():
     return render_template("reports.html")
 
 
-# Fetch and process security reports data for DataTables display.
-# Retrieves reports from Redis and instances, applies filtering and sorting,
-# and returns formatted JSON response for the reports table interface.
+# Process DataTables AJAX request for security reports with filtering and pagination.
+# Retrieves reports from Redis and instances, applies search/filter/sort, returns JSON response.
 @reports.route("/reports/fetch", methods=["POST"])
 @login_required
 @cors_required
@@ -62,12 +60,20 @@ def reports_fetch():
         logger.debug("reports_fetch() called")
     
     redis_client = get_redis_client()
+    if DEBUG_MODE:
+        logger.debug(f"Redis client obtained: {redis_client is not None}")
 
-    # Fetch reports
+    # Fetch reports from Redis queue and BunkerWeb instances for analysis.
+    # Combines data from Redis requests list and instance reports into single stream.
     def fetch_reports():
+        if DEBUG_MODE:
+            logger.debug("fetch_reports() starting")
+        
         if redis_client:
             try:
                 redis_reports = redis_client.lrange("requests", 0, -1)
+                if DEBUG_MODE:
+                    logger.debug(f"Retrieved {len(redis_reports)} raw reports from Redis")
                 redis_reports = (loads(report_raw.decode("utf-8", "replace")) for report_raw in redis_reports)
             except BaseException as e:
                 logger.exception("Failed to fetch reports from Redis")
@@ -75,8 +81,12 @@ def reports_fetch():
                 flash("Failed to fetch reports from Redis, see logs for more information.", "error")
                 redis_reports = []
         else:
+            if DEBUG_MODE:
+                logger.debug("Redis client not available")
             redis_reports = []
         instance_reports = BW_INSTANCES_UTILS.get_reports() if BW_INSTANCES_UTILS else []
+        if DEBUG_MODE:
+            logger.debug(f"Retrieved {len(instance_reports)} instance reports")
         return chain(redis_reports, instance_reports)
 
     # Filter valid and unique reports
@@ -88,6 +98,8 @@ def reports_fetch():
         and (400 <= report.get("status", 0) < 500 or report.get("security_mode") == "detect")
         and not seen_ids.add(report.get("id"))
     )
+    if DEBUG_MODE:
+        logger.debug(f"Filtered to {len(all_reports)} unique valid reports")
 
     # Extract DataTables parameters
     draw = int(request.form.get("draw", 1))
@@ -96,26 +108,40 @@ def reports_fetch():
     search_value = request.form.get("search[value]", "").lower()
     order_column_index = int(request.form.get("order[0][column]", 0)) - 1
     order_direction = request.form.get("order[0][dir]", "desc")
+    if DEBUG_MODE:
+        logger.debug(f"DataTables params - draw: {draw}, start: {start}, length: {length}, search: '{search_value}'")
+    
     search_panes = defaultdict(list)
     for key, value in request.form.items():
         if key.startswith("searchPanes["):
             field = key.split("[")[1].split("]")[0]
             search_panes[field].append(value)
+    if DEBUG_MODE:
+        logger.debug(f"SearchPanes filters: {len(search_panes)} fields")
 
     columns = ["date", "id", "ip", "country", "method", "url", "status", "user_agent", "reason", "server_name", "data", "security_mode"]
 
-    # Apply searchPanes filters
+    # Apply SearchPanes column filters to reduce report dataset.
+    # Filters reports based on user-selected values in DataTables SearchPanes interface.
     def filter_by_search_panes(reports):
+        if DEBUG_MODE:
+            logger.debug(f"filter_by_search_panes() called with {len(reports)} reports")
         for field, selected_values in search_panes.items():
             reports = [report for report in reports if report.get(field, "N/A") in selected_values]
+        if DEBUG_MODE:
+            logger.debug(f"After searchPanes filters: {len(reports)} reports")
         return reports
 
-    # Global search filtering
+    # Check if report matches global search term across all columns.
+    # Returns True if search value found in any report field for DataTables filtering.
     def global_search_filter(report):
         return any(search_value in str(report.get(col, "")).lower() for col in columns)
 
-    # Sort reports
+    # Sort reports in-place by specified column and direction from DataTables.
+    # Uses column index and sort direction to order reports for display.
     def sort_reports(reports):
+        if DEBUG_MODE:
+            logger.debug(f"sort_reports() called with {len(reports)} reports")
         if 0 <= order_column_index < len(columns):
             sort_key = columns[order_column_index]
             reports.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
@@ -123,11 +149,16 @@ def reports_fetch():
     # Apply filters and sort
     filtered_reports = filter(global_search_filter, all_reports) if search_value else all_reports
     filtered_reports = list(filter_by_search_panes(filtered_reports))
+    if DEBUG_MODE:
+        logger.debug(f"After global search filter: {len(filtered_reports)} reports")
     sort_reports(filtered_reports)
 
     paginated_reports = filtered_reports if length == -1 else filtered_reports[start : start + length]  # noqa: E203
+    if DEBUG_MODE:
+        logger.debug(f"Paginated to {len(paginated_reports)} reports")
 
-    # Format reports for the response
+    # Transform raw report data into safe HTML-escaped format for DataTables.
+    # Handles JSON serialization of data field and provides fallback for errors.
     def format_report(report):
         try:
             # Handle the data field safely - ensure it's proper JSON or convert safely
@@ -159,6 +190,7 @@ def reports_fetch():
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
             }
         except Exception as e:
+            logger.exception("Error formatting report")
             logger.error(f"Error formatting report: {e}")
             # Return a safe fallback if formatting fails
             return {
@@ -177,6 +209,8 @@ def reports_fetch():
             }
 
     formatted_reports = [format_report(report) for report in paginated_reports]
+    if DEBUG_MODE:
+        logger.debug(f"Formatted {len(formatted_reports)} reports for response")
 
     # Calculate pane counts
     pane_counts = defaultdict(lambda: defaultdict(lambda: {"total": 0, "count": 0}))
@@ -233,14 +267,18 @@ def reports_fetch():
                 }
                 for value, counts in values.items()
             ]
+    if DEBUG_MODE:
+        logger.debug(f"Prepared SearchPanes options for {len(search_panes_options)} fields")
 
     # Response
-    return jsonify(
-        {
-            "draw": draw,
-            "recordsTotal": len(all_reports),
-            "recordsFiltered": len(filtered_reports),
-            "data": formatted_reports,
-            "searchPanes": {"options": search_panes_options},
-        }
-    )
+    response_data = {
+        "draw": draw,
+        "recordsTotal": len(all_reports),
+        "recordsFiltered": len(filtered_reports),
+        "data": formatted_reports,
+        "searchPanes": {"options": search_panes_options},
+    }
+    if DEBUG_MODE:
+        logger.debug(f"Returning response - total: {len(all_reports)}, filtered: {len(filtered_reports)}, displayed: {len(formatted_reports)}")
+    
+    return jsonify(response_data)
