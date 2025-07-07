@@ -1,9 +1,36 @@
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from itertools import chain
+from os import getenv, sep
+from os.path import join
+from sys import path as sys_path
 from threading import Thread
 from time import time
 from typing import Dict, List
+
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+# Import the setup_logger function from bw_logger module and give it the
+# shorter alias 'bwlog' for convenience.
+from bw_logger import setup_logger as bwlog
+
+# Initialize bw_logger module
+logger = bwlog(
+    title="UI",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+# Check if debug logging is enabled
+DEBUG_MODE = getenv("LOG_LEVEL", "INFO").upper() == "DEBUG"
+
+if DEBUG_MODE:
+    logger.debug("Debug mode enabled for services module")
+
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 
@@ -15,21 +42,37 @@ from app.utils import get_blacklisted_settings
 services = Blueprint("services", __name__)
 
 
+# Display services management page with list of configured services.
+# Shows all services including draft and published configurations
+# for administration and monitoring purposes.
 @services.route("/services", methods=["GET"])
 @login_required
 def services_page():
+    if DEBUG_MODE:
+        logger.debug("services_page() called")
     return render_template("services.html", services=DB.get_services(with_drafts=True))
 
 
+# Redirect trailing slash requests to proper services page.
+# Handles URL normalization for consistent routing behavior
+# when users access /services/ instead of /services.
 @services.route("/services/", methods=["GET"])
 @login_required
 def services_redirect():
+    if DEBUG_MODE:
+        logger.debug("services_redirect() called")
     return redirect(url_for("services.services_page"))
 
 
+# Convert services between draft and published states.
+# Processes bulk service conversion requests and manages state
+# transitions with proper validation and error handling.
 @services.route("/services/convert", methods=["POST"])
 @login_required
 def services_convert():
+    if DEBUG_MODE:
+        logger.debug("services_convert() called")
+    
     if DB.readonly:
         return handle_error("Database is in read-only mode", "services")
 
@@ -110,9 +153,15 @@ def services_convert():
     )
 
 
+# Delete selected services from BunkerWeb configuration.
+# Handles bulk service deletion with validation and proper cleanup
+# of associated configuration settings and custom configs.
 @services.route("/services/delete", methods=["POST"])
 @login_required
 def services_delete():
+    if DEBUG_MODE:
+        logger.debug("services_delete() called")
+    
     if DB.readonly:
         return handle_error("Database is in read-only mode", "services")
 
@@ -181,9 +230,15 @@ def services_delete():
     )
 
 
+# Handle individual service configuration page and updates.
+# Manages service creation, editing, and configuration validation
+# with support for both easy and raw configuration modes.
 @services.route("/services/<string:service>", methods=["GET", "POST"])
 @login_required
 def services_service_page(service: str):
+    if DEBUG_MODE:
+        logger.debug(f"services_service_page() called for service: {service}")
+    
     services = BW_CONFIG.get_config(global_only=True, methods=False, with_drafts=True, filtered_settings=("SERVER_NAME",))["SERVER_NAME"].split(" ")
     service_exists = service in services
 
@@ -405,9 +460,15 @@ def services_service_page(service: str):
     )
 
 
+# Export selected services configuration as environment file.
+# Generates downloadable .env file containing service-specific settings
+# for backup, migration, or external configuration management.
 @services.route("/services/export", methods=["GET"])
 @login_required
 def services_service_export():
+    if DEBUG_MODE:
+        logger.debug("services_service_export() called")
+    
     services = request.args.get("services", "").split(",")
     if not services:
         return handle_error("No services selected.", "services", True)
