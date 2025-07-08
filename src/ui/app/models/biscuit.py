@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from ipaddress import ip_address
 from pathlib import Path
 from traceback import format_exc
@@ -228,7 +228,7 @@ class BiscuitTokenFactory:
         builder = BiscuitBuilder(
             f"""
             user("{user_id}");
-            time({datetime.now(UTC).isoformat()});
+            time({datetime.now(timezone.utc).isoformat()});
             client_ip("{request.remote_addr}");
             domain("{request.host}");
             version("{get_version()}");

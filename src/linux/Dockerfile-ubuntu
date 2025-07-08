@@ -1,4 +1,4 @@
-FROM ubuntu:noble@sha256:b59d21599a2b151e23eea5f6602f4af4d7d31c4e236d22bf0b62b86d2e386b8f AS builder
+FROM ubuntu:noble@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98bf86db94eea8528c2c076 AS builder
 
 ENV OS=ubuntu
 ENV NGINX_VERSION=1.28.0
@@ -71,7 +71,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
     echo "Skipping JS minification"; \
     fi
 
-FROM ubuntu:noble@sha256:b59d21599a2b151e23eea5f6602f4af4d7d31c4e236d22bf0b62b86d2e386b8f
+FROM ubuntu:noble@sha256:440dcf6a5640b2ae5c77724e68787a906afb8ddee98bf86db94eea8528c2c076
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
