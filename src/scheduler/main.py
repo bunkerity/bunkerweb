@@ -157,6 +157,13 @@ def handle_reload(signum, frame):
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
+                env={
+                    "PATH": getenv("PATH", ""),
+                    "PYTHONPATH": getenv("PYTHONPATH", ""),
+                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                    "DATABASE_URI": getenv("DATABASE_URI", ""),
+                },
             )
             if proc.returncode != 0:
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
@@ -416,6 +423,13 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
         stdin=DEVNULL,
         stderr=STDOUT,
         check=False,
+        env={
+            "PATH": getenv("PATH", ""),
+            "PYTHONPATH": getenv("PYTHONPATH", ""),
+            "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+            "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+            "DATABASE_URI": getenv("DATABASE_URI", ""),
+        },
     )
 
     if proc.returncode != 0:
@@ -663,6 +677,13 @@ if __name__ == "__main__":
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
+                env={
+                    "PATH": getenv("PATH", ""),
+                    "PYTHONPATH": getenv("PYTHONPATH", ""),
+                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                    "DATABASE_URI": getenv("DATABASE_URI", ""),
+                },
             )
             if proc.returncode != 0:
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
@@ -842,6 +863,13 @@ if __name__ == "__main__":
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
+                    env={
+                        "PATH": getenv("PATH", ""),
+                        "PYTHONPATH": getenv("PYTHONPATH", ""),
+                        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                        "DATABASE_URI": getenv("DATABASE_URI", ""),
+                    },
                 )
                 if proc.returncode != 0:
                     LOGGER.error("Config saver failed, configuration will not work as expected...")

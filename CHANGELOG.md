@@ -2,6 +2,7 @@
 
 ## v1.6.3-rc1 - ????/??/??
 
+- [BUGFIX] Update scheduler environment variables handling to avoid issues when there are too many environment variables set.
 - [MISC] Enhance plugin command execution with error handling and available commands listing
 
 ## v1.6.2 - ????/??/??
