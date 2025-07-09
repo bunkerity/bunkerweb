@@ -7,7 +7,7 @@ from os import environ, get_terminal_size, getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
-from sys import path as sys_path
+from sys import argv as sys_argv, path as sys_path
 from traceback import format_exc
 from typing import Any, Optional, Tuple
 from time import time
@@ -467,39 +467,154 @@ class CLI(ApiCaller):
         found = False
         plugin_type = "core"
         file_name = None
+        available_commands = []
 
         for db_plugin in self.__db.get_plugins():
             if db_plugin["id"] == plugin_id:
                 found = True
                 plugin_type = db_plugin["type"]
-                file_name = db_plugin["bwcli"].get(command, None)
+                available_commands = list(db_plugin.get("bwcli", {}).keys()) if db_plugin.get("bwcli") else []
+                file_name = db_plugin["bwcli"].get(command, None) if db_plugin.get("bwcli") else None
                 break
 
         if not found:
             return False, self.__format_error(f"Plugin {self.BOLD}{plugin_id}{self.RESET} not found")
         elif not file_name:
-            return False, self.__format_error(f"Command {self.BOLD}{command}{self.RESET} not found for plugin {self.CYAN}{plugin_id}{self.RESET}")
+            error_msg = f"Command {self.BOLD}{command}{self.RESET} not found for plugin {self.CYAN}{plugin_id}{self.RESET}"
+            if available_commands:
+                error_msg += f"\nAvailable commands: {self.YELLOW}{', '.join(available_commands)}{self.RESET}"
+            else:
+                error_msg += f"\nNo CLI commands available for plugin {self.CYAN}{plugin_id}{self.RESET}"
+            return False, self.__format_error(error_msg)
 
-        command_path = (
+        plugin_base_path = (
             Path(sep, "usr", "share", "bunkerweb", "core", plugin_id)
             if plugin_type == "core"
             else (Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin_id) if plugin_type == "pro" else Path(sep, "etc", "bunkerweb", "plugins", plugin_id))
-        ).joinpath("bwcli", file_name)
+        )
+
+        command_path = plugin_base_path.joinpath("bwcli", file_name)
 
         if not command_path.is_file():
             return False, self.__format_error(
                 f"Command {self.BOLD}{command}{self.RESET} not found for plugin {self.CYAN}{plugin_id}{self.RESET}\nFile {command_path} not found"
             )
 
+        # Check if it's a Python module
+        if file_name.endswith(".py"):
+            return self.__exec_plugin_module(command_path, plugin_base_path, plugin_id, command, debug, extra_args)
+        return self.__exec_external_command(command_path, plugin_id, command, debug, extra_args)
+
+    def __exec_plugin_module(
+        self, command_path: Path, plugin_base_path: Path, plugin_id: str, command: str, debug: bool = False, extra_args: Optional[list] = None
+    ) -> Tuple[bool, str]:
+        """Execute a Python module as a plugin command, similar to JobScheduler approach."""
+        from importlib.util import module_from_spec, spec_from_file_location
+
+        # Convert to absolute path
+        abs_path = command_path.resolve()
+        module_dir = plugin_base_path.as_posix()
+
+        # Validate path exists
+        if not abs_path.exists():
+            return False, self.__format_error(f"Plugin command file not found: {abs_path}")
+
+        # Add plugin directory to sys.path temporarily
+        if module_dir not in sys_path:
+            sys_path.insert(0, module_dir)
+            path_added = True
+        else:
+            path_added = False
+
+        try:
+            # Prepare environment similar to JobScheduler
+            old_env = environ.copy()
+            plugin_env = self.__variables.copy()
+            plugin_env.update(environ)
+            if debug:
+                plugin_env["LOG_LEVEL"] = "DEBUG"
+            if self.__db:
+                plugin_env["DATABASE_URI"] = self.__db.database_uri
+
+            # Store extra args in environment for the module to access
+            if extra_args:
+                plugin_env["CLI_EXTRA_ARGS"] = " ".join(extra_args)
+
+            environ.clear()
+            environ.update(plugin_env)
+
+            self.__logger.debug(f"Executing Python module {abs_path.as_posix()}")
+            self.__logger.info(f"Executing {plugin_id}:{command} (Python module)")
+
+            # Backup and modify sys.argv to prevent argument parsing conflicts
+            old_argv = sys_argv.copy()
+            # Set sys.argv to just the script name and any extra args
+            sys_argv[:] = [abs_path.as_posix()] + (extra_args or [])
+
+            # Load and execute the module
+            spec = spec_from_file_location(f"{plugin_id}_{command}", abs_path.as_posix())
+            if spec is None:
+                return False, self.__format_error(f"Failed to create module spec for {abs_path}")
+
+            if spec.loader is None:
+                return False, self.__format_error(f"Failed to create module loader for {abs_path}")
+
+            module = module_from_spec(spec)
+
+            # Execute the module
+            try:
+                spec.loader.exec_module(module)
+                return True, self.__format_success(
+                    f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} executed successfully"
+                )
+            except SystemExit as e:
+                exit_code = e.code if isinstance(e.code, int) else 1
+                if exit_code == 0:
+                    return True, self.__format_success(
+                        f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} executed successfully"
+                    )
+                else:
+                    return False, self.__format_error(
+                        f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} failed with exit code {exit_code}"
+                    )
+            except Exception as e:
+                self.__logger.error(f"Exception while executing command '{command}' from plugin '{plugin_id}': {e}")
+                self.__logger.debug(format_exc())
+                return False, self.__format_error(f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} failed: {e}")
+
+        finally:
+            # Restore original sys.argv
+            if "old_argv" in locals():
+                sys_argv[:] = old_argv
+
+            # Restore original environment
+            environ.clear()
+            environ.update(old_env)
+
+            # Remove plugin directory from sys.path if we added it
+            if path_added and module_dir in sys_path:
+                sys_path.remove(module_dir)
+
+    def __exec_external_command(
+        self, command_path: Path, plugin_id: str, command: str, debug: bool = False, extra_args: Optional[list] = None
+    ) -> Tuple[bool, str]:
+        """Execute an external command (legacy support for non-Python commands)."""
         cmd = [command_path.as_posix()]
         if extra_args:
             cmd.extend(extra_args)
 
-        self.__logger.debug(f"Executing command {' '.join(cmd)}")
-
+        self.__logger.debug(f"Executing external command {' '.join(cmd)}")
         print(f"\n{self.CYAN}{self.ICON_INFO} Executing {self.BOLD}{' '.join(cmd)}{self.RESET}\n")
 
-        proc = run(cmd, stdin=DEVNULL, stderr=STDOUT, check=False, env=self.__variables | environ | ({"LOG_LEVEL": "DEBUG"} if debug else {}) | ({"DATABASE_URI": self.__db.database_uri} if self.__db else {}))  # type: ignore
+        # Prepare environment
+        cmd_env = self.__variables.copy()
+        cmd_env.update(environ)
+        if debug:
+            cmd_env["LOG_LEVEL"] = "DEBUG"
+        if self.__db:
+            cmd_env["DATABASE_URI"] = self.__db.database_uri
+
+        proc = run(cmd, stdin=DEVNULL, stderr=STDOUT, check=False, env=cmd_env)
 
         if proc.returncode != 0:
             return False, self.__format_error(

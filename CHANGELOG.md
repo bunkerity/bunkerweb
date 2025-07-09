@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.3-rc1 - ????/??/??
+
+- [MISC] Enhance plugin command execution with error handling and available commands listing
+
 ## v1.6.2 - ????/??/??
 
 - [SECURITY] Introduce ModSecurity exclusion rules targeting the password input upon login, preventing false-positive blocks on valid complex passwords while preserving strict overall request inspection.
