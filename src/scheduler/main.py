@@ -867,7 +867,7 @@ if __name__ == "__main__":
                 if args.variables:
                     env_file_path = deepcopy(tmp_variables_path)
                 else:
-                    env_content = "\n".join(f"{key}={value}" for key, value in env.items())
+                    env_content = "\n".join(f"{key}={value}" for key, value in (env | environ).items())
                     env_file_path.write_text(env_content + "\n", encoding="utf-8")
 
                 proc = subprocess_run(
