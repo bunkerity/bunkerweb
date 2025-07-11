@@ -377,7 +377,8 @@ def _initialize_logging() -> None:
             print("[DEBUG] Initializing logging system")
 
         setLoggerClass(BWLog)
-        # Initialize the EXEPTION_LEVEL - We set custom emojis later for all levels
+        # Initialize the EXEPTION_LEVEL
+        # We set custom emojis later for all levels
         addLevelName(EXCEPTION_LEVEL, "EXCEPTION")
         root_logger = getLogger()
         if getenv("LOG_TO_FILES_ONLY", "no").lower() != "yes":
