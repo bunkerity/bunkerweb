@@ -66,11 +66,11 @@ $(document).ready(function () {
   const $typeDropdownItems = $("#types-dropdown-menu li.nav-item");
 
   const changeTypesVisibility = () => {
+    // Treat both "global" and "Global" as global
+    const isGlobal = selectedService.toLowerCase() === "global";
     $typeDropdownItems.each(function () {
       const item = $(this);
-      item.toggle(
-        selectedService === "global" || item.data("context") === "multisite",
-      );
+      item.toggle(isGlobal || item.data("context") === "multisite");
     });
   };
 
@@ -110,10 +110,31 @@ $(document).ready(function () {
   });
 
   $serviceDropdownItems.on("click", function () {
+    const previousService = selectedService;
     selectedService = $(this).text().trim();
     changeTypesVisibility();
     if (
-      selectedService !== "global" &&
+      selectedService.toLowerCase() === "global" &&
+      previousService.toLowerCase() !== "global"
+    ) {
+      $("#select-type")
+        .parent()
+        .attr("data-bs-custom-class", "info-tooltip")
+        .attr(
+          "data-bs-original-title",
+          "You can now select global types for your custom config.",
+        )
+        .tooltip("show");
+
+      // Hide tooltip after 2 seconds
+      setTimeout(() => {
+        $("#select-type")
+          .parent()
+          .tooltip("hide")
+          .attr("data-bs-original-title", "");
+      }, 2000);
+    } else if (
+      selectedService.toLowerCase() !== "global" &&
       $(`#config-type-${selectedType}`).data("context") !== "multisite"
     ) {
       const firstMultisiteType = $(
