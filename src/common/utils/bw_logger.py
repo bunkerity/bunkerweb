@@ -238,7 +238,6 @@ def _create_file_handler(
         return True
 
     except OSError:
-        # FIX: Removed 'as e' as the variable was not explicitly used.
         # logger.exception automatically captures and logs the exception info.
         logger.exception(f"Failed to create primary log file: {abs_log_path}")
         fallback_paths = [
@@ -378,6 +377,7 @@ def _initialize_logging() -> None:
             print("[DEBUG] Initializing logging system")
 
         setLoggerClass(BWLog)
+        # Initialize the EXEPTION_LEVEL - We set custom emojis later for all levels
         addLevelName(EXCEPTION_LEVEL, "EXCEPTION")
         root_logger = getLogger()
         if getenv("LOG_TO_FILES_ONLY", "no").lower() != "yes":
