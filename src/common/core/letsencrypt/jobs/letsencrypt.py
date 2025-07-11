@@ -345,91 +345,138 @@ class NjallaProvider(Provider):
     )
 
 
-class WildcardGenerator:
-    """Manages the generation of wildcard domains across domain groups."""
+class WildcardCertificate:
+    """Represents a wildcard certificate configuration."""
 
-    def __init__(self):
-        self.__domain_groups = {}  # Stores raw domains grouped by identifier
-        self.__wildcards = {}  # Stores generated wildcard patterns
+    def __init__(self, group_name: str, email: str, staging: bool, domains: List[str], provider: str, profile: str, max_retries: int = 0):
+        self.group_name = group_name
+        self.email = email
+        self.staging = staging
+        self.domains = set(domains)
+        self.provider = provider
+        self.profile = profile
+        self.max_retries = max_retries
+        self._wildcard_domains = None
 
-    def extend(self, group: str, domains: List[str], email: str, staging: bool = False):
-        """
-        Add domains to a group and regenerate wildcards.
+    @property
+    def wildcard_domains(self) -> List[str]:
+        """Get the wildcard domains for this certificate."""
+        if self._wildcard_domains is None:
+            self._wildcard_domains = self._generate_wildcards()
+        return self._wildcard_domains
 
-        Args:
-            group: Group identifier for these domains
-            domains: List of domains to add
-            email: Contact email for this domain group
-            staging: Whether these domains are for staging environment
-        """
-        # Initialize group if it doesn't exist
-        if group not in self.__domain_groups:
-            self.__domain_groups[group] = {"staging": set(), "prod": set(), "email": email}
+    @property
+    def cert_name(self) -> str:
+        """Get the certificate name (base domain from the first domain)."""
+        if not self.domains:
+            return self.group_name
+        # Use the base domain from the first domain as cert name
+        first_domain = next(iter(self.domains))
+        return WildcardGenerator.get_base_domain(first_domain)
 
-        # Add domains to appropriate environment
-        env_type = "staging" if staging else "prod"
+    @property
+    def domains_str(self) -> str:
+        """Get domains as comma-separated string for certbot."""
+        return ",".join(sorted(self.wildcard_domains, key=lambda x: (x[0] != "*", x)))
+
+    def _generate_wildcards(self) -> List[str]:
+        """Generate wildcard patterns from the domains."""
+        wildcards = set()
+        for domain in self.domains:
+            domain = domain.strip()
+            if not domain:
+                continue
+
+            parts = domain.split(".")
+            if len(parts) > 2:
+                # For subdomains, create wildcard for base domain
+                base_domain = ".".join(parts[1:])
+                wildcards.add(f"*.{base_domain}")
+                wildcards.add(base_domain)
+            else:
+                # For top-level domains, just add as-is
+                wildcards.add(domain)
+
+        return sorted(wildcards, key=lambda x: (x[0] != "*", x))
+
+    def add_domains(self, domains: List[str]):
+        """Add more domains to this certificate."""
         for domain in domains:
             if domain := domain.strip():
-                self.__domain_groups[group][env_type].add(domain)
+                self.domains.add(domain)
+        # Reset cached wildcard domains
+        self._wildcard_domains = None
 
-        # Regenerate wildcards after adding new domains
-        self.__generate_wildcards(staging)
 
-    def __generate_wildcards(self, staging: bool = False):
+class WildcardGenerator:
+    """Manages wildcard certificate configurations."""
+
+    def __init__(self):
+        self._certificates: Dict[str, WildcardCertificate] = {}
+
+    def add_certificate(self, group_name: str, domains: List[str], email: str, staging: bool, provider: str, profile: str, max_retries: int = 0):
         """
-        Generate wildcard patterns for the specified environment.
+        Add or update a wildcard certificate configuration.
 
         Args:
-            staging: Whether to generate wildcards for staging environment
+            group_name: Unique identifier for this certificate group
+            domains: List of domains for this certificate
+            email: Contact email for the certificate
+            staging: Whether to use staging environment
+            provider: DNS provider name
+            profile: Certificate profile (classic, tlsserver, shortlived)
+            max_retries: Maximum number of retry attempts
         """
-        self.__wildcards.clear()
-        env_type = "staging" if staging else "prod"
-
-        # Process each domain group
-        for group, types in self.__domain_groups.items():
-            if group not in self.__wildcards:
-                self.__wildcards[group] = {"staging": set(), "prod": set(), "email": types["email"]}
-
-            # Process each domain in the group
-            for domain in types[env_type]:
-                # Convert domain to wildcards and add to appropriate group
-                self.__add_domain_wildcards(domain, group, env_type)
-
-    def __add_domain_wildcards(self, domain: str, group: str, env_type: str):
-        """
-        Convert a domain to wildcard patterns and add to the wildcards collection.
-
-        Args:
-            domain: Domain to process
-            group: Group identifier
-            env_type: Environment type (staging or prod)
-        """
-        parts = domain.split(".")
-
-        # Handle subdomains (domains with more than 2 parts)
-        if len(parts) > 2:
-            # Create wildcard for the base domain (e.g., *.example.com)
-            base_domain = ".".join(parts[1:])
-            self.__wildcards[group][env_type].add(f"*.{base_domain}")
-            self.__wildcards[group][env_type].add(base_domain)
+        if group_name in self._certificates:
+            # Update existing certificate with new domains
+            self._certificates[group_name].add_domains(domains)
         else:
-            # Just add the raw domain for top-level domains
-            self.__wildcards[group][env_type].add(domain)
+            # Create new certificate configuration
+            self._certificates[group_name] = WildcardCertificate(
+                group_name=group_name, email=email, staging=staging, domains=domains, provider=provider, profile=profile, max_retries=max_retries
+            )
 
-    def get_wildcards(self) -> Dict[str, Dict[Literal["staging", "prod", "email"], str]]:
-        """
-        Get formatted wildcard domains for each group.
+    def get_certificates(self) -> List[WildcardCertificate]:
+        """Get all wildcard certificates that need to be generated."""
+        return [cert for cert in self._certificates.values() if cert.domains]
 
-        Returns:
-            Dictionary of group data with formatted wildcard domains
-        """
+    def get_certificate_by_group(self, group_name: str) -> Optional[WildcardCertificate]:
+        """Get a specific certificate by group name."""
+        return self._certificates.get(group_name)
+
+    def has_certificates(self) -> bool:
+        """Check if there are any certificates to generate."""
+        return any(cert.domains for cert in self._certificates.values())
+
+    def clear(self):
+        """Clear all certificate configurations."""
+        self._certificates.clear()
+
+    def get_certificate_by_base_domain(self, domain: str) -> Optional[WildcardCertificate]:
+        """Get certificate that would cover the given domain."""
+        base_domain = self.get_base_domain(domain)
+        for cert in self._certificates.values():
+            if cert.cert_name == base_domain:
+                return cert
+        return None
+
+    # Legacy compatibility methods - no longer parse group names
+    def extend(self, group: str, domains: List[str], email: str, staging: bool = False):
+        """Legacy method for backward compatibility - now requires provider/profile to be set separately."""
+        if group not in self._certificates:
+            # Default values when we can't parse from group name
+            self.add_certificate(group, domains, email, staging, "unknown", "classic")
+        else:
+            self._certificates[group].add_domains(domains)
+
+    def get_wildcards(self) -> Dict[str, Dict[str, str]]:
+        """Legacy method for backward compatibility."""
         result = {}
-        for group, data in self.__wildcards.items():
-            result[group] = {"email": data["email"]}
-            for env_type in ("staging", "prod"):
-                if domains := data[env_type]:
-                    # Sort domains with wildcards first
-                    result[group][env_type] = ",".join(sorted(domains, key=lambda x: x[0] != "*"))
+        for cert in self._certificates.values():
+            if not cert.domains:
+                continue
+
+            result[cert.group_name] = {"email": cert.email, "staging" if cert.staging else "prod": cert.domains_str}
         return result
 
     @staticmethod

@@ -15,7 +15,7 @@ from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
-from typing import Dict, Literal, Type, Union
+from typing import Dict, List, Literal, Optional, Type, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -39,6 +39,7 @@ from letsencrypt import (
     NjallaProvider,
     NSOneProvider,
     OvhProvider,
+    Provider,
     Rfc2136Provider,
     Route53Provider,
     SakuraCloudProvider,
@@ -68,6 +69,192 @@ PSL_URL = "https://publicsuffix.org/list/public_suffix_list.dat"
 PSL_STATIC_FILE = "public_suffix_list.dat"
 
 
+class CredentialFileManager:
+    """Manages credential files intelligently to avoid duplicates."""
+
+    def __init__(self, cache_path: Path, job):
+        self.cache_path = cache_path
+        self.job = job
+        self._credential_registry = {}  # Maps content hash to file info
+        self._service_credentials = {}  # Maps service to credential file path
+        self._name_counter = 1  # Counter for generating short unique names
+
+    def _generate_secure_filename(self, content: bytes, file_extension: str, prefix: str = "cred") -> str:
+        """Generate a secure, short filename that doesn't leak sensitive information."""
+        # Use full SHA-256 hash for security, but only use first 12 chars for filename
+        content_hash = bytes_hash(content, algorithm="sha256")
+        short_hash = content_hash[:12]  # 12 chars = 2^48 combinations, very low collision probability
+
+        # Use a simple counter-based approach for even shorter names if needed
+        # Format: cred_001.ext, cred_002.ext, etc. or hash-based cred_a1b2c3d4e5f6.ext
+        return f"{prefix}_{short_hash}.{file_extension}"
+
+    def get_or_create_credential_file(self, service_name: str, provider, content: bytes, use_wildcard: bool = False, wildcard_group: str = None) -> Path:
+        """Get existing credential file or create new one, avoiding duplicates."""
+        # Create content hash for deduplication
+        content_hash = bytes_hash(content, algorithm="sha256")
+        file_extension = provider.get_file_type() if provider else "txt"
+
+        # Check if we already have this exact credential content
+        if content_hash in self._credential_registry:
+            existing_path = self._credential_registry[content_hash]["path"]
+            self._credential_registry[content_hash]["services"].add(service_name)
+            self._service_credentials[service_name] = existing_path
+            LOGGER.debug(f"Reusing existing credential file {existing_path} for service {service_name}")
+            return existing_path
+
+        # Create new credential file with secure naming
+        if use_wildcard and wildcard_group:
+            # For wildcard certificates, use the group name directly (already secure and short)
+            # The group name is now in format: wc_12345678
+            file_name = f"{wildcard_group}.{file_extension}"
+            credential_path = self.cache_path.joinpath(file_name)
+        else:
+            # For individual services, use hash-based naming
+            file_name = self._generate_secure_filename(content, file_extension, "cred")
+            credential_path = self.cache_path.joinpath(file_name)
+
+        # Register this credential file
+        self._credential_registry[content_hash] = {"path": credential_path, "services": {service_name}, "content": content, "use_wildcard": use_wildcard}
+        self._service_credentials[service_name] = credential_path
+
+        return credential_path
+
+    def save_credential_file(self, credential_path: Path, content: bytes, service_name: str, use_wildcard: bool) -> bool:
+        """Save credential file with proper caching and secure permissions."""
+        try:
+            file_exists = credential_path.is_file()
+            needs_update = False
+
+            if not file_exists:
+                needs_update = True
+                action = "saving"
+            else:
+                # Check if content has changed
+                try:
+                    old_content = credential_path.read_bytes()
+                    if old_content != content:
+                        needs_update = True
+                        action = "updating"
+                    else:
+                        # File exists and content is the same, just ensure secure permissions
+                        credential_path.chmod(0o600)
+                        LOGGER.debug(f"Credential file {credential_path.name} is up to date")
+                        return True
+                except (OSError, IOError) as e:
+                    LOGGER.warning(f"Could not read existing credential file {credential_path.name}: {e}, recreating...")
+                    needs_update = True
+                    action = "recreating"
+
+            if needs_update:
+                # Save/update the file through cache system
+                cached, err = self.job.cache_file(credential_path.name, content, job_name="certbot-renew", service_id=service_name if not use_wildcard else "")
+                if not cached:
+                    LOGGER.error(f"Error while {action} credential file {credential_path.name} in cache: {err}")
+                    return False
+
+                LOGGER.info(f"Successfully {action.replace('ing', 'ed')} credential file {credential_path.name} in cache")
+
+            # Always ensure secure permissions (0o600 = read/write for owner only)
+            if credential_path.exists():
+                credential_path.chmod(0o600)
+                LOGGER.debug(f"Applied secure permissions (0o600) to {credential_path.name}")
+            else:
+                LOGGER.warning(f"Credential file {credential_path.name} was not created properly")
+                return False
+
+            return True
+
+        except Exception as e:
+            LOGGER.error(f"Unexpected error handling credential file {credential_path.name}: {e}")
+            return False
+
+    def get_active_credential_files(self) -> set:
+        """Get all credential files that are currently in use."""
+        active_files = set()
+
+        # Files from the credential registry (newly created or managed files)
+        active_files.update(info["path"] for info in self._credential_registry.values())
+
+        # Files from service credentials (includes existing files that were registered)
+        active_files.update(self._service_credentials.values())
+
+        return active_files
+
+    def register_existing_credential_file(self, service_name: str, credential_path: Path, content: bytes = None):
+        """Register an existing credential file to prevent it from being deleted."""
+        if not credential_path.exists():
+            LOGGER.warning(f"Cannot register non-existent credential file: {credential_path}")
+            return
+
+        # Add to service credentials mapping
+        self._service_credentials[service_name] = credential_path
+
+        # If we have content, also add to registry for proper tracking
+        if content is not None:
+            content_hash = bytes_hash(content, algorithm="sha256")
+            if content_hash not in self._credential_registry:
+                self._credential_registry[content_hash] = {
+                    "path": credential_path,
+                    "services": {service_name},
+                    "content": content,
+                    "use_wildcard": False,  # Assume non-wildcard for existing files
+                }
+            else:
+                # Add service to existing registry entry
+                self._credential_registry[content_hash]["services"].add(service_name)
+
+        LOGGER.debug(f"Registered existing credential file {credential_path.name} for service {service_name}")
+
+    def get_service_credential_file(self, service_name: str) -> Optional[Path]:
+        """Get the credential file path for a specific service."""
+        return self._service_credentials.get(service_name)
+
+    def ensure_secure_permissions(self):
+        """Ensure all managed credential files have secure permissions."""
+        for info in self._credential_registry.values():
+            credential_path = info["path"]
+            if credential_path.exists():
+                try:
+                    credential_path.chmod(0o600)
+                    LOGGER.debug(f"Ensured secure permissions for {credential_path.name}")
+                except (OSError, IOError) as e:
+                    LOGGER.warning(f"Could not set secure permissions for {credential_path.name}: {e}")
+
+    def cleanup_unused_files(self):
+        """Remove credential files that are no longer referenced."""
+        if not self.cache_path.is_dir():
+            return
+
+        active_files = self.get_active_credential_files()
+
+        LOGGER.info(f"Credential cleanup: {len(active_files)} active files to preserve")
+        LOGGER.debug(f"Active credential files: {[str(f) for f in active_files]}")
+        LOGGER.debug(f"Service to credential mapping: {self._service_credentials.copy()}")
+
+        files_removed = 0
+        files_kept = 0
+
+        for ext in ("*.ini", "*.env", "*.json"):
+            for file in list(self.cache_path.rglob(ext)):
+                if "etc" in file.parts or not file.is_file():
+                    continue
+
+                # Keep files that are actively used
+                if file in active_files:
+                    LOGGER.debug(f"Keeping active credential file {file}")
+                    files_kept += 1
+                    continue
+
+                # Remove unused files
+                LOGGER.info(f"Removing unused credential file {file}")
+                service_id = file.parent.name if file.parent.name != "letsencrypt" else ""
+                self.job.del_cache(file.name, job_name="certbot-renew", service_id=service_id)
+                files_removed += 1
+
+        LOGGER.info(f"Credential cleanup completed: {files_kept} files kept, {files_removed} files removed")
+
+
 def load_public_suffix_list(job):
     job_cache = job.get_cache(PSL_STATIC_FILE, with_info=True, with_data=True)
     if (
@@ -81,7 +268,7 @@ def load_public_suffix_list(job):
         resp = get(PSL_URL, timeout=5)
         resp.raise_for_status()
         content = resp.text
-        cached, err = JOB.cache_file(PSL_STATIC_FILE, content.encode("utf-8"))
+        cached, err = job.cache_file(PSL_STATIC_FILE, content.encode("utf-8"))
         if not cached:
             LOGGER.error(f"Error while saving public suffix list to cache : {err}")
         return content.splitlines()
@@ -133,6 +320,94 @@ def is_domain_blacklisted(domain, psl):
         if f"*.{candidate}" in psl["rules"]:
             if len(labels[i:]) == 2:
                 return True  # Block foo.bar and *.foo.bar
+    return False
+
+
+def extract_credential_items(service_name: str, is_multisite: bool, provider_name: str = "") -> Dict[str, str]:
+    """Extract and process credential items from environment variables."""
+    credential_key = f"{service_name}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if is_multisite else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
+    credential_items = {}
+
+    # Collect all credential items
+    for env_key, env_value in environ.items():
+        if not env_value or not env_key.startswith(credential_key):
+            continue
+
+        if " " not in env_value:
+            credential_items["json_data"] = env_value
+            continue
+
+        key, value = env_value.split(" ", 1)
+        credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+
+    # Handle JSON data
+    if "json_data" in credential_items:
+        value = credential_items.pop("json_data")
+        if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+            with suppress(BaseException):
+                decoded = b64decode(value).decode("utf-8")
+                json_data = loads(decoded)
+                if isinstance(json_data, dict):
+                    credential_items = {
+                        k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                        for k, v in json_data.items()
+                    }
+
+    # Process base64 encoded credentials (except for rfc2136)
+    if credential_items:
+        for key, value in credential_items.items():
+            if provider_name != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                with suppress(BaseException):
+                    decoded = b64decode(value).decode("utf-8")
+                    if decoded != value:
+                        credential_items[key] = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+
+    return credential_items
+
+
+def get_service_config(service_name: str, is_multisite: bool) -> Dict[str, str]:
+    """Get all Let's Encrypt configuration for a service."""
+    prefix = f"{service_name}_" if is_multisite else ""
+
+    config = {
+        "email": getenv(f"{prefix}EMAIL_LETS_ENCRYPT", "") or f"contact@{service_name}",
+        "challenge": getenv(f"{prefix}LETS_ENCRYPT_CHALLENGE", "http"),
+        "staging": getenv(f"{prefix}USE_LETS_ENCRYPT_STAGING", "no") == "yes",
+        "use_wildcard": getenv(f"{prefix}USE_LETS_ENCRYPT_WILDCARD", "no") == "yes",
+        "provider": getenv(f"{prefix}LETS_ENCRYPT_DNS_PROVIDER", ""),
+        "propagation": getenv(f"{prefix}LETS_ENCRYPT_DNS_PROPAGATION", "default"),
+        "profile": getenv(f"{prefix}LETS_ENCRYPT_PROFILE", "classic"),
+        "check_psl": getenv(f"{prefix}LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes") == "no",
+        "max_retries": getenv(f"{prefix}LETS_ENCRYPT_MAX_RETRIES", "0"),
+    }
+
+    # Override profile if custom profile is set
+    custom_profile = getenv(f"{prefix}LETS_ENCRYPT_CUSTOM_PROFILE", "").strip()
+    if custom_profile:
+        config["profile"] = custom_profile
+
+    return config
+
+
+def validate_and_create_provider(provider_name: str, credential_items: Dict[str, str], provider_classes: Dict) -> Optional[Provider]:
+    """Validate credentials and create provider instance."""
+    if provider_name not in provider_classes:
+        return None
+
+    try:
+        return provider_classes[provider_name](**credential_items)
+    except ValidationError as ve:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"Error while validating credentials: {ve}")
+        return None
+
+
+def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) -> bool:
+    """Check if any domains are blacklisted by PSL rules."""
+    for domain in domains:
+        if is_domain_blacklisted(domain, psl_rules):
+            LOGGER.error(f"Domain {domain} is blacklisted by Public Suffix List, refusing certificate request for {service_name}.")
+            return True
     return False
 
 
@@ -415,7 +690,7 @@ try:
     stdout = proc.stdout
 
     WILDCARD_GENERATOR = WildcardGenerator()
-    credential_paths = set()
+    credential_manager = CredentialFileManager(CACHE_PATH, JOB)  # Initialize credential manager
     generated_domains = set()
     domains_to_ask = {}
     active_cert_names = set()  # Track ALL active certificate names, not just processed ones
@@ -428,20 +703,20 @@ try:
             if (getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") if IS_MULTISITE else getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
                 continue
 
-            letsencrypt_challenge = getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") if IS_MULTISITE else getenv("LETS_ENCRYPT_CHALLENGE", "http")
+            # Get service configuration
+            config = get_service_config(first_server, IS_MULTISITE)
             original_first_server = deepcopy(first_server)
 
-            if (
-                letsencrypt_challenge == "dns"
-                and (getenv(f"{original_first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes"
-            ):
+            # Handle wildcard configuration
+            if config["challenge"] == "dns" and config["use_wildcard"]:
                 wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))
-                first_server = wildcards[0].lstrip("*.")
+                wildcard_base_domain = WILDCARD_GENERATOR.get_base_domain(wildcards[0])
+                first_server = wildcard_base_domain
                 domains = set(wildcards)
             else:
                 domains = set(domains.split(" "))
 
-            # Add the certificate name to our active set regardless if we're generating it or not
+            # Add the certificate name to our active set
             active_cert_names.add(first_server)
 
             certificate_block = None
@@ -524,6 +799,10 @@ try:
                 )
                 continue
 
+            letsencrypt_challenge = (
+                getenv(f"{original_first_server}_LETS_ENCRYPT_CHALLENGE", "http") if IS_MULTISITE else getenv("LETS_ENCRYPT_CHALLENGE", "http")
+            )
+
             if letsencrypt_challenge == "dns":
                 if letsencrypt_provider and current_provider != letsencrypt_provider:
                     domains_to_ask[first_server] = 2
@@ -532,59 +811,23 @@ try:
 
                 # Check if DNS credentials have changed
                 if letsencrypt_provider and current_provider == letsencrypt_provider:
-                    credential_key = f"{original_first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
-                    current_credential_items = {}
+                    current_credential_items = extract_credential_items(original_first_server, IS_MULTISITE, letsencrypt_provider)
 
-                    # Collect current credential items
-                    for env_key, env_value in environ.items():
-                        if env_value and env_key.startswith(credential_key):
-                            if " " not in env_value:
-                                current_credential_items["json_data"] = env_value
-                                continue
-                            key, value = env_value.split(" ", 1)
-                            current_credential_items[key.lower()] = (
-                                value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                            )
+                    if current_credential_items and letsencrypt_provider in provider_classes:
+                        current_provider_instance = validate_and_create_provider(letsencrypt_provider, current_credential_items, provider_classes)
+                        if current_provider_instance:
+                            current_credentials_content = current_provider_instance.get_formatted_credentials()
 
-                    if "json_data" in current_credential_items:
-                        value = current_credential_items.pop("json_data")
-                        if not current_credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-                            with suppress(BaseException):
-                                decoded = b64decode(value).decode("utf-8")
-                                json_data = loads(decoded)
-                                if isinstance(json_data, dict):
-                                    current_credential_items = {
-                                        k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                                        for k, v in json_data.items()
-                                    }
+                            # Check if stored credentials file exists and compare
+                            file_type = current_provider_instance.get_file_type()
+                            stored_credentials_path = CACHE_PATH.joinpath(first_server, f"credentials.{file_type}")
 
-                    if current_credential_items:
-                        # Process regular credentials for base64 decoding
-                        for key, value in current_credential_items.items():
-                            if letsencrypt_provider != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-                                with suppress(BaseException):
-                                    decoded = b64decode(value).decode("utf-8")
-                                    if decoded != value:
-                                        current_credential_items[key] = (
-                                            decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                                        )
-
-                        # Generate current credentials content
-                        if letsencrypt_provider in provider_classes:
-                            with suppress(ValidationError, KeyError):
-                                current_provider_instance = provider_classes[letsencrypt_provider](**current_credential_items)
-                                current_credentials_content = current_provider_instance.get_formatted_credentials()
-
-                                # Check if stored credentials file exists and compare
-                                file_type = current_provider_instance.get_file_type()
-                                stored_credentials_path = CACHE_PATH.joinpath(first_server, f"credentials.{file_type}")
-
-                                if stored_credentials_path.is_file():
-                                    stored_credentials_content = stored_credentials_path.read_bytes()
-                                    if stored_credentials_content != current_credentials_content:
-                                        domains_to_ask[first_server] = 2
-                                        LOGGER.warning(f"[{original_first_server}] DNS credentials for {first_server} have changed, asking new certificate...")
-                                        continue
+                            if stored_credentials_path.is_file():
+                                stored_credentials_content = stored_credentials_path.read_bytes()
+                                if stored_credentials_content != current_credentials_content:
+                                    domains_to_ask[first_server] = 2
+                                    LOGGER.warning(f"[{original_first_server}] DNS credentials for {first_server} have changed, asking new certificate...")
+                                    continue
             elif current_provider != "manual" and letsencrypt_challenge == "http":
                 domains_to_ask[first_server] = 2
                 LOGGER.warning(f"[{original_first_server}] {first_server} is no longer using DNS challenge, asking new certificate...")
@@ -592,6 +835,41 @@ try:
 
             domains_to_ask[first_server] = 0
             LOGGER.info(f"[{original_first_server}] Certificates already exist for domain(s) {domains}, expiry date: {cert_domains.group('expiry_date')}")
+
+            # Even if certificate exists, we still need to track credential files that are in use
+            if letsencrypt_challenge == "dns" and letsencrypt_provider:
+                # Generate credentials for tracking purposes
+                current_credential_items = extract_credential_items(original_first_server, IS_MULTISITE, letsencrypt_provider)
+
+                if current_credential_items and letsencrypt_provider in provider_classes:
+                    provider_instance = validate_and_create_provider(letsencrypt_provider, current_credential_items, provider_classes)
+                    if provider_instance:
+                        file_type = provider_instance.get_file_type()
+
+                        # Determine credential file path based on wildcard usage
+                        if config.get("use_wildcard"):
+                            content = provider_instance.get_formatted_credentials()
+                            # Use the same improved group naming for existing certificates
+                            base_domain = WILDCARD_GENERATOR.get_base_domain(original_first_server)
+                            group_data = f"{base_domain}_{letsencrypt_provider}_{config.get('staging', False)}_{config.get('profile', 'classic')}"
+                            group_hash = bytes_hash(group_data.encode(), algorithm="sha256")[:8]
+                            group = f"wc_{group_hash}"
+                            existing_credentials_path = CACHE_PATH.joinpath(f"{group}.{file_type}")
+                        else:
+                            existing_credentials_path = CACHE_PATH.joinpath(original_first_server, f"credentials.{file_type}")
+
+                        # Register existing credential file with manager and ensure secure permissions
+                        if existing_credentials_path.exists():
+                            # Properly register the existing file to prevent deletion
+                            credential_manager.register_existing_credential_file(
+                                original_first_server, existing_credentials_path, content if "content" in locals() else None
+                            )
+                            # Ensure secure permissions on existing files
+                            try:
+                                existing_credentials_path.chmod(0o600)
+                                LOGGER.debug(f"Applied secure permissions to existing credential file {existing_credentials_path.name}")
+                            except (OSError, IOError) as e:
+                                LOGGER.warning(f"Could not set secure permissions for existing credential file {existing_credentials_path.name}: {e}")
 
     psl_lines = None
     psl_rules = None
@@ -630,7 +908,8 @@ try:
             data["use_wildcard"] = False
 
         if (not data["use_wildcard"] and not domains_to_ask.get(first_server)) or (
-            data["use_wildcard"] and not domains_to_ask.get(WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))[0].lstrip("*."))
+            data["use_wildcard"]
+            and not domains_to_ask.get(WILDCARD_GENERATOR.get_base_domain(WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))[0]))
         ):
             continue
 
@@ -642,17 +921,8 @@ try:
 
         # * Getting the DNS provider data if necessary
         if data["challenge"] == "dns":
-            credential_key = f"{first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
-            credential_items = {}
-
-            # Collect all credential items
-            for env_key, env_value in environ.items():
-                if env_value and env_key.startswith(credential_key):
-                    if " " not in env_value:
-                        credential_items["json_data"] = env_value
-                        continue
-                    key, value = env_value.split(" ", 1)
-                    credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+            # Extract and validate credentials
+            credential_items = extract_credential_items(first_server, IS_MULTISITE, data["provider"])
 
             if "json_data" in credential_items:
                 value = credential_items.pop("json_data")
@@ -671,19 +941,7 @@ try:
                         LOGGER.error(f"Error while decoding JSON data for service {first_server} : {value} : \n{e}")
 
             if not data["credential_items"]:
-                # Process regular credentials
-                data["credential_items"] = {}
-                for key, value in credential_items.items():
-                    # Check for base64 encoding
-                    if data["provider"] != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-                        try:
-                            decoded = b64decode(value).decode("utf-8")
-                            if decoded != value:
-                                value = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                        except BaseException as e:
-                            LOGGER.debug(format_exc())
-                            LOGGER.debug(f"Error while decoding credential item {key} for service {first_server} : {value} : \n{e}")
-                    data["credential_items"][key] = value
+                data["credential_items"] = credential_items
 
         LOGGER.debug(f"Data for service {first_server} : {dumps(data)}")
 
@@ -706,11 +964,8 @@ try:
                 continue
 
             # * Validating the credentials
-            try:
-                provider = provider_classes[data["provider"]](**data["credential_items"])
-            except ValidationError as ve:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Error while validating credentials for service {first_server} :\n{ve}")
+            provider = validate_and_create_provider(data["provider"], data["credential_items"], provider_classes)
+            if not provider:
                 continue
 
             content = provider.get_formatted_credentials()
@@ -723,15 +978,13 @@ try:
         file_type = provider.get_file_type() if data["challenge"] == "dns" else "txt"
         file_path = (first_server, f"credentials.{file_type}")
         if data["use_wildcard"]:
-            # Use the improved method for generating consistent group names
-            group = WILDCARD_GENERATOR.create_group_name(
-                domain=first_server,
-                provider=data["provider"] if data["challenge"] == "dns" else "http",
-                challenge_type=data["challenge"],
-                staging=data["staging"],
-                content_hash=bytes_hash(content, algorithm="sha1"),
-                profile=data["profile"],
-            )
+            # Create a shorter, more secure group name for wildcard certificates
+            # Instead of using the complex create_group_name, use a simple hash-based approach
+            base_domain = WILDCARD_GENERATOR.get_base_domain(first_server)
+            # Create a unique identifier based on domain, provider, and environment
+            group_data = f"{base_domain}_{data['provider']}_{data['staging']}_{data['profile']}"
+            group_hash = bytes_hash(group_data.encode(), algorithm="sha256")[:8]
+            group = f"wc_{group_hash}"
 
             LOGGER.info(
                 f"Service {first_server} is using wildcard, "
@@ -746,17 +999,21 @@ try:
                     psl_rules = parse_psl(psl_lines)
 
                 wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains(domains.split(" "))
-
                 LOGGER.debug(f"Wildcard domains for {first_server} : {wildcards}")
 
-                for d in wildcards:
-                    if is_domain_blacklisted(d, psl_rules):
-                        LOGGER.error(f"Wildcard domain {d} is blacklisted by Public Suffix List, refusing certificate request for {first_server}.")
-                        is_blacklisted = True
-                        break
+                if check_psl_blacklist(wildcards, psl_rules, first_server):
+                    is_blacklisted = True
 
             if not is_blacklisted:
-                WILDCARD_GENERATOR.extend(group, domains.split(" "), data["email"], data["staging"])
+                WILDCARD_GENERATOR.add_certificate(
+                    group_name=group,
+                    domains=domains.split(" "),
+                    email=data["email"],
+                    staging=data["staging"],
+                    provider=data["provider"] if data["challenge"] == "dns" else "http",
+                    profile=data["profile"],
+                    max_retries=data["max_retries"],
+                )
                 file_path = (f"{group}.{file_type}",)
                 LOGGER.debug(f"[{first_server}] Wildcard group {group}")
         elif data["check_psl"]:
@@ -765,43 +1022,22 @@ try:
             if psl_rules is None:
                 psl_rules = parse_psl(psl_lines)
 
-            for d in domains.split():
-                if is_domain_blacklisted(d, psl_rules):
-                    LOGGER.error(f"Domain {d} is blacklisted by Public Suffix List, refusing certificate request for {first_server}.")
-                    is_blacklisted = True
-                    break
+            if check_psl_blacklist(domains.split(), psl_rules, first_server):
+                is_blacklisted = True
 
         if is_blacklisted:
             continue
 
         # * Generating the credentials file
-        credentials_path = CACHE_PATH.joinpath(*file_path)
+        if data["use_wildcard"]:
+            file_type = provider.get_file_type() if data["challenge"] == "dns" else "txt"
+            credentials_path = credential_manager.get_or_create_credential_file(first_server, provider, content, use_wildcard=True, wildcard_group=group)
+        else:
+            credentials_path = credential_manager.get_or_create_credential_file(first_server, provider, content, use_wildcard=False)
 
         if data["challenge"] == "dns":
-            if not credentials_path.is_file():
-                cached, err = JOB.cache_file(
-                    credentials_path.name, content, job_name="certbot-renew", service_id=first_server if not data["use_wildcard"] else ""
-                )
-                if not cached:
-                    LOGGER.error(f"Error while saving service {first_server}'s credentials file in cache : {err}")
-                    continue
-                LOGGER.info(f"Successfully saved service {first_server}'s credentials file in cache")
-            elif data["use_wildcard"]:
-                LOGGER.info(f"Service {first_server}'s wildcard credentials file has already been generated")
-            else:
-                old_content = credentials_path.read_bytes()
-                if old_content != content:
-                    LOGGER.warning(f"Service {first_server}'s credentials file is outdated, updating it...")
-                    cached, err = JOB.cache_file(credentials_path.name, content, job_name="certbot-renew", service_id=first_server)
-                    if not cached:
-                        LOGGER.error(f"Error while updating service {first_server}'s credentials file in cache : {err}")
-                        continue
-                    LOGGER.info(f"Successfully updated service {first_server}'s credentials file in cache")
-                else:
-                    LOGGER.info(f"Service {first_server}'s credentials file is up to date")
-
-            credential_paths.add(credentials_path)
-            credentials_path.chmod(0o600)  # ? Setting the permissions to 600 (this is important to avoid warnings from certbot)
+            if not credential_manager.save_credential_file(credentials_path, content, first_server, data["use_wildcard"]):
+                continue
 
         if data["use_wildcard"]:
             continue
@@ -833,78 +1069,81 @@ try:
             status = 1 if status == 0 else status
             LOGGER.info(f"Certificate generation succeeded for domain(s) : {domains}")
 
-        generated_domains.update(domains.split(","))
-
-    # * Generating the wildcards if necessary
-    wildcards = WILDCARD_GENERATOR.get_wildcards()
-    if wildcards:
-        for group, data in wildcards.items():
-            if not data:
+        generated_domains.update(domains.split(","))  # * Generating the wildcards if necessary
+    wildcard_certificates = WILDCARD_GENERATOR.get_certificates()
+    if wildcard_certificates:
+        for cert in wildcard_certificates:
+            if not cert.domains:
                 continue
-            # * Generating the certificate from the generated credentials
-            group_parts = group.split("_")
-            provider = group_parts[0]
-            profile = group_parts[2]
-            base_domain = group_parts[3]
 
-            email = data.pop("email")
-            credentials_file = CACHE_PATH.joinpath(f"{group}.{provider_classes[provider].get_file_type() if provider in provider_classes else 'txt'}")
-
-            # Process different environment types (staging/prod)
-            for key, domains in data.items():
-                if not domains:
-                    continue
-
-                staging = key == "staging"
-                LOGGER.info(
-                    f"Asking wildcard certificates for domain(s): {domains} (email = {email})"
-                    f"{' using staging ' if staging else ''} with {'dns' if provider in provider_classes else 'http'} challenge, "
-                    f"using {profile!r} profile..."
-                )
-
-                domains_split = domains.split(",")
-
-                # Add wildcard certificate names to active set
-                for domain in domains_split:
-                    # Extract the base domain from the wildcard domain
-                    base_domain = WILDCARD_GENERATOR.get_base_domain(domain)
-                    active_cert_names.add(base_domain)
-
-                if (
-                    certbot_new_with_retry(
-                        "dns",
-                        domains,
-                        email,
-                        provider,
-                        credentials_file,
-                        "default",
-                        profile,
-                        staging,
-                        domains_to_ask.get(base_domain, 0) == 2,
-                        cmd_env=env,
-                    )
-                    != 0
-                ):
-                    status = 2
-                    LOGGER.error(f"Certificate generation failed for domain(s) {domains} ...")
+            # Get credentials file path using the credential manager
+            credentials_file = credential_manager.get_service_credential_file(cert.cert_name)
+            if not credentials_file:
+                # If not found, try to get it based on group name
+                if cert.provider in provider_classes:
+                    file_extension = provider_classes[cert.provider].get_file_type()
                 else:
-                    status = 1 if status == 0 else status
-                    LOGGER.info(f"Certificate generation succeeded for domain(s): {domains}")
+                    file_extension = "txt"
+                credentials_file = CACHE_PATH.joinpath(f"{cert.group_name}.{file_extension}")
 
-                generated_domains.update(domains_split)
+            # Track the credential file and ensure secure permissions
+            if cert.provider in provider_classes and credentials_file.exists():
+                # Properly register the wildcard credential file
+                credential_manager.register_existing_credential_file(cert.cert_name, credentials_file)
+                # Ensure secure permissions on wildcard credential files
+                try:
+                    credentials_file.chmod(0o600)
+                    LOGGER.debug(f"Applied secure permissions to wildcard credential file {credentials_file.name}")
+                except (OSError, IOError) as e:
+                    LOGGER.warning(f"Could not set secure permissions for wildcard credential file {credentials_file.name}: {e}")
+
+            LOGGER.info(
+                f"Asking wildcard certificates for domain(s): {cert.domains_str} (email = {cert.email})"
+                f"{' using staging ' if cert.staging else ''} with {'dns' if cert.provider in provider_classes else 'http'} challenge, "
+                f"using {cert.profile!r} profile..."
+            )
+
+            # Add wildcard certificate names to active set
+            active_cert_names.add(cert.cert_name)
+
+            # Determine challenge type based on provider
+            challenge_type = "dns" if cert.provider in provider_classes else "http"
+            provider_name = cert.provider if cert.provider in provider_classes else None
+
+            if (
+                certbot_new_with_retry(
+                    challenge_type,
+                    cert.domains_str,
+                    cert.email,
+                    provider_name,
+                    credentials_file,
+                    "default",
+                    cert.profile,
+                    cert.staging,
+                    domains_to_ask.get(cert.cert_name, 0) == 2,
+                    cmd_env=env,
+                    max_retries=cert.max_retries,
+                )
+                != 0
+            ):
+                status = 2
+                LOGGER.error(f"Certificate generation failed for domain(s) {cert.domains_str} ...")
+            else:
+                status = 1 if status == 0 else status
+                LOGGER.info(f"Certificate generation succeeded for domain(s): {cert.domains_str}")
+
+            generated_domains.update(cert.wildcard_domains)
     else:
         LOGGER.info("No wildcard domains found, skipping wildcard certificate(s) generation...")
 
     if CACHE_PATH.is_dir():
-        # * Clearing all missing credentials files
-        for ext in ("*.ini", "*.env", "*.json"):
-            for file in list(CACHE_PATH.rglob(ext)):
-                if "etc" in file.parts or not file.is_file():
-                    continue
-                # ? If the file is not in the wildcard groups, remove it
-                if file not in credential_paths:
-                    LOGGER.debug(f"Removing old credentials file {file}")
-                    JOB.del_cache(file.name, job_name="certbot-renew", service_id=file.parent.name if file.parent.name != "letsencrypt" else "")
+        # * Ensure all credential files have secure permissions
+        LOGGER.debug("Ensuring secure permissions on all credential files...")
+        credential_manager.ensure_secure_permissions()
+
+        # * Clean up unused credential files using intelligent manager
+        LOGGER.info("Cleaning up unused credential files...")
+        credential_manager.cleanup_unused_files()
 
     # * Clearing all no longer needed certificates
     if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":

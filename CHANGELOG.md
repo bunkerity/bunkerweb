@@ -3,6 +3,7 @@
 ## v1.6.3-rc1 - ????/??/??
 
 - [BUGFIX] Update scheduler environment variables handling to avoid issues when there are too many environment variables set.
+- [BUGFIX] Fix `Let's Encrypt` credential files being removed upon reload of the scheduler creating issues with the certificate renewal.
 - [UI] Fix shenanigans when fetching the latest version in the web UI.
 - [MISC] Enhance plugin command execution with error handling and available commands listing
 
