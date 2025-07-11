@@ -9,36 +9,47 @@ from functools import partial
 from glob import glob
 from importlib.util import module_from_spec, spec_from_file_location
 from json import loads
-from logging import Logger
 from pathlib import Path
 from re import compile as re_compile
 from typing import Any, Dict, List, Optional
 import schedule
 from sys import path as sys_path
 from threading import Lock
+from os import sep
+from os.path import join
 
-# Add dependencies to sys.path
-for deps_path in [os.path.join(os.sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="SCHEDULER-Jobs", 
+    log_file_path="/var/log/bunkerweb/scheduler.log"
+)
+
+logger.debug("Debug mode enabled for SCHEDULER-Jobs")
+
 from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
 
 class JobScheduler(ApiCaller):
     def __init__(
         self,
-        logger: Optional[Logger] = None,
         *,
         db: Optional[Database] = None,
         lock: Optional[Lock] = None,
         apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
-        self.__logger = logger or setup_logger("Scheduler", os.getenv("CUSTOM_LOG_LEVEL", os.getenv("LOG_LEVEL", "INFO")))
-        self.db = db or Database(self.__logger)
+        self.logger = logger
+        self.db = db or Database(self.logger)
         # Store only essential environment variables to reduce memory usage
         self.__base_env = os.environ.copy()
         self.__lock = lock
@@ -89,9 +100,9 @@ class JobScheduler(ApiCaller):
                 plugin_jobs = plugin_data.get("jobs", [])
                 return plugin_name, self.__validate_jobs(plugin_jobs, plugin_name, plugin_file)
             except FileNotFoundError:
-                self.__logger.warning(f"Plugin file not found: {plugin_file}")
+                self.logger.warning(f"Plugin file not found: {plugin_file}")
             except Exception as e:
-                self.__logger.warning(f"Exception while getting jobs for plugin {plugin_name}: {e}")
+                self.logger.warning(f"Exception while getting jobs for plugin {plugin_name}: {e}")
             return plugin_name, []
 
         # Load/validate plugins in parallel:
@@ -105,7 +116,7 @@ class JobScheduler(ApiCaller):
         valid_jobs = []
         for job in plugin_jobs:
             if not all(k in job for k in ("name", "file", "every", "reload")):
-                self.__logger.warning(f"Missing keys in job definition in plugin {plugin_name}. Required keys: name, file, every, reload. Job: {job}")
+                self.logger.warning(f"Missing keys in job definition in plugin {plugin_name}. Required keys: name, file, every, reload. Job: {job}")
                 continue
 
             name_valid = self.__compiled_regexes["name"].match(job["name"])
@@ -115,7 +126,7 @@ class JobScheduler(ApiCaller):
             async_valid = isinstance(job.get("async", False), bool)
 
             if not all((name_valid, file_valid, every_valid, reload_valid, async_valid)):
-                self.__logger.warning(f"Invalid job definition in plugin {plugin_name}. Job: {job}")
+                self.logger.warning(f"Invalid job definition in plugin {plugin_name}. Job: {job}")
                 continue
 
             job["path"] = os.path.dirname(plugin_file)
@@ -135,11 +146,11 @@ class JobScheduler(ApiCaller):
             raise ValueError(f"Can't convert string '{every}' to schedule")
 
     def __reload(self) -> bool:
-        self.__logger.info("Reloading nginx...")
+        self.logger.info("Reloading nginx...")
         reload_min_timeout = self.env.get("RELOAD_MIN_TIMEOUT", "5")
 
         if not reload_min_timeout.isdigit():
-            self.__logger.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
+            self.logger.error("RELOAD_MIN_TIMEOUT must be an integer, defaulting to 5")
             reload_min_timeout = 5
 
         reload_success = self.send_to_apis(
@@ -148,9 +159,9 @@ class JobScheduler(ApiCaller):
             timeout=max(int(reload_min_timeout), 3 * len(self.env.get("SERVER_NAME", "www.example.com").split(" "))),
         )[0]
         if reload_success:
-            self.__logger.info("Successfully reloaded nginx")
+            self.logger.info("Successfully reloaded nginx")
             return True
-        self.__logger.error("Error while reloading nginx")
+        self.logger.error("Error while reloading nginx")
         return False
 
     def __exec_plugin_module(self, path: str, name: str) -> None:
@@ -176,7 +187,7 @@ class JobScheduler(ApiCaller):
         spec.loader.exec_module(module)
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
-        self.__logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
+        self.logger.info(f"Executing job '{name}' from plugin '{plugin}'...")
         success = True
         ret = -1
         start_date = datetime.now().astimezone()
@@ -187,7 +198,7 @@ class JobScheduler(ApiCaller):
             ret = e.code if isinstance(e.code, int) else 1
         except Exception as e:
             success = False
-            self.__logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
+            self.logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
             with self.__thread_lock:
                 self.__job_success = False
         end_date = datetime.now().astimezone()
@@ -198,7 +209,7 @@ class JobScheduler(ApiCaller):
 
         if self.__job_success and (ret < 0 or ret >= 2):
             success = False
-            self.__logger.error(f"Error while executing job '{name}' from plugin '{plugin}'")
+            self.logger.error(f"Error while executing job '{name}' from plugin '{plugin}'")
             with self.__thread_lock:
                 self.__job_success = False
 
@@ -212,13 +223,13 @@ class JobScheduler(ApiCaller):
             err = self.db.add_job_run(name, success, start_date, end_date)
 
         if not err:
-            self.__logger.info(f"Successfully added job run for the job '{name}'")
+            self.logger.info(f"Successfully added job run for the job '{name}'")
         else:
-            self.__logger.warning(f"Failed to add job run for the job '{name}': {err}")
+            self.logger.warning(f"Failed to add job run for the job '{name}': {err}")
 
     def __update_cache_permissions(self):
         """Update permissions for cache files and directories."""
-        self.__logger.info("Updating /var/cache/bunkerweb permissions...")
+        self.logger.info("Updating /var/cache/bunkerweb permissions...")
         cache_path = Path(os.sep, "var", "cache", "bunkerweb")
 
         DIR_MODE = 0o740
@@ -233,7 +244,7 @@ class JobScheduler(ApiCaller):
                 if current_mode != target_mode:
                     item.chmod(target_mode)
         except Exception as e:
-            self.__logger.error(f"Error while updating cache permissions: {e}")
+            self.logger.error(f"Error while updating cache permissions: {e}")
 
     def setup(self):
         for plugin, jobs in self.__jobs.items():
@@ -246,7 +257,7 @@ class JobScheduler(ApiCaller):
                     if every != "once":
                         self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
                 except Exception as e:
-                    self.__logger.error(f"Exception while scheduling job '{name}' for plugin '{plugin}': {e}")
+                    self.logger.error(f"Exception while scheduling job '{name}' for plugin '{plugin}': {e}")
 
     def run_pending(self) -> bool:
         pending_jobs = [job for job in schedule.jobs if job.should_run]
@@ -255,7 +266,7 @@ class JobScheduler(ApiCaller):
             return True
 
         if self.try_database_readonly():
-            self.__logger.error("Database is in read-only mode, pending jobs will not be executed")
+            self.logger.error("Database is in read-only mode, pending jobs will not be executed")
             return True
 
         self.__job_success = True
@@ -276,22 +287,22 @@ class JobScheduler(ApiCaller):
                 try:
                     if self.apis:
                         cache_path = os.path.join(os.sep, "var", "cache", "bunkerweb")
-                        self.__logger.info(f"Sending '{cache_path}' folder...")
+                        self.logger.info(f"Sending '{cache_path}' folder...")
                         if not self.send_files(cache_path, "/cache"):
                             success = False
-                            self.__logger.error(f"Error while sending '{cache_path}' folder")
+                            self.logger.error(f"Error while sending '{cache_path}' folder")
                         else:
-                            self.__logger.info(f"Successfully sent '{cache_path}' folder")
+                            self.logger.info(f"Successfully sent '{cache_path}' folder")
 
                     if not self.__reload():
                         success = False
                 except Exception as e:
                     success = False
-                    self.__logger.error(f"Exception while reloading after job scheduling: {e}")
+                    self.logger.error(f"Exception while reloading after job scheduling: {e}")
                 self.__job_reload = False
 
             if pending_jobs:
-                self.__logger.info("All scheduled jobs have been executed")
+                self.logger.info("All scheduled jobs have been executed")
 
             return success
         finally:
@@ -306,7 +317,7 @@ class JobScheduler(ApiCaller):
 
     def run_once(self, plugins: Optional[List[str]] = None, ignore_plugins: Optional[List[str]] = None) -> bool:
         if self.try_database_readonly():
-            self.__logger.error("Database is in read-only mode, jobs will not be executed")
+            self.logger.error("Database is in read-only mode, jobs will not be executed")
             return True
 
         self.__job_success = True
@@ -354,7 +365,7 @@ class JobScheduler(ApiCaller):
 
     def run_single(self, job_name: str) -> bool:
         if self.try_database_readonly():
-            self.__logger.error(f"Database is in read-only mode, single job '{job_name}' will not be executed")
+            self.logger.error(f"Database is in read-only mode, single job '{job_name}' will not be executed")
             return True
 
         if self.__lock:
@@ -371,7 +382,7 @@ class JobScheduler(ApiCaller):
                         break
 
             if not job_plugin or not job_to_run:
-                self.__logger.warning(f"Job '{job_name}' not found")
+                self.logger.warning(f"Job '{job_name}' not found")
                 return False
 
             try:
@@ -415,7 +426,7 @@ class JobScheduler(ApiCaller):
             self.setup()
             return success
         except Exception as e:
-            self.__logger.error(f"Exception while reloading scheduler: {e}")
+            self.logger.error(f"Exception while reloading scheduler: {e}")
             return False
 
     def try_database_readonly(self, force: bool = False) -> bool:
@@ -435,7 +446,7 @@ class JobScheduler(ApiCaller):
                 self.db.retry_connection(pool_timeout=1)
                 self.db.retry_connection(log=False)
                 self.db.readonly = False
-                self.__logger.info("The database is no longer read-only, defaulting to read-write mode")
+                self.logger.info("The database is no longer read-only, defaulting to read-write mode")
             except Exception:
                 try:
                     self.db.retry_connection(readonly=True, pool_timeout=1)
