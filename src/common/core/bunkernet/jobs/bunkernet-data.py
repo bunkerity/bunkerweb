@@ -16,7 +16,7 @@ from bw_logger import setup_logger
 
 # Initialize bw_logger module
 logger = setup_logger(
-    title="bunkernet",
+    title="bunkernet-data",
     log_file_path="/var/log/bunkerweb/bunkernet.log"
 )
 
