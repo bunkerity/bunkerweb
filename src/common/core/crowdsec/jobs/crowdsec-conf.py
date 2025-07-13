@@ -4,41 +4,56 @@ from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 
-
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="crowdsec",
+    log_file_path="/var/log/bunkerweb/crowdsec.log"
+)
+
+logger.debug("Debug mode enabled for crowdsec")
+
 from jinja2 import Environment, FileSystemLoader
-from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
-LOGGER = setup_logger("CROWDSEC", getenv("LOG_LEVEL", "INFO"))
 PLUGIN_PATH = Path(sep, "usr", "share", "bunkerweb", "core", "crowdsec")
 status = 0
 
 try:
+    logger.debug("Starting crowdsec configuration generation")
+    
     # Check if at least a server has CrowdSec activated
     cs_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
+        logger.debug("Checking multisite configuration")
         for first_server in getenv("SERVER_NAME", "www.example.com").strip().split(" "):
             if getenv(f"{first_server}_USE_CROWDSEC", "no") == "yes":
                 cs_activated = True
+                logger.debug(f"Crowdsec activated for server: {first_server}")
                 break
     # Singlesite case
     elif getenv("USE_CROWDSEC", "no") == "yes":
         cs_activated = True
+        logger.debug("Crowdsec activated for singlesite")
 
     if not cs_activated:
-        LOGGER.info("CrowdSec is not activated, skipping job...")
+        logger.info("CrowdSec is not activated, skipping job...")
         sys_exit(status)
 
-    JOB = Job(LOGGER, __file__)
+    JOB = Job(logger, __file__)
 
     # Generate content
+    logger.debug("Rendering crowdsec.conf template")
     jinja_env = Environment(loader=FileSystemLoader(PLUGIN_PATH.joinpath("misc")))
     content = (
         jinja_env.get_template("crowdsec.conf")
@@ -61,19 +76,23 @@ try:
         )
         .encode()
     )
+    logger.debug(f"Generated configuration content size: {len(content)} bytes")
 
     # Update db
     cached, err = JOB.cache_file("crowdsec.conf", content)
     if not cached:
-        LOGGER.error(f"Error while caching crowdsec.conf file : {err}")
+        logger.error(f"Error while caching crowdsec.conf file : {err}")
+    else:
+        logger.debug("Successfully cached crowdsec.conf file")
 
     # Done
-    LOGGER.info("CrowdSec configuration successfully generated")
+    logger.info("CrowdSec configuration successfully generated")
 except SystemExit as e:
     status = e.code
+    logger.debug(f"SystemExit with code: {status}")
 except BaseException as e:
     status = 2
-    LOGGER.debug(format_exc())
-    LOGGER.error(f"Exception while running crowdsec-init.py :\n{e}")
+    logger.exception("Exception while running crowdsec-conf.py")
 
+logger.debug(f"Exiting with status: {status}")
 sys_exit(status)
