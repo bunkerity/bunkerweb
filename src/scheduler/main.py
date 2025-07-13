@@ -37,7 +37,7 @@ logger = setup_logger(
     log_file_path="/var/log/bunkerweb/scheduler.log"
 )
 
-logger.debug("Debug mode enabled for SCHEDULER")
+logger.debug("Debug mode enabled for __name__")
 
 from schedule import every as schedule_every, run_pending
 
@@ -180,7 +180,7 @@ def handle_reload(signum, frame):
         else:
             logger.warning("Ignored reload operation because scheduler is not running ...")
     except BaseException as e:
-        logger.error(f"Exception while reloading scheduler : {e}")
+        logger.exception("Exception while reloading scheduler")
 
 
 signal(SIGHUP, handle_reload)
@@ -774,7 +774,7 @@ if __name__ == "__main__":
                     if err:
                         logger.error(f"Couldn't save some manually created custom configs to database: {err}")
                 except BaseException as e:
-                    logger.error(f"Error while saving custom configs to database: {e}")
+                    logger.exception("Error while saving custom configs to database")
 
             generate_custom_configs(SCHEDULER.db.get_custom_configs())
 
@@ -833,7 +833,7 @@ if __name__ == "__main__":
                         if err:
                             logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
                     except BaseException as e:
-                        logger.error(f"Error while saving {_type} plugins to database: {e}")
+                        logger.exception(f"Error while saving {_type} plugins to database")
                 else:
                     return send_file_to_bunkerweb(plugin_path, "/pro_plugins" if _type == "pro" else "/plugins")
 
@@ -1021,7 +1021,7 @@ if __name__ == "__main__":
 
                     logger.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
             except BaseException as e:
-                logger.error(f"Exception while reloading after running jobs once scheduling : {e}")
+                logger.exception("Exception while reloading after running jobs once scheduling")
 
             try:
                 SCHEDULER.db.set_metadata({"failover": not success, "failover_message": failover_message})
@@ -1063,7 +1063,7 @@ if __name__ == "__main__":
                     logger.info("Successfully reloaded bunkerweb")
                     Thread(target=backup_failover).start()
             except BaseException as e:
-                logger.error(f"Exception while executing failover logic : {e}")
+                logger.exception("Exception while executing failover logic")
 
             try:
                 ret = SCHEDULER.db.checked_changes(CHANGES, plugins_changes="all")
@@ -1091,7 +1091,7 @@ if __name__ == "__main__":
                     elif ret:
                         logger.error(f"An error occurred when setting the scheduler first start : {ret}")
                 except BaseException as e:
-                    logger.error(f"Error while setting the scheduler first start : {e}")
+                    logger.exception("Error while setting the scheduler first start")
                 finally:
                     scheduler_first_start = False
 
@@ -1209,7 +1209,7 @@ if __name__ == "__main__":
                 except BaseException:
                     logger.debug(format_exc())
                     if errors > 5:
-                        logger.error(f"An error occurred when executing the scheduler : {format_exc()}")
+                        logger.exception(f"An error occurred when executing the scheduler")
                         stop(1)
                     errors += 1
                     sleep(5)
@@ -1273,5 +1273,5 @@ if __name__ == "__main__":
                         env["TZ"] = tz
 
     except:
-        logger.error(f"Exception while executing scheduler : {format_exc()}")
+        logger.exception("Exception while executing scheduler")
         stop(1)

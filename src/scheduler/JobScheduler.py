@@ -29,7 +29,7 @@ from bw_logger import setup_logger
 
 # Initialize bw_logger module
 logger = setup_logger(
-    title="SCHEDULER-Jobs", 
+    title="SCHEDULER-Jobs",
     log_file_path="/var/log/bunkerweb/scheduler.log"
 )
 
@@ -102,7 +102,9 @@ class JobScheduler(ApiCaller):
             except FileNotFoundError:
                 self.logger.warning(f"Plugin file not found: {plugin_file}")
             except Exception as e:
-                self.logger.warning(f"Exception while getting jobs for plugin {plugin_name}: {e}")
+                self.logger.exception(
+                    f"Exception while getting jobs for plugin {plugin_name}"
+                )
             return plugin_name, []
 
         # Load/validate plugins in parallel:
@@ -198,7 +200,7 @@ class JobScheduler(ApiCaller):
             ret = e.code if isinstance(e.code, int) else 1
         except Exception as e:
             success = False
-            self.logger.error(f"Exception while executing job '{name}' from plugin '{plugin}': {e}")
+            self.logger.exception(f"Exception while executing job '{name}' from plugin '{plugin}'")
             with self.__thread_lock:
                 self.__job_success = False
         end_date = datetime.now().astimezone()
@@ -257,7 +259,9 @@ class JobScheduler(ApiCaller):
                     if every != "once":
                         self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
                 except Exception as e:
-                    self.logger.error(f"Exception while scheduling job '{name}' for plugin '{plugin}': {e}")
+                    self.logger.exception(
+                        f"Exception while scheduling job '{name}' for plugin '{plugin}'"
+                    )
 
     def run_pending(self) -> bool:
         pending_jobs = [job for job in schedule.jobs if job.should_run]
@@ -298,7 +302,9 @@ class JobScheduler(ApiCaller):
                         success = False
                 except Exception as e:
                     success = False
-                    self.logger.error(f"Exception while reloading after job scheduling: {e}")
+                    self.logger.exception(
+                        "Exception while reloading after job scheduling"
+                    )
                 self.__job_reload = False
 
             if pending_jobs:
@@ -426,7 +432,7 @@ class JobScheduler(ApiCaller):
             self.setup()
             return success
         except Exception as e:
-            self.logger.error(f"Exception while reloading scheduler: {e}")
+            self.logger.exception("Exception while reloading scheduler")
             return False
 
     def try_database_readonly(self, force: bool = False) -> bool:
