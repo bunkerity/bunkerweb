@@ -15,9 +15,22 @@ from threading import Thread
 from time import time
 from traceback import format_exc
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI")
 
 from cachelib import FileSystemCache
 from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
@@ -36,7 +49,6 @@ from app.utils import (
     BISCUIT_PUBLIC_KEY_FILE,
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
-    LOGGER,
     flash,
     get_blacklisted_settings,
     get_filtered_settings,
@@ -79,7 +91,7 @@ class DynamicFlask(Flask):
         blueprint template folders (especially plugins) take precedence
         over the application's global template folder.
         """
-        LOGGER.debug("Creating global jinja loader with custom blueprint priority handling")
+        logger.debug("Creating global jinja loader with custom blueprint priority handling")
         # Collect loaders from each blueprint in descending order of 'plugin_priority'
         # (or zero if not set).
         blueprint_loaders = []
@@ -91,27 +103,27 @@ class DynamicFlask(Flask):
                 if loader is None:
                     template_path = abspath(bp.template_folder)
                     loader = FileSystemLoader(template_path)
-                    LOGGER.debug(f"Created FileSystemLoader for blueprint '{name}' with path: {template_path}")
+                    logger.debug(f"Created FileSystemLoader for blueprint '{name}' with path: {template_path}")
                 else:
-                    LOGGER.debug(f"Using existing jinja_loader for blueprint '{name}'")
+                    logger.debug(f"Using existing jinja_loader for blueprint '{name}'")
                 # Priority: higher means we want it searched first.
                 priority = getattr(bp, "plugin_priority", 0)
-                LOGGER.debug(f"Blueprint '{name}' has plugin_priority: {priority}")
+                logger.debug(f"Blueprint '{name}' has plugin_priority: {priority}")
                 blueprint_loaders.append((priority, loader))
 
         # Sort blueprint loaders descending by priority
         blueprint_loaders.sort(key=itemgetter(0), reverse=True)
         loaders_in_order = [ldr for (_prio, ldr) in blueprint_loaders]
-        LOGGER.debug(f"Blueprint loaders sorted by priority: {[p for p, _ in blueprint_loaders]}")
+        logger.debug(f"Blueprint loaders sorted by priority: {[p for p, _ in blueprint_loaders]}")
 
         # Finally, add the app's own jinja_loader (which handles the global templates folder)
         # at the end. This ensures plugin templates overshadow global templates if names clash.
         if self.jinja_loader is not None:
             loaders_in_order.append(self.jinja_loader)
-            LOGGER.debug("App's jinja_loader appended to the end of loaders list")
+            logger.debug("App's jinja_loader appended to the end of loaders list")
 
         final_loader = ChoiceLoader(loaders_in_order)
-        LOGGER.debug("Global jinja loader created successfully")
+        logger.debug("Global jinja loader created successfully")
         return final_loader
 
     def register_blueprint(self, blueprint, **options):
@@ -121,7 +133,7 @@ class DynamicFlask(Flask):
             existing_priority = getattr(existing_bp, "plugin_priority", 0)
             new_priority = getattr(blueprint, "plugin_priority", 0)
             if new_priority > existing_priority:
-                LOGGER.info(f"Overriding blueprint '{blueprint.name}': new priority {new_priority} over {existing_priority}")
+                logger.info(f"Overriding blueprint '{blueprint.name}': new priority {new_priority} over {existing_priority}")
                 # Remove the existing blueprint.
                 del self.blueprints[blueprint.name]
                 # Also remove all URL rules associated with the existing blueprint.
@@ -130,7 +142,7 @@ class DynamicFlask(Flask):
                     self.url_map._rules.remove(rule)
                     self.url_map._rules_by_endpoint.pop(rule.endpoint, None)
             else:
-                LOGGER.info(f"Skipping blueprint '{blueprint.name}' with priority {new_priority} " f"(existing priority {existing_priority})")
+                logger.info(f"Skipping blueprint '{blueprint.name}' with priority {new_priority} " f"(existing priority {existing_priority})")
                 return  # Do not register a lower- or equal-priority blueprint.
 
         # Allow registration even after first request by temporarily resetting the flag.
@@ -145,14 +157,14 @@ class DynamicFlask(Flask):
 
 # Flask app
 app = DynamicFlask(__name__, static_url_path="/", static_folder="app/static", template_folder="app/templates")
-app.logger = LOGGER
+app.logger = logger
 
 with app.app_context():
     PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
     app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
 
     if not LIB_DIR.joinpath(".flask_secret").is_file():
-        LOGGER.error("The .flask_secret file is missing, exiting ...")
+        logger.error("The .flask_secret file is missing, exiting ...")
         stop(1)
     FLASK_SECRET = LIB_DIR.joinpath(".flask_secret").read_text(encoding="utf-8").strip()
 
@@ -206,7 +218,7 @@ with app.app_context():
                     return url_for(f"{endpoint}.{endpoint}_page", **values)
                 return url_for(endpoint, **values)
             except BuildError as e:
-                LOGGER.debug(f"Couldn't build the URL for {endpoint}: {e}")
+                logger.exception(f"Couldn't build the URL for {endpoint}")
         return "#"
 
     # Declare functions for jinja2
@@ -238,7 +250,7 @@ def inject_variables():
             if resp:
                 app_env = {**app_env, **resp}
         except Exception:
-            LOGGER.exception("Error in context_processor hook")
+            logger.exception("Error in context_processor hook")
 
     app.config["ENV"] = app_env
 
@@ -249,7 +261,7 @@ def inject_variables():
 def load_user(username):
     ui_user = DB.get_ui_user(username=username)
     if not ui_user:
-        LOGGER.warning(f"Couldn't get the user {username} from the database.")
+        logger.warning(f"Couldn't get the user {username} from the database.")
         return None
 
     ui_user.list_roles = [role.role_name for role in ui_user.roles]
@@ -286,8 +298,7 @@ def handle_csrf_error(_):
     :param e: The exception object
     :return: A template with the error message and a 401 status code.
     """
-    LOGGER.debug(format_exc())
-    LOGGER.error(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
+    logger.exception(f"CSRF token is missing or invalid for {request.path} by {current_user.get_id()}")
     if not current_user:
         return redirect(url_for("setup.setup_page")), 403
     return logout_page(), 403
@@ -310,7 +321,7 @@ def check_database_state(request_method: str, request_path: str):
         try:
             DB.retry_connection(pool_timeout=1)
             DB.retry_connection(log=False)
-            LOGGER.info("The database is no longer read-only, defaulting to read-write mode")
+            logger.info("The database is no longer read-only, defaulting to read-write mode")
         except BaseException:
             failed = True
             try:
@@ -356,7 +367,7 @@ def refresh_app_context():
     current_generation = DATA.get("REFRESH_GENERATION", 0)
     worker_generation = DATA.get("WORKERS", {}).get(worker_pid, {}).get("refresh_generation", 0)
 
-    LOGGER.debug(f"Worker {worker_pid} refreshing context (generation {worker_generation} → {current_generation})")
+    logger.debug(f"Worker {worker_pid} refreshing context (generation {worker_generation} → {current_generation})")
     DATA.load_from_file()
 
     # Initialize tracking structures if they don't exist
@@ -408,33 +419,33 @@ def refresh_app_context():
             # Load the module
             spec = spec_from_file_location(module_name, target_file)
             if not spec or not spec.loader:
-                LOGGER.warning(f"Could not load spec for file: {target_file}")
+                logger.warning(f"Could not load spec for file: {target_file}")
                 continue
 
             hook_module = module_from_spec(spec)
             try:
                 spec.loader.exec_module(hook_module)
             except Exception as exec_err:
-                LOGGER.warning(f"Error executing module {target_file}: {exec_err}")
+                logger.warning(f"Error executing module {target_file}: {exec_err}")
                 continue
 
             for hook_type, hook_info in HOOKS.items():
                 if hasattr(hook_module, hook_type) and callable(getattr(hook_module, hook_type)):
                     hook_function = getattr(hook_module, hook_type)
                     app.config.setdefault(hook_info["key"], []).append(hook_function)
-                    LOGGER.info(f"{hook_info['log_prefix']} hook '{hook_type}' from {py_file} loaded")
+                    logger.info(f"{hook_info['log_prefix']} hook '{hook_type}' from {py_file} loaded")
 
             if hook_dir in sys_path:
                 sys_path.remove(hook_dir)
         except Exception as exc:
-            LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+            logger.error(f"Error loading potential hooks from {py_file}: {exc}")
 
     # --- CLEAN UP OBSOLETE HOOK PATHS ---
     for module_name, hook_dir in list(app.hook_sys_paths.items()):
         if module_name not in active_hook_modules and hook_dir in sys_path:
             sys_path.remove(hook_dir)
             del app.hook_sys_paths[module_name]
-            LOGGER.debug(f"Removed {hook_dir} from sys.path for obsolete hook {module_name}")
+            logger.debug(f"Removed {hook_dir} from sys.path for obsolete hook {module_name}")
 
     # --- LOAD BLUEPRINTS ---
     for bp_dir in chain(pro_bp_dirs, external_bp_dirs, core_bp_dirs):
@@ -497,13 +508,13 @@ def refresh_app_context():
                         # Register in our blueprint registry by priority
                         if bp_name not in blueprint_registry or bp.plugin_priority > getattr(blueprint_registry[bp_name], "plugin_priority", 0):
                             blueprint_registry[bp_name] = bp
-                            LOGGER.info(f"Blueprint '{bp_name}' from {bp_file} registered with priority {bp.plugin_priority}")
+                            logger.info(f"Blueprint '{bp_name}' from {bp_file} registered with priority {bp.plugin_priority}")
                     else:
-                        LOGGER.warning(f"Object '{bp_name}' in {bp_file} is not a valid Blueprint")
+                        logger.warning(f"Object '{bp_name}' in {bp_file} is not a valid Blueprint")
                 else:
-                    LOGGER.debug(f"No blueprint named '{bp_name}' found in {bp_file}")
+                    logger.debug(f"No blueprint named '{bp_name}' found in {bp_file}")
             except Exception as exc:
-                LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
+                logger.error(f"Error loading blueprint from {bp_file}: {exc}")
 
     # --- HANDLE BLUEPRINT CHANGES ---
     # Remove blueprints for deleted plugins
@@ -531,13 +542,13 @@ def refresh_app_context():
             for endpoint in [ep for ep in app.view_functions if ep.startswith(f"{bp_name}.")]:
                 app.view_functions.pop(endpoint, None)
 
-            LOGGER.debug(f"Blueprint '{bp_name}' was completely removed")
+            logger.debug(f"Blueprint '{bp_name}' was completely removed")
 
     # Restore original blueprints if missing
     for bp_name, bp in app.original_blueprints.items():
         if bp_name not in app.blueprints:
             app.register_blueprint(bp)
-            LOGGER.debug(f"Re-registered original blueprint '{bp_name}'")
+            logger.debug(f"Re-registered original blueprint '{bp_name}'")
 
     # Register new and updated plugin blueprints
     for bp_name, bp in blueprint_registry.items():
@@ -548,7 +559,7 @@ def refresh_app_context():
             new_priority = getattr(bp, "plugin_priority", 0)
 
             if new_priority <= existing_priority:
-                LOGGER.debug(f"Skipping registration for '{bp_name}' (priority {new_priority} <= {existing_priority})")
+                logger.debug(f"Skipping registration for '{bp_name}' (priority {new_priority} <= {existing_priority})")
                 continue
 
             # Remove existing blueprint before registering the new one
@@ -562,7 +573,7 @@ def refresh_app_context():
 
         # Register the blueprint
         app.register_blueprint(bp)
-        LOGGER.info(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
+        logger.info(f"Registered blueprint '{bp_name}' with priority {getattr(bp, 'plugin_priority', 0)}")
 
         # Add to extra pages if it has a root route
         for rule in app.url_map.iter_rules():
@@ -587,7 +598,7 @@ def refresh_app_context():
     if "NEEDS_CONTEXT_REFRESH" in DATA:
         del DATA["NEEDS_CONTEXT_REFRESH"]
 
-    LOGGER.debug(f"Worker {worker_pid} completed context refresh to generation {current_generation}")
+    logger.debug(f"Worker {worker_pid} completed context refresh to generation {current_generation}")
 
 
 @app.before_request
@@ -636,12 +647,12 @@ def before_request():
             safe_reload_plugins()
             # Increment refresh generation to trigger refresh for all workers
             DATA["REFRESH_GENERATION"] = current_generation + 1
-            LOGGER.info(f"Incremented refresh generation to {DATA['REFRESH_GENERATION']}")
+            logger.info(f"Incremented refresh generation to {DATA['REFRESH_GENERATION']}")
             # Refresh this worker immediately
             refresh_app_context()
         # Normal request - check if this worker needs to refresh
         elif not DATA.get("RELOADING", False) and worker_generation < current_generation:
-            LOGGER.debug(f"Worker {worker_pid} refreshing (generation {worker_generation} < {current_generation})")
+            logger.debug(f"Worker {worker_pid} refreshing (generation {worker_generation} < {current_generation})")
             refresh_app_context()
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
@@ -669,13 +680,13 @@ def before_request():
                     return redirect(url_for("totp.totp_page", next=request.form.get("next")))
                 passed = False
             elif (app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private) and session["ip"] != request.remote_addr:
-                LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
+                logger.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
                 passed = False
             elif session["user_agent"] != request.headers.get("User-Agent"):
-                LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
+                logger.warning(f"User {current_user.get_id()} tried to access his session with a different User-Agent.")
                 passed = False
             elif "session_id" in session and session["session_id"] in DATA.get("REVOKED_SESSIONS", []):
-                LOGGER.warning(f"User {current_user.get_id()} tried to access a revoked session.")
+                logger.warning(f"User {current_user.get_id()} tried to access a revoked session.")
                 passed = False
 
             if not passed:
@@ -764,7 +775,7 @@ def before_request():
             if resp:
                 return resp
         except Exception:
-            LOGGER.exception("Error in before_request hook")
+            logger.exception("Error in before_request hook")
 
 
 def mark_user_access(user, session_id):
@@ -773,8 +784,8 @@ def mark_user_access(user, session_id):
 
     ret = DB.mark_ui_user_access(session_id, datetime.now().astimezone())
     if ret:
-        LOGGER.error(f"Couldn't mark the user access: {ret}")
-    LOGGER.debug(f"Marked the user access for session {session_id}")
+        logger.error(f"Couldn't mark the user access: {ret}")
+    logger.debug(f"Marked the user access for session {session_id}")
 
 
 @app.after_request
@@ -825,7 +836,7 @@ def set_security_headers(response):
             if resp:
                 return resp
         except Exception:
-            LOGGER.exception("Error in after_request hook")
+            logger.exception("Error in after_request hook")
 
     return response
 
@@ -843,7 +854,7 @@ def teardown_request(teardown):
         try:
             hook(teardown)
         except Exception:
-            LOGGER.exception("Error in teardown_request hook")
+            logger.exception("Error in teardown_request hook")
 
 
 ### * MISC ROUTES * ###
@@ -909,7 +920,7 @@ def check_reloading():
 
     if not DATA.get("RELOADING", False) or DATA.get("LAST_RELOAD", 0) + 60 < current_time:
         if DATA.get("RELOADING", False):
-            LOGGER.warning("Reloading took too long, forcing the state to be reloaded")
+            logger.warning("Reloading took too long, forcing the state to be reloaded")
             flask_flash("Forced the status to be reloaded", "error")
             DATA["RELOADING"] = False
 
@@ -936,7 +947,7 @@ def set_theme():
 
     ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
     if ret:
-        LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
+        logger.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
         return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
 
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
@@ -964,7 +975,7 @@ def set_language():
 
     ret = DB.update_ui_user(**user_data, old_username=current_user.get_id())
     if ret:
-        LOGGER.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
+        logger.error(f"Couldn't update the user {current_user.get_id()}: {ret}")
         return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
 
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")
@@ -990,7 +1001,7 @@ def set_columns_preferences():
 
     ret = DB.update_ui_user_columns_preferences(current_user.get_id(), table_name, columns_preferences)
     if ret:
-        LOGGER.error(f"Couldn't update the user {current_user.get_id()}'s columns preferences: {ret}")
+        logger.error(f"Couldn't update the user {current_user.get_id()}'s columns preferences: {ret}")
         return Response(status=500, response=dumps({"message": "Internal server error"}), content_type="application/json")
 
     return Response(status=200, response=dumps({"message": "ok"}), content_type="application/json")

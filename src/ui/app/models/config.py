@@ -4,22 +4,46 @@ from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from operator import itemgetter
 from os import getenv, sep
+from os.path import join
+from sys import path as sys_path
 from flask import flash
 from json import loads as json_loads
 from pathlib import Path
 from re import error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-config",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-config")
+
 from app.utils import get_blacklisted_settings
 
 
 class Config:
+    # Initialize configuration manager with database and data interfaces.
+    # Loads plugin settings and sets up validation parameters.
     def __init__(self, db, data) -> None:
+        logger.debug("Config.__init__() called")
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
         self.__data = data
         self.__ignore_regex_check = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
 
+    # Generate nginx configuration from global and service configurations.
+    # Processes multisite settings and validates configuration changes.
     def gen_conf(
         self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True, changed_service: Optional[str] = None, override_method: str = "ui"
     ) -> Union[str, Set[str]]:
@@ -35,6 +59,7 @@ class Config:
         ConfigGenerationError
             If an error occurred during the generation of the configuration file, raises this exception
         """
+        logger.debug(f"gen_conf() called: services={len(services_conf)}, check_changes={check_changes}")
         conf = global_conf.copy()
 
         servers = []
@@ -65,12 +90,16 @@ class Config:
 
         return self.__db.save_config(conf, override_method, changed=check_changes)
 
+    # Get all plugin settings combined with core settings.
+    # Returns merged dictionary of all available configuration options.
     def get_plugins_settings(self) -> dict:
         return {
             **{k: v for x in self.get_plugins().values() for k, v in x["settings"].items()},
             **self.__settings,
         }
 
+    # Get plugins filtered by type with optional data inclusion.
+    # Returns sorted dictionary of plugins matching specified criteria.
     def get_plugins(self, *, _type: Literal["all", "external", "ui", "pro"] = "all", with_data: bool = False) -> dict:
         db_plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
         db_plugins.sort(key=itemgetter("name"))
@@ -82,9 +111,13 @@ class Config:
 
         return plugins
 
+    # Get core settings configuration.
+    # Returns the base settings dictionary loaded from settings.json.
     def get_settings(self) -> dict:
         return self.__settings
 
+    # Get current configuration with optional filtering and draft inclusion.
+    # Returns configuration dictionary based on specified parameters.
     def get_config(
         self,
         global_only: bool = False,
@@ -101,6 +134,8 @@ class Config:
         """
         return self.__db.get_non_default_settings(global_only=global_only, methods=methods, with_drafts=with_drafts, filtered_settings=filtered_settings)
 
+    # Get service configurations with optional method and draft filtering.
+    # Returns list of service configuration dictionaries.
     def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services
 
@@ -111,6 +146,8 @@ class Config:
         """
         return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
+    # Validate and filter variables based on plugin settings and permissions.
+    # Removes blacklisted, invalid, or non-editable variables with error reporting.
     def check_variables(self, variables: dict, config: dict, to_check: dict, *, global_config: bool = False, new: bool = False, threaded: bool = False) -> dict:
         """
         Validate and filter variables based on allowed settings and patterns.
@@ -127,6 +164,7 @@ class Config:
         Error messages are either flashed immediately (non-threaded) or appended to
         self.__data["TO_FLASH"] (threaded).
         """
+        logger.debug(f"check_variables() called: variables={len(variables)}, to_check={len(to_check)}")
         self.__data.load_from_file()
         plugins_settings = self.get_plugins_settings()
         blacklisted_settings = get_blacklisted_settings(global_config)
@@ -181,6 +219,8 @@ class Config:
 
         return variables
 
+    # Create a new service configuration with validation and generation.
+    # Returns success message and status code after processing.
     def new_service(self, variables: dict, is_draft: bool = False, override_method: str = "ui", check_changes: bool = True) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
@@ -199,6 +239,7 @@ class Config:
         Exception
             raise this if the service already exists
         """
+        logger.debug(f"new_service() called: SERVER_NAME={variables.get('SERVER_NAME')}, is_draft={is_draft}")
         services = self.get_services(methods=False, with_drafts=True)
         server_name_splitted = variables["SERVER_NAME"].split(" ")
         for service in services:
@@ -213,6 +254,8 @@ class Config:
             return ret, 1
         return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
 
+    # Edit existing service configuration with validation and generation.
+    # Handles server name changes and configuration updates.
     def edit_service(
         self, old_server_name: str, variables: dict, *, check_changes: bool = True, is_draft: bool = False, override_method: str = "ui"
     ) -> Tuple[str, int]:
@@ -230,6 +273,7 @@ class Config:
         str
             the confirmation message
         """
+        logger.debug(f"edit_service() called: old={old_server_name}, new={variables.get('SERVER_NAME')}")
         services = self.get_services(methods=False, with_drafts=True)
         changed_server_name = old_server_name != variables["SERVER_NAME"]
         server_name_splitted = variables["SERVER_NAME"].split(" ")
@@ -255,6 +299,8 @@ class Config:
             return ret, 1
         return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
+    # Edit global configuration settings with validation and generation.
+    # Updates global settings and regenerates configuration.
     def edit_global_conf(self, variables: dict, *, check_changes: bool = True, override_method: str = "ui") -> Tuple[str, int]:
         """Edits the global conf
 
@@ -268,11 +314,14 @@ class Config:
         str
             the confirmation message
         """
+        logger.debug(f"edit_global_conf() called: {len(variables)} variables")
         ret = self.gen_conf(variables, self.get_services(methods=False, with_drafts=True), check_changes=check_changes, override_method=override_method)
         if isinstance(ret, str):
             return ret, 1
         return "The global configuration has been edited.", 0
 
+    # Delete service configuration and clean up related settings.
+    # Removes service and associated configuration keys.
     def delete_service(self, service_name: str, *, check_changes: bool = True, override_method: str = "ui") -> Tuple[str, int]:
         """Deletes a service
 
@@ -291,6 +340,7 @@ class Config:
         Exception
             raises this if the service_name given isn't found
         """
+        logger.debug(f"delete_service() called: service_name={service_name}")
         service_name = service_name.split(" ")[0]
         full_env = self.get_config(methods=False)
         services = self.get_services(methods=False, with_drafts=True)

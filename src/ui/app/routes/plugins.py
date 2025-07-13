@@ -14,6 +14,23 @@ from typing import List, Optional, Union
 from uuid import uuid4
 from zipfile import BadZipFile, ZipFile
 
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-plugins",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-plugins")
+
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -22,7 +39,7 @@ from werkzeug.utils import secure_filename
 from common_utils import bytes_hash  # type: ignore
 
 from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
-from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
+from app.utils import ALWAYS_USED_PLUGINS, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
 
 from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
 
@@ -32,17 +49,22 @@ plugins = Blueprint("plugins", __name__)
 @plugins.route("/plugins", methods=["GET"])
 @login_required
 def plugins_page():
+    logger.debug("plugins_page() called")
     tmp_ui_path = TMP_DIR.joinpath("ui")
     # Remove everything in the tmp folder
     rmtree(tmp_ui_path, ignore_errors=True)
     tmp_ui_path.mkdir(parents=True, exist_ok=True)
+    logger.debug("Cleaned and recreated tmp UI directory")
     return render_template("plugins.html")
 
 
 @plugins.route("/plugins/delete", methods=["POST"])
 @login_required
 def delete_plugin():
+    logger.debug("delete_plugin() called")
+    
     if DB.readonly:
+        logger.debug("Database is in read-only mode, blocking plugin deletion")
         return Response("Database is in read-only mode", 403)
 
     verify_data_in_form(
@@ -53,12 +75,17 @@ def delete_plugin():
     )
     DATA.load_from_file()
 
-    plugins = request.form["plugins"].split(",")
+    plugins_to_delete = request.form["plugins"].split(",")
+    logger.debug(f"Deleting plugins: {plugins_to_delete}")
 
+    # Delete multiple plugins from database with error handling and user feedback.
+    # Processes each plugin individually and provides status updates.
     def update_plugins(plugins: List[str]):
+        logger.debug("Starting plugin deletion in background thread")
         wait_applying()
 
         for plugin in plugins:
+            logger.debug(f"Deleting plugin: {plugin}")
             err = DB.delete_plugin(plugin, "ui", changes=plugin == plugins[-1])
             if err:
                 if not err.startswith("Plugin with id"):
@@ -66,17 +93,20 @@ def delete_plugin():
                 else:
                     message = err
 
+                logger.exception(f"Failed to delete plugin {plugin}: {err}")
                 DATA["TO_FLASH"].append({"content": message, "type": "error"})
             else:
+                logger.debug(f"Successfully deleted plugin: {plugin}")
                 DATA["TO_FLASH"].append({"content": f"Deleted plugin {plugin} successfully", "type": "success"})
 
         DATA["RELOADING"] = False
+        logger.debug("Plugin deletion thread completed")
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
 
-    Thread(target=update_plugins, args=(plugins,)).start()
+    Thread(target=update_plugins, args=(plugins_to_delete,)).start()
 
-    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
+    return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins_to_delete)}"))
 
 
 def get_plugin_path(plugin_id: str) -> Optional[Path]:
@@ -147,7 +177,7 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 
                 tmp_dir = tmp_dir.joinpath("ui")
             except BaseException as e:
-                LOGGER.error(f"An error occurred while extracting the plugin: {e}")
+                logger.exception(f"An error occurred while extracting the plugin: {e}")
                 return {"status": "ko", "code": 500, "message": "An error occurred while extracting the plugin, see logs for more details"}
 
     try:
@@ -164,7 +194,7 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
             rmtree(tmp_dir, ignore_errors=True)
             TMP_DIR.joinpath("ui").mkdir(parents=True, exist_ok=True)
 
-        LOGGER.error(f"An error occurred while importing the plugin: {e}")
+        logger.exception(f"An error occurred while importing the plugin: {e}")
         return {"status": "ko", "code": 500, "message": "An error occurred while importing the plugin, see logs for more details"}
 
     exception = None
@@ -200,7 +230,7 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
             TMP_DIR.joinpath("ui").mkdir(parents=True, exist_ok=True)
 
         if message:
-            LOGGER.error(message + (f": {exception}" if exception else ""))
+            logger.exception(message + (f": {exception}" if exception else ""))
         if message or not isinstance(res, dict) and not res:
             return {
                 "status": "ko",
@@ -217,7 +247,10 @@ def run_action(plugin: str, function_name: str = "", *, tmp_dir: Optional[Path] 
 @plugins.route("/plugins/refresh", methods=["POST"])
 @login_required
 def plugins_refresh():
+    logger.debug("plugins_refresh() called")
+    
     if DB.readonly:
+        logger.debug("Database is in read-only mode, blocking plugin refresh")
         return handle_error("Database is in read-only mode", "plugins")
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
@@ -230,6 +263,7 @@ def plugins_refresh():
 
     # Upload plugins
     if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
+        logger.debug("No plugins found in tmp directory")
         return handle_error("Please upload new plugins to reload plugins", "plugins", True)
     DATA.load_from_file()
 
@@ -238,7 +272,10 @@ def plugins_refresh():
     new_plugins = []
     new_plugins_ids = []
 
-    for file in listdir(str(tmp_ui_path)):
+    files_in_tmp = listdir(str(tmp_ui_path))
+    logger.debug(f"Processing {len(files_in_tmp)} files from tmp directory")
+
+    for file in files_in_tmp:
         if not tmp_ui_path.joinpath(file).is_file():
             continue
 
@@ -247,6 +284,8 @@ def plugins_refresh():
         temp_folder_name = file.split(".")[0]
         temp_folder_path = tmp_ui_path.joinpath(temp_folder_name)
         is_dir = False
+
+        logger.debug(f"Processing plugin file: {file}")
 
         try:
             if file.endswith(".zip"):
@@ -260,7 +299,7 @@ def plugins_refresh():
                 except BadZipFile:
                     errors += 1
                     message = f"{file} is not a valid zip file. ({folder_name or temp_folder_name})"
-                    LOGGER.exception(message)
+                    logger.exception(message)
                     DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
             else:
                 try:
@@ -278,17 +317,17 @@ def plugins_refresh():
                 except ReadError:
                     errors += 1
                     message = f"Couldn't read file {file} ({folder_name or temp_folder_name})"
-                    LOGGER.exception(message)
+                    logger.exception(message)
                     DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
                 except CompressionError:
                     errors += 1
                     message = f"{file} is not a valid tar file ({folder_name or temp_folder_name})"
-                    LOGGER.exception(message)
+                    logger.exception(message)
                     DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
                 except HeaderError:
                     errors += 1
                     message = f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})"
-                    LOGGER.exception(message)
+                    logger.exception(message)
                     DATA["TO_FLASH"].append({"content": f"{message}, check logs for more details", "type": "error", "save": False})
 
             if is_dir:
@@ -313,6 +352,7 @@ def plugins_refresh():
                 raise ValueError
 
             folder_name = plugin_file["id"]
+            logger.debug(f"Processing plugin: {folder_name}")
 
             if not PLUGIN_NAME_RX.match(folder_name):
                 errors += 1
@@ -350,6 +390,7 @@ def plugins_refresh():
                 }
             )
             new_plugins_ids.append(folder_name)
+            logger.debug(f"Successfully prepared plugin: {folder_name}")
         except KeyError:
             errors += 1
             DATA["TO_FLASH"].append(
@@ -387,29 +428,40 @@ def plugins_refresh():
             errors += 1
             DATA["TO_FLASH"].append({"content": str(e), "type": "error", "save": False})
 
+    logger.debug(f"Plugin processing completed: {len(new_plugins)} successful, {errors} errors")
+
     if errors >= files_count:
         return redirect(url_for("loading", next=url_for("plugins.plugins_page")))
 
+    # Update database with new plugins and handle conflicts with existing ones.
+    # Validates plugin uniqueness and provides feedback on upload status.
     def update_plugins():
+        logger.debug("Starting plugin database update in background thread")
         wait_applying()
 
         plugins = BW_CONFIG.get_plugins(_type="ui", with_data=True)
         for plugin in plugins:
             if plugin in new_plugins_ids:
+                logger.debug(f"Plugin {plugin} already exists, skipping")
                 DATA["TO_FLASH"].append({"content": f"Plugin {plugin} already exists", "type": "error"})
                 del new_plugins[new_plugins_ids.index(plugin)]
 
         if not new_plugins:
+            logger.debug("No new plugins to update")
             DATA["RELOADING"] = False
             return
 
+        logger.debug(f"Updating {len(new_plugins)} plugins in database")
         err = DB.update_external_plugins(new_plugins, _type="ui", delete_missing=False)
         if err:
+            logger.exception(f"Failed to update plugins in database: {err}")
             DATA["TO_FLASH"].append({"content": f"Couldn't update ui plugins to database: {err}", "type": "error"})
         else:
+            logger.debug("Plugins uploaded successfully")
             DATA["TO_FLASH"].append({"content": "Plugins uploaded successfully", "type": "success"})
 
         DATA["RELOADING"] = False
+        logger.debug("Plugin update thread completed")
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
     Thread(target=update_plugins).start()
@@ -420,23 +472,33 @@ def plugins_refresh():
 @plugins.route("/plugins/upload", methods=["POST"])
 @login_required
 def upload_plugin():
+    logger.debug("upload_plugin() called")
+    
     if DB.readonly:
+        logger.debug("Database is in read-only mode, blocking plugin upload")
         return {"status": "ko", "message": "Database is in read-only mode"}, 403
 
     if not request.files:
+        logger.debug("No files provided in upload request")
         return {"status": "ko"}, 400
 
     tmp_ui_path = TMP_DIR.joinpath("ui")
 
-    for uploaded_file in request.files.values():
+    uploaded_files = list(request.files.values())
+    logger.debug(f"Processing {len(uploaded_files)} uploaded files")
+
+    for uploaded_file in uploaded_files:
         if not uploaded_file.filename:
+            logger.debug("Empty filename in uploaded file")
             return {"status": "ko"}, 422
 
         if not uploaded_file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
+            logger.debug(f"Invalid file type: {uploaded_file.filename}")
             return {"status": "ko"}, 422
 
         file_name = Path(secure_filename(uploaded_file.filename)).name
         folder_name = file_name.rsplit(".", 2)[0]
+        logger.debug(f"Processing uploaded file: {file_name}")
 
         with BytesIO(uploaded_file.read()) as plugin_file:
             plugin_file.seek(0, 0)
@@ -449,6 +511,7 @@ def upload_plugin():
                     if len(plugins) > 1:
                         for file in zip_file.namelist():
                             if isabs(file) or ".." in file:
+                                logger.debug(f"Invalid file path in zip: {file}")
                                 return {"status": "ko"}, 422
 
                         zip_file.extractall(str(tmp_ui_path) + "/")
@@ -460,6 +523,7 @@ def upload_plugin():
                     if len(plugins) > 1:
                         for member in tar_file.getmembers():
                             if isabs(member.name) or ".." in member.name:
+                                logger.debug(f"Invalid file path in tar: {member.name}")
                                 return {"status": "ko"}, 422
 
                         try:
@@ -469,14 +533,18 @@ def upload_plugin():
                             # deepcode ignore TarSlip: The files in the tar are being inspected before extraction
                             tar_file.extractall(str(tmp_ui_path) + "/")
 
+            logger.debug(f"Found {len(plugins)} plugins in archive: {plugins}")
+
             if len(plugins) <= 1:
                 plugin_file.seek(0, 0)
                 # deepcode ignore PT: The folder name is being sanitized before
                 tmp_ui_path.joinpath(file_name).write_bytes(plugin_file.read())
+                logger.debug(f"Single plugin saved: {file_name}")
                 return {"status": "ok"}, 201
 
         for plugin in plugins:
             if tmp_ui_path.joinpath(folder_name, plugin).exists():
+                logger.debug(f"Creating archive for plugin: {plugin}")
                 with BytesIO() as tgz:
                     with tar_open(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3) as tf:
                         tf.add(str(tmp_ui_path.joinpath(folder_name, plugin)), arcname=plugin)
@@ -486,29 +554,34 @@ def upload_plugin():
     # deepcode ignore PT: The folder name is being sanitized before
     rmtree(tmp_ui_path.joinpath(folder_name), ignore_errors=True)
 
+    logger.debug("Plugin upload completed successfully")
     return {"status": "ok"}, 201
 
 
 @plugins.route("/plugins/<string:plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin_page(plugin: str):
+    logger.debug(f"custom_plugin_page() called for plugin: {plugin}")
     rmtree(TMP_DIR.joinpath("ui", "page"), ignore_errors=True)
 
     if not PLUGIN_NAME_RX.match(plugin):
+        logger.debug(f"Invalid plugin ID: {plugin}")
         return handle_error("Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)", "plugins")
 
     if request.method == "POST":
+        logger.debug(f"Executing action for plugin: {plugin}")
         action_result = run_action(plugin)
 
         if isinstance(action_result, Response):
-            LOGGER.info("Plugin action executed successfully")
+            logger.debug("Plugin action executed successfully, returning Response")
             return action_result
 
         # case error
         if action_result["status"] == "ko":
+            logger.debug(f"Plugin action failed: {action_result['message']}")
             return error_message(escape(action_result["message"])), action_result["code"]
 
-        LOGGER.info(f"Plugin {plugin} action executed successfully")
+        logger.debug(f"Plugin {plugin} action executed successfully")
 
         if request.content_type == "application/x-www-form-urlencoded":
             return redirect(f"{url_for('plugins.plugins_page')}/{plugin}", code=303)
@@ -521,6 +594,7 @@ def custom_plugin_page(plugin: str):
             break
 
     if not plugin_data:
+        logger.debug(f"Plugin not found in database: {plugin}")
         return error_message("Plugin not found"), 404
 
     plugin_id = plugin.upper()
@@ -549,6 +623,8 @@ def custom_plugin_page(plugin: str):
             if is_metrics_on and is_used:
                 break
 
+    logger.debug(f"Plugin {plugin} usage status: used={is_used}, metrics={is_metrics_on}")
+
     pre_render = {}
     plugin_page = ""
 
@@ -560,11 +636,12 @@ def custom_plugin_page(plugin: str):
         if plugin_fs_path and (plugin_fs_path / "ui").exists():
             # Use the filesystem path directly
             tmp_page_dir = plugin_fs_path / "ui"
-            LOGGER.debug(f"Using filesystem path for plugin {plugin}: {tmp_page_dir}")
+            logger.debug(f"Using filesystem path for plugin {plugin}: {tmp_page_dir}")
         else:
             # Fall back to database if not found in filesystem
             page = DB.get_plugin_page(plugin)
             if not page:
+                logger.debug(f"Plugin {plugin} does not have a page")
                 return error_message("The plugin does not have a page"), 404
 
             # Extract from database blob to temporary location
@@ -586,7 +663,7 @@ def custom_plugin_page(plugin: str):
                     tar.extract(member, tmp_page_dir)
 
             tmp_page_dir = tmp_page_dir.joinpath("ui")
-            LOGGER.debug(f"Plugin {plugin} page extracted from database successfully")
+            logger.debug(f"Plugin {plugin} page extracted from database successfully")
 
         # Execute pre-render action if exists
         pre_render = run_action(plugin, "pre_render", tmp_dir=tmp_page_dir)
@@ -596,6 +673,7 @@ def custom_plugin_page(plugin: str):
             page_content = template_path.read_text(encoding="utf-8")
 
             if page_content.startswith('{% extends "base.html" %}'):
+                logger.debug(f"Plugin {plugin} uses old template format")
                 page_content = """<div class="d-flex align-items-center justify-content-center">
     <div class="text-center text-primary">
         <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold">
@@ -617,8 +695,9 @@ def custom_plugin_page(plugin: str):
                     .from_string(page_content)
                     .render(pre_render=pre_render, **template_vars)
                 )
+                logger.debug(f"Plugin {plugin} page rendered successfully")
             except BaseException:
-                LOGGER.exception("An error occurred while rendering the plugin page")
+                logger.exception("An error occurred while rendering the plugin page")
                 plugin_page = '<div class="mt-2 mb-2 alert alert-danger text-center" role="alert">An error occurred while rendering the plugin page<br/>See logs for more details</div>'
 
             # Clean up temporary directories if extracted from database

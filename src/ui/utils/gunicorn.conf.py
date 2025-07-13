@@ -9,17 +9,28 @@ from stat import S_IRUSR, S_IWUSR
 from subprocess import call
 from sys import exit, path as sys_path
 from time import sleep
-from traceback import format_exc
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-gunicorn",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-gunicorn")
 
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 from passlib.totp import generate_secret
 
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
 
 from app.models.ui_database import UIDatabase
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
@@ -106,10 +117,8 @@ def on_starting(server):
     if docker_secrets:
         environ.update(docker_secrets)
 
-    LOGGER = setup_logger("UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
-
     if docker_secrets:
-        LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
+        logger.info(f"Loaded {len(docker_secrets)} Docker secrets")
 
     def set_secure_permissions(file_path: Path):
         """Set file permissions to 600 (owner read/write only)."""
@@ -125,22 +134,22 @@ def on_starting(server):
                 flask_secret = FLASK_SECRET_FILE.read_text(encoding="utf-8").strip()
                 if not flask_secret:
                     raise ValueError("Secret file is empty.")
-                LOGGER.info("Flask secret successfully loaded from the file.")
+                logger.info("Flask secret successfully loaded from the file.")
             except (ValueError, Exception) as e:
-                LOGGER.error(f"Failed to load Flask secret from file: {e}. Falling back to environment variable or generating a new secret.")
+                logger.exception("Failed to load Flask secret from file. Falling back to environment variable or generating a new secret.")
 
         # * Step 2: Check environment variable if no valid file
         if not flask_secret:
             flask_secret_env = getenv("FLASK_SECRET", "").strip()
             if flask_secret_env:
                 flask_secret = flask_secret_env
-                LOGGER.info("Flask secret successfully loaded from the environment variable.")
+                logger.info("Flask secret successfully loaded from the environment variable.")
 
         # * Step 3: Generate new secret if none found
         if not flask_secret:
-            LOGGER.warning("No valid Flask secret found. Generating a new random secret...")
+            logger.warning("No valid Flask secret found. Generating a new random secret...")
             flask_secret = token_hex(64)
-            LOGGER.info("Generated a new Flask secret.")
+            logger.info("Generated a new Flask secret.")
 
         # * Step 4: Hash for change detection
         current_env_hash = sha256(flask_secret.encode("utf-8")).hexdigest()
@@ -148,9 +157,9 @@ def on_starting(server):
 
         # * Step 5: Compare hashes and update if necessary
         if previous_env_hash and current_env_hash == previous_env_hash:
-            LOGGER.info("The FLASK_SECRET environment variable has not changed since the last restart.")
+            logger.info("The FLASK_SECRET environment variable has not changed since the last restart.")
         else:
-            LOGGER.warning("The FLASK_SECRET environment variable has changed or is being set for the first time.")
+            logger.warning("The FLASK_SECRET environment variable has changed or is being set for the first time.")
             with FLASK_SECRET_FILE.open("w", encoding="utf-8") as file:
                 file.write(flask_secret)
             set_secure_permissions(FLASK_SECRET_FILE)
@@ -159,12 +168,11 @@ def on_starting(server):
                 file.write(current_env_hash)
             set_secure_permissions(FLASK_SECRET_HASH_FILE)
 
-        LOGGER.info("Flask secret securely stored.")
-        LOGGER.info("Flask secret hash securely stored for change detection.")
+        logger.info("Flask secret securely stored.")
+        logger.info("Flask secret hash securely stored for change detection.")
     except Exception as e:
         message = f"An error occurred while handling the Flask secret: {e}"
-        LOGGER.debug(format_exc())
-        LOGGER.critical(message)
+        logger.exception("Exception while handling Flask secret")
         ERROR_FILE.write_text(message, encoding="utf-8")
         exit(1)
 
@@ -178,9 +186,9 @@ def on_starting(server):
         if TOTP_SECRETS_FILE.is_file():
             try:
                 totp_secrets = loads(TOTP_SECRETS_FILE.read_text(encoding="utf-8"))
-                LOGGER.info("TOTP secrets successfully loaded from the file.")
+                logger.info("TOTP secrets successfully loaded from the file.")
             except JSONDecodeError:
-                LOGGER.error("Failed to load TOTP secrets from file. Falling back to environment or generating new secrets.")
+                logger.exception("Failed to load TOTP secrets from file. Falling back to environment or generating new secrets.")
 
         # * Step 2: Check environment variable if no valid file
         totp_secrets_env = None
@@ -194,20 +202,20 @@ def on_starting(server):
                     elif isinstance(parsed_secrets, list):
                         totp_secrets = {f"key-{i+1}": secret for i, secret in enumerate(parsed_secrets)}
                 except JSONDecodeError:
-                    LOGGER.info("TOTP_SECRETS is not valid JSON. Treating as space-separated secrets.")
+                    logger.exception("TOTP_SECRETS is not valid JSON. Treating as space-separated secrets.")
                     totp_secrets = {f"key-{i+1}": secret for i, secret in enumerate(totp_secrets_env.split())}
 
         # * Step 3: Validate and clean secrets
         for key, secret in list(totp_secrets.items()):
             if not isinstance(secret, str) or len(secret) != VALID_TOTP_SECRET_LENGTH:
-                LOGGER.warning(f"Invalid TOTP secret for key: {key}. Secret will be excluded.")
+                logger.warning(f"Invalid TOTP secret for key: {key}. Secret will be excluded.")
                 totp_secrets.pop(key)
 
         # * Step 4: Generate new secrets if none are valid
         if not totp_secrets:
-            LOGGER.warning("No valid TOTP secrets found. Generating new secure secrets...")
+            logger.warning("No valid TOTP secrets found. Generating new secure secrets...")
             totp_secrets = {f"key-{i}": generate_secret() for i in range(1, 6)}
-            LOGGER.info(f"Generated {len(totp_secrets)} secure TOTP secrets.")
+            logger.info(f"Generated {len(totp_secrets)} secure TOTP secrets.")
 
         # * Step 5: Hash for change detection
         current_env_hash = sha256(dumps(totp_secrets, sort_keys=True).encode("utf-8")).hexdigest()
@@ -215,13 +223,13 @@ def on_starting(server):
 
         # * Step 6: Compare hashes and update if necessary
         if previous_env_hash and current_env_hash == previous_env_hash:
-            LOGGER.info("The TOTP_SECRETS environment variable has not changed since the last restart.")
+            logger.info("The TOTP_SECRETS environment variable has not changed since the last restart.")
         else:
             if not totp_secrets_env:
-                LOGGER.warning("The TOTP_SECRETS environment variable has changed or is being set for the first time.")
+                logger.warning("The TOTP_SECRETS environment variable has changed or is being set for the first time.")
                 invalid_totp_secrets = True
             else:
-                LOGGER.info("We won't reset the TOTP secrets, as the TOTP_SECRETS environment variable is set.")
+                logger.info("We won't reset the TOTP secrets, as the TOTP_SECRETS environment variable is set.")
 
             with TOTP_SECRETS_FILE.open("w", encoding="utf-8") as file:
                 dump(totp_secrets, file, indent=2)
@@ -231,12 +239,11 @@ def on_starting(server):
                 file.write(current_env_hash)
             set_secure_permissions(TOTP_HASH_FILE)
 
-        LOGGER.info("TOTP secrets securely stored.")
-        LOGGER.info("TOTP environment hash securely stored for change detection.")
+        logger.info("TOTP secrets securely stored.")
+        logger.info("TOTP environment hash securely stored for change detection.")
     except Exception as e:
         message = f"An error occurred while handling TOTP secrets: {e}"
-        LOGGER.debug(format_exc())
-        LOGGER.critical(message)
+        logger.exception("Exception while handling TOTP secrets")
         ERROR_FILE.write_text(message, encoding="utf-8")
         exit(1)
 
@@ -261,9 +268,9 @@ def on_starting(server):
                 biscuit_public_key_hex = pub_hex
                 biscuit_private_key_hex = priv_hex
                 keys_loaded = True
-                LOGGER.info("Valid Biscuit keys successfully loaded from files.")
+                logger.info("Valid Biscuit keys successfully loaded from files.")
             except Exception as e:
-                LOGGER.error(f"Failed to load or validate Biscuit keys from files: {e}. Falling back.")
+                logger.exception("Failed to load or validate Biscuit keys from files. Falling back.")
                 biscuit_public_key_hex = None  # Ensure reset if loading failed
                 biscuit_private_key_hex = None
 
@@ -279,15 +286,15 @@ def on_starting(server):
                     biscuit_public_key_hex = pub_hex_env
                     biscuit_private_key_hex = priv_hex_env
                     keys_loaded = True
-                    LOGGER.info("Valid Biscuit keys successfully loaded from environment variables.")
+                    logger.info("Valid Biscuit keys successfully loaded from environment variables.")
                 except Exception as e:
-                    LOGGER.error(f"Failed to validate Biscuit keys from environment variables: {e}. Falling back.")
+                    logger.exception("Failed to validate Biscuit keys from environment variables. Falling back.")
                     biscuit_public_key_hex = None  # Ensure reset if env validation failed
                     biscuit_private_key_hex = None
 
         # * Step 3: Generate new keys if none found or loaded/validated successfully
         if not keys_loaded:
-            LOGGER.warning("No valid Biscuit keys found from files or environment. Generating new random keys...")
+            logger.warning("No valid Biscuit keys found from files or environment. Generating new random keys...")
             # Generate new keys using the biscuit library
             keypair = KeyPair()
             biscuit_private_key_obj = keypair.private_key
@@ -295,7 +302,7 @@ def on_starting(server):
             biscuit_private_key_hex = biscuit_private_key_obj.to_hex()
             biscuit_public_key_hex = biscuit_public_key_obj.to_hex()
             keys_generated = True
-            LOGGER.info("Generated new Biscuit key pair.")
+            logger.info("Generated new Biscuit key pair.")
 
         # Ensure we have keys before proceeding
         if not biscuit_public_key_hex or not biscuit_private_key_hex:
@@ -313,9 +320,9 @@ def on_starting(server):
 
         if public_key_changed or private_key_changed or keys_generated:
             if keys_generated:
-                LOGGER.warning("Saving newly generated Biscuit keys.")
+                logger.warning("Saving newly generated Biscuit keys.")
             else:
-                LOGGER.warning("The Biscuit keys have changed or are being set for the first time.")
+                logger.warning("The Biscuit keys have changed or are being set for the first time.")
 
             # Update public key file and hash
             with BISCUIT_PUBLIC_KEY_FILE.open("w", encoding="utf-8") as file:
@@ -335,32 +342,31 @@ def on_starting(server):
                 file.write(current_private_key_hash)
             set_secure_permissions(BISCUIT_PRIVATE_KEY_HASH_FILE)
         else:
-            LOGGER.info("The Biscuit keys have not changed since the last restart.")
+            logger.info("The Biscuit keys have not changed since the last restart.")
 
-        LOGGER.info("Biscuit keys securely stored.")
-        LOGGER.info("Biscuit key hashes securely stored for change detection.")
+        logger.info("Biscuit keys securely stored.")
+        logger.info("Biscuit key hashes securely stored for change detection.")
     except Exception as e:
         message = f"An error occurred while handling Biscuit keys: {e}"
-        LOGGER.debug(format_exc())
-        LOGGER.critical(message)
+        logger.exception("Exception while handling Biscuit keys")
         ERROR_FILE.write_text(message, encoding="utf-8")
         exit(1)
 
-    DB = UIDatabase(LOGGER)
+    DB = UIDatabase(logger)
     current_time = datetime.now().astimezone()
 
     ready = False
     while not ready:
         if (datetime.now().astimezone() - current_time).total_seconds() > 60:
             message = "Timed out while waiting for the database to be initialized."
-            LOGGER.error(message)
+            logger.error(message)
             ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
         db_metadata = DB.get_metadata()
         ui_roles = DB.get_ui_roles(as_dict=True)
         if isinstance(db_metadata, str) or not db_metadata["is_initialized"] or (isinstance(ui_roles, str) and "doesn't exist" in ui_roles):
-            LOGGER.warning("Database is not initialized, retrying in 5s ...")
+            logger.warning("Database is not initialized, retrying in 5s ...")
         else:
             ready = True
             continue
@@ -370,21 +376,21 @@ def on_starting(server):
         ret = DB.create_ui_role("admin", "Admins can create new users, edit and read the data.", ["manage", "write", "read"])
         if ret:
             message = f"Couldn't create the admin role in the database: {ret}"
-            LOGGER.error(message)
+            logger.error(message)
             ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
         ret = DB.create_ui_role("writer", "Writers can edit and read the data but can't create new users.", ["write", "read"])
         if ret:
             message = f"Couldn't create the writer role in the database: {ret}"
-            LOGGER.error(message)
+            logger.error(message)
             ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
         ret = DB.create_ui_role("reader", "Readers can only read the data.", ["read"])
         if ret:
             message = f"Couldn't create the reader role in the database: {ret}"
-            LOGGER.error(message)
+            logger.error(message)
             ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
@@ -394,14 +400,14 @@ def on_starting(server):
     while ADMIN_USER == "Error":
         if (datetime.now().astimezone() - current_time).total_seconds() > 60:
             message = "Timed out while waiting for the admin user."
-            LOGGER.error(message)
+            logger.error(message)
             ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
         try:
             ADMIN_USER = DB.get_ui_user(as_dict=True)
         except BaseException as e:
-            LOGGER.debug(f"Couldn't get the admin user: {e}")
+            logger.exception("Couldn't get the admin user")
             sleep(1)
 
     env_admin_username = getenv("ADMIN_USERNAME", "")
@@ -409,12 +415,12 @@ def on_starting(server):
 
     if ADMIN_USER:
         if invalid_totp_secrets:
-            LOGGER.warning("The TOTP secrets have changed, removing admin TOTP secrets ...")
+            logger.warning("The TOTP secrets have changed, removing admin TOTP secrets ...")
             err = DB.update_ui_user(
                 ADMIN_USER["username"], ADMIN_USER["password"], None, theme=ADMIN_USER["theme"], method=ADMIN_USER["method"], language=ADMIN_USER["language"]
             )
             if err:
-                LOGGER.error(f"Couldn't update the admin user in the database: {err}")
+                logger.error(f"Couldn't update the admin user in the database: {err}")
 
         if env_admin_username or env_admin_password:
             override_admin_creds = getenv("OVERRIDE_ADMIN_CREDS", "no").lower() == "yes"
@@ -426,7 +432,7 @@ def on_starting(server):
 
                 if env_admin_password and not check_password(env_admin_password, ADMIN_USER["password"]):
                     if not USER_PASSWORD_RX.match(env_admin_password):
-                        LOGGER.warning(
+                        logger.warning(
                             "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character. It will not be updated."
                         )
                     else:
@@ -435,7 +441,7 @@ def on_starting(server):
 
                 if updated:
                     if override_admin_creds:
-                        LOGGER.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
+                        logger.warning("Overriding the admin user credentials, as the OVERRIDE_ADMIN_CREDS environment variable is set to 'yes'.")
                     err = DB.update_ui_user(
                         ADMIN_USER["username"],
                         ADMIN_USER["password"],
@@ -445,30 +451,30 @@ def on_starting(server):
                         language=ADMIN_USER["language"],
                     )
                     if err:
-                        LOGGER.error(f"Couldn't update the admin user in the database: {err}")
+                        logger.error(f"Couldn't update the admin user in the database: {err}")
                     else:
-                        LOGGER.info("The admin user was updated successfully.")
+                        logger.info("The admin user was updated successfully.")
             else:
-                LOGGER.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
+                logger.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
     elif env_admin_username and env_admin_password:
         user_name = env_admin_username or "admin"
 
         if not DEBUG:
             if len(user_name) > 256:
                 message = "The admin username is too long. It must be less than 256 characters."
-                LOGGER.error(message)
+                logger.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
             elif not USER_PASSWORD_RX.match(env_admin_password):
                 message = "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character."
-                LOGGER.error(message)
+                logger.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
 
         ret = DB.create_ui_user(user_name, gen_password_hash(env_admin_password), ["admin"], admin=True)
         if ret and "already exists" not in ret:
             message = f"Couldn't create the admin user in the database: {ret}"
-            LOGGER.critical(message)
+            logger.critical(message)
             ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
@@ -476,7 +482,7 @@ def on_starting(server):
     try:
         latest_version = get_latest_stable_release()
     except BaseException as e:
-        LOGGER.error(f"Exception while fetching latest release information: {e}")
+        logger.error(f"Exception while fetching latest release information: {e}")
 
     UI_DATA_FILE.write_text(
         dumps(
@@ -491,7 +497,7 @@ def on_starting(server):
     )
     set_secure_permissions(UI_DATA_FILE)
 
-    LOGGER.info(
+    logger.info(
         "UI will disconnect users that have their IP address changed during a session"
         + (" except for private IP addresses." if getenv("CHECK_PRIVATE_IP", "yes").lower() == "no" else ".")
     )
@@ -499,19 +505,19 @@ def on_starting(server):
     UI_SESSIONS_CACHE.mkdir(parents=True, exist_ok=True)
 
     if TMP_PID_FILE.is_file():
-        LOGGER.info("Stopping temporary UI...")
+        logger.info("Stopping temporary UI...")
         call(["kill", "-SIGTERM", TMP_PID_FILE.read_text().strip()])
         current_time = datetime.now().astimezone()
         while TMP_PID_FILE.is_file():
             if (datetime.now().astimezone() - current_time).total_seconds() > 60:
                 message = "Timed out while waiting for the temporary UI to stop."
-                LOGGER.error(message)
+                logger.error(message)
                 ERROR_FILE.write_text(message, encoding="utf-8")
                 exit(1)
             sleep(1)
-        LOGGER.info("Temporary UI is stopped")
+        logger.info("Temporary UI is stopped")
 
-    LOGGER.info("UI is ready")
+    logger.info("UI is ready")
 
 
 def when_ready(server):

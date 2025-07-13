@@ -6,18 +6,26 @@ from signal import SIGINT, SIGTERM, signal
 from subprocess import PIPE, Popen, call
 from sys import path as sys_path
 
-
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-temp",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-temp")
+
 from flask import Flask, render_template, request
 
-from logger import setup_logger  # type: ignore
-
 from app.models.reverse_proxied import ReverseProxied
-
-LOGGER = setup_logger("TMP-UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 ERROR_FILE = TMP_DIR.joinpath("ui.error")
@@ -35,8 +43,8 @@ def stop(status):
 
 
 def handle_stop(signum, frame):
-    LOGGER.info("Caught stop operation")
-    LOGGER.info("Stopping web ui ...")
+    logger.info("Caught stop operation")
+    logger.info("Stopping web ui ...")
     stop(0, False)
 
 

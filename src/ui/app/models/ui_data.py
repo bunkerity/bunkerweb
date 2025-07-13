@@ -1,6 +1,26 @@
 from json import dumps, loads
 from multiprocessing import Lock
+from os import sep
+from os.path import join
 from pathlib import Path
+from sys import path as sys_path
+
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-ui-data",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-ui-data")
 
 
 class UIData(dict):

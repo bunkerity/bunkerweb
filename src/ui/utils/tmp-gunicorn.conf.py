@@ -3,12 +3,24 @@ from os.path import join
 from pathlib import Path
 from sys import path as sys_path
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-tmp-gunicorn",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-tmp-gunicorn")
+
 from common_utils import handle_docker_secrets  # type: ignore
-from logger import setup_logger  # type: ignore
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 TMP_UI_DIR = TMP_DIR.joinpath("ui")
@@ -76,12 +88,10 @@ def on_starting(server):
     if docker_secrets:
         environ.update(docker_secrets)
 
-    LOGGER = setup_logger("TMP-UI", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
-
     if docker_secrets:
-        LOGGER.info(f"Loaded {len(docker_secrets)} Docker secrets")
+        logger.info(f"Loaded {len(docker_secrets)} Docker secrets")
 
-    LOGGER.info("TMP-UI is ready")
+    logger.info("TMP-UI is ready")
 
 
 def when_ready(server):

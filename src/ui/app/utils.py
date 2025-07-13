@@ -1,25 +1,39 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
-from os import _exit
-from os.path import sep
+from os import _exit, sep
+from os.path import join
 from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
+from sys import path as sys_path
 from typing import Dict, Optional, Set, Union
+
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI")
 
 from bcrypt import checkpw, gensalt, hashpw
 from flask import flash as flask_flash, session
 from regex import compile as re_compile, match
 from requests import get
 
-from logger import setup_logger  # type: ignore
-
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
 LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
-
-LOGGER = setup_logger("UI")
 
 USER_PASSWORD_RX = re_compile(r"^(?=.*\p{Ll})(?=.*\p{Lu})(?=.*\d)(?=.*\P{Alnum}).{8,}$")
 PLUGIN_NAME_RX = re_compile(r"^[\w.-]{4,64}$")
@@ -126,8 +140,8 @@ def stop(status, _stop: bool = True):
 
 
 def handle_stop(signum, frame):
-    LOGGER.info("Caught stop operation")
-    LOGGER.info("Stopping web ui ...")
+    logger.info("Caught stop operation")
+    logger.info("Stopping web ui ...")
     stop(0, False)
 
 
@@ -229,7 +243,7 @@ def get_latest_stable_release():
             latest_release = release
 
     if not latest_release:
-        LOGGER.error("Failed to fetch latest release information")
+        logger.error("Failed to fetch latest release information")
         latest_release = "unknown"
     else:
         latest_release = latest_release["tag_name"].removeprefix("v")
