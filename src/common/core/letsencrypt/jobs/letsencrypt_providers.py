@@ -44,6 +44,18 @@ class Provider(BaseModel):
         return "ini"
 
 
+class BunnyNetProvider(Provider):
+    """BunnyNet DNS provider."""
+
+    dns_bunny_api_key: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_bunny_api_key": ("dns_bunny_api_key", "bunnynet_api_key", "api_key"),
+        }
+    )
+
+
 class CloudflareProvider(Provider):
     """Cloudflare DNS provider."""
 

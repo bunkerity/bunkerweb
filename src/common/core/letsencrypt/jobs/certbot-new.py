@@ -27,6 +27,7 @@ from jobs import Job  # type: ignore
 from logger import setup_logger  # type: ignore
 
 from letsencrypt_providers import (
+    BunnyNetProvider,
     CloudflareProvider,
     DesecProvider,
     DigitalOceanProvider,
@@ -66,31 +67,10 @@ CHALLENGE_TYPES = ["http", "dns"]
 PROFILE_TYPES = ["classic", "tlsserver", "shortlived"]
 DNS_PROPAGATION_DEFAULT = "default"
 RSA_PROVIDERS = ("infomaniak", "ionos")
-AUTHENTICATOR_PROVIDERS = ("desec", "infomaniak", "ionos", "njalla", "scaleway")
+AUTHENTICATOR_PROVIDERS = ("bunny", "desec", "infomaniak", "ionos", "njalla", "scaleway")
 
-PROVIDERS: Dict[
-    str,
-    Union[
-        Type[CloudflareProvider],
-        Type[DesecProvider],
-        Type[DigitalOceanProvider],
-        Type[DnsimpleProvider],
-        Type[DnsMadeEasyProvider],
-        Type[GehirnProvider],
-        Type[GoogleProvider],
-        Type[InfomaniakProvider],
-        Type[IonosProvider],
-        Type[LinodeProvider],
-        Type[LuaDnsProvider],
-        Type[NjallaProvider],
-        Type[NSOneProvider],
-        Type[OvhProvider],
-        Type[Rfc2136Provider],
-        Type[Route53Provider],
-        Type[SakuraCloudProvider],
-        Type[ScalewayProvider],
-    ],
-] = {
+PROVIDERS: Dict[str, Type[Provider]] = {
+    "bunny": BunnyNetProvider,
     "cloudflare": CloudflareProvider,
     "desec": DesecProvider,
     "digitalocean": DigitalOceanProvider,
