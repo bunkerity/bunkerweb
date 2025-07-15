@@ -6,6 +6,7 @@
 - [BUGFIX] Fix `Let's Encrypt` credential files being removed upon reload of the scheduler creating issues with the certificate renewal.
 - [BUGFIX] Change `BAD_BEHAVIOR_BAN_SCOPE` setting context from `multisite` to `global`.
 - [UI] Fix shenanigans when fetching the latest version in the web UI.
+- [UI] Fix the fact that the "global" choice wasn't categorized as is in the web UI when editing a custom configuration.
 - [DOCS] Update error handling documentation to clarify custom error page placement and ROOT_FOLDER settings.
 - [MISC] Enhance plugin command execution with error handling and available commands listing
 

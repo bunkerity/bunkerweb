@@ -62,11 +62,12 @@ $(document).ready(function () {
 
   const $serviceSearch = $("#service-search");
   const $serviceDropdownMenu = $("#services-dropdown-menu");
-  const $serviceDropdownItems = $("#services-dropdown-menu li.nav-item");
+  const $serviceDropdownItems = $(
+    "#services-dropdown-menu button.dropdown-item",
+  );
   const $typeDropdownItems = $("#types-dropdown-menu li.nav-item");
 
   const changeTypesVisibility = () => {
-    // Treat both "global" and "Global" as global
     const isGlobal = selectedService.toLowerCase() === "global";
     $typeDropdownItems.each(function () {
       const item = $(this);
@@ -86,7 +87,7 @@ $(document).ready(function () {
         const item = $(this);
         const matches = item.text().toLowerCase().includes(inputValue);
 
-        item.toggle(matches);
+        item.parent().toggle(matches);
 
         if (matches) {
           visibleItems++; // Increment when an item is shown
@@ -96,7 +97,7 @@ $(document).ready(function () {
       if (visibleItems === 0) {
         if ($serviceDropdownMenu.find(".no-service-items").length === 0) {
           $serviceDropdownMenu.append(
-            '<li class="no-service-items dropdown-item text-muted">No Item</li>',
+            '<li class="no-service-items dropdown-item text-muted" data-i18n="status.no_item">No Item</li>',
           );
         }
       } else {
@@ -111,7 +112,7 @@ $(document).ready(function () {
 
   $serviceDropdownItems.on("click", function () {
     const previousService = selectedService;
-    selectedService = $(this).text().trim();
+    selectedService = $(this).data("service");
     changeTypesVisibility();
     if (
       selectedService.toLowerCase() === "global" &&
