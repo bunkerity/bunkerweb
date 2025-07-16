@@ -329,6 +329,7 @@ utils.get_reason = function(ctx)
 			{ key = "msgs", env_var = "REASON_DATA_MSGS" },
 			{ key = "matched_vars", env_var = "REASON_DATA_MATCHED_VARS" },
 			{ key = "matched_var_names", env_var = "REASON_DATA_MATCHED_VAR_NAMES" },
+			{ key = "anomaly_score", env_var = "REASON_DATA_ANOMALY_SCORE" },
 		}
 
 		for _, data_type in ipairs(data_types) do

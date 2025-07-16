@@ -647,6 +647,8 @@ $(document).ready(function () {
     const reportDataString = button.data("report-data");
     let rawDataForFallback = null;
     let reason = "Unknown";
+    let anomalyScore = null;
+    let isModSec = false;
 
     try {
       // First, try to get the reason from row data
@@ -710,16 +712,37 @@ $(document).ready(function () {
         }
       }
 
-      // Store raw data for copy functionality - ensure it's always available
       rawDataForFallback = reportData || {};
       $("#dataModal").data("raw-data", rawDataForFallback);
 
-      // Update modal title with reason
-      $("#dataModalLabel").html(`
+      // Detect ModSecurity report and extract anomaly score
+      if (
+        reportData &&
+        (reportData.anomaly_score !== undefined ||
+          reportData.ids ||
+          reportData.msgs)
+      ) {
+        isModSec = true;
+        anomalyScore = reportData.anomaly_score;
+      }
+
+      // Update modal title with reason and anomaly score badge if present
+      let modalTitleHtml = `
         <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details - ${escapeHtml(
           reason,
         )}
-      `);
+      `;
+      if (
+        isModSec &&
+        anomalyScore !== undefined &&
+        anomalyScore !== null &&
+        anomalyScore !== ""
+      ) {
+        modalTitleHtml += `<span class="badge bg-danger ms-2 align-middle">Anomaly Score: <span class="fw-bold">${escapeHtml(
+          anomalyScore,
+        )}</span></span>`;
+      }
+      $("#dataModalLabel").html(modalTitleHtml);
 
       // Generate formatted content with error handling
       try {
@@ -903,7 +926,11 @@ $(document).ready(function () {
 
     // Check if this looks like a ModSecurity-style report
     const hasSecurityFields =
-      data.ids || data.msgs || data.matched_var_names || data.matched_vars;
+      data.ids ||
+      data.msgs ||
+      data.matched_var_names ||
+      data.matched_vars ||
+      data.anomaly_score;
 
     if (hasSecurityFields) {
       html += formatModSecurityData(data);
