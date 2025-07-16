@@ -247,11 +247,11 @@ spec:
             - name: KUBERNETES_MODE
               value: "YES"
             - name: DATABASE_URI
-              value: "mysql+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+              value: "mysql+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
             - name: ADMIN_USERNAME
               value: "changeme"
             - name: ADMIN_PASSWORD
-              value: "changeme"
+              value: "Ch@ngeme1234"
 ---
 apiVersion: v1
 kind: Service
