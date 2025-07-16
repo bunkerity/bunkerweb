@@ -10,7 +10,8 @@
     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
     "MAX_CLIENT_SIZE": "50m",
     "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Strict-Transport-Security X-Frame-Options X-Content-Type-Options Referrer-Policy",
-    "REVERSE_PROXY_KEEPALIVE": "yes"
+    "REVERSE_PROXY_KEEPALIVE": "yes",
+    "USE_ROBOTSTXT": "yes"
   },
   "steps": [
     {
@@ -26,7 +27,8 @@
         "INTERCEPTED_ERROR_CODES",
         "MAX_CLIENT_SIZE",
         "KEEP_UPSTREAM_HEADERS",
-        "REVERSE_PROXY_KEEPALIVE"
+        "REVERSE_PROXY_KEEPALIVE",
+        "USE_ROBOTSTXT"
       ]
     }
   ]

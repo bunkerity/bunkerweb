@@ -7,6 +7,7 @@
 - [BUGFIX] Change `BAD_BEHAVIOR_BAN_SCOPE` setting context from `multisite` to `global`.
 - [BUGFIX] Update template data handling to use template_data instead of template when updating external plugins.
 - [FEATURE] Add `BunnyNet` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add new `robotstxt` plugin to manage the robots.txt file from settings and serve it
 - [UI] Fix shenanigans when fetching the latest version in the web UI.
 - [UI] Fix the fact that the "global" choice wasn't categorized as is in the web UI when editing a custom configuration.
 - [UI] Fix multivalue toggle button functionality and transition effects

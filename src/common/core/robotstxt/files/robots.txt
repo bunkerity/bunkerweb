@@ -1,0 +1,9 @@
+{% if header then %}
+{*header*}
+{% end %}
+{% for _, rule in ipairs(rule) do %}
+{*rule*}
+{% end %}
+{% for _, sitemap in ipairs(sitemap) do %}
+Sitemap: {*sitemap*}
+{% end %}
