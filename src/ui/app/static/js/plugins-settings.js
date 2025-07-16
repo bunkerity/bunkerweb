@@ -435,12 +435,6 @@ $(document).ready(() => {
           settingValue = $this.is(":checked") ? "yes" : "no";
         }
 
-        // Check if it's a multiple setting with numeric suffix
-        const isMultipleSetting =
-          settingName &&
-          $this.attr("id").startsWith("multiple-") &&
-          /_\d+$/.test(settingName);
-
         appendHiddenInput(form, settingName, settingValue);
       });
 
@@ -1429,61 +1423,6 @@ $(document).ready(() => {
   $("#confirm-reset-template-config").on("click", function () {
     resetTemplateConfig();
   });
-
-  $('div[id^="multiple-"]')
-    .filter(function () {
-      return /^multiple-.*-\d+$/.test($(this).attr("id"));
-    })
-    .each(function () {
-      let defaultValues = true;
-      let disabled = false;
-      $(this)
-        .find("input, select")
-        .each(function () {
-          const type = $(this).attr("type");
-          const defaultVal = $(this).data("default");
-
-          if ($(this).prop("disabled")) {
-            disabled = true;
-          }
-
-          // Check for select element
-          if ($(this).is("select")) {
-            const selectedVal = $(this).find("option:selected").val();
-            if (selectedVal != defaultVal) {
-              defaultValues = false;
-            }
-          } else if (type === "checkbox") {
-            const isChecked =
-              $(this).prop("checked") === (defaultVal === "yes");
-            if (!isChecked) {
-              defaultValues = false;
-            }
-          } else {
-            const isMatchingValue = $(this).val() == defaultVal;
-            if (!isMatchingValue) {
-              defaultValues = false;
-            }
-          }
-        });
-
-      if (defaultValues) $(`#show-${$(this).attr("id")}`).trigger("click");
-      if (disabled && $(`#remove-${$(this).attr("id")}`).length) {
-        $(`#remove-${$(this).attr("id")}`).addClass("disabled");
-        $(`#remove-${$(this).attr("id")}`)
-          .parent()
-          .attr("title", t("tooltip.cannot_remove_disabled"));
-
-        new bootstrap.Tooltip(
-          $(`#remove-${$(this).attr("id")}`)
-            .parent()
-            .get(0),
-          {
-            placement: "top",
-          },
-        );
-      }
-    });
 
   if (
     (usedTemplate === "" || usedTemplate === "ui") &&

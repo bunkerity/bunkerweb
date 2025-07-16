@@ -12,6 +12,7 @@
 - [UI] Fix the fact that the "global" choice wasn't categorized as is in the web UI when editing a custom configuration.
 - [UI] Fix multivalue toggle button functionality and transition effects
 - [UI] Enhance ModSecurity Reporting: Add Anomaly Score Handling
+- [UI] Improve multiple setting handling in plugin settings template for better UI interaction (always show the first group, hide others by default)
 - [BUGFIX] Fix unban functionality to correctly handle global bans in the web UI.
 - [DOCS] Update error handling documentation to clarify custom error page placement and ROOT_FOLDER settings.
 - [MISC] Enhance plugin command execution with error handling and available commands listing

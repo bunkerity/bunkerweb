@@ -307,6 +307,7 @@
                                         {% for setting_suffix, settings in multiples.items() %}
                                             <div class="row multiple-container pt-2 pb-2">
                                                 {% set setting_id_suffix = "-" + setting_suffix %}
+                                                {% set is_first = loop.first %}
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <h6 class="mb-0 me-2">
                                                         {{ multiple.replace('-', ' ') | capitalize }}
@@ -332,17 +333,17 @@
                                                         {% endif %}
                                                         <button id="show-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
                                                                 type="button"
-                                                                class="btn btn-xs btn-text-secondary rounded-pill show-multiple p-0"
+                                                                class="btn btn-xs btn-text-secondary rounded-pill show-multiple p-0{% if not is_first %} collapsed{% endif %}"
                                                                 data-bs-toggle="collapse"
                                                                 data-bs-target="#multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                                aria-expanded="true"
+                                                                aria-expanded="{{ 'true' if is_first else 'false' }}"
                                                                 aria-controls="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}">
-                                                            <i class="bx bx-show-alt bx-sm"></i>&nbsp;<span data-i18n="button.multiple_hide">HIDE</span>
+                                                            <i class="bx bx-{% if is_first %}show-alt{% else %}hide{% endif %} bx-sm"></i>&nbsp;<span data-i18n="button.multiple_{% if is_first %}hide{% else %}show{% endif %}">{% if is_first %}HIDE{% else %}SHOW{% endif %}</span>
                                                         </button>
                                                     </div>
                                                 </div>
                                                 <div id="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                     class="collapse show multiple-collapse pt-0">
+                                                     class="collapse{% if is_first %} show{% endif %} multiple-collapse pt-0">
                                                     <div class="row g-2 gx-6 mt-2 pt-2">
                                                         {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
                                                             {% set setting_config = config.get(setting, {}) %}
