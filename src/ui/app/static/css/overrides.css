@@ -1566,7 +1566,7 @@ span.cursor-pointer ~ .reset-setting {
 }
 
 .multivalue-toggle-btn .bx {
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease-in-out !important;
 }
 
 .multivalue-toggle-btn.expanded .bx {

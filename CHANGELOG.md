@@ -8,6 +8,7 @@
 - [FEATURE] Add `BunnyNet` as a DNS provider in the `letsencrypt` plugin
 - [UI] Fix shenanigans when fetching the latest version in the web UI.
 - [UI] Fix the fact that the "global" choice wasn't categorized as is in the web UI when editing a custom configuration.
+- [UI] Fix multivalue toggle button functionality and transition effects
 - [DOCS] Update error handling documentation to clarify custom error page placement and ROOT_FOLDER settings.
 - [MISC] Enhance plugin command execution with error handling and available commands listing
 
