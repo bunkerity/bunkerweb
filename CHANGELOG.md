@@ -5,6 +5,7 @@
 - [BUGFIX] Update scheduler environment variables handling to avoid issues when there are too many environment variables set.
 - [BUGFIX] Fix `Let's Encrypt` credential files being removed upon reload of the scheduler creating issues with the certificate renewal.
 - [BUGFIX] Change `BAD_BEHAVIOR_BAN_SCOPE` setting context from `multisite` to `global`.
+- [BUGFIX] Update template data handling to use template_data instead of template when updating external plugins.
 - [FEATURE] Add `BunnyNet` as a DNS provider in the `letsencrypt` plugin
 - [UI] Fix shenanigans when fetching the latest version in the web UI.
 - [UI] Fix the fact that the "global" choice wasn't categorized as is in the web UI when editing a custom configuration.
