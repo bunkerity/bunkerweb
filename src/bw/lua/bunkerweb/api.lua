@@ -265,20 +265,10 @@ api.global.POST["^/unban$"] = function(self)
 		end
 	end
 
-	-- For global unbans or if no scope specified, remove global and service-specific bans
-	if ban_scope == "global" then
-		-- Delete global ban
-		datastore:delete("bans_ip_" .. ip["ip"])
-
-		-- Delete all service-specific bans for this IP
-		for _, k in ipairs(datastore:keys()) do
-			if k:find("^bans_service_.-_ip_" .. ip["ip"] .. "$") then
-				datastore:delete(k)
-			end
-		end
-	-- For service-specific unbans, only remove that service ban
-	elseif ban_scope == "service" and service then
-		datastore:delete("bans_service_" .. service .. "_ip_" .. ip["ip"])
+	-- Use utils.remove_ban to remove the ban(s)
+	local ok, err = utils.remove_ban(ip["ip"], service, ban_scope)
+	if not ok then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "failed to remove ban: " .. err)
 	end
 
 	return self:response(HTTP_OK, "success", response_msg)
@@ -348,32 +338,15 @@ api.global.POST["^/ban$"] = function(self)
 	end
 	ban.country = country
 
-	-- Determine the appropriate key based on ban scope
-	local ban_key = "bans_ip_" .. ban["ip"]
-	if ban.ban_scope == "service" then
-		ban_key = "bans_service_" .. ban["service"] .. "_ip_" .. ban["ip"]
-	end
-
-	-- Set the ban data with permanent flag
-	local ban_data = encode({
-		reason = ban["reason"],
-		service = ban["service"],
-		date = os.time(),
-		country = ban["country"],
-		ban_scope = ban["ban_scope"],
-		permanent = ban["exp"] == -1,
-	})
-
-	-- For permanent bans, don't set expiry
-	if ban["exp"] == -1 then
-		datastore:set(ban_key, ban_data)
-	else
-		datastore:set(ban_key, ban_data, ban["exp"])
+	-- Use utils.add_ban to ensure ban is applied to datastore and Redis
+	local ok, err = utils.add_ban(ban.ip, ban.reason, ban.exp, ban.service, ban.country, ban.ban_scope)
+	if not ok then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "failed to add ban: " .. err)
 	end
 
 	-- Create a more informative response message
 	local scope_text = ban.ban_scope == "global" and "globally" or ("for service " .. ban.service)
-	local duration_text = ban["exp"] == -1 and "permanently" or ("for " .. ban["exp"] .. " seconds")
+	local duration_text = not ban["exp"] and "permanently" or ("for " .. ban["exp"] .. " seconds")
 	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " banned " .. scope_text .. " " .. duration_text)
 end
 
@@ -401,12 +374,12 @@ api.global.GET["^/bans$"] = function(self)
 			local ban_data
 			ok, ban_data = pcall(decode, result)
 			if not ok then
-				ban_data = { reason = result, service = "unknown", date = -1, ban_scope = "global" }
+				ban_data = { reason = result, service = "unknown", date = 0, ban_scope = "global" }
 			end
 
 			-- Check for permanent ban flag and override TTL if set
 			if ban_data["permanent"] then
-				ttl = -1
+				ttl = 0
 			end
 
 			table.insert(data, {
@@ -444,12 +417,12 @@ api.global.GET["^/bans$"] = function(self)
 				local ban_data
 				ok, ban_data = pcall(decode, result)
 				if not ok then
-					ban_data = { reason = result, service = service, date = -1, ban_scope = "service" }
+					ban_data = { reason = result, service = service, date = 0, ban_scope = "service" }
 				end
 
 				-- Check for permanent ban flag and override TTL if set
 				if ban_data["permanent"] then
-					ttl = -1
+					ttl = 0
 				end
 
 				table.insert(data, {

@@ -88,8 +88,8 @@ function datastore:ttl(key, worker)
 	if err then
 		return false, err
 	end
-	if ttl == nil or ttl < 0 then
-		return true, -1
+	if not ttl then
+		return true, 0
 	end
 	return true, ttl
 end

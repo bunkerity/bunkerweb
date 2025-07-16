@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
-from json import dumps, loads
+from json import loads
 from operator import itemgetter
 from os import environ, get_terminal_size, getenv, sep
 from os.path import join
@@ -10,7 +10,6 @@ from subprocess import DEVNULL, STDOUT, run
 from sys import argv as sys_argv, path as sys_path
 from traceback import format_exc
 from typing import Any, Optional, Tuple
-from time import time
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -24,27 +23,26 @@ from common_utils import get_redis_client, handle_docker_secrets  # type: ignore
 
 
 def format_remaining_time(seconds):
-    years, seconds = divmod(seconds, 60 * 60 * 24 * 365)
-    months, seconds = divmod(seconds, 60 * 60 * 24 * 30)
-    while months >= 12:
-        years += 1
-        months -= 12
-    days, seconds = divmod(seconds, 60 * 60 * 24)
-    hours, seconds = divmod(seconds, 60 * 60)
-    minutes, seconds = divmod(seconds, 60)
+    if not isinstance(seconds, (int, float)) or seconds < 0:
+        return "permanent"
+
+    seconds = int(seconds)
+    days, remainder = divmod(seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
     time_parts = []
-    if years > 0:
-        time_parts.append(f"{int(years)} year{'' if years == 1 else 's'}")
-    if months > 0:
-        time_parts.append(f"{int(months)} month{'' if months == 1 else 's'}")
     if days > 0:
-        time_parts.append(f"{int(days)} day{'' if days == 1 else 's'}")
+        time_parts.append(f"{days} day{'s' if days != 1 else ''}")
     if hours > 0:
-        time_parts.append(f"{int(hours)} hour{'' if hours == 1 else 's'}")
+        time_parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
     if minutes > 0:
-        time_parts.append(f"{int(minutes)} minute{'' if minutes == 1 else 's'}")
+        time_parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
     if seconds > 0:
-        time_parts.append(f"{seconds} second{'' if seconds == 1 else 's'}")
+        time_parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+
+    if not time_parts:
+        return "less than a second"
 
     if len(time_parts) > 1:
         time_parts[-1] = f"and {time_parts[-1]}"
@@ -185,28 +183,13 @@ class CLI(ApiCaller):
 
     def unban(self, ip: str, service: Optional[str] = None) -> Tuple[bool, str]:
         """Unban an IP address globally or from a specific service"""
-        if self.__redis:
-            try:
-                # Delete global ban
-                ok = self.__redis.delete(f"bans_ip_{ip}")
-                if not ok:
-                    self.__logger.error(f"Failed to delete ban for {ip} from redis")
-
-                # If service is specified, delete service-specific ban
-                if service:
-                    service_key = f"bans_service_{service}_ip_{ip}"
-                    ok = self.__redis.delete(service_key)
-                    if not ok:
-                        self.__logger.error(f"Failed to delete service-specific ban for {ip} on service {service} from redis")
-                else:
-                    # Delete all service-specific bans for this IP
-                    for key in self.__redis.scan_iter(f"bans_service_*_ip_{ip}"):
-                        self.__redis.delete(key)
-            except Exception as e:
-                self.__logger.error(f"Failed to delete ban for {ip} from redis: {e}")
-
+        # Always use API as the source of truth for unban
+        ban_scope = "service" if service else "global"
         try:
-            if self.send_to_apis("POST", "/unban", data={"ip": ip} | ({"service": service} if service else {})):
+            data = {"ip": ip, "ban_scope": ban_scope}
+            if service:
+                data["service"] = service
+            if self.send_to_apis("POST", "/unban", data=data):
                 if service:
                     success_msg = (
                         f"{self.ICON_UNLOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been unbanned from service {self.CYAN}{service}{self.RESET}"
@@ -227,7 +210,6 @@ class CLI(ApiCaller):
 
         # Validate the service name if scope is service
         if ban_scope == "service":
-            # Try to get list of services
             services = []
             try:
                 if self.__db:
@@ -235,12 +217,8 @@ class CLI(ApiCaller):
                     services = config.get("SERVER_NAME", [])
                 else:
                     services = self.__get_variable("SERVER_NAME", "").split(" ")
-
-                # Ensure services is a list
                 if isinstance(services, str):
                     services = services.split()
-
-                # Check if service exists
                 if not service or service == "bwcli" or service not in services:
                     self.__logger.warning(f"Invalid service '{service}' for IP {ip}, defaulting to global ban")
                     ban_scope = "global"
@@ -250,34 +228,14 @@ class CLI(ApiCaller):
                 ban_scope = "global"
                 service = "bwcli"
 
-        if self.__redis:
-            try:
-                ban_data = dumps({"reason": reason, "date": time(), "service": service, "ban_scope": ban_scope, "permanent": exp == -1})
-
-                ban_key = f"bans_ip_{ip}"
-                if ban_scope == "service" and service != "bwcli":
-                    ban_key = f"bans_service_{service}_ip_{ip}"
-
-                ok = self.__redis.set(ban_key, ban_data)
-                if not ok:
-                    self.__logger.error(f"Failed to ban {ip} in redis")
-
-                # Only set expiration if not permanent ban
-                if exp != -1:
-                    self.__redis.expire(ban_key, int(exp))
-            except Exception as e:
-                self.__logger.error(f"Failed to ban {ip} in redis: {e}")
-
         try:
-            if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": service or "bwcli", "ban_scope": ban_scope}):
+            data = {"ip": ip, "exp": exp, "reason": reason, "service": service or "bwcli", "ban_scope": ban_scope}
+            if self.send_to_apis("POST", "/ban", data=data):
                 scope_text = f"{self.GREEN}globally{self.RESET}" if ban_scope == "global" else f"for service {self.CYAN}{service}{self.RESET}"
-
-                # Display different duration for permanent bans
-                if exp == -1:
+                if not exp:
                     duration = f"{self.RED}permanently{self.RESET}"
                 else:
                     duration = f"{self.YELLOW}{format_remaining_time(exp)}{self.RESET}"
-
                 success_msg = (
                     f"{self.ICON_LOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been banned {scope_text}\n"
                     f"{self.ICON_CLOCK} Duration: {duration}\n"
@@ -316,9 +274,9 @@ class CLI(ApiCaller):
                     try:
                         ban_data = loads(data.decode("utf-8", "replace"))
                         ban_data["ip"] = ip
-                        # If permanent flag is set, override TTL to -1
+                        # If permanent flag is set, override TTL to 0
                         if ban_data.get("permanent", False):
-                            exp = -1
+                            exp = 0
                         ban_data["exp"] = exp
                         ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
                         servers["redis"].append(ban_data)
@@ -337,9 +295,9 @@ class CLI(ApiCaller):
                     try:
                         ban_data = loads(data.decode("utf-8", "replace"))
                         ban_data["ip"] = ip
-                        # If permanent flag is set, override TTL to -1
+                        # If permanent flag is set, override TTL to 0
                         if ban_data.get("permanent", False):
-                            exp = -1
+                            exp = 0
                         ban_data["exp"] = exp
                         ban_data["service"] = service
                         ban_data["ban_scope"] = "service"
@@ -377,12 +335,12 @@ class CLI(ApiCaller):
                     banned_date = ""
 
                     # Handle permanent bans
-                    if ban.get("permanent", False) or ban.get("exp", 0) == -1:
+                    if ban.get("permanent", False) or not ban.get("exp", 0):
                         remaining = f"{self.RED}permanent{self.RESET}"
                     else:
                         remaining = f"for {self.CYAN}{format_remaining_time(ban.get('exp', 0))}{self.RESET}"
 
-                    if ban["date"] != -1:
+                    if ban["date"] >= 1:
                         banned_date = f"on {self.WHITE}{datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S')}{self.RESET} "
 
                     ip_info = f"{self.BOLD}{self.WHITE}{ban['ip']}{self.RESET} [{banned_country}]"
@@ -410,12 +368,12 @@ class CLI(ApiCaller):
                     banned_date = ""
 
                     # Handle permanent bans
-                    if ban.get("permanent", False) or ban.get("exp", 0) == -1:
+                    if ban.get("permanent", False) or not ban.get("exp", 0):
                         remaining = f"{self.RED}permanent{self.RESET}"
                     else:
                         remaining = f"for {self.CYAN}{format_remaining_time(ban.get('exp', 0))}{self.RESET}"
 
-                    if ban["date"] != -1:
+                    if ban["date"] >= 1:
                         banned_date = f"on {self.WHITE}{datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S')}{self.RESET} "
 
                     ip_info = f"{self.BOLD}{self.WHITE}{ban['ip']}{self.RESET} [{banned_country}]"

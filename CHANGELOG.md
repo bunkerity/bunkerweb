@@ -11,6 +11,7 @@
 - [UI] Fix multivalue toggle button functionality and transition effects
 - [DOCS] Update error handling documentation to clarify custom error page placement and ROOT_FOLDER settings.
 - [MISC] Enhance plugin command execution with error handling and available commands listing
+- [MISC] Sreamline ban management by utilizing utility functions for adding and removing bans
 - [DEPS] Updated NGINX version to 1.28.0 for Fedora integration now that it is available in the repositories.
 
 ## v1.6.2 - ????/??/??
