@@ -58,7 +58,7 @@ function badbehavior:log()
 	-- Add incr operation so timer can manage it
 	local status = tostring(ngx.status)
 	local ban_scope = self.variables["BAD_BEHAVIOR_BAN_SCOPE"]
-	local ban_time = tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"])
+	local ban_time = tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]) or 0
 
 	local ok, err = self.datastore.dict:rpush(
 		"plugin_badbehavior_incr",
@@ -233,13 +233,14 @@ function badbehavior:timer()
 	for _, data in pairs(counters) do
 		if data.counter >= data.threshold then
 			if data.security_mode == "block" then
+				local ban_time = tonumber(data.ban_time) or 0
 				local ok, err =
-					add_ban(data.ip, "bad behavior", data.ban_time, data.server_name, data.country, data.ban_scope)
+					add_ban(data.ip, "bad behavior", ban_time, data.server_name, data.country, data.ban_scope)
 				if not ok then
 					ret = false
 					ret_err = "can't save ban : " .. err
 				else
-					local ban_duration = data.ban_time == 0 and "permanently" or "for " .. data.ban_time .. "s"
+					local ban_duration = ban_time == 0 and "permanently" or "for " .. ban_time .. "s"
 					self.logger:log(
 						WARN,
 						string.format(
@@ -254,7 +255,8 @@ function badbehavior:timer()
 					)
 				end
 			else
-				local detection_msg = data.ban_time == 0 and "permanently" or "for " .. data.ban_time .. "s"
+				local detection_msg = (tonumber(data.ban_time) or 0) == 0 and "permanently"
+					or "for " .. tostring(data.ban_time) .. "s"
 				self.logger:log(
 					WARN,
 					string.format(
