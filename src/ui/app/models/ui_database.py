@@ -1,14 +1,25 @@
 from datetime import datetime
-from logging import Logger
 from os import sep
 from os.path import join
 from sys import path as sys_path
 from typing import Dict, List, Literal, Optional, Union
 
-
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-ui-database",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-ui-database")
 
 from bcrypt import gensalt, hashpw
 from sqlalchemy.orm import joinedload
@@ -21,11 +32,16 @@ from app.utils import COLUMNS_PREFERENCES_DEFAULTS
 
 
 class UIDatabase(Database):
-    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, pool: Optional[bool] = None, log: bool = True, **kwargs) -> None:
+    # Initialize the UIDatabase instance with database connection and logging.
+    # Inherits from Database class and configures UI-specific database settings.
+    def __init__(self, logger_param=None, sqlalchemy_string: Optional[str] = None, *, pool: Optional[bool] = None, log: bool = True, **kwargs) -> None:
         super().__init__(logger, sqlalchemy_string, ui=True, pool=pool, log=log, **kwargs)
 
+    # Get UI user by username or return the first admin user if username is None.
+    # Ensures admin users have proper roles and default column preferences configured.
     def get_ui_user(self, *, username: Optional[str] = None, as_dict: bool = False) -> Optional[Union[UiUsers, dict]]:
-        """Get ui user. If username is None, return the first admin user."""
+        logger.debug(f"get_ui_user() called with username={username}, as_dict={as_dict}")
+        
         with self._db_session() as session:
             # Build query based on parameters
             query = session.query(UiUsers)
@@ -34,13 +50,16 @@ class UIDatabase(Database):
 
             ui_user = query.first()
             if not ui_user:
+                logger.debug("No UI user found")
                 return None
 
             # Ensure admin users have the "admin" role
             if ui_user.admin and not self.readonly:
+                logger.debug("Checking admin role for admin user")
                 admin_role_exists = any(role.role_name == "admin" for role in ui_user.roles)
 
                 if not admin_role_exists:
+                    logger.debug("Admin role missing, creating and assigning it")
                     # Check if admin role exists, create it if not
                     admin_role = session.query(Roles).filter_by(name="admin").first()
                     if not admin_role:
@@ -60,14 +79,17 @@ class UIDatabase(Database):
 
             # Add default column preferences if missing
             if not ui_user.columns_preferences and not self.readonly:
+                logger.debug("Adding default column preferences")
                 for table_name, columns in COLUMNS_PREFERENCES_DEFAULTS.items():
                     session.add(UserColumnsPreferences(user_name=ui_user.username, table_name=table_name, columns=columns))
                 session.commit()
                 session.refresh(ui_user)
 
             if not as_dict:
+                logger.debug("Returning UiUsers object")
                 return ui_user
 
+            logger.debug("Converting to dictionary format")
             return {
                 "username": ui_user.username,
                 "email": ui_user.email,
@@ -83,6 +105,8 @@ class UIDatabase(Database):
                 "recovery_codes": [rc.code for rc in ui_user.recovery_codes],
             }
 
+    # Create a new UI user with specified credentials and settings.
+    # Validates role existence and creates associated recovery codes and preferences.
     def create_ui_user(
         self,
         username: str,
@@ -98,20 +122,24 @@ class UIDatabase(Database):
         method: str = "manual",
         admin: bool = False,
     ) -> str:
-        """Create ui user."""
+        logger.debug(f"create_ui_user() called with username={username}, admin={admin}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             if admin and session.query(UiUsers).with_entities(UiUsers.username).filter_by(admin=True).first():
+                logger.debug("Admin user already exists")
                 return "An admin user already exists"
 
             user = session.query(UiUsers).with_entities(UiUsers.username).filter_by(username=username).first()
             if user:
+                logger.debug(f"User {username} already exists")
                 return f"User {username} already exists"
 
             for role in roles:
                 if not session.query(Roles).with_entities(Roles.name).filter_by(name=role).first():
+                    logger.debug(f"Role {role} doesn't exist")
                     return f"Role {role} doesn't exist"
                 session.add(RolesUsers(user_name=username, role_name=role))
 
@@ -139,11 +167,15 @@ class UIDatabase(Database):
 
             try:
                 session.commit()
+                logger.debug(f"User {username} created successfully")
             except BaseException as e:
+                logger.exception("Exception while creating UI user")
                 return str(e)
 
         return ""
 
+    # Update existing UI user with new credentials and settings.
+    # Handles username changes and updates recovery codes if TOTP secret changes.
     def update_ui_user(
         self,
         username: str,
@@ -157,7 +189,8 @@ class UIDatabase(Database):
         method: str = "manual",
         language: str = "en",
     ) -> str:
-        """Update ui user."""
+        logger.debug(f"update_ui_user() called with username={username}, old_username={old_username}")
+        
         totp_changed = False
         old_username = old_username or username
         with self._db_session() as session:
@@ -166,12 +199,15 @@ class UIDatabase(Database):
 
             user = session.query(UiUsers).filter_by(username=old_username).first()
             if not user:
+                logger.debug(f"User {old_username} doesn't exist")
                 return f"User {old_username} doesn't exist"
 
             if username != old_username:
                 if session.query(UiUsers).with_entities(UiUsers.username).filter_by(username=username).first():
+                    logger.debug(f"User {username} already exists")
                     return f"User {username} already exists"
 
+                logger.debug(f"Updating username from {old_username} to {username}")
                 user.username = username
 
                 session.query(RolesUsers).filter_by(user_name=old_username).update({"user_name": username})
@@ -191,10 +227,13 @@ class UIDatabase(Database):
 
             try:
                 session.commit()
+                logger.debug(f"User {username} updated successfully")
             except BaseException as e:
+                logger.exception("Exception while updating UI user")
                 return str(e)
 
         if totp_changed:
+            logger.debug("TOTP secret changed, updating recovery codes")
             if totp_recovery_codes:
                 self.refresh_ui_user_recovery_codes(username, totp_recovery_codes or [])
             else:
@@ -202,14 +241,18 @@ class UIDatabase(Database):
 
         return ""
 
+    # Delete UI user and all associated data from the database.
+    # Removes roles, recovery codes, and column preferences for the user.
     def delete_ui_user(self, username: str) -> str:
-        """Delete ui user."""
+        logger.debug(f"delete_ui_user() called with username={username}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
+                logger.debug(f"User {username} doesn't exist")
                 return f"User {username} doesn't exist"
 
             session.query(RolesUsers).filter_by(user_name=username).delete()
@@ -219,19 +262,25 @@ class UIDatabase(Database):
 
             try:
                 session.commit()
+                logger.debug(f"User {username} deleted successfully")
             except BaseException as e:
+                logger.exception("Exception while deleting UI user")
                 return str(e)
 
         return ""
 
+    # Record user login session with IP address and user agent.
+    # Creates a new session entry and returns the session ID for tracking.
     def mark_ui_user_login(self, username: str, date: datetime, ip: str, user_agent: str) -> Union[str, int]:
-        """Mark ui user login."""
+        logger.debug(f"mark_ui_user_login() called with username={username}, ip={ip}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
+                logger.debug(f"User {username} doesn't exist")
                 return f"User {username} doesn't exist"
 
             user_session = UserSessions(
@@ -247,36 +296,48 @@ class UIDatabase(Database):
                 session.flush()  # Flush to get the auto-generated ID
                 session_id = user_session.id
                 session.commit()
+                logger.debug(f"Login session created with ID {session_id}")
                 return session_id
             except BaseException as e:
+                logger.exception("Exception while marking UI user login")
                 return str(e)
 
+    # Update the last activity timestamp for a user session.
+    # Tracks user activity to maintain session validity and statistics.
     def mark_ui_user_access(self, session_id: int, date: datetime) -> str:
-        """Mark ui user access."""
+        logger.debug(f"mark_ui_user_access() called with session_id={session_id}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             user_session = session.query(UserSessions).filter_by(id=session_id).first()
             if not user_session:
+                logger.debug(f"Session {session_id} doesn't exist")
                 return f"Session {session_id} doesn't exist"
 
             user_session.last_activity = date
 
             try:
                 session.commit()
+                logger.debug(f"Session {session_id} activity updated")
             except BaseException as e:
+                logger.exception("Exception while marking UI user access")
                 return str(e)
 
         return ""
 
+    # Create a new role with specified permissions.
+    # Validates permissions existence and creates necessary permission entries.
     def create_ui_role(self, name: str, description: str, permissions: List[str]) -> str:
-        """Create ui role."""
+        logger.debug(f"create_ui_role() called with name={name}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             if session.query(Roles).with_entities(Roles.name).filter_by(name=name).first():
+                logger.debug(f"Role {name} already exists")
                 return f"Role {name} already exists"
 
             session.add(Roles(name=name, description=description, update_datetime=datetime.now().astimezone()))
@@ -288,17 +349,23 @@ class UIDatabase(Database):
 
             try:
                 session.commit()
+                logger.debug(f"Role {name} created successfully")
             except BaseException as e:
+                logger.exception("Exception while creating UI role")
                 return str(e)
 
         return ""
 
+    # Retrieve all UI roles with their permissions and metadata.
+    # Returns either role objects or dictionary format based on as_dict parameter.
     def get_ui_roles(self, *, as_dict: bool = False) -> Union[str, List[Union[Roles, dict]]]:
-        """Get ui roles."""
+        logger.debug(f"get_ui_roles() called with as_dict={as_dict}")
+        
         with self._db_session() as session:
             try:
                 roles = session.query(Roles).with_entities(Roles.name, Roles.description, Roles.update_datetime).all()
                 if not as_dict:
+                    logger.debug(f"Returning {len(roles)} roles as objects")
                     return roles
 
                 roles_data = []
@@ -315,21 +382,28 @@ class UIDatabase(Database):
 
                     roles_data.append(role_data)
 
+                logger.debug(f"Returning {len(roles_data)} roles as dictionaries")
                 return roles_data
             except BaseException as e:
+                logger.exception("Exception while getting UI roles")
                 return str(e)
 
+    # Replace all recovery codes for a user with new ones.
+    # Hashes the new codes and stores them securely in the database.
     def refresh_ui_user_recovery_codes(self, username: str, codes: List[str]) -> str:
-        """Refresh ui user recovery codes."""
+        logger.debug(f"refresh_ui_user_recovery_codes() called with username={username}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             if not codes:
+                logger.debug("No recovery codes provided")
                 return "No recovery codes provided"
 
             user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
+                logger.debug(f"User {username} doesn't exist")
                 return f"User {username} doesn't exist"
 
             session.query(UserRecoveryCodes).filter_by(user_name=username).delete()
@@ -339,13 +413,18 @@ class UIDatabase(Database):
 
             try:
                 session.commit()
+                logger.debug(f"Recovery codes refreshed for user {username}")
             except BaseException as e:
+                logger.exception("Exception while refreshing UI user recovery codes")
                 return str(e)
 
         return ""
 
+    # Remove all recovery codes for a user from the database.
+    # Used when disabling two-factor authentication for a user account.
     def delete_ui_user_recovery_codes(self, username: str) -> str:
-        """Delete ui user recovery codes."""
+        logger.debug(f"delete_ui_user_recovery_codes() called with username={username}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -354,67 +433,100 @@ class UIDatabase(Database):
 
             try:
                 session.commit()
+                logger.debug(f"Recovery codes deleted for user {username}")
             except BaseException as e:
+                logger.exception("Exception while deleting UI user recovery codes")
                 return str(e)
 
         return ""
 
+    # Get all roles assigned to a specific user.
+    # Returns a list of role names for authorization checks.
     def get_ui_user_roles(self, username: str) -> List[str]:
-        """Get ui user roles."""
+        logger.debug(f"get_ui_user_roles() called with username={username}")
+        
         with self._db_session() as session:
-            return [role.role_name for role in session.query(RolesUsers).with_entities(RolesUsers.role_name).filter_by(user_name=username)]
+            roles = [role.role_name for role in session.query(RolesUsers).with_entities(RolesUsers.role_name).filter_by(user_name=username)]
+            logger.debug(f"Found {len(roles)} roles for user {username}")
+            return roles
 
+    # Get all permissions granted to a specific role.
+    # Returns a list of permission names for access control validation.
     def get_ui_role_permissions(self, role_name: str) -> List[str]:
-        """Get ui role permissions."""
+        logger.debug(f"get_ui_role_permissions() called with role_name={role_name}")
+        
         with self._db_session() as session:
-            return [
+            permissions = [
                 permission.permission_name
                 for permission in session.query(RolesPermissions).with_entities(RolesPermissions.permission_name).filter_by(role_name=role_name)
             ]
+            logger.debug(f"Found {len(permissions)} permissions for role {role_name}")
+            return permissions
 
+    # Get all recovery codes for a user account.
+    # Returns hashed codes for two-factor authentication recovery.
     def get_ui_user_recovery_codes(self, username: str) -> List[str]:
-        """Get ui user recovery codes."""
+        logger.debug(f"get_ui_user_recovery_codes() called with username={username}")
+        
         with self._db_session() as session:
-            return [code.code for code in session.query(UserRecoveryCodes).with_entities(UserRecoveryCodes.code).filter_by(user_name=username)]
+            codes = [code.code for code in session.query(UserRecoveryCodes).with_entities(UserRecoveryCodes.code).filter_by(user_name=username)]
+            logger.debug(f"Found {len(codes)} recovery codes for user {username}")
+            return codes
 
+    # Get all permissions granted to a user through their assigned roles.
+    # Aggregates permissions from all user roles for comprehensive access control.
     def get_ui_user_permissions(self, username: str) -> List[str]:
-        """Get ui user permissions."""
+        logger.debug(f"get_ui_user_permissions() called with username={username}")
+        
         with self._db_session() as session:
             query = session.query(RolesUsers).with_entities(RolesUsers.role_name).filter_by(user_name=username)
 
         permissions = []
         for role in query:
             permissions.extend(self.get_ui_role_permissions(role.role_name))
+        
+        logger.debug(f"Found {len(permissions)} total permissions for user {username}")
         return permissions
 
+    # Use and remove a recovery code for two-factor authentication.
+    # Validates the code and deletes it from the database after use.
     def use_ui_user_recovery_code(self, username: str, hashed_code: str) -> str:
-        """Use ui user recovery code."""
+        logger.debug(f"use_ui_user_recovery_code() called with username={username}")
+        
         with self._db_session() as session:
             user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
+                logger.debug(f"User {username} doesn't exist")
                 return f"User {username} doesn't exist"
 
             recovery_code = session.query(UserRecoveryCodes).filter_by(user_name=username, code=hashed_code).first()
             if not recovery_code:
+                logger.debug("Invalid recovery code provided")
                 return "Invalid recovery code"
 
             session.delete(recovery_code)
 
             try:
                 session.commit()
+                logger.debug(f"Recovery code used for user {username}")
             except BaseException as e:
+                logger.exception("Exception while using UI user recovery code")
                 return str(e)
 
         return ""
 
+    # Delete all old sessions except the most recent one for a user.
+    # Helps maintain session security by removing outdated login sessions.
     def delete_ui_user_old_sessions(self, username: str) -> str:
-        """Delete ui user old sessions."""
+        logger.debug(f"delete_ui_user_old_sessions() called with username={username}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
+                logger.debug(f"User {username} doesn't exist")
                 return f"User {username} doesn't exist"
 
             sessions_to_delete = session.query(UserSessions).filter_by(user_name=username).order_by(UserSessions.creation_date.desc()).offset(1).all()
@@ -423,43 +535,57 @@ class UIDatabase(Database):
 
             try:
                 session.commit()
+                logger.debug(f"Deleted {len(sessions_to_delete)} old sessions for user {username}")
             except BaseException as e:
+                logger.exception("Exception while deleting UI user old sessions")
                 return str(e)
 
         return ""
 
+    # Update column visibility preferences for a user's table view.
+    # Allows users to customize which columns are shown in data tables.
     def update_ui_user_columns_preferences(self, username: str, table_name: str, columns: Dict[str, bool]) -> str:
-        """Update ui user columns preferences."""
+        logger.debug(f"update_ui_user_columns_preferences() called with username={username}, table={table_name}")
+        
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
 
             user = session.query(UiUsers).filter_by(username=username).first()
             if not user:
+                logger.debug(f"User {username} doesn't exist")
                 return f"User {username} doesn't exist"
 
             columns_preferences = session.query(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).first()
             if not columns_preferences:
+                logger.debug(f"Table {table_name} doesn't exist")
                 return f"Table {table_name} doesn't exist"
 
             columns_preferences.columns = columns
 
             try:
                 session.commit()
+                logger.debug(f"Column preferences updated for user {username}, table {table_name}")
             except BaseException as e:
+                logger.exception("Exception while updating UI user columns preferences")
                 return str(e)
 
         return ""
 
+    # Get column visibility preferences for a user's table view.
+    # Returns preferences or creates defaults if none exist for the user.
     def get_ui_user_columns_preferences(self, username: str, table_name: str) -> Dict[str, bool]:
-        """Get ui user columns preferences."""
+        logger.debug(f"get_ui_user_columns_preferences() called with username={username}, table={table_name}")
+        
         with self._db_session() as session:
             columns_preferences = session.query(UserColumnsPreferences).filter_by(user_name=username, table_name=table_name).first()
             if not columns_preferences:
                 default_columns = COLUMNS_PREFERENCES_DEFAULTS.get(table_name, {})
                 if not self.readonly and session.query(UiUsers).filter_by(username=username).first():
+                    logger.debug(f"Creating default preferences for user {username}, table {table_name}")
                     session.add(UserColumnsPreferences(user_name=username, table_name=table_name, columns=default_columns))
                     session.commit()
                 return default_columns
 
+            logger.debug(f"Retrieved column preferences for user {username}, table {table_name}")
             return columns_preferences.columns

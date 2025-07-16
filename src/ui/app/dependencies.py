@@ -1,12 +1,29 @@
 from contextlib import suppress
 from io import BytesIO
-from logging import getLogger
 from os import sep
+from os.path import join
 from pathlib import Path
 from shutil import rmtree
 from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
+from sys import path as sys_path
 from tarfile import open as tar_open
-from traceback import format_exc
+
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-dependencies",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-dependencies")
 
 from common_utils import bytes_hash  # type: ignore
 
@@ -15,7 +32,7 @@ from app.models.instance import InstancesUtils
 from app.models.ui_data import UIData
 from app.models.ui_database import UIDatabase
 
-DB = UIDatabase(getLogger("UI"), log=False)
+DB = UIDatabase(logger, log=False)
 DATA = UIData(Path(sep, "var", "tmp", "bunkerweb").joinpath("ui_data.json"))
 
 BW_CONFIG = Config(DB, data=DATA)
@@ -53,7 +70,7 @@ def reload_plugins():
                     if bytes_hash(plugin_content, algorithm="sha256") == plugin["checksum"]:
                         ignored_plugins.add(target.name)
                         continue
-            DB.logger.debug(f"Checksum of {target} has changed, removing it ...")
+            logger.debug(f"Checksum of {target} has changed, removing it ...")
 
             if target.is_symlink() or target.is_file():
                 with suppress(OSError):
@@ -81,23 +98,21 @@ def reload_plugins():
                         if executable_file.stat().st_mode & 0o777 != desired_perms:
                             executable_file.chmod(desired_perms)
         except OSError as e:
-            DB.logger.debug(format_exc())
             if plugin["method"] != "manual":
-                DB.logger.error(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\": {e}")
+                logger.exception(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\"")
         except BaseException as e:
-            DB.logger.debug(format_exc())
-            DB.logger.error(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\": {e}")
+            logger.exception(f"Error while generating {plugin['type']} plugins \"{plugin['name']}\"")
 
     ret = DB.checked_changes(["ui_plugins"])
     if ret:
-        DB.logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+        logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
 
     # Cleanup: Remove plugin folders that exist on the filesystem but are not in the database.
     for plugin_path in (EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH):
         if plugin_path.exists():
             for item in plugin_path.iterdir():
                 if item.name not in known_plugin_ids:
-                    DB.logger.debug(f"Plugin {item.name} not found in database, removing it...")
+                    logger.debug(f"Plugin {item.name} not found in database, removing it...")
                     with suppress(OSError):
                         if item.is_symlink() or item.is_file():
                             item.unlink()

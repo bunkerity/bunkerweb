@@ -2,15 +2,35 @@ from base64 import b64encode
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
+from os import sep
+from os.path import join
+from sys import path as sys_path
 from time import sleep
 from typing import Any, Dict, Optional, Tuple, Union
+
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-routes-utils",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-routes-utils")
 
 from flask import Response, redirect, request, url_for
 from qrcode.main import QRCode
 from regex import compile as re_compile
 
 from app.dependencies import BW_CONFIG, DB
-from app.utils import LOGGER, flash
+from app.utils import flash
 
 from common_utils import get_redis_client as get_common_redis_client  # type: ignore
 
@@ -30,7 +50,7 @@ def wait_applying():
     while not ready and (datetime.now().astimezone() - current_time).seconds < 120:
         db_metadata = DB.get_metadata()
         if isinstance(db_metadata, str):
-            LOGGER.error(f"An error occurred when checking for changes in the database : {db_metadata}")
+            logger.error(f"An error occurred when checking for changes in the database : {db_metadata}")
         elif not any(
             v
             for k, v in db_metadata.items()
@@ -39,11 +59,11 @@ def wait_applying():
             ready = True
             continue
         else:
-            LOGGER.warning("Scheduler is already applying a configuration, retrying in 1s ...")
+            logger.warning("Scheduler is already applying a configuration, retrying in 1s ...")
         sleep(1)
 
     if not ready:
-        LOGGER.error("Too many retries while waiting for scheduler to apply configuration...")
+        logger.error("Too many retries while waiting for scheduler to apply configuration...")
 
 
 def verify_data_in_form(
@@ -52,8 +72,8 @@ def verify_data_in_form(
     if not request.form:
         return handle_error("Invalid request", redirect_url, next, "error")
 
-    LOGGER.debug(f"Verifying data in form: {data}")
-    LOGGER.debug(f"Request form: {request.form}")
+    logger.debug(f"Verifying data in form: {data}")
+    logger.debug(f"Request form: {request.form}")
 
     # Loop on each key in data
     for key, values in (data or {}).items():
@@ -75,10 +95,10 @@ def handle_error(err_message: str = "", redirect_url: str = "", next: bool = Fal
     flash(err_message, "error")
 
     if log == "error":
-        LOGGER.error(err_message)
+        logger.error(err_message)
 
     if log == "exception":
-        LOGGER.exception(err_message)
+        logger.exception(err_message)
 
     if not redirect_url:
         return False
@@ -91,7 +111,7 @@ def handle_error(err_message: str = "", redirect_url: str = "", next: bool = Fal
 
 
 def error_message(msg: str):
-    LOGGER.error(msg)
+    logger.error(msg)
     return {"status": "ko", "message": msg}
 
 

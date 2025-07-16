@@ -1,11 +1,30 @@
 from datetime import datetime, timedelta
 from itertools import chain
-from os import environ, getenv
+from os import environ, getenv, sep
+from os.path import join
+from re import escape, match
+from sys import path as sys_path
+from time import sleep
+
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-setup",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-setup")
 
 # from secrets import choice
 # from string import ascii_letters, digits
-from re import escape, match
-from time import sleep
 
 from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -13,7 +32,7 @@ from flask_login import current_user
 # from app.models.totp import totp as TOTP
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.utils import LOGGER, USER_PASSWORD_RX, gen_password_hash
+from app.utils import USER_PASSWORD_RX, gen_password_hash
 
 from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
@@ -207,7 +226,7 @@ def setup_page():
                 global_config = DB.get_config(global_only=True)
                 BW_CONFIG.edit_global_conf(global_config | {"MULTISITE": "yes"}, check_changes=False)
 
-            LOGGER.debug(f"Creating new service with base_config: {base_config} and config: {config}")
+            logger.debug(f"Creating new service with base_config: {base_config} and config: {config}")
 
             operation, error = BW_CONFIG.new_service(base_config, override_method="wizard", check_changes=False)
             if error:
@@ -219,7 +238,7 @@ def setup_page():
 
             err = DB.checked_changes(["config", "custom_configs"], plugins_changes="all", value=True)
             if err:
-                LOGGER.error(f"Error while applying changes to the database: {err}, you may need to reload the application")
+                logger.error(f"Error while applying changes to the database: {err}, you may need to reload the application")
 
         return Response(status=200)
 

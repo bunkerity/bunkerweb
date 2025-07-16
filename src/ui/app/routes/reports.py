@@ -2,15 +2,32 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import chain
 from json import dumps, loads
-from traceback import format_exc
 from html import escape
+from os import sep
+from os.path import join
+from sys import path as sys_path
+
+# Add BunkerWeb dependency paths to Python path for module imports
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) 
+                  for paths in (("deps", "python"), ("utils",), ("api",), 
+                               ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
+from bw_logger import setup_logger
+
+# Initialize bw_logger module
+logger = setup_logger(
+    title="UI-reports",
+    log_file_path="/var/log/bunkerweb/ui.log"
+)
+
+logger.debug("Debug mode enabled for UI-reports")
 
 from flask import Blueprint, flash, jsonify, render_template, request, url_for
 from flask_login import login_required
 
 from app.dependencies import BW_INSTANCES_UTILS
-from app.utils import LOGGER
-
 from app.routes.utils import cors_required, get_redis_client
 
 reports = Blueprint("reports", __name__)
@@ -35,8 +52,8 @@ def reports_fetch():
                 redis_reports = redis_client.lrange("requests", 0, -1)
                 redis_reports = (loads(report_raw.decode("utf-8", "replace")) for report_raw in redis_reports)
             except BaseException as e:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Failed to fetch reports from Redis: {e}")
+                logger.exception("Failed to fetch reports from Redis")
+                logger.error(f"Failed to fetch reports from Redis: {e}")
                 flash("Failed to fetch reports from Redis, see logs for more information.", "error")
                 redis_reports = []
         else:
@@ -124,7 +141,7 @@ def reports_fetch():
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
             }
         except Exception as e:
-            LOGGER.error(f"Error formatting report: {e}")
+            logger.exception("Error formatting report")
             # Return a safe fallback if formatting fails
             return {
                 "date": "N/A",
