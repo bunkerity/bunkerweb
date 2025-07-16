@@ -622,7 +622,7 @@ Depending on your choices during installation:
 
 ### Installation using package manager
 
-Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). For Fedora, as NGINX 1.28.0 is not yet available, we will use NGINX 1.26.3. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
 === "Debian"
 
@@ -734,10 +734,10 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
             sudo dnf config-manager --set-enabled updates-testing
             ```
 
-    Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):
+    Fedora already provides NGINX 1.28.0 that we support
 
     ```shell
-    sudo dnf install -y --allowerasing nginx-1.26.3
+    sudo dnf install -y --allowerasing nginx-1.28.0
     ```
 
     !!! example "Disable the setup wizard"

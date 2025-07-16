@@ -214,12 +214,6 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-if [ "$OS" = "fedora" ] ; then
-	mv /tmp/bunkerweb/deps/src/nginx-1.26 /tmp/bunkerweb/deps/src/nginx
-else
-	mv /tmp/bunkerweb/deps/src/nginx-1.28 /tmp/bunkerweb/deps/src/nginx
-fi
-
 export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx"
 do_and_check_cmd mv auto/configure ./
 echo '#!/bin/bash' > "/tmp/bunkerweb/deps/src/nginx/configure-fix.sh"
