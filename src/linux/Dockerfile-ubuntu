@@ -1,17 +1,21 @@
-FROM ubuntu:noble@sha256:e356c061e8d56c58b708d0907925a9bd54cc8f467f05bfa3d714d1d0a4883d97 AS builder
+FROM ubuntu:noble@sha256:c4570d2f4665d5d118ae29fb494dee4f8db8fcfaee0e37a2e19b827f399070d3 AS builder
+
+# Install dependencies
+RUN apt update && \
+    apt install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common \
+    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3 python3-dev python3-pip python3-venv -y
 
 ENV OS=ubuntu
 ENV NGINX_VERSION=1.28.0
+ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 
-# Install Nginx and dependencies
-RUN apt update && \
-    apt install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common \
-    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3 python3-dev python3-pip python3-venv -y && \
-    echo "deb https://nginx.org/packages/ubuntu/ noble nginx" > /etc/apt/sources.list.d/nginx.list && \
-    echo "deb-src https://nginx.org/packages/ubuntu/ noble nginx" >> /etc/apt/sources.list.d/nginx.list && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
+# Install Nginx
+RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor --output /usr/share/keyrings/nginx-archive-keyring.gpg && \
+    gpg --batch --no-default-keyring --keyring /usr/share/keyrings/nginx-archive-keyring.gpg --list-keys --with-colons | awk -F: '/^fpr:/ { print $10 }' | grep -qx "$EXPECTED_FPR" || { echo "ERROR: expected fingerprint $EXPECTED_FPR not found in keyring" >&2; exit 1; } && \
+    . /etc/os-release && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] https://nginx.org/packages/${OS} ${VERSION_CODENAME} nginx" | tee /etc/apt/sources.list.d/nginx.list && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~noble
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~${VERSION_CODENAME}
 
 WORKDIR /tmp/bunkerweb/deps
 
@@ -71,7 +75,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
     echo "Skipping JS minification"; \
     fi
 
-FROM ubuntu:noble@sha256:e356c061e8d56c58b708d0907925a9bd54cc8f467f05bfa3d714d1d0a4883d97
+FROM ubuntu:noble@sha256:c4570d2f4665d5d118ae29fb494dee4f8db8fcfaee0e37a2e19b827f399070d3
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

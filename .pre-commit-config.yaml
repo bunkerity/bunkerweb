@@ -67,7 +67,7 @@ repos:
       - id: codespell
         name: Codespell Spell Checker
         exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/app/static/(fonts|libs)/.+|src/ui/app/static/locales/.+)$
-        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/json/countries.topojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py,src/ui/app/static/js/pages/reports.js
+        entry: codespell --ignore-regex="(tabEl|Widgits|fpr)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/json/countries.topojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py,src/ui/app/static/js/pages/reports.js
         language: python
         types: [text]
 
