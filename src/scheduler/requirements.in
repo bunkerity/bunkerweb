@@ -16,6 +16,7 @@ certbot-dns-route53==4.1.1
 certbot-dns-sakuracloud==4.1.1
 
 # Third-party certbot plugins
+certbot-dns-bunny==3.0.0
 certbot-dns-desec==1.2.1
 certbot-dns-infomaniak==0.2.3
 certbot-dns-ionos==2024.11.9

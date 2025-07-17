@@ -62,15 +62,16 @@ $(document).ready(function () {
 
   const $serviceSearch = $("#service-search");
   const $serviceDropdownMenu = $("#services-dropdown-menu");
-  const $serviceDropdownItems = $("#services-dropdown-menu li.nav-item");
+  const $serviceDropdownItems = $(
+    "#services-dropdown-menu button.dropdown-item",
+  );
   const $typeDropdownItems = $("#types-dropdown-menu li.nav-item");
 
   const changeTypesVisibility = () => {
+    const isGlobal = selectedService.toLowerCase() === "global";
     $typeDropdownItems.each(function () {
       const item = $(this);
-      item.toggle(
-        selectedService === "global" || item.data("context") === "multisite",
-      );
+      item.toggle(isGlobal || item.data("context") === "multisite");
     });
   };
 
@@ -86,7 +87,7 @@ $(document).ready(function () {
         const item = $(this);
         const matches = item.text().toLowerCase().includes(inputValue);
 
-        item.toggle(matches);
+        item.parent().toggle(matches);
 
         if (matches) {
           visibleItems++; // Increment when an item is shown
@@ -96,7 +97,7 @@ $(document).ready(function () {
       if (visibleItems === 0) {
         if ($serviceDropdownMenu.find(".no-service-items").length === 0) {
           $serviceDropdownMenu.append(
-            '<li class="no-service-items dropdown-item text-muted">No Item</li>',
+            '<li class="no-service-items dropdown-item text-muted" data-i18n="status.no_item">No Item</li>',
           );
         }
       } else {
@@ -110,10 +111,31 @@ $(document).ready(function () {
   });
 
   $serviceDropdownItems.on("click", function () {
-    selectedService = $(this).text().trim();
+    const previousService = selectedService;
+    selectedService = $(this).data("service");
     changeTypesVisibility();
     if (
-      selectedService !== "global" &&
+      selectedService.toLowerCase() === "global" &&
+      previousService.toLowerCase() !== "global"
+    ) {
+      $("#select-type")
+        .parent()
+        .attr("data-bs-custom-class", "info-tooltip")
+        .attr(
+          "data-bs-original-title",
+          "You can now select global types for your custom config.",
+        )
+        .tooltip("show");
+
+      // Hide tooltip after 2 seconds
+      setTimeout(() => {
+        $("#select-type")
+          .parent()
+          .tooltip("hide")
+          .attr("data-bs-original-title", "");
+      }, 2000);
+    } else if (
+      selectedService.toLowerCase() !== "global" &&
       $(`#config-type-${selectedType}`).data("context") !== "multisite"
     ) {
       const firstMultisiteType = $(

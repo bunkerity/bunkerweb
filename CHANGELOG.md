@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.6.3-rc1 - ????/??/??
+
+- [BUGFIX] Update scheduler environment variables handling to avoid issues when there are too many environment variables set.
+- [BUGFIX] Fix `Let's Encrypt` credential files being removed upon reload of the scheduler creating issues with the certificate renewal.
+- [BUGFIX] Change `BAD_BEHAVIOR_BAN_SCOPE` setting context from `multisite` to `global`.
+- [BUGFIX] Update template data handling to use template_data instead of template when updating external plugins.
+- [BUGFIX] Fix unban functionality to correctly handle global bans in the web UI.
+- [FEATURE] Add `BunnyNet` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add new `robotstxt` plugin to manage the robots.txt file from settings and serve it
+- [UI] Fix shenanigans when fetching the latest version in the web UI.
+- [UI] Fix the fact that the "global" choice wasn't categorized as is in the web UI when editing a custom configuration.
+- [UI] Fix multivalue toggle button functionality and transition effects
+- [UI] Enhance ModSecurity Reporting: Add Anomaly Score Handling
+- [UI] Improve multiple setting handling in plugin settings template for better UI interaction (always show the first group, hide others by default)
+- [DOCS] Update error handling documentation to clarify custom error page placement and ROOT_FOLDER settings.
+- [MISC] Enhance plugin command execution with error handling and available commands listing
+- [MISC] Streamline ban management by utilizing utility functions for adding and removing bans
+- [MISC] Reorder session data retrieval in antibot access method for improved clarity and flow
+- [LINUX] Drop support of Fedora 40
+- [DEPS] Updated NGINX version to 1.28.0 for Fedora integration now that it is available in the repositories.
+
 ## v1.6.2 - ????/??/??
 
 - [SECURITY] Introduce ModSecurity exclusion rules targeting the password input upon login, preventing false-positive blocks on valid complex passwords while preserving strict overall request inspection.

@@ -9,6 +9,7 @@ acme==4.1.1 \
     --hash=sha256:9c904453bf1374789b6cd78c6314dea6e7609b4f6c58e35339ee91701f39cd20
     # via
     #   certbot
+    #   certbot-dns-bunny
     #   certbot-dns-cloudflare
     #   certbot-dns-digitalocean
     #   certbot-dns-dnsimple
@@ -36,13 +37,13 @@ beautifulsoup4==4.13.4 \
     --hash=sha256:9bbbb14bfde9d79f38b8cd5f8c7c85f4b8f2523190ebed90e950a8dea4cb1c4b \
     --hash=sha256:dbb3c4e1ceae6aefebdaf2423247260cd062430a410e38c66f2baa50a8437195
     # via dns-lexicon
-boto3==1.39.2 \
-    --hash=sha256:a37f202978f11f384e3fd1f0ff8938367b527845493f9509357e1732debc390f \
-    --hash=sha256:edad811edacb8c99f2fe59b117d9b9d8ee3972beb6c090c8aa164ddbc506d67d
+boto3==1.39.4 \
+    --hash=sha256:6c955729a1d70181bc8368e02a7d3f350884290def63815ebca8408ee6d47571 \
+    --hash=sha256:f8e9534b429121aa5c5b7c685c6a94dd33edf14f87926e9a182d5b50220ba284
     # via certbot-dns-route53
-botocore==1.39.2 \
-    --hash=sha256:474445fa8b281dd5db8fc62184f0f6e494d4f1efb96fe10312490583e67a9dd0 \
-    --hash=sha256:921cab9aa6e1e4ceddcece5b55b57daae7722168e74409f1aafcc2c5589df676
+botocore==1.39.4 \
+    --hash=sha256:c41e167ce01cfd1973c3fa9856ef5244a51ddf9c82cb131120d8617913b6812a \
+    --hash=sha256:e662ac35c681f7942a93f2ec7b4cde8f8b56dd399da47a79fa3e370338521a56
     # via
     #   boto3
     #   s3transfer
@@ -55,6 +56,7 @@ certbot==4.1.1 \
     --hash=sha256:f586519f4338428688bcb0a89aa6eaff1af575345185eb3d18cbbe326cfa96bf
     # via
     #   -r requirements.in
+    #   certbot-dns-bunny
     #   certbot-dns-cloudflare
     #   certbot-dns-desec
     #   certbot-dns-digitalocean
@@ -73,6 +75,10 @@ certbot==4.1.1 \
     #   certbot-dns-route53
     #   certbot-dns-sakuracloud
     #   certbot-dns-scaleway
+certbot-dns-bunny==3.0.0 \
+    --hash=sha256:507fe45c3aa399c93c30fd68b06ba6e5646bb56e1d454a7f1ffac8c8677e5a21 \
+    --hash=sha256:e58e450747e79fd9dad6cdf21d3685b23e7e3d2fea65c16aca3a4dfd8cd31397
+    # via -r requirements.in
 certbot-dns-cloudflare==4.1.1 \
     --hash=sha256:9d557e7865ea76dc6b73cf555a1c8246355e41d55dd05122e781f9025675d543 \
     --hash=sha256:ab42e92ebac8909b40341d8fb0795bf4c938f71d1443bcda120c6ca8894d002a
@@ -145,9 +151,9 @@ certbot-dns-scaleway==0.0.7 \
     --hash=sha256:999dda5b8689277facb77e1757b8a6b207baeecc0ded0c27aea2c51331affc92 \
     --hash=sha256:bc0833ed71a5cd314a93f8d02144c54e17066ee1e2b950ed868b14b2211f5e9e
     # via -r requirements.in
-certifi==2025.6.15 \
-    --hash=sha256:2e0c7ce7cb5d8f8634ca55d2ba7e6ec2689a2fd6537d8dec1296a477a4910057 \
-    --hash=sha256:d747aa5a8b9bbbb1bb8c22bb13e22bd1f18e9796defa16bab421f7f7a317323b
+certifi==2025.7.14 \
+    --hash=sha256:6b31f564a415d79ee77df69d757bb49a5bb53bd9f756cbbe24394ffd6fc1f4b2 \
+    --hash=sha256:8ea99dbdfaaf2ba2f9bac77b9249ef62ec5218e7c2b2e903378ed5fccf765995
     # via requests
 cffi==1.17.1 \
     --hash=sha256:045d61c734659cc045141be4bae381a41d89b741f795af1dd018bfb532fd0df8 \
@@ -399,9 +405,9 @@ google-api-core==2.25.1 \
     --hash=sha256:8a2a56c1fef82987a524371f99f3bd0143702fecc670c72e600c1cda6bf8dbb7 \
     --hash=sha256:d2aaa0b13c78c61cb3f4282c464c046e45fbd75755683c9c525e6e8f7ed0a5e8
     # via google-api-python-client
-google-api-python-client==2.174.0 \
-    --hash=sha256:9eb7616a820b38a9c12c5486f9b9055385c7feb18b20cbafc5c5a688b14f3515 \
-    --hash=sha256:f695205ceec97bfaa1590a14282559c4109326c473b07352233a3584cdbf4b89
+google-api-python-client==2.176.0 \
+    --hash=sha256:2b451cdd7fd10faeb5dd20f7d992f185e1e8f4124c35f2cdcc77c843139a4cf1 \
+    --hash=sha256:e22239797f1d085341e12cd924591fc65c56d08e0af02549d7606092e6296510
     # via certbot-dns-google
 google-auth==2.40.3 \
     --hash=sha256:1370d4593e86213563547f97a92752fc658456fe4514c809544f330fed45a7ca \
@@ -445,9 +451,9 @@ jmespath==1.0.1 \
     # via
     #   boto3
     #   botocore
-josepy==2.0.0 \
-    --hash=sha256:e7d7acd2fe77435cda76092abe4950bb47b597243a8fb733088615fa6de9ec40 \
-    --hash=sha256:eb50ec564b1b186b860c7738769274b97b19b5b831239669c0f3d5c86b62a4c0
+josepy==2.1.0 \
+    --hash=sha256:0eadf09b96821bdae9a8b14145425cb9fe0bbee64c6fdfce3ccd4ceb7d7efbbd \
+    --hash=sha256:9beafbaa107ec7128e6c21d86b2bc2aea2f590158e50aca972dca3753046091f
     # via
     #   acme
     #   certbot
@@ -796,6 +802,7 @@ requests==2.32.4 \
     # via
     #   -r requirements.in
     #   acme
+    #   certbot-dns-bunny
     #   certbot-dns-desec
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
@@ -848,9 +855,9 @@ tldextract==5.3.0 \
     --hash=sha256:b3d2b70a1594a0ecfa6967d57251527d58e00bb5a91a74387baa0d87a0678609 \
     --hash=sha256:f70f31d10b55c83993f55e91ecb7c5d84532a8972f22ec578ecfbe5ea2292db2
     # via dns-lexicon
-typing-extensions==4.14.0 \
-    --hash=sha256:8676b788e32f02ab42d9e7c61324048ae4c6d844a399eebace3d4979d75ceef4 \
-    --hash=sha256:a1514509136dd0b477638fc68d6a91497af5076466ad0fa6c338e44e359944af
+typing-extensions==4.14.1 \
+    --hash=sha256:38b39f4aeeab64884ce9f74c94263ef78f3c22467c8724005483154c26648d36 \
+    --hash=sha256:d1e1e3b58374dc93031d6eda2420a48ea44a36c2b4766a4fdeb3710755731d76
     # via
     #   beautifulsoup4
     #   pydantic
@@ -876,6 +883,7 @@ zipp==3.23.0 \
     --hash=sha256:071652d6115ed432f5ce1d34c336c0adfd6a884660d1e9712a256d3d3bd4b14e \
     --hash=sha256:a07157588a12518c9d4034df3fbbee09c814741a33ff63c05fa29d26a2404166
     # via
+    #   certbot-dns-bunny
     #   certbot-dns-desec
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos

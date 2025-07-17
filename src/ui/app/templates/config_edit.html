@@ -53,6 +53,7 @@
                                         class="dropdown-item{% if not config_service or config_service == 'global' %} active{% endif %}"
                                         role="tab"
                                         data-bs-toggle="tab"
+                                        data-service="global"
                                         {% if not config_service %}aria-selected="true"{% endif %}
                                         data-i18n="scope.global">Global</button>
                             </li>
@@ -62,6 +63,7 @@
                                             class="dropdown-item{% if config_service == service %} active{% endif %}"
                                             role="tab"
                                             data-bs-toggle="tab"
+                                            data-service="{{ service }}"
                                             {% if config_service == service %}aria-selected="true"{% endif %}>
                                         {{ service }}
                                     </button>

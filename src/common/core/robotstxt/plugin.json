@@ -1,0 +1,38 @@
+{
+  "id": "robotstxt",
+  "name": "Robots.txt",
+  "description": "Manage the robots.txt file. Standard for controlling web crawler access to your site.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "USE_ROBOTSTXT": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable robots.txt file.",
+      "id": "use-robotstxt",
+      "label": "Use robots.txt",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "ROBOTSTXT_RULE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Rules for robots.txt (one per line).",
+      "id": "robotstxt-rule",
+      "label": "Robots.txt rule",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "robotstxt-rule"
+    },
+    "ROBOTSTXT_SITEMAP": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitemap URL(s) to include in robots.txt.",
+      "id": "robotstxt-sitemap",
+      "label": "Robots.txt sitemap",
+      "regex": "^(https?://\\S+)?$",
+      "type": "text",
+      "multiple": "robotstxt-sitemap"
+    }
+  }
+}

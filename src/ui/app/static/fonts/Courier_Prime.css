@@ -3,27 +3,27 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url(../fonts/Courier_prime/Courier_prime.woff), format("woff");
+  src: url(../fonts/Courier_prime/CourierPrime-Regular.ttf) format("truetype");
 }
 @font-face {
   font-family: "Courier Prime";
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(../fonts/Courier_prime/Courier_prime_bold.woff), format("woff");
+  src: url(../fonts/Courier_prime/CourierPrime-Bold.ttf) format("truetype");
 }
 @font-face {
   font-family: "Courier Prime";
   font-style: italic;
   font-weight: 300;
   font-display: swap;
-  src: url(../fonts/Courier_prime/Courier_prime_italic.woff), format("woff");
+  src: url(../fonts/Courier_prime/CourierPrime-Italic.ttf) format("truetype");
 }
 @font-face {
   font-family: "Courier Prime";
   font-style: italic;
   font-weight: 600;
   font-display: swap;
-  src: url(../fonts/Courier_prime/Courier_prime_bold_italic.woff),
-    format("woff");
+  src: url(../fonts/Courier_prime/CourierPrime-BoldItalic.ttf)
+    format("truetype");
 }

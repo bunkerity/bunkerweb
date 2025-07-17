@@ -435,12 +435,6 @@ $(document).ready(() => {
           settingValue = $this.is(":checked") ? "yes" : "no";
         }
 
-        // Check if it's a multiple setting with numeric suffix
-        const isMultipleSetting =
-          settingName &&
-          $this.attr("id").startsWith("multiple-") &&
-          /_\d+$/.test(settingName);
-
         appendHiddenInput(form, settingName, settingValue);
       });
 
@@ -1261,9 +1255,7 @@ $(document).ready(() => {
     $(".toggle-draft").html(
       `<i class="bx bx-sm bx-${
         isDraft ? "globe" : "file-blank"
-      }"></i>&nbsp; <span data-i18n="${newStatusKey}">${t(
-        newStatusKey,
-      )}</span>`,
+      }"></i>&nbsp; <span data-i18n="${newStatusKey}">${t(newStatusKey)}</span>`,
     );
   });
 
@@ -1431,61 +1423,6 @@ $(document).ready(() => {
   $("#confirm-reset-template-config").on("click", function () {
     resetTemplateConfig();
   });
-
-  $('div[id^="multiple-"]')
-    .filter(function () {
-      return /^multiple-.*-\d+$/.test($(this).attr("id"));
-    })
-    .each(function () {
-      let defaultValues = true;
-      let disabled = false;
-      $(this)
-        .find("input, select")
-        .each(function () {
-          const type = $(this).attr("type");
-          const defaultVal = $(this).data("default");
-
-          if ($(this).prop("disabled")) {
-            disabled = true;
-          }
-
-          // Check for select element
-          if ($(this).is("select")) {
-            const selectedVal = $(this).find("option:selected").val();
-            if (selectedVal != defaultVal) {
-              defaultValues = false;
-            }
-          } else if (type === "checkbox") {
-            const isChecked =
-              $(this).prop("checked") === (defaultVal === "yes");
-            if (!isChecked) {
-              defaultValues = false;
-            }
-          } else {
-            const isMatchingValue = $(this).val() == defaultVal;
-            if (!isMatchingValue) {
-              defaultValues = false;
-            }
-          }
-        });
-
-      if (defaultValues) $(`#show-${$(this).attr("id")}`).trigger("click");
-      if (disabled && $(`#remove-${$(this).attr("id")}`).length) {
-        $(`#remove-${$(this).attr("id")}`).addClass("disabled");
-        $(`#remove-${$(this).attr("id")}`)
-          .parent()
-          .attr("title", t("tooltip.cannot_remove_disabled"));
-
-        new bootstrap.Tooltip(
-          $(`#remove-${$(this).attr("id")}`)
-            .parent()
-            .get(0),
-          {
-            placement: "top",
-          },
-        );
-      }
-    });
 
   if (
     (usedTemplate === "" || usedTemplate === "ui") &&
@@ -1950,24 +1887,18 @@ $(document).ready(() => {
   isInit = false;
 
   // Multivalue functionality
-  // Function to toggle visibility of multivalue items
-  const toggleMultivalueVisibility = ($container) => {
+  const toggleMultivalueVisibility = ($container, isToggleAction = false) => {
     const $inputGroups = $container.find(".multivalue-input-group");
     const visibleLimit = 5;
 
     if ($inputGroups.length <= visibleLimit) {
-      // Remove toggle if we have 5 or fewer items
       $container.find(".multivalue-toggle").remove();
       $inputGroups.show();
       return;
     }
 
-    // Check if toggle already exists
     let $toggle = $container.find(".multivalue-toggle");
-    const toggleExists = $toggle.length > 0;
-
-    if (!toggleExists) {
-      // Create the toggle button
+    if (!$toggle.length) {
       const toggleHtml = `
         <div class="multivalue-toggle mt-2 mb-2">
           <button type="button" class="btn btn-sm btn-outline-secondary multivalue-toggle-btn">
@@ -1980,31 +1911,38 @@ $(document).ready(() => {
       `;
       $container.find(".multivalue-inputs").after(toggleHtml);
       $toggle = $container.find(".multivalue-toggle");
-
-      // Initially show the button in collapsed state
-      $inputGroups.slice(visibleLimit).hide();
-      return;
+    } else {
+      // Update count
+      $toggle.find(".hidden-count").text($inputGroups.length - visibleLimit);
     }
 
-    const $toggleBtn = $toggle.find(".multivalue-toggle-btn");
-    const $toggleText = $toggle.find(".toggle-text");
+    const $toggleBtn = $container.find(".multivalue-toggle-btn");
+    const $toggleText = $container.find(".toggle-text");
+    let isExpanded = $toggleBtn.hasClass("expanded");
 
-    const isExpanded = $toggleBtn.hasClass("expanded");
+    if (isToggleAction) {
+      isExpanded = !isExpanded;
+      $toggleBtn.toggleClass("expanded", isExpanded);
+    }
 
     if (isExpanded) {
-      // Collapse: show only first 5
+      $inputGroups.show();
+      $toggleText.text("Show less");
+      $toggleBtn
+        .find("i")
+        .removeClass("bx-chevron-down")
+        .addClass("bx-chevron-up");
+    } else {
       $inputGroups.slice(visibleLimit).hide();
       $toggleText.html(
         `Show all (<span class="hidden-count">${
           $inputGroups.length - visibleLimit
         }</span> more)`,
       );
-      $toggleBtn.removeClass("expanded");
-    } else {
-      // Expand: show all
-      $inputGroups.show();
-      $toggleText.text("Show less");
-      $toggleBtn.addClass("expanded");
+      $toggleBtn
+        .find("i")
+        .removeClass("bx-chevron-up")
+        .addClass("bx-chevron-down");
     }
   };
 
@@ -2022,11 +1960,6 @@ $(document).ready(() => {
 
     $hiddenInput.val(values.join(separator));
     $hiddenInput.trigger("change");
-
-    // Only update visibility toggle if not during initialization
-    if (!$container.hasClass("initializing")) {
-      toggleMultivalueVisibility($container);
-    }
   };
 
   const addMultivalueItem = ($container, value = "", $insertAfter = null) => {
@@ -2036,8 +1969,6 @@ $(document).ready(() => {
 
     if (isDisabled) return;
 
-    let $newInputGroup;
-
     const inputGroupHtml = `
       <div class="input-group mb-2 multivalue-input-group">
         <input type="text"
@@ -2045,12 +1976,10 @@ $(document).ready(() => {
                value="${value}"
                placeholder="Enter value..."
                data-i18n="form.placeholder.multivalue_enter_value">
-
         <button type="button"
                 class="btn btn-outline-success add-multivalue-item">
           <i class="bx bx-plus"></i>
         </button>
-
         <button type="button"
                 class="btn btn-outline-danger remove-multivalue-item">
           <i class="bx bx-x"></i>
@@ -2059,76 +1988,61 @@ $(document).ready(() => {
     `;
 
     if ($insertAfter && $insertAfter.length) {
-      // Insert after the specified element
       $insertAfter.after(inputGroupHtml);
-      $newInputGroup = $insertAfter.next();
     } else {
-      // Fallback: append to the end
       const $inputsContainer = $container.find(".multivalue-inputs");
       $inputsContainer.append(inputGroupHtml);
-      $newInputGroup = $inputsContainer.children().last();
     }
 
-    // Focus on the new input
-    $newInputGroup.find(".multivalue-input").focus();
-
-    // Focus on the new input (find the one that was just added)
-    const $newInput =
-      $insertAfter && $insertAfter.length
-        ? $insertAfter.next().find(".multivalue-input")
-        : $container.find(".multivalue-input").last();
-
+    const $newInput = $container.find(".multivalue-input").last();
     $newInput.focus();
 
     updateMultivalueHiddenInput($container);
+    toggleMultivalueVisibility($container, false);
+
+    const numItemsAfter = $container.find(".multivalue-input-group").length;
+    if (numItemsAfter > 5) {
+      const $toggleBtn = $container.find(".multivalue-toggle-btn");
+      if ($toggleBtn.length && !$toggleBtn.hasClass("expanded")) {
+        toggleMultivalueVisibility($container, true);
+      }
+    }
   };
 
   const removeMultivalueItem = ($inputGroup, $container) => {
-    // Don't remove if it's the only item
     if ($container.find(".multivalue-input-group").length <= 1) {
-      // Just clear the value instead of removing
       $inputGroup.find(".multivalue-input").val("");
       updateMultivalueHiddenInput($container);
       return;
     }
 
+    const wasExpanded = $container
+      .find(".multivalue-toggle-btn")
+      .hasClass("expanded");
+
     $inputGroup.remove();
     updateMultivalueHiddenInput($container);
-  }; // Initialize existing multivalue containers
+    toggleMultivalueVisibility($container, false);
+
+    if (wasExpanded) {
+      const $toggleBtn = $container.find(".multivalue-toggle-btn");
+      if ($toggleBtn.length && !$toggleBtn.hasClass("expanded")) {
+        toggleMultivalueVisibility($container, true);
+      }
+    }
+  };
+
+  // Initialize existing multivalue containers
   $(".multivalue-container").each(function () {
     const $container = $(this);
-    const $inputGroups = $container.find(".multivalue-input-group");
-
-    // Mark as initializing to prevent toggle updates
-    $container.addClass("initializing");
-
-    // Set initial collapsed state if more than 5 items
-    if ($inputGroups.length > 5) {
-      $inputGroups.slice(5).hide();
-      // Create toggle button in collapsed state
-      const toggleHtml = `
-        <div class="multivalue-toggle mt-2 mb-2">
-          <button type="button" class="btn btn-sm btn-outline-secondary multivalue-toggle-btn">
-            <i class="bx bx-chevron-down me-1"></i>
-            <span class="toggle-text">Show all (<span class="hidden-count">${
-              $inputGroups.length - 5
-            }</span> more)</span>
-          </button>
-        </div>
-      `;
-      $container.find(".multivalue-inputs").after(toggleHtml);
-    }
-
     updateMultivalueHiddenInput($container);
-
-    // Remove initializing flag
-    $container.removeClass("initializing");
+    toggleMultivalueVisibility($container, false);
   });
 
   // Handle multivalue toggle button clicks
   $(document).on("click", ".multivalue-toggle-btn", function () {
     const $container = $(this).closest(".multivalue-container");
-    toggleMultivalueVisibility($container);
+    toggleMultivalueVisibility($container, true);
   });
 
   // Handle add button clicks

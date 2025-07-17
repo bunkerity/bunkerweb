@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from contextlib import suppress
+from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
 from json import load as json_load
@@ -157,6 +158,13 @@ def handle_reload(signum, frame):
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
+                env={
+                    "PATH": getenv("PATH", ""),
+                    "PYTHONPATH": getenv("PYTHONPATH", ""),
+                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                    "DATABASE_URI": getenv("DATABASE_URI", ""),
+                },
             )
             if proc.returncode != 0:
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
@@ -416,6 +424,13 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
         stdin=DEVNULL,
         stderr=STDOUT,
         check=False,
+        env={
+            "PATH": getenv("PATH", ""),
+            "PYTHONPATH": getenv("PYTHONPATH", ""),
+            "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+            "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+            "DATABASE_URI": getenv("DATABASE_URI", ""),
+        },
     )
 
     if proc.returncode != 0:
@@ -651,6 +666,13 @@ if __name__ == "__main__":
         if SCHEDULER.db.readonly:
             LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
         else:
+            env_file_path = deepcopy(NGINX_TMP_VARIABLES_PATH)
+            if args.variables:
+                env_file_path = deepcopy(tmp_variables_path)
+            else:
+                env_content = "\n".join(f"{key}={value}" for key, value in environ.items())
+                env_file_path.write_text(env_content + "\n", encoding="utf-8")
+
             # run the config saver
             proc = subprocess_run(
                 [
@@ -658,11 +680,19 @@ if __name__ == "__main__":
                     "--settings",
                     BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
                     "--first-run",
-                ]
-                + (["--variables", tmp_variables_path.as_posix()] if args.variables else []),
+                    "--variables",
+                    env_file_path.as_posix(),
+                ],
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
+                env={
+                    "PATH": getenv("PATH", ""),
+                    "PYTHONPATH": getenv("PYTHONPATH", ""),
+                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                    "DATABASE_URI": getenv("DATABASE_URI", ""),
+                },
             )
             if proc.returncode != 0:
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
@@ -832,16 +862,32 @@ if __name__ == "__main__":
             else:
                 # run the config saver to save potential ignored external plugins settings
                 LOGGER.info("Running config saver to save potential ignored external plugins settings ...")
+
+                env_file_path = deepcopy(NGINX_TMP_VARIABLES_PATH)
+                if args.variables:
+                    env_file_path = deepcopy(tmp_variables_path)
+                else:
+                    env_content = "\n".join(f"{key}={value}" for key, value in (env | environ).items())
+                    env_file_path.write_text(env_content + "\n", encoding="utf-8")
+
                 proc = subprocess_run(
                     [
                         BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
                         "--settings",
                         BUNKERWEB_PATH.joinpath("settings.json").as_posix(),
-                    ]
-                    + (["--variables", tmp_variables_path.as_posix()] if args.variables else []),
+                        "--variables",
+                        env_file_path.as_posix(),
+                    ],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
+                    env={
+                        "PATH": getenv("PATH", ""),
+                        "PYTHONPATH": getenv("PYTHONPATH", ""),
+                        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                        "DATABASE_URI": getenv("DATABASE_URI", ""),
+                    },
                 )
                 if proc.returncode != 0:
                     LOGGER.error("Config saver failed, configuration will not work as expected...")

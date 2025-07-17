@@ -1430,10 +1430,8 @@ $(document).ready(function () {
         const $li = $(this);
         const $input = $li.find("input[name='ip']");
         if (!validateBan($input, ipServiceMap)) {
-          // Validate *and* update the map
           allValid = false;
         } else {
-          // If valid, add to map for subsequent checks
           const ip = $input.val().trim();
           const banScope = $li.find("select[name='ban_scope']").val();
           if (banScope === "global") {
@@ -1445,14 +1443,13 @@ $(document).ready(function () {
         }
       });
 
-    if (!allValid) return; // Stop if any entry is invalid
+    if (!allValid) return;
 
     // Collect valid ban data
     const bans = [];
     $("#bans-container")
       .find("li.ban-item")
       .each(function () {
-        // Changed selector slightly
         const $this = $(this);
         const ip = $this.find("input[name='ip']").val().trim();
         const isPermanent = $this
@@ -1464,12 +1461,24 @@ $(document).ready(function () {
         const service =
           ban_scope === "service"
             ? $this.find("select[name='service']").val()
-            : null; // Set service to null for global
+            : null;
+
+        // Convert end_date to duration in seconds (exp)
+        let exp = 0;
+        if (!isPermanent && end_date) {
+          exp = Math.max(
+            0,
+            Math.floor(new Date(end_date).getTime() / 1000 - Date.now() / 1000),
+          );
+        }
+        if (isPermanent) {
+          exp = 0;
+        }
 
         bans.push({
           ip: ip,
           end_date: isPermanent ? "0" : `${end_date}${getTimeZoneOffset()}`,
-          exp: isPermanent ? 0 : null, // Set exp to 0 if permanent ban
+          exp: exp,
           reason: reason,
           ban_scope: ban_scope,
           service: service,

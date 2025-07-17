@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 from base64 import b64decode
-from contextlib import suppress
-from copy import deepcopy
 from datetime import datetime, timedelta
-from json import dumps, loads
+from json import loads
 from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
@@ -15,7 +12,8 @@ from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
-from typing import Dict, Literal, Type, Union
+from typing import Dict, List, Optional, Tuple, Type, Union
+
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -24,7 +22,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from pydantic import ValidationError
 from requests import get
 
-from letsencrypt import (
+from common_utils import bytes_hash, file_hash  # type: ignore
+from jobs import Job  # type: ignore
+from logger import setup_logger  # type: ignore
+
+from letsencrypt_providers import (
+    BunnyNetProvider,
     CloudflareProvider,
     DesecProvider,
     DigitalOceanProvider,
@@ -39,24 +42,19 @@ from letsencrypt import (
     NjallaProvider,
     NSOneProvider,
     OvhProvider,
+    Provider,
     Rfc2136Provider,
     Route53Provider,
     SakuraCloudProvider,
     ScalewayProvider,
-    WildcardGenerator,
 )
 
-from common_utils import bytes_hash  # type: ignore
-from jobs import Job  # type: ignore
-from logger import setup_logger  # type: ignore
-
+LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper()
 LOGGER = setup_logger("LETS-ENCRYPT.new")
+LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.new.certbot")
+
 CERTBOT_BIN = join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot")
 DEPS_PATH = join(sep, "usr", "share", "bunkerweb", "deps", "python")
-
-LOGGER_CERTBOT = setup_logger("LETS-ENCRYPT.new.certbot")
-status = 0
-
 PLUGIN_PATH = Path(sep, "usr", "share", "bunkerweb", "core", "letsencrypt")
 JOBS_PATH = PLUGIN_PATH.joinpath("jobs")
 CACHE_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
@@ -64,8 +62,41 @@ DATA_PATH = CACHE_PATH.joinpath("etc")
 WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
 
+IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
+CHALLENGE_TYPES = ["http", "dns"]
+PROFILE_TYPES = ["classic", "tlsserver", "shortlived"]
+DNS_PROPAGATION_DEFAULT = "default"
+RSA_PROVIDERS = ("infomaniak", "ionos")
+AUTHENTICATOR_PROVIDERS = ("bunny", "desec", "infomaniak", "ionos", "njalla", "scaleway")
+
+PROVIDERS: Dict[str, Type[Provider]] = {
+    "bunny": BunnyNetProvider,
+    "cloudflare": CloudflareProvider,
+    "desec": DesecProvider,
+    "digitalocean": DigitalOceanProvider,
+    "dnsimple": DnsimpleProvider,
+    "dnsmadeeasy": DnsMadeEasyProvider,
+    "gehirn": GehirnProvider,
+    "google": GoogleProvider,
+    "infomaniak": InfomaniakProvider,
+    "ionos": IonosProvider,
+    "linode": LinodeProvider,
+    "luadns": LuaDnsProvider,
+    "njalla": NjallaProvider,
+    "nsone": NSOneProvider,
+    "ovh": OvhProvider,
+    "rfc2136": Rfc2136Provider,
+    "route53": Route53Provider,
+    "sakuracloud": SakuraCloudProvider,
+    "scaleway": ScalewayProvider,
+}
+
+status = 0
+
 PSL_URL = "https://publicsuffix.org/list/public_suffix_list.dat"
 PSL_STATIC_FILE = "public_suffix_list.dat"
+psl_lines = None
+psl_rules = None
 
 
 def load_public_suffix_list(job):
@@ -73,24 +104,23 @@ def load_public_suffix_list(job):
     if (
         isinstance(job_cache, dict)
         and job_cache.get("last_update")
-        and job_cache["last_update"] < (datetime.now().astimezone() - timedelta(days=1)).timestamp()
+        and job_cache["last_update"] > (datetime.now().astimezone() - timedelta(days=1)).timestamp()
     ):
         return job_cache["data"].decode("utf-8").splitlines()
 
     try:
-        resp = get(PSL_URL, timeout=5)
+        resp = get(PSL_URL, timeout=8)
         resp.raise_for_status()
         content = resp.text
-        cached, err = JOB.cache_file(PSL_STATIC_FILE, content.encode("utf-8"))
+        cached, err = job.cache_file(PSL_STATIC_FILE, content.encode("utf-8"))
         if not cached:
             LOGGER.error(f"Error while saving public suffix list to cache : {err}")
         return content.splitlines()
     except BaseException as e:
         LOGGER.debug(format_exc())
-        LOGGER.error(f"Error while downloading public suffix list : {e}")
-        if PSL_STATIC_FILE.exists():
-            with PSL_STATIC_FILE.open("r", encoding="utf-8") as f:
-                return f.read().splitlines()
+        LOGGER.error(f"Error while downloading public suffix list: {e}")
+        if isinstance(job_cache, dict):
+            return job_cache.get("data", b"").decode("utf-8").splitlines()
         return []
 
 
@@ -136,127 +166,292 @@ def is_domain_blacklisted(domain, psl):
     return False
 
 
-def certbot_new_with_retry(
-    challenge_type: Literal["dns", "http"],
-    domains: str,
-    email: str,
-    provider: str = None,
-    credentials_path: Union[str, Path] = None,
-    propagation: str = "default",
-    profile: str = "classic",
-    staging: bool = False,
-    force: bool = False,
-    cmd_env: Dict[str, str] = None,
-    max_retries: int = 0,
-) -> int:
-    """Execute certbot with retry mechanism."""
-    attempt = 1
-    while attempt <= max_retries + 1:  # +1 for the initial attempt
-        if attempt > 1:
-            LOGGER.warning(f"Certificate generation failed, retrying... (attempt {attempt}/{max_retries + 1})")
-            # Wait before retrying (exponential backoff: 30s, 60s, 120s...)
-            wait_time = min(30 * (2 ** (attempt - 2)), 300)  # Cap at 5 minutes
-            LOGGER.info(f"Waiting {wait_time} seconds before retry...")
-            sleep(wait_time)
-
-        result = certbot_new(
-            challenge_type,
-            domains,
-            email,
-            provider,
-            credentials_path,
-            propagation,
-            profile,
-            staging,
-            force,
-            cmd_env,
-        )
-
-        if result == 0:
-            if attempt > 1:
-                LOGGER.info(f"Certificate generation succeeded on attempt {attempt}")
-            return result
-
-        if attempt >= max_retries + 1:
-            LOGGER.error(f"Certificate generation failed after {max_retries + 1} attempts")
-            return result
-
-        attempt += 1
-
-    return result
+def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) -> bool:
+    """Check if any domains are blacklisted by PSL rules."""
+    for domain in domains:
+        if is_domain_blacklisted(domain, psl_rules):
+            LOGGER.error(f"Domain {domain} is blacklisted by Public Suffix List, refusing certificate request for {service_name}.")
+            return True
+    return False
 
 
-def certbot_new(
-    challenge_type: Literal["dns", "http"],
-    domains: str,
-    email: str,
-    provider: str = None,
-    credentials_path: Union[str, Path] = None,
-    propagation: str = "default",
-    profile: str = "classic",
-    staging: bool = False,
-    force: bool = False,
-    cmd_env: Dict[str, str] = None,
-) -> int:
-    if isinstance(credentials_path, str):
-        credentials_path = Path(credentials_path)
+def extract_provider(service: str, authenticator: str = "") -> Optional[Provider]:
+    credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
+    credential_items = {}
 
+    # Collect all credential items
+    for env_key, env_value in environ.items():
+        if not env_value or not env_key.startswith(credential_key):
+            continue
+
+        if " " not in env_value:
+            credential_items["json_data"] = env_value
+            continue
+
+        key, value = env_value.split(" ", 1)
+        credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+
+    # Handle JSON data
+    if "json_data" in credential_items:
+        value = credential_items.pop("json_data")
+        if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+            try:
+                decoded = b64decode(value).decode("utf-8")
+                json_data = loads(decoded)
+                if isinstance(json_data, dict):
+                    credential_items = {
+                        k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                        for k, v in json_data.items()
+                    }
+            except BaseException:
+                LOGGER.debug(format_exc())
+
+    # Process base64 encoded credentials (except for rfc2136)
+    if credential_items:
+        for key, value in credential_items.items():
+            if authenticator != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
+                try:
+                    decoded = b64decode(value).decode("utf-8")
+                    if decoded != value:
+                        credential_items[key] = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+                except BaseException:
+                    LOGGER.debug(format_exc())
+
+    if not credential_items:
+        LOGGER.warning(f"[Service: {service}] DNS challenge selected but no DNS credentials are configured, skipping generation.")
+        return None
+
+    try:
+        return PROVIDERS[authenticator](**credential_items)
+    except ValidationError as ve:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"[Service: {service}] Error while validating credentials, skipping generation: {ve}")
+        return None
+
+
+def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+    def env(key: str, default: Optional[str] = None) -> str:
+        if IS_MULTISITE:
+            return getenv(f"{service}_{key}", default)
+        return getenv(key, default)
+
+    authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
+    server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
+    email_val = env("EMAIL_LETS_ENCRYPT", "") or f"contact@{service}"
+    retries_val = env("LETS_ENCRYPT_RETRIES", "0")
+    challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
+    profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
+    custom_profile = env("LETS_ENCRYPT_CUSTOM_PROFILE", "").lower()
+    dns_propagation_val = env("LETS_ENCRYPT_DNS_PROPAGATION", DNS_PROPAGATION_DEFAULT).lower()
+    wildcard = env("USE_LETS_ENCRYPT_WILDCARD", "no").lower() == "yes"
+    activated = env("AUTO_LETS_ENCRYPT", "no").lower() == "yes" and env("LETS_ENCRYPT_PASSTHROUGH", "no").lower() == "no"
+
+    # User-friendly checks
+    if activated and not server_names_val:
+        LOGGER.warning(f"[Service: {service}] SERVER_NAME is empty. Please set a valid server name, skipping generation.")
+        activated = False
+
+    if "@" not in email_val:
+        if activated:
+            LOGGER.warning(f"[Service: {service}] EMAIL_LETS_ENCRYPT is missing or invalid. Using default: 'contact@{service}'")
+        email_val = f"contact@{service}"
+
+    try:
+        retries_int = int(retries_val)
+        if retries_int < 0:
+            if activated:
+                LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RETRIES is negative. Defaulting to 0.")
+            retries_int = 0
+    except Exception:
+        if activated:
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_RETRIES is not a valid integer. Defaulting to 0.")
+        retries_int = 0
+
+    if activated and challenge_val not in CHALLENGE_TYPES:
+        LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_CHALLENGE '{challenge_val}' is invalid. Must be one of {CHALLENGE_TYPES!r}, skipping generation.")
+        activated = False
+
+    if custom_profile:
+        profile_val = custom_profile
+    elif profile_val not in PROFILE_TYPES:
+        if activated:
+            LOGGER.warning(f"[Service: {service}] LETS_ENCRYPT_PROFILE '{profile_val}' is invalid. Must be one of {PROFILE_TYPES!r}. Defaulting to 'classic'.")
+        profile_val = "classic"
+
+    # Validate dns_propagation
+    if dns_propagation_val != DNS_PROPAGATION_DEFAULT:
+        try:
+            dns_propagation_int = int(dns_propagation_val)
+            if dns_propagation_int <= 0:
+                if activated:
+                    LOGGER.warning(
+                        f"[Service: {service}] LETS_ENCRYPT_DNS_PROPAGATION must be a positive integer or '{DNS_PROPAGATION_DEFAULT}'. Defaulting to '{DNS_PROPAGATION_DEFAULT}'."
+                    )
+                dns_propagation_val = DNS_PROPAGATION_DEFAULT
+        except Exception:
+            if activated:
+                LOGGER.warning(
+                    f"[Service: {service}] LETS_ENCRYPT_DNS_PROPAGATION is not a valid integer or '{DNS_PROPAGATION_DEFAULT}'. Defaulting to '{DNS_PROPAGATION_DEFAULT}'."
+                )
+            dns_propagation_val = DNS_PROPAGATION_DEFAULT
+
+    provider = None
+    if challenge_val == "dns":
+        if not authenticator:
+            if activated:
+                LOGGER.warning(f"[Service: {service}] DNS challenge selected but no DNS provider is configured, skipping generation.")
+            activated = False
+        elif authenticator not in PROVIDERS:
+            if activated:
+                LOGGER.warning(
+                    f"[Service: {service}] DNS provider '{authenticator}' is not supported. Must be one of {list(PROVIDERS.keys())!r}, skipping generation."
+                )
+            activated = False
+        else:
+            provider = extract_provider(service, authenticator)
+            if not provider:
+                activated = False
+    else:
+        authenticator = "manual"
+        if wildcard:
+            LOGGER.debug(f"[Service: {service}] Wildcard domains are not supported for HTTP challenges, deactivating wildcard support.")
+            wildcard = False
+
+    server_names = server_names_val.split(" ")
+    server_name = service
+    if wildcard:
+        server_names = extract_wildcards_from_domains(server_names)
+        server_name = server_names[-1] if server_names else service
+
+    return server_name, {
+        "server_names": ",".join(server_names),
+        "activated": activated,
+        "email": email_val,
+        "challenge": challenge_val,
+        "authenticator": authenticator or "manual",
+        "dns_propagation": dns_propagation_val,
+        "provider": provider,
+        "wildcard": wildcard,
+        "staging": env("USE_LETS_ENCRYPT_STAGING", "no").lower() == "yes",
+        "profile": profile_val,
+        "disable_psl_check": env("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "no").lower() == "yes",
+        "retries": retries_int,
+        "exists": False,
+        "force_renew": False,
+    }
+
+
+def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
+    wildcards = set()
+    for domain in domains:
+        parts = domain.split(".")
+        if len(parts) > 2:
+            base_domain = ".".join(parts[1:])
+            wildcards.add(f"*.{base_domain}")
+            wildcards.add(base_domain)
+        else:
+            wildcards.add(domain)
+
+    return sorted(wildcards, key=lambda x: x[0] != "*")
+
+
+def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
     # * Building the certbot command
     command = [
         CERTBOT_BIN,
-        "certonly",
+        "delete",
+        "--cert-name",
+        service,
         "--config-dir",
         DATA_PATH.as_posix(),
         "--work-dir",
         WORK_DIR,
         "--logs-dir",
         LOGS_DIR,
-        "-n",
-        "-d",
-        domains,
-        "--email",
-        email,
-        "--agree-tos",
-        "--expand",
-        f"--preferred-profile={profile}",
     ]
+
+    if LOG_LEVEL == "DEBUG":
+        command.append("-v")
 
     if not cmd_env:
         cmd_env = {}
 
-    if challenge_type == "dns":
+    process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
+
+    while process.poll() is None:
+        if process.stderr:
+            rlist, _, _ = select([process.stderr], [], [], 2)
+            if rlist:
+                for line in process.stderr:
+                    LOGGER_CERTBOT.info(line.strip())
+                    break
+
+    return process.returncode
+
+
+def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str] = None) -> int:
+    # * Building the certbot command
+    command = [
+        CERTBOT_BIN,
+        "certonly",
+        "-n",
+        "-d",
+        config["server_names"],
+        "--preferred-profile",
+        config["profile"],
+        "--agree-tos",
+        "--config-dir",
+        DATA_PATH.as_posix(),
+        "--work-dir",
+        WORK_DIR,
+        "--logs-dir",
+        LOGS_DIR,
+        "--email",
+        config["email"],
+        "--break-my-certs",
+    ]
+
+    if LOG_LEVEL == "DEBUG":
+        command.append("-v")
+
+    if not cmd_env:
+        cmd_env = {}
+
+    if config["challenge"] == "dns":
         # * Adding DNS challenge hooks
         command.append("--preferred-challenges=dns")
 
         # * Adding the propagation time to the command
-        if propagation != "default":
-            if not propagation.isdigit():
-                LOGGER.warning(f"Invalid propagation time : {propagation}, using provider's default...")
-            else:
-                command.extend([f"--dns-{provider}-propagation-seconds", propagation])
+        if config["dns_propagation"] != DNS_PROPAGATION_DEFAULT:
+            command.extend([f"--dns-{config['authenticator']}-propagation-seconds", str(config["dns_propagation"])])
+
+        # * Caching the credentials file if not already done
+        credentials = config["provider"].get_formatted_credentials()
+        credentials_file = f"credentials_{bytes_hash(credentials, algorithm='sha256')[:12]}.{config['provider'].get_file_type()}"
+        credentials_path = CACHE_PATH.joinpath(credentials_file)
+        if not credentials_path.is_file() or config["force_renew"]:
+            JOB.cache_file(credentials_file, credentials)
+        credentials_path.chmod(0o600)  # Set permissions to read/write for owner only
 
         # * Adding the credentials to the command
-        if provider == "route53":
+        if config["authenticator"] == "route53":
             # ? Route53 credentials are different from the others, we need to add them to the environment
-            with credentials_path.open("r") as file:
-                for line in file:
-                    key, value = line.strip().split("=", 1)
-                    cmd_env[key] = value
+            for line in credentials.decode().splitlines():
+                key, value = line.strip().split("=", 1)
+                cmd_env[key] = value
         else:
-            command.extend([f"--dns-{provider}-credentials", credentials_path.as_posix()])
+            command.extend([f"--dns-{config['authenticator']}-credentials", credentials_path.as_posix()])
 
-        # * Adding the RSA key size argument like in the infomaniak plugin documentation
-        if provider in ("infomaniak", "ionos"):
+        # * Adding the RSA key size argument for RSA providers
+        if config["authenticator"] in RSA_PROVIDERS:
             command.extend(["--rsa-key-size", "4096"])
 
-        # * Adding plugin argument
-        if provider in ("desec", "infomaniak", "ionos", "njalla", "scaleway"):
-            # ? Desec, Infomaniak, IONOS, Njalla and Scaleway plugins use different arguments
-            command.extend(["--authenticator", f"dns-{provider}"])
+        # * Adding DNS provider argument
+        if config["authenticator"] in AUTHENTICATOR_PROVIDERS:
+            command.extend(["--authenticator", f"dns-{config['authenticator']}"])
         else:
-            command.append(f"--dns-{provider}")
-
-    elif challenge_type == "http":
+            command.append(f"--dns-{config['authenticator']}")
+    else:
         # * Adding HTTP challenge hooks
         command.extend(
             [
@@ -269,14 +464,13 @@ def certbot_new(
             ]
         )
 
-    if staging:
+    if config["staging"]:
         command.append("--staging")
 
-    if force:
-        command.append("--force-renewal")
-
-    if getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")).upper() == "DEBUG":
-        command.append("-v")
+    if config["force_renew"]:
+        ret = certbot_delete(service, cmd_env)
+        if ret != 0:
+            LOGGER.error(f"Failed to delete certificate for {service}")
 
     current_date = datetime.now()
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
@@ -291,108 +485,47 @@ def certbot_new(
 
         if datetime.now() - current_date > timedelta(seconds=5):
             LOGGER.info(
-                "⏳ Still generating certificate(s)" + (" (this may take a while depending on the provider)" if challenge_type == "dns" else "") + "..."
+                "⏳ Still generating certificate(s)" + (" (this may take a while depending on the provider)" if config["challenge"] == "dns" else "") + "..."
             )
             current_date = datetime.now()
 
     return process.returncode
 
 
-IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
-
 try:
-    servers = getenv("SERVER_NAME", "www.example.com").lower() or []
+    # ? Load services configuration
+    server_names = getenv("SERVER_NAME", "www.example.com").strip()
 
-    if isinstance(servers, str):
-        servers = servers.split(" ")
-
-    if not servers:
-        LOGGER.warning("There are no server names, skipping generation...")
+    if not server_names:
+        LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    use_letsencrypt = False
-    use_letsencrypt_dns = False
+    services = {}
+    for service in server_names.split(" "):
+        if not service.strip():
+            continue
 
-    if not IS_MULTISITE:
-        use_letsencrypt = getenv("AUTO_LETS_ENCRYPT", "no") == "yes"
-        use_letsencrypt_dns = getenv("LETS_ENCRYPT_CHALLENGE", "http") == "dns"
-        domains_server_names = {servers[0]: " ".join(servers).lower()}
-    else:
-        domains_server_names = {}
+        server_name, config = build_service_config(service)
+        if config["wildcard"] and server_name in services:
+            continue
+        services[server_name] = config
 
-        for first_server in servers:
-            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
-                use_letsencrypt = True
-
-            if first_server and getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") == "dns":
-                use_letsencrypt_dns = True
-
-            domains_server_names[first_server] = getenv(f"{first_server}_SERVER_NAME", first_server).lower()
-
-    if not use_letsencrypt:
-        LOGGER.info("Let's Encrypt is not activated, skipping generation...")
+    if not any(service["activated"] for service in services.values()):
+        LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
         sys_exit(0)
 
-    provider_classes = {}
+    JOB = Job(LOGGER, __file__.replace("new", "renew"))
 
-    if use_letsencrypt_dns:
-        provider_classes: Dict[
-            str,
-            Union[
-                Type[CloudflareProvider],
-                Type[DesecProvider],
-                Type[DigitalOceanProvider],
-                Type[DnsimpleProvider],
-                Type[DnsMadeEasyProvider],
-                Type[GehirnProvider],
-                Type[GoogleProvider],
-                Type[InfomaniakProvider],
-                Type[IonosProvider],
-                Type[LinodeProvider],
-                Type[LuaDnsProvider],
-                Type[NjallaProvider],
-                Type[NSOneProvider],
-                Type[OvhProvider],
-                Type[Rfc2136Provider],
-                Type[Route53Provider],
-                Type[SakuraCloudProvider],
-                Type[ScalewayProvider],
-            ],
-        ] = {
-            "cloudflare": CloudflareProvider,
-            "desec": DesecProvider,
-            "digitalocean": DigitalOceanProvider,
-            "dnsimple": DnsimpleProvider,
-            "dnsmadeeasy": DnsMadeEasyProvider,
-            "gehirn": GehirnProvider,
-            "google": GoogleProvider,
-            "infomaniak": InfomaniakProvider,
-            "ionos": IonosProvider,
-            "linode": LinodeProvider,
-            "luadns": LuaDnsProvider,
-            "njalla": NjallaProvider,
-            "nsone": NSOneProvider,
-            "ovh": OvhProvider,
-            "rfc2136": Rfc2136Provider,
-            "route53": Route53Provider,
-            "sakuracloud": SakuraCloudProvider,
-            "scaleway": ScalewayProvider,
-        }
-
-    JOB = Job(LOGGER, __file__)
-
-    # ? Restore data from db cache of certbot-renew job
-    JOB.restore_cache(job_name="certbot-renew")
-
-    env = {
+    # ? Fetch existing certificates
+    cmd_env = {
         "PATH": getenv("PATH", ""),
         "PYTHONPATH": getenv("PYTHONPATH", ""),
         "RELOAD_MIN_TIMEOUT": getenv("RELOAD_MIN_TIMEOUT", "5"),
         "DISABLE_CONFIGURATION_TESTING": getenv("DISABLE_CONFIGURATION_TESTING", "no").lower(),
     }
-    env["PYTHONPATH"] = env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in env["PYTHONPATH"] else "")
+    cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
     if getenv("DATABASE_URI"):
-        env["DATABASE_URI"] = getenv("DATABASE_URI")
+        cmd_env["DATABASE_URI"] = getenv("DATABASE_URI")
 
     proc = run(
         [
@@ -404,607 +537,180 @@ try:
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
-        ],
+        ]
+        + ["-v" if LOG_LEVEL == "DEBUG" else ""],
         stdin=DEVNULL,
         stdout=PIPE,
         stderr=STDOUT,
         text=True,
-        env=env,
+        env=cmd_env,
         check=False,
     )
     stdout = proc.stdout
+    existing_certificates = {}
 
-    WILDCARD_GENERATOR = WildcardGenerator()
-    credential_paths = set()
-    generated_domains = set()
-    domains_to_ask = {}
-    active_cert_names = set()  # Track ALL active certificate names, not just processed ones
-
+    # ? Check if the command was successful
     if proc.returncode != 0:
-        LOGGER.error(f"Error while checking certificates :\n{proc.stdout}")
+        LOGGER.error(f"Failed to fetch existing certificates, force the generation of certificates: \n{stdout}")
+        services = {service: config | {"force_renew": True} for service, config in services.items()}
     else:
-        certificate_blocks = stdout.split("Certificate Name: ")[1:]
-        for first_server, domains in domains_server_names.items():
-            if (getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") if IS_MULTISITE else getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
+        # ? Parse existing certificates
+        for certificate_block in stdout.split("Certificate Name: ")[1:]:
+            certificate_lines = certificate_block.splitlines()
+            if not certificate_lines:
                 continue
 
-            letsencrypt_challenge = getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") if IS_MULTISITE else getenv("LETS_ENCRYPT_CHALLENGE", "http")
-            original_first_server = deepcopy(first_server)
+            service = certificate_lines[0].strip()
+            match_domains = search(r"Domains:\s+(.+)$", certificate_block, MULTILINE)
+            domains = match_domains.group(1).strip().replace(" ", ",") if match_domains else ""
 
-            if (
-                letsencrypt_challenge == "dns"
-                and (getenv(f"{original_first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes"
-            ):
-                wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))
-                first_server = wildcards[0].lstrip("*.")
-                domains = set(wildcards)
-            else:
-                domains = set(domains.split(" "))
+            existing_certificates[service] = {"active": False, "server_names": domains}
 
-            # Add the certificate name to our active set regardless if we're generating it or not
-            active_cert_names.add(first_server)
+            renewal_file = DATA_PATH.joinpath("renewal", f"{service}.conf")
+            if renewal_file.is_file():
+                renewal_content = renewal_file.read_text()
 
-            certificate_block = None
-            for block in certificate_blocks:
-                if block.startswith(f"{first_server}\n"):
-                    certificate_block = block
-                    break
+                match_profile = search(r"^preferred_profile\s*=\s*(\S+)$", renewal_content, MULTILINE)
+                profile = match_profile.group(1) if match_profile else ""
 
-            if not certificate_block:
-                domains_to_ask[first_server] = 1
-                LOGGER.warning(f"[{original_first_server}] Certificate block for {first_server} not found, asking new certificate...")
-                continue
+                match_challenge = search(r"^pref_challs\s*=\s*(\S+)$", renewal_content, MULTILINE)
+                challenge = match_challenge.group(1).split(",")[0].replace("-01", "") if match_challenge else ""
 
-            try:
-                cert_domains = search(r"Domains: (?P<domains>.*)\n\s*Expiry Date: (?P<expiry_date>.*)\n", certificate_block, MULTILINE)
-            except BaseException as e:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"[{original_first_server}] Error while parsing certificate block: {e}")
-                continue
+                match_authenticator = search(r"^authenticator\s*=\s*(\S+)$", renewal_content, MULTILINE)
+                authenticator = match_authenticator.group(1).replace("dns-", "") if match_authenticator else ""
 
-            if not cert_domains:
-                LOGGER.error(f"[{original_first_server}] Failed to parse domains and expiry date from certificate block.")
-                continue
+                match_credentials = search(rf"^dns_{authenticator}_credentials\s*=\s*(\S+)$", renewal_content, MULTILINE)
+                credentials_hash = ""
+                if match_credentials and match_credentials.group(1):
+                    credentials_path = Path(match_credentials.group(1))
+                    if credentials_path.is_file():
+                        credentials_hash = file_hash(credentials_path, algorithm="sha256")
 
-            cert_domains_list = cert_domains.group("domains").strip().split()
-            cert_domains_set = set(cert_domains_list)
-            desired_domains_set = set(domains) if isinstance(domains, (list, set)) else set(domains.split())
+                match_server = search(r"^server\s*=\s*(\S+)$", renewal_content, MULTILINE)
+                server = match_server.group(1) if match_server else ""
 
-            if cert_domains_set != desired_domains_set:
-                domains_to_ask[first_server] = 2
-                LOGGER.warning(
-                    f"[{original_first_server}] Domains for {first_server} differ from desired set (existing: {sorted(cert_domains_set)}, desired: {sorted(desired_domains_set)}), asking new certificate..."
+                existing_certificates[service].update(
+                    {
+                        "challenge": challenge,
+                        "authenticator": authenticator,
+                        "credentials_hash": credentials_hash,
+                        "staging": "acme-staging" in server,
+                        "profile": profile,
+                    }
                 )
-                continue
 
-            use_letsencrypt_staging = (
-                getenv(f"{original_first_server}_USE_LETS_ENCRYPT_STAGING", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_STAGING", "no")
-            ) == "yes"
-            is_test_cert = "TEST_CERT" in cert_domains.group("expiry_date")
-
-            if (is_test_cert and not use_letsencrypt_staging) or (not is_test_cert and use_letsencrypt_staging):
-                domains_to_ask[first_server] = 2
-                LOGGER.warning(f"[{original_first_server}] Certificate environment (staging/production) changed for {first_server}, asking new certificate...")
-                continue
-
-            letsencrypt_provider = getenv(f"{original_first_server}_LETS_ENCRYPT_DNS_PROVIDER", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROVIDER", "")
-            letsencrypt_profile = (
-                getenv(f"{original_first_server}_LETS_ENCRYPT_PROFILE", "classic") if IS_MULTISITE else getenv("LETS_ENCRYPT_PROFILE", "classic")
-            )
-
-            # Override profile if custom profile is set
-            custom_profile = (
-                getenv(f"{original_first_server}_LETS_ENCRYPT_CUSTOM_PROFILE", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_CUSTOM_PROFILE", "")
-            ).strip()
-            if custom_profile:
-                letsencrypt_profile = custom_profile
-
-            renewal_file = DATA_PATH.joinpath("renewal", f"{first_server}.conf")
-            if not renewal_file.is_file():
-                LOGGER.error(f"[{original_first_server}] Renewal file for {first_server} not found, asking new certificate...")
-                domains_to_ask[first_server] = 1
-                continue
-
-            current_provider = None
-            current_profile = "classic"
-            with renewal_file.open("r") as file:
-                for line in file:
-                    if line.startswith("authenticator"):
-                        key, value = line.strip().split("=", 1)
-                        current_provider = value.strip().replace("dns-", "")
-                    elif line.startswith("preferred_profile"):
-                        key, value = line.strip().split("=", 1)
-                        current_profile = value.strip()
-
-            # Check if profile has changed
-            if current_profile != letsencrypt_profile:
-                domains_to_ask[first_server] = 2
-                LOGGER.warning(
-                    f"[{original_first_server}] Profile for {first_server} changed from {current_profile} to {letsencrypt_profile}, asking new certificate..."
-                )
-                continue
-
-            if letsencrypt_challenge == "dns":
-                if letsencrypt_provider and current_provider != letsencrypt_provider:
-                    domains_to_ask[first_server] = 2
-                    LOGGER.warning(f"[{original_first_server}] Provider for {first_server} is not the same as in the certificate, asking new certificate...")
-                    continue
-
-                # Check if DNS credentials have changed
-                if letsencrypt_provider and current_provider == letsencrypt_provider:
-                    credential_key = f"{original_first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
-                    current_credential_items = {}
-
-                    # Collect current credential items
-                    for env_key, env_value in environ.items():
-                        if env_value and env_key.startswith(credential_key):
-                            if " " not in env_value:
-                                current_credential_items["json_data"] = env_value
-                                continue
-                            key, value = env_value.split(" ", 1)
-                            current_credential_items[key.lower()] = (
-                                value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                            )
-
-                    if "json_data" in current_credential_items:
-                        value = current_credential_items.pop("json_data")
-                        if not current_credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-                            with suppress(BaseException):
-                                decoded = b64decode(value).decode("utf-8")
-                                json_data = loads(decoded)
-                                if isinstance(json_data, dict):
-                                    current_credential_items = {
-                                        k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                                        for k, v in json_data.items()
-                                    }
-
-                    if current_credential_items:
-                        # Process regular credentials for base64 decoding
-                        for key, value in current_credential_items.items():
-                            if letsencrypt_provider != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-                                with suppress(BaseException):
-                                    decoded = b64decode(value).decode("utf-8")
-                                    if decoded != value:
-                                        current_credential_items[key] = (
-                                            decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                                        )
-
-                        # Generate current credentials content
-                        if letsencrypt_provider in provider_classes:
-                            with suppress(ValidationError, KeyError):
-                                current_provider_instance = provider_classes[letsencrypt_provider](**current_credential_items)
-                                current_credentials_content = current_provider_instance.get_formatted_credentials()
-
-                                # Check if stored credentials file exists and compare
-                                file_type = current_provider_instance.get_file_type()
-                                stored_credentials_path = CACHE_PATH.joinpath(first_server, f"credentials.{file_type}")
-
-                                if stored_credentials_path.is_file():
-                                    stored_credentials_content = stored_credentials_path.read_bytes()
-                                    if stored_credentials_content != current_credentials_content:
-                                        domains_to_ask[first_server] = 2
-                                        LOGGER.warning(f"[{original_first_server}] DNS credentials for {first_server} have changed, asking new certificate...")
-                                        continue
-            elif current_provider != "manual" and letsencrypt_challenge == "http":
-                domains_to_ask[first_server] = 2
-                LOGGER.warning(f"[{original_first_server}] {first_server} is no longer using DNS challenge, asking new certificate...")
-                continue
-
-            domains_to_ask[first_server] = 0
-            LOGGER.info(f"[{original_first_server}] Certificates already exist for domain(s) {domains}, expiry date: {cert_domains.group('expiry_date')}")
-
-    psl_lines = None
-    psl_rules = None
-
-    for first_server, domains in domains_server_names.items():
-        if (getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") if IS_MULTISITE else getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
-            LOGGER.info(f"Let's Encrypt is not activated for {first_server}, skipping...")
+    # ? Check if the services' certificates already exist
+    for server_name, config in services.items():
+        if config["force_renew"] or not config["activated"] or server_name not in existing_certificates:
             continue
 
-        # * Getting all the necessary data
-        data = {
-            "email": (getenv(f"{first_server}_EMAIL_LETS_ENCRYPT", "") if IS_MULTISITE else getenv("EMAIL_LETS_ENCRYPT", "")) or f"contact@{first_server}",
-            "challenge": getenv(f"{first_server}_LETS_ENCRYPT_CHALLENGE", "http") if IS_MULTISITE else getenv("LETS_ENCRYPT_CHALLENGE", "http"),
-            "staging": (getenv(f"{first_server}_USE_LETS_ENCRYPT_STAGING", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_STAGING", "no")) == "yes",
-            "use_wildcard": (getenv(f"{first_server}_USE_LETS_ENCRYPT_WILDCARD", "no") if IS_MULTISITE else getenv("USE_LETS_ENCRYPT_WILDCARD", "no")) == "yes",
-            "provider": getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROVIDER", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROVIDER", ""),
-            "propagation": (
-                getenv(f"{first_server}_LETS_ENCRYPT_DNS_PROPAGATION", "default") if IS_MULTISITE else getenv("LETS_ENCRYPT_DNS_PROPAGATION", "default")
-            ),
-            "profile": getenv(f"{first_server}_LETS_ENCRYPT_PROFILE", "classic") if IS_MULTISITE else getenv("LETS_ENCRYPT_PROFILE", "classic"),
-            "check_psl": (
-                getenv(f"{first_server}_LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes") if IS_MULTISITE else getenv("LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES", "yes")
-            )
-            == "no",
-            "max_retries": getenv(f"{first_server}_LETS_ENCRYPT_MAX_RETRIES", "0") if IS_MULTISITE else getenv("LETS_ENCRYPT_MAX_RETRIES", "0"),
-            "credential_items": {},
-        }
+        existing_cert = existing_certificates[server_name]
+        existing_cert["active"] = True
 
-        # Override profile if custom profile is set
-        custom_profile = (getenv(f"{first_server}_LETS_ENCRYPT_CUSTOM_PROFILE", "") if IS_MULTISITE else getenv("LETS_ENCRYPT_CUSTOM_PROFILE", "")).strip()
-        if custom_profile:
-            data["profile"] = custom_profile
-
-        if data["challenge"] == "http" and data["use_wildcard"]:
-            LOGGER.warning(f"Wildcard is not supported with HTTP challenge, disabling wildcard for service {first_server}...")
-            data["use_wildcard"] = False
-
-        if (not data["use_wildcard"] and not domains_to_ask.get(first_server)) or (
-            data["use_wildcard"] and not domains_to_ask.get(WILDCARD_GENERATOR.extract_wildcards_from_domains((first_server,))[0].lstrip("*."))
-        ):
-            continue
-
-        if not data["max_retries"].isdigit():
-            LOGGER.warning(f"Invalid max retries value for service {first_server} : {data['max_retries']}, using default value of 0...")
-            data["max_retries"] = 0
-        else:
-            data["max_retries"] = int(data["max_retries"])
-
-        # * Getting the DNS provider data if necessary
-        if data["challenge"] == "dns":
-            credential_key = f"{first_server}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
-            credential_items = {}
-
-            # Collect all credential items
-            for env_key, env_value in environ.items():
-                if env_value and env_key.startswith(credential_key):
-                    if " " not in env_value:
-                        credential_items["json_data"] = env_value
-                        continue
-                    key, value = env_value.split(" ", 1)
-                    credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-
-            if "json_data" in credential_items:
-                value = credential_items.pop("json_data")
-                # Handle the case of a single credential that might be base64-encoded JSON
-                if not credential_items and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-                    try:
-                        decoded = b64decode(value).decode("utf-8")
-                        json_data = loads(decoded)
-                        if isinstance(json_data, dict):
-                            data["credential_items"] = {
-                                k.lower(): str(v).removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                                for k, v in json_data.items()
-                            }
-                    except BaseException as e:
-                        LOGGER.debug(format_exc())
-                        LOGGER.error(f"Error while decoding JSON data for service {first_server} : {value} : \n{e}")
-
-            if not data["credential_items"]:
-                # Process regular credentials
-                data["credential_items"] = {}
-                for key, value in credential_items.items():
-                    # Check for base64 encoding
-                    if data["provider"] != "rfc2136" and len(value) % 4 == 0 and match(r"^[A-Za-z0-9+/=]+$", value):
-                        try:
-                            decoded = b64decode(value).decode("utf-8")
-                            if decoded != value:
-                                value = decoded.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-                        except BaseException as e:
-                            LOGGER.debug(format_exc())
-                            LOGGER.debug(f"Error while decoding credential item {key} for service {first_server} : {value} : \n{e}")
-                    data["credential_items"][key] = value
-
-        LOGGER.debug(f"Data for service {first_server} : {dumps(data)}")
-
-        # * Checking if the DNS data is valid
-        if data["challenge"] == "dns":
-            if not data["provider"]:
-                LOGGER.warning(
-                    f"No provider found for service {first_server} (available providers : {', '.join(provider_classes.keys())}), skipping certificate(s) generation..."  # noqa: E501
-                )
-                continue
-            elif data["provider"] not in provider_classes:
-                LOGGER.warning(
-                    f"Provider {data['provider']} not found for service {first_server} (available providers : {', '.join(provider_classes.keys())}), skipping certificate(s) generation..."  # noqa: E501
-                )
-                continue
-            elif not data["credential_items"]:
-                LOGGER.warning(
-                    f"No valid credentials items found for service {first_server} (you should have at least one), skipping certificate(s) generation..."
-                )
-                continue
-
-            # * Validating the credentials
-            try:
-                provider = provider_classes[data["provider"]](**data["credential_items"])
-            except ValidationError as ve:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Error while validating credentials for service {first_server} :\n{ve}")
-                continue
-
-            content = provider.get_formatted_credentials()
-        else:
-            content = b"http_challenge"
-
-        is_blacklisted = False
-
-        # * Adding the domains to Wildcard Generator if necessary
-        file_type = provider.get_file_type() if data["challenge"] == "dns" else "txt"
-        file_path = (first_server, f"credentials.{file_type}")
-        if data["use_wildcard"]:
-            # Use the improved method for generating consistent group names
-            group = WILDCARD_GENERATOR.create_group_name(
-                domain=first_server,
-                provider=data["provider"] if data["challenge"] == "dns" else "http",
-                challenge_type=data["challenge"],
-                staging=data["staging"],
-                content_hash=bytes_hash(content, algorithm="sha1"),
-                profile=data["profile"],
-            )
-
-            LOGGER.info(
-                f"Service {first_server} is using wildcard, "
-                + ("the propagation time will be the provider's default and " if data["challenge"] == "dns" else "")
-                + "the email will be the same as the first domain that created the group..."
-            )
-
-            if data["check_psl"]:
-                if psl_lines is None:
-                    psl_lines = load_public_suffix_list(JOB)
-                if psl_rules is None:
-                    psl_rules = parse_psl(psl_lines)
-
-                wildcards = WILDCARD_GENERATOR.extract_wildcards_from_domains(domains.split(" "))
-
-                LOGGER.debug(f"Wildcard domains for {first_server} : {wildcards}")
-
-                for d in wildcards:
-                    if is_domain_blacklisted(d, psl_rules):
-                        LOGGER.error(f"Wildcard domain {d} is blacklisted by Public Suffix List, refusing certificate request for {first_server}.")
-                        is_blacklisted = True
-                        break
-
-            if not is_blacklisted:
-                WILDCARD_GENERATOR.extend(group, domains.split(" "), data["email"], data["staging"])
-                file_path = (f"{group}.{file_type}",)
-                LOGGER.debug(f"[{first_server}] Wildcard group {group}")
-        elif data["check_psl"]:
+        if not config["disable_psl_check"]:
             if psl_lines is None:
                 psl_lines = load_public_suffix_list(JOB)
             if psl_rules is None:
                 psl_rules = parse_psl(psl_lines)
 
-            for d in domains.split():
-                if is_domain_blacklisted(d, psl_rules):
-                    LOGGER.error(f"Domain {d} is blacklisted by Public Suffix List, refusing certificate request for {first_server}.")
-                    is_blacklisted = True
-                    break
-
-        if is_blacklisted:
-            continue
-
-        # * Generating the credentials file
-        credentials_path = CACHE_PATH.joinpath(*file_path)
-
-        if data["challenge"] == "dns":
-            if not credentials_path.is_file():
-                cached, err = JOB.cache_file(
-                    credentials_path.name, content, job_name="certbot-renew", service_id=first_server if not data["use_wildcard"] else ""
-                )
-                if not cached:
-                    LOGGER.error(f"Error while saving service {first_server}'s credentials file in cache : {err}")
-                    continue
-                LOGGER.info(f"Successfully saved service {first_server}'s credentials file in cache")
-            elif data["use_wildcard"]:
-                LOGGER.info(f"Service {first_server}'s wildcard credentials file has already been generated")
-            else:
-                old_content = credentials_path.read_bytes()
-                if old_content != content:
-                    LOGGER.warning(f"Service {first_server}'s credentials file is outdated, updating it...")
-                    cached, err = JOB.cache_file(credentials_path.name, content, job_name="certbot-renew", service_id=first_server)
-                    if not cached:
-                        LOGGER.error(f"Error while updating service {first_server}'s credentials file in cache : {err}")
-                        continue
-                    LOGGER.info(f"Successfully updated service {first_server}'s credentials file in cache")
-                else:
-                    LOGGER.info(f"Service {first_server}'s credentials file is up to date")
-
-            credential_paths.add(credentials_path)
-            credentials_path.chmod(0o600)  # ? Setting the permissions to 600 (this is important to avoid warnings from certbot)
-
-        if data["use_wildcard"]:
-            continue
-
-        domains = domains.replace(" ", ",")
-        LOGGER.info(
-            f"Asking certificates for domain(s) : {domains} (email = {data['email']}){' using staging' if data['staging'] else ''} with {data['challenge']} challenge, using {data['profile']!r} profile..."
-        )
-
-        if (
-            certbot_new_with_retry(
-                data["challenge"],
-                domains,
-                data["email"],
-                data["provider"],
-                credentials_path,
-                data["propagation"],
-                data["profile"],
-                data["staging"],
-                domains_to_ask[first_server] == 2,
-                cmd_env=env,
-                max_retries=data["max_retries"],
-            )
-            != 0
-        ):
-            status = 2
-            LOGGER.error(f"Certificate generation failed for domain(s) {domains} ...")
-        else:
-            status = 1 if status == 0 else status
-            LOGGER.info(f"Certificate generation succeeded for domain(s) : {domains}")
-
-        generated_domains.update(domains.split(","))
-
-    # * Generating the wildcards if necessary
-    wildcards = WILDCARD_GENERATOR.get_wildcards()
-    if wildcards:
-        for group, data in wildcards.items():
-            if not data:
+            if check_psl_blacklist(config["server_names"].split(","), psl_rules, server_name):
+                config["activated"] = False
                 continue
-            # * Generating the certificate from the generated credentials
-            group_parts = group.split("_")
-            provider = group_parts[0]
-            profile = group_parts[2]
-            base_domain = group_parts[3]
 
-            email = data.pop("email")
-            credentials_file = CACHE_PATH.joinpath(f"{group}.{provider_classes[provider].get_file_type() if provider in provider_classes else 'txt'}")
+        if set(config["server_names"].split(",")) != set(existing_cert["server_names"].split(",")):
+            LOGGER.warning(f"[Service: {service}] Server names do not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
+        elif config["challenge"] != existing_cert["challenge"]:
+            LOGGER.warning(f"[Service: {service}] Challenge type does not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
+        elif config["authenticator"] != existing_cert["authenticator"]:
+            LOGGER.warning(f"[Service: {service}] DNS provider does not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
+        elif config["staging"] != existing_cert["staging"]:
+            LOGGER.warning(f"[Service: {service}] Staging environment does not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
+        elif config["profile"] != existing_cert["profile"]:
+            LOGGER.warning(f"[Service: {service}] Profile does not match existing certificate, forcing renewal.")
+            config["force_renew"] = True
 
-            # Process different environment types (staging/prod)
-            for key, domains in data.items():
-                if not domains:
-                    continue
+        if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
+            LOGGER.warning(f"[Service: {service}] DNS credentials have changed, forcing renewal.")
+            config["force_renew"] = True
 
-                staging = key == "staging"
-                LOGGER.info(
-                    f"Asking wildcard certificates for domain(s): {domains} (email = {email})"
-                    f"{' using staging ' if staging else ''} with {'dns' if provider in provider_classes else 'http'} challenge, "
-                    f"using {profile!r} profile..."
-                )
+    # ? generate new certificates and renew existing ones if needed
+    for service, config in services.items():
+        if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
+            config["exists"] = True
+            continue
+        elif not config["activated"]:
+            continue
 
-                domains_split = domains.split(",")
+        LOGGER.info(
+            f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email']}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile..."
+        )
+        LOGGER.debug(f"Service configuration: {config}")
 
-                # Add wildcard certificate names to active set
-                for domain in domains_split:
-                    # Extract the base domain from the wildcard domain
-                    base_domain = WILDCARD_GENERATOR.get_base_domain(domain)
-                    active_cert_names.add(base_domain)
+        for attempts in range(1, config["retries"] + 2):
+            if attempts > 1:
+                LOGGER.warning(f"Certificate generation failed, retrying... (attempt {attempts}/{config['retries'] + 1})")
+                # Wait before retrying (exponential backoff: 30s, 60s, 120s...)
+                wait_time = min(30 * (2 ** (attempts - 2)), 300)  # Cap at 5 minutes
+                LOGGER.info(f"Waiting {wait_time} seconds before retry...")
+                sleep(wait_time)
 
-                if (
-                    certbot_new_with_retry(
-                        "dns",
-                        domains,
-                        email,
-                        provider,
-                        credentials_file,
-                        "default",
-                        profile,
-                        staging,
-                        domains_to_ask.get(base_domain, 0) == 2,
-                        cmd_env=env,
-                    )
-                    != 0
-                ):
-                    status = 2
-                    LOGGER.error(f"Certificate generation failed for domain(s) {domains} ...")
-                else:
-                    status = 1 if status == 0 else status
-                    LOGGER.info(f"Certificate generation succeeded for domain(s): {domains}")
+            ret = certbot_new(config, cmd_env.copy())
 
-                generated_domains.update(domains_split)
-    else:
-        LOGGER.info("No wildcard domains found, skipping wildcard certificate(s) generation...")
+            if ret == 0:
+                LOGGER.info(f"Certificate(s) for {service} generated successfully.")
+                config["exists"] = True
+                status = 1 if status == 0 else status
+                break
+
+            attempts += 1
+
+        if not config["exists"]:
+            status = 2
+            LOGGER.error(f"Failed to generate certificate(s) for {service} after {config['retries'] + 1} attempts.")
 
     if CACHE_PATH.is_dir():
-        # * Clearing all missing credentials files
-        for ext in ("*.ini", "*.env", "*.json"):
-            for file in list(CACHE_PATH.rglob(ext)):
-                if "etc" in file.parts or not file.is_file():
-                    continue
-                # ? If the file is not in the wildcard groups, remove it
-                if file not in credential_paths:
-                    LOGGER.debug(f"Removing old credentials file {file}")
-                    JOB.del_cache(file.name, job_name="certbot-renew", service_id=file.parent.name if file.parent.name != "letsencrypt" else "")
-
-    # * Clearing all no longer needed certificates
-    if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
-        LOGGER.info("Clear old certificates is activated, removing old / no longer used certificates...")
-
-        # Get list of all certificates
-        proc = run(
-            [
-                CERTBOT_BIN,
-                "certificates",
-                "--config-dir",
-                DATA_PATH.as_posix(),
-                "--work-dir",
-                WORK_DIR,
-                "--logs-dir",
-                LOGS_DIR,
-            ],
-            stdin=DEVNULL,
-            stdout=PIPE,
-            stderr=STDOUT,
-            text=True,
-            env=env,
-            check=False,
-        )
-
-        if proc.returncode == 0:
-            certificate_blocks = proc.stdout.split("Certificate Name: ")[1:]
-            for block in certificate_blocks:
-                cert_name = block.split("\n", 1)[0].strip()
-
-                # Skip certificates that are in our active list
-                if cert_name in active_cert_names:
-                    LOGGER.debug(f"Keeping active certificate: {cert_name}")
-                    continue
-
-                LOGGER.warning(f"Removing old certificate {cert_name} (not in active certificates list)")
-
-                # Use certbot's delete command
-                delete_proc = run(
-                    [
-                        CERTBOT_BIN,
-                        "delete",
-                        "--config-dir",
-                        DATA_PATH.as_posix(),
-                        "--work-dir",
-                        WORK_DIR,
-                        "--logs-dir",
-                        LOGS_DIR,
-                        "--cert-name",
-                        cert_name,
-                        "-n",  # non-interactive
-                    ],
-                    stdin=DEVNULL,
-                    stdout=PIPE,
-                    stderr=STDOUT,
-                    text=True,
-                    env=env,
-                    check=False,
+        # * Clean up unused credential files
+        used_credential_files = set()
+        for config in services.values():
+            if config.get("exists") and config.get("challenge") == "dns" and config.get("provider"):
+                used_credential_files.add(
+                    f"credentials_{bytes_hash(config['provider'].get_formatted_credentials(), algorithm='sha256')[:12]}.{config['provider'].get_file_type()}"
                 )
 
-                if delete_proc.returncode == 0:
-                    LOGGER.info(f"Successfully deleted certificate {cert_name}")
-                    # Remove any remaining files for this certificate
-                    cert_dir = DATA_PATH.joinpath("live", cert_name)
-                    archive_dir = DATA_PATH.joinpath("archive", cert_name)
-                    renewal_file = DATA_PATH.joinpath("renewal", f"{cert_name}.conf")
-                    for path in (cert_dir, archive_dir):
-                        if path.exists():
-                            try:
-                                for file in path.glob("*"):
-                                    try:
-                                        file.unlink()
-                                    except Exception as e:
-                                        LOGGER.error(f"Failed to remove file {file}: {e}")
-                                path.rmdir()
-                                LOGGER.info(f"Removed directory {path}")
-                            except Exception as e:
-                                LOGGER.error(f"Failed to remove directory {path}: {e}")
-                        if renewal_file.exists():
-                            try:
-                                renewal_file.unlink()
-                                LOGGER.info(f"Removed renewal file {renewal_file}")
-                            except Exception as e:
-                                LOGGER.error(f"Failed to remove renewal file {renewal_file}: {e}")
-                else:
-                    LOGGER.error(f"Failed to delete certificate {cert_name}: {delete_proc.stdout}")
-        else:
-            LOGGER.error(f"Error listing certificates: {proc.stdout}")
+        for ext in ("*.ini", "*.env", "*.json"):
+            for file in CACHE_PATH.glob(ext):
+                if file.name not in used_credential_files:
+                    JOB.del_cache(file.name)
+                    LOGGER.debug(f"Removed unused credential file: {file.name}")
 
-    # * Save data to db cache
-    if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
-        cached, err = JOB.cache_dir(DATA_PATH, job_name="certbot-renew")
-        if not cached:
-            LOGGER.error(f"Error while saving data to db cache : {err}")
-        else:
-            LOGGER.info("Successfully saved data to db cache")
+        # * Clearing all no longer needed certificates
+        if getenv("LETS_ENCRYPT_CLEAR_OLD_CERTS", "no") == "yes":
+            for service, data in existing_certificates.items():
+                if not data["active"]:
+                    LOGGER.warning(f"Certificate for {service} does not exist anymore, removing...")
+
+                    ret = certbot_delete(service, cmd_env)
+
+                    if ret != 0:
+                        LOGGER.error(f"Failed to delete certificate for {service}")
+                    else:
+                        LOGGER.info(f"Certificate for {service} deleted successfully.")
+
+        # * Save data to db cache
+        if DATA_PATH.is_dir() and list(DATA_PATH.iterdir()):
+            cached, err = JOB.cache_dir(DATA_PATH)
+            if not cached:
+                LOGGER.error(f"Error while saving data to db cache : {err}")
+            else:
+                LOGGER.info("Successfully saved data to db cache")
 except SystemExit as e:
     status = e.code
 except BaseException as e:
-    status = 1
+    status = 2
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running certbot-new.py :\n{e}")
 

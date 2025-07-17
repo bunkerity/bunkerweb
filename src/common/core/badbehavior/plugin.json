@@ -52,7 +52,7 @@
       "type": "number"
     },
     "BAD_BEHAVIOR_BAN_SCOPE": {
-      "context": "multisite",
+      "context": "global",
       "default": "service",
       "help": "Determines the level of the ban. 'service' will ban the IP for the service only, 'global' will ban the IP for the whole system.",
       "id": "bad-behavior-ban-scope",

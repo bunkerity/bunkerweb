@@ -329,6 +329,7 @@ utils.get_reason = function(ctx)
 			{ key = "msgs", env_var = "REASON_DATA_MSGS" },
 			{ key = "matched_vars", env_var = "REASON_DATA_MATCHED_VARS" },
 			{ key = "matched_var_names", env_var = "REASON_DATA_MATCHED_VAR_NAMES" },
+			{ key = "anomaly_score", env_var = "REASON_DATA_ANOMALY_SCORE" },
 		}
 
 		for _, data_type in ipairs(data_types) do
@@ -740,18 +741,18 @@ utils.is_banned = function(ip, server_name)
 			-- luacheck: ignore 311
 			ok, ttl = datastore:ttl(key)
 
-			-- Check if this is a permanent ban (ttl = -1)
+			-- Check if this is a permanent ban (ttl = 0)
 			local is_permanent = false
 			if ok and ban_data and ban_data.permanent then
 				is_permanent = ban_data.permanent
 			end
 
-			-- If permanent, override ttl to -1 for consistency
+			-- If permanent, override ttl to 0 for consistency
 			if is_permanent then
-				ttl = -1
+				ttl = 0
 			end
 
-			return true, result, ttl or -1
+			return true, result, ttl or 0
 		elseif err ~= "not found" then
 			return nil, "datastore:get() error: " .. tostring(result)
 		end
@@ -796,7 +797,13 @@ utils.is_banned = function(ip, server_name)
 			if ok then
 				data[1] = ban_data["reason"]
 			end
-			return true, data[1], data[2]
+
+			local ttl = data[2]
+			-- Redis TTL for permanent keys is -1. Normalize to 0 for consistency.
+			if ttl < 0 then
+				ttl = 0
+			end
+			return true, data[1], ttl
 		end
 
 		return false, "not banned"
@@ -839,11 +846,11 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
 		date = os.time(),
 		country = country or "local",
 		ban_scope = ban_scope or "global",
-		permanent = ttl == -1,
+		permanent = not ttl or ttl == 0,
 	})
 
-	-- Convert -1 TTL to nil for permanent bans in local datastore
-	local effective_ttl = ttl == -1 and nil or ttl
+	-- Convert 0 TTL to nil for permanent bans in local datastore
+	local effective_ttl = (not ttl or ttl == 0) and nil or ttl
 
 	local ok, err = datastore:set(ban_key, ban_data, effective_ttl)
 	if not ok then
@@ -866,7 +873,7 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
 	end
 
 	-- For Redis, set without expiration if permanent, otherwise with EX and ttl
-	if ttl == -1 then
+	if not ttl or ttl == 0 then
 		ok, err = clusterstore:call("set", ban_key, ban_data)
 	else
 		ok, err = clusterstore:call("set", ban_key, ban_data, "EX", ttl)
@@ -877,6 +884,63 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
 		return false, "redis SET failed : " .. err
 	end
 	clusterstore:close()
+	return true, "success"
+end
+
+utils.remove_ban = function(ip, service, ban_scope)
+	-- Set default scope to global
+	if not ban_scope then
+		ban_scope = "global"
+	end
+
+	-- Connect to redis if needed
+	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	if not use_redis then
+		return nil, "can't get USE_REDIS variable : " .. err
+	end
+	use_redis = use_redis == "yes"
+
+	local clusterstore
+	if use_redis then
+		clusterstore = require "bunkerweb.clusterstore":new()
+		local ok, connect_err = clusterstore:connect()
+		if not ok then
+			return false, "can't connect to redis: " .. connect_err
+		end
+	end
+
+	-- Handle service-specific unban
+	if ban_scope == "service" and service then
+		local ban_key = "bans_service_" .. service .. "_ip_" .. ip
+		datastore:delete(ban_key)
+		if use_redis then
+			clusterstore:call("del", ban_key)
+		end
+	-- Handle global unban
+	else
+		-- Delete global ban from datastore and redis
+		local global_ban_key = "bans_ip_" .. ip
+		datastore:delete(global_ban_key)
+		if use_redis then
+			clusterstore:call("del", global_ban_key)
+		end
+
+		-- Delete all service-specific bans for this IP from datastore and redis
+		-- This is inefficient but it's how it's done in api.lua
+		for _, k in ipairs(datastore:keys()) do
+			if k:find("^bans_service_.-_ip_" .. ip .. "$") then
+				datastore:delete(k)
+				if use_redis then
+					clusterstore:call("del", k)
+				end
+			end
+		end
+	end
+
+	if clusterstore then
+		clusterstore:close()
+	end
+
 	return true, "success"
 end
 

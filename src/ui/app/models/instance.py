@@ -127,18 +127,12 @@ class Instance:
             return f"IP {ip} has been banned {scope_text} on instance {self.hostname} for {exp} seconds{f' with reason: {reason}' if reason else ''}."
         return f"Can't ban {ip} on instance {self.hostname}"
 
-    def unban(self, ip: str, service: str = None) -> str:
+    def unban(self, ip: str, service: str = None, ban_scope: str = "global") -> str:
         try:
             # Prepare request data
-            data = {"ip": ip}
-
-            # Only include service if it's specified and not a placeholder
+            data = {"ip": ip, "ban_scope": ban_scope}
             if service and service not in ("unknown", "Web UI", "default server"):
                 data["service"] = service
-                data["ban_scope"] = "service"
-            else:
-                data["ban_scope"] = "global"
-
             result = self.apiCaller.send_to_apis("POST", "/unban", data=data)[0]
         except BaseException as e:
             service_text = f" for service {service}" if service else ""
@@ -225,8 +219,10 @@ class InstancesUtils:
             if instance.ban(ip, exp, reason, service, ban_scope).startswith("Can't ban")
         ] or ""
 
-    def unban(self, ip: str, service: str = None, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        return [instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service).startswith("Can't unban")] or ""
+    def unban(self, ip: str, service: str = None, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+        return [
+            instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service, ban_scope).startswith("Can't unban")
+        ] or ""
 
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""

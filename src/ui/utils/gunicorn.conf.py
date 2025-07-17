@@ -472,17 +472,11 @@ def on_starting(server):
             ERROR_FILE.write_text(message, encoding="utf-8")
             exit(1)
 
-    latest_release = None
+    latest_version = "unknown"
     try:
-        latest_release = get_latest_stable_release()
+        latest_version = get_latest_stable_release()
     except BaseException as e:
         LOGGER.error(f"Exception while fetching latest release information: {e}")
-
-    if not latest_release:
-        LOGGER.error("Failed to fetch latest release information")
-        latest_version = "unknown"
-    else:
-        latest_version = latest_release["tag_name"].removeprefix("v")
 
     UI_DATA_FILE.write_text(
         dumps(

@@ -225,8 +225,26 @@ include /etc/nginx/{{ service_id }}/modsec/*.conf
 
   {% if USE_MODSECURITY_CRS == "yes" -%}
 # set REASON env var
-SecRuleUpdateActionById 949110 "t:none,deny,status:{{ DENY_HTTP_STATUS }},setenv:REASON=modsecurity,setenv:REASON_DATA_UNIQUE_ID=%{UNIQUE_ID},setenv:REASON_DATA_RULES=%{TX.BUNKERWEB_RULES},setenv:REASON_DATA_MSGS=%{TX.BUNKERWEB_MSGS},setenv:REASON_DATA_MATCHED_VARS=%{TX.BUNKERWEB_MATCHED_VARS},setenv:REASON_DATA_MATCHED_VAR_NAMES=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}"
-SecRuleUpdateActionById 959100 "t:none,deny,status:{{ DENY_HTTP_STATUS }},setenv:REASON=modsecurity,setenv:REASON_DATA_UNIQUE_ID=%{UNIQUE_ID},setenv:REASON_DATA_RULES=%{TX.BUNKERWEB_RULES},setenv:REASON_DATA_MSGS=%{TX.BUNKERWEB_MSGS},setenv:REASON_DATA_MATCHED_VARS=%{TX.BUNKERWEB_MATCHED_VARS},setenv:REASON_DATA_MATCHED_VAR_NAMES=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}"
+SecRuleUpdateActionById 949110 \
+  "t:none,deny,status:{{ DENY_HTTP_STATUS }},\
+   setenv:'REASON=modsecurity',\
+   setenv:'REASON_DATA_UNIQUE_ID=%{UNIQUE_ID}',\
+   setenv:'REASON_DATA_RULES=%{TX.BUNKERWEB_RULES}',\
+   setenv:'REASON_DATA_MSGS=%{TX.BUNKERWEB_MSGS}',\
+   setenv:'REASON_DATA_MATCHED_VARS=%{TX.BUNKERWEB_MATCHED_VARS}',\
+   setenv:'REASON_DATA_MATCHED_VAR_NAMES=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}',\
+   setenv:'REASON_DATA_ANOMALY_SCORE=%{TX.BUNKERWEB_ANOMALY_SCORE}'"
+
+SecRuleUpdateActionById 959100 \
+  "t:none,deny,status:{{ DENY_HTTP_STATUS }},\
+   setenv:'REASON=modsecurity',\
+   setenv:'REASON_DATA_UNIQUE_ID=%{UNIQUE_ID}',\
+   setenv:'REASON_DATA_RULES=%{TX.BUNKERWEB_RULES}',\
+   setenv:'REASON_DATA_MSGS=%{TX.BUNKERWEB_MSGS}',\
+   setenv:'REASON_DATA_MATCHED_VARS=%{TX.BUNKERWEB_MATCHED_VARS}',\
+   setenv:'REASON_DATA_MATCHED_VAR_NAMES=%{TX.BUNKERWEB_MATCHED_VAR_NAMES}',\
+   setenv:'REASON_DATA_ANOMALY_SCORE=%{TX.BUNKERWEB_ANOMALY_SCORE}'"
+
 
 # let BW manage when method is not allowed (and save up some computing)
 SecRuleUpdateActionById 911100 "t:none,allow,nolog"

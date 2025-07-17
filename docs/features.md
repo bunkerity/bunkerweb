@@ -133,14 +133,14 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                               |
     | `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                     |
     | `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                  |
-    | `USE_TEMPLATE`    | ``      | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
+    | `USE_TEMPLATE`    |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
 
 === "Nginx Settings"
 
     | Setting                         | Default       | Context | Multiple | Description                                                                               |
     | ------------------------------- | ------------- | ------- | -------- | ----------------------------------------------------------------------------------------- |
     | `NGINX_PREFIX`                  | `/etc/nginx/` | global  | No       | **Nginx Prefix:** Where nginx will search for configurations.                             |
-    | `SERVER_NAMES_HASH_BUCKET_SIZE` | ``            | global  | No       | **Server Names Hash Bucket Size:** Value for the server_names_hash_bucket_size directive. |
+    | `SERVER_NAMES_HASH_BUCKET_SIZE` |               | global  | No       | **Server Names Hash Bucket Size:** Value for the server_names_hash_bucket_size directive. |
 
 ### Example Configurations
 
@@ -748,7 +748,7 @@ Follow these steps to configure and use the Bad Behavior feature:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Threshold:** The number of "bad" status codes an IP can generate within the counting period before being banned.                                                                    |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Count Period:** The time window (in seconds) during which bad status codes are counted toward the threshold.                                                                        |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Ban Duration:** How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). Set to `0` for permanent bans that never expire. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | multisite | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                                                                   |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                                                                   |
 
 !!! warning "False Positives"
     Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.
@@ -1563,7 +1563,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.2
+        image: bunkerity/bunkerweb:1.6.3-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1580,7 +1580,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2035,15 +2035,17 @@ The Errors plugin provides customizable error handling for your website, letting
 
 1. When a client encounters an HTTP error (for example, 400, 404, or 500), BunkerWeb intercepts the error response.
 2. Instead of showing the default error page, BunkerWeb displays a custom, professionally designed error page.
-3. Error pages are fully customizable through your configuration, allowing you to specify custom pages for specific error codes.
+3. Error pages are fully customizable through your configuration, allowing you to specify custom pages for specific error codes. **Custom error page files must be placed in the directory defined by the `ROOT_FOLDER` setting (see the Miscellaneous plugin documentation).**
+   - By default, `ROOT_FOLDER` is `/var/www/html/{server_name}` (where `{server_name}` is replaced by the actual server name).
+   - In multisite mode, each site can have its own `ROOT_FOLDER`, so custom error pages must be placed in the corresponding directory for each site.
 4. The default error pages provide clear explanations, helping users understand what went wrong and what they can do next.
 
 ### How to Use
 
 Follow these steps to configure and use the Errors feature:
 
-1. **Define custom error pages:** Specify which HTTP error codes should use custom error pages using the `ERRORS` setting.
-2. **Configure your error pages:** For each error code, you can use the default BunkerWeb error page or provide your own custom HTML page.
+1. **Define custom error pages:** Specify which HTTP error codes should use custom error pages using the `ERRORS` setting. The custom error page files must be located in the folder specified by the `ROOT_FOLDER` setting for the site. In multisite mode, this means each site/server can have its own folder for custom error pages.
+2. **Configure your error pages:** For each error code, you can use the default BunkerWeb error page or provide your own custom HTML page (placed in the appropriate `ROOT_FOLDER`).
 3. **Set intercepted error codes:** Select which error codes should always be handled by BunkerWeb with the `INTERCEPTED_ERROR_CODES` setting.
 4. **Let BunkerWeb handle the rest:** Once configured, error handling occurs automatically for all specified error codes.
 
@@ -4557,6 +4559,68 @@ Follow these steps to configure and use the Reverse Scan feature:
     REVERSE_SCAN_TIMEOUT: "1500"
     REVERSE_SCAN_PORTS: "22 25 80 443 1080 3128 3333 4444 5555 6588 6666 7777 8000 8080 8081 8800 8888 9999"
     ```
+
+## Robots.txt
+
+STREAM support :white_check_mark:
+
+The Robots.txt plugin manages the [robots.txt](https://www.robotstxt.org/) file for your website. This file tells web crawlers and robots which parts of your site they can or cannot access.
+
+**How it works:**
+
+1. When enabled, BunkerWeb creates a `/robots.txt` file at the root of your website.
+2. The file contains rules and optional sitemap URLs, configured via environment variables.
+3. Web crawlers and automated tools can easily find this file at the standard location.
+4. The content is configured using simple settings that allow you to specify rules and sitemaps.
+5. BunkerWeb automatically formats the file according to the robots.txt standard.
+
+### How to Use
+
+1. **Enable the feature:** Set the `USE_ROBOTSTXT` setting to `yes` to enable the robots.txt file.
+2. **Configure rules:** Specify one or more rules using the `ROBOTSTXT_RULE` setting (e.g., `User-agent: *`, `Disallow: /private`).
+3. **Add sitemaps (optional):** Specify one or more sitemap URLs using the `ROBOTSTXT_SITEMAP` setting.
+4. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb will automatically create and serve the robots.txt file at the standard location.
+
+### Configuration Settings
+
+| Setting             | Default | Context   | Multiple | Description                                                                                                                        |
+| ------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_ROBOTSTXT`     | `no`    | multisite | no       | **Enable robots.txt:** Set to `yes` to enable the robots.txt file.                                                                 |
+| `ROBOTSTXT_RULE`    |         | multisite | yes      | **Rule:** Each line in robots.txt (e.g., user-agent, disallow). (If empty, the default rule is `User-agent: *` and `Disallow: /`). |
+| `ROBOTSTXT_SITEMAP` |         | multisite | yes      | **Sitemap:** Sitemap URL(s) to include.                                                                                            |
+
+### Example Configurations
+
+**Basic Configuration**
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_RULE: "User-agent: *"
+ROBOTSTXT_RULE_2: "Disallow: /private"
+```
+
+**With Sitemap**
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_RULE: "User-agent: *"
+ROBOTSTXT_RULE_2: "Disallow: /private"
+ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
+```
+
+**Multiple Sitemaps**
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_RULE: "User-agent: *"
+ROBOTSTXT_RULE_2: "Disallow: /private"
+ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
+ROBOTSTXT_SITEMAP_2: "https://example.com/sitemap-news.xml"
+```
+
+---
+
+For more information, see the [robots.txt documentation](https://www.robotstxt.org/robotstxt.html).
 
 ## SSL
 

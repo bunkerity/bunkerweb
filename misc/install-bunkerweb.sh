@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default values
-BUNKERWEB_VERSION="1.6.2"
+BUNKERWEB_VERSION="1.6.3-rc1"
 NGINX_VERSION=""
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
@@ -177,7 +177,7 @@ check_supported_os() {
                     fi
                 fi
             fi
-            NGINX_VERSION="1.26.3"
+            NGINX_VERSION="1.28.0"
             ;;
         "rhel"|"rocky"|"almalinux")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
@@ -438,7 +438,7 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--version)
-            BUNKERWEB_VERSION="1.6.2"
+            BUNKERWEB_VERSION="1.6.3-rc1"
             shift 2
             ;;
         -w|--enable-wizard)

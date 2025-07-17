@@ -20,7 +20,7 @@ from Templator import Templator
 
 DB_PATH = Path(sep, "usr", "share", "bunkerweb", "db")
 
-LOGGER = setup_logger("Generator", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("Generator", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
 if __name__ == "__main__":
     try:

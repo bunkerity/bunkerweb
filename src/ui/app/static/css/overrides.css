@@ -21,8 +21,9 @@
 }
 
 body {
-  font-family: var(--bs-body-font-family), "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Heiti SC",
+  font-family:
+    var(--bs-body-font-family), "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Heiti SC",
     "WenQuanYi Micro Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol";
 }
@@ -236,12 +237,14 @@ button.list-group-item-secondary.active {
 
 :root {
   --dt-row-selected: 230, 234, 237;
-  --font-don-jose: "Don Jose", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+  --font-don-jose:
+    "Don Jose", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
-  --font-courier-prime: "Courier Prime", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-    "Helvetica Neue", sans-serif;
+  --font-courier-prime:
+    "Courier Prime", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
 }
 
 .badge-dot {
@@ -1563,7 +1566,7 @@ span.cursor-pointer ~ .reset-setting {
 }
 
 .multivalue-toggle-btn .bx {
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease-in-out !important;
 }
 
 .multivalue-toggle-btn.expanded .bx {
