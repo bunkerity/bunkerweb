@@ -63,11 +63,9 @@ WORK_DIR = join(sep, "var", "lib", "bunkerweb", "letsencrypt")
 LOGS_DIR = join(sep, "var", "log", "bunkerweb", "letsencrypt")
 
 IS_MULTISITE = getenv("MULTISITE", "no") == "yes"
-CHALLENGE_TYPES = ["http", "dns"]
-PROFILE_TYPES = ["classic", "tlsserver", "shortlived"]
+CHALLENGE_TYPES = ("http", "dns")
+PROFILE_TYPES = ("classic", "tlsserver", "shortlived")
 DNS_PROPAGATION_DEFAULT = "default"
-RSA_PROVIDERS = ("infomaniak", "ionos")
-AUTHENTICATOR_PROVIDERS = ("bunny", "desec", "infomaniak", "ionos", "njalla", "scaleway")
 
 PROVIDERS: Dict[str, Type[Provider]] = {
     "bunny": BunnyNetProvider,
@@ -360,6 +358,7 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
     command = [
         CERTBOT_BIN,
         "delete",
+        "-n",
         "--cert-name",
         service,
         "--config-dir",
@@ -435,22 +434,11 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
 
         # * Adding the credentials to the command
         if config["authenticator"] == "route53":
-            # ? Route53 credentials are different from the others, we need to add them to the environment
-            for line in credentials.decode().splitlines():
-                key, value = line.strip().split("=", 1)
-                cmd_env[key] = value
+            cmd_env["AWS_CONFIG_FILE"] = credentials_path.as_posix()
         else:
             command.extend([f"--dns-{config['authenticator']}-credentials", credentials_path.as_posix()])
 
-        # * Adding the RSA key size argument for RSA providers
-        if config["authenticator"] in RSA_PROVIDERS:
-            command.extend(["--rsa-key-size", "4096"])
-
-        # * Adding DNS provider argument
-        if config["authenticator"] in AUTHENTICATOR_PROVIDERS:
-            command.extend(["--authenticator", f"dns-{config['authenticator']}"])
-        else:
-            command.append(f"--dns-{config['authenticator']}")
+        command.extend(config["provider"].get_extra_args())
     else:
         # * Adding HTTP challenge hooks
         command.extend(
@@ -468,9 +456,13 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
         command.append("--staging")
 
     if config["force_renew"]:
-        ret = certbot_delete(service, cmd_env)
-        if ret != 0:
-            LOGGER.error(f"Failed to delete certificate for {service}")
+        renewal_file = DATA_PATH.joinpath("renewal", f"{service}.conf")
+        if renewal_file.is_file():
+            ret = certbot_delete(service, cmd_env)
+            if ret != 0:
+                LOGGER.error(f"Failed to delete certificate for {service}")
+        else:
+            LOGGER.info(f"No existing certificate found for {service}, skipping removal.")
 
     current_date = datetime.now()
     process = Popen(command, stdin=DEVNULL, stderr=PIPE, universal_newlines=True, env=cmd_env)
@@ -531,14 +523,14 @@ try:
         [
             CERTBOT_BIN,
             "certificates",
+            "-n",
             "--config-dir",
             DATA_PATH.as_posix(),
             "--work-dir",
             WORK_DIR,
             "--logs-dir",
             LOGS_DIR,
-        ]
-        + ["-v" if LOG_LEVEL == "DEBUG" else ""],
+        ],
         stdin=DEVNULL,
         stdout=PIPE,
         stderr=STDOUT,
@@ -548,6 +540,8 @@ try:
     )
     stdout = proc.stdout
     existing_certificates = {}
+
+    LOGGER_CERTBOT.debug(f"Certbot output:\n{stdout}")
 
     # ? Check if the command was successful
     if proc.returncode != 0:
@@ -560,7 +554,7 @@ try:
             if not certificate_lines:
                 continue
 
-            service = certificate_lines[0].strip()
+            service = certificate_lines[0].split(" ")[0].strip()
             match_domains = search(r"Domains:\s+(.+)$", certificate_block, MULTILINE)
             domains = match_domains.group(1).strip().replace(" ", ",") if match_domains else ""
 
@@ -598,6 +592,8 @@ try:
                         "profile": profile,
                     }
                 )
+
+        LOGGER_CERTBOT.debug(f"Existing certificates: {existing_certificates}")
 
     # ? Check if the services' certificates already exist
     for server_name, config in services.items():
@@ -640,6 +636,7 @@ try:
     # ? generate new certificates and renew existing ones if needed
     for service, config in services.items():
         if existing_certificates.get(service, {}).get("active") and not config["force_renew"]:
+            LOGGER.info(f"Certificate(s) for {service} already exist, skipping generation.")
             config["exists"] = True
             continue
         elif not config["activated"]:
