@@ -6,6 +6,7 @@
 - [BUGFIX] Fix `Let's Encrypt` credential files being removed upon reload of the scheduler creating issues with the certificate renewal.
 - [BUGFIX] Change `BAD_BEHAVIOR_BAN_SCOPE` setting context from `multisite` to `global`.
 - [BUGFIX] Update template data handling to use template_data instead of template when updating external plugins.
+- [BUGFIX] Fix unban functionality to correctly handle global bans in the web UI.
 - [FEATURE] Add `BunnyNet` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add new `robotstxt` plugin to manage the robots.txt file from settings and serve it
 - [UI] Fix shenanigans when fetching the latest version in the web UI.
@@ -13,7 +14,6 @@
 - [UI] Fix multivalue toggle button functionality and transition effects
 - [UI] Enhance ModSecurity Reporting: Add Anomaly Score Handling
 - [UI] Improve multiple setting handling in plugin settings template for better UI interaction (always show the first group, hide others by default)
-- [BUGFIX] Fix unban functionality to correctly handle global bans in the web UI.
 - [DOCS] Update error handling documentation to clarify custom error page placement and ROOT_FOLDER settings.
 - [MISC] Enhance plugin command execution with error handling and available commands listing
 - [MISC] Streamline ban management by utilizing utility functions for adding and removing bans
