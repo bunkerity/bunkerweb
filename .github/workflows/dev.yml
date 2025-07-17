@@ -45,17 +45,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux:
-          [
-            ubuntu,
-            debian,
-            fedora-40,
-            fedora-41,
-            fedora-42,
-            rhel,
-            rhel9,
-            ubuntu-jammy,
-          ]
+        linux: [ubuntu, debian, fedora-41, fedora-42, rhel, rhel9, ubuntu-jammy]
         include:
           - linux: ubuntu
             package: deb
@@ -63,8 +53,6 @@ jobs:
             package: deb
           - linux: debian
             package: deb
-          - linux: fedora-40
-            package: rpm
           - linux: fedora-41
             package: rpm
           - linux: fedora-42
@@ -200,17 +188,7 @@ jobs:
     needs: [build-packages]
     strategy:
       matrix:
-        linux:
-          [
-            ubuntu,
-            debian,
-            fedora-40,
-            fedora-41,
-            fedora-42,
-            el,
-            el9,
-            ubuntu-jammy,
-          ]
+        linux: [ubuntu, debian, fedora-41, fedora-42, el, el9, ubuntu-jammy]
         arch: [amd64]
         include:
           - release: dev
@@ -227,12 +205,6 @@ jobs:
             suffix: ""
             version: bookworm
             package: deb
-          - linux: fedora-40
-            package_arch: x86_64
-            separator: "-"
-            suffix: "1."
-            version: 40
-            package: rpm
           - linux: fedora-41
             package_arch: x86_64
             separator: "-"

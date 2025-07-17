@@ -440,7 +440,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         sudo systemctl enable dnsmasq
         ```
 
-    === "RHEL/CentOS/Fedora"
+    === "RHEL/Fedora"
 
         ```bash
         # Install dnsmasq

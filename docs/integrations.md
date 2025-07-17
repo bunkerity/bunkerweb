@@ -512,7 +512,6 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 40
 - Fedora 41
 - Fedora 42
 - Red Hat Enterprise Linux (RHEL) 8.10
@@ -586,7 +585,7 @@ The easy install script automatically:
 - **Sets up the setup wizard** (if enabled) for easy web-based configuration
 - **Provides comprehensive next steps** and resource links
 
-#### RHEL/CentOS considerations
+#### RHEL considerations
 
 !!! warning "External database support on RHEL-based systems"
     If you plan to use an external database (recommended for production), you must install the appropriate database client package:
@@ -725,14 +724,9 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
     !!! info "Fedora Update Testing"
         If you can't find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository:
 
-        === "Fedora 41/42"
-            ```shell
-            sudo dnf config-manager setopt updates-testing.enabled=1
-            ```
-        === "Fedora 40"
-            ```shell
-            sudo dnf config-manager --set-enabled updates-testing
-            ```
+        ```shell
+        sudo dnf config-manager setopt updates-testing.enabled=1
+        ```
 
     Fedora already provides NGINX 1.28.0 that we support
 

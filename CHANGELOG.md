@@ -18,6 +18,7 @@
 - [MISC] Enhance plugin command execution with error handling and available commands listing
 - [MISC] Streamline ban management by utilizing utility functions for adding and removing bans
 - [MISC] Reorder session data retrieval in antibot access method for improved clarity and flow
+- [LINUX] Drop support of Fedora 40
 - [DEPS] Updated NGINX version to 1.28.0 for Fedora integration now that it is available in the repositories.
 
 ## v1.6.2 - ????/??/??
