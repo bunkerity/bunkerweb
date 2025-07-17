@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 from sys import path as sys_path
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -43,6 +43,11 @@ class Provider(BaseModel):
         """Return the file type that the credentials should be written to."""
         return "ini"
 
+    @staticmethod
+    def get_extra_args() -> List[str]:
+        """Return additional arguments for the provider."""
+        return []
+
 
 class BunnyNetProvider(Provider):
     """BunnyNet DNS provider."""
@@ -54,6 +59,11 @@ class BunnyNetProvider(Provider):
             "dns_bunny_api_key": ("dns_bunny_api_key", "bunnynet_api_key", "api_key"),
         }
     )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-bunny"]
 
 
 class CloudflareProvider(Provider):
@@ -82,6 +92,11 @@ class CloudflareProvider(Provider):
             raise ValueError("Either 'dns_cloudflare_api_token' or both 'dns_cloudflare_email' and 'dns_cloudflare_api_key' must be provided.")
         return self
 
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-cloudflare"]
+
 
 class DesecProvider(Provider):
     """deSEC DNS provider."""
@@ -93,6 +108,11 @@ class DesecProvider(Provider):
             "dns_desec_token": ("dns_desec_token", "desec_token", "token"),
         }
     )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-desec"]
 
 
 class DigitalOceanProvider(Provider):
@@ -106,6 +126,11 @@ class DigitalOceanProvider(Provider):
         }
     )
 
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-digitalocean"]
+
 
 class DnsimpleProvider(Provider):
     """DNSimple DNS provider."""
@@ -117,6 +142,11 @@ class DnsimpleProvider(Provider):
             "dns_dnsimple_token": ("dns_dnsimple_token", "dnsimple_token", "token"),
         }
     )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-dnsimple"]
 
 
 class DnsMadeEasyProvider(Provider):
@@ -132,6 +162,11 @@ class DnsMadeEasyProvider(Provider):
         }
     )
 
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-dnsmadeeasy"]
+
 
 class GehirnProvider(Provider):
     """Gehirn DNS provider."""
@@ -145,6 +180,11 @@ class GehirnProvider(Provider):
             "dns_gehirn_api_secret": ("dns_gehirn_api_secret", "gehirn_api_secret", "api_secret"),
         }
     )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-gehirn"]
 
 
 class GoogleProvider(Provider):
@@ -185,6 +225,11 @@ class GoogleProvider(Provider):
         """Return the file type that the credentials should be written to."""
         return "json"
 
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-google"]
+
 
 class InfomaniakProvider(Provider):
     """Infomaniak DNS provider."""
@@ -196,6 +241,11 @@ class InfomaniakProvider(Provider):
             "dns_infomaniak_token": ("dns_infomaniak_token", "infomaniak_token", "token"),
         }
     )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-infomaniak", "--rsa-key-size", "4096"]
 
 
 class IonosProvider(Provider):
@@ -213,6 +263,11 @@ class IonosProvider(Provider):
         }
     )
 
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-ionos", "--rsa-key-size", "4096"]
+
 
 class LinodeProvider(Provider):
     """Linode DNS provider."""
@@ -224,6 +279,11 @@ class LinodeProvider(Provider):
             "dns_linode_key": ("dns_linode_key", "linode_key", "key"),
         }
     )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-linode"]
 
 
 class LuaDnsProvider(Provider):
@@ -239,6 +299,28 @@ class LuaDnsProvider(Provider):
         }
     )
 
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-luadns"]
+
+
+class NjallaProvider(Provider):
+    """Njalla DNS provider."""
+
+    dns_njalla_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_njalla_token": ("dns_njalla_token", "njalla_token", "token", "api_token", "auth_token"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-njalla"]
+
 
 class NSOneProvider(Provider):
     """NS1 DNS provider."""
@@ -250,6 +332,11 @@ class NSOneProvider(Provider):
             "dns_nsone_api_key": ("dns_nsone_api_key", "nsone_api_key", "api_key"),
         }
     )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-nsone"]
 
 
 class OvhProvider(Provider):
@@ -268,6 +355,11 @@ class OvhProvider(Provider):
             "dns_ovh_consumer_key": ("dns_ovh_consumer_key", "ovh_consumer_key", "consumer_key"),
         }
     )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-ovh"]
 
 
 class Rfc2136Provider(Provider):
@@ -295,6 +387,11 @@ class Rfc2136Provider(Provider):
         """Return the formatted credentials, excluding defaults."""
         return "\n".join(f"{key} = {value}" for key, value in self.model_dump(exclude={"file_type"}, exclude_defaults=True).items()).encode("utf-8")
 
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-rfc2136"]
+
 
 class Route53Provider(Provider):
     """AWS Route 53 DNS provider."""
@@ -310,13 +407,21 @@ class Route53Provider(Provider):
     )
 
     def get_formatted_credentials(self) -> bytes:
-        """Return the formatted credentials in environment variable format."""
-        return "\n".join(f"{key.upper()}={value!r}" for key, value in self.model_dump(exclude={"file_type"}).items()).encode("utf-8")
+        """Return the formatted credentials in environment variable format, with [default] at the top."""
+        lines = ["[default]"]
+        for key, value in self.model_dump(exclude={"file_type"}).items():
+            lines.append(f"{key}={value}")
+        return "\n".join(lines).encode("utf-8")
 
     @staticmethod
     def get_file_type() -> Literal["env"]:
         """Return the file type that the credentials should be written to."""
         return "env"
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-route53"]
 
 
 class SakuraCloudProvider(Provider):
@@ -332,6 +437,11 @@ class SakuraCloudProvider(Provider):
         }
     )
 
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--dns-sakuracloud"]
+
 
 class ScalewayProvider(Provider):
     """Scaleway DNS provider."""
@@ -344,14 +454,7 @@ class ScalewayProvider(Provider):
         }
     )
 
-
-class NjallaProvider(Provider):
-    """Njalla DNS provider."""
-
-    dns_njalla_token: str
-
-    _validate_aliases = alias_model_validator(
-        {
-            "dns_njalla_token": ("dns_njalla_token", "njalla_token", "token", "api_token", "auth_token"),
-        }
-    )
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["-a", "dns-scaleway"]
