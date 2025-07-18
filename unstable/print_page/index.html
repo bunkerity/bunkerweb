@@ -1715,7 +1715,6 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Debian 12 "Bookworm"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 40</li>
 <li>Fedora 41</li>
 <li>Fedora 42</li>
 <li>Red Hat Enterprise Linux (RHEL) 8.10</li>
@@ -1776,7 +1775,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--forc
 <li><strong>Sets up the setup wizard</strong> (if enabled) for easy web-based configuration</li>
 <li><strong>Provides comprehensive next steps</strong> and resource links</li>
 </ul>
-<h4 id="integrations-rhelcentos-considerations">RHEL/CentOS considerations</h4>
+<h4 id="integrations-rhel-considerations">RHEL considerations</h4>
 <div class="admonition warning">
 <p class="admonition-title">External database support on RHEL-based systems</p>
 <p>If you plan to use an external database (recommended for production), you must install the appropriate database client package:</p>
@@ -1806,7 +1805,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>Restart the scheduler: <code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
 <h3 id="integrations-installation-using-package-manager">Installation using package manager</h3>
-<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. For Fedora, as NGINX 1.28.0 is not yet available, we will use NGINX 1.26.3. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="integrations-__tabbed_1_1" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_2" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_3" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_4" name="integrations-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="integrations-__tabbed_1_1">Debian</label><label for="integrations-__tabbed_1_2">Ubuntu</label><label for="integrations-__tabbed_1_3">Fedora</label><label for="integrations-__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1881,21 +1880,11 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="admonition info">
 <p class="admonition-title">Fedora Update Testing</p>
 <p>If you can't find the NGINX version listed in the stable repository, you can enable the <code>updates-testing</code> repository:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="integrations-__tabbed_2_1" name="integrations-__tabbed_2" type="radio" /><input id="integrations-__tabbed_2_2" name="integrations-__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="integrations-__tabbed_2_1">Fedora 41/42</label><label for="integrations-__tabbed_2_2">Fedora 40</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>--set-enabled<span class="w"> </span>updates-testing
-</code></pre></div>
-</div>
-</div>
-</div>
-</div>
-<p>Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.26.3
+<p>Fedora already provides NGINX 1.28.0 that we support</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.0
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>
@@ -2750,7 +2739,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <li>Azure ARM Template</li>
 <li>Azure portal via the Marketplace</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="integrations-__tabbed_3_1" name="integrations-__tabbed_3" type="radio" /><input id="integrations-__tabbed_3_2" name="integrations-__tabbed_3" type="radio" /><input id="integrations-__tabbed_3_3" name="integrations-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="integrations-__tabbed_3_1">Cloud Shell</label><label for="integrations-__tabbed_3_2">ARM Template</label><label for="integrations-__tabbed_3_3">Marketplace</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="integrations-__tabbed_2_1" name="integrations-__tabbed_2" type="radio" /><input id="integrations-__tabbed_2_2" name="integrations-__tabbed_2" type="radio" /><input id="integrations-__tabbed_2_3" name="integrations-__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="integrations-__tabbed_2_1">Cloud Shell</label><label for="integrations-__tabbed_2_2">ARM Template</label><label for="integrations-__tabbed_2_3">Marketplace</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Create a resource group. Replace value <code>RG_NAME</code></p>
@@ -2815,7 +2804,7 @@ To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write an
 <p>The All-In-One image comes with several built-in services, which can be controlled using environment variables. See the <a href="#integrations-all-in-one-aio-image">All-In-One (AIO) Image section</a> of the integrations page for more details.</p>
 </div>
 <div class="tabbed-block">
-<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. For Fedora, as NGINX 1.28.0 is not yet available, we will use NGINX 1.26.3. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="quickstart-guide-__tabbed_2_1" name="quickstart-guide-__tabbed_2" type="radio" /><input id="quickstart-guide-__tabbed_2_2" name="quickstart-guide-__tabbed_2" type="radio" /><input id="quickstart-guide-__tabbed_2_3" name="quickstart-guide-__tabbed_2" type="radio" /><input id="quickstart-guide-__tabbed_2_4" name="quickstart-guide-__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_2_1">Debian</label><label for="quickstart-guide-__tabbed_2_2">Ubuntu</label><label for="quickstart-guide-__tabbed_2_3">Fedora</label><label for="quickstart-guide-__tabbed_2_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2878,21 +2867,11 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="admonition info">
 <p class="admonition-title">Fedora Update Testing</p>
 <p>If you cannot find the NGINX version listed in the stable repository, you can enable the <code>updates-testing</code> repository:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="quickstart-guide-__tabbed_3_1" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_2" name="quickstart-guide-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_3_1">Fedora 41/42</label><label for="quickstart-guide-__tabbed_3_2">Fedora 40</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>--set-enabled<span class="w"> </span>updates-testing
-</code></pre></div>
-</div>
-</div>
-</div>
-</div>
-<p>Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.26.3
+<p>Fedora already provides NGINX 1.28.0 that we support</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.28.0
 </code></pre></div>
 <p>And finally install BunkerWeb testing:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -3351,7 +3330,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <figcaption>Web interface home</figcaption>
 </figure>
 <h2 id="quickstart-guide-creating-a-new-service">Creating a new service</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:7"><input checked="checked" id="quickstart-guide-__tabbed_4_1" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_2" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_3" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_4" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_5" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_6" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_7" name="quickstart-guide-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_4_1">Web UI</label><label for="quickstart-guide-__tabbed_4_2">All-in-one</label><label for="quickstart-guide-__tabbed_4_3">Linux variables.env file</label><label for="quickstart-guide-__tabbed_4_4">Docker</label><label for="quickstart-guide-__tabbed_4_5">Docker autoconf labels</label><label for="quickstart-guide-__tabbed_4_6">Kubernetes annotations</label><label for="quickstart-guide-__tabbed_4_7">Swarm labels</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="quickstart-guide-__tabbed_3_1" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_2" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_3" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_4" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_5" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_6" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_7" name="quickstart-guide-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_3_1">Web UI</label><label for="quickstart-guide-__tabbed_3_2">All-in-one</label><label for="quickstart-guide-__tabbed_3_3">Linux variables.env file</label><label for="quickstart-guide-__tabbed_3_4">Docker</label><label for="quickstart-guide-__tabbed_3_5">Docker autoconf labels</label><label for="quickstart-guide-__tabbed_3_6">Kubernetes annotations</label><label for="quickstart-guide-__tabbed_3_7">Swarm labels</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can create a new service by navigating to the <code>Services</code> section of the web interface and clicking on the <code>➕ Create new service</code> button.</p>
@@ -3365,7 +3344,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <p class="admonition-title">Draft service</p>
 <p>You can create a draft service to save your progress and come back to it later. Just click on the <code>🌐 Online</code> button to toggle the service to draft mode.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="quickstart-guide-__tabbed_5_1" name="quickstart-guide-__tabbed_5" type="radio" /><input id="quickstart-guide-__tabbed_5_2" name="quickstart-guide-__tabbed_5" type="radio" /><input id="quickstart-guide-__tabbed_5_3" name="quickstart-guide-__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_5_1">Easy mode</label><label for="quickstart-guide-__tabbed_5_2">Advanced mode</label><label for="quickstart-guide-__tabbed_5_3">Raw mode</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="quickstart-guide-__tabbed_4_1" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_2" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_3" name="quickstart-guide-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_4_1">Easy mode</label><label for="quickstart-guide-__tabbed_4_2">Advanced mode</label><label for="quickstart-guide-__tabbed_4_3">Raw mode</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>In this mode, you can choose among the available templates and fill in the required fields.</p>
@@ -4031,7 +4010,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 </tr>
 <tr>
 <td><code>USE_TEMPLATE</code></td>
-<td>``</td>
+<td></td>
 <td>multisite</td>
 <td>No</td>
 <td><strong>Use Template:</strong> Config template to use that will override the default values of specific settings.</td>
@@ -4060,7 +4039,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 </tr>
 <tr>
 <td><code>SERVER_NAMES_HASH_BUCKET_SIZE</code></td>
-<td>``</td>
+<td></td>
 <td>global</td>
 <td>No</td>
 <td><strong>Server Names Hash Bucket Size:</strong> Value for the server_names_hash_bucket_size directive.</td>
@@ -5071,7 +5050,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <tr>
 <td><code>BAD_BEHAVIOR_BAN_SCOPE</code></td>
 <td><code>service</code></td>
-<td>multisite</td>
+<td>global</td>
 <td>no</td>
 <td><strong>Ban Scope:</strong> Determines whether bans apply only to the current service (<code>service</code>) or to all services (<code>global</code>).</td>
 </tr>
@@ -6832,14 +6811,16 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <ol>
 <li>When a client encounters an HTTP error (for example, 400, 404, or 500), BunkerWeb intercepts the error response.</li>
 <li>Instead of showing the default error page, BunkerWeb displays a custom, professionally designed error page.</li>
-<li>Error pages are fully customizable through your configuration, allowing you to specify custom pages for specific error codes.</li>
+<li>Error pages are fully customizable through your configuration, allowing you to specify custom pages for specific error codes. <strong>Custom error page files must be placed in the directory defined by the <code>ROOT_FOLDER</code> setting (see the Miscellaneous plugin documentation).</strong></li>
+<li>By default, <code>ROOT_FOLDER</code> is <code>/var/www/html/{server_name}</code> (where <code>{server_name}</code> is replaced by the actual server name).</li>
+<li>In multisite mode, each site can have its own <code>ROOT_FOLDER</code>, so custom error pages must be placed in the corresponding directory for each site.</li>
 <li>The default error pages provide clear explanations, helping users understand what went wrong and what they can do next.</li>
 </ol>
 <h3 id="features-how-to-use_13">How to Use</h3>
 <p>Follow these steps to configure and use the Errors feature:</p>
 <ol>
-<li><strong>Define custom error pages:</strong> Specify which HTTP error codes should use custom error pages using the <code>ERRORS</code> setting.</li>
-<li><strong>Configure your error pages:</strong> For each error code, you can use the default BunkerWeb error page or provide your own custom HTML page.</li>
+<li><strong>Define custom error pages:</strong> Specify which HTTP error codes should use custom error pages using the <code>ERRORS</code> setting. The custom error page files must be located in the folder specified by the <code>ROOT_FOLDER</code> setting for the site. In multisite mode, this means each site/server can have its own folder for custom error pages.</li>
+<li><strong>Configure your error pages:</strong> For each error code, you can use the default BunkerWeb error page or provide your own custom HTML page (placed in the appropriate <code>ROOT_FOLDER</code>).</li>
 <li><strong>Set intercepted error codes:</strong> Select which error codes should always be handled by BunkerWeb with the <code>INTERCEPTED_ERROR_CODES</code> setting.</li>
 <li><strong>Let BunkerWeb handle the rest:</strong> Once configured, error handling occurs automatically for all specified error codes.</li>
 </ol>
@@ -7842,6 +7823,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </thead>
 <tbody>
 <tr>
+<td><code>bunny</code></td>
+<td>bunny.net</td>
+<td><code>dns_bunny_api_key</code></td>
+<td></td>
+<td><a href="https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst">Documentation</a></td>
+</tr>
+<tr>
 <td><code>cloudflare</code></td>
 <td>Cloudflare</td>
 <td>either <code>api_token</code><br>or <code>email</code> and <code>api_key</code></td>
@@ -7895,7 +7883,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>Infomaniak</td>
 <td><code>token</code></td>
 <td></td>
-<td><a href="https://github.com/infomaniak/certbot-dns-infomaniak">Documentation</a></td>
+<td><a href="https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst">Documentation</a></td>
 </tr>
 <tr>
 <td><code>ionos</code></td>
@@ -7923,7 +7911,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>Njalla</td>
 <td><code>token</code></td>
 <td></td>
-<td><a href="https://github.com/chaptergy/certbot-dns-njalla">Documentation</a></td>
+<td><a href="https://github.com/chaptergy/certbot-dns-njalla/blob/main/README.md">Documentation</a></td>
 </tr>
 <tr>
 <td><code>nsone</code></td>
@@ -8348,6 +8336,27 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>global</td>
 <td>yes</td>
 <td>Maximum number of concurrent healthchecks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
+<td><code>http</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Type of healthcheck (http or https).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Verify SSL certificate in healthchecks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
+<td></td>
+<td>global</td>
+<td>yes</td>
+<td>Host header for healthchecks (useful for HTTPS).</td>
 </tr>
 </tbody>
 </table>
@@ -10896,6 +10905,138 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 </div>
+<h2 id="features-robotstxt">Robots.txt</h2>
+<p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>The Robots.txt plugin manages the <a href="https://www.robotstxt.org/">robots.txt</a> file for your website. This file tells web crawlers and robots which parts of your site they can or cannot access.</p>
+<p><strong>How it works:</strong></p>
+<p>When enabled, BunkerWeb dynamically generates the <code>/robots.txt</code> file at the root of your website. The rules within this file are aggregated from multiple sources in the following order:</p>
+<ol>
+<li><strong>DarkVisitors API:</strong> If <code>ROBOTSTXT_DARKVISITORS_TOKEN</code> is provided, rules are fetched from the <a href="https://darkvisitors.com/">DarkVisitors</a> API, allowing dynamic blocking of malicious bots and AI crawlers based on configured agent types and disallowed user agents.</li>
+<li><strong>Community Lists:</strong> Rules from pre-defined, community-maintained <code>robots.txt</code> lists (specified by <code>ROBOTSTXT_COMMUNITY_LISTS</code>) are included.</li>
+<li><strong>Custom URLs:</strong> Rules are fetched from user-provided URLs (specified by <code>ROBOTSTXT_URLS</code>).</li>
+<li><strong>Manual Rules:</strong> Rules defined directly via <code>ROBOTSTXT_RULE</code> environment variables are added.</li>
+</ol>
+<p>All rules from these sources are combined. After aggregation, <code>ROBOTSTXT_IGNORE_RULES</code> are applied to filter out any unwanted rules using PCRE regex patterns. Finally, if no rules remain after this entire process, a default <code>User-agent: *</code> and <code>Disallow: /</code> rule is automatically applied to ensure a basic level of protection. Optional sitemap URLs (specified by <code>ROBOTSTXT_SITEMAP</code>) are also included in the final <code>robots.txt</code> output.</p>
+<h3 id="features-dynamic-bot-circumvention-with-darkvisitors-api">Dynamic Bot Circumvention with DarkVisitors API</h3>
+<p><a href="https://darkvisitors.com/">DarkVisitors</a> is a service that provides a dynamic <code>robots.txt</code> file to help block known malicious bots and AI crawlers. By integrating with DarkVisitors, BunkerWeb can automatically fetch and serve an up-to-date <code>robots.txt</code> that helps protect your site from unwanted automated traffic.</p>
+<p>To enable this, you need to sign up at <a href="https://darkvisitors.com/docs/robots-txt">darkvisitors.com</a> and obtain a bearer token.</p>
+<h3 id="features-how-to-use_28">How to Use</h3>
+<ol>
+<li><strong>Enable the feature:</strong> Set the <code>USE_ROBOTSTXT</code> setting to <code>yes</code>.</li>
+<li><strong>Configure rules:</strong> Choose one or more methods to define your <code>robots.txt</code> rules:<ul>
+<li><strong>DarkVisitors API:</strong> Provide <code>ROBOTSTXT_DARKVISITORS_TOKEN</code> and optionally <code>ROBOTSTXT_DARKVISITORS_AGENT_TYPES</code> and <code>ROBOTSTXT_DARKVISITORS_DISALLOW</code>.</li>
+<li><strong>Community Lists:</strong> Specify <code>ROBOTSTXT_COMMUNITY_LISTS</code> (space-separated IDs).</li>
+<li><strong>Custom URLs:</strong> Provide <code>ROBOTSTXT_URLS</code> (space-separated URLs).</li>
+<li><strong>Manual Rules:</strong> Use <code>ROBOTSTXT_RULE</code> for individual rules (multiple rules can be specified with <code>ROBOTSTXT_RULE_N</code>).</li>
+</ul>
+</li>
+<li><strong>Filter rules (optional):</strong> Use <code>ROBOTSTXT_IGNORE_RULES_N</code> to exclude specific rules by regex pattern.</li>
+<li><strong>Add sitemaps (optional):</strong> Use <code>ROBOTSTXT_SITEMAP_N</code> for sitemap URLs.</li>
+<li><strong>Obtain the generated robots.txt file:</strong> Once BunkerWeb is running with the above settings, you can access the dynamically generated <code>robots.txt</code> file by making an HTTP GET request to <code>http(s)://your-domain.com/robots.txt</code>.</li>
+</ol>
+<h3 id="features-configuration-settings_28">Configuration Settings</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_ROBOTSTXT</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>No</td>
+<td>Enables or disables the <code>robots.txt</code> feature.</td>
+</tr>
+<tr>
+<td><code>ROBOTSTXT_DARKVISITORS_TOKEN</code></td>
+<td></td>
+<td>multisite</td>
+<td>No</td>
+<td>Bearer token for the DarkVisitors API.</td>
+</tr>
+<tr>
+<td><code>ROBOTSTXT_DARKVISITORS_AGENT_TYPES</code></td>
+<td></td>
+<td>multisite</td>
+<td>No</td>
+<td>Comma-separated list of agent types (e.g., <code>AI_Data_Scraper</code>) to include from DarkVisitors.</td>
+</tr>
+<tr>
+<td><code>ROBOTSTXT_DARKVISITORS_DISALLOW</code></td>
+<td><code>/</code></td>
+<td>multisite</td>
+<td>No</td>
+<td>A string specifying which URLs are disallowed. This value will be sent as the disallow field when contacting the DarkVisitors API.</td>
+</tr>
+<tr>
+<td><code>ROBOTSTXT_COMMUNITY_LISTS</code></td>
+<td></td>
+<td>multisite</td>
+<td>No</td>
+<td>Space-separated list of community-maintained rule set IDs to include.</td>
+</tr>
+<tr>
+<td><code>ROBOTSTXT_URLS</code></td>
+<td></td>
+<td>multisite</td>
+<td>No</td>
+<td>Space-separated list of URLs to fetch additional <code>robots.txt</code> rules from. Supports <code>file://</code> and basic auth (<code>http://user:pass@url</code>).</td>
+</tr>
+<tr>
+<td><code>ROBOTSTXT_RULE</code></td>
+<td></td>
+<td>multisite</td>
+<td>Yes</td>
+<td>A single rule for <code>robots.txt</code>.</td>
+</tr>
+<tr>
+<td><code>ROBOTSTXT_IGNORE_RULES</code></td>
+<td></td>
+<td>multisite</td>
+<td>Yes</td>
+<td>A single PCRE regex pattern to ignore rules.</td>
+</tr>
+<tr>
+<td><code>ROBOTSTXT_SITEMAP</code></td>
+<td></td>
+<td>multisite</td>
+<td>Yes</td>
+<td>A single sitemap URL.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="features-example-configurations_30">Example Configurations</h3>
+<p><strong>Basic Manual Rules</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">ROBOTSTXT_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">*&quot;</span>
+<span class="nt">ROBOTSTXT_RULE_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Disallow:</span><span class="nv"> </span><span class="s">/private&quot;</span>
+<span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span>
+</code></pre></div>
+<p><strong>Using Dynamic Sources (DarkVisitors &amp; Community List)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">ROBOTSTXT_DARKVISITORS_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-darkvisitors-token-here&quot;</span>
+<span class="nt">ROBOTSTXT_DARKVISITORS_AGENT_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AI</span><span class="nv"> </span><span class="s">Data</span><span class="nv"> </span><span class="s">Scraper&quot;</span>
+<span class="nt">ROBOTSTXT_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;robots-disallowed&quot;</span>
+<span class="nt">ROBOTSTXT_IGNORE_RULES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
+</code></pre></div>
+<p><strong>Combined Configuration</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">ROBOTSTXT_DARKVISITORS_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-darkvisitors-token-here&quot;</span>
+<span class="nt">ROBOTSTXT_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ai-robots-txt&quot;</span>
+<span class="nt">ROBOTSTXT_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/my-custom-rules.txt&quot;</span>
+<span class="nt">ROBOTSTXT_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">MyOwnBot&quot;</span>
+<span class="nt">ROBOTSTXT_RULE_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Disallow:</span><span class="nv"> </span><span class="s">/admin&quot;</span>
+<span class="nt">ROBOTSTXT_IGNORE_RULES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
+<span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span>
+</code></pre></div>
+<hr />
+<p>For more information, see the <a href="https://www.robotstxt.org/robotstxt.html">robots.txt documentation</a>.</p>
 <h2 id="features-ssl">SSL</h2>
 <p>STREAM support <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>The SSL plugin provides robust SSL/TLS encryption capabilities for your BunkerWeb-protected websites. This core component enables secure HTTPS connections by configuring and optimizing cryptographic protocols, ciphers, and related security settings to protect data in transit between clients and your web services.</p>
@@ -10915,14 +11056,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Modern Standards:</strong> Configured for compliance with industry best practices and security standards</li>
 </ul>
 </div>
-<h3 id="features-how-to-use_28">How to Use</h3>
+<h3 id="features-how-to-use_29">How to Use</h3>
 <p>Follow these steps to configure and use the SSL feature:</p>
 <ol>
 <li><strong>Configure protocols:</strong> Choose which SSL/TLS protocol versions to support using the <code>SSL_PROTOCOLS</code> setting.</li>
 <li><strong>Select cipher suites:</strong> Specify the encryption strength using the <code>SSL_CIPHERS_LEVEL</code> setting or provide custom ciphers with <code>SSL_CIPHERS_CUSTOM</code>.</li>
 <li><strong>Configure HTTP to HTTPS redirection:</strong> Set up automatic redirection using the <code>AUTO_REDIRECT_HTTP_TO_HTTPS</code> or <code>REDIRECT_HTTP_TO_HTTPS</code> settings.</li>
 </ol>
-<h3 id="features-configuration-settings_28">Configuration Settings</h3>
+<h3 id="features-configuration-settings_29">Configuration Settings</h3>
 <table>
 <thead>
 <tr>
@@ -10979,7 +11120,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Protocol Selection</p>
 <p>Support for older protocols like SSLv3, TLSv1.0, and TLSv1.1 is intentionally disabled by default due to known vulnerabilities. Only enable these protocols if you absolutely need to support legacy clients and understand the security implications of doing so.</p>
 </div>
-<h3 id="features-example-configurations_30">Example Configurations</h3>
+<h3 id="features-example-configurations_31">Example Configurations</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="40:4"><input checked="checked" id="features-__tabbed_40_1" name="features-__tabbed_40" type="radio" /><input id="features-__tabbed_40_2" name="features-__tabbed_40" type="radio" /><input id="features-__tabbed_40_3" name="features-__tabbed_40" type="radio" /><input id="features-__tabbed_40_4" name="features-__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="features-__tabbed_40_1">Modern Security (Default)</label><label for="features-__tabbed_40_2">Maximum Security</label><label for="features-__tabbed_40_3">Legacy Compatibility</label><label for="features-__tabbed_40_4">Custom Ciphers</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11029,7 +11170,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>The content is configured using simple settings that allow you to specify contact information, encryption keys, policies, and acknowledgments.</li>
 <li>BunkerWeb automatically formats the file in accordance with RFC 9116.</li>
 </ol>
-<h3 id="features-how-to-use_29">How to Use</h3>
+<h3 id="features-how-to-use_30">How to Use</h3>
 <p>Follow these steps to configure and use the Security.txt feature:</p>
 <ol>
 <li><strong>Enable the feature:</strong> Set the <code>USE_SECURITYTXT</code> setting to <code>yes</code> to enable the security.txt file.</li>
@@ -11037,7 +11178,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Set additional information:</strong> Configure optional fields like expiration date, encryption, acknowledgments, and policy URLs.</li>
 <li><strong>Let BunkerWeb handle the rest:</strong> Once configured, BunkerWeb will automatically create and serve the security.txt file at the standard location.</li>
 </ol>
-<h3 id="features-configuration-settings_29">Configuration Settings</h3>
+<h3 id="features-configuration-settings_30">Configuration Settings</h3>
 <table>
 <thead>
 <tr>
@@ -11140,7 +11281,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">URLs Must Use HTTPS</p>
 <p>According to RFC 9116, all URLs in the security.txt file (except for <code>mailto:</code> and <code>tel:</code> links) MUST use HTTPS. Non-HTTPS URLs will automatically be converted to HTTPS by BunkerWeb to ensure compliance with the standard.</p>
 </div>
-<h3 id="features-example-configurations_31">Example Configurations</h3>
+<h3 id="features-example-configurations_32">Example Configurations</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="41:3"><input checked="checked" id="features-__tabbed_41_1" name="features-__tabbed_41" type="radio" /><input id="features-__tabbed_41_2" name="features-__tabbed_41" type="radio" /><input id="features-__tabbed_41_3" name="features-__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="features-__tabbed_41_1">Basic Configuration</label><label for="features-__tabbed_41_2">Comprehensive Configuration</label><label for="features-__tabbed_41_3">Multiple Contacts Configuration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11191,7 +11332,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Browser Security Warnings</p>
 <p>Browsers will display security warnings when users visit sites using self-signed certificates, as these certificates aren't validated by a trusted certificate authority. For production environments, consider using <a href="#features-lets-encrypt">Let's Encrypt</a> instead.</p>
 </div>
-<h3 id="features-how-to-use_30">How to Use</h3>
+<h3 id="features-how-to-use_31">How to Use</h3>
 <p>Follow these steps to configure and use the Self-signed Certificate feature:</p>
 <ol>
 <li><strong>Enable the feature:</strong> Set the <code>GENERATE_SELF_SIGNED_SSL</code> setting to <code>yes</code> to enable self-signed certificate generation.</li>
@@ -11204,7 +11345,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Stream Mode Configuration</p>
 <p>For stream mode, configure the <code>LISTEN_STREAM_PORT_SSL</code> setting to specify the SSL/TLS listening port. This step is essential for proper operation in stream mode.</p>
 </div>
-<h3 id="features-configuration-settings_30">Configuration Settings</h3>
+<h3 id="features-configuration-settings_31">Configuration Settings</h3>
 <table>
 <thead>
 <tr>
@@ -11254,7 +11395,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Certificate Information</p>
 <p>The generated self-signed certificates use the specified algorithm (defaulting to Elliptic Curve cryptography with the prime256v1 curve) and include the configured subject, ensuring proper functionality for your domains.</p>
 </div>
-<h3 id="features-example-configurations_32">Example Configurations</h3>
+<h3 id="features-example-configurations_33">Example Configurations</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="42:3"><input checked="checked" id="features-__tabbed_42_1" name="features-__tabbed_42" type="radio" /><input id="features-__tabbed_42_2" name="features-__tabbed_42" type="radio" /><input id="features-__tabbed_42_3" name="features-__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="features-__tabbed_42_1">Basic Configuration</label><label for="features-__tabbed_42_2">Short-lived Certificates</label><label for="features-__tabbed_42_3">Testing with RSA Certificates</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11296,7 +11437,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>Sessions are automatically managed with configurable timeouts, ensuring security while maintaining usability.</li>
 <li>The cryptographic security of sessions is ensured through a secret key that is used to sign session cookies.</li>
 </ol>
-<h3 id="features-how-to-use_31">How to Use</h3>
+<h3 id="features-how-to-use_32">How to Use</h3>
 <p>Follow these steps to configure and use the Sessions feature:</p>
 <ol>
 <li><strong>Configure session security:</strong> Set a strong, unique <code>SESSIONS_SECRET</code> to ensure session cookies cannot be forged. (The default value is "random" which triggers BunkerWeb to generate a random secret key.)</li>
@@ -11305,7 +11446,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Configure Redis integration:</strong> For distributed environments, set <code>USE_REDIS</code> to "yes" and configure your <a href="#features-redis">Redis connection</a> to share session data across multiple BunkerWeb nodes.</li>
 <li><strong>Let BunkerWeb handle the rest:</strong> Once configured, session management happens automatically for your website.</li>
 </ol>
-<h3 id="features-configuration-settings_31">Configuration Settings</h3>
+<h3 id="features-configuration-settings_32">Configuration Settings</h3>
 <table>
 <thead>
 <tr>
@@ -11387,7 +11528,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>This ensures users maintain their session regardless of which BunkerWeb instance handles their requests</li>
 </ol>
 </div>
-<h3 id="features-example-configurations_33">Example Configurations</h3>
+<h3 id="features-example-configurations_34">Example Configurations</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="43:4"><input checked="checked" id="features-__tabbed_43_1" name="features-__tabbed_43" type="radio" /><input id="features-__tabbed_43_2" name="features-__tabbed_43" type="radio" /><input id="features-__tabbed_43_3" name="features-__tabbed_43" type="radio" /><input id="features-__tabbed_43_4" name="features-__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="features-__tabbed_43_1">Basic Configuration</label><label for="features-__tabbed_43_2">Enhanced Security</label><label for="features-__tabbed_43_3">Clustered Environment with Redis</label><label for="features-__tabbed_43_4">Long-lived Sessions</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11498,7 +11639,7 @@ For blocking unwanted clients instead, refer to the <a href="#features-blacklist
 <li>If a visitor doesn't match any whitelist criteria, they proceed through all normal security checks as usual.</li>
 <li>Whitelists can be automatically updated from external sources on a regular schedule.</li>
 </ol>
-<h3 id="features-how-to-use_32">How to Use</h3>
+<h3 id="features-how-to-use_33">How to Use</h3>
 <p>Follow these steps to configure and use the Whitelist feature:</p>
 <ol>
 <li><strong>Enable the feature:</strong> The Whitelist feature is disabled by default. Set the <code>USE_WHITELIST</code> setting to <code>yes</code> to enable it.</li>
@@ -11511,7 +11652,7 @@ For blocking unwanted clients instead, refer to the <a href="#features-blacklist
 <p class="admonition-title">stream mode</p>
 <p>When using stream mode, only IP, rDNS, and ASN checks are performed.</p>
 </div>
-<h3 id="features-configuration-settings_32">Configuration Settings</h3>
+<h3 id="features-configuration-settings_33">Configuration Settings</h3>
 <p><strong>General</strong></p>
 <table>
 <thead>
@@ -11776,7 +11917,7 @@ For blocking unwanted clients instead, refer to the <a href="#features-blacklist
 <p class="admonition-title">Security Bypass</p>
 <p>Whitelisted visitors will completely <strong>bypass all other security checks</strong> in BunkerWeb, including WAF rules, rate limiting, bad bot detection, and any other security mechanisms. Only use the whitelist for trusted sources you're absolutely confident in.</p>
 </div>
-<h3 id="features-example-configurations_34">Example Configurations</h3>
+<h3 id="features-example-configurations_35">Example Configurations</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="45:5"><input checked="checked" id="features-__tabbed_45_1" name="features-__tabbed_45" type="radio" /><input id="features-__tabbed_45_2" name="features-__tabbed_45" type="radio" /><input id="features-__tabbed_45_3" name="features-__tabbed_45" type="radio" /><input id="features-__tabbed_45_4" name="features-__tabbed_45" type="radio" /><input id="features-__tabbed_45_5" name="features-__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="features-__tabbed_45_1">Basic Organization Access</label><label for="features-__tabbed_45_2">Advanced Configuration</label><label for="features-__tabbed_45_3">Using Local Files</label><label for="features-__tabbed_45_4">API Access Pattern</label><label for="features-__tabbed_45_5">Well-Known Crawlers</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -12185,7 +12326,7 @@ DNS_RESOLVERS=127.0.0.53
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>First, install and configure dnsmasq on your Linux system:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="advanced-__tabbed_6_1" name="advanced-__tabbed_6" type="radio" /><input id="advanced-__tabbed_6_2" name="advanced-__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_6_1">Debian/Ubuntu</label><label for="advanced-__tabbed_6_2">RHEL/CentOS/Fedora</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="advanced-__tabbed_6_1" name="advanced-__tabbed_6" type="radio" /><input id="advanced-__tabbed_6_2" name="advanced-__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="advanced-__tabbed_6_1">Debian/Ubuntu</label><label for="advanced-__tabbed_6_2">RHEL/Fedora</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1"># Install dnsmasq</span>

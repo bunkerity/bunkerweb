@@ -948,9 +948,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rhelcentos-considerations" class="md-nav__link">
+  <a href="#rhel-considerations" class="md-nav__link">
     <span class="md-ellipsis">
-      RHEL/CentOS considerations
+      RHEL considerations
     </span>
   </a>
   
@@ -1845,7 +1845,6 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Debian 12 "Bookworm"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 40</li>
 <li>Fedora 41</li>
 <li>Fedora 42</li>
 <li>Red Hat Enterprise Linux (RHEL) 8.10</li>
@@ -1906,7 +1905,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--forc
 <li><strong>Sets up the setup wizard</strong> (if enabled) for easy web-based configuration</li>
 <li><strong>Provides comprehensive next steps</strong> and resource links</li>
 </ul>
-<h4 id="rhelcentos-considerations">RHEL/CentOS considerations</h4>
+<h4 id="rhel-considerations">RHEL considerations</h4>
 <div class="admonition warning">
 <p class="admonition-title">External database support on RHEL-based systems</p>
 <p>If you plan to use an external database (recommended for production), you must install the appropriate database client package:</p>
@@ -1936,7 +1935,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>Restart the scheduler: <code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
 <h3 id="installation-using-package-manager">Installation using package manager</h3>
-<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. For Fedora, as NGINX 1.28.0 is not yet available, we will use NGINX 1.26.3. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2011,21 +2010,11 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="admonition info">
 <p class="admonition-title">Fedora Update Testing</p>
 <p>If you can't find the NGINX version listed in the stable repository, you can enable the <code>updates-testing</code> repository:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Fedora 41/42</label><label for="__tabbed_2_2">Fedora 40</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
 </code></pre></div>
 </div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>--set-enabled<span class="w"> </span>updates-testing
-</code></pre></div>
-</div>
-</div>
-</div>
-</div>
-<p>Fedora already provides NGINX 1.26.3 that we support (NGINX 1.28.0 is not yet available in Fedora repositories):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.26.3
+<p>Fedora already provides NGINX 1.28.0 that we support</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.0
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Disable the setup wizard</p>
@@ -2880,7 +2869,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <li>Azure ARM Template</li>
 <li>Azure portal via the Marketplace</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Cloud Shell</label><label for="__tabbed_3_2">ARM Template</label><label for="__tabbed_3_3">Marketplace</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Cloud Shell</label><label for="__tabbed_2_2">ARM Template</label><label for="__tabbed_2_3">Marketplace</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Create a resource group. Replace value <code>RG_NAME</code></p>
