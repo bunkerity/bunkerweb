@@ -90,7 +90,9 @@
     "entire_config": "التكوين الكامل",
     "export": "تصدير",
     "filters_suffix": " مرشحات",
+    "follow": "متابعة",
     "github_stars": "نجوم",
+    "go_back": "الرجوع",
     "hide": "إخفاء",
     "history": "السجل",
     "login": "تسجيل الدخول",
@@ -698,6 +700,14 @@
       "success": "نجاح"
     }
   },
+  "logs": {
+    "eventsource_failed": "فشل اتصال EventSource",
+    "parse_error": "فشل في تحليل بيانات التدفق: {{error}}",
+    "stream_error": "خطأ في التدفق: {{message}}",
+    "stream_init": "تم تهيئة التدفق، حجم الملف: {{size}}",
+    "stream_initialized": "تم تهيئة التدفق مع التحديث، حجم الملف: {{size}}",
+    "trimmed_notice": "--- تم إزالة {{count}} سطر من السجلات القديمة لتحسين الأداء ---"
+  },
   "link": {
     "back_to_login": "العودة إلى تسجيل الدخول",
     "forgot_password": "هل نسيت كلمة المرور؟",
@@ -1206,6 +1216,7 @@
     "draft_toggle_disabled": "يمكن تبديل وضع المسودة فقط للخدمات التي تم إنشاؤها عبر واجهة المستخدم.",
     "email_lets_encrypt": "عنوان البريد الإلكتروني المطلوب تسجيله لدى Let's Encrypt لإدارة الشهادات والإشعارات.",
     "email_length": "يجب أن يكون البريد الإلكتروني بين 1 و 256 حرفًا.",
+    "follow_latest_page_only": "وضع المتابعة متاح فقط في الصفحة الأحدث",
     "global_config_source": "القيمة موروثة من التكوين العام.",
     "instance_not_up": "المثيل {{hostname}} لا يستجيب حاليًا ('up').",
     "lets_encrypt_custom_profile": "ملف التعريف المخصص الذي سيتم استخدامه لـ Let's Encrypt (مثل 'my_custom_profile').",
@@ -1243,6 +1254,7 @@
     "readonly_user_action_disabled": "معطل: حسابك للقراءة فقط، الإجراء '{{action}}' معطل.",
     "remove_ban_entry": "إزالة إدخال الحظر هذا من القائمة.",
     "reset_template_settings": "إعادة تعيين جميع الإعدادات في عرض القالب الحالي إلى قيمها الافتراضية.",
+    "select_file_to_follow": "اختر ملفًا لتمكين وضع المتابعة",
     "server_name": "اسم النطاق الأساسي أو اسم الخادم لهذه الخدمة.",
     "stream_support": {
       "no": "لا يدعم وضع STREAM.",

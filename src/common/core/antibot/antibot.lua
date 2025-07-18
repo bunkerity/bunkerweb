@@ -160,28 +160,7 @@ function antibot:access()
 		return self:ret(true, "antibot not activated")
 	end
 
-	-- Get session data
-	local session, err = get_session(self.ctx)
-	if not session then
-		return self:ret(false, "can't get session : " .. err)
-	end
-	self.session = session
-	self.session_data = session:get("antibot") or {}
-	self.ctx.bw.antibot_session_data = self.session_data
-
-	-- Check if session is valid
-	local msg = self:check_session()
-	self.logger:log(INFO, "check_session returned : " .. msg)
-
-	-- Don't go further if client resolved the challenge
-	if self.session_data.resolved then
-		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
-			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
-		end
-		return self:ret(true, "client already resolved the challenge")
-	end
-
-	-- Check the caches
+	-- Check the caches and ignore lists
 	local checks = {
 		["IP"] = "ip" .. self.ctx.bw.remote_addr,
 	}
@@ -228,6 +207,27 @@ function antibot:access()
 				end
 			end
 		end
+	end
+
+	-- Get session data
+	local session, err = get_session(self.ctx)
+	if not session then
+		return self:ret(false, "can't get session : " .. err)
+	end
+	self.session = session
+	self.session_data = session:get("antibot") or {}
+	self.ctx.bw.antibot_session_data = self.session_data
+
+	-- Check if session is valid
+	local msg = self:check_session()
+	self.logger:log(INFO, "check_session returned : " .. msg)
+
+	-- Don't go further if client resolved the challenge
+	if self.session_data.resolved then
+		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
+		end
+		return self:ret(true, "client already resolved the challenge")
 	end
 
 	-- Prepare challenge if needed

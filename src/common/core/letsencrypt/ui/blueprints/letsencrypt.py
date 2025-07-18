@@ -73,7 +73,7 @@ def retrieve_certificates():
         domain = cert_file.parent.name
         certificates["domain"].append(domain)
         cert_info = {
-            "common_name": "Unknown",
+            "common_name": domain,
             "issuer": "Unknown",
             "issuer_server": "Unknown",
             "valid_from": None,
@@ -81,7 +81,7 @@ def retrieve_certificates():
             "serial_number": "Unknown",
             "fingerprint": "Unknown",
             "version": "Unknown",
-            "preferred_profile": "Unknown",
+            "preferred_profile": "classic",
             "challenge": "Unknown",
             "authenticator": "Unknown",
             "key_type": "Unknown",

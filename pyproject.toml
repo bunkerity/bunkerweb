@@ -1,7 +1,7 @@
 [project]
 name = "BunkerWeb"
 description = "Make your web services secure by default !"
-version = "1.6.2-rc7"
+version = "1.6.3-rc1"
 authors = [
     { name = "Bunkerity", email = "contact@bunkerity.com" }
 ]

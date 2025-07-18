@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from datetime import datetime
+from json import loads
 from operator import itemgetter
 from os import getenv
 from typing import Any, List, Literal, Optional, Tuple, Union
@@ -126,18 +127,12 @@ class Instance:
             return f"IP {ip} has been banned {scope_text} on instance {self.hostname} for {exp} seconds{f' with reason: {reason}' if reason else ''}."
         return f"Can't ban {ip} on instance {self.hostname}"
 
-    def unban(self, ip: str, service: str = None) -> str:
+    def unban(self, ip: str, service: str = None, ban_scope: str = "global") -> str:
         try:
             # Prepare request data
-            data = {"ip": ip}
-
-            # Only include service if it's specified and not a placeholder
+            data = {"ip": ip, "ban_scope": ban_scope}
             if service and service not in ("unknown", "Web UI", "default server"):
                 data["service"] = service
-                data["ban_scope"] = "service"
-            else:
-                data["ban_scope"] = "global"
-
             result = self.apiCaller.send_to_apis("POST", "/unban", data=data)[0]
         except BaseException as e:
             service_text = f" for service {service}" if service else ""
@@ -224,8 +219,10 @@ class InstancesUtils:
             if instance.ban(ip, exp, reason, service, ban_scope).startswith("Can't ban")
         ] or ""
 
-    def unban(self, ip: str, service: str = None, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        return [instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service).startswith("Can't unban")] or ""
+    def unban(self, ip: str, service: str = None, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+        return [
+            instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service, ban_scope).startswith("Can't unban")
+        ] or ""
 
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""
@@ -286,77 +283,184 @@ class InstancesUtils:
         return sorted(reports, key=itemgetter("date"), reverse=True)
 
     def get_metrics(self, plugin_id: str, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None):
-        """Get metrics from all instances or a specific instance"""
+        """Get metrics from all instances or a specific instance, with Redis integration"""
+        from app.routes.utils import get_redis_client
 
-        def update_metrics_from_instance(instance: Instance, metrics: dict) -> dict[str, Any]:
+        redis_client = get_redis_client()
+
+        def aggregate_metrics(base_metrics: dict, new_metrics: dict) -> dict[str, Any]:
+            """Aggregate metrics from different sources"""
+            for key, value in new_metrics.items():
+                if key not in base_metrics:
+                    base_metrics[key] = value
+                    continue
+
+                # Some values are the same for all instances, don't aggregate them
+                if key == "redis_nb_keys":
+                    continue
+
+                # Aggregate based on value type
+                if isinstance(value, (int, float)):
+                    base_metrics[key] += value
+                elif isinstance(value, str):
+                    base_metrics[key] = value
+                elif isinstance(value, list):
+                    if isinstance(base_metrics[key], list):
+                        base_metrics[key].extend(value)
+                    else:
+                        base_metrics[key] = value
+                elif isinstance(value, dict):
+                    if not isinstance(base_metrics[key], dict):
+                        base_metrics[key] = {}
+                    for k, v in value.items():
+                        if k not in base_metrics[key]:
+                            base_metrics[key][k] = v
+                        elif isinstance(v, (int, float)):
+                            base_metrics[key][k] += v
+                        elif isinstance(v, list):
+                            if isinstance(base_metrics[key][k], list):
+                                base_metrics[key][k].extend(v)
+                            else:
+                                base_metrics[key][k] = v
+                        else:
+                            base_metrics[key][k] = v
+            return base_metrics
+
+        def get_redis_metrics() -> dict[str, Any]:
+            """Get aggregated metrics from Redis"""
+            if not redis_client:
+                return {}
+
+            try:
+                redis_metrics = {}
+                # Get all metric keys for this plugin from all workers
+                pattern = f"metrics:{plugin_id}_*"
+                keys = redis_client.keys(pattern)
+
+                for key in keys:
+                    try:
+                        key_str = key.decode("utf-8") if isinstance(key, bytes) else key
+                        # Extract metric name from key (remove prefix and worker suffix)
+                        metric_name = key_str.replace(f"metrics:{plugin_id}_", "").split(":")[0]
+
+                        # Determine Redis data type and get value accordingly
+                        key_type = redis_client.type(key)
+                        if isinstance(key_type, bytes):
+                            key_type = key_type.decode("utf-8")
+
+                        decoded_value = None
+
+                        if key_type == "string":
+                            # Handle string values (counters and simple metrics)
+                            value = redis_client.get(key)
+                            if value is None:
+                                continue
+
+                            # Decode value based on its content
+                            try:
+                                decoded_value = loads(value.decode("utf-8"))
+                            except (ValueError, UnicodeDecodeError):
+                                # Try as number
+                                try:
+                                    decoded_value = float(value.decode("utf-8"))
+                                    if decoded_value.is_integer():
+                                        decoded_value = int(decoded_value)
+                                except ValueError:
+                                    # Fall back to string
+                                    decoded_value = value.decode("utf-8")
+
+                        elif key_type == "list":
+                            # Handle list values (table metrics)
+                            list_values = redis_client.lrange(key, 0, -1)
+                            decoded_value = []
+                            for item in list_values:
+                                try:
+                                    decoded_item = loads(item.decode("utf-8"))
+                                    decoded_value.append(decoded_item)
+                                except (ValueError, UnicodeDecodeError):
+                                    # Fall back to string
+                                    decoded_value.append(item.decode("utf-8"))
+
+                        elif key_type == "none":
+                            # Key doesn't exist
+                            continue
+                        else:
+                            # Unsupported Redis data type, skip
+                            self.__db.logger.warning(f"Unsupported Redis data type {key_type} for key {key_str}")
+                            continue
+
+                        if decoded_value is None:
+                            continue
+
+                        # Aggregate values for the same metric name across workers
+                        if metric_name in redis_metrics:
+                            if isinstance(redis_metrics[metric_name], (int, float)) and isinstance(decoded_value, (int, float)):
+                                redis_metrics[metric_name] += decoded_value
+                            elif isinstance(redis_metrics[metric_name], list) and isinstance(decoded_value, list):
+                                redis_metrics[metric_name].extend(decoded_value)
+                            # For other types, just use the latest value
+                        else:
+                            redis_metrics[metric_name] = decoded_value
+
+                    except Exception as e:
+                        self.__db.logger.warning(f"Failed to process Redis metric key {key}: {e}")
+                        continue
+
+                return redis_metrics
+            except Exception as e:
+                self.__db.logger.warning(f"Failed to get metrics from Redis: {e}")
+                return {}
+
+        def get_instance_metrics(instance: Instance) -> dict[str, Any]:
+            """Get metrics from a single instance"""
             try:
                 if plugin_id == "redis":
                     resp, instance_metrics = instance.metrics_redis()
                 else:
                     resp, instance_metrics = instance.metrics(plugin_id)
-            except BaseException as e:
+            except Exception as e:
                 self.__db.logger.warning(f"Can't get metrics from {instance.hostname}: {e}")
-                return metrics
+                return {}
 
-            # filters
             if not resp:
                 self.__db.logger.warning(f"Can't get metrics from {instance.hostname}")
-                return metrics
+                return {}
 
-            if (
-                not isinstance(instance_metrics.get(instance.hostname, {"msg": None}).get("msg"), dict)
-                or instance_metrics[instance.hostname].get("status", "error") != "success"
-            ):
-                self.__db.logger.warning(
-                    f"Can't get metrics from {instance.hostname}: {instance_metrics[instance.hostname].get('msg')} - {instance_metrics[instance.hostname].get('status')}"
-                )
-                return metrics
+            instance_data = instance_metrics.get(instance.hostname, {})
+            if not isinstance(instance_data.get("msg"), dict) or instance_data.get("status") != "success":
+                self.__db.logger.warning(f"Can't get metrics from {instance.hostname}: {instance_data.get('msg')} - {instance_data.get('status')}")
+                return {}
 
-            # Update metrics looking for value type
-            for key, value in instance_metrics[instance.hostname]["msg"].items():
-                if key not in metrics:
-                    metrics[key] = value
-                    continue
+            return instance_data["msg"]
 
-                # Some value are the same for all instances, we don't need to update them
-                # Example redis_nb_keys count
-                if key == "redis_nb_keys":
-                    continue
-
-                # Case value is number, add it to the existing value
-                if isinstance(value, (int, float)):
-                    metrics[key] += value
-                # Case value is string, replace the existing value
-                elif isinstance(value, str):
-                    metrics[key] = value
-                # Case value is list, extend it to the existing value
-                elif isinstance(value, list):
-                    metrics[key].extend(value)
-                # Case value is a dict, loop on it and update the existing value
-                elif isinstance(value, dict):
-                    for k, v in value.items():
-                        if k not in metrics[key]:
-                            metrics[key][k] = v
-                            continue
-                        elif isinstance(v, (int, float)):
-                            metrics[key][k] += v
-                            continue
-                        elif isinstance(v, list):
-                            metrics[key][k].extend(v)
-                            continue
-                        metrics[key][k] = v
-
-            return metrics
-
+        # Initialize metrics
         metrics = {}
+
+        # If redis_client is available and we're not targeting a specific hostname,
+        # prioritize Redis metrics as they're aggregated across all workers
+        if redis_client and not hostname:
+            redis_metrics = get_redis_metrics()
+            if redis_metrics:
+                # For requests specifically, if we have Redis data, don't fetch from instances
+                # to avoid duplicates since Redis already contains the aggregated data
+                if plugin_id == "requests" and redis_metrics:
+                    return redis_metrics
+                metrics = aggregate_metrics(metrics, redis_metrics)
+
+        # Get instance metrics (either as fallback or for specific hostname)
         if hostname:
             instance = Instance.from_hostname(hostname, self.__db)
-            if not instance:
-                return {}
-            return update_metrics_from_instance(instance, metrics.copy())
+            if instance:
+                instance_metrics = get_instance_metrics(instance)
+                metrics = aggregate_metrics(metrics, instance_metrics)
+        else:
+            # Only fetch from instances if we don't have Redis data for requests
+            # or if we're looking for non-request metrics
+            if not (redis_client and plugin_id == "requests" and metrics):
+                for instance in instances or self.get_instances(status="up"):
+                    instance_metrics = get_instance_metrics(instance)
+                    metrics = aggregate_metrics(metrics, instance_metrics)
 
-        for instance in instances or self.get_instances(status="up"):
-            metrics = update_metrics_from_instance(instance, metrics.copy())
         return metrics
 
     def get_ping(self, plugin_id: str, *, instances: Optional[List[Instance]] = None):

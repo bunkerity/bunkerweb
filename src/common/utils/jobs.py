@@ -26,7 +26,7 @@ EXPIRE_TIME = {
 
 
 class Job:
-    def __init__(self, logger: Logger, job_path: str, db=None, *, deprecated: bool = False):
+    def __init__(self, logger: Logger, job_path: Optional[Union[str, Path]] = None, db=None, *, deprecated: bool = False):
         """Initialize Job class."""
         if job_path:
             job_path = Path(job_path)
@@ -144,9 +144,12 @@ class Job:
         return ret
 
     def get_cache(
-        self, name: str, *, job_name: str = "", service_id: str = "", plugin_id: str = "", with_info: bool = False, with_data: bool = True
+        self, name: Union[str, Path], *, job_name: str = "", service_id: str = "", plugin_id: str = "", with_info: bool = False, with_data: bool = True
     ) -> Optional[Union[Dict[str, Any], bytes]]:
         """Get cache file from database or from local cache file."""
+        if isinstance(name, Path):
+            name = str(name)
+
         cache_path = self.job_path.joinpath(service_id, name)
         ret_data = {}
         if cache_path.is_file():
@@ -161,9 +164,12 @@ class Job:
         return ret_data
 
     def is_cached_file(
-        self, name: str, expire: Literal["hour", "day", "week", "month"], *, job_name: str = "", service_id: str = "", plugin_id: str = ""
+        self, name: Union[str, Path], expire: Literal["hour", "day", "week", "month"], *, job_name: str = "", service_id: str = "", plugin_id: str = ""
     ) -> bool:
         """Check if cache file is cached and if it's still fresh."""
+        if isinstance(name, Path):
+            name = str(name)
+
         is_cached = False
         try:
             cache_info = self.get_cache(name, job_name=job_name, service_id=service_id, plugin_id=plugin_id, with_info=True, with_data=False)
@@ -178,7 +184,7 @@ class Job:
 
     def cache_file(
         self,
-        name: str,
+        name: Union[str, Path],
         file_cache: Union[bytes, str, Path],
         *,
         job_name: str = "",
@@ -188,6 +194,9 @@ class Job:
         overwrite_file: bool = True,
     ) -> Tuple[bool, str]:
         """Cache file in database and in local cache file."""
+        if isinstance(name, Path):
+            name = str(name)
+
         ret, err = True, "success"
         cache_path = self.job_path.joinpath(service_id, name)
 
@@ -231,8 +240,11 @@ class Job:
 
         return self.cache_file(file_name, content.getvalue(), job_name=job_name, service_id=service_id)
 
-    def del_cache(self, name: str, *, job_name: str = "", service_id: str = "") -> Tuple[bool, str]:
+    def del_cache(self, name: Union[str, Path], *, job_name: str = "", service_id: str = "") -> Tuple[bool, str]:
         """Delete cache file from database and local cache file."""
+        if isinstance(name, Path):
+            name = str(name)
+
         ret, err = True, "success"
         job_name = job_name or self.job_name
         job_path = self.job_path.joinpath(service_id)
@@ -250,8 +262,11 @@ class Job:
             return False, f"exception :\n{format_exc()}"
         return ret, err
 
-    def cache_hash(self, name: str, *, job_name: str = "", service_id: str = "", plugin_id: str = "") -> Optional[str]:
+    def cache_hash(self, name: Union[str, Path], *, job_name: str = "", service_id: str = "", plugin_id: str = "") -> Optional[str]:
         """Get cache file hash from database or from local cache file."""
+        if isinstance(name, Path):
+            name = str(name)
+
         cache_path = self.job_path.joinpath(service_id, name)
         if cache_path.is_file():
             return file_hash(cache_path)

@@ -133,14 +133,14 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `AUTOCONF_MODE`   | `no`    | global    | No       | **Autoconf Mode:** Enable Autoconf Docker integration.                                               |
     | `SWARM_MODE`      | `no`    | global    | No       | **Swarm Mode:** Enable Docker Swarm integration.                                                     |
     | `KUBERNETES_MODE` | `no`    | global    | No       | **Kubernetes Mode:** Enable Kubernetes integration.                                                  |
-    | `USE_TEMPLATE`    | ``      | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
+    | `USE_TEMPLATE`    |         | multisite | No       | **Use Template:** Config template to use that will override the default values of specific settings. |
 
 === "Nginx Settings"
 
     | Setting                         | Default       | Context | Multiple | Description                                                                               |
     | ------------------------------- | ------------- | ------- | -------- | ----------------------------------------------------------------------------------------- |
     | `NGINX_PREFIX`                  | `/etc/nginx/` | global  | No       | **Nginx Prefix:** Where nginx will search for configurations.                             |
-    | `SERVER_NAMES_HASH_BUCKET_SIZE` | ``            | global  | No       | **Server Names Hash Bucket Size:** Value for the server_names_hash_bucket_size directive. |
+    | `SERVER_NAMES_HASH_BUCKET_SIZE` |               | global  | No       | **Server Names Hash Bucket Size:** Value for the server_names_hash_bucket_size directive. |
 
 ### Example Configurations
 
@@ -226,7 +226,7 @@ Attackers often use automated tools (bots) to try and exploit your website. To p
 
 Follow these steps to enable and configure the Antibot feature:
 
-1. **Choose a challenge type:** Decide which type of antibot challenge to use (e.g., [captcha](#__tabbed_1_3), [hcaptcha](#__tabbed_1_5), [javascript](#__tabbed_1_2)).
+1. **Choose a challenge type:** Decide which type of antibot challenge to use (e.g., [captcha](#__tabbed_3_3), [hcaptcha](#__tabbed_3_5), [javascript](#__tabbed_3_2)).
 2. **Enable the feature:** Set the `USE_ANTIBOT` setting to your chosen challenge type in your BunkerWeb configuration.
 3. **Configure the settings:** Adjust the other `ANTIBOT_*` settings as needed. For reCAPTCHA, hCaptcha, Turnstile, and mCaptcha, you must create an account with the respective service and obtain API keys.
 4. **Important:** Ensure the `ANTIBOT_URI` is a unique URL on your site that is not in use.
@@ -748,7 +748,7 @@ Follow these steps to configure and use the Bad Behavior feature:
 | `BAD_BEHAVIOR_THRESHOLD`    | `10`                          | multisite | no       | **Threshold:** The number of "bad" status codes an IP can generate within the counting period before being banned.                                                                    |
 | `BAD_BEHAVIOR_COUNT_TIME`   | `60`                          | multisite | no       | **Count Period:** The time window (in seconds) during which bad status codes are counted toward the threshold.                                                                        |
 | `BAD_BEHAVIOR_BAN_TIME`     | `86400`                       | multisite | no       | **Ban Duration:** How long (in seconds) an IP will remain banned after exceeding the threshold. Default is 24 hours (86400 seconds). Set to `0` for permanent bans that never expire. |
-| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | multisite | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                                                                   |
+| `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ban Scope:** Determines whether bans apply only to the current service (`service`) or to all services (`global`).                                                                   |
 
 !!! warning "False Positives"
     Be careful when setting the threshold and count time. Setting these values too low may inadvertently ban legitimate users who encounter errors while browsing your site.
@@ -1563,7 +1563,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.3-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1580,7 +1580,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -2035,15 +2035,17 @@ The Errors plugin provides customizable error handling for your website, letting
 
 1. When a client encounters an HTTP error (for example, 400, 404, or 500), BunkerWeb intercepts the error response.
 2. Instead of showing the default error page, BunkerWeb displays a custom, professionally designed error page.
-3. Error pages are fully customizable through your configuration, allowing you to specify custom pages for specific error codes.
+3. Error pages are fully customizable through your configuration, allowing you to specify custom pages for specific error codes. **Custom error page files must be placed in the directory defined by the `ROOT_FOLDER` setting (see the Miscellaneous plugin documentation).**
+   - By default, `ROOT_FOLDER` is `/var/www/html/{server_name}` (where `{server_name}` is replaced by the actual server name).
+   - In multisite mode, each site can have its own `ROOT_FOLDER`, so custom error pages must be placed in the corresponding directory for each site.
 4. The default error pages provide clear explanations, helping users understand what went wrong and what they can do next.
 
 ### How to Use
 
 Follow these steps to configure and use the Errors feature:
 
-1. **Define custom error pages:** Specify which HTTP error codes should use custom error pages using the `ERRORS` setting.
-2. **Configure your error pages:** For each error code, you can use the default BunkerWeb error page or provide your own custom HTML page.
+1. **Define custom error pages:** Specify which HTTP error codes should use custom error pages using the `ERRORS` setting. The custom error page files must be located in the folder specified by the `ROOT_FOLDER` setting for the site. In multisite mode, this means each site/server can have its own folder for custom error pages.
+2. **Configure your error pages:** For each error code, you can use the default BunkerWeb error page or provide your own custom HTML page (placed in the appropriate `ROOT_FOLDER`).
 3. **Set intercepted error codes:** Select which error codes should always be handled by BunkerWeb with the `INTERCEPTED_ERROR_CODES` setting.
 4. **Let BunkerWeb handle the rest:** Once configured, error handling occurs automatically for all specified error codes.
 
@@ -2645,26 +2647,27 @@ Follow these steps to configure and use the Let's Encrypt feature:
 
 The Let's Encrypt plugin supports a wide range of DNS providers for DNS challenges. Each provider requires specific credentials that must be provided using the `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting.
 
-| Provider       | Description     | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Documentation                                                                         |
-| -------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| `cloudflare`   | Cloudflare      | either `api_token`<br>or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)             |
-| `desec`        | deSEC           | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)    |
-| `digitalocean` | DigitalOcean    | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)           |
-| `dnsimple`     | DNSimple        | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)               |
-| `dnsmadeeasy`  | DNS Made Easy   | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)            |
-| `gehirn`       | Gehirn DNS      | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                 |
-| `google`       | Google Cloud    | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
-| `infomaniak`   | Infomaniak      | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak)                 |
-| `ionos`        | IONOS           | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md) |
-| `linode`       | Linode          | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
-| `luadns`       | LuaDNS          | `email`<br>`token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                 |
-| `njalla`       | Njalla          | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/chaptergy/certbot-dns-njalla)                      |
-| `nsone`        | NS1             | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                  |
-| `ovh`          | OVH             | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (default: `ovh-eu`)                                                                                                                                                                                                                                           | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                    |
-| `rfc2136`      | RFC 2136        | `server`<br>`name`<br>`secret`                                                                               | `port` (default: `53`)<br>`algorithm` (default: `HMAC-SHA512`)<br>`sign_query` (default: `false`)                                                                                                                                                                        | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                |
-| `route53`      | Amazon Route 53 | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                |
-| `sakuracloud`  | Sakura Cloud    | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)            |
-| `scaleway`     | Scaleway        | `application_token`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst) |
+| Provider       | Description     | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Documentation                                                                              |
+| -------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `bunny`        | bunny.net       | `dns_bunny_api_key`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst)             |
+| `cloudflare`   | Cloudflare      | either `api_token`<br>or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)                  |
+| `desec`        | deSEC           | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)         |
+| `digitalocean` | DigitalOcean    | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                |
+| `dnsimple`     | DNSimple        | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                    |
+| `dnsmadeeasy`  | DNS Made Easy   | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                 |
+| `gehirn`       | Gehirn DNS      | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                      |
+| `google`       | Google Cloud    | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                      |
+| `infomaniak`   | Infomaniak      | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst) |
+| `ionos`        | IONOS           | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md)      |
+| `linode`       | Linode          | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                      |
+| `luadns`       | LuaDNS          | `email`<br>`token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                      |
+| `njalla`       | Njalla          | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/chaptergy/certbot-dns-njalla/blob/main/README.md)       |
+| `nsone`        | NS1             | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                       |
+| `ovh`          | OVH             | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (default: `ovh-eu`)                                                                                                                                                                                                                                           | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                         |
+| `rfc2136`      | RFC 2136        | `server`<br>`name`<br>`secret`                                                                               | `port` (default: `53`)<br>`algorithm` (default: `HMAC-SHA512`)<br>`sign_query` (default: `false`)                                                                                                                                                                        | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                     |
+| `route53`      | Amazon Route 53 | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                     |
+| `sakuracloud`  | Sakura Cloud    | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                 |
+| `scaleway`     | Scaleway        | `application_token`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst)      |
 
 ### Example Configurations
 
@@ -2920,6 +2923,9 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_HEALTHCHECK_RISE`           | `1`           | global  | yes      | Number of successful healthchecks before marking the server as up. |
 | `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`         | global  | yes      | HTTP status considered valid in healthchecks.                      |
 | `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`          | global  | yes      | Maximum number of concurrent healthchecks.                         |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`        | global  | yes      | Type of healthcheck (http or https).                               |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global  | yes      | Verify SSL certificate in healthchecks.                            |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |               | global  | yes      | Host header for healthchecks (useful for HTTPS).                   |
 
 ## Metrics
 
@@ -3003,12 +3009,13 @@ For example, `/metrics/requests` returns information about blocked requests.
 
 ### Configuration Settings
 
-| Setting                              | Default  | Context   | Multiple | Description                                                                           |
-| ------------------------------------ | -------- | --------- | -------- | ------------------------------------------------------------------------------------- |
-| `USE_METRICS`                        | `yes`    | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.       |
-| `METRICS_MEMORY_SIZE`                | `16m`    | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `16m`, `32m`).       |
-| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker.     |
-| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis. |
+| Setting                              | Default  | Context   | Multiple | Description                                                                                                          |
+| ------------------------------------ | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `USE_METRICS`                        | `yes`    | multisite | no       | **Enable Metrics:** Set to `yes` to enable collection and retrieval of metrics.                                      |
+| `METRICS_MEMORY_SIZE`                | `16m`    | global    | no       | **Memory Size:** Size of the internal storage for metrics (e.g., `16m`, `32m`).                                      |
+| `METRICS_MAX_BLOCKED_REQUESTS`       | `1000`   | global    | no       | **Max Blocked Requests:** Maximum number of blocked requests to store per worker.                                    |
+| `METRICS_MAX_BLOCKED_REQUESTS_REDIS` | `100000` | global    | no       | **Max Redis Blocked Requests:** Maximum number of blocked requests to store in Redis.                                |
+| `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | no       | **Save Metrics to Redis:** Set to `yes` to save metrics (counters and tables) to Redis for cluster-wide aggregation. |
 
 !!! tip "Sizing Memory Allocation"
     The `METRICS_MEMORY_SIZE` setting should be adjusted based on your traffic volume and the number of instances. For high-traffic sites, consider increasing this value to ensure all metrics are captured without data loss.
@@ -3033,6 +3040,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "16m"
     METRICS_MAX_BLOCKED_REQUESTS: "1000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_SAVE_TO_REDIS: "yes"
     ```
 
 === "Low-Resource Environment"
@@ -3044,6 +3052,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "8m"
     METRICS_MAX_BLOCKED_REQUESTS: "500"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    METRICS_SAVE_TO_REDIS: "no"
     ```
 
 === "High-Traffic Environment"
@@ -3055,6 +3064,7 @@ For example, `/metrics/requests` returns information about blocked requests.
     METRICS_MEMORY_SIZE: "64m"
     METRICS_MAX_BLOCKED_REQUESTS: "5000"
     METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    METRICS_SAVE_TO_REDIS: "yes"
     ```
 
 === "Metrics Disabled"
@@ -3427,7 +3437,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.15.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.15.0) (**default**).
+- **`4`**: Stable [v4.16.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.16.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"
@@ -3981,45 +3991,45 @@ Follow these steps to configure and use the Redirect feature:
 
 STREAM support :white_check_mark:
 
-The Redis plugin integrates Redis into BunkerWeb for caching and fast data retrieval. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
+The Redis plugin integrates [Redis](https://redis.io/) or [Valkey](https://valkey.io/) into BunkerWeb for caching and fast data retrieval. This feature is essential for deploying BunkerWeb in high-availability environments where session data, metrics, and other shared information must be accessible across multiple nodes.
 
 **How it works:**
 
-1. When enabled, BunkerWeb establishes a connection to your configured Redis server.
-2. Critical data such as session information, metrics, and security-related data are stored in Redis.
+1. When enabled, BunkerWeb establishes a connection to your configured Redis or Valkey server.
+2. Critical data such as session information, metrics, and security-related data are stored in Redis/Valkey.
 3. Multiple BunkerWeb instances can share this data, enabling seamless clustering and load balancing.
-4. The plugin supports various Redis deployment options, including standalone servers, password authentication, SSL/TLS encryption, and Redis Sentinel for high availability.
+4. The plugin supports various Redis/Valkey deployment options, including standalone servers, password authentication, SSL/TLS encryption, and Redis Sentinel for high availability.
 5. Automatic reconnection and configurable timeouts ensure robustness in production environments.
 
 ### How to Use
 
 Follow these steps to configure and use the Redis plugin:
 
-1. **Enable the feature:** Set the `USE_REDIS` setting to `yes` to enable Redis integration.
-2. **Configure connection details:** Specify your Redis server's hostname/IP address and port.
-3. **Set security options:** Configure authentication credentials if your Redis server requires them.
+1. **Enable the feature:** Set the `USE_REDIS` setting to `yes` to enable Redis/Valkey integration.
+2. **Configure connection details:** Specify your Redis/Valkey server's hostname/IP address and port.
+3. **Set security options:** Configure authentication credentials if your Redis/Valkey server requires them.
 4. **Configure advanced options:** Set the database selection, SSL options, and timeouts as needed.
 5. **For high availability,** configure Sentinel settings if you're using Redis Sentinel.
 
 ### Configuration Settings
 
-| Setting                   | Default    | Context | Multiple | Description                                                                              |
-| ------------------------- | ---------- | ------- | -------- | ---------------------------------------------------------------------------------------- |
-| `USE_REDIS`               | `no`       | global  | no       | **Enable Redis:** Set to `yes` to enable Redis integration for cluster mode.             |
-| `REDIS_HOST`              |            | global  | no       | **Redis Server:** IP address or hostname of the Redis server.                            |
-| `REDIS_PORT`              | `6379`     | global  | no       | **Redis Port:** Port number of the Redis server.                                         |
-| `REDIS_DATABASE`          | `0`        | global  | no       | **Redis Database:** Database number to use on the Redis server (0-15).                   |
-| `REDIS_SSL`               | `no`       | global  | no       | **Redis SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis connection.       |
-| `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis SSL Verify:** Set to `yes` to verify the Redis server's SSL certificate.         |
-| `REDIS_TIMEOUT`           | `5`        | global  | no       | **Redis Timeout:** Connection timeout in seconds for Redis operations.                   |
-| `REDIS_USERNAME`          |            | global  | no       | **Redis Username:** Username for Redis authentication (Redis 6.0+).                      |
-| `REDIS_PASSWORD`          |            | global  | no       | **Redis Password:** Password for Redis authentication.                                   |
-| `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).        |
-| `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                       |
-| `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                       |
-| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                 |
-| `REDIS_KEEPALIVE_IDLE`    | `300`      | global  | no       | **Keepalive Idle:** Time (in seconds) between TCP keepalive probes for idle connections. |
-| `REDIS_KEEPALIVE_POOL`    | `3`        | global  | no       | **Keepalive Pool:** Maximum number of Redis connections kept in the pool.                |
+| Setting                   | Default    | Context | Multiple | Description                                                                                      |
+| ------------------------- | ---------- | ------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `USE_REDIS`               | `no`       | global  | no       | **Enable Redis:** Set to `yes` to enable Redis/Valkey integration for cluster mode.              |
+| `REDIS_HOST`              |            | global  | no       | **Redis/Valkey Server:** IP address or hostname of the Redis/Valkey server.                      |
+| `REDIS_PORT`              | `6379`     | global  | no       | **Redis/Valkey Port:** Port number of the Redis/Valkey server.                                   |
+| `REDIS_DATABASE`          | `0`        | global  | no       | **Redis/Valkey Database:** Database number to use on the Redis/Valkey server (0-15).             |
+| `REDIS_SSL`               | `no`       | global  | no       | **Redis/Valkey SSL:** Set to `yes` to enable SSL/TLS encryption for the Redis/Valkey connection. |
+| `REDIS_SSL_VERIFY`        | `yes`      | global  | no       | **Redis/Valkey SSL Verify:** Set to `yes` to verify the Redis/Valkey server's SSL certificate.   |
+| `REDIS_TIMEOUT`           | `5`        | global  | no       | **Redis/Valkey Timeout:** Connection timeout in seconds for Redis/Valkey operations.             |
+| `REDIS_USERNAME`          |            | global  | no       | **Redis/Valkey Username:** Username for Redis/Valkey authentication (Redis 6.0+).                |
+| `REDIS_PASSWORD`          |            | global  | no       | **Redis/Valkey Password:** Password for Redis/Valkey authentication.                             |
+| `REDIS_SENTINEL_HOSTS`    |            | global  | no       | **Sentinel Hosts:** Space-separated list of Redis Sentinel hosts (hostname:port).                |
+| `REDIS_SENTINEL_USERNAME` |            | global  | no       | **Sentinel Username:** Username for Redis Sentinel authentication.                               |
+| `REDIS_SENTINEL_PASSWORD` |            | global  | no       | **Sentinel Password:** Password for Redis Sentinel authentication.                               |
+| `REDIS_SENTINEL_MASTER`   | `mymaster` | global  | no       | **Sentinel Master:** Name of the master in Redis Sentinel configuration.                         |
+| `REDIS_KEEPALIVE_IDLE`    | `300`      | global  | no       | **Keepalive Idle:** Time (in seconds) between TCP keepalive probes for idle connections.         |
+| `REDIS_KEEPALIVE_POOL`    | `3`        | global  | no       | **Keepalive Pool:** Maximum number of Redis/Valkey connections kept in the pool.                 |
 
 !!! tip "High Availability with Redis Sentinel"
     For production environments requiring high availability, configure Redis Sentinel settings. This provides automatic failover capabilities if the primary Redis server becomes unavailable.
@@ -4035,15 +4045,15 @@ Follow these steps to configure and use the Redis plugin:
 !!! info "Cluster Requirements"
     When deploying BunkerWeb in a cluster:
 
-    - All BunkerWeb instances should connect to the same Redis server or Sentinel cluster
+    - All BunkerWeb instances should connect to the same Redis or Valkey server or Sentinel cluster
     - Configure the same database number across all instances
-    - Ensure network connectivity between all BunkerWeb instances and Redis servers
+    - Ensure network connectivity between all BunkerWeb instances and Redis/Valkey servers
 
 ### Example Configurations
 
 === "Basic Configuration"
 
-    A simple configuration for connecting to a Redis server on the local machine:
+    A simple configuration for connecting to a Redis or Valkey server on the local machine:
 
     ```yaml
     USE_REDIS: "yes"
@@ -4093,7 +4103,7 @@ Follow these steps to configure and use the Redis plugin:
 
 ### Redis Best Practices
 
-When using Redis with BunkerWeb, consider these best practices to ensure optimal performance, security, and reliability:
+When using Redis or Valkey with BunkerWeb, consider these best practices to ensure optimal performance, security, and reliability:
 
 #### Memory Management
 - **Monitor memory usage:** Configure Redis with appropriate `maxmemory` settings to prevent out-of-memory errors
@@ -4554,6 +4564,92 @@ Follow these steps to configure and use the Reverse Scan feature:
     REVERSE_SCAN_PORTS: "22 25 80 443 1080 3128 3333 4444 5555 6588 6666 7777 8000 8080 8081 8800 8888 9999"
     ```
 
+## Robots.txt
+
+STREAM support :white_check_mark:
+
+The Robots.txt plugin manages the [robots.txt](https://www.robotstxt.org/) file for your website. This file tells web crawlers and robots which parts of your site they can or cannot access.
+
+**How it works:**
+
+When enabled, BunkerWeb dynamically generates the `/robots.txt` file at the root of your website. The rules within this file are aggregated from multiple sources in the following order:
+
+1.  **DarkVisitors API:** If `ROBOTSTXT_DARKVISITORS_TOKEN` is provided, rules are fetched from the [DarkVisitors](https://darkvisitors.com/) API, allowing dynamic blocking of malicious bots and AI crawlers based on configured agent types and disallowed user agents.
+2.  **Community Lists:** Rules from pre-defined, community-maintained `robots.txt` lists (specified by `ROBOTSTXT_COMMUNITY_LISTS`) are included.
+3.  **Custom URLs:** Rules are fetched from user-provided URLs (specified by `ROBOTSTXT_URLS`).
+4.  **Manual Rules:** Rules defined directly via `ROBOTSTXT_RULE` environment variables are added.
+
+All rules from these sources are combined. After aggregation, `ROBOTSTXT_IGNORE_RULES` are applied to filter out any unwanted rules using PCRE regex patterns. Finally, if no rules remain after this entire process, a default `User-agent: *` and `Disallow: /` rule is automatically applied to ensure a basic level of protection. Optional sitemap URLs (specified by `ROBOTSTXT_SITEMAP`) are also included in the final `robots.txt` output.
+
+### Dynamic Bot Circumvention with DarkVisitors API
+
+[DarkVisitors](https://darkvisitors.com/) is a service that provides a dynamic `robots.txt` file to help block known malicious bots and AI crawlers. By integrating with DarkVisitors, BunkerWeb can automatically fetch and serve an up-to-date `robots.txt` that helps protect your site from unwanted automated traffic.
+
+To enable this, you need to sign up at [darkvisitors.com](https://darkvisitors.com/docs/robots-txt) and obtain a bearer token.
+
+### How to Use
+
+1.  **Enable the feature:** Set the `USE_ROBOTSTXT` setting to `yes`.
+2.  **Configure rules:** Choose one or more methods to define your `robots.txt` rules:
+    -   **DarkVisitors API:** Provide `ROBOTSTXT_DARKVISITORS_TOKEN` and optionally `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` and `ROBOTSTXT_DARKVISITORS_DISALLOW`.
+    -   **Community Lists:** Specify `ROBOTSTXT_COMMUNITY_LISTS` (space-separated IDs).
+    -   **Custom URLs:** Provide `ROBOTSTXT_URLS` (space-separated URLs).
+    -   **Manual Rules:** Use `ROBOTSTXT_RULE` for individual rules (multiple rules can be specified with `ROBOTSTXT_RULE_N`).
+3.  **Filter rules (optional):** Use `ROBOTSTXT_IGNORE_RULES_N` to exclude specific rules by regex pattern.
+4.  **Add sitemaps (optional):** Use `ROBOTSTXT_SITEMAP_N` for sitemap URLs.
+5.  **Obtain the generated robots.txt file:** Once BunkerWeb is running with the above settings, you can access the dynamically generated `robots.txt` file by making an HTTP GET request to `http(s)://your-domain.com/robots.txt`.
+
+### Configuration Settings
+
+| Setting                              | Default | Context   | Multiple | Description                                                                                                                           |
+| ------------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_ROBOTSTXT`                      | `no`    | multisite | No       | Enables or disables the `robots.txt` feature.                                                                                         |
+| `ROBOTSTXT_DARKVISITORS_TOKEN`       |         | multisite | No       | Bearer token for the DarkVisitors API.                                                                                                |
+| `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` |         | multisite | No       | Comma-separated list of agent types (e.g., `AI_Data_Scraper`) to include from DarkVisitors.                                           |
+| `ROBOTSTXT_DARKVISITORS_DISALLOW`    | `/`     | multisite | No       | A string specifying which URLs are disallowed. This value will be sent as the disallow field when contacting the DarkVisitors API.    |
+| `ROBOTSTXT_COMMUNITY_LISTS`          |         | multisite | No       | Space-separated list of community-maintained rule set IDs to include.                                                                 |
+| `ROBOTSTXT_URLS`                     |         | multisite | No       | Space-separated list of URLs to fetch additional `robots.txt` rules from. Supports `file://` and basic auth (`http://user:pass@url`). |
+| `ROBOTSTXT_RULE`                     |         | multisite | Yes      | A single rule for `robots.txt`.                                                                                                       |
+| `ROBOTSTXT_IGNORE_RULES`             |         | multisite | Yes      | A single PCRE regex pattern to ignore rules.                                                                                          |
+| `ROBOTSTXT_SITEMAP`                  |         | multisite | Yes      | A single sitemap URL.                                                                                                                 |
+
+### Example Configurations
+
+**Basic Manual Rules**
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_RULE: "User-agent: *"
+ROBOTSTXT_RULE_1: "Disallow: /private"
+ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
+```
+
+**Using Dynamic Sources (DarkVisitors & Community List)**
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_DARKVISITORS_TOKEN: "your-darkvisitors-token-here"
+ROBOTSTXT_DARKVISITORS_AGENT_TYPES: "AI Data Scraper"
+ROBOTSTXT_COMMUNITY_LISTS: "robots-disallowed"
+ROBOTSTXT_IGNORE_RULES: "User-agent: Googlebot-Image"
+```
+
+**Combined Configuration**
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_DARKVISITORS_TOKEN: "your-darkvisitors-token-here"
+ROBOTSTXT_COMMUNITY_LISTS: "ai-robots-txt"
+ROBOTSTXT_URLS: "https://example.com/my-custom-rules.txt"
+ROBOTSTXT_RULE: "User-agent: MyOwnBot"
+ROBOTSTXT_RULE_1: "Disallow: /admin"
+ROBOTSTXT_IGNORE_RULES: "User-agent: Googlebot-Image"
+ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
+```
+
+---
+
+For more information, see the [robots.txt documentation](https://www.robotstxt.org/robotstxt.html).
 ## SSL
 
 STREAM support :white_check_mark:

@@ -90,7 +90,9 @@
     "entire_config": "Entire Config",
     "export": "Export",
     "filters_suffix": " Filters",
+    "follow": "Follow",
     "github_stars": "Stars",
+    "go_back": "Go Back",
     "hide": "Hide",
     "history": "History",
     "login": "Login",
@@ -698,6 +700,14 @@
       "success": "Success"
     }
   },
+  "logs": {
+    "eventsource_failed": "EventSource connection failed",
+    "parse_error": "Failed to parse stream data: {{error}}",
+    "stream_error": "Stream error: {{message}}",
+    "stream_init": "Stream initialized, file size: {{size}}",
+    "stream_initialized": "Stream initialized with refresh, file size: {{size}}",
+    "trimmed_notice": "--- {{count}} older log lines were removed for performance ---"
+  },
   "link": {
     "back_to_login": "Back to Login",
     "forgot_password": "Forgot Password?",
@@ -1205,6 +1215,7 @@
     "draft_toggle_disabled": "Draft mode can only be toggled for services created via the UI.",
     "email_lets_encrypt": "The email address to register with Let's Encrypt for certificate management and notifications.",
     "email_length": "Email must be between 1 and 256 characters.",
+    "follow_latest_page_only": "Follow mode is only available on the latest page",
     "global_config_source": "Value inherited from global configuration.",
     "instance_not_up": "Instance {{hostname}} is currently not responding ('up').",
     "lets_encrypt_custom_profile": "The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile').",
@@ -1242,6 +1253,7 @@
     "readonly_user_action_disabled": "Disabled: Your account is read-only, action '{{action}}' disabled.",
     "remove_ban_entry": "Remove this ban entry from the list.",
     "reset_template_settings": "Reset all settings in the current template view to their defaults.",
+    "select_file_to_follow": "Select a file to enable follow mode",
     "server_name": "The primary domain name or server name for this service.",
     "stream_support": {
       "no": "Does not support STREAM mode.",

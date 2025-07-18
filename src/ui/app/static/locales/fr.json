@@ -90,7 +90,9 @@
     "entire_config": "Config Entière",
     "export": "Exporter",
     "filters_suffix": " Filtres",
+    "follow": "Suivre",
     "github_stars": "Étoiles",
+    "go_back": "Retour",
     "hide": "Masquer",
     "history": "Historique",
     "login": "Connexion",
@@ -698,6 +700,14 @@
       "success": "Succès"
     }
   },
+  "logs": {
+    "eventsource_failed": "Échec de la connexion EventSource",
+    "parse_error": "Échec de l'analyse des données de flux : {{error}}",
+    "stream_error": "Erreur de flux : {{message}}",
+    "stream_init": "Flux initialisé, taille du fichier : {{size}}",
+    "stream_initialized": "Flux initialisé avec actualisation, taille du fichier : {{size}}",
+    "trimmed_notice": "--- {{count}} anciennes lignes de log ont été supprimées pour les performances ---"
+  },
   "link": {
     "back_to_login": "Retour à la Connexion",
     "forgot_password": "Mot de Passe Oublié ?",
@@ -945,10 +955,9 @@
     "last_24h": "Dernières 24 heures",
     "last_30d": "Derniers 30 jours",
     "last_7d": "Derniers 7 jours",
-    "last_run_state": "État Dernière Exécution",
+    "last_run": "État de la Dernière Exécution",
     "last_seen": "Vu la Dernière Fois",
     "last_update": "Dernière MàJ",
-    "loading": "Chargement des volets de recherche...",
     "method": "Méthode",
     "next_24h": "Prochaines 24 heures",
     "next_30d": "Prochains 30 jours",
@@ -1206,6 +1215,7 @@
     "draft_toggle_disabled": "Le mode Brouillon ne peut être basculé que pour les services créés via l'UI.",
     "email_lets_encrypt": "L'adresse email à enregistrer auprès de Let's Encrypt pour la gestion des certificats et les notifications.",
     "email_length": "L'email doit contenir entre 1 et 256 caractères.",
+    "follow_latest_page_only": "Le mode suivi n'est disponible que sur la dernière page",
     "global_config_source": "Valeur héritée de la configuration globale.",
     "instance_not_up": "L'instance {{hostname}} ne répond pas actuellement ('up').",
     "lets_encrypt_custom_profile": "Le profil personnalisé à utiliser pour Let's Encrypt (ex : 'mon_profil_personnalise').",
@@ -1243,6 +1253,7 @@
     "readonly_user_action_disabled": "Désactivé : Votre compte est en lecture seule, action '{{action}}' désactivée.",
     "remove_ban_entry": "Retirer cette entrée de bannissement de la liste.",
     "reset_template_settings": "Réinitialiser tous les paramètres de la vue modèle actuelle à leurs valeurs par défaut.",
+    "select_file_to_follow": "Sélectionner un fichier pour activer le mode suivi",
     "server_name": "Le nom de domaine principal ou nom de serveur pour ce service.",
     "stream_support": {
       "no": "Ne supporte pas le mode STREAM.",

@@ -54,9 +54,9 @@
       return ("" + e).toLowerCase();
     },
     v = function (e, o, t, r) {
-      null == o && (o = "&"),
+      (null == o && (o = "&"),
         null == t && (t = "="),
-        null == r && (r = window.decodeURIComponent);
+        null == r && (r = window.decodeURIComponent));
       var a = {};
       return (
         u(e.split(o), function (e) {
@@ -80,7 +80,7 @@
     },
     k = function (e, o, t) {
       var r = function () {
-        return w(e, o, r), t.apply(this, arguments);
+        return (w(e, o, r), t.apply(this, arguments));
       };
       m(e, o, r);
     },
@@ -89,7 +89,7 @@
         var r = "readystatechange",
           a = function () {
             if (o.test(e.readyState))
-              return w(e, r, a), t.apply(this, arguments);
+              return (w(e, r, a), t.apply(this, arguments));
           };
         m(e, r, a);
       }
@@ -201,7 +201,7 @@
       },
     },
     Z = function (e, o) {
-      (e = b(e).replace(/^octicon-/, "")), p(M, e) || (e = "mark-github");
+      ((e = b(e).replace(/^octicon-/, "")), p(M, e) || (e = "mark-github"));
       var t = o >= 24 && 24 in M[e].heights ? 24 : 16,
         r = M[e].heights[t];
       return (
@@ -276,7 +276,7 @@
       // Otherwise, fetch fresh data
       if (d) {
         var xhr = new a();
-        m(xhr, "abort", fireQueue),
+        (m(xhr, "abort", fireQueue),
           m(xhr, "error", fireQueue),
           m(xhr, "load", function () {
             var data;
@@ -298,7 +298,7 @@
             fireQueue(isError, data);
           }),
           xhr.open("GET", url),
-          xhr.send();
+          xhr.send());
       } else {
         // JSONP fallback
         var that = this || window;
@@ -326,10 +326,10 @@
               that._({ meta: {} });
             }
           };
-        m(script, "load", onScriptDone),
+        (m(script, "load", onScriptDone),
           m(script, "error", onScriptDone),
           x(script, /de|m/, onScriptDone),
-          that.document.getElementsByTagName("head")[0].appendChild(script);
+          that.document.getElementsByTagName("head")[0].appendChild(script));
       }
     },
     E = function (e, o, t) {
@@ -371,7 +371,7 @@
         ),
         u = d.hostname.replace(/\.$/, "");
       if (("." + u).substring(u.length - 10) !== "." + c)
-        return d.removeAttribute("href"), void t(s);
+        return (d.removeAttribute("href"), void t(s));
       var h = (" /" + d.pathname).split(/\/+/);
       if (
         ((((u === c || u === "gist." + c) && "archive" === h[3]) ||
@@ -390,14 +390,14 @@
           "-" !== h[1])
       ) {
         var g, m;
-        if (!h[2] && h[1]) (m = "followers"), (g = "?tab=followers");
-        else if (!h[3] && h[2]) (m = "stargazers_count"), (g = "/stargazers");
+        if (!h[2] && h[1]) ((m = "followers"), (g = "?tab=followers"));
+        else if (!h[3] && h[2]) ((m = "stargazers_count"), (g = "/stargazers"));
         else if (h[4] || "subscription" !== h[3])
           if (h[4] || "fork" !== h[3]) {
             if ("issues" !== h[3]) return void t(s);
-            (m = "open_issues_count"), (g = "/issues");
-          } else (m = "forks_count"), (g = "/forks");
-        else (m = "subscribers_count"), (g = "/watchers");
+            ((m = "open_issues_count"), (g = "/issues"));
+          } else ((m = "forks_count"), (g = "/forks"));
+        else ((m = "subscribers_count"), (g = "/watchers"));
         var w = h[2] ? "/repos/" + h[1] + "/" + h[2] : "/users/" + h[1];
         F.call(this, l + w, function (e, o) {
           if (!e) {
@@ -432,7 +432,7 @@
       return (L > 1 ? t.ceil((t.round(e * L) / L) * 2) / 2 : t.ceil(e)) || 0;
     },
     G = function (e, o) {
-      (e.style.width = o[0] + "px"), (e.style.height = o[1] + "px");
+      ((e.style.width = o[0] + "px"), (e.style.height = o[1] + "px"));
     },
     T = function (o, r) {
       if (null != o && null != r) {
@@ -468,7 +468,7 @@
             scrolling: "no",
             frameBorder: 0,
           });
-          G(n, [0, 0]), (n.style.border = "none");
+          (G(n, [0, 0]), (n.style.border = "none"));
           var c = function () {
             var a,
               l = n.contentWindow;
@@ -477,18 +477,18 @@
             } catch (o) {
               return void e.body.appendChild(n.parentNode.removeChild(n));
             }
-            w(n, "load", c),
+            (w(n, "load", c),
               E.call(l, a, o, function (e) {
                 var a = (function (e) {
                   var o = e.offsetWidth,
                     r = e.offsetHeight;
                   if (e.getBoundingClientRect) {
                     var a = e.getBoundingClientRect();
-                    (o = t.max(o, _(a.width))), (r = t.max(r, _(a.height)));
+                    ((o = t.max(o, _(a.width))), (r = t.max(r, _(a.height))));
                   }
                   return [o, r];
                 })(e);
-                n.parentNode.removeChild(n),
+                (n.parentNode.removeChild(n),
                   k(n, "load", function () {
                     G(n, a);
                   }),
@@ -496,9 +496,9 @@
                     i +
                     "#" +
                     (n.name = (function (e, o, t, r) {
-                      null == o && (o = "&"),
+                      (null == o && (o = "&"),
                         null == t && (t = "="),
-                        null == r && (r = window.encodeURIComponent);
+                        null == r && (r = window.encodeURIComponent));
                       var a = [];
                       for (var n in e) {
                         var i = e[n];
@@ -506,10 +506,10 @@
                       }
                       return a.join(o);
                     })(o))),
-                  r(n);
-              });
+                  r(n));
+              }));
           };
-          m(n, "load", c), e.body.appendChild(n);
+          (m(n, "load", c), e.body.appendChild(n));
         }
       }
     };
@@ -528,7 +528,7 @@
         setTimeout(o);
       else if (e.addEventListener) {
         var t = g(o);
-        k(e, "DOMContentLoaded", t), k(window, "load", t);
+        (k(e, "DOMContentLoaded", t), k(window, "load", t));
       } else x(e, /m/, o);
     })(function () {
       var o,

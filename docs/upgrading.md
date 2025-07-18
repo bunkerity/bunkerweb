@@ -75,16 +75,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.2-rc7
+                        image: bunkerity/bunkerweb:1.6.3-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+                        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.2-rc7
+                        image: bunkerity/bunkerweb-autoconf:1.6.3-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.2-rc7
+                        image: bunkerity/bunkerweb-ui:1.6.3-rc1
                         ...
                 ```
 
@@ -119,7 +119,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y bunkerweb=1.6.2-rc7
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.3-rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -145,7 +145,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y bunkerweb-1.6.2-rc7
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.3-rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -199,7 +199,15 @@
 
 === "Docker"
 
-    1. **Restore the backup**.
+    1. **Extract the backup if zipped**.
+
+        Extract the backup zip file first:
+
+        ```bash
+        unzip /path/to/backup/directory/backup.zip -d /path/to/backup/directory/
+        ```
+
+    2. **Restore the backup**.
 
         === "SQLite"
 
@@ -268,7 +276,7 @@
                 docker compose down
                 ```
 
-    2. **Downgrade BunkerWeb**.
+    3. **Downgrade BunkerWeb**.
 
         ```yaml
         services:
@@ -286,7 +294,7 @@
                 ...
         ```
 
-    3. **Start the containers**.
+    4. **Start the containers**.
 
         ```bash
         docker compose up -d
@@ -294,13 +302,21 @@
 
 === "Linux"
 
-    4. **Stop the services**.
+    4. **Extract the backup if zipped**.
+
+        Extract the backup zip file first:
+
+        ```bash
+        unzip /path/to/backup/directory/backup.zip -d /path/to/backup/directory/
+        ```
+
+    5. **Stop the services**.
 
         ```bash
         sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
         ```
 
-    5. **Restore the backup**.
+    6. **Restore the backup**.
 
         === "SQLite"
 
@@ -337,13 +353,13 @@
                 psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-    6. **Start the services**.
+    7. **Start the services**.
 
         ```bash
         sudo systemctl start bunkerweb bunkerweb-ui bunkerweb-scheduler
         ```
 
-    7. **Downgrade BunkerWeb**.
+    8. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)
 
 ## Upgrade from 1.5.X
@@ -534,16 +550,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.2-rc7
+                        image: bunkerity/bunkerweb:1.6.3-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+                        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.2-rc7
+                        image: bunkerity/bunkerweb-autoconf:1.6.3-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.2-rc7
+                        image: bunkerity/bunkerweb-ui:1.6.3-rc1
                         ...
                 ```
 
@@ -577,7 +593,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y bunkerweb=1.6.2-rc7
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.3-rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -603,7 +619,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y bunkerweb-1.6.2-rc7
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.3-rc1
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -655,7 +671,15 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
 === "Docker"
 
-    1. **Restore the backup**.
+    1. **Extract the backup if zipped**.
+
+        Extract the backup zip file first:
+
+        ```bash
+        unzip /path/to/backup/directory/backup.zip -d /path/to/backup/directory/
+        ```
+
+    2. **Restore the backup**.
 
         === "SQLite"
 
@@ -724,7 +748,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 docker compose down
                 ```
 
-    2. **Downgrade BunkerWeb**.
+    3. **Downgrade BunkerWeb**.
 
         ```yaml
         services:
@@ -742,7 +766,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ...
         ```
 
-    3. **Start the containers**.
+    4. **Start the containers**.
 
         ```bash
         docker compose up -d
@@ -750,13 +774,21 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
 === "Linux"
 
-    4. **Stop the services**.
+    4. **Extract the backup if zipped**.
+
+        Extract the backup zip file first:
+
+        ```bash
+        unzip /path/to/backup/directory/backup.zip -d /path/to/backup/directory/
+        ```
+
+    5. **Stop the services**.
 
         ```bash
         sudo systemctl stop bunkerweb bunkerweb-ui bunkerweb-scheduler
         ```
 
-    5. **Restore the backup**.
+    6. **Restore the backup**.
 
         === "SQLite"
 
@@ -793,11 +825,11 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 psql -U <username> -d <database_name> < /path/to/backup/directory/backup.sql
                 ```
 
-    6. **Start the services**.
+    7. **Start the services**.
 
         ```bash
         sudo systemctl start bunkerweb bunkerweb-ui bunkerweb-scheduler
         ```
 
-    7. **Downgrade BunkerWeb**.
+    8. **Downgrade BunkerWeb**.
         - Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the [integration Linux page](integrations.md#linux)

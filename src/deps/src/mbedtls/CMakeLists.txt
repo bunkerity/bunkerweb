@@ -40,12 +40,12 @@ cmake_policy(SET CMP0012 NEW)
 if(TEST_CPP)
     project("Mbed TLS"
         LANGUAGES C CXX
-        VERSION 3.6.3
+        VERSION 3.6.4
     )
 else()
     project("Mbed TLS"
         LANGUAGES C
-        VERSION 3.6.3
+        VERSION 3.6.4
     )
 endif()
 
@@ -355,35 +355,37 @@ if(ENABLE_TESTING OR ENABLE_PROGRAMS)
     if(GEN_FILES)
         add_custom_command(
             OUTPUT
-                ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include/test/test_keys.h
-            WORKING_DIRECTORY
-                ${CMAKE_CURRENT_SOURCE_DIR}/tests
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_keys.h
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test
             COMMAND
                 "${MBEDTLS_PYTHON_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/framework/scripts/generate_test_keys.py"
                 "--output"
-                "${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include/test/test_keys.h"
+                "${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_keys.h"
             DEPENDS
                 ${CMAKE_CURRENT_SOURCE_DIR}/framework/scripts/generate_test_keys.py
         )
-        add_custom_target(test_keys_header DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include/test/test_keys.h)
+        add_custom_target(test_keys_header
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_keys.h)
         add_custom_command(
             OUTPUT
-                ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_certs.h
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_certs.h
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test
             WORKING_DIRECTORY
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests
             COMMAND
                 "${MBEDTLS_PYTHON_EXECUTABLE}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/framework/scripts/generate_test_cert_macros.py"
                 "--output"
-                "${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_certs.h"
+                "${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_certs.h"
             DEPENDS
                 ${CMAKE_CURRENT_SOURCE_DIR}/framework/scripts/generate_test_cert_macros.py
         )
-        add_custom_target(test_certs_header DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/src/test_certs.h)
+        add_custom_target(test_certs_header DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/tests/include/test/test_certs.h)
         add_dependencies(mbedtls_test test_keys_header test_certs_header)
     endif()
     target_include_directories(mbedtls_test
+        PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/tests/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/framework/tests/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -474,7 +476,7 @@ if(NOT DISABLE_PACKAGE_CONFIG_AND_INSTALL)
     write_basic_package_version_file(
         "cmake/MbedTLSConfigVersion.cmake"
             COMPATIBILITY SameMajorVersion
-            VERSION 3.6.3)
+            VERSION 3.6.4)
 
     install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/cmake/MbedTLSConfig.cmake"

@@ -1,6 +1,11 @@
 $(function () {
-  // Ensure i18next is loaded before using it
-  const t = typeof i18next !== "undefined" ? i18next.t : (key) => key; // Fallback
+  // Dynamic translation function that always uses the latest i18next state
+  const t = (key, options = {}) => {
+    if (typeof i18next !== "undefined" && i18next.isInitialized) {
+      return i18next.t(key, options);
+    }
+    return key; // Fallback to key if i18next is not ready
+  };
 
   var headingColor = config.colors.headingColor;
   var legendColor = config.colors.bodyColor;
@@ -425,7 +430,7 @@ $(function () {
   );
 
   const blockedRequests = Object.keys(requestsData).reduce((acc, key) => {
-    if (["403", "444"].includes(key)) {
+    if (["403", "429", "444"].includes(key)) {
       acc += parseInt(requestsData[key], 10); // Parse blocked requests as integer
     }
     return acc;
@@ -792,50 +797,84 @@ $(function () {
 
   // Handle theme changes and language changes for charts
   function updateChartsWithTranslations() {
-    if (requestsChart) {
-      requestsChart.destroy();
+    // Update theme colors first
+    theme = $("#theme").val();
+    headingColor = config.colors.headingColor;
+    legendColor = config.colors.bodyColor;
+    if (theme === "dark") {
+      headingColor = config.colors.white;
+      legendColor = config.colors.white;
+    }
+
+    // Safely destroy and recreate charts with updated translations
+    try {
+      if (requestsChart) {
+        requestsChart.destroy();
+        requestsChart = null;
+      }
       renderStatsChart();
+    } catch (error) {
+      console.warn("Error updating requests chart:", error);
     }
-    if ($ipsData.length && ipsChart) {
-      ipsChart.destroy();
-      renderIpsChart();
+
+    try {
+      if ($ipsData.length && ipsChart) {
+        ipsChart.destroy();
+        ipsChart = null;
+      }
+      if ($ipsData.length) {
+        renderIpsChart();
+      }
+    } catch (error) {
+      console.warn("Error updating IPs chart:", error);
     }
-    if (blockingChart) {
-      blockingChart.destroy();
+
+    try {
+      if (blockingChart) {
+        blockingChart.destroy();
+        blockingChart = null;
+      }
       renderBlockingStatus();
+    } catch (error) {
+      console.warn("Error updating blocking chart:", error);
     }
 
     // Update map labels
     if (map) {
-      info.update();
-      // Remove and re-add legend to update translations
-      if (legend) {
-        map.removeControl(legend);
-        legend.addTo(map);
+      try {
+        info.update();
+        // Remove and re-add legend to update translations
+        if (legend) {
+          map.removeControl(legend);
+          legend.addTo(map);
+        }
+      } catch (error) {
+        console.warn("Error updating map labels:", error);
       }
     }
   }
 
+  // Create debounced version of the update function
+  const debouncedUpdateCharts = debounce(updateChartsWithTranslations, 100);
+
   $("#dark-mode-toggle").on("change", function () {
     setTimeout(() => {
-      theme = $("#theme").val();
-      headingColor = config.colors.headingColor;
-      legendColor = config.colors.bodyColor;
-      if (theme === "dark") {
-        headingColor = config.colors.white;
-        legendColor = config.colors.white;
-      }
-
-      updateChartsWithTranslations();
+      debouncedUpdateCharts();
     }, 30);
   });
 
   // Listen for language changes and update charts
-  if (typeof i18next !== "undefined") {
-    i18next.on("languageChanged", () => {
-      updateChartsWithTranslations();
-    });
+  function setupLanguageChangeListener() {
+    if (typeof i18next !== "undefined" && i18next.isInitialized) {
+      i18next.off("languageChanged", debouncedUpdateCharts); // Remove existing listener to prevent duplicates
+      i18next.on("languageChanged", () => {
+        debouncedUpdateCharts();
+      });
+    }
   }
+
+  // Setup language change listener immediately if i18next is ready
+  setupLanguageChangeListener();
 
   // Wait for window.i18nextReady = true before continuing
   if (typeof window.i18nextReady === "undefined" || !window.i18nextReady) {
@@ -848,6 +887,9 @@ $(function () {
     };
     new Promise((resolve) => {
       waitForI18next(resolve);
-    }).then(() => updateChartsWithTranslations());
+    }).then(() => {
+      setupLanguageChangeListener();
+      debouncedUpdateCharts();
+    });
   }
 });

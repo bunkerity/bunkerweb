@@ -1,0 +1,20 @@
+# Unix Shell Builtins
+alias
+builtin
+chdir
+done
+endif
+endsw
+esac
+eval
+export
+fg
+fi
+foreach
+function
+history
+hup
+repeat
+set
+setenv
+zmodload

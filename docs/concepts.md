@@ -30,9 +30,8 @@ If you think a new integration should be supported, do not hesitate to open a [n
 
 ## Settings
 
-!!! tip "PRO settings"
-
-    Some plugins are reserved for the **PRO version**. [Find out more about the PRO version here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
+!!! tip "BunkerWeb PRO settings"
+    Some plugins are reserved for the **PRO version**. Want to quickly test BunkerWeb PRO for one month? Use the code `freetrial` when placing your order on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) or by clicking [here](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) to directly to apply the promo code (will be effective at checkout).
 
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 
@@ -67,10 +66,6 @@ You can also use the search bar and directly specify a setting name:
 !!! info "Going further"
 
     The complete list of available settings with descriptions and possible values is available in the [settings section](features.md) of the documentation.
-
-!!! info "Settings generator tool"
-
-    To help you tune BunkerWeb, we offer an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc).
 
 ## Multisite mode
 
@@ -110,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/examples) directory of the repository.
 
 ## Custom configurations
 
@@ -131,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/examples) directory of the repository.
 
 ## Database
 

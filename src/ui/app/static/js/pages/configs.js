@@ -97,10 +97,9 @@ $(document).ready(function () {
         </li>`);
       list.append(listItem);
 
-      const id = `${config.type.toLowerCase()}-${config.service.replaceAll(
-        ".",
-        "_",
-      )}-${config.name}`;
+      const id = `${config.type.toLowerCase()}-${(
+        config.service || "global"
+      ).replaceAll(".", "_")}-${config.name}`;
 
       // Clone the type element and append it to the list item
       const typeClone = $(`#type-${id}`).clone();
@@ -577,10 +576,11 @@ $(document).ready(function () {
       );
       return;
     }
+    const service = $(this).data("config-service");
     const config = {
       name: $(this).data("config-name"),
       type: $(this).data("config-type"),
-      service: $(this).data("config-service"),
+      service: service === "global" ? null : service,
     };
     setupDeletionModal([config]);
   });

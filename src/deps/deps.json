@@ -227,9 +227,9 @@
     },
     {
       "id": "mbedtls",
-      "name": "Mbed TLS v3.6.3",
+      "name": "Mbed TLS v3.6.4",
       "url": "https://github.com/Mbed-TLS/mbedtls.git",
-      "commit": "22098d41c6620ce07cf8a0134d37302355e1e5ef",
+      "commit": "c765c831e5c2a0971410692f92f7a81d6ec65ec2",
       "post_install": "rm -r src/deps/src/mbedtls/tests src/deps/src/mbedtls/docs src/deps/src/mbedtls/programs"
     },
     {
@@ -247,18 +247,11 @@
       "post_install": "rm -r src/deps/src/modsecurity-nginx/tests && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.rej && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch || rm src/deps/src/modsecurity-nginx/config.orig src/deps/src/modsecurity-nginx/config.rej"
     },
     {
-      "id": "nginx-1.26",
-      "name": "Nginx v1.26.3",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "1be0fb0c9f9bc3489c7b40576efd6afe6b2eccd5",
-      "post_install": "rm -r src/deps/src/nginx-1.26/docs"
-    },
-    {
-      "id": "nginx-1.28",
+      "id": "nginx",
       "name": "Nginx v1.28.0",
       "url": "https://github.com/nginx/nginx.git",
       "commit": "481d28cb4e04c8096b9b6134856891dc52ecc68f",
-      "post_install": "rm -r src/deps/src/nginx-1.28/docs"
+      "post_install": "rm -r src/deps/src/nginx/docs"
     },
     {
       "id": "nginx_cookie_flag_module",

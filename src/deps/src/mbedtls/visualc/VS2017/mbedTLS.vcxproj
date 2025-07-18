@@ -259,11 +259,12 @@
     <ClInclude Include="..\..\framework\tests\include\test\psa_helpers.h" />
     <ClInclude Include="..\..\framework\tests\include\test\psa_memory_poisoning_wrappers.h" />
     <ClInclude Include="..\..\framework\tests\include\test\random.h" />
-    <ClInclude Include="..\..\framework\tests\include\test\test_keys.h" />
     <ClInclude Include="..\..\framework\tests\include\test\threading_helpers.h" />
     <ClInclude Include="..\..\tests\include\test\certs.h" />
     <ClInclude Include="..\..\tests\include\test\psa_test_wrappers.h" />
     <ClInclude Include="..\..\tests\include\test\ssl_helpers.h" />
+    <ClInclude Include="..\..\tests\include\test\test_certs.h" />
+    <ClInclude Include="..\..\tests\include\test\test_keys.h" />
     <ClInclude Include="..\..\framework\tests\include\test\drivers\aead.h" />
     <ClInclude Include="..\..\framework\tests\include\test\drivers\asymmetric_encryption.h" />
     <ClInclude Include="..\..\framework\tests\include\test\drivers\cipher.h" />
@@ -274,6 +275,7 @@
     <ClInclude Include="..\..\framework\tests\include\test\drivers\pake.h" />
     <ClInclude Include="..\..\framework\tests\include\test\drivers\signature.h" />
     <ClInclude Include="..\..\framework\tests\include\test\drivers\test_driver.h" />
+    <ClInclude Include="..\..\framework\tests\include\test\drivers\test_driver_common.h" />
     <ClInclude Include="..\..\library\aesce.h" />
     <ClInclude Include="..\..\library\aesni.h" />
     <ClInclude Include="..\..\library\alignment.h" />
@@ -287,6 +289,7 @@
     <ClInclude Include="..\..\library\block_cipher_internal.h" />
     <ClInclude Include="..\..\library\bn_mul.h" />
     <ClInclude Include="..\..\library\check_crypto_config.h" />
+    <ClInclude Include="..\..\library\cipher_invasive.h" />
     <ClInclude Include="..\..\library\cipher_wrap.h" />
     <ClInclude Include="..\..\library\common.h" />
     <ClInclude Include="..\..\library\constant_time_impl.h" />

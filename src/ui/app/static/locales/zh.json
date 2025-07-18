@@ -91,6 +91,7 @@
     "export": "导出",
     "filters_suffix": " 过滤器",
     "github_stars": "星标",
+    "go_back": "返回",
     "hide": "隐藏",
     "history": "历史记录",
     "login": "登录",
@@ -698,6 +699,14 @@
       "success": "成功"
     }
   },
+  "logs": {
+    "eventsource_failed": "EventSource 连接失败",
+    "parse_error": "解析流数据失败：{{error}}",
+    "stream_error": "流错误：{{message}}",
+    "stream_init": "流已初始化，文件大小：{{size}}",
+    "stream_initialized": "流已通过刷新初始化，文件大小：{{size}}",
+    "trimmed_notice": "--- 为提高性能，已删除 {{count}} 条较早的日志行 ---"
+  },
   "link": {
     "back_to_login": "返回登录",
     "forgot_password": "忘记密码？",
@@ -945,6 +954,7 @@
     "last_24h": "过去 24 小时",
     "last_30d": "过去 30 天",
     "last_7d": "过去 7 天",
+    "last_run": "上次运行状态",
     "last_run_state": "上次运行状态",
     "last_seen": "最后出现",
     "last_update": "最后更新",
@@ -1206,6 +1216,7 @@
     "draft_toggle_disabled": "草稿模式只能在通过 UI 创建的服务上切换。",
     "email_lets_encrypt": "用于向 Let's Encrypt 注册以进行证书管理和通知的电子邮件地址。",
     "email_length": "电子邮件必须在 1 到 256 个字符之间。",
+    "follow_latest_page_only": "跟随模式仅在最新页面可用",
     "global_config_source": "值继承自全局配置。",
     "instance_not_up": "实例 {{hostname}} 当前未响应 ('up')。",
     "lets_encrypt_custom_profile": "用于 Let's Encrypt 的自定义配置文件（例如 'my_custom_profile'）。",
@@ -1243,6 +1254,7 @@
     "readonly_user_action_disabled": "已禁用：您的帐户是只读的，操作 '{{action}}' 已禁用。",
     "remove_ban_entry": "从列表中移除此封禁条目。",
     "reset_template_settings": "将当前模板视图中的所有设置重置为其默认值。",
+    "select_file_to_follow": "选择一个文件以启用跟随模式",
     "server_name": "此服务的主域名或服务器名称。",
     "stream_support": {
       "no": "不支持 STREAM 模式。",

@@ -59,6 +59,7 @@ try:
         [
             CERTBOT_BIN,
             "renew",
+            "-n",
             "--no-random-sleep-on-renew",
             "--config-dir",
             DATA_PATH.as_posix(),

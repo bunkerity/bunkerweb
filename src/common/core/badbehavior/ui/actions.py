@@ -98,14 +98,18 @@ def pre_render(**kwargs):
         # Format data for list_bad_behavior_history
         list_data = {"date": [], "id": [], "ip": [], "server_name": [], "method": [], "url": [], "status": []}
         if "table_increments" in metrics:
+            seen_ids = set()
             for increment in metrics["table_increments"]:
-                list_data["date"].append(datetime.fromtimestamp(increment["date"]).isoformat())
-                list_data["id"].append(increment["id"])
-                list_data["ip"].append(increment["ip"])
-                list_data["server_name"].append(increment["server_name"])
-                list_data["method"].append(increment["method"])
-                list_data["url"].append(increment["url"])
-                list_data["status"].append(increment["status"])
+                # Deduplicate based on ID only
+                if increment["id"] not in seen_ids:
+                    seen_ids.add(increment["id"])
+                    list_data["date"].append(datetime.fromtimestamp(increment["date"]).isoformat())
+                    list_data["id"].append(increment["id"])
+                    list_data["ip"].append(increment["ip"])
+                    list_data["server_name"].append(increment["server_name"])
+                    list_data["method"].append(increment["method"])
+                    list_data["url"].append(increment["url"])
+                    list_data["status"].append(increment["status"])
         ret["list_bad_behavior_history"]["data"] = list_data
 
     except BaseException as e:

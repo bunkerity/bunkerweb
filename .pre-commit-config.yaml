@@ -24,11 +24,14 @@ repos:
         name: Black Python Formatter
         language_version: python3.9
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: ffb6a759a979008c0e6dff86e39f4745a2d9eac4 # frozen: v3.1.0
+  - repo: local
     hooks:
       - id: prettier
-        name: Prettier Code Formatter
+        name: Prettier
+        entry: prettier --write
+        language: system
+        types: [text]
+        files: \.(js|ts|jsx|tsx|css|less|html|json|markdown|md|yaml|yml)$
 
   - repo: https://github.com/JohnnyMorganz/StyLua
     rev: c4616d3cdddb48779b0c4097752157cdb9903b52 # frozen: v2.1.0
@@ -44,7 +47,7 @@ repos:
         args: ["--std", "min", "--codes", "--ranges", "--no-cache"]
 
   - repo: https://github.com/pycqa/flake8
-    rev: 4b5e89b4b108a6c1a000c591d334a99a80d34c7b # frozen: 7.2.0
+    rev: d93590f5be797aabb60e3b09f2f52dddb02f349f # frozen: 7.3.0
     hooks:
       - id: flake8
         name: Flake8 Python Linter
@@ -52,7 +55,7 @@ repos:
         exclude: ^src/common/db/alembic/(mariadb|mysql|postgresql|sqlite)_versions
 
   - repo: https://github.com/dosisod/refurb
-    rev: 2e31f0033b6c00bf99912fc6a8b5fd00460c9ba0 # frozen: v2.0.0
+    rev: 6310068b3faa547fb36240fd52e5bd282c29289f # frozen: v2.1.0
     hooks:
       - id: refurb
         name: Refurb Python Refactoring Tool
@@ -64,7 +67,7 @@ repos:
       - id: codespell
         name: Codespell Spell Checker
         exclude: (^src/(ui/templates|common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|src/ui/app/static/(fonts|libs)/.+|src/ui/app/static/locales/.+)$
-        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/json/countries.topojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py,src/ui/app/static/js/pages/reports.js
+        entry: codespell --ignore-regex="(tabEl|Widgits|fpr)" --skip CHANGELOG.md,CODE_OF_CONDUCT.md,src/ui/client/build.py,src/ui/app/static/json/countries.geojson,src/ui/app/static/json/countries.topojson,src/ui/app/static/js/pages/bans.js,src/ui/app/static/json/periscop.min.json,src/ui/app/static/json/blockhaus.min.json,src/ui/app/routes/reports.py,src/ui/app/static/js/pages/reports.js
         language: python
         types: [text]
 

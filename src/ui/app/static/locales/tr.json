@@ -90,7 +90,9 @@
     "entire_config": "Tüm Yapılandırma",
     "export": "Dışa Aktar",
     "filters_suffix": " Filtreler",
+    "follow": "Takip Et",
     "github_stars": "Yıldızlar",
+    "go_back": "Geri Dön",
     "hide": "Gizle",
     "history": "Geçmiş",
     "login": "Giriş Yap",
@@ -119,8 +121,8 @@
     "select_page": "Sayfa Seç",
     "service": "Servis",
     "set_1h": "1 Saat Ayarla",
-    "set_24h": "24 Saat Ayarla",
     "set_1w": "1 Hafta Ayarla",
+    "set_24h": "24 Saat Ayarla",
     "set_permanent": "Kalıcı Ayarla",
     "setup": "Kurulum",
     "show": "Göster",
@@ -544,10 +546,10 @@
   },
   "duration": {
     "1_hour": "1 Saat",
-    "24_hours": "24 Saat",
     "1_week": "1 Hafta",
-    "permanent": "Kalıcı",
-    "custom": "Özel"
+    "24_hours": "24 Saat",
+    "custom": "Özel",
+    "permanent": "Kalıcı"
   },
   "error": {
     "401": {
@@ -666,8 +668,8 @@
       "multivalue_enter_value": "Değer girin...",
       "plugin_search": "Eklenti ara...",
       "search": "Ara...",
-      "select_service": "Servis Seç",
       "secret_token": "Gizli Token",
+      "select_service": "Servis Seç",
       "username_example": "mehmetyilmaz"
     },
     "validation": {
@@ -697,6 +699,14 @@
       "start_date": "Başlangıç Tarihi",
       "success": "Başarılı"
     }
+  },
+  "logs": {
+    "eventsource_failed": "EventSource bağlantısı başarısız oldu",
+    "parse_error": "Akış verisi ayrıştırılamadı: {{error}}",
+    "stream_error": "Akış hatası: {{message}}",
+    "stream_init": "Akış başlatıldı, dosya boyutu: {{size}}",
+    "stream_initialized": "Akış yenileme ile başlatıldı, dosya boyutu: {{size}}",
+    "trimmed_notice": "--- Performans için {{count}} eski günlük satırı kaldırıldı ---"
   },
   "link": {
     "back_to_login": "Girişe Dön",
@@ -791,8 +801,8 @@
     "mode_selection": "Mod Seçimi",
     "more": "Daha fazla...",
     "plugin_activated": "Eklenti Etkinleştirildi",
-    "plugin_deactivated": "Eklenti Devre Dışı Bırakıldı",
     "plugin_activated_global": "Eklenti Global Olarak Etkinleştirildi",
+    "plugin_deactivated": "Eklenti Devre Dışı Bırakıldı",
     "plugin_deactivated_global": "Eklenti Global Olarak Devre Dışı Bırakıldı",
     "plugins": "Eklentiler",
     "plugins_pages": "Eklentiler Sayfası",
@@ -948,7 +958,6 @@
     "last_run": "Son Çalıştırma Durumu",
     "last_seen": "Son Görülme",
     "last_update": "Son Güncelleme",
-    "loading": "Arama Panelleri Yükleniyor...",
     "method": "Yöntem",
     "next_24h": "Sonraki 24 saat",
     "next_30d": "Sonraki 30 gün",
@@ -1123,8 +1132,8 @@
       "template": "Şablon",
       "time_left": "Kalan Süre",
       "type": "Tür",
-      "user_agent": "User-Agent",
       "url": "URL",
+      "user_agent": "User-Agent",
       "version": "Versiyon"
     }
   },
@@ -1206,12 +1215,13 @@
     "draft_toggle_disabled": "Taslak modu yalnızca UI üzerinden oluşturulan servisler için değiştirilebilir.",
     "email_lets_encrypt": "Let's Encrypt ile sertifika yönetimi ve bildirimler için kaydedilecek e-posta adresi.",
     "email_length": "E-posta 1 ile 256 karakter arasında olmalıdır.",
+    "follow_latest_page_only": "Takip modu sadece son sayfada kullanılabilir",
     "global_config_source": "Değer global yapılandırmadan miras alınmıştır.",
     "instance_not_up": "Instance {{hostname}} şu anda yanıt vermiyor ('açık' değil).",
+    "latest_version_installed": "En son sürümü kullanıyorsunuz.",
     "lets_encrypt_custom_profile": "Let's Encrypt için kullanılacak özel profil (örn. 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Genel Sonek Listesi (Public Suffix List) ile eşleşen alan adları için sertifika isteklerini devre dışı bırak (önerilir).",
     "lets_encrypt_profile": "Let's Encrypt için kullanılacak profil (classic, tlsserver, shortlived).",
-    "latest_version_installed": "En son sürümü kullanıyorsunuz.",
     "license_key": "BunkerWeb PRO lisans anahtarınız.",
     "link": {
       "access_plugin_page": "{{name}} Sayfasına Eriş",
@@ -1243,6 +1253,7 @@
     "readonly_user_action_disabled": "Devre dışı: Hesabınız salt okunur, '{{action}}' işlemi devre dışı.",
     "remove_ban_entry": "Bu yasaklama kaydını listeden kaldır.",
     "reset_template_settings": "Mevcut şablon görünümündeki tüm ayarları varsayılanlara sıfırla.",
+    "select_file_to_follow": "Takip modunu etkinleştirmek için bir dosya seçin",
     "server_name": "Bu servisin birincil alan adı veya sunucu adı.",
     "stream_support": {
       "no": "STREAM modunu desteklemez.",
@@ -1286,7 +1297,7 @@
       },
       "instances": {
         "actions": "Bu Instance için mevcut aksiyonlar",
-        "created": "Instance'ın ilk kaydedildiği tarih ve saat",
+        "created": "Instance'ın ilk kaydedildiği tarih ve saati",
         "details": "Instance detaylarını göster",
         "health": "Instance'ın sağlık durumu (Açık, Kapalı, Yükleniyor)",
         "hostname": "Instance'ın Hostname veya URL'si",
@@ -1340,7 +1351,7 @@
         "actions": "Bu Servis için mevcut aksiyonlar",
         "created": "Servisin oluşturulduğu tarih ve saat",
         "details": "Servis detaylarını göster",
-        "last_update": "Servisin en son güncellendiği tarih ve saat",
+        "last_update": "Servisin en son güncellendiği tarih ve saati",
         "method": "Servisin oluşturulma yöntemi (örn. ui, dosya)",
         "name": "Servisin adı",
         "select_all": "Tüm Servisleri seç",

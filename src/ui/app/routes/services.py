@@ -21,6 +21,12 @@ def services_page():
     return render_template("services.html", services=DB.get_services(with_drafts=True))
 
 
+@services.route("/services/", methods=["GET"])
+@login_required
+def services_redirect():
+    return redirect(url_for("services.services_page"))
+
+
 @services.route("/services/convert", methods=["POST"])
 @login_required
 def services_convert():

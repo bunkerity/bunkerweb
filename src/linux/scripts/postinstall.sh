@@ -19,6 +19,7 @@ function do_and_check_cmd() {
 echo "Decompressing deps directory with pigz..."
 cd /usr/share/bunkerweb || exit 1
 if [ -f "deps.tar.gz" ]; then
+    rm -rf deps
     # Use pigz if available, fallback to gzip
     if command -v pigz >/dev/null 2>&1; then
         tar --use-compress-program="pigz -d -p$(nproc)" -xf deps.tar.gz

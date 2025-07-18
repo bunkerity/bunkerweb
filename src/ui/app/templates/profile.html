@@ -369,6 +369,7 @@
                                                        placeholder="Enter code"
                                                        aria-label="2FA Code"
                                                        data-i18n="form.placeholder.2fa_code"
+                                                       autocomplete="one-time-code"
                                                        required
                                                        {% if is_readonly %}disabled{% endif %} />
                                             </div>
@@ -421,6 +422,7 @@
                                                        placeholder="Enter code"
                                                        aria-label="2FA Code or Recovery Code"
                                                        data-i18n="form.placeholder.2fa_or_recovery"
+                                                       autocomplete="one-time-code"
                                                        required
                                                        {% if is_readonly %}disabled{% endif %} />
                                             </div>

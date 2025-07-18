@@ -42,9 +42,19 @@ SecRule REQUEST_FILENAME "@rx ^/" \
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
 
+SecRule REQUEST_FILENAME "@endsWith /login" \
+    "id:1007778,ctl:ruleRemoveTargetByTag=attack-sqli;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rce;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-lfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-protocol;ARGS:password,ctl:ruleRemoveTargetByTag=attack-ssrf;ARGS:password,ctl:ruleRemoveTargetByTag=attack-xss;ARGS:password,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+    "nolog"
+
+SecRule REQUEST_FILENAME "@endsWith /instances/new" \
+    "id:1007779,ctl:ruleRemoveTargetById=931100;ARGS:hostname,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+    "nolog"
+
             {% if re.match("^(?:\d{1,3}\.){3}\d{1,3}$|^\[[0-9a-fA-F:]+\]$", server_name) %}
 SecRule REQUEST_FILENAME "@rx ^/" \
-    "id:1007778,ctl:ruleRemoveById=920350,nolog,chain"
+    "id:1007780,ctl:ruleRemoveById=920350,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
             {% endif %}

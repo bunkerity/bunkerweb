@@ -14,16 +14,9 @@ Please note that professional services are directly offered by [Bunkerity](https
 
 ## Which professional services do you offer?
 
-We offer technical support around the BunkerWeb solution. By using this service, we will assist you on the technical issues (installation, configuration, false positive, ...).
+We offer technical support and consulting around the BunkerWeb solution. By using this service, we will assist you on the technical issues (installation, configuration, false positive, ...). We can also offer custom SLA depending on your needs.
 
 According to your needs you have the choice between "one time" and subscription offers.
-
-One important thing to note is that the support service is based on a "credit" system where you pay for a number of support hours dedicated to you. Time spent on your requests will be deducted from your credit. In other words, you only pay for real time dedicated to your needs.
-
-In addition to the support service, we also offer custom services around the BunkerWeb solution to meet your specific needs:
-
-- Consulting: a dedicated expert will give you advice on your project
-- Development: if you need specific features in BunkerWeb, we can do it for you
 
 ## How can I get more information?
 

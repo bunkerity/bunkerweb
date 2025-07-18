@@ -90,7 +90,9 @@
     "entire_config": "Gesamte Konfiguration",
     "export": "Exportieren",
     "filters_suffix": " Filter",
+    "follow": "Folgen",
     "github_stars": "Sterne",
+    "go_back": "Zurück",
     "hide": "Ausblenden",
     "history": "Verlauf",
     "login": "Anmelden",
@@ -698,6 +700,14 @@
       "success": "Erfolg"
     }
   },
+  "logs": {
+    "eventsource_failed": "EventSource-Verbindung fehlgeschlagen",
+    "parse_error": "Fehler beim Parsen der Stream-Daten: {{error}}",
+    "stream_error": "Stream-Fehler: {{message}}",
+    "stream_init": "Stream initialisiert, Dateigröße: {{size}}",
+    "stream_initialized": "Stream mit Aktualisierung initialisiert, Dateigröße: {{size}}",
+    "trimmed_notice": "--- {{count}} ältere Log-Zeilen wurden aus Performancegründen entfernt ---"
+  },
   "link": {
     "back_to_login": "Zurück zum Login",
     "forgot_password": "Passwort vergessen?",
@@ -1206,6 +1216,7 @@
     "draft_toggle_disabled": "Der Entwurfsmodus kann nur für Dienste umgeschaltet werden, die über die UI erstellt wurden.",
     "email_lets_encrypt": "Die E-Mail-Adresse zur Registrierung bei Let's Encrypt für Zertifikatsverwaltung und Benachrichtigungen.",
     "email_length": "Die E-Mail muss zwischen 1 und 256 Zeichen lang sein.",
+    "follow_latest_page_only": "Der Folgemodus ist nur auf der letzten Seite verfügbar",
     "global_config_source": "Wert von globaler Konfiguration geerbt.",
     "instance_not_up": "Instanz {{hostname}} antwortet derzeit nicht ('up').",
     "lets_encrypt_custom_profile": "Das benutzerdefinierte Profil, das für Let's Encrypt verwendet werden soll (z. B. 'mein_benutzerdefiniertes_profil').",
@@ -1243,6 +1254,7 @@
     "readonly_user_action_disabled": "Deaktiviert: Ihr Konto ist schreibgeschützt, Aktion '{{action}}' deaktiviert.",
     "remove_ban_entry": "Diesen Sperreintrag aus der Liste entfernen.",
     "reset_template_settings": "Alle Einstellungen in der aktuellen Vorlagenansicht auf ihre Standardwerte zurücksetzen.",
+    "select_file_to_follow": "Wählen Sie eine Datei aus, um den Folgemodus zu aktivieren",
     "server_name": "Der primäre Domainname oder Servername für diesen Dienst.",
     "stream_support": {
       "no": "Unterstützt keinen STREAM-Modus.",

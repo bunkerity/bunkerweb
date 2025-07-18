@@ -3,11 +3,11 @@
     <!-- Content -->
     <div class="card p-1 mb-4 sticky-card">
         <div class="d-flex flex-wrap justify-content-around align-items-center">
-            <div class="d-flex justify-content-center">
+            <div class="d-flex justify-content-start">
                 <div class="dropdown btn-group"
-                     {% if not files %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available" data-i18n="tooltip.no_log_files"{% endif %}>
+                     {% if not files.main and not files.letsencrypt %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="No log files available" data-i18n="tooltip.no_log_files"{% endif %}>
                     <button type="button"
-                            class="btn btn-outline-primary dropdown-toggle{% if not files %} disabled{% endif %}"
+                            class="btn btn-outline-primary dropdown-toggle{% if not files.main and not files.letsencrypt %} disabled{% endif %}"
                             data-bs-toggle="dropdown"
                             aria-haspopup="true"
                             aria-expanded="false">
@@ -17,15 +17,39 @@
                     <ul id="types-dropdown-menu"
                         class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
                         role="tablist">
-                        {% for file in files %}
-                            <li class="nav-item">
-                                <a role="button"
-                                   href="{{ url_for('logs', file=file) }}"
-                                   class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
-                                    {{ file }}
-                                </a>
+                        {% if files.main %}
+                            <li>
+                                <h6 class="dropdown-header">Main Logs</h6>
                             </li>
-                        {% endfor %}
+                            {% for file in files.main %}
+                                <li class="nav-item">
+                                    <a role="button"
+                                       href="{{ url_for('logs', file=file) }}"
+                                       class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
+                                        {{ file }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                        {% if files.letsencrypt %}
+                            {% if files.main %}
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                            {% endif %}
+                            <li>
+                                <h6 class="dropdown-header">Let's Encrypt Logs</h6>
+                            </li>
+                            {% for file in files.letsencrypt %}
+                                <li class="nav-item">
+                                    <a role="button"
+                                       href="{{ url_for('logs', file=file) }}"
+                                       class="dropdown-item{% if current_file and current_file == file %} active{% endif %}">
+                                        {{ file.replace('letsencrypt_', '') }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
                     </ul>
                 </div>
                 {% if page_num > 1 %}
@@ -54,13 +78,24 @@
                     </div>
                 {% endif %}
             </div>
-            <div {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS" data-i18n="tooltip.copy_https_only"{% endif %}>
-                <button id="copy-logs"
-                        type="button"
-                        class="btn btn-outline-secondary {% if not request.is_secure %}disabled{% endif %}">
-                    <i class="bx bx-copy-alt"></i>
-                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.copy">Copy</span></span>
-                </button>
+            <div class="d-flex justify-content-end">
+                <div {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS" data-i18n="tooltip.copy_https_only"{% endif %}>
+                    <button id="copy-logs"
+                            type="button"
+                            class="btn btn-outline-secondary {% if not request.is_secure %}disabled{% endif %}">
+                        <i class="bx bx-copy-alt"></i>
+                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.copy">Copy</span></span>
+                    </button>
+                </div>
+                <div {% if not current_file %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select a log file to follow" data-i18n="tooltip.select_file_to_follow"{% elif page_num > 1 and current_page != page_num %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Follow is only available on the latest page" data-i18n="tooltip.follow_latest_page_only"{% endif %}>
+                    <button id="follow-logs"
+                            type="button"
+                            class="btn btn-outline-primary ms-2"
+                            {% if not current_file or (page_num > 1 and current_page != page_num) %}disabled{% endif %}>
+                        <i class="bx bx-play"></i>
+                        <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.follow">Follow</span></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -83,7 +83,9 @@ def configs_delete():
             key = f"{(db_config['service_id'] + '/') if db_config['service_id'] else ''}{db_config['type']}/{db_config['name']}"
             keep = True
             for config in configs:
-                if db_config["name"] == config["name"] and db_config["service_id"] == config["service"] and db_config["type"] == config["type"]:
+                # Normalize service comparison: treat "global" string as None
+                config_service = config["service"] if config["service"] != "global" else None
+                if db_config["name"] == config["name"] and db_config["service_id"] == config_service and db_config["type"] == config["type"]:
                     if db_config["method"] != "ui":
                         non_ui_configs.add(key)
                         continue

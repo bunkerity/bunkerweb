@@ -90,7 +90,9 @@
     "entire_config": "Configuração Completa",
     "export": "Exportar",
     "filters_suffix": " Filtros",
+    "follow": "Seguir",
     "github_stars": "Estrelas",
+    "go_back": "Voltar",
     "hide": "Ocultar",
     "history": "Histórico",
     "login": "Login",
@@ -119,8 +121,8 @@
     "select_page": "Selecionar Página",
     "service": "Serviço",
     "set_1h": "Definir 1 Hora",
-    "set_24h": "Definir 24 Horas",
     "set_1w": "Definir 1 Semana",
+    "set_24h": "Definir 24 Horas",
     "set_permanent": "Definir Permanente",
     "setup": "Configurar",
     "show": "Mostrar",
@@ -544,10 +546,10 @@
   },
   "duration": {
     "1_hour": "1 Hora",
-    "24_hours": "24 Horas",
     "1_week": "1 Semana",
-    "permanent": "Permanente",
-    "custom": "Personalizado"
+    "24_hours": "24 Horas",
+    "custom": "Personalizado",
+    "permanent": "Permanente"
   },
   "error": {
     "401": {
@@ -662,12 +664,12 @@
       "2fa_or_recovery": "Digite o código ou código de recuperação",
       "config_name": "minha-config-personalizada",
       "enter_username": "Digite seu nome de usuário",
-      "keywords": "Palavras-chave...",
+      "keywords": "Palavras-chave",
       "multivalue_enter_value": "Inserir valor...",
       "plugin_search": "Pesquisar plugins...",
       "search": "Pesquisar...",
-      "select_service": "Selecionar Serviço",
       "secret_token": "Token Secreto",
+      "select_service": "Selecionar Serviço",
       "username_example": "joaosilva"
     },
     "validation": {
@@ -697,6 +699,14 @@
       "start_date": "Data de Início",
       "success": "Sucesso"
     }
+  },
+  "logs": {
+    "eventsource_failed": "A conexão EventSource falhou",
+    "parse_error": "Falha ao analisar dados do stream: {{error}}",
+    "stream_error": "Erro de stream: {{message}}",
+    "stream_init": "Stream inicializado, tamanho do arquivo: {{size}}",
+    "stream_initialized": "Stream inicializado com atualização, tamanho do arquivo: {{size}}",
+    "trimmed_notice": "--- {{count}} linhas de log mais antigas foram removidas por desempenho ---"
   },
   "link": {
     "back_to_login": "Voltar ao Login",
@@ -791,8 +801,8 @@
     "mode_selection": "Seleção de Modo",
     "more": "Mais...",
     "plugin_activated": "Plugin Ativado",
-    "plugin_deactivated": "Plugin Desativado",
     "plugin_activated_global": "Plugin Ativado Globalmente",
+    "plugin_deactivated": "Plugin Desativado",
     "plugin_deactivated_global": "Plugin Desativado Globalmente",
     "plugins": "Plugins",
     "plugins_pages": "Páginas de Plugins",
@@ -945,10 +955,9 @@
     "last_24h": "Últimas 24 horas",
     "last_30d": "Últimos 30 dias",
     "last_7d": "Últimos 7 dias",
-    "last_run": "Última Execução",
+    "last_run": "Estado da Última Execução",
     "last_seen": "Visto pela Última Vez",
     "last_update": "Última Atualização",
-    "loading": "Carregando Painéis de Pesquisa...",
     "method": "Método",
     "next_24h": "Próximas 24 horas",
     "next_30d": "Próximos 30 dias",
@@ -1206,12 +1215,13 @@
     "draft_toggle_disabled": "O modo Rascunho só pode ser alternado para serviços criados através da UI.",
     "email_lets_encrypt": "O endereço de email para registrar com Let's Encrypt para gerenciamento de certificados e notificações.",
     "email_length": "O email deve ter entre 1 e 256 caracteres.",
+    "follow_latest_page_only": "O modo de seguir só está disponível na última página",
     "global_config_source": "Valor herdado da configuração global.",
     "instance_not_up": "A instância {{hostname}} não está respondendo atualmente ('up').",
+    "latest_version_installed": "Você está executando a versão mais recente.",
     "lets_encrypt_custom_profile": "O perfil personalizado a ser usado para o Let's Encrypt (ex: 'meu_perfil_personalizado').",
     "lets_encrypt_disable_public_suffixes": "Desativar solicitações de certificado para domínios que correspondam à Public Suffix List (recomendado).",
     "lets_encrypt_profile": "O perfil a ser usado para o Let's Encrypt (classic, tlsserver, shortlived).",
-    "latest_version_installed": "Você está executando a versão mais recente.",
     "license_key": "Sua chave de licença BunkerWeb PRO.",
     "link": {
       "access_plugin_page": "Acessar Página {{name}}",
@@ -1243,6 +1253,7 @@
     "readonly_user_action_disabled": "Desabilitado: Sua conta é somente leitura, ação '{{action}}' desabilitada.",
     "remove_ban_entry": "Remover esta entrada de bloqueio da lista.",
     "reset_template_settings": "Restabelecer todas as configurações na vista de modelo atual para os seus valores padrão.",
+    "select_file_to_follow": "Selecione um arquivo para habilitar o modo de seguir",
     "server_name": "O nome de domínio principal ou nome do servidor para este serviço.",
     "stream_support": {
       "no": "Não suporta modo STREAM.",

@@ -9,6 +9,7 @@ package-lock.json
 /src/ui/*.txt
 .mypy_cache
 .cache/
+.env
 /package*.json
 src/ui/client/static
 src/ui/client/templates

@@ -16,11 +16,10 @@ if [ ! -f /var/run/bunkerweb/nginx.pid ]; then
   exit 1
 fi
 
-# Check BunkerWeb health endpoint
-check="$(curl -s -H "Host: healthcheck.bunkerweb.io" http://127.0.0.1:6000/healthz 2>&1)"
+/usr/share/bunkerweb/helpers/healthcheck.sh
 # shellcheck disable=SC2181
-if [ $? -ne 0 ] || [ "$check" != "ok" ]; then
-  echo "BunkerWeb health check failed: $check"
+if [ $? -ne 0 ]; then
+  echo "BunkerWeb health check failed"
   exit 1
 fi
 
@@ -32,15 +31,10 @@ if [ "${SERVICE_UI:-yes}" = "yes" ]; then
     exit 1
   fi
 
-  # Check UI PID file exists
-  if [ ! -f /var/run/bunkerweb/ui.pid ]; then
-    echo "UI PID file not found"
-    exit 1
-  fi
-
-  # Check UI health marker file
-  if [ ! -f /var/tmp/bunkerweb/ui.healthy ]; then
-    echo "UI health marker file not found"
+  /usr/share/bunkerweb/helpers/healthcheck-ui.sh
+  # shellcheck disable=SC2181
+  if [ $? -ne 0 ]; then
+    echo "UI health check failed"
     exit 1
   fi
 else
@@ -55,15 +49,10 @@ if [ "${SERVICE_SCHEDULER:-yes}" = "yes" ]; then
     exit 1
   fi
 
-  # Check scheduler PID file exists
-  if [ ! -f /var/run/bunkerweb/scheduler.pid ]; then
-    echo "Scheduler PID file not found"
-    exit 1
-  fi
-
-  # Check scheduler health marker file
-  if [ ! -f /var/tmp/bunkerweb/scheduler.healthy ]; then
-    echo "Scheduler health marker file not found"
+  /usr/share/bunkerweb/helpers/healthcheck-scheduler.sh
+  # shellcheck disable=SC2181
+  if [ $? -ne 0 ]; then
+    echo "Scheduler health check failed"
     exit 1
   fi
 else
@@ -78,9 +67,10 @@ if [ "${AUTOCONF_MODE:-no}" = "yes" ]; then
     exit 1
   fi
 
-  # Check autoconf health marker file
-  if [ ! -f /var/tmp/bunkerweb/autoconf.healthy ]; then
-    echo "Autoconf health marker file not found"
+  /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
+  # shellcheck disable=SC2181
+  if [ $? -ne 0 ]; then
+    echo "Autoconf health check failed"
     exit 1
   fi
 else

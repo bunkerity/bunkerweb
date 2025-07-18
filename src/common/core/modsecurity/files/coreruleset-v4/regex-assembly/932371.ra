@@ -1,0 +1,23 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Word list for rule 932371 (Stricter sibling to 932370)
+##!
+##! This rule contains commands that were excluded at PL-1 due to being false positive prone or common english words.
+
+##!+ i
+
+##! extension/switches suffix
+##! cmd.com, cmd.exe, etc.
+##!$ (?:\.[\"\^]*\w+)?
+##! cmd/h
+##!$ \b
+
+##! starting tokens prefix
+##!> assemble
+  ##!> include windows-commands-prefix
+
+  ##!> cmdline windows
+    at@
+  ##!<
+##!<

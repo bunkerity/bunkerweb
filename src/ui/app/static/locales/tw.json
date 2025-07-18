@@ -91,6 +91,7 @@
     "export": "匯出",
     "filters_suffix": " 過濾器",
     "github_stars": "星號",
+    "go_back": "返回",
     "hide": "隱藏",
     "history": "歷史記錄",
     "login": "登入",
@@ -133,7 +134,8 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段"
+    "wipe_other_sessions": "清除其他工作階段",
+    "follow": "跟隨"
   },
   "country": {
     "AD": "安道爾",
@@ -1370,5 +1372,13 @@
     "pattern": "請輸入有效的 {{field}} 值。",
     "required": "{{field}} 是必填項。",
     "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。"
+  },
+  "logs": {
+    "eventsource_failed": "EventSource 連線失敗",
+    "parse_error": "解析串流資料失敗：{{error}}",
+    "stream_error": "串流錯誤：{{message}}",
+    "stream_init": "串流已初始化，檔案大小：{{size}}",
+    "stream_initialized": "串流已初始化並重新整理，檔案大小：{{size}}",
+    "trimmed_notice": "--- {{count}} 條較舊的日誌行已為了效能而移除 ---"
   }
 }

@@ -90,7 +90,9 @@
     "entire_config": "Configuración Completa",
     "export": "Exportar",
     "filters_suffix": " Filtros",
+    "follow": "Seguir",
     "github_stars": "Estrellas",
+    "go_back": "Regresar",
     "hide": "Ocultar",
     "history": "Historial",
     "login": "Iniciar Sesión",
@@ -666,8 +668,8 @@
       "multivalue_enter_value": "Introduce un valor...",
       "plugin_search": "Buscar plugins...",
       "search": "Buscar...",
-      "select_service": "Seleccionar Servicio",
       "secret_token": "Token Secreto",
+      "select_service": "Seleccionar Servicio",
       "username_example": "juandoe"
     },
     "validation": {
@@ -697,6 +699,14 @@
       "start_date": "Fecha de Inicio",
       "success": "Éxito"
     }
+  },
+  "logs": {
+    "eventsource_failed": "Falló la conexión EventSource",
+    "parse_error": "Error al analizar los datos del flujo: {{error}}",
+    "stream_error": "Error de flujo: {{message}}",
+    "stream_init": "Flujo inicializado, tamaño del archivo: {{size}}",
+    "stream_initialized": "Flujo inicializado con actualización, tamaño del archivo: {{size}}",
+    "trimmed_notice": "--- {{count}} líneas de registro antiguas fueron eliminadas por rendimiento ---"
   },
   "link": {
     "back_to_login": "Volver al Inicio de Sesión",
@@ -1206,6 +1216,7 @@
     "draft_toggle_disabled": "El modo Borrador solo se puede alternar para servicios creados a través de la UI.",
     "email_lets_encrypt": "La dirección de correo electrónico para registrarse con Let's Encrypt para la gestión de certificados y notificaciones.",
     "email_length": "El correo electrónico debe tener entre 1 y 256 caracteres.",
+    "follow_latest_page_only": "El modo seguimiento solo está disponible en la última página",
     "global_config_source": "Valor heredado de la configuración global.",
     "instance_not_up": "La instancia {{hostname}} no responde actualmente ('up').",
     "lets_encrypt_custom_profile": "El perfil personalizado a utilizar para Let's Encrypt (por ejemplo, 'mi_perfil_personalizado').",
@@ -1243,6 +1254,7 @@
     "readonly_user_action_disabled": "Deshabilitado: Tu cuenta es de solo lectura, acción '{{action}}' deshabilitada.",
     "remove_ban_entry": "Eliminar esta entrada de bloqueo de la lista.",
     "reset_template_settings": "Restablecer todas las configuraciones en la vista de plantilla actual a sus valores predeterminados.",
+    "select_file_to_follow": "Seleccionar un archivo para habilitar el modo seguimiento",
     "server_name": "El nombre de dominio principal o nombre de servidor para este servicio.",
     "stream_support": {
       "no": "No soporta modo STREAM.",

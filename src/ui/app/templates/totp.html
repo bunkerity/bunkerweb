@@ -58,18 +58,18 @@
                                     <input type="hidden"
                                            name="next"
                                            value="{{ request.values.get('next', '') }}" />
-                                    <div class="mb-6 form-password-toggle">
+                                    <div class="mb-6">
                                         <label class="form-label" for="totp_token" data-i18n="form.label.2fa_code">2FA Code</label>
                                         <div class="input-group input-group-merge">
-                                            <input type="password"
+                                            <input type="text"
                                                    id="totp_token"
                                                    class="form-control"
                                                    name="totp_token"
                                                    placeholder="2FA Code"
                                                    data-i18n="form.placeholder.2fa_code"
                                                    aria-describedby="2FA Code"
+                                                   autocomplete="one-time-code"
                                                    required />
-                                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
                                         </div>
                                     </div>
                                     <div class="mb-6">

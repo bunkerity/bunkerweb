@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
-from json import dumps, loads
+from json import loads
 from operator import itemgetter
 from os import environ, get_terminal_size, getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
-from sys import path as sys_path
+from sys import argv as sys_argv, path as sys_path
 from traceback import format_exc
 from typing import Any, Optional, Tuple
-from time import time
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -24,27 +23,26 @@ from common_utils import get_redis_client, handle_docker_secrets  # type: ignore
 
 
 def format_remaining_time(seconds):
-    years, seconds = divmod(seconds, 60 * 60 * 24 * 365)
-    months, seconds = divmod(seconds, 60 * 60 * 24 * 30)
-    while months >= 12:
-        years += 1
-        months -= 12
-    days, seconds = divmod(seconds, 60 * 60 * 24)
-    hours, seconds = divmod(seconds, 60 * 60)
-    minutes, seconds = divmod(seconds, 60)
+    if not isinstance(seconds, (int, float)) or seconds < 0:
+        return "permanent"
+
+    seconds = int(seconds)
+    days, remainder = divmod(seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
     time_parts = []
-    if years > 0:
-        time_parts.append(f"{int(years)} year{'' if years == 1 else 's'}")
-    if months > 0:
-        time_parts.append(f"{int(months)} month{'' if months == 1 else 's'}")
     if days > 0:
-        time_parts.append(f"{int(days)} day{'' if days == 1 else 's'}")
+        time_parts.append(f"{days} day{'s' if days != 1 else ''}")
     if hours > 0:
-        time_parts.append(f"{int(hours)} hour{'' if hours == 1 else 's'}")
+        time_parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
     if minutes > 0:
-        time_parts.append(f"{int(minutes)} minute{'' if minutes == 1 else 's'}")
+        time_parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
     if seconds > 0:
-        time_parts.append(f"{seconds} second{'' if seconds == 1 else 's'}")
+        time_parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+
+    if not time_parts:
+        return "less than a second"
 
     if len(time_parts) > 1:
         time_parts[-1] = f"and {time_parts[-1]}"
@@ -185,28 +183,13 @@ class CLI(ApiCaller):
 
     def unban(self, ip: str, service: Optional[str] = None) -> Tuple[bool, str]:
         """Unban an IP address globally or from a specific service"""
-        if self.__redis:
-            try:
-                # Delete global ban
-                ok = self.__redis.delete(f"bans_ip_{ip}")
-                if not ok:
-                    self.__logger.error(f"Failed to delete ban for {ip} from redis")
-
-                # If service is specified, delete service-specific ban
-                if service:
-                    service_key = f"bans_service_{service}_ip_{ip}"
-                    ok = self.__redis.delete(service_key)
-                    if not ok:
-                        self.__logger.error(f"Failed to delete service-specific ban for {ip} on service {service} from redis")
-                else:
-                    # Delete all service-specific bans for this IP
-                    for key in self.__redis.scan_iter(f"bans_service_*_ip_{ip}"):
-                        self.__redis.delete(key)
-            except Exception as e:
-                self.__logger.error(f"Failed to delete ban for {ip} from redis: {e}")
-
+        # Always use API as the source of truth for unban
+        ban_scope = "service" if service else "global"
         try:
-            if self.send_to_apis("POST", "/unban", data={"ip": ip} | ({"service": service} if service else {})):
+            data = {"ip": ip, "ban_scope": ban_scope}
+            if service:
+                data["service"] = service
+            if self.send_to_apis("POST", "/unban", data=data):
                 if service:
                     success_msg = (
                         f"{self.ICON_UNLOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been unbanned from service {self.CYAN}{service}{self.RESET}"
@@ -227,7 +210,6 @@ class CLI(ApiCaller):
 
         # Validate the service name if scope is service
         if ban_scope == "service":
-            # Try to get list of services
             services = []
             try:
                 if self.__db:
@@ -235,12 +217,8 @@ class CLI(ApiCaller):
                     services = config.get("SERVER_NAME", [])
                 else:
                     services = self.__get_variable("SERVER_NAME", "").split(" ")
-
-                # Ensure services is a list
                 if isinstance(services, str):
                     services = services.split()
-
-                # Check if service exists
                 if not service or service == "bwcli" or service not in services:
                     self.__logger.warning(f"Invalid service '{service}' for IP {ip}, defaulting to global ban")
                     ban_scope = "global"
@@ -250,34 +228,14 @@ class CLI(ApiCaller):
                 ban_scope = "global"
                 service = "bwcli"
 
-        if self.__redis:
-            try:
-                ban_data = dumps({"reason": reason, "date": time(), "service": service, "ban_scope": ban_scope, "permanent": exp == -1})
-
-                ban_key = f"bans_ip_{ip}"
-                if ban_scope == "service" and service != "bwcli":
-                    ban_key = f"bans_service_{service}_ip_{ip}"
-
-                ok = self.__redis.set(ban_key, ban_data)
-                if not ok:
-                    self.__logger.error(f"Failed to ban {ip} in redis")
-
-                # Only set expiration if not permanent ban
-                if exp != -1:
-                    self.__redis.expire(ban_key, int(exp))
-            except Exception as e:
-                self.__logger.error(f"Failed to ban {ip} in redis: {e}")
-
         try:
-            if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason, "service": service or "bwcli", "ban_scope": ban_scope}):
+            data = {"ip": ip, "exp": exp, "reason": reason, "service": service or "bwcli", "ban_scope": ban_scope}
+            if self.send_to_apis("POST", "/ban", data=data):
                 scope_text = f"{self.GREEN}globally{self.RESET}" if ban_scope == "global" else f"for service {self.CYAN}{service}{self.RESET}"
-
-                # Display different duration for permanent bans
-                if exp == -1:
+                if not exp:
                     duration = f"{self.RED}permanently{self.RESET}"
                 else:
                     duration = f"{self.YELLOW}{format_remaining_time(exp)}{self.RESET}"
-
                 success_msg = (
                     f"{self.ICON_LOCK} IP {self.BOLD}{self.WHITE}{ip}{self.RESET} has been banned {scope_text}\n"
                     f"{self.ICON_CLOCK} Duration: {duration}\n"
@@ -316,9 +274,9 @@ class CLI(ApiCaller):
                     try:
                         ban_data = loads(data.decode("utf-8", "replace"))
                         ban_data["ip"] = ip
-                        # If permanent flag is set, override TTL to -1
+                        # If permanent flag is set, override TTL to 0
                         if ban_data.get("permanent", False):
-                            exp = -1
+                            exp = 0
                         ban_data["exp"] = exp
                         ban_data["ban_scope"] = ban_data.get("ban_scope", "global")
                         servers["redis"].append(ban_data)
@@ -337,9 +295,9 @@ class CLI(ApiCaller):
                     try:
                         ban_data = loads(data.decode("utf-8", "replace"))
                         ban_data["ip"] = ip
-                        # If permanent flag is set, override TTL to -1
+                        # If permanent flag is set, override TTL to 0
                         if ban_data.get("permanent", False):
-                            exp = -1
+                            exp = 0
                         ban_data["exp"] = exp
                         ban_data["service"] = service
                         ban_data["ban_scope"] = "service"
@@ -377,12 +335,12 @@ class CLI(ApiCaller):
                     banned_date = ""
 
                     # Handle permanent bans
-                    if ban.get("permanent", False) or ban.get("exp", 0) == -1:
+                    if ban.get("permanent", False) or not ban.get("exp", 0):
                         remaining = f"{self.RED}permanent{self.RESET}"
                     else:
                         remaining = f"for {self.CYAN}{format_remaining_time(ban.get('exp', 0))}{self.RESET}"
 
-                    if ban["date"] != -1:
+                    if ban["date"] >= 1:
                         banned_date = f"on {self.WHITE}{datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S')}{self.RESET} "
 
                     ip_info = f"{self.BOLD}{self.WHITE}{ban['ip']}{self.RESET} [{banned_country}]"
@@ -410,12 +368,12 @@ class CLI(ApiCaller):
                     banned_date = ""
 
                     # Handle permanent bans
-                    if ban.get("permanent", False) or ban.get("exp", 0) == -1:
+                    if ban.get("permanent", False) or not ban.get("exp", 0):
                         remaining = f"{self.RED}permanent{self.RESET}"
                     else:
                         remaining = f"for {self.CYAN}{format_remaining_time(ban.get('exp', 0))}{self.RESET}"
 
-                    if ban["date"] != -1:
+                    if ban["date"] >= 1:
                         banned_date = f"on {self.WHITE}{datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d at %H:%M:%S')}{self.RESET} "
 
                     ip_info = f"{self.BOLD}{self.WHITE}{ban['ip']}{self.RESET} [{banned_country}]"
@@ -467,39 +425,154 @@ class CLI(ApiCaller):
         found = False
         plugin_type = "core"
         file_name = None
+        available_commands = []
 
         for db_plugin in self.__db.get_plugins():
             if db_plugin["id"] == plugin_id:
                 found = True
                 plugin_type = db_plugin["type"]
-                file_name = db_plugin["bwcli"].get(command, None)
+                available_commands = list(db_plugin.get("bwcli", {}).keys()) if db_plugin.get("bwcli") else []
+                file_name = db_plugin["bwcli"].get(command, None) if db_plugin.get("bwcli") else None
                 break
 
         if not found:
             return False, self.__format_error(f"Plugin {self.BOLD}{plugin_id}{self.RESET} not found")
         elif not file_name:
-            return False, self.__format_error(f"Command {self.BOLD}{command}{self.RESET} not found for plugin {self.CYAN}{plugin_id}{self.RESET}")
+            error_msg = f"Command {self.BOLD}{command}{self.RESET} not found for plugin {self.CYAN}{plugin_id}{self.RESET}"
+            if available_commands:
+                error_msg += f"\nAvailable commands: {self.YELLOW}{', '.join(available_commands)}{self.RESET}"
+            else:
+                error_msg += f"\nNo CLI commands available for plugin {self.CYAN}{plugin_id}{self.RESET}"
+            return False, self.__format_error(error_msg)
 
-        command_path = (
+        plugin_base_path = (
             Path(sep, "usr", "share", "bunkerweb", "core", plugin_id)
             if plugin_type == "core"
             else (Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin_id) if plugin_type == "pro" else Path(sep, "etc", "bunkerweb", "plugins", plugin_id))
-        ).joinpath("bwcli", file_name)
+        )
+
+        command_path = plugin_base_path.joinpath("bwcli", file_name)
 
         if not command_path.is_file():
             return False, self.__format_error(
                 f"Command {self.BOLD}{command}{self.RESET} not found for plugin {self.CYAN}{plugin_id}{self.RESET}\nFile {command_path} not found"
             )
 
+        # Check if it's a Python module
+        if file_name.endswith(".py"):
+            return self.__exec_plugin_module(command_path, plugin_base_path, plugin_id, command, debug, extra_args)
+        return self.__exec_external_command(command_path, plugin_id, command, debug, extra_args)
+
+    def __exec_plugin_module(
+        self, command_path: Path, plugin_base_path: Path, plugin_id: str, command: str, debug: bool = False, extra_args: Optional[list] = None
+    ) -> Tuple[bool, str]:
+        """Execute a Python module as a plugin command, similar to JobScheduler approach."""
+        from importlib.util import module_from_spec, spec_from_file_location
+
+        # Convert to absolute path
+        abs_path = command_path.resolve()
+        module_dir = plugin_base_path.as_posix()
+
+        # Validate path exists
+        if not abs_path.exists():
+            return False, self.__format_error(f"Plugin command file not found: {abs_path}")
+
+        # Add plugin directory to sys.path temporarily
+        if module_dir not in sys_path:
+            sys_path.insert(0, module_dir)
+            path_added = True
+        else:
+            path_added = False
+
+        try:
+            # Prepare environment similar to JobScheduler
+            old_env = environ.copy()
+            plugin_env = self.__variables.copy()
+            plugin_env.update(environ)
+            if debug:
+                plugin_env["LOG_LEVEL"] = "DEBUG"
+            if self.__db:
+                plugin_env["DATABASE_URI"] = self.__db.database_uri
+
+            # Store extra args in environment for the module to access
+            if extra_args:
+                plugin_env["CLI_EXTRA_ARGS"] = " ".join(extra_args)
+
+            environ.clear()
+            environ.update(plugin_env)
+
+            self.__logger.debug(f"Executing Python module {abs_path.as_posix()}")
+            self.__logger.info(f"Executing {plugin_id}:{command} (Python module)")
+
+            # Backup and modify sys.argv to prevent argument parsing conflicts
+            old_argv = sys_argv.copy()
+            # Set sys.argv to just the script name and any extra args
+            sys_argv[:] = [abs_path.as_posix()] + (extra_args or [])
+
+            # Load and execute the module
+            spec = spec_from_file_location(f"{plugin_id}_{command}", abs_path.as_posix())
+            if spec is None:
+                return False, self.__format_error(f"Failed to create module spec for {abs_path}")
+
+            if spec.loader is None:
+                return False, self.__format_error(f"Failed to create module loader for {abs_path}")
+
+            module = module_from_spec(spec)
+
+            # Execute the module
+            try:
+                spec.loader.exec_module(module)
+                return True, self.__format_success(
+                    f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} executed successfully"
+                )
+            except SystemExit as e:
+                exit_code = e.code if isinstance(e.code, int) else 1
+                if exit_code == 0:
+                    return True, self.__format_success(
+                        f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} executed successfully"
+                    )
+                else:
+                    return False, self.__format_error(
+                        f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} failed with exit code {exit_code}"
+                    )
+            except Exception as e:
+                self.__logger.error(f"Exception while executing command '{command}' from plugin '{plugin_id}': {e}")
+                self.__logger.debug(format_exc())
+                return False, self.__format_error(f"Command {self.BOLD}{command}{self.RESET} for plugin {self.CYAN}{plugin_id}{self.RESET} failed: {e}")
+
+        finally:
+            # Restore original sys.argv
+            if "old_argv" in locals():
+                sys_argv[:] = old_argv
+
+            # Restore original environment
+            environ.clear()
+            environ.update(old_env)
+
+            # Remove plugin directory from sys.path if we added it
+            if path_added and module_dir in sys_path:
+                sys_path.remove(module_dir)
+
+    def __exec_external_command(
+        self, command_path: Path, plugin_id: str, command: str, debug: bool = False, extra_args: Optional[list] = None
+    ) -> Tuple[bool, str]:
+        """Execute an external command (legacy support for non-Python commands)."""
         cmd = [command_path.as_posix()]
         if extra_args:
             cmd.extend(extra_args)
 
-        self.__logger.debug(f"Executing command {' '.join(cmd)}")
-
+        self.__logger.debug(f"Executing external command {' '.join(cmd)}")
         print(f"\n{self.CYAN}{self.ICON_INFO} Executing {self.BOLD}{' '.join(cmd)}{self.RESET}\n")
 
-        proc = run(cmd, stdin=DEVNULL, stderr=STDOUT, check=False, env=self.__variables | environ | ({"LOG_LEVEL": "DEBUG"} if debug else {}) | ({"DATABASE_URI": self.__db.database_uri} if self.__db else {}))  # type: ignore
+        # Prepare environment
+        cmd_env = self.__variables.copy()
+        cmd_env.update(environ)
+        if debug:
+            cmd_env["LOG_LEVEL"] = "DEBUG"
+        if self.__db:
+            cmd_env["DATABASE_URI"] = self.__db.database_uri
+
+        proc = run(cmd, stdin=DEVNULL, stderr=STDOUT, check=False, env=cmd_env)
 
         if proc.returncode != 0:
             return False, self.__format_error(

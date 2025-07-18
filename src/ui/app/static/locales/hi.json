@@ -90,7 +90,9 @@
     "entire_config": "संपूर्ण कॉन्फ़िगरेशन",
     "export": "निर्यात करें",
     "filters_suffix": " फ़िल्टर",
+    "follow": "Follow",
     "github_stars": "स्टार्स",
+    "go_back": "वापस जाओ",
     "hide": "छिपाएं",
     "history": "इतिहास",
     "login": "लॉगिन करें",
@@ -709,6 +711,14 @@
     "see_more": "और देखें",
     "upgrade": "अपग्रेड करें?"
   },
+  "logs": {
+    "eventsource_failed": "इवेंटसोर्स कनेक्शन विफल",
+    "parse_error": "स्ट्रीम डेटा पार्स करने में विफल: {{error}}",
+    "stream_error": "स्ट्रीम त्रुटि: {{message}}",
+    "stream_init": "स्ट्रीम प्रारंभ, फ़ाइल आकार: {{size}}",
+    "stream_initialized": "स्ट्रीम रीफ्रेश के साथ प्रारंभ, फ़ाइल आकार: {{size}}",
+    "trimmed_notice": "--- प्रदर्शन के लिए {{count}} पुरानी लॉग लाइनें हटा दी गईं ---"
+  },
   "modal": {
     "body": {
       "add_plugin_dropzone": "अपना प्लगइन संग्रह यहाँ खींचें और छोड़ें या फ़ाइलें चुनने के लिए क्लिक करें।",
@@ -945,10 +955,9 @@
     "last_24h": "पिछले 24 घंटे",
     "last_30d": "पिछले 30 दिन",
     "last_7d": "पिछले 7 दिन",
-    "last_run_state": "अंतिम रन स्थिति",
+    "last_run": "अंतिम रन स्थिति",
     "last_seen": "अंतिम बार देखा गया",
     "last_update": "अंतिम अपडेट",
-    "loading": "खोज पैन लोड हो रहे हैं...",
     "method": "विधि",
     "next_24h": "अगले 24 घंटे",
     "next_30d": "अगले 30 दिन",
@@ -1206,12 +1215,13 @@
     "draft_toggle_disabled": "ड्राफ्ट मोड केवल UI के माध्यम से बनाई गई सेवाओं पर टॉगल किया जा सकता है।",
     "email_lets_encrypt": "प्रमाणपत्र प्रबंधन और सूचनाओं के लिए Let's Encrypt के साथ पंजीकरण करने हेतु ईमेल पता।",
     "email_length": "ईमेल 1 और 256 वर्णों के बीच होना चाहिए।",
+    "follow_latest_page_only": "फ़ॉलो मोड केवल नवीनतम पृष्ठ पर उपलब्ध है",
     "global_config_source": "मान वैश्विक कॉन्फ़िगरेशन से विरासत में मिला है।",
     "instance_not_up": "इंस्टेंस {{hostname}} वर्तमान में प्रतिक्रिया नहीं दे रहा है ('up')।",
+    "latest_version_installed": "आप नवीनतम संस्करण चला रहे हैं।",
     "lets_encrypt_custom_profile": "Let's Encrypt के लिए उपयोग करने हेतु कस्टम प्रोफ़ाइल (जैसे 'my_custom_profile')।",
     "lets_encrypt_disable_public_suffixes": "सार्वजनिक प्रत्यय सूची से मेल खाने वाले डोमेन के लिए प्रमाणपत्र अनुरोध अक्षम करें (अनुशंसित)।",
     "lets_encrypt_profile": "Let's Encrypt के लिए उपयोग करने हेतु प्रोफ़ाइल (classic, tlsserver, shortlived)।",
-    "latest_version_installed": "आप नवीनतम संस्करण चला रहे हैं।",
     "license_key": "आपकी BunkerWeb PRO लाइसेंस कुंजी।",
     "link": {
       "access_plugin_page": "एक्सेस {{name}} पृष्ठ",
@@ -1243,6 +1253,7 @@
     "readonly_user_action_disabled": "अक्षम: आपका खाता रीड-ओनली है, कार्रवाई '{{action}}' अक्षम है।",
     "remove_ban_entry": "सूची से इस प्रतिबंध प्रविष्टि को हटाएं।",
     "reset_template_settings": "वर्तमान टेम्पलेट दृश्य में सभी सेटिंग्स को उनके डिफ़ॉल्ट पर रीसेट करें।",
+    "select_file_to_follow": "फ़ॉलो मोड सक्षम करने के लिए एक फ़ाइल चुनें",
     "server_name": "इस सेवा के लिए प्राथमिक डोमेन नाम या सर्वर नाम।",
     "stream_support": {
       "no": "STREAM मोड का समर्थन नहीं करता।",

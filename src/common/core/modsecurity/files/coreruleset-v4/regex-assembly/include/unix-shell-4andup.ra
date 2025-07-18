@@ -9,7 +9,7 @@
 ##! NL=$'\n'
 ##! original="$(grep -vE '^[#$]' regex-assembly/include/unix-shell-4andup.ra)"
 ##! source="$(awk '/^[^#$]/ {split($0,x,"/"); y=x[length(x)]} length(y) > 3 {print y}' \
-##!   rules/unix-shell.data | \
+##!   rules/unix-{shell,shell-builtins}.data | \
 ##!   sort | uniq)"
 ##! result=""
 ##! # retain all unmodified entries in this list and skip removed ones; ignore the manually added suffixes
@@ -499,6 +499,7 @@ stdin@
 stdout
 strace
 strings@
+sudo-rs
 sudo@
 sudo_
 sudoedit
@@ -566,6 +567,7 @@ vimdiff
 vipw@
 virsh@
 visudo
+visudo-rs
 volatility@
 wall@
 watch@
@@ -611,6 +613,7 @@ zipnote
 zipsplit
 ziptool
 zless@
+zmodload
 zmore@
 zrun@
 zsoelim

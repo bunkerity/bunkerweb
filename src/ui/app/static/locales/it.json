@@ -90,7 +90,9 @@
     "entire_config": "Configurazione Intera",
     "export": "Esporta",
     "filters_suffix": " Filtri",
+    "follow": "Segui",
     "github_stars": "Stelle",
+    "go_back": "Indietro",
     "hide": "Nascondi",
     "history": "Cronologia",
     "login": "Accedi",
@@ -698,6 +700,14 @@
       "success": "Successo"
     }
   },
+  "logs": {
+    "eventsource_failed": "Connessione EventSource fallita",
+    "parse_error": "Errore nell'analisi dei dati del flusso: {{error}}",
+    "stream_error": "Errore del flusso: {{message}}",
+    "stream_init": "Flusso inizializzato, dimensione file: {{size}}",
+    "stream_initialized": "Flusso inizializzato con aggiornamento, dimensione file: {{size}}",
+    "trimmed_notice": "--- {{count}} righe di log più vecchie sono state rimosse per le prestazioni ---"
+  },
   "link": {
     "back_to_login": "Torna al Login",
     "forgot_password": "Password Dimenticata?",
@@ -1206,6 +1216,7 @@
     "draft_toggle_disabled": "La modalità Bozza può essere attivata/disattivata solo per i servizi creati tramite UI.",
     "email_lets_encrypt": "L'indirizzo email da registrare con Let's Encrypt per la gestione dei certificati e le notifiche.",
     "email_length": "L'email deve avere tra 1 e 256 caratteri.",
+    "follow_latest_page_only": "La modalità seguimento è disponibile solo sull'ultima pagina",
     "global_config_source": "Valore ereditato dalla configurazione globale.",
     "instance_not_up": "L'istanza {{hostname}} non risponde attualmente ('up').",
     "lets_encrypt_custom_profile": "Il profilo personalizzato da utilizzare per Let's Encrypt (es. 'my_custom_profile').",
@@ -1243,6 +1254,7 @@
     "readonly_user_action_disabled": "Disabilitato: Il tuo account è di sola lettura, azione '{{action}}' disabilitata.",
     "remove_ban_entry": "Rimuovi questa voce di blocco dalla lista.",
     "reset_template_settings": "Ripristina tutte le impostazioni nella vista del modello corrente ai loro valori predefiniti.",
+    "select_file_to_follow": "Seleziona un file per abilitare la modalità seguimento",
     "server_name": "Il nome di dominio primario o nome del server per questo servizio.",
     "stream_support": {
       "no": "Non supporta la modalità STREAM.",

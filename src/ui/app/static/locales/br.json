@@ -90,7 +90,9 @@
     "entire_config": "Configuração Completa",
     "export": "Exportar",
     "filters_suffix": " Filtros",
+    "follow": "Seguir",
     "github_stars": "Estrelas",
+    "go_back": "Voltar",
     "hide": "Ocultar",
     "history": "Histórico",
     "login": "Login",
@@ -698,6 +700,14 @@
       "success": "Sucesso"
     }
   },
+  "logs": {
+    "eventsource_failed": "Conexão EventSource falhou",
+    "parse_error": "Falha ao analisar dados do stream: {{error}}",
+    "stream_error": "Erro do stream: {{message}}",
+    "stream_init": "Stream inicializado, tamanho do arquivo: {{size}}",
+    "stream_initialized": "Stream inicializado com atualização, tamanho do arquivo: {{size}}",
+    "trimmed_notice": "--- {{count}} linhas de log mais antigas foram removidas para performance ---"
+  },
   "link": {
     "back_to_login": "Voltar ao Login",
     "forgot_password": "Esqueceu a Senha?",
@@ -948,7 +958,6 @@
     "last_run": "Última Execução",
     "last_seen": "Visto pela Última Vez",
     "last_update": "Última Atualização",
-    "loading": "Carregando Painéis de Pesquisa...",
     "method": "Método",
     "next_24h": "Próximas 24 horas",
     "next_30d": "Próximos 30 dias",
@@ -1206,6 +1215,7 @@
     "draft_toggle_disabled": "O modo Rascunho só pode ser alternado para serviços criados através da UI.",
     "email_lets_encrypt": "O endereço de email para registrar com Let's Encrypt para gerenciamento de certificados e notificações.",
     "email_length": "O email deve ter entre 1 e 256 caracteres.",
+    "follow_latest_page_only": "O modo seguir só está disponível na página mais recente",
     "global_config_source": "Valor herdado da configuração global.",
     "instance_not_up": "A instância {{hostname}} não está respondendo atualmente ('up').",
     "lets_encrypt_custom_profile": "O perfil personalizado a ser usado para o Let's Encrypt (ex: 'meu_perfil_personalizado').",
@@ -1243,6 +1253,7 @@
     "readonly_user_action_disabled": "Desabilitado: Sua conta é somente leitura, ação '{{action}}' desabilitada.",
     "remove_ban_entry": "Remover esta entrada de bloqueio da lista.",
     "reset_template_settings": "Restabelecer todas as configurações na vista de modelo atual para os seus valores padrão.",
+    "select_file_to_follow": "Selecione um arquivo para ativar o modo seguir",
     "server_name": "O nome de domínio principal ou nome do servidor para este serviço.",
     "stream_support": {
       "no": "Não suporta modo STREAM.",

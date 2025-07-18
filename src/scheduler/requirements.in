@@ -16,13 +16,14 @@ certbot-dns-route53==4.1.1
 certbot-dns-sakuracloud==4.1.1
 
 # Third-party certbot plugins
+certbot-dns-bunny==3.0.0
 certbot-dns-desec==1.2.1
 certbot-dns-infomaniak==0.2.3
 certbot-dns-ionos==2024.11.9
 certbot-dns-njalla==2.0.2
 certbot-dns-scaleway==0.0.7
 
-cryptography==45.0.4
+cryptography==45.0.5
 importlib-metadata==8.7.0
 maxminddb==2.7.0
 pydantic==2.11.7

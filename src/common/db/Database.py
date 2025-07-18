@@ -460,7 +460,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.2-rc7"
+                return "1.6.3-rc1"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -492,7 +492,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.2-rc7",
+            "version": "1.6.3-rc1",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -2952,7 +2952,7 @@ class Database:
                         saved_templates.add(template_id)
 
                         db_ids = [step.id for step in session.query(Template_steps).with_entities(Template_steps.id).filter_by(template_id=template_id)]
-                        missing_ids = [x for x in range(1, len(template.get("steps", [])) + 1) if x not in db_ids]
+                        missing_ids = [x for x in range(1, len(template_data.get("steps", [])) + 1) if x not in db_ids]
 
                         if missing_ids:
                             changes = True
@@ -2962,8 +2962,13 @@ class Database:
 
                         steps_settings = {}
                         steps_configs = {}
-                        for step_id, step in enumerate(template.get("steps", []), start=1):
-                            db_step = session.query(Template_steps).with_entities(Template_steps.id).filter_by(id=step_id, template_id=template_id).first()
+                        for step_id, step in enumerate(template_data.get("steps", []), start=1):
+                            db_step = (
+                                session.query(Template_steps)
+                                .with_entities(Template_steps.id, Template_steps.title, Template_steps.subtitle)
+                                .filter_by(id=step_id, template_id=template_id)
+                                .first()
+                            )
                             if not db_step:
                                 changes = True
                                 to_put.append(Template_steps(id=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
@@ -2980,35 +2985,31 @@ class Database:
                                     changes = True
                                     session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
 
-                            order = 0
                             for setting in step.get("settings", []):
                                 if step_id not in steps_settings:
                                     steps_settings[step_id] = []
-                                steps_settings[step_id].append(setting | {"order": order})
-                                order += 1
+                                steps_settings[step_id].append(setting)
 
-                            order = 0
                             for config in step.get("configs", []):
                                 if step_id not in steps_configs:
                                     steps_configs[step_id] = []
-                                steps_configs[step_id].append(config | {"order": order})
-                                order += 1
+                                steps_configs[step_id].append(config)
 
                         db_template_settings = [
-                            f"{setting.setting_id}_{setting.suffix}" if setting.suffix else setting.setting_id
-                            for setting in session.query(Template_settings)
-                            .with_entities(Template_settings.id)
+                            f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                            for template_setting in session.query(Template_settings)
+                            .with_entities(Template_settings.id, Template_settings.setting_id, Template_settings.suffix)
                             .filter_by(template_id=template_id)
                             .order_by(Template_settings.order)
                         ]
-                        missing_ids = [setting for setting in template.get("settings", {}) if setting not in db_template_settings]
+                        missing_ids = [setting for setting in template_data.get("settings", {}) if setting not in db_template_settings]
 
                         if missing_ids:
                             changes = True
                             session.query(Template_settings).filter(Template_settings.id.in_(missing_ids)).delete()
 
                         order = 0
-                        for setting, default in template.get("settings", {}).items():
+                        for setting, default in template_data.get("settings", {}).items():
                             setting_id, suffix = setting.rsplit("_", 1) if self.SUFFIX_RX.search(setting) else (setting, None)
                             if suffix is not None:
                                 suffix = int(suffix)
@@ -3089,14 +3090,14 @@ class Database:
                             .filter_by(template_id=template_id)
                             .order_by(Template_custom_configs.order)
                         ]
-                        missing_ids = [config for config in template.get("configs", {}) if config not in db_template_configs]
+                        missing_ids = [config for config in template_data.get("configs", {}) if config not in db_template_configs]
 
                         if missing_ids:
                             changes = True
                             session.query(Template_custom_configs).filter(Template_custom_configs.name.in_(missing_ids)).delete()
 
                         order = 0
-                        for config in template.get("configs", []):
+                        for config in template_data.get("configs", []):
                             try:
                                 config_type, config_name = config.split("/", 1)
                             except ValueError:

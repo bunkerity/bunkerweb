@@ -6,7 +6,8 @@
     "greylist",
     "bunkernet",
     "limit",
-    "securitytxt"
+    "securitytxt",
+    "robotstxt"
   ],
   "init_worker": [
     "redis",
@@ -46,6 +47,7 @@
     "misc",
     "cors",
     "securitytxt",
+    "robotstxt",
     "antibot"
   ],
   "headers": [

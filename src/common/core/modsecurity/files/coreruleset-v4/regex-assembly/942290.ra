@@ -1,6 +1,11 @@
 ##! Please refer to the documentation at
 ##! https://coreruleset.org/docs/development/regex_assembly/.
 
+##! The following curl commands can be used to get the operators:
+##! curl -s https://www.mongodb.com/docs/manual/reference/operator/update.md | grep -oP '\[\`\$.*\`\]' | cut -d\` -f2 | sort -u
+##! curl -s https://www.mongodb.com/docs/manual/reference/operator/aggregation.md | grep -oP '\[\`\$.*\`\]' | cut -d\` -f2 | sort -u
+##! curl -s https://www.mongodb.com/docs/manual/reference/operator/query.md | grep -oP '\[\`\$.*\`\]' | cut -d\` -f2 | sort -u
+##!
 ##!+ i
 
 ##!> define operator_syntax_start \[?\$
@@ -9,32 +14,211 @@
 ##!> assemble
   {{operator_syntax_start}}
   ##!=>
-  ne
+  abs
+  accumulator
+  acos
+  acosh
+  add
+  addToSet
+  all
+  allElementsTrue
+  and
+  anyElementTrue
+  arrayElemAt
+  arrayToObject
+  asin
+  asinh
+  atan
+  atan2
+  atanh
+  avg
+  between
+  binarySize
+  bit
+  bitAnd
+  bitNot
+  bitOr
+  bitXor
+  bottom
+  bottomN
+  bsonSize
+  bucket
+  bucketAuto
+  ceil
+  cmp
+  concat
+  concatArrays
+  cond
+  convert
+  cos
+  cosh
+  count
+  covariancePop
+  covarianceSamp
+  currentDate
+  dateAdd
+  dateDiff
+  dateFromParts
+  dateFromString
+  dateSubtract
+  dateToParts
+  dateToString
+  dateTrunc
+  dayOfMonth
+  dayOfWeek
+  dayOfYear
+  degreesToRadians
+  denseRank
+  derivative
+  div
+  divide
+  documentNumber
+  each
+  elemMatch
   eq
+  exists
+  exp
+  expMovingAvg
+  expr
+  filter
+  first
+  firstN
+  floor
+  function
+  getField
+  group
+  gt
+  gte
+  hour
+  ifNull
+  in
+  inc
+  indexOfArray
+  indexOfBytes
+  indexOfCP
+  integral
+  isArray
+  isNumber
+  isoDayOfWeek
+  isoWeek
+  isoWeekYear
+  jsonSchema
+  last
+  lastN
+  let
+  like
+  linearFill
+  literal
+  ln
+  locf
+  log
+  log10
   lt
   lte
-  ni
-  nin
+  ltrim
+  map
+  max
+  maxN
+  median
+  mergeObjects
+  meta
+  millisecond
+  min
+  minN
+  minute
   mod
-  all
-  size
-  exists
-  type
-  slice
-  or
-  xor
-  nor
-  div
-  like
-  between
-  and
+  month
+  mul
+  multiply
+  natural
+  ne
+  nin
   nor
   not
+  objectToArray
+  or
+  percentile
+  pop
+  position
+  pow
+  project
+  pull
+  pullAll
+  push
+  radiansToDegrees
+  rand
+  range
+  rank
+  reduce
   regex
+  regexFind
+  regexFindAll
+  regexMatch
+  rename
+  replaceAll
+  replaceOne
+  reverseArray
+  round
+  rtrim
+  sampleRate
+  second
+  set
+  setDifference
+  setEquals
+  setField
+  setIntersection
+  setIsSubset
+  setOnInsert
+  setUnion
+  setWindowFields
+  shift
+  sin
+  sinh
+  size
+  slice
+  sort
+  sortArray
+  split
+  sqrt
+  stdDevPop
+  stdDevSamp
+  strLenBytes
+  strLenCP
+  strcasecmp
+  substr
+  substrBytes
+  substrCP
+  subtract
+  sum
+  switch
+  tan
+  tanh
   text
+  toBool
+  toDate
+  toDecimal
+  toDouble
+  toHashedIndexKey
+  toInt
+  toLong
+  toLower
+  toObjectId
+  toString
+  toUUID
+  toUpper
+  top
+  topN
+  trim
+  trunc
+  tsIncrement
+  tsSecond
+  type
+  unset
+  week
   where
-  jsonSchema
-  elemMatch
+  xor
+  year
+  zip
   ##!=>
   {{operator_syntax_end}}
   ##!=>

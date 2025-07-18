@@ -1,7 +1,7 @@
-FROM fedora:41@sha256:bf42d5bd976fcad0134ddca3929e5056297464d7cde0d3bd06cc3c04fd03ccf1 AS builder
+FROM fedora:41@sha256:308f23de6b836224f523b3b27055479a1653faf923bf4cb8e14b1e0c80a7cd94 AS builder
 
 ENV OS=fedora
-ENV NGINX_VERSION=1.26.3
+ENV NGINX_VERSION=1.28.0
 
 # Install Nginx, fpm and dependencies
 RUN dnf update -y && \
@@ -67,7 +67,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
     echo "Skipping JS minification"; \
     fi
 
-FROM fedora:41@sha256:bf42d5bd976fcad0134ddca3929e5056297464d7cde0d3bd06cc3c04fd03ccf1
+FROM fedora:41@sha256:308f23de6b836224f523b3b27055479a1653faf923bf4cb8e14b1e0c80a7cd94
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

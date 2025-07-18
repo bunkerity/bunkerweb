@@ -1,8 +1,8 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations) folder.
 
 This section only focuses on advanced usages and security tuning, see the [settings section](features.md) of the documentation to see all the available settings.
 
@@ -87,7 +87,7 @@ You will find more settings about real IP in the [settings section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.2-rc7
+            bunkerity/bunkerweb-all-in-one:1.6.3-rc1
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -98,7 +98,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc7
+          image: bunkerity/bunkerweb:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +106,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+          image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +123,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc7
+          image: bunkerity/bunkerweb:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +131,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+          image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -178,7 +178,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc7
+          image: bunkerity/bunkerweb:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +186,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+          image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ You will find more settings about real IP in the [settings section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.2-rc7
+            bunkerity/bunkerweb-all-in-one:1.6.3-rc1
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -262,7 +262,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc7
+          image: bunkerity/bunkerweb:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +272,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+          image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +290,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc7
+          image: bunkerity/bunkerweb:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +300,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+          image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -352,7 +352,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.2-rc7
+          image: bunkerity/bunkerweb:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +362,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+          image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -440,7 +440,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         sudo systemctl enable dnsmasq
         ```
 
-    === "RHEL/CentOS/Fedora"
+    === "RHEL/Fedora"
 
         ```bash
         # Install dnsmasq
@@ -510,7 +510,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc7
+        bunkerity/bunkerweb-all-in-one:1.6.3-rc1
     ```
 
 === "Docker"
@@ -538,7 +538,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.3-rc1
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -549,7 +549,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -663,7 +663,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc7
+        bunkerity/bunkerweb-all-in-one:1.6.3-rc1
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -703,7 +703,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc7
+        bunkerity/bunkerweb-all-in-one:1.6.3-rc1
     ```
 
 === "Docker"
@@ -726,7 +726,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+      image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -769,7 +769,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+      image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -839,7 +839,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+      image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -952,11 +952,11 @@ You will need to increase the `max_allowed_packet` on your database server.
 
 ### Persistence of bans and reports
 
-By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote Redis server.
+By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote [Redis](https://redis.io/) or [Valkey](https://valkey.io/) server.
 
-**Why Use Redis?**
+**Why Use Redis/Valkey?**
 
-Redis is a powerful, in-memory data store commonly used as a database, cache, and message broker. It is highly scalable and supports a variety of data structures, including:
+Redis and Valkey are powerful, in-memory data stores commonly used as databases, caches, and message brokers. They are highly scalable and support a variety of data structures, including:
 
 - **Strings**: Basic key-value pairs.
 - **Hashes**: Field-value pairs within a single key.
@@ -964,30 +964,30 @@ Redis is a powerful, in-memory data store commonly used as a database, cache, an
 - **Sets**: Unordered collections of unique strings.
 - **Sorted Sets**: Ordered collections with scores.
 
-By leveraging Redis, BunkerWeb can persistently store bans, reports, and cache data, ensuring durability and scalability.
+By leveraging Redis or Valkey, BunkerWeb can persistently store bans, reports, and cache data, ensuring durability and scalability.
 
-**Enabling Redis Support**
+**Enabling Redis/Valkey Support**
 
-To enable Redis support, configure the following settings in your BunkerWeb configuration file:
+To enable Redis or Valkey support, configure the following settings in your BunkerWeb configuration file:
 
 ```conf
-# Enable Redis support
+# Enable Redis/Valkey support
 USE_REDIS=yes
 
-# Redis server hostname or IP address
+# Redis/Valkey server hostname or IP address
 REDIS_HOST=<hostname>
 
-# Redis server port number (default: 6379)
+# Redis/Valkey server port number (default: 6379)
 REDIS_PORT=6379
 
-# Redis database number (default: 0)
+# Redis/Valkey database number (default: 0)
 REDIS_DATABASE=0
 ```
 
-- **`USE_REDIS`**: Set to `yes` to enable Redis integration.
-- **`REDIS_HOST`**: Specify the hostname or IP address of the Redis server.
-- **`REDIS_PORT`**: Specify the port number for the Redis server. Defaults to `6379`.
-- **`REDIS_DATABASE`**: Specify the Redis database number to use. Defaults to `0`.
+- **`USE_REDIS`**: Set to `yes` to enable Redis/Valkey integration.
+- **`REDIS_HOST`**: Specify the hostname or IP address of the Redis/Valkey server.
+- **`REDIS_PORT`**: Specify the port number for the Redis/Valkey server. Defaults to `6379`.
+- **`REDIS_DATABASE`**: Specify the Redis/Valkey database number to use. Defaults to `0`.
 
 If you require more advanced settings, such as authentication, SSL/TLS support, or Sentinel mode, refer to the [Redis plugin settings documentation](features.md#redis) for detailed guidance.
 
@@ -1051,7 +1051,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc7
+        bunkerity/bunkerweb-all-in-one:1.6.3-rc1
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1072,7 +1072,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.3-rc1
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1087,7 +1087,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1138,7 +1138,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.3-rc1
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1192,7 +1192,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.3-rc1
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -1498,7 +1498,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.2-rc7
+        bunkerity/bunkerweb-all-in-one:1.6.3-rc1
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1542,7 +1542,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.3-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1557,7 +1557,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1651,7 +1651,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.3-rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1664,7 +1664,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1679,7 +1679,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.2-rc7
+        image: bunkerity/bunkerweb-autoconf:1.6.3-rc1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1829,7 +1829,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.2-rc7
+        image: bunkerity/bunkerweb:1.6.3-rc1
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2016,7 +2016,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.2-rc7
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
         environment:
           USE_IPv6: "yes"
 

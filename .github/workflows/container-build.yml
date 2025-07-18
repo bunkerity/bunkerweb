@@ -120,7 +120,7 @@ jobs:
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
         if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
-        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37 # v0.31.0
+        uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # v0.32.0
         with:
           vuln-type: os
           skip-dirs: /root/.cargo
@@ -132,15 +132,15 @@ jobs:
           trivyignores: .trivyignore
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
-      - name: Docker Scout Analysis
-        if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
-        uses: docker/scout-action@aceeb83b88f2ae54376891227858dda7af647183 # v1.18.1
-        with:
-          command: cves,recommendations
-          image: local/${{ inputs.IMAGE }}
-          only-fixed: true
-          only-package-types: apk
-          exit-code: true
+      # - name: Docker Scout Analysis # TODO: Add back when the openssl shenanigans are fixed
+      #   if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
+      #   uses: docker/scout-action@aceeb83b88f2ae54376891227858dda7af647183 # v1.18.1
+      #   with:
+      #     command: cves,recommendations
+      #     image: local/${{ inputs.IMAGE }}
+      #     only-fixed: true
+      #     only-package-types: apk
+      #     exit-code: true
       # Push image
       - name: Push image
         if: inputs.PUSH == true
