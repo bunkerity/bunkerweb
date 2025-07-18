@@ -147,6 +147,18 @@ def handle_reload(signum, frame):
                 LOGGER.warning("The database is read-only, no need to save the changes in the configuration as they will not be saved")
                 return
 
+            cmd_env = {
+                "PATH": getenv("PATH", ""),
+                "PYTHONPATH": getenv("PYTHONPATH", ""),
+                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                "DATABASE_URI": getenv("DATABASE_URI", ""),
+            }
+
+            for key, value in environ.items():
+                if "CUSTOM_CONF" in key:
+                    cmd_env[key] = value
+
             proc = subprocess_run(
                 [
                     BUNKERWEB_PATH.joinpath("gen", "save_config.py").as_posix(),
@@ -158,13 +170,7 @@ def handle_reload(signum, frame):
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
-                env={
-                    "PATH": getenv("PATH", ""),
-                    "PYTHONPATH": getenv("PYTHONPATH", ""),
-                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                    "DATABASE_URI": getenv("DATABASE_URI", ""),
-                },
+                env=cmd_env,
             )
             if proc.returncode != 0:
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
@@ -670,8 +676,20 @@ if __name__ == "__main__":
             if args.variables:
                 env_file_path = deepcopy(tmp_variables_path)
             else:
-                env_content = "\n".join(f"{key}={value}" for key, value in environ.items())
+                env_content = "\n".join(f"{key}={value}" for key, value in environ.items() if "CUSTOM_CONF" not in key)
                 env_file_path.write_text(env_content + "\n", encoding="utf-8")
+
+            cmd_env = {
+                "PATH": getenv("PATH", ""),
+                "PYTHONPATH": getenv("PYTHONPATH", ""),
+                "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                "DATABASE_URI": getenv("DATABASE_URI", ""),
+            }
+
+            for key, value in environ.items():
+                if "CUSTOM_CONF" in key:
+                    cmd_env[key] = value
 
             # run the config saver
             proc = subprocess_run(
@@ -686,13 +704,7 @@ if __name__ == "__main__":
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
-                env={
-                    "PATH": getenv("PATH", ""),
-                    "PYTHONPATH": getenv("PYTHONPATH", ""),
-                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                    "DATABASE_URI": getenv("DATABASE_URI", ""),
-                },
+                env=cmd_env,
             )
             if proc.returncode != 0:
                 LOGGER.error("Config saver failed, configuration will not work as expected...")
@@ -867,8 +879,20 @@ if __name__ == "__main__":
                 if args.variables:
                     env_file_path = deepcopy(tmp_variables_path)
                 else:
-                    env_content = "\n".join(f"{key}={value}" for key, value in (env | environ).items())
+                    env_content = "\n".join(f"{key}={value}" for key, value in (env | environ).items() if "CUSTOM_CONF" not in key)
                     env_file_path.write_text(env_content + "\n", encoding="utf-8")
+
+                cmd_env = {
+                    "PATH": getenv("PATH", ""),
+                    "PYTHONPATH": getenv("PYTHONPATH", ""),
+                    "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+                    "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+                    "DATABASE_URI": getenv("DATABASE_URI", ""),
+                }
+
+                for key, value in environ.items():
+                    if "CUSTOM_CONF" in key:
+                        cmd_env[key] = value
 
                 proc = subprocess_run(
                     [
@@ -881,13 +905,7 @@ if __name__ == "__main__":
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
-                    env={
-                        "PATH": getenv("PATH", ""),
-                        "PYTHONPATH": getenv("PYTHONPATH", ""),
-                        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-                        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-                        "DATABASE_URI": getenv("DATABASE_URI", ""),
-                    },
+                    env=cmd_env,
                 )
                 if proc.returncode != 0:
                     LOGGER.error("Config saver failed, configuration will not work as expected...")

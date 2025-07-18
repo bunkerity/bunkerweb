@@ -99,7 +99,7 @@ if __name__ == "__main__":
         )
 
         custom_confs = []
-        for k, v in (environ | dotenv_env).items():
+        for k, v in environ.items():
             if CUSTOM_CONF_RX.match(k):
                 custom_conf = CUSTOM_CONF_RX.search(k)
                 custom_confs.append(
