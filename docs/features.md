@@ -2647,27 +2647,27 @@ Follow these steps to configure and use the Let's Encrypt feature:
 
 The Let's Encrypt plugin supports a wide range of DNS providers for DNS challenges. Each provider requires specific credentials that must be provided using the `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` setting.
 
-| Provider       | Description     | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Documentation                                                                         |
-| -------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| `bunny`        | bunny.net       | `dns_bunny_api_key`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst)        |
-| `cloudflare`   | Cloudflare      | either `api_token`<br>or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)             |
-| `desec`        | deSEC           | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)    |
-| `digitalocean` | DigitalOcean    | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)           |
-| `dnsimple`     | DNSimple        | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)               |
-| `dnsmadeeasy`  | DNS Made Easy   | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)            |
-| `gehirn`       | Gehirn DNS      | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                 |
-| `google`       | Google Cloud    | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                 |
-| `infomaniak`   | Infomaniak      | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak)                 |
-| `ionos`        | IONOS           | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md) |
-| `linode`       | Linode          | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                 |
-| `luadns`       | LuaDNS          | `email`<br>`token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                 |
-| `njalla`       | Njalla          | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/chaptergy/certbot-dns-njalla)                      |
-| `nsone`        | NS1             | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                  |
-| `ovh`          | OVH             | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (default: `ovh-eu`)                                                                                                                                                                                                                                           | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                    |
-| `rfc2136`      | RFC 2136        | `server`<br>`name`<br>`secret`                                                                               | `port` (default: `53`)<br>`algorithm` (default: `HMAC-SHA512`)<br>`sign_query` (default: `false`)                                                                                                                                                                        | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                |
-| `route53`      | Amazon Route 53 | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                |
-| `sakuracloud`  | Sakura Cloud    | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)            |
-| `scaleway`     | Scaleway        | `application_token`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst) |
+| Provider       | Description     | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Documentation                                                                              |
+| -------------- | --------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `bunny`        | bunny.net       | `dns_bunny_api_key`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst)             |
+| `cloudflare`   | Cloudflare      | either `api_token`<br>or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)                  |
+| `desec`        | deSEC           | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)         |
+| `digitalocean` | DigitalOcean    | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                |
+| `dnsimple`     | DNSimple        | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                    |
+| `dnsmadeeasy`  | DNS Made Easy   | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                 |
+| `gehirn`       | Gehirn DNS      | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                      |
+| `google`       | Google Cloud    | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (default: `service_account`)<br>`auth_uri` (default: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (default: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (default: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentation](https://certbot-dns-google.readthedocs.io/en/stable/)                      |
+| `infomaniak`   | Infomaniak      | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/infomaniak/certbot-dns-infomaniak/blob/main/README.rst) |
+| `ionos`        | IONOS           | `prefix`<br>`secret`                                                                                         | `endpoint` (default: `https://api.hosting.ionos.com`)                                                                                                                                                                                                                    | [Documentation](https://github.com/helgeerbe/certbot-dns-ionos/blob/master/README.md)      |
+| `linode`       | Linode          | `key`                                                                                                        |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-linode.readthedocs.io/en/stable/)                      |
+| `luadns`       | LuaDNS          | `email`<br>`token`                                                                                           |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-luadns.readthedocs.io/en/stable/)                      |
+| `njalla`       | Njalla          | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/chaptergy/certbot-dns-njalla/blob/main/README.md)       |
+| `nsone`        | NS1             | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-nsone.readthedocs.io/en/stable/)                       |
+| `ovh`          | OVH             | `application_key`<br>`application_secret`<br>`consumer_key`                                                  | `endpoint` (default: `ovh-eu`)                                                                                                                                                                                                                                           | [Documentation](https://certbot-dns-ovh.readthedocs.io/en/stable/)                         |
+| `rfc2136`      | RFC 2136        | `server`<br>`name`<br>`secret`                                                                               | `port` (default: `53`)<br>`algorithm` (default: `HMAC-SHA512`)<br>`sign_query` (default: `false`)                                                                                                                                                                        | [Documentation](https://certbot-dns-rfc2136.readthedocs.io/en/stable/)                     |
+| `route53`      | Amazon Route 53 | `access_key_id`<br>`secret_access_key`                                                                       |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-route53.readthedocs.io/en/stable/)                     |
+| `sakuracloud`  | Sakura Cloud    | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-sakuracloud.readthedocs.io/en/stable/)                 |
+| `scaleway`     | Scaleway        | `application_token`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/vanonox/certbot-dns-scaleway/blob/main/README.rst)      |
 
 ### Example Configurations
 
@@ -4568,30 +4568,45 @@ Follow these steps to configure and use the Reverse Scan feature:
 
 STREAM support :white_check_mark:
 
-The Robots.txt plugin manages the [robots.txt](https://www.robotstxt.org/) file for your website. This file tells web crawlers and robots which parts of your site they can or cannot access.
+The Robots.txt plugin manages the [robots.txt](httpshttps://www.robotstxt.org/) file for your website. This file tells web crawlers and robots which parts of your site they can or cannot access.
 
 **How it works:**
 
-1. When enabled, BunkerWeb creates a `/robots.txt` file at the root of your website.
-2. The file contains rules and optional sitemap URLs, configured via environment variables.
-3. Web crawlers and automated tools can easily find this file at the standard location.
-4. The content is configured using simple settings that allow you to specify rules and sitemaps.
-5. BunkerWeb automatically formats the file according to the robots.txt standard.
+1.  When enabled, BunkerWeb creates a `/robots.txt` file at the root of your website.
+2.  The file contains rules and optional sitemap URLs, configured via environment variables.
+3.  Web crawlers and automated tools can easily find this file at the standard location.
+4.  The content is configured using simple settings that allow you to specify rules and sitemaps.
+5.  BunkerWeb automatically formats the file according to the robots.txt standard.
+
+### Dynamic Rule Sets
+
+In addition to manually specifying rules, the Robots.txt plugin can download and aggregate rules from external sources. This allows you to use community-maintained lists or your own custom rule sets hosted at a URL.
+
+-   **Community Lists:** You can select from a list of pre-defined, community-maintained `robots.txt` rule sets.
+-   **Custom URLs:** You can provide one or more URLs to fetch additional `robots.txt` rules from.
+-   **Ignore Rules:** You can specify regex patterns to filter out unwanted rules from all sources, which is useful for resolving conflicts or customizing lists.
 
 ### How to Use
 
-1. **Enable the feature:** Set the `USE_ROBOTSTXT` setting to `yes` to enable the robots.txt file.
-2. **Configure rules:** Specify one or more rules using the `ROBOTSTXT_RULE` setting (e.g., `User-agent: *`, `Disallow: /private`).
-3. **Add sitemaps (optional):** Specify one or more sitemap URLs using the `ROBOTSTXT_SITEMAP` setting.
-4. **Let BunkerWeb handle the rest:** Once configured, BunkerWeb will automatically create and serve the robots.txt file at the standard location.
+1.  **Enable the feature:** Set the `USE_ROBOTSTXT` setting to `yes` to enable the robots.txt file.
+2.  **Configure rules:**
+    -   Use `ROBOTSTXT_RULE` to specify rules manually.
+    -   Use `ROBOTSTXT_COMMUNITY_LISTS` to include community-maintained lists.
+    -   Use `ROBOTSTXT_URLS` to fetch rules from your own URLs.
+3.  **Filter rules (optional):** Use `ROBOTSTXT_IGNORE_RULES` to exclude specific rules.
+4.  **Add sitemaps (optional):** Specify one or more sitemap URLs using the `ROBOTSTXT_SITEMAP` setting.
+5.  **Let BunkerWeb handle the rest:** Once configured, BunkerWeb will automatically create and serve the robots.txt file at the standard location.
 
 ### Configuration Settings
 
-| Setting             | Default | Context   | Multiple | Description                                                                                                                        |
-| ------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_ROBOTSTXT`     | `no`    | multisite | no       | **Enable robots.txt:** Set to `yes` to enable the robots.txt file.                                                                 |
-| `ROBOTSTXT_RULE`    |         | multisite | yes      | **Rule:** Each line in robots.txt (e.g., user-agent, disallow). (If empty, the default rule is `User-agent: *` and `Disallow: /`). |
-| `ROBOTSTXT_SITEMAP` |         | multisite | yes      | **Sitemap:** Sitemap URL(s) to include.                                                                                            |
+| Setting                     | Default | Context   | Multiple | Description                                                                                                                                            |
+| --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_ROBOTSTXT`             | `no`    | multisite | No       | Enables or disables the `robots.txt` feature.                                                                                                          |
+| `ROBOTSTXT_COMMUNITY_LISTS` |         | multisite | Yes      | A space-separated list of community-maintained rule sets to include.                                                                                   |
+| `ROBOTSTXT_URLS`            |         | multisite | Yes      | A space-separated list of URLs to fetch `robots.txt` rules from.                                                                                       |
+| `ROBOTSTXT_RULE`            |         | multisite | Yes      | A single rule for `robots.txt`. Use `ROBOTSTXT_RULE_N` for multiple rules. If no rules are provided from any source, defaults to denying all crawlers. |
+| `ROBOTSTXT_IGNORE_RULES`    |         | multisite | Yes      | A single PCRE regex pattern to ignore rules. Any matching rules from any source will be ignored.                                                       |
+| `ROBOTSTXT_SITEMAP`         |         | multisite | Yes      | A single sitemap URL. sitemaps.                                                                                                                        |
 
 ### Example Configurations
 
@@ -4600,7 +4615,7 @@ The Robots.txt plugin manages the [robots.txt](https://www.robotstxt.org/) file 
 ```yaml
 USE_ROBOTSTXT: "yes"
 ROBOTSTXT_RULE: "User-agent: *"
-ROBOTSTXT_RULE_2: "Disallow: /private"
+ROBOTSTXT_RULE_1: "Disallow: /private"
 ```
 
 **With Sitemap**
@@ -4608,24 +4623,56 @@ ROBOTSTXT_RULE_2: "Disallow: /private"
 ```yaml
 USE_ROBOTSTXT: "yes"
 ROBOTSTXT_RULE: "User-agent: *"
-ROBOTSTXT_RULE_2: "Disallow: /private"
+ROBOTSTXT_RULE_1: "Disallow: /private"
 ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ```
 
-**Multiple Sitemaps**
+**Using Community Lists**
+
+This example uses two community lists to block AI crawlers and other disallowed bots.
 
 ```yaml
 USE_ROBOTSTXT: "yes"
-ROBOTSTXT_RULE: "User-agent: *"
-ROBOTSTXT_RULE_2: "Disallow: /private"
+ROBOTSTXT_COMMUNITY_LISTS: "ai-robots-txt robots-disallowed"
+```
+
+**Using a Custom URL**
+
+This example fetches additional rules from a custom URL.
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_URLS: "https://example.com/my-custom-rules.txt"
+```
+
+**Ignoring Specific Rules**
+
+This example uses a community list but filters out a specific rule for `Googlebot-Image`.
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_COMMUNITY_LISTS: "ai-robots-txt"
+ROBOTSTXT_IGNORE_RULES: "User-agent: Googlebot-Image"
+ROBOTSTXT_IGNORE_RULES_1: "^Disallow: /wp-admin"
+```
+
+**Advanced Configuration (Combined)**
+
+This example combines all features to create a comprehensive `robots.txt` file.
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_COMMUNITY_LISTS: "ai-robots-txt"
+ROBOTSTXT_URLS: "https://example.com/my-custom-rules.txt"
+ROBOTSTXT_RULE: "User-agent: MyOwnBot"
+ROBOTSTXT_RULE_1: "Disallow: /admin"
+ROBOTSTXT_IGNORE_RULES: "User-agent: Googlebot-Image"
 ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
-ROBOTSTXT_SITEMAP_2: "https://example.com/sitemap-news.xml"
 ```
 
 ---
 
 For more information, see the [robots.txt documentation](https://www.robotstxt.org/robotstxt.html).
-
 ## SSL
 
 STREAM support :white_check_mark:

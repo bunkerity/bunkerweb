@@ -14,6 +14,37 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "ROBOTSTXT_COMMUNITY_LISTS": {
+      "context": "multisite",
+      "default": "",
+      "help": "Select community-maintained lists to include in robots.txt.",
+      "id": "robotstxt-community-lists",
+      "label": "Community robots.txt lists",
+      "regex": "^.*$",
+      "type": "multiselect",
+      "multiselect": [
+        {
+          "id": "ai-robots-txt",
+          "label": "This list contains AI-related crawlers of all types, regardless of purpose.",
+          "value": "https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/refs/heads/main/robots.txt"
+        },
+        {
+          "id": "robots-disallowed",
+          "label": "The RobotsDisallowed project is a harvest of the robots.txt disallowed directories of the world's top websites - specifically those of the Alexa 100K and the Majestic 100K.",
+          "value": "https://raw.githubusercontent.com/danielmiessler/RobotsDisallowed/refs/heads/master/curated.txt"
+        }
+      ]
+    },
+    "ROBOTSTXT_URLS": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing robots.txt rules. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "id": "robotstxt-urls",
+      "label": "Robots.txt URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
+    },
     "ROBOTSTXT_RULE": {
       "context": "multisite",
       "default": "",
@@ -33,6 +64,25 @@
       "regex": "^(https?://\\S+)?$",
       "type": "text",
       "multiple": "robotstxt-sitemap"
+    },
+    "ROBOTSTXT_IGNORE_RULES": {
+      "context": "multisite",
+      "default": "",
+      "help": "Rule (PCRE regex) to ignore. Can be specified multiple times.",
+      "id": "robotstxt-ignore-rules",
+      "label": "Ignore rule",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "robotstxt-ignore-rules"
     }
-  }
+  },
+  "jobs": [
+    {
+      "name": "robots-txt-download",
+      "file": "robots-txt-download.py",
+      "every": "hour",
+      "reload": true,
+      "async": true
+    }
+  ]
 }
