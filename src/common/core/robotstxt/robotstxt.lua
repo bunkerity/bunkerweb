@@ -119,23 +119,55 @@ function robotstxt:init()
 			["rule"] = {},
 			["sitemap"] = {},
 		}
-		-- Read downloaded rules
-		local file_path = "/var/cache/bunkerweb/robotstxt/" .. key .. "/rules.list"
-		local f = open(file_path, "r")
-		if f then
-			for line in f:lines() do
-				if line ~= "" then
-					table.insert(policies["rule"], line)
+		-- Read rules from files
+		local rule_files = {
+			"/var/cache/bunkerweb/robotstxt/" .. key .. "/darkvisitors.list",
+			"/var/cache/bunkerweb/robotstxt/" .. key .. "/rules.list",
+		}
+		for _, file_path in ipairs(rule_files) do
+			local f = open(file_path, "r")
+			if f then
+				local is_darkvisitors_list = (
+					file_path == "/var/cache/bunkerweb/robotstxt/" .. key .. "/darkvisitors.list"
+				)
+				local first_line_skipped = false
+				for line in f:lines() do
+					if is_darkvisitors_list and not first_line_skipped then
+						first_line_skipped = true
+						-- Skip this line
+					elseif line ~= "" then
+						table.insert(policies["rule"], line)
+					end
 				end
+				f:close()
 			end
-			f:close()
 		end
 
 		-- Add rules and sitemaps from environment variables
 		if variables[key] then
-			for var, value in pairs(variables[key]) do
+			local sorted_vars = {}
+			for var_name, _ in pairs(variables[key]) do
+				table.insert(sorted_vars, var_name)
+			end
+			-- Natural sort for variables like ROBOTSTXT_RULE_1, ROBOTSTXT_RULE_2, ROBOTSTXT_RULE_10
+			table.sort(sorted_vars, function(a, b)
+				local base_a = a:gsub("_[0-9]+$", "")
+				local base_b = b:gsub("_[0-9]+$", "")
+				if base_a < base_b then
+					return true
+				end
+				if base_a > base_b then
+					return false
+				end
+				local num_a = tonumber(a:match("_([0-9]+)$")) or 0
+				local num_b = tonumber(b:match("_([0-9]+)$")) or 0
+				return num_a < num_b
+			end)
+
+			for _, var in ipairs(sorted_vars) do
+				local value = variables[key][var]
 				if value ~= "" then
-					local policy_key = string.lower(string.gsub(string.gsub(var, "^ROBOTSTXT_", ""), "_%d+$", ""))
+					local policy_key = string.lower(string.gsub(string.gsub(var, "^ROBOTSTXT_", ""), "_%d*$", ""))
 					if policy_key == "rule" then
 						policies.rule[#policies.rule + 1] = value
 					elseif policy_key == "sitemap" then
@@ -184,17 +216,13 @@ function robotstxt:init()
 end
 
 local function sanitize_rules(rules)
-	local seen = {}
 	local sanitized = {}
 	local has_user_agent = false
 	for _, rule in ipairs(rules) do
 		local trimmed = rule:match("^%s*(.-)%s*$")
-		if not seen[trimmed] then
-			seen[trimmed] = true
-			table.insert(sanitized, trimmed)
-			if trimmed:lower():find("^user%-agent:") then
-				has_user_agent = true
-			end
+		table.insert(sanitized, trimmed)
+		if trimmed:lower():find("^user%-agent:") then
+			has_user_agent = true
 		end
 	end
 	if not has_user_agent and #sanitized > 0 then

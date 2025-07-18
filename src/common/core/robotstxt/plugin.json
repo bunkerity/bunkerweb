@@ -74,12 +74,47 @@
       "regex": "^.*$",
       "type": "text",
       "multiple": "robotstxt-ignore-rules"
+    },
+    "ROBOTSTXT_DARKVISITORS_TOKEN": {
+      "context": "multisite",
+      "default": "",
+      "help": "Bearer token for the DarkVisitors API.",
+      "id": "robotstxt-darkvisitors-token",
+      "label": "DarkVisitors API Token",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+      "context": "multisite",
+      "default": "",
+      "help": "Comma-separated list of agent types to include in the DarkVisitors agent_types field when contacting the DarkVisitors API.",
+      "id": "robotstxt-darkvisitors-agent-types",
+      "label": "DarkVisitors Agent Types",
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": ","
+    },
+    "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+      "context": "multisite",
+      "default": "/",
+      "help": "A string specifying which URLs are disallowed. This value will be sent as the disallow field when contacting the DarkVisitors API.",
+      "id": "robotstxt-darkvisitors-disallow",
+      "label": "DarkVisitors Disallow",
+      "regex": "^.*$",
+      "type": "text"
     }
   },
   "jobs": [
     {
       "name": "robots-txt-download",
       "file": "robots-txt-download.py",
+      "every": "hour",
+      "reload": true,
+      "async": true
+    },
+    {
+      "name": "robots-txt-darkvisitors",
+      "file": "robots-txt-darkvisitors.py",
       "every": "hour",
       "reload": true,
       "async": true

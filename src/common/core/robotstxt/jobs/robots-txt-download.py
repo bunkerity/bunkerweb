@@ -147,8 +147,10 @@ try:
                     and cached_url["last_update"] > (datetime.now().astimezone() - timedelta(hours=1)).timestamp()
                 ):
                     LOGGER.debug(f"URL {url} has already been downloaded less than 1 hour ago, skipping download...")
+
                     if url not in processed_urls:
                         aggregated_recap["skipped_urls"] += 1
+
                     cached_data = cached_url.get("data", b"")
                     if cached_data:
                         for line in cached_data.split(b"\n")[1:]:
@@ -198,14 +200,17 @@ try:
                         if url not in processed_urls:
                             aggregated_recap["downloaded_urls"] += 1
 
-                        url_content = b""
+                        url_content = b"User-agent: *\n" if is_robots_disallowed else b""
                         count_lines = 0
                         for line in iterable:
                             line = line.strip()
+
                             if not line or line.startswith((b"#", b";")):
                                 continue
+
                             if is_robots_disallowed:
                                 line = b"Disallow: " + line
+
                             unique_entries.add(line)
                             url_content += line + b"\n"
                             count_lines += 1
