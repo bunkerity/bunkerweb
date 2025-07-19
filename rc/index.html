@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -71,7 +71,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1032,7 +1032,7 @@
 <figcaption>Make your web services secure by default!</figcaption>
 </figure>
 <p>BunkerWeb is a next-generation, open-source Web Application Firewall (WAF).</p>
-<p>As a full-featured web server (based on <a href="https://nginx.org/">NGINX</a> under the hood), it protects your web services to make them "secure by default." BunkerWeb integrates seamlessly into your existing environments (<a href="integrations/#linux">Linux</a>, <a href="integrations/#docker">Docker</a>, <a href="integrations/#swarm">Swarm</a>, <a href="integrations/#kubernetes">Kubernetes</a>, …) and is fully configurable (don't panic, there is an <a href="web-ui/">awesome web UI</a> if you don't like the CLI) to meet your specific use cases. In other words, cybersecurity is no longer a hassle.</p>
+<p>As a full-featured web server (based on <a href="https://nginx.org/">NGINX</a> under the hood), it protects your web services to make them "secure by default." BunkerWeb integrates seamlessly into your existing environments (<a href="integrations/#linux">Linux</a>, <a href="integrations/#docker">Docker</a>, <a href="integrations/#swarm">Swarm</a>, <a href="integrations/#kubernetes">Kubernetes</a>, …) as a reverse proxy and is fully configurable (don't panic, there is an <a href="web-ui/">awesome web UI</a> if you don't like the CLI) to meet your specific use cases. In other words, cybersecurity is no longer a hassle.</p>
 <p>BunkerWeb includes primary <a href="advanced/#security-tuning">security features</a> as part of the core but can be easily extended with additional ones thanks to a <a href="plugins/">plugin system</a>.</p>
 <h2 id="why-bunkerweb">Why BunkerWeb?</h2>
 <p align="center">
@@ -1059,7 +1059,7 @@
 <p><strong>Free as in "freedom"</strong>: BunkerWeb is licensed under the free <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPLv3 license</a>, embracing the principles of freedom and openness. Enjoy the freedom to use, modify, and distribute the software, backed by a supportive community.</p>
 </li>
 <li>
-<p><strong>Professional services</strong>: Get technical support, tailored consulting, and custom development directly from the maintainers of BunkerWeb. Visit the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">BunkerWeb Panel</a> for more information.</p>
+<p><strong>Professional services</strong>: Get technical support, tailored consulting, and custom development directly from the maintainers of BunkerWeb. Visit the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> for more information.</p>
 </li>
 </ul>
 <h2 id="security-features">Security features</h2>
@@ -1104,22 +1104,31 @@
 
 <p>BunkerWeb offers an optional <a href="web-ui/">user interface</a> to manage your instances and their configurations. An online read-only demo is available at <a href="https://demo-ui.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">demo-ui.bunkerweb.io</a>. Feel free to test it yourself.</p>
 <h2 id="bunkerweb-cloud">BunkerWeb Cloud</h2>
+<figure>
+<p><img align="center," alt="Overview" src="assets/img/bunkerweb-cloud.webp" width="600" />
+  </p>
+<figcaption>BunkerWeb Cloud</figcaption>
+</figure>
 <p>Don't want to self-host and manage your own BunkerWeb instance(s)? You might be interested in BunkerWeb Cloud, our fully managed SaaS offering for BunkerWeb.</p>
-<p>Try our <a href="https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_source=doc&amp;utm_campaign=self">BunkerWeb Cloud beta offer for free</a> and get access to:</p>
+<p>Try our <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">BunkerWeb Cloud offer</a> and get access to:</p>
 <ul>
 <li>A fully managed BunkerWeb instance hosted in our cloud</li>
 <li>All BunkerWeb features, including PRO ones</li>
 <li>A monitoring platform with dashboards and alerts</li>
 <li>Technical support to assist you with configuration</li>
 </ul>
-<p>You will find more information about BunkerWeb Cloud on the <a href="https://panel.bunkerweb.io/knowledgebase/55/BunkerWeb-Cloud?utm_source=doc&amp;utm_campaign=self">FAQ page</a> of the BunkerWeb panel.</p>
+<p>If you are interested in the BunkerWeb Cloud offering, don't hesitate to <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> so we can discuss your needs.</p>
 <h2 id="pro-version">PRO version</h2>
+<div class="admonition tip">
+<p class="admonition-title">BunkerWeb PRO free trial</p>
+<p>Want to quickly test BunkerWeb PRO for one month? Use the code <code>freetrial</code> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a> or by clicking <a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">here</a> to directly to apply the promo code (will be effective at checkout).</p>
+</div>
 <p>When using BunkerWeb, you have the choice of the version you want to use: open-source or PRO.</p>
 <p>Whether it's enhanced security, an enriched user experience, or technical monitoring, the BunkerWeb PRO version allows you to fully benefit from BunkerWeb and meet your professional needs.</p>
 <p>In the documentation or the user interface, PRO features are annotated with a crown <img src="assets/img/pro-icon.svg" alt="crown pro icon" height="32px" width="32px"> to distinguish them from those integrated into the open-source version.</p>
 <p>You can upgrade from the open-source version to the PRO one easily and at any time. The process is straightforward:</p>
 <ul>
-<li>Claim your <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">free trial on the BunkerWeb panel</a></li>
+<li>Claim your <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">free trial on the BunkerWeb panel</a> by using the <code>freetrial</code> promo code at checkout</li>
 <li>Once connected to the client area, copy your PRO license key</li>
 <li>Paste your private key into BunkerWeb using the <a href="web-ui/#upgrade-to-pro">web UI</a> or <a href="features/#pro">specific setting</a></li>
 </ul>
@@ -1136,7 +1145,6 @@
 <li><a href="https://docs.bunkerweb.io"><strong>Documentation</strong></a>: Technical documentation of the BunkerWeb solution.</li>
 <li><a href="https://demo.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc"><strong>Demo</strong></a>: Demonstration website of BunkerWeb. Don't hesitate to attempt attacks to test the robustness of the solution.</li>
 <li><a href="https://demo-ui.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc"><strong>Web UI</strong></a>: Online read-only demo of the web UI of BunkerWeb.</li>
-<li><a href="https://config.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc"><strong>Configurator</strong></a>: A user-friendly tool to help you configure BunkerWeb.</li>
 <li><a href="https://threatmap.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc"><strong>Threatmap</strong></a>: Live cyberattacks blocked by BunkerWeb instances all around the world.</li>
 </ul>
 <p>Community and social networks:</p>
@@ -1247,7 +1255,7 @@
       <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="assets/javascripts/bundle.56ea9cef.min.js"></script>
       
         <script src="js/print-site.js"></script>
       

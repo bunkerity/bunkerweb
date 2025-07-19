@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -73,7 +73,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1112,9 +1112,9 @@
 </ul>
 </div>
 <h2 id="upgrade-to-pro">Upgrade to PRO</h2>
-<div class="admonition info">
-<p class="admonition-title">What is BunkerWeb PRO ?</p>
-<p>BunkerWeb PRO is an enhanced version of the BunkerWeb open-source edition. Whether it offers enhanced security, an enriched user experience, or improved technical monitoring, BunkerWeb PRO allows you to fully benefit from BunkerWeb and meet professional needs. Do not hesitate to visit the <a href="https://panel.bunkerweb.io/knowledgebase?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a> or <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact us</a> if you have any questions regarding the PRO version.</p>
+<div class="admonition tip">
+<p class="admonition-title">BunkerWeb PRO free trial</p>
+<p>Want to quickly test BunkerWeb PRO for one month? Use the code <code>freetrial</code> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a> or by clicking <a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">here</a> to directly to apply the promo code (will be effective at checkout).</p>
 </div>
 <p>Once you have your PRO license key from the <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a>, you can paste it into the PRO page of the web UI.</p>
 <figure>
@@ -1172,7 +1172,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1190,7 +1190,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -1218,7 +1218,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
@@ -1294,7 +1294,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1313,7 +1313,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># We don&#39;t need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service</span>
@@ -1333,7 +1333,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
@@ -1352,7 +1352,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># This is the syslog-ng container address</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
@@ -1560,6 +1560,7 @@ log {
 <li><code>MAX_THREADS</code>: the number of threads used by the web UI (default is <code>MAX_WORKERS</code> * 2).</li>
 <li><code>FORWARDED_ALLOW_IPS</code>: a list of IP addresses or networks that are allowed to be used in the <code>X-Forwarded-For</code> header (default is <code>*</code> in <strong>Docker images</strong> and <code>127.0.0.1</code> on <strong>Linux installations</strong>).</li>
 <li><code>CHECK_PRIVATE_IP</code>: set it to <code>yes</code> to not disconnect users that have their IP address changed during a session if they are in a private network (default is <code>yes</code>). (Non-private IP addresses are always checked).</li>
+<li><code>ENABLE_HEALTHCHECK</code>: set it to <code>yes</code> to enable the <code>/healthcheck</code> endpoint that returns a simple JSON response with status information (default is <code>no</code>).</li>
 </ul>
 <p>The web UI will use these variables to authenticate you and handle the 2FA feature.</p>
 </div>
@@ -1620,7 +1621,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
-<p>If you want another Database backend than MariaDB please refer to the docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/misc/integrations">misc/integrations folder</a> of the repository.</p>
+<p>If you want another Database backend than MariaDB please refer to the docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations">misc/integrations folder</a> of the repository.</p>
 </div>
 <p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;ui-env</span>
@@ -1629,7 +1630,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1641,7 +1642,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -1663,7 +1664,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
@@ -1718,7 +1719,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
-<p>If you want another Database backend than MariaDB please refer to the docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/misc/integrations">misc/integrations folder</a> of the repository.</p>
+<p>If you want another Database backend than MariaDB please refer to the docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations">misc/integrations folder</a> of the repository.</p>
 </div>
 <p>Here is the docker-compose boilerplate that you can use (don't forget to edit the <code>changeme</code> data):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;ui-env</span>
@@ -1728,7 +1729,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1743,7 +1744,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
@@ -1757,7 +1758,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -1791,7 +1792,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
@@ -1831,7 +1832,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the <code>7000</code> port.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
-<p>If you want another Database backend than MariaDB please refer to the yaml files in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/misc/integrations">misc/integrations folder</a> of the repository.</p>
+<p>If you want another Database backend than MariaDB please refer to the yaml files in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations">misc/integrations folder</a> of the repository.</p>
 </div>
 <p>Here is the corresponding part of your values.yaml file that you can use:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">settings</span><span class="p">:</span>
@@ -1867,7 +1868,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/">reverse proxy setup</a>. We recommend you to connect BunkerWeb and web UI using a dedicated network (like <code>bw-universe</code> also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the <code>7000</code> port.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
-<p>If you want another Database backend than MariaDB please refer to the stack files in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/misc/integrations">misc/integrations folder</a> of the repository.</p>
+<p>If you want another Database backend than MariaDB please refer to the stack files in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations">misc/integrations folder</a> of the repository.</p>
 </div>
 <p>Here is the stack boilerplate that you can use (don't forget to edit the <code>changeme</code> data):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-ui-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;ui-env</span>
@@ -1877,7 +1878,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
@@ -1906,7 +1907,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
@@ -1922,7 +1923,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">DOCKER_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://bw-docker:2375&quot;</span>
@@ -1967,7 +1968,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.2-rc7</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.3-rc1</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
@@ -2028,7 +2029,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>German (de)</li>
 <li>Italian (it)</li>
 </ul>
-<p>See the <a href="https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc7/src/ui/app/static/locales/README.md">locales/README.md</a> for details on translation provenance and review status.</p>
+<p>See the <a href="https://github.com/bunkerity/bunkerweb/raw/v1.6.3-rc1/src/ui/app/static/locales/README.md">locales/README.md</a> for details on translation provenance and review status.</p>
 <h3 id="contributing-translations">Contributing Translations</h3>
 <p>We welcome contributions to improve or add new locale files!</p>
 <p><strong>How to contribute a translation:</strong></p>
@@ -2040,7 +2041,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Submit a pull request.</li>
 </ol>
 <p>For updates, edit the relevant file and update the provenance table as needed.</p>
-<p>See the <a href="https://github.com/bunkerity/bunkerweb/raw/v1.6.2-rc7/src/ui/app/static/locales/README.md">locales/README.md</a> for full guidelines.</p>
+<p>See the <a href="https://github.com/bunkerity/bunkerweb/raw/v1.6.3-rc1/src/ui/app/static/locales/README.md">locales/README.md</a> for full guidelines.</p>
 
 
 
@@ -2142,7 +2143,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
       <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

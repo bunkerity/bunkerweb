@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -73,7 +73,7 @@
     <script defer>
       window.addEventListener('DOMContentLoaded', () => {
         const bannerEl = document.querySelector('aside.md-banner');
-        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. More info and free trial <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro">here</a>.</p>'},
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
         { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
         { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
         ]
@@ -1041,8 +1041,8 @@
 </div>
 <h2 id="settings">Settings</h2>
 <div class="admonition tip">
-<p class="admonition-title">PRO settings</p>
-<p>Some plugins are reserved for the <strong>PRO version</strong>. <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc#pro">Find out more about the PRO version here.</a></p>
+<p class="admonition-title">BunkerWeb PRO settings</p>
+<p>Some plugins are reserved for the <strong>PRO version</strong>. Want to quickly test BunkerWeb PRO for one month? Use the code <code>freetrial</code> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a> or by clicking <a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">here</a> to directly to apply the promo code (will be effective at checkout).</p>
 </div>
 <p>Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.</p>
 <p>The configuration of BunkerWeb is done using what we call "settings" or "variables." Each setting is identified by a name such as <code>AUTO_LETS_ENCRYPT</code> or <code>USE_ANTIBOT</code>. You can assign values to these settings to configure BunkerWeb.</p>
@@ -1071,10 +1071,6 @@ USE_BROTLI=no
 <p class="admonition-title">Going further</p>
 <p>The complete list of available settings with descriptions and possible values is available in the <a href="../features/">settings section</a> of the documentation.</p>
 </div>
-<div class="admonition info">
-<p class="admonition-title">Settings generator tool</p>
-<p>To help you tune BunkerWeb, we offer an easy-to-use settings generator tool available at <a href="https://config.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">config.bunkerweb.io</a>.</p>
-</div>
 <h2 id="multisite-mode">Multisite mode</h2>
 <p>Understanding the multisite mode is essential when utilizing BunkerWeb. As our primary focus is safeguarding web applications, our solution is intricately linked to the concept of "virtual hosts" or "vhosts" (more info <a href="https://en.wikipedia.org/wiki/Virtual_hosting">here</a>). These virtual hosts enable the serving of multiple web applications from a single instance or cluster.</p>
 <p>By default, BunkerWeb has the multisite mode disabled. This means that only one web application will be served, and all settings will be applied to it. This setup is ideal when you have a single application to protect, as you don't need to concern yourself with multisite configurations.</p>
@@ -1102,7 +1098,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>You will find concrete examples of multisite mode in the <a href="../advanced/">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/examples">examples</a> directory of the repository.</p>
+<p>You will find concrete examples of multisite mode in the <a href="../advanced/">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="custom-configurations">Custom configurations</h2>
 <p>To address unique challenges and cater to specific use cases, BunkerWeb offers the flexibility of custom configurations. While the provided settings and <a href="../plugins/">external plugins</a> cover a wide range of scenarios, there may be situations that require additional customization.</p>
@@ -1117,7 +1113,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>You will find concrete examples of custom configurations in the <a href="../advanced/#custom-configurations">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.2-rc7/examples">examples</a> directory of the repository.</p>
+<p>You will find concrete examples of custom configurations in the <a href="../advanced/#custom-configurations">advanced usages</a> of the documentation and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/examples">examples</a> directory of the repository.</p>
 </div>
 <h2 id="database">Database</h2>
 <p>BunkerWeb securely stores its current configuration in a backend database, which contains essential data for smooth operation. The following information is stored in the database:</p>
@@ -1377,7 +1373,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
       <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

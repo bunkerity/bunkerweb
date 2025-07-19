@@ -1,0 +1,2017 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation of BunkerWeb, the open source and next generation WAF.">
+      
+      
+      
+        <link rel="canonical" href="https://docs.bunkerweb.io/latest/upgrading/">
+      
+      
+        <link rel="prev" href="../web-ui/">
+      
+      
+        <link rel="next" href="../troubleshooting/">
+      
+      
+      <link rel="icon" href="../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+    
+    
+      
+        <title>Upgrading - BunkerWeb documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+      
+
+
+    
+    
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+
+    <script defer>
+  // Lazy load images and embed youtube videos
+  window.addEventListener("load", () => {
+    document.querySelectorAll("[data-src]").forEach((el) => {
+      el.setAttribute("src", el.getAttribute("data-src"));
+    });
+  });
+  // Add missing label
+  try {
+    document
+      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
+      .setAttribute("aria-label", "Search in documentation");
+  } catch (err) {}
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        startBannerLoop();
+        // Try to get dynamic content
+        // Else keep static ones
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
+
+    
+      
+    
+    
+      <link rel="stylesheet" href="../css/print-site.css">
+    
+      <link rel="stylesheet" href="../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../assets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="Upgrading - BunkerWeb documentation" >
+      
+        <meta  property="og:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  property="og:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/upgrading.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://docs.bunkerweb.io/latest/upgrading/" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="Upgrading - BunkerWeb documentation" >
+      
+        <meta  name="twitter:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  name="twitter:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/upgrading.png" >
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#upgrading" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+    📢 Looking for BunkerWeb PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../..">
+        <strong>Click here to view latest.</strong>
+    </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="BunkerWeb documentation" class="md-header__button md-logo" aria-label="BunkerWeb documentation" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BunkerWeb documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Upgrading
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bunkerity/bunkerweb" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Introduction
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Concepts
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../integrations/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Integrations
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart-guide/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Quickstart guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../features/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Features
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../advanced/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Advanced usages
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../web-ui/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Web UI
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Upgrading
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../troubleshooting/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Troubleshooting
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../plugins/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Plugins
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../professional-services/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Professional services
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../about/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  About
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="BunkerWeb documentation" class="md-nav__button md-logo" aria-label="BunkerWeb documentation" data-md-component="logo">
+      
+  <img src="../assets/logo.png" alt="logo">
+
+    </a>
+    BunkerWeb documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bunkerity/bunkerweb" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integrations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quickstart guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Features
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced usages
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Web UI
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Upgrading
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Upgrading
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#upgrade-from-16x" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrade from 1.6.X
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrade from 1.6.X">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Procedure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rollback
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrade-from-15x" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrade from 1.5.X
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Upgrade from 1.5.X">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      What changed?
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What changed?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bunkerweb-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      BunkerWeb container
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-values-and-new-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default values and new settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoconf-namespaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Autoconf namespaces
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#procedure_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Procedure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rollback_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rollback
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugins
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../professional-services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Professional services
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="upgrading">Upgrading</h1>
+<h2 id="upgrade-from-16x">Upgrade from 1.6.X</h2>
+<div class="admonition warning">
+<p class="admonition-title">Read me first</p>
+<p>We often add new features and settings to BunkerWeb. We recommend you read the <a href="../features/">settings</a> sections of the documentation or the GitHub releases to see what's new.</p>
+</div>
+<h3 id="procedure">Procedure</h3>
+<ol>
+<li>
+<p><strong>Backup the database</strong>:</p>
+<ul>
+<li>Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.</li>
+<li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
+</ul>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>&lt;scheduler_container&gt;:/path/to/backup/directory<span class="w"> </span>/path/to/backup/directory
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.10 users</p>
+<p>If you are using <strong>RHEL 8.10</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">MySQL/MariaDB</label><label for="__tabbed_2_2">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Install the MySQL repository configuration package</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
+</code></pre></div>
+</li>
+<li>
+<p><strong>Enable the MySQL repository</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>--enable<span class="w"> </span>mysql80-community
+</code></pre></div>
+</li>
+<li>
+<p><strong>Install the MySQL client</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>mysql-community-client
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Install the PostgreSQL repository configuration package</strong></p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">/pgdg-redhat-repo-latest.noarch.rpm&quot;</span>
+</code></pre></div>
+</li>
+<li>
+<p><strong>Install the PostgreSQL client</strong></p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span>postgresql&lt;version&gt;
+</code></pre></div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
+</code></pre></div>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Upgrade BunkerWeb</strong>:</p>
+<ul>
+<li>
+<p>Upgrade BunkerWeb to the latest version.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Docker</label><label for="__tabbed_3_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Update the Docker Compose file</strong>: Update the Docker Compose file to use the new version of the BunkerWeb image.
+    <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.3-rc1</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.3-rc1</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.3-rc1</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.3-rc1</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Restart the containers</strong>: Restart the containers to apply the changes.
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div></p>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Stop the services</strong>:
+    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Update BunkerWeb</strong>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Debian/Ubuntu</label><label for="__tabbed_4_2">Fedora/RedHat</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>First, if you have previously held the BunkerWeb package, unhold it :</p>
+<p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
+</code></pre></div>
+<p>Then, you can update the BunkerWeb package :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.3-rc1
+</code></pre></div>
+<p>To prevent the BunkerWeb package from upgrading when executing <code>apt upgrade</code>, you can use the following command :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
+</code></pre></div>
+<p>More details in the <a href="../integrations/#__tabbed_1_1">integration Linux page</a>.</p>
+</div>
+<div class="tabbed-block">
+<p>First, if you have previously held the BunkerWeb package, unhold it :</p>
+<p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>nginx
+</code></pre></div>
+<p>Then, you can update the BunkerWeb package :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.3-rc1
+</code></pre></div>
+<p>To prevent the BunkerWeb package from upgrading when executing <code>dnf upgrade</code>, you can use the following command :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx
+</code></pre></div>
+<p>More details in the <a href="../integrations/#__tabbed_1_3">integration Linux page</a>.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Start the services</strong>:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-ui
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+        Or reboot the system:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>reboot
+</code></pre></div></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Check the logs</strong>: Check the logs of the scheduler service to ensure that the migration was successful.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Docker</label><label for="__tabbed_5_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>&lt;scheduler_container&gt;
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>bunkerweb<span class="w"> </span>--no-pager
+</code></pre></div>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Verify the database</strong>: Verify that the database upgrade was successful by checking the data and configurations in the new database container.</p>
+</li>
+</ol>
+<h3 id="rollback">Rollback</h3>
+<div class="admonition failure">
+<p class="admonition-title">In case of issues</p>
+<p>If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in <a href="#__tabbed_1_1">step 1</a>.</p>
+<p>Get support and more information :</p>
+<ul>
+<li><a href="https://panel.bunkerweb.io/?utm_source=doc&amp;utm_campaign=self">Order professional support</a></li>
+<li><a href="https://github.com/bunkerity/bunkerweb/issues">Create an issue on GitHub</a></li>
+<li><a href="https://discord.bunkerity.com">Join the BunkerWeb Discord server</a></li>
+</ul>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Docker</label><label for="__tabbed_6_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Extract the backup if zipped</strong>.</p>
+<p>Extract the backup zip file first:</p>
+<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>/path/to/backup/directory/backup.zip<span class="w"> </span>-d<span class="w"> </span>/path/to/backup/directory/
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup</strong>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQLite</label><label for="__tabbed_7_2">MySQL/MariaDB</label><label for="__tabbed_7_3">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Remove the existing database file.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+<li>
+<p><strong>Fix permissions.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>chown<span class="w"> </span>root:nginx<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+</code></pre></div>
+</li>
+<li>
+<p><strong>Stop the stack.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Restore the backup.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-e<span class="w"> </span><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;your_password&gt;<span class="w"> </span>-i<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+<li>
+<p><strong>Stop the stack.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Remove the existing database.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>dropdb<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>--force<span class="w"> </span>&lt;database_name&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Recreate the database.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>createdb<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+<li>
+<p><strong>Stop the stack.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+</code></pre></div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Downgrade BunkerWeb</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+</li>
+<li>
+<p><strong>Start the containers</strong>.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Extract the backup if zipped</strong>.</p>
+<p>Extract the backup zip file first:</p>
+<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>/path/to/backup/directory/backup.zip<span class="w"> </span>-d<span class="w"> </span>/path/to/backup/directory/
+</code></pre></div>
+</li>
+<li>
+<p><strong>Stop the services</strong>.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup</strong>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">SQLite</label><label for="__tabbed_8_2">MySQL/MariaDB</label><label for="__tabbed_8_3">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+sudo<span class="w"> </span>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+sudo<span class="w"> </span>chown<span class="w"> </span>root:nginx<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-p<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Remove the existing database.</strong></p>
+<div class="highlight"><pre><span></span><code>dropdb<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>--force<span class="w"> </span>&lt;database_name&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Recreate the database.</strong></p>
+<div class="highlight"><pre><span></span><code>createdb<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup.</strong></p>
+<div class="highlight"><pre><span></span><code>psql<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Start the services</strong>.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</li>
+<li>
+<p><strong>Downgrade BunkerWeb</strong>.</p>
+<ul>
+<li>Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the <a href="../integrations/#linux">integration Linux page</a></li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<h2 id="upgrade-from-15x">Upgrade from 1.5.X</h2>
+<h3 id="what-changed">What changed?</h3>
+<h4 id="scheduler">Scheduler</h4>
+<p>Unlike the 1.5.X releases, the Scheduler service <strong>no longer uses the <em>docker socket proxy</em> to fetch BunkerWeb's instances</strong>. Instead, it uses the new <code>BUNKERWEB_INSTANCES</code> environment variable.</p>
+<div class="admonition info">
+<p class="admonition-title">About the <code>BUNKERWEB_INSTANCES</code> environment variable</p>
+<p>This new variable is a list of BunkerWeb instances separated by spaces in this format: <code>http://bunkerweb:5000 bunkerweb1:5000 bunkerweb2:5000 ...</code>. The scheduler will then use this list to fetch the instances' configuration and to send the configuration to them.</p>
+<ul>
+<li>The <code>http://</code> prefix is optional.</li>
+<li>The port is optional and defaults to the value of the <code>API_HTTP_PORT</code> environment variable.</li>
+<li>The default value of the <code>BUNKERWEB_INSTANCES</code> environment variable is <code>127.0.0.1</code>.</li>
+</ul>
+</div>
+<p>In other words, the new system is fully agnostic and generic: the scheduler is in charge of managing a list of BunkerWeb instances and doesn't need to care about the environment.</p>
+<div class="admonition tip">
+<p class="admonition-title">Autoconf/Kubernetes/Swarm integrations</p>
+<p>If you are using the <code>Autoconf</code>, <code>Kubernetes</code>, or <code>Swarm</code> integrations, you can set the <code>BUNKERWEB_INSTANCES</code> environment variable to an empty string (so that it doesn't try to send the configuration to the default one which is <code>127.0.0.1</code>).</p>
+<p><strong>The instances will be automatically fetched by the controller</strong>. You can also add custom instances to the list that may not be picked up by the controller.</p>
+</div>
+<p>Since the <code>1.6</code>, the Scheduler also have a new <a href="../concepts/">built-in healthcheck system</a>, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
+<h4 id="bunkerweb-container">BunkerWeb container</h4>
+<p>Another important change is that the <strong>settings</strong> that were previously declared on the BunkerWeb container <strong>are now declared on the scheduler</strong>. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.</p>
+<p>While the settings are now declared on the Scheduler container, <strong>you'll still need to declare api related mandatory settings on the BunkerWeb container</strong> like the <code>API_WHITELIST_IP</code> setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.</p>
+<div class="admonition warning">
+<p class="admonition-title">BunkerWeb's container settings</p>
+<p>Every API related setting that you declare on the BunkerWeb container <strong>have to be mirrored on the Scheduler container</strong> so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.</p>
+</div>
+<h4 id="default-values-and-new-settings">Default values and new settings</h4>
+<p>We tried our best not to change default value but we have added many other settings. It's highly recommended to read the <a href="../advanced/#security-tuning">security tuning</a> and <a href="../features/">settings</a> sections of the documentation.</p>
+<h4 id="templates">Templates</h4>
+<p>We added a new feature called <strong>templates</strong>. Templates provide a structured and standardized approach to defining settings and custom configurations, check the <a href="../concepts/#templates">concepts/templates</a> section for more information.</p>
+<h4 id="autoconf-namespaces">Autoconf namespaces</h4>
+<p>We added a <strong>namespace</strong> feature to the autoconf integrations. Namespaces allow you to group your instances and apply settings only to them. Check the following sections according to your Integration for more information:</p>
+<ul>
+<li><a href="../integrations/#namespaces">Autoconf/namespaces</a></li>
+<li><a href="../integrations/#namespaces_1">Kubernetes/namespaces</a></li>
+<li><a href="../integrations/#namespaces_2">Swarm/namespaces</a></li>
+</ul>
+<h3 id="procedure_1">Procedure</h3>
+<ol>
+<li>
+<p><strong>Backup the database</strong>:</p>
+<ul>
+<li>Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.</li>
+<li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
+</ul>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">1.5.7 and later</label><label for="__tabbed_9_2">1.5.6 and earlier</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Docker</label><label for="__tabbed_10_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>&lt;scheduler_container&gt;:/path/to/backup/directory<span class="w"> </span>/path/to/backup/directory
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.10 users</p>
+<p>If you are using <strong>RHEL 8.10</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">MySQL/MariaDB</label><label for="__tabbed_11_2">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Install the MySQL repository configuration package</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>https://dev.mysql.com/get/mysql80-community-release-el8-9.noarch.rpm
+</code></pre></div>
+</li>
+<li>
+<p><strong>Enable the MySQL repository</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>--enable<span class="w"> </span>mysql80-community
+</code></pre></div>
+</li>
+<li>
+<p><strong>Install the MySQL client</strong></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>mysql-community-client
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Install the PostgreSQL repository configuration package</strong></p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">/pgdg-redhat-repo-latest.noarch.rpm&quot;</span>
+</code></pre></div>
+</li>
+<li>
+<p><strong>Install the PostgreSQL client</strong></p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span>postgresql&lt;version&gt;
+</code></pre></div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="12:4"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><input id="__tabbed_12_4" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">SQLite</label><label for="__tabbed_12_2">MariaDB</label><label for="__tabbed_12_3">MySQL</label><label for="__tabbed_12_4">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Docker</label><label for="__tabbed_13_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>We first need to install the <code>sqlite</code> package in the container.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>apk<span class="w"> </span>add<span class="w"> </span>sqlite
+</code></pre></div>
+<p>Then, backup the database.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span><span class="s2">&quot;.dump&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span><span class="s2">&quot;.dump&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Docker</label><label for="__tabbed_14_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>mariadb-dump<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>mariadb-dump<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>mysqldump<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>mysqldump<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Docker</label><label for="__tabbed_16_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">PGPASSWORD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>pg_dump<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nv">PGPASSWORD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>pg_dump<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Upgrade BunkerWeb</strong>:</p>
+<ul>
+<li>
+<p>Upgrade BunkerWeb to the latest version.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Docker</label><label for="__tabbed_17_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Update the Docker Compose file</strong>: Update the Docker Compose file to use the new version of the BunkerWeb image.
+    <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.3-rc1</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.3-rc1</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.3-rc1</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.3-rc1</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Restart the containers</strong>: Restart the containers to apply the changes.
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div></p>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Stop the services</strong>:
+    <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Update BunkerWeb</strong>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Debian/Ubuntu</label><label for="__tabbed_18_2">Fedora/RedHat</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>First, if you have previously held the BunkerWeb package, unhold it :</p>
+<p>You can print a list of packages on hold with <code>apt-mark showhold</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>unhold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
+</code></pre></div>
+<p>Then, you can update the BunkerWeb package :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.3-rc1
+</code></pre></div>
+<p>To prevent the BunkerWeb package from upgrading when executing <code>apt upgrade</code>, you can use the following command :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
+</code></pre></div>
+<p>More details in the <a href="../integrations/#__tabbed_1_1">integration Linux page</a>.</p>
+</div>
+<div class="tabbed-block">
+<p>First, if you have previously held the BunkerWeb package, unhold it :</p>
+<p>You can print a list of packages on hold with <code>dnf versionlock list</code></p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>delete<span class="w"> </span>package<span class="w"> </span>nginx
+</code></pre></div>
+<p>Then, you can update the BunkerWeb package :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.3-rc1
+</code></pre></div>
+<p>To prevent the BunkerWeb package from upgrading when executing <code>dnf upgrade</code>, you can use the following command :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx
+</code></pre></div>
+<p>More details in the <a href="../integrations/#__tabbed_1_3">integration Linux page</a>.</p>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Start the services</strong>:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-ui
+</code></pre></div>
+        Or reboot the system:
+        <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>reboot
+</code></pre></div></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Check the logs</strong>: Check the logs of the scheduler service to ensure that the migration was successful.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Docker</label><label for="__tabbed_19_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>&lt;scheduler_container&gt;
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>bunkerweb<span class="w"> </span>--no-pager
+</code></pre></div>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Verify the database</strong>: Verify that the database upgrade was successful by checking the data and configurations in the new database container.</p>
+</li>
+</ol>
+<h3 id="rollback_1">Rollback</h3>
+<div class="admonition failure">
+<p class="admonition-title">In case of issues</p>
+<p>If you encounter any issues during the upgrade, you can rollback to the previous version of the database by restoring the backup taken in <a href="#__tabbed_1_1">step 1</a>.</p>
+<p>Get support and more information :</p>
+<ul>
+<li><a href="https://panel.bunkerweb.io/?utm_source=doc&amp;utm_campaign=self">Order professional support</a></li>
+<li><a href="https://github.com/bunkerity/bunkerweb/issues">Create an issue on GitHub</a></li>
+<li><a href="https://discord.bunkerity.com">Join the BunkerWeb Discord server</a></li>
+</ul>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Docker</label><label for="__tabbed_20_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Extract the backup if zipped</strong>.</p>
+<p>Extract the backup zip file first:</p>
+<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>/path/to/backup/directory/backup.zip<span class="w"> </span>-d<span class="w"> </span>/path/to/backup/directory/
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup</strong>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">SQLite</label><label for="__tabbed_21_2">MySQL/MariaDB</label><label for="__tabbed_21_3">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Remove the existing database file.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+<li>
+<p><strong>Fix permissions.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>chown<span class="w"> </span>root:nginx<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-i<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+</code></pre></div>
+</li>
+<li>
+<p><strong>Stop the stack.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Restore the backup.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-e<span class="w"> </span><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;your_password&gt;<span class="w"> </span>-i<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+<li>
+<p><strong>Stop the stack.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Remove the existing database.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>dropdb<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>--force<span class="w"> </span>&lt;database_name&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Recreate the database.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>createdb<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+<li>
+<p><strong>Stop the stack.</strong></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+</code></pre></div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Downgrade BunkerWeb</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:&lt;old_version&gt;</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+</li>
+<li>
+<p><strong>Start the containers</strong>.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Extract the backup if zipped</strong>.</p>
+<p>Extract the backup zip file first:</p>
+<div class="highlight"><pre><span></span><code>unzip<span class="w"> </span>/path/to/backup/directory/backup.zip<span class="w"> </span>-d<span class="w"> </span>/path/to/backup/directory/
+</code></pre></div>
+</li>
+<li>
+<p><strong>Stop the services</strong>.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup</strong>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">SQLite</label><label for="__tabbed_22_2">MySQL/MariaDB</label><label for="__tabbed_22_3">PostgreSQL</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+sudo<span class="w"> </span>sqlite3<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+sudo<span class="w"> </span>chown<span class="w"> </span>root:nginx<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>mysql<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-p<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Remove the existing database.</strong></p>
+<div class="highlight"><pre><span></span><code>dropdb<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>--force<span class="w"> </span>&lt;database_name&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Recreate the database.</strong></p>
+<div class="highlight"><pre><span></span><code>createdb<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Restore the backup.</strong></p>
+<div class="highlight"><pre><span></span><code>psql<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&lt;<span class="w"> </span>/path/to/backup/directory/backup.sql
+</code></pre></div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</li>
+<li>
+<p><strong>Start the services</strong>.</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb-ui<span class="w"> </span>bunkerweb-scheduler
+</code></pre></div>
+</li>
+<li>
+<p><strong>Downgrade BunkerWeb</strong>.</p>
+<ul>
+<li>Downgrade BunkerWeb to the previous version by following the same steps as when upgrading BunkerWeb in the <a href="../integrations/#linux">integration Linux page</a></li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
+    </div>
+  
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.com/invite/fTf46FmtyD" target="_blank" rel="noopener" title="discord.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M524.531 69.836a1.5 1.5 0 0 0-.764-.7A485 485 0 0 0 404.081 32.03a1.82 1.82 0 0 0-1.923.91 338 338 0 0 0-14.9 30.6 447.9 447.9 0 0 0-134.426 0 310 310 0 0 0-15.135-30.6 1.89 1.89 0 0 0-1.924-.91 483.7 483.7 0 0 0-119.688 37.107 1.7 1.7 0 0 0-.788.676C39.068 183.651 18.186 294.69 28.43 404.354a2.02 2.02 0 0 0 .765 1.375 487.7 487.7 0 0 0 146.825 74.189 1.9 1.9 0 0 0 2.063-.676A348 348 0 0 0 208.12 430.4a1.86 1.86 0 0 0-1.019-2.588 321 321 0 0 1-45.868-21.853 1.885 1.885 0 0 1-.185-3.126 251 251 0 0 0 9.109-7.137 1.82 1.82 0 0 1 1.9-.256c96.229 43.917 200.41 43.917 295.5 0a1.81 1.81 0 0 1 1.924.233 235 235 0 0 0 9.132 7.16 1.884 1.884 0 0 1-.162 3.126 301.4 301.4 0 0 1-45.89 21.83 1.875 1.875 0 0 0-1 2.611 391 391 0 0 0 30.014 48.815 1.86 1.86 0 0 0 2.063.7A486 486 0 0 0 610.7 405.729a1.88 1.88 0 0 0 .765-1.352c12.264-126.783-20.532-236.912-86.934-334.541M222.491 337.58c-28.972 0-52.844-26.587-52.844-59.239s23.409-59.241 52.844-59.241c29.665 0 53.306 26.82 52.843 59.239 0 32.654-23.41 59.241-52.843 59.241m195.38 0c-28.971 0-52.843-26.587-52.843-59.239s23.409-59.241 52.843-59.241c29.667 0 53.307 26.82 52.844 59.239 0 32.654-23.177 59.241-52.844 59.241"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/bunkerity" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/bunkerity/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/bunkerity" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+        <script src="../js/print-site.js"></script>
+      
+        <script src="../assets/extra.js"></script>
+      
+    
+  </body>
+</html>
