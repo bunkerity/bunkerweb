@@ -2087,3 +2087,14 @@ html.dark-style div.dts div.dataTables_scrollBody table {
   font-weight: bold;
   text-decoration: underline;
 }
+
+.pro-card {
+  background: linear-gradient(135deg, var(--bs-primary), var(--bs-bw-blue));
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pro-card h6,
+.pro-card .list-group-item {
+  color: #fff;
+}
