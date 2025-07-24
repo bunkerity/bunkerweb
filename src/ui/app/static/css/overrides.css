@@ -21,9 +21,8 @@
 }
 
 body {
-  font-family:
-    var(--bs-body-font-family), "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Heiti SC",
+  font-family: var(--bs-body-font-family), "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Heiti SC",
     "WenQuanYi Micro Hei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol";
 }
@@ -196,9 +195,7 @@ button.list-group-item-secondary.active {
   background-color: var(--bs-bw-green); /* Initial background color */
   color: #fff;
   animation: colorPhase 3s infinite; /* Apply the color phasing animation */
-  transition:
-    background-color 0.3s ease-in-out,
-    box-shadow 0.3s ease-in-out; /* Smooth transitions */
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Smooth transitions */
 }
 
 .buy-now .btn-buy-now:hover {
@@ -237,14 +234,12 @@ button.list-group-item-secondary.active {
 
 :root {
   --dt-row-selected: 230, 234, 237;
-  --font-don-jose:
-    "Don Jose", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+  --font-don-jose: "Don Jose", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
-  --font-courier-prime:
-    "Courier Prime", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  --font-courier-prime: "Courier Prime", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
 }
 
 .badge-dot {
@@ -563,9 +558,7 @@ a.badge:hover {
 
 .setting-highlight {
   background-color: rgba(var(--bs-bw-green-rgb), 0.5);
-  transition:
-    background-color 2s ease,
-    opacity 2s ease;
+  transition: background-color 2s ease, opacity 2s ease;
   opacity: 1;
 }
 
@@ -1185,9 +1178,7 @@ div.dtsp-panesContainer
   padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
   opacity: 0;
   visibility: hidden;
-  transition:
-    opacity 0.2s ease,
-    visibility 0.2s ease !important;
+  transition: opacity 0.2s ease, visibility 0.2s ease !important;
   border-radius: 0.25rem;
   color: #ff7f50 !important;
 }
@@ -1235,9 +1226,7 @@ span.cursor-pointer ~ .reset-setting {
 
 .was-validated .form-select.plugin-setting:valid,
 .form-select.plugin-setting.is-valid {
-  background-position:
-    right 0.75rem center,
-    center right 1.5rem;
+  background-position: right 0.75rem center, center right 1.5rem;
   padding-right: 4rem !important;
   transition: background-position 0.2s ease;
 }
@@ -1247,9 +1236,7 @@ span.cursor-pointer ~ .reset-setting {
   .was-validated
   .form-select.plugin-setting:valid:not(.text-muted),
 .form-floating:hover .form-select.plugin-setting.is-valid:not(.text-muted) {
-  background-position:
-    right 3rem center,
-    center right 4.5rem;
+  background-position: right 3rem center, center right 4.5rem;
 }
 
 /* Adjust input text padding to avoid overlap with reset button */
@@ -2087,4 +2074,16 @@ html.dark-style div.dts div.dataTables_scrollBody table {
 
 .dark-style .reset-setting:hover:not(.text-muted) {
   color: #ff4500 !important;
+}
+
+.pro-alert {
+  background: none;
+  border: linear-gradient(135deg, var(--bs-primary), var(--bs-bw-blue));
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pro-alert .alert-link {
+  font-weight: bold;
+  text-decoration: underline;
 }

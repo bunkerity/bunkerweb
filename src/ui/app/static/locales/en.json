@@ -1007,6 +1007,21 @@
       "title": "UI Settings"
     },
     "step3": {
+      "title": "Upgrade to PRO",
+      "subtitle": "Unlock advanced features and get the most out of BunkerWeb.",
+      "label": {
+        "pro_benefits": "PRO Benefits"
+      },
+      "pro_benefit_1_title": "Access to all PRO features",
+      "pro_benefit_1_description": "Unlock all advanced features including enhanced security, performance, and management tools.",
+      "pro_benefit_2_title": "Technical support from maintainers",
+      "pro_benefit_2_description": "Get priority support from the BunkerWeb team for any issues or questions you may have.",
+      "pro_benefit_3_title": "Custom development",
+      "pro_benefit_3_description": "Tailored solutions to meet your specific needs.",
+      "pro_benefit_4_title": "Custom consulting",
+      "pro_benefit_4_description": "Expert advice to optimize your BunkerWeb setup."
+    },
+    "step4": {
       "label": {
         "final_url": "BunkerWeb UI URL"
       },
@@ -1015,6 +1030,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 An admin user already exists. Please proceed to the next step.",
+      "pro_license_key_exists": "⭐ A PRO license key is already configured, please proceed to the next step.",
       "reverse_proxy_configured": "↪️ A reverse proxy is already configured for the web interface. Please proceed to the next step.",
       "secure_password": "Secure Password",
       "unique_server_name": "Unique Server Name"

@@ -2,7 +2,7 @@ $(document).ready(() => {
   // Initialize variables
   let toastNum = 1;
   let currentStep = 1;
-  const CHECK_STEP = 3;
+  const CHECK_STEP = 4;
   const uiUser = $("#ui_user").val() === "yes";
   const uiReverseProxy = $("#ui_reverse_proxy").val() === "yes";
 
@@ -311,7 +311,7 @@ $(document).ready(() => {
       $previousStepButton.removeClass("disabled");
     }
 
-    if (currentStep === 3) {
+    if (currentStep === 4) {
       $nextStepButton.addClass("d-none");
       $saveSettingsButton.removeClass("d-none");
       populateOverview();
@@ -570,7 +570,7 @@ $(document).ready(() => {
   // Save Settings Button Click
   $saveSettingsButton.on("click", function (e) {
     e.preventDefault();
-    if (currentStep !== 3) return;
+    if (currentStep !== 4) return;
     const $subscribeNewsletter = $("#setup-subscribe-newsletter");
     if ($subscribeNewsletter.prop("checked")) {
       const $email = $("#email");
@@ -606,6 +606,9 @@ $(document).ready(() => {
 
     // Append the Theme
     formData.append("theme", $("[name='theme']").val());
+
+    // Append the PRO License Key
+    formData.append("PRO_LICENSE_KEY", $("#PRO_LICENSE_KEY").val());
 
     const server_name = getServerName();
     const ui_url = $("#REVERSE_PROXY_URL").val();

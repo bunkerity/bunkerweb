@@ -120,8 +120,19 @@
                                                         data-bs-target="#navs-steps-3"
                                                         aria-controls="navs-steps-3">3</button>
                                                 <div class="text-nowrap">
-                                                    <div class="fw-bold text-muted" data-i18n="setup.step3.title">Overview</div>
-                                                    <small class="text-muted" data-i18n="setup.step3.subtitle">Review your settings</small>
+                                                    <div class="fw-bold text-muted" data-i18n="setup.step3.title">PRO Features</div>
+                                                    <small class="text-muted" data-i18n="setup.step3.subtitle">Activate PRO features</small>
+                                                </div>
+                                            </li>
+                                            <li class="breadcrumb-item nav-link d-flex align-items-center pe-0">
+                                                <button class="btn btn-primary pt-3 pb-3 me-3 disabled"
+                                                        role="tab"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#navs-steps-4"
+                                                        aria-controls="navs-steps-4">4</button>
+                                                <div class="text-nowrap">
+                                                    <div class="fw-bold text-muted" data-i18n="setup.step4.title">Overview</div>
+                                                    <small class="text-muted" data-i18n="setup.step4.subtitle">Review your settings</small>
                                                 </div>
                                             </li>
                                         </ol>
@@ -1088,9 +1099,101 @@
                                          role="tabpanel"
                                          data-step="3"
                                          aria-labelledby="navs-steps-3-tab">
+                                        <div class="pro-alert alert alert-primary" role="alert">
+                                            <h5 class="alert-heading fw-bold d-flex align-items-center courier-prime">
+                                                <img class='me-2'
+                     src="{{ pro_diamond_url if is_pro_version else url_for('static', filename='img/diamond-blue.svg') }}"
+                     alt="Pro plugin"
+                     width="24px">
+                                                <span class="text-primary shine">BunkerWeb PRO free trial</span>
+                                            </h5>
+                                            <p class="mb-0 mt-2">
+                                                Want to quickly test BunkerWeb PRO for one month? Use the code <strong>freetrial</strong> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc"
+    target="_blank"
+    rel="noopener"
+    class="alert-link">BunkerWeb panel</a> or by <a href="https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=ui"
+    target="_blank"
+    rel="noopener"
+    class="alert-link">clicking here</a> to directly apply the promo code (will be effective at checkout).
+                                            </p>
+                                        </div>
                                         <div class="pt-1 pb-4">
-                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step3.title">Overview</h5>
-                                            <p class="card-subtitle text-muted" data-i18n="setup.step3.subtitle">Review your settings</p>
+                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step3.title">Upgrade to PRO</h5>
+                                            <p class="card-subtitle text-muted" data-i18n="setup.step3.subtitle">
+                                                Unlock advanced features and get the most out of BunkerWeb.
+                                            </p>
+                                        </div>
+                                        <div class="row justify-content-center">
+                                            <div class="col-12 col-md-10 col-lg-8">
+                                                {% if pro_license_key %}
+                                                    <p class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+                                                       data-i18n="setup.status.pro_license_key_exists">
+                                                        ⭐ A PRO license key is already configured, please proceed to the next step.
+                                                    </p>
+                                                {% else %}
+                                                    <div class="mb-4">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <label id="label-PRO_LICENSE_KEY"
+                                                                   for="PRO_LICENSE_KEY"
+                                                                   class="form-label fw-semibold text-truncate"
+                                                                   data-i18n="form.label.license_key">
+                                                                License Key
+                                                            </label>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
+                                                                      data-bs-toggle="tooltip"
+                                                                      data-bs-placement="top"
+                                                                      data-bs-original-title="Enter your PRO license key to activate PRO features"
+                                                                      data-i18n="tooltip.license_key">
+                                                                    <span class="bx bx-question-mark bx-xs"></span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <input id="PRO_LICENSE_KEY"
+                                                               name="PRO_LICENSE_KEY"
+                                                               type="password"
+                                                               class="form-control plugin-setting mt-1"
+                                                               aria-labelledby="label-PRO_LICENSE_KEY"
+                                                               pattern="^.*$" />
+                                                    </div>
+                                                    <div class="card mb-4 p-0">
+                                                        <div class="card-body">
+                                                            <h6 class="mb-3 fw-bold" data-i18n="setup.step3.label.pro_benefits">PRO Benefits</h6>
+                                                            <ul class="list-group list-group-flush">
+                                                                <li class="list-group-item">
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_1_title">Access to all PRO features</strong>: <span data-i18n="setup.step3.pro_benefit_1_description">Unlock all advanced features including enhanced security, performance, and management tools.</span>
+                                                                </li>
+                                                                <li class="list-group-item">
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_2_title">Technical support from maintainers</strong>: <span data-i18n="setup.step3.pro_benefit_2_description">Get priority support from the BunkerWeb team for any issues or questions you may have.</span>
+                                                                </li>
+                                                                <li class="list-group-item">
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_3_title">Custom development</strong>: <span data-i18n="setup.step3.pro_benefit_3_description">Tailored solutions to meet your specific needs.</span>
+                                                                </li>
+                                                                <li class="list-group-item">
+                                                                    <i class="bx bx-check text-success me-2"></i><strong class="courier-prime" data-i18n="setup.step3.pro_benefit_4_title">Custom consulting</strong>: <span data-i18n="setup.step3.pro_benefit_4_description">Expert advice to optimize your BunkerWeb setup.</span>
+                                                                </li>
+                                                            </ul>
+                                                            <div class="text-center mt-3">
+                                                                <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=ui"
+                                                                   target="_blank"
+                                                                   rel="noopener"
+                                                                   class="btn btn-primary"
+                                                                   data-i18n="link.more_info">More info</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="navs-steps-4"
+                                         class="ps-2 pe-2 tab-pane fade"
+                                         role="tabpanel"
+                                         data-step="4"
+                                         aria-labelledby="navs-steps-4-tab">
+                                        <div class="pt-1 pb-4">
+                                            <h5 class="mb-1 fw-bold" data-i18n="setup.step4.title">Overview</h5>
+                                            <p class="card-subtitle text-muted" data-i18n="setup.step4.subtitle">Review your settings</p>
                                         </div>
                                         <div class="d-flex justify-content-center pb-0 mb-4">
                                             <div class="col-12 col-md-8">
@@ -1157,7 +1260,7 @@
                                                 {% endif %}
                                                 {% if not ui_reverse_proxy %}
                                                     <div class="pb-3">
-                                                        <h6 class="mt-2 mb-2 fw-bold" data-i18n="setup.step3.label.final_url">BunkerWeb UI final URL</h6>
+                                                        <h6 class="mt-2 mb-2 fw-bold" data-i18n="setup.step4.label.final_url">BunkerWeb UI final URL</h6>
                                                         {% set setting = "SERVER_NAME + REVERSE_PROXY_HOST" %}
                                                         {% set setting_data = {"type": "text", "id": "overview_service_url", "regex": "^.+$"} %}
                                                         {% include "models/input_setting.html" %}

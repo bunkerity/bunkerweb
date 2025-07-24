@@ -48,10 +48,12 @@ def setup_page():
             "CUSTOM_SSL_KEY",
             "CUSTOM_SSL_CERT_DATA",
             "CUSTOM_SSL_KEY_DATA",
+            "PRO_LICENSE_KEY",
         ),
     )
 
     admin_user = DB.get_ui_user()
+    pro_license_key = db_config.get("PRO_LICENSE_KEY", getenv("PRO_LICENSE_KEY", ""))
 
     ui_reverse_proxy = None
     ui_reverse_proxy_url = None
@@ -97,6 +99,10 @@ def setup_page():
 
         if not any(key in request.form for key in required_keys):
             return handle_error(f"Missing either one of the following parameters: {', '.join(required_keys)}.", "setup")
+
+        if not pro_license_key and request.form.get("PRO_LICENSE_KEY", ""):
+            global_config = DB.get_config(global_only=True)
+            BW_CONFIG.edit_global_conf(global_config | {"PRO_LICENSE_KEY": request.form["PRO_LICENSE_KEY"]}, check_changes=False)
 
         if not admin_user:
             if len(request.form["admin_username"]) > 256:
@@ -261,6 +267,7 @@ def setup_page():
         custom_ssl_key=db_config.get("CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")),
         custom_ssl_cert_data=db_config.get("CUSTOM_SSL_CERT_DATA", getenv("CUSTOM_SSL_CERT_DATA", "")),
         custom_ssl_key_data=db_config.get("CUSTOM_SSL_KEY_DATA", getenv("CUSTOM_SSL_KEY_DATA", "")),
+        pro_license_key=db_config.get("PRO_LICENSE_KEY", getenv("PRO_LICENSE_KEY", "")),
         # totp_qr_image=totp_qr_image,
         # totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
     )
