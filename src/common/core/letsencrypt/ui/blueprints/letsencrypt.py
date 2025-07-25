@@ -185,8 +185,8 @@ def letsencrypt_delete():
 
     download_certificates()
 
-    env = {"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")}
-    env["PYTHONPATH"] = env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in env["PYTHONPATH"] else "")
+    cmd_env = {"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")}
+    cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
 
     delete_proc = run(
         [
@@ -206,7 +206,7 @@ def letsencrypt_delete():
         stdout=PIPE,
         stderr=STDOUT,
         text=True,
-        env=env,
+        env=cmd_env,
         check=False,
     )
 

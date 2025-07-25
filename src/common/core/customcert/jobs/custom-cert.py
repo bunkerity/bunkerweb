@@ -94,6 +94,7 @@ def check_cert(cert_file: Union[Path, bytes], key_file: Union[Path, bytes], firs
                     stdin=DEVNULL,
                     stderr=DEVNULL,
                     check=False,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
                 )
 
                 if result.returncode != 0:

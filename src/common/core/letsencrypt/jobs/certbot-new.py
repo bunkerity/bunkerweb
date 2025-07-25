@@ -516,8 +516,8 @@ try:
         "DISABLE_CONFIGURATION_TESTING": getenv("DISABLE_CONFIGURATION_TESTING", "no").lower(),
     }
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
-    if getenv("DATABASE_URI"):
-        cmd_env["DATABASE_URI"] = getenv("DATABASE_URI")
+    if getenv("DATABASE_URI", ""):
+        cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
 
     proc = run(
         [
