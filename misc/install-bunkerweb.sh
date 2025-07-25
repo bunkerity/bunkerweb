@@ -18,6 +18,8 @@ NGINX_VERSION=""
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
 INTERACTIVE_MODE="yes"
+CROWDSEC_INSTALL="no"
+CROWDSEC_APPSEC_INSTALL="no"
 
 # Function to print colored output
 print_status() {
@@ -113,12 +115,67 @@ ask_user_preferences() {
             done
         fi
 
+        # Ask about CrowdSec installation
+        if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
+            echo
+            echo "CrowdSec is a community-powered, open-source intrusion prevention engine that analyzes logs in real time to detect, block and share intelligence on malicious IPs."
+            echo "It seamlessly integrates with BunkerWeb for automated threat remediation."
+            while true; do
+                read -p "Would you like to automatically install and configure CrowdSec? (Y/n): " -r
+                case $REPLY in
+                    [Yy]*|"")
+                        CROWDSEC_INSTALL="yes"
+                        break
+                        ;;
+                    [Nn]*)
+                        CROWDSEC_INSTALL="no"
+                        break
+                        ;;
+                    *)
+                        echo "Please answer yes (y) or no (n)."
+                        ;;
+                esac
+            done
+        fi
+
+        # Ask about AppSec installation if CrowdSec is chosen
+        if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+            echo
+            echo "CrowdSec Application Security Component (AppSec) adds advanced application security, turning CrowdSec into a full WAF."
+            echo "It's optional, installs alongside CrowdSec, and integrates seamlessly with the engine."
+            while true; do
+                read -p "Would you like to install and configure the CrowdSec AppSec Component? (Y/n): " -r
+                case $REPLY in
+                    [Yy]*|"")
+                        CROWDSEC_APPSEC_INSTALL="yes"
+                        break
+                        ;;
+                    [Nn]*)
+                        CROWDSEC_APPSEC_INSTALL="no"
+                        break
+                        ;;
+                    *)
+                        echo "Please answer yes (y) or no (n)."
+                        ;;
+                esac
+            done
+        fi
+
         echo
         print_status "Configuration summary:"
-        echo "  • BunkerWeb version: $BUNKERWEB_VERSION"
-        echo "  • Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
-        echo "  • Operating system: $DISTRO_ID $DISTRO_VERSION"
-        echo "  • NGINX version: $NGINX_VERSION"
+        echo "  🛡 BunkerWeb version: $BUNKERWEB_VERSION"
+        echo "  🧙‍♂️ Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
+        echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
+        echo "  🟢 NGINX version: $NGINX_VERSION"
+        if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+            if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
+                echo "  🦙 CrowdSec: Will be installed (with AppSec Component)"
+            else
+                echo "  🦙 CrowdSec: Will be installed (without AppSec Component)"
+            fi
+        else
+            echo "  🦙 CrowdSec: Not installed"
+        fi
         echo
     fi
 }
@@ -346,6 +403,120 @@ install_bunkerweb_rpm() {
     print_status "BunkerWeb $BUNKERWEB_VERSION installed successfully"
 }
 
+# Function to install CrowdSec
+install_crowdsec() {
+    print_step "Installing CrowdSec security engine"
+
+    # Ensure required dependencies
+    for dep in curl gnupg2 ca-certificates; do
+        if ! command -v $dep >/dev/null 2>&1; then
+            print_status "Installing missing dependency: $dep"
+            case "$DISTRO_ID" in
+                "debian"|"ubuntu")
+                    run_cmd apt update
+                    run_cmd apt install -y $dep
+                    ;;
+                "fedora"|"rhel"|"rocky"|"almalinux")
+                    run_cmd dnf install -y $dep
+                    ;;
+                *)
+                    print_warning "Automatic install not supported on $DISTRO_ID"
+                    ;;
+            esac
+        fi
+    done
+
+    # Add CrowdSec repository and install engine
+    print_step "Adding CrowdSec repository and installing engine"
+    run_cmd curl -s https://install.crowdsec.net | sh
+    case "$DISTRO_ID" in
+        "debian"|"ubuntu")
+            run_cmd apt install -y crowdsec
+            ;;
+        "fedora"|"rhel"|"rocky"|"almalinux")
+            run_cmd dnf install -y crowdsec
+            ;;
+        *)
+            print_error "Unsupported distribution: $DISTRO_ID"
+            return
+            ;;
+    esac
+    print_status "CrowdSec engine installed"
+
+    # Configure log acquisition for BunkerWeb
+    print_step "Configuring CrowdSec to parse BunkerWeb logs"
+    ACQ_FILE="/etc/crowdsec/acquis.yaml"
+    ACQ_CONTENT="filenames:
+  - /var/log/bunkerweb/access.log
+  - /var/log/bunkerweb/error.log
+  - /var/log/bunkerweb/modsec_audit.log
+labels:
+  type: nginx
+"
+    if [ -f "$ACQ_FILE" ]; then
+        cp "$ACQ_FILE" "${ACQ_FILE}.bak"
+        echo "$ACQ_CONTENT" >> "$ACQ_FILE"
+        print_status "Appended BunkerWeb acquisition config to: $ACQ_FILE"
+    else
+        echo "$ACQ_CONTENT" > "$ACQ_FILE"
+        print_status "Created acquisition file: $ACQ_FILE"
+    fi
+
+    # Update hub and install core collections/parsers
+    print_step "Updating hub and installing detection collections/parsers"
+    cscli hub update
+    cscli collections install crowdsecurity/nginx
+    cscli parsers install crowdsecurity/geoip-enrich
+
+    # AppSec installation if chosen
+    if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
+        print_step "Installing and configuring CrowdSec AppSec Component"
+        APPSEC_ACQ_FILE="/etc/crowdsec/acquis.d/appsec.yaml"
+        APPSEC_ACQ_CONTENT="appsec_config: crowdsecurity/appsec-default
+labels:
+  type: appsec
+listen_addr: 127.0.0.1:7422
+source: appsec
+"
+        mkdir -p /etc/crowdsec/acquis.d
+        echo "$APPSEC_ACQ_CONTENT" > "$APPSEC_ACQ_FILE"
+        print_status "Created AppSec acquisition file: $APPSEC_ACQ_FILE"
+        cscli collections install crowdsecurity/appsec-virtual-patching
+        cscli collections install crowdsecurity/appsec-generic-rules
+        print_status "Installed AppSec collections"
+    fi
+
+    # Register BunkerWeb bouncer(s) and retrieve API key
+    print_step "Registering BunkerWeb bouncer with CrowdSec"
+    BOUNCER_KEY=$(cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6 --output raw)
+    if [ -z "$BOUNCER_KEY" ]; then
+        print_warning "Failed to retrieve API key; please register manually: cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6"
+    else
+        print_status "Bouncer Successfully registered"
+    fi
+
+    CROWDSEC_ENV_TMP="/var/tmp/crowdsec.env"
+    {
+        echo "USE_CROWDSEC=yes"
+        echo "CROWDSEC_API=http://127.0.0.1:8080"
+        if [ -n "$BOUNCER_KEY" ]; then
+            echo "CROWDSEC_API_KEY=$BOUNCER_KEY"
+        fi
+        if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
+            echo "CROWDSEC_APPSEC_URL=http://127.0.0.1:7422"
+        fi
+    } > "$CROWDSEC_ENV_TMP"
+
+    # Restart and enable services
+    print_step "Restarting services and enabling at boot"
+    run_cmd systemctl restart crowdsec
+    sleep 2
+    systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
+
+    print_status "CrowdSec installed successfully"
+    echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#crowdsec"
+}
+
 # Function to show final information
 show_final_info() {
     echo
@@ -518,6 +689,11 @@ main() {
             install_bunkerweb_rpm
             ;;
     esac
+
+    # Install CrowdSec if chosen
+    if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+        install_crowdsec
+    fi
 
     # Show final information
     show_final_info
