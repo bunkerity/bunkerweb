@@ -92,7 +92,7 @@ ask_user_preferences() {
         # Ask about setup wizard
         if [ -z "$ENABLE_WIZARD" ]; then
             echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🧙‍♂️ BunkerWeb Setup Wizard${NC}"
+            echo -e "${BLUE}🧙 BunkerWeb Setup Wizard${NC}"
             echo -e "${BLUE}========================================${NC}"
             echo "The BunkerWeb setup wizard provides a web-based interface to:"
             echo "  • Complete initial configuration easily"
@@ -178,7 +178,7 @@ ask_user_preferences() {
         echo
         print_status "Configuration summary:"
         echo "  🛡 BunkerWeb version: $BUNKERWEB_VERSION"
-        echo "  🧙‍♂️ Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
+        echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
         echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
         echo "  🟢 NGINX version: $NGINX_VERSION"
         if [ "$CROWDSEC_INSTALL" = "yes" ]; then
@@ -700,15 +700,12 @@ main() {
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
             install_nginx_debian
-            install_bunkerweb_debian
             ;;
         "fedora")
             install_nginx_fedora
-            install_bunkerweb_rpm
             ;;
         "rhel"|"rocky"|"almalinux")
             install_nginx_rhel
-            install_bunkerweb_rpm
             ;;
     esac
 
@@ -716,6 +713,19 @@ main() {
     if [ "$CROWDSEC_INSTALL" = "yes" ]; then
         install_crowdsec
     fi
+
+    # Install NGINX based on distribution
+    case "$DISTRO_ID" in
+        "debian"|"ubuntu")
+            install_bunkerweb_debian
+            ;;
+        "fedora")
+            install_bunkerweb_rpm
+            ;;
+        "rhel"|"rocky"|"almalinux")
+            install_bunkerweb_rpm
+            ;;
+    esac
 
     # Show final information
     show_final_info
