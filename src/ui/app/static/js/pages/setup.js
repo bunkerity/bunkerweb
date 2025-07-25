@@ -527,6 +527,12 @@ $(document).ready(() => {
 
       if (!isStepValid) return;
 
+      if (newStep !== 1) {
+        $(".join-newsletter").addClass("visually-hidden");
+      } else {
+        $(".join-newsletter").removeClass("visually-hidden");
+      }
+
       currentStep = newStep;
       navigateToStep(newStep);
     } else {
