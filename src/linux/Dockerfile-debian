@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim@sha256:6ac2c08566499cc2415926653cf2ed7c3aedac445675a013cc09469c9e118fdd AS builder
+FROM debian:bookworm-slim@sha256:2424c1850714a4d94666ec928e24d86de958646737b1d113f5b2207be44d37d8 AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -75,7 +75,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
     echo "Skipping JS minification"; \
     fi
 
-FROM debian:bookworm-slim@sha256:6ac2c08566499cc2415926653cf2ed7c3aedac445675a013cc09469c9e118fdd
+FROM debian:bookworm-slim@sha256:2424c1850714a4d94666ec928e24d86de958646737b1d113f5b2207be44d37d8
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
