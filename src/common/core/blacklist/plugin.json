@@ -24,9 +24,9 @@
       "type": "multiselect",
       "multiselect": [
         {
-          "id": "ip:laurent-minne-fr-be-aggressive",
-          "label": "Laurent Minne's FR/BE aggressive IPs",
-          "value": "https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt"
+          "id": "ip:laurent-minne-data-shield-aggressive",
+          "label": "Laurent Minne's Data Shield Aggressive IPs",
+          "value": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt"
         },
         {
           "id": "ip:danmeuk-tor-exit",

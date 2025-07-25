@@ -59,7 +59,7 @@ status = 0
 KINDS = ("IP", "RDNS", "ASN", "USER_AGENT", "URI", "IGNORE_IP", "IGNORE_RDNS", "IGNORE_ASN", "IGNORE_USER_AGENT", "IGNORE_URI")
 
 COMMUNITY_LISTS = {
-    "ip:laurent-minne-fr-be-aggressive": "https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt",
+    "ip:laurent-minne-data-shield-aggressive": "https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt",
     "ip:danmeuk-tor-exit": "https://www.dan.me.uk/torlist/?exit",
     "ua:mitchellkrogza-bad-user-agents": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
 }
@@ -248,7 +248,7 @@ try:
                                 LOGGER.error(f"Error while opening file {url[7:]} : {e}")
                                 failed_urls.add(url)
                                 if url_file not in urls:
-                                    aggregated_recap["failed_count"] += 1
+                                    aggregated_recap[kind]["failed_count"] += 1
                                 failed = True
                         else:
                             max_retries = 3
