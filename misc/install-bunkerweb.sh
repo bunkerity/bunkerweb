@@ -91,6 +91,9 @@ ask_user_preferences() {
 
         # Ask about setup wizard
         if [ -z "$ENABLE_WIZARD" ]; then
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🧙‍♂️ BunkerWeb Setup Wizard${NC}"
+            echo -e "${BLUE}========================================${NC}"
             echo "The BunkerWeb setup wizard provides a web-based interface to:"
             echo "  • Complete initial configuration easily"
             echo "  • Set up your first protected service"
@@ -98,7 +101,8 @@ ask_user_preferences() {
             echo "  • Access the management interface"
             echo
             while true; do
-                read -p "Would you like to enable the setup wizard? (Y/n): " -r
+                echo -e "${YELLOW}Would you like to enable the setup wizard? (Y/n):${NC} "
+                read -p "" -r
                 case $REPLY in
                     [Yy]*|"")
                         ENABLE_WIZARD="yes"
@@ -118,10 +122,15 @@ ask_user_preferences() {
         # Ask about CrowdSec installation
         if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
             echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🦙 CrowdSec Intrusion Prevention${NC}"
+            echo -e "${BLUE}========================================${NC}"
             echo "CrowdSec is a community-powered, open-source intrusion prevention engine that analyzes logs in real time to detect, block and share intelligence on malicious IPs."
             echo "It seamlessly integrates with BunkerWeb for automated threat remediation."
+            echo
             while true; do
-                read -p "Would you like to automatically install and configure CrowdSec? (Y/n): " -r
+                echo -e "${YELLOW}Would you like to automatically install and configure CrowdSec? (Y/n):${NC} "
+                read -p "" -r
                 case $REPLY in
                     [Yy]*|"")
                         CROWDSEC_INSTALL="yes"
@@ -141,10 +150,15 @@ ask_user_preferences() {
         # Ask about AppSec installation if CrowdSec is chosen
         if [ "$CROWDSEC_INSTALL" = "yes" ]; then
             echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🛡️ CrowdSec Application Security (AppSec)${NC}"
+            echo -e "${BLUE}========================================${NC}"
             echo "CrowdSec Application Security Component (AppSec) adds advanced application security, turning CrowdSec into a full WAF."
             echo "It's optional, installs alongside CrowdSec, and integrates seamlessly with the engine."
+            echo
             while true; do
-                read -p "Would you like to install and configure the CrowdSec AppSec Component? (Y/n): " -r
+                echo -e "${YELLOW}Would you like to install and configure the CrowdSec AppSec Component? (Y/n):${NC} "
+                read -p "" -r
                 case $REPLY in
                     [Yy]*|"")
                         CROWDSEC_APPSEC_INSTALL="yes"
@@ -405,6 +419,11 @@ install_bunkerweb_rpm() {
 
 # Function to install CrowdSec
 install_crowdsec() {
+    echo
+    echo -e "${BLUE}========================================${NC}"
+    echo -e "${BLUE}CrowdSec Security Engine Installation${NC}"
+    echo -e "${BLUE}========================================${NC}"
+    echo
     print_step "Installing CrowdSec security engine"
 
     # Ensure required dependencies
@@ -426,7 +445,7 @@ install_crowdsec() {
         fi
     done
 
-    # Add CrowdSec repository and install engine
+    echo -e "${YELLOW}--- Step 1: Add CrowdSec repository and install engine ---${NC}"
     print_step "Adding CrowdSec repository and installing engine"
     run_cmd curl -s https://install.crowdsec.net | sh
     case "$DISTRO_ID" in
@@ -443,7 +462,7 @@ install_crowdsec() {
     esac
     print_status "CrowdSec engine installed"
 
-    # Configure log acquisition for BunkerWeb
+    echo -e "${YELLOW}--- Step 2: Configure log acquisition for BunkerWeb ---${NC}"
     print_step "Configuring CrowdSec to parse BunkerWeb logs"
     ACQ_FILE="/etc/crowdsec/acquis.yaml"
     ACQ_CONTENT="filenames:
@@ -462,7 +481,7 @@ labels:
         print_status "Created acquisition file: $ACQ_FILE"
     fi
 
-    # Update hub and install core collections/parsers
+    echo -e "${YELLOW}--- Step 3: Update hub and install core collections/parsers ---${NC}"
     print_step "Updating hub and installing detection collections/parsers"
     cscli hub update
     cscli collections install crowdsecurity/nginx
@@ -470,6 +489,7 @@ labels:
 
     # AppSec installation if chosen
     if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
+        echo -e "${YELLOW}--- Step 4: Install and configure CrowdSec AppSec Component ---${NC}"
         print_step "Installing and configuring CrowdSec AppSec Component"
         APPSEC_ACQ_FILE="/etc/crowdsec/acquis.d/appsec.yaml"
         APPSEC_ACQ_CONTENT="appsec_config: crowdsecurity/appsec-default
@@ -486,7 +506,7 @@ source: appsec
         print_status "Installed AppSec collections"
     fi
 
-    # Register BunkerWeb bouncer(s) and retrieve API key
+    echo -e "${YELLOW}--- Step 5: Register BunkerWeb bouncer(s) and retrieve API key ---${NC}"
     print_step "Registering BunkerWeb bouncer with CrowdSec"
     BOUNCER_KEY=$(cscli bouncers add crowdsec-bunkerweb-bouncer/v1.6 --output raw)
     if [ -z "$BOUNCER_KEY" ]; then
@@ -507,14 +527,16 @@ source: appsec
         fi
     } > "$CROWDSEC_ENV_TMP"
 
-    # Restart and enable services
+    echo -e "${YELLOW}--- Step 6: Restart and enable services ---${NC}"
     print_step "Restarting services and enabling at boot"
     run_cmd systemctl restart crowdsec
     sleep 2
     systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
 
-    print_status "CrowdSec installed successfully"
+    echo
+    echo -e "${GREEN}CrowdSec installed successfully${NC}"
     echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#crowdsec"
+    echo -e "${BLUE}========================================${NC}"
 }
 
 # Function to show final information
