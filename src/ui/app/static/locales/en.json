@@ -91,6 +91,7 @@
     "export": "Export",
     "filters_suffix": " Filters",
     "follow": "Follow",
+    "force_check": "Force check",
     "github_stars": "Stars",
     "go_back": "Go Back",
     "hide": "Hide",
@@ -865,6 +866,10 @@
       "expires_in": "Expires in",
       "title": "Pro Expiration Date",
       "unknown": "Unknown expiration date"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
     },
     "key": {
       "title": {

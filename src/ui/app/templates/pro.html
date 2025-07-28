@@ -191,6 +191,32 @@
                     </div>
                 </div>
             </div>
+            <div class="col-12 col-xl-4">
+                <div class="card p-4 position-relative h-100">
+                    <i class='bx bx-revision bx-sm position-absolute top-0 end-0 m-3 text-primary'></i>
+                    <div class="card-header p-2">
+                        <div class="card-title">
+                            <h5 class="me-2 text-primary shine don-jose mb-0">
+                                <span data-i18n="pro.force_check.title">Force check</span>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="card-body position-relative">
+                        <div class="d-flex flex-column justify-content-center align-items-center h-100 text-center">
+                            <p data-i18n="pro.force_check.description">Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.</p>
+                            <form method="POST" action="{{ url_for('pro') }}/force-check">
+                                <input type="hidden"
+                                       id="csrf_token"
+                                       name="csrf_token"
+                                       value="{{ csrf_token() }}" />
+                                <button type="submit" class="btn btn-primary text-uppercase don-jose mt-3">
+                                    <span data-i18n="button.force_check">Force check</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!--/ Content -->
