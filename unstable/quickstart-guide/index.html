@@ -771,9 +771,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#configure-the-reverse-proxy-and-https" class="md-nav__link">
+  <a href="#configure-the-reverse-proxy-https-and-other-advanced-settings" class="md-nav__link">
     <span class="md-ellipsis">
-      Configure the Reverse Proxy and HTTPS
+      Configure the Reverse Proxy, HTTPS and other advanced settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pro-activation" class="md-nav__link">
+    <span class="md-ellipsis">
+      PRO activation
     </span>
   </a>
   
@@ -1334,7 +1343,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -1492,7 +1501,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -1557,17 +1566,44 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <figcaption>Setup Wizard landing page</figcaption>
 </figure>
 <p>Once you're on the setup page, you can enter the <strong>administrator username, email, and password</strong> and click on the "Next" button.</p>
-<h3 id="configure-the-reverse-proxy-and-https">Configure the Reverse Proxy and HTTPS</h3>
-<p>The next step will ask you to enter the <strong>server name</strong> (domain/FQDN) that the web UI will use. You can also choose to enable <strong>Let's Encrypt</strong> or use a <strong>custom certificate</strong>.</p>
+<h3 id="configure-the-reverse-proxy-https-and-other-advanced-settings">Configure the Reverse Proxy, HTTPS and other advanced settings</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Basic setup</label><label for="__tabbed_3_2">Advanced setup</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>The next step will ask you to enter the <strong>server name</strong> (domain/FQDN) that the web UI will use.</p>
+<p>You can also choose to enable <a href="../features/#lets-encrypt">Let's Encrypt</a></p>
+<p><figure markdown>
+  <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2.png" />
+  <figcaption>Setup Wizard step 2</figcaption>
+</figure></p>
+</div>
+<div class="tabbed-block">
+<p>The next step will ask you to enter the <strong>server name</strong> (domain/FQDN) that the web UI will use.</p>
+<p>You can also choose to enable <a href="../features/#lets-encrypt">Let's Encrypt</a>.</p>
+<p>If you expand the <code>Advanced settings</code> section, you can also configure the following options:</p>
+<ul>
+<li><strong>Reverse Proxy</strong>: Tweak the Reverse Proxy settings for your administrator interface (e.g., if you want to use a path).</li>
+<li><a href="../features/#real-ip">Real IP</a>: Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).</li>
+<li><a href="../features/#custom-ssl-certificate">Custom Certificate</a>: Upload a custom TLS certificate if you don't want to use Let's Encrypt.</li>
+</ul>
+<p><figure markdown>
+  <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2-advanced.png" />
+  <figcaption>Setup Wizard step 2 (advanced)</figcaption>
+</figure></p>
+</div>
+</div>
+</div>
+<h3 id="pro-activation">PRO activation</h3>
+<p>If you have a PRO license, you can activate it by entering your license key in the <code>Upgrade to PRO</code> section. This will enable the PRO features of BunkerWeb.</p>
 <figure>
-<p><img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2.png" />
+<p><img align="center" alt="Setup Wizard PRO step" src="../assets/img/ui-wizard-step3.png" />
   </p>
-<figcaption>Setup Wizard step 2</figcaption>
+<figcaption>Setup Wizard PRO step</figcaption>
 </figure>
 <h3 id="overview-of-your-settings">Overview of your settings</h3>
 <p>The last step will give you an overview of the settings you've entered. You can click on the "Setup" button to complete the setup.</p>
 <figure>
-<p><img align="center" alt="Setup Wizard final step" src="../assets/img/ui-wizard-step3.png" />
+<p><img align="center" alt="Setup Wizard final step" src="../assets/img/ui-wizard-step4.png" />
   </p>
 <figcaption>Setup Wizard final step</figcaption>
 </figure>
@@ -1585,7 +1621,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <figcaption>Web interface home</figcaption>
 </figure>
 <h2 id="creating-a-new-service">Creating a new service</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Web UI</label><label for="__tabbed_3_2">All-in-one</label><label for="__tabbed_3_3">Linux variables.env file</label><label for="__tabbed_3_4">Docker</label><label for="__tabbed_3_5">Docker autoconf labels</label><label for="__tabbed_3_6">Kubernetes annotations</label><label for="__tabbed_3_7">Swarm labels</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:7"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><input id="__tabbed_4_6" name="__tabbed_4" type="radio" /><input id="__tabbed_4_7" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Web UI</label><label for="__tabbed_4_2">All-in-one</label><label for="__tabbed_4_3">Linux variables.env file</label><label for="__tabbed_4_4">Docker</label><label for="__tabbed_4_5">Docker autoconf labels</label><label for="__tabbed_4_6">Kubernetes annotations</label><label for="__tabbed_4_7">Swarm labels</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can create a new service by navigating to the <code>Services</code> section of the web interface and clicking on the <code>➕ Create new service</code> button.</p>
@@ -1599,7 +1635,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <p class="admonition-title">Draft service</p>
 <p>You can create a draft service to save your progress and come back to it later. Just click on the <code>🌐 Online</code> button to toggle the service to draft mode.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Easy mode</label><label for="__tabbed_4_2">Advanced mode</label><label for="__tabbed_4_3">Raw mode</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Easy mode</label><label for="__tabbed_5_2">Advanced mode</label><label for="__tabbed_5_3">Raw mode</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>In this mode, you can choose among the available templates and fill in the required fields.</p>

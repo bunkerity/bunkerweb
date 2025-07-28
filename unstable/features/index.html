@@ -5463,7 +5463,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.6.6</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.6.10</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># To persist the CrowdSec data</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># The logs of BunkerWeb for CrowdSec to parse</span>

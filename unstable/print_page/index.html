@@ -3079,7 +3079,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -3237,7 +3237,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
@@ -3302,17 +3302,44 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <figcaption>Setup Wizard landing page</figcaption>
 </figure>
 <p>Once you're on the setup page, you can enter the <strong>administrator username, email, and password</strong> and click on the "Next" button.</p>
-<h3 id="quickstart-guide-configure-the-reverse-proxy-and-https">Configure the Reverse Proxy and HTTPS</h3>
-<p>The next step will ask you to enter the <strong>server name</strong> (domain/FQDN) that the web UI will use. You can also choose to enable <strong>Let's Encrypt</strong> or use a <strong>custom certificate</strong>.</p>
+<h3 id="quickstart-guide-configure-the-reverse-proxy-https-and-other-advanced-settings">Configure the Reverse Proxy, HTTPS and other advanced settings</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="quickstart-guide-__tabbed_3_1" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_2" name="quickstart-guide-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_3_1">Basic setup</label><label for="quickstart-guide-__tabbed_3_2">Advanced setup</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>The next step will ask you to enter the <strong>server name</strong> (domain/FQDN) that the web UI will use.</p>
+<p>You can also choose to enable <a href="#features-lets-encrypt">Let's Encrypt</a></p>
+<p><figure markdown>
+  <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2.png" />
+  <figcaption>Setup Wizard step 2</figcaption>
+</figure></p>
+</div>
+<div class="tabbed-block">
+<p>The next step will ask you to enter the <strong>server name</strong> (domain/FQDN) that the web UI will use.</p>
+<p>You can also choose to enable <a href="#features-lets-encrypt">Let's Encrypt</a>.</p>
+<p>If you expand the <code>Advanced settings</code> section, you can also configure the following options:</p>
+<ul>
+<li><strong>Reverse Proxy</strong>: Tweak the Reverse Proxy settings for your administrator interface (e.g., if you want to use a path).</li>
+<li><a href="#features-real-ip">Real IP</a>: Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).</li>
+<li><a href="#features-custom-ssl-certificate">Custom Certificate</a>: Upload a custom TLS certificate if you don't want to use Let's Encrypt.</li>
+</ul>
+<p><figure markdown>
+  <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2-advanced.png" />
+  <figcaption>Setup Wizard step 2 (advanced)</figcaption>
+</figure></p>
+</div>
+</div>
+</div>
+<h3 id="quickstart-guide-pro-activation">PRO activation</h3>
+<p>If you have a PRO license, you can activate it by entering your license key in the <code>Upgrade to PRO</code> section. This will enable the PRO features of BunkerWeb.</p>
 <figure>
-<p><img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2.png" />
+<p><img align="center" alt="Setup Wizard PRO step" src="../assets/img/ui-wizard-step3.png" />
   </p>
-<figcaption>Setup Wizard step 2</figcaption>
+<figcaption>Setup Wizard PRO step</figcaption>
 </figure>
 <h3 id="quickstart-guide-overview-of-your-settings">Overview of your settings</h3>
 <p>The last step will give you an overview of the settings you've entered. You can click on the "Setup" button to complete the setup.</p>
 <figure>
-<p><img align="center" alt="Setup Wizard final step" src="../assets/img/ui-wizard-step3.png" />
+<p><img align="center" alt="Setup Wizard final step" src="../assets/img/ui-wizard-step4.png" />
   </p>
 <figcaption>Setup Wizard final step</figcaption>
 </figure>
@@ -3330,7 +3357,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <figcaption>Web interface home</figcaption>
 </figure>
 <h2 id="quickstart-guide-creating-a-new-service">Creating a new service</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="quickstart-guide-__tabbed_3_1" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_2" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_3" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_4" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_5" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_6" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_7" name="quickstart-guide-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_3_1">Web UI</label><label for="quickstart-guide-__tabbed_3_2">All-in-one</label><label for="quickstart-guide-__tabbed_3_3">Linux variables.env file</label><label for="quickstart-guide-__tabbed_3_4">Docker</label><label for="quickstart-guide-__tabbed_3_5">Docker autoconf labels</label><label for="quickstart-guide-__tabbed_3_6">Kubernetes annotations</label><label for="quickstart-guide-__tabbed_3_7">Swarm labels</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:7"><input checked="checked" id="quickstart-guide-__tabbed_4_1" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_2" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_3" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_4" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_5" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_6" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_7" name="quickstart-guide-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_4_1">Web UI</label><label for="quickstart-guide-__tabbed_4_2">All-in-one</label><label for="quickstart-guide-__tabbed_4_3">Linux variables.env file</label><label for="quickstart-guide-__tabbed_4_4">Docker</label><label for="quickstart-guide-__tabbed_4_5">Docker autoconf labels</label><label for="quickstart-guide-__tabbed_4_6">Kubernetes annotations</label><label for="quickstart-guide-__tabbed_4_7">Swarm labels</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can create a new service by navigating to the <code>Services</code> section of the web interface and clicking on the <code>➕ Create new service</code> button.</p>
@@ -3344,7 +3371,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <p class="admonition-title">Draft service</p>
 <p>You can create a draft service to save your progress and come back to it later. Just click on the <code>🌐 Online</code> button to toggle the service to draft mode.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="quickstart-guide-__tabbed_4_1" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_2" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_3" name="quickstart-guide-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_4_1">Easy mode</label><label for="quickstart-guide-__tabbed_4_2">Advanced mode</label><label for="quickstart-guide-__tabbed_4_3">Raw mode</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="quickstart-guide-__tabbed_5_1" name="quickstart-guide-__tabbed_5" type="radio" /><input id="quickstart-guide-__tabbed_5_2" name="quickstart-guide-__tabbed_5" type="radio" /><input id="quickstart-guide-__tabbed_5_3" name="quickstart-guide-__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_5_1">Easy mode</label><label for="quickstart-guide-__tabbed_5_2">Advanced mode</label><label for="quickstart-guide-__tabbed_5_3">Raw mode</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>In this mode, you can choose among the available templates and fill in the required fields.</p>
@@ -6215,7 +6242,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.6.6</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.6.10</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># To persist the CrowdSec data</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># The logs of BunkerWeb for CrowdSec to parse</span>
@@ -14539,7 +14566,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the admin user</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># This is the volume used to store the logs</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
@@ -14673,7 +14700,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the admin user</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
@@ -14814,6 +14841,14 @@ log {
 <figcaption>Username / Password form</figcaption>
 </figure>
 <h3 id="web-ui-two-factor-authentication">Two-Factor authentication</h3>
+<div class="admonition tip">
+<p class="admonition-title">Mandatory encryption keys</p>
+<p>When enabling 2FA, you must provide at least one encryption key. This key will be used to encrypt your TOTP secrets.</p>
+<p>The recommended way to generate a valid key is to use the <code>passlib</code> package:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(totp.generate_secret())&quot;</span>
+</code></pre></div>
+<p>Set the generated key in the <code>TOTP_ENCRYPTION_KEYS</code> environment variable of the web UI. You can also set multiple keys separated by spaces or as a dictionary (for backward compatibility).</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Lost secret key</p>
 <p>In case you lost your secret key, two options are available:</p>
@@ -14869,7 +14904,7 @@ log {
 <li><code>ADMIN_USERNAME</code>: username to access the web UI.</li>
 <li><code>ADMIN_PASSWORD</code>: password to access the web UI.</li>
 <li><code>FLASK_SECRET</code>: a secret key used to encrypt the session cookie (if not set, a random key will be generated).</li>
-<li><code>TOTP_SECRETS</code>: a list of TOTP secrets separated by spaces or a dictionary (e.g.: <code>{"1": "mysecretkey"}</code> or <code>mysecretkey</code> or <code>mysecretkey mysecretkey1</code>). <strong>We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys</strong> (if not set, a random number of secret keys will be generated). Check out the <a href="https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets">passlib documentation</a> for more information.</li>
+<li><code>TOTP_ENCRYPTION_KEYS</code> (or <code>TOTP_SECRETS</code>): a list of TOTP encryption keys separated by spaces or a dictionary (e.g.: <code>{"1": "mysecretkey"}</code> or <code>mysecretkey</code> or <code>mysecretkey mysecretkey1</code>). <strong>We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys</strong> (if not set, a random number of secret keys will be generated). Check out the <a href="https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets">passlib documentation</a> for more information.</li>
 <li><code>LISTEN_ADDR</code>: the address where the web UI will listen (default is <code>0.0.0.0</code> in <strong>Docker images</strong> and <code>127.0.0.1</code> on <strong>Linux installations</strong>).</li>
 <li><code>LISTEN_PORT</code>: the port where the web UI will listen (default is <code>7000</code>).</li>
 <li><code>MAX_WORKERS</code>: the number of workers used by the web UI (default is the number of CPUs).</li>
@@ -14886,7 +14921,7 @@ log {
 <p>You can generate a valid <strong>FLASK_SECRET</strong> using the following command:</p>
 <div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import secrets; print(secrets.token_hex(64))&quot;</span>
 </code></pre></div>
-<p>You can generate valid space-separated <strong>TOTP_SECRETS</strong> using the following command (you will need the <code>passlib</code> package):</p>
+<p>You can generate valid space-separated <strong>TOTP_ENCRYPTION_KEYS</strong> using the following command (you will need the <code>passlib</code> package):</p>
 <div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from passlib import totp; print(totp.generate_secret())&quot;</span>
 </code></pre></div>
 </div>
@@ -14901,10 +14936,10 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="
 <p>A dedicated environment file located at <code>/etc/bunkerweb/ui.env</code> is used to configure the web UI:</p>
 <div class="highlight"><pre><span></span><code>ADMIN_USERNAME=changeme
 ADMIN_PASSWORD=changeme
-TOTP_SECRETS=mysecret
+TOTP_ENCRYPTION_KEYS=mysecret
 </code></pre></div>
 <p>Replace the <code>changeme</code> data with your own values.</p>
-<p>Remember to set a stronger secret key for the <code>TOTP_SECRETS</code>.</p>
+<p>Remember to set a stronger secret key for the <code>TOTP_ENCRYPTION_KEYS</code>.</p>
 <p>Each time you edit the <code>/etc/bunkerweb/ui.env</code> file, you will need to restart the service:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>bunkerweb-ui
 </code></pre></div>
@@ -14985,7 +15020,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the changeme user</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
@@ -15113,7 +15148,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the changeme user</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_TEMPLATE=ui&quot;</span>
@@ -15289,7 +15324,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*ui-env</span>
 <span class="w">      </span><span class="nt">ADMIN_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
 <span class="w">      </span><span class="nt">ADMIN_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the changeme user</span>
-<span class="w">      </span><span class="nt">TOTP_SECRETS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
+<span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
