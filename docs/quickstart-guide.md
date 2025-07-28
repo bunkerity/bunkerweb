@@ -372,7 +372,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1
         image: bunkerity/bunkerweb-ui:1.6.3-rc1
         environment:
           <<: *bw-ui-env
-          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -542,7 +542,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1
         image: bunkerity/bunkerweb-ui:1.6.3-rc1
         environment:
           <<: *bw-ui-env
-          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         restart: "unless-stopped"
         networks:
           - bw-universe
@@ -608,13 +608,43 @@ You should see a setup page just like this one:
 
 Once you're on the setup page, you can enter the **administrator username, email, and password** and click on the "Next" button.
 
-### Configure the Reverse Proxy and HTTPS
+### Configure the Reverse Proxy, HTTPS and other advanced settings
 
-The next step will ask you to enter the **server name** (domain/FQDN) that the web UI will use. You can also choose to enable **Let's Encrypt** or use a **custom certificate**.
+=== "Basic setup"
+
+    The next step will ask you to enter the **server name** (domain/FQDN) that the web UI will use.
+
+    You can also choose to enable [Let's Encrypt](features.md#lets-encrypt)
+
+    <figure markdown>
+      ![Setup Wizard step 2](assets/img/ui-wizard-step2.png){ align=center }
+      <figcaption>Setup Wizard step 2</figcaption>
+    </figure>
+
+=== "Advanced setup"
+
+    The next step will ask you to enter the **server name** (domain/FQDN) that the web UI will use.
+
+    You can also choose to enable [Let's Encrypt](features.md#lets-encrypt).
+
+    If you expand the `Advanced settings` section, you can also configure the following options:
+
+    * **Reverse Proxy**: Tweak the Reverse Proxy settings for your administrator interface (e.g., if you want to use a path).
+    * [Real IP](features.md#real-ip): Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).
+    * [Custom Certificate](features.md#custom-ssl-certificate): Upload a custom TLS certificate if you don't want to use Let's Encrypt.
+
+    <figure markdown>
+      ![Setup Wizard step 2](assets/img/ui-wizard-step2-advanced.png){ align=center }
+      <figcaption>Setup Wizard step 2 (advanced)</figcaption>
+    </figure>
+
+### PRO activation
+
+If you have a PRO license, you can activate it by entering your license key in the `Upgrade to PRO` section. This will enable the PRO features of BunkerWeb.
 
 <figure markdown>
-  ![Setup Wizard step 2](assets/img/ui-wizard-step2.png){ align=center }
-  <figcaption>Setup Wizard step 2</figcaption>
+  ![Setup Wizard PRO step](assets/img/ui-wizard-step3.png){ align=center }
+  <figcaption>Setup Wizard PRO step</figcaption>
 </figure>
 
 ### Overview of your settings
@@ -622,7 +652,7 @@ The next step will ask you to enter the **server name** (domain/FQDN) that the w
 The last step will give you an overview of the settings you've entered. You can click on the "Setup" button to complete the setup.
 
 <figure markdown>
-  ![Setup Wizard final step](assets/img/ui-wizard-step3.png){ align=center }
+  ![Setup Wizard final step](assets/img/ui-wizard-step4.png){ align=center }
   <figcaption>Setup Wizard final step</figcaption>
 </figure>
 

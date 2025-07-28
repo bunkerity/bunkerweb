@@ -121,8 +121,8 @@
     "select_page": "Selecionar Página",
     "service": "Serviço",
     "set_1h": "Definir 1 Hora",
-    "set_24h": "Definir 24 Horas",
     "set_1w": "Definir 1 Semana",
+    "set_24h": "Definir 24 Horas",
     "set_permanent": "Definir Permanente",
     "setup": "Configurar",
     "show": "Mostrar",
@@ -546,10 +546,10 @@
   },
   "duration": {
     "1_hour": "1 Hora",
-    "24_hours": "24 Horas",
     "1_week": "1 Semana",
-    "permanent": "Permanente",
-    "custom": "Personalizado"
+    "24_hours": "24 Horas",
+    "custom": "Personalizado",
+    "permanent": "Permanente"
   },
   "error": {
     "401": {
@@ -646,6 +646,10 @@
       "password": "Senha",
       "permanent_ban": "Banimento Permanente",
       "raw_configuration": "Configuração Bruta",
+      "real_ip_from": "IP real de",
+      "real_ip_from_urls": "IP real de",
+      "real_ip_header": "Cabeçalho IP real",
+      "real_ip_recursive": "IP real recursivo",
       "reason": "Motivo",
       "secret_token": "Token Secreto",
       "server_name": "Nome do Servidor",
@@ -656,6 +660,8 @@
       "ui_url": "URL UI",
       "use_custom_ssl": "Usar SSL Personalizado",
       "use_lets_encrypt_staging": "Usar Let's Encrypt Staging",
+      "use_proxy_protocol": "Usar protocolo PROXY",
+      "use_real_ip": "Usar IP Real",
       "username": "Nome de usuário",
       "wildcard_certificates": "Certificados Wildcard"
     },
@@ -668,8 +674,8 @@
       "multivalue_enter_value": "Digite o valor...",
       "plugin_search": "Pesquisar plugins...",
       "search": "Pesquisar...",
-      "select_service": "Selecionar Serviço",
       "secret_token": "Token Secreto",
+      "select_service": "Selecionar Serviço",
       "username_example": "joaosilva"
     },
     "validation": {
@@ -801,8 +807,8 @@
     "mode_selection": "Seleção de Modo",
     "more": "Mais...",
     "plugin_activated": "Plugin Ativado",
-    "plugin_deactivated": "Plugin Desativado",
     "plugin_activated_global": "Plugin Ativado Globalmente",
+    "plugin_deactivated": "Plugin Desativado",
     "plugin_deactivated_global": "Plugin Desativado Globalmente",
     "plugins": "Plugins",
     "plugins_pages": "Páginas de Plugins",
@@ -956,6 +962,7 @@
     "last_30d": "Últimos 30 dias",
     "last_7d": "Últimos 7 dias",
     "last_run": "Última Execução",
+    "last_run_state": "Estado da Última Execução",
     "last_seen": "Visto pela Última Vez",
     "last_update": "Última Atualização",
     "method": "Método",
@@ -1001,12 +1008,28 @@
       "section": {
         "custom_certificate": "Certificado Personalizado",
         "lets_encrypt": "Let's Encrypt",
+        "real_ip": "IP Real",
         "reverse_proxy": "Proxy Reverso"
       },
       "subtitle": "Configure as configurações específicas da interface web.",
       "title": "Configurações da UI"
     },
     "step3": {
+      "title": "Atualizar para PRO",
+      "subtitle": "Desbloqueie recursos avançados e aproveite ao máximo o BunkerWeb.",
+      "label": {
+        "pro_benefits": "Benefícios PRO"
+      },
+      "pro_benefit_1_title": "Acesso a todos os recursos PRO",
+      "pro_benefit_1_description": "Desbloqueie todos os recursos avançados, incluindo ferramentas aprimoradas de segurança, desempenho e gerenciamento.",
+      "pro_benefit_2_title": "Suporte técnico dos mantenedores",
+      "pro_benefit_2_description": "Obtenha suporte prioritário da equipe do BunkerWeb para quaisquer problemas ou dúvidas que possa ter.",
+      "pro_benefit_3_title": "Desenvolvimento personalizado",
+      "pro_benefit_3_description": "Soluções sob medida para atender às suas necessidades específicas.",
+      "pro_benefit_4_title": "Consultoria personalizada",
+      "pro_benefit_4_description": "Aconselhamento especializado para otimizar sua configuração do BunkerWeb."
+    },
+    "step4": {
       "label": {
         "final_url": "URL da UI do BunkerWeb"
       },
@@ -1015,6 +1038,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 Já existe um usuário administrador. Por favor, prossiga para o próximo passo.",
+      "pro_license_key_exists": "⭐ Uma chave de licença PRO já está configurada, por favor, prossiga para o próximo passo.",
       "reverse_proxy_configured": "↪️ Já existe um proxy reverso configurado para a interface web. Por favor, prossiga para o próximo passo.",
       "secure_password": "Senha Segura",
       "unique_server_name": "Nome do Servidor Único"
@@ -1251,6 +1275,10 @@
     "pro_feature": "Este é um recurso PRO.",
     "readonly_db_action_disabled": "Desabilitado: O banco de dados está em modo somente leitura.",
     "readonly_user_action_disabled": "Desabilitado: Sua conta é somente leitura, ação '{{action}}' desabilitada.",
+    "real_ip_from": "Lista de IPs / redes confiáveis, separadas por espaços, de onde vêm as solicitações via proxy.",
+    "real_ip_from_urls": "Lista de URLs contendo IPs / redes confiáveis, separadas por espaços, de onde vêm as solicitações via proxy. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url.",
+    "real_ip_header": "Cabeçalho HTTP contendo o IP real ou o valor especial proxy_protocol para o protocolo PROXY.",
+    "real_ip_recursive": "Realizar uma pesquisa recursiva no contêiner do cabeçalho de endereço IP.",
     "remove_ban_entry": "Remover esta entrada de bloqueio da lista.",
     "reset_template_settings": "Restabelecer todas as configurações na vista de modelo atual para os seus valores padrão.",
     "select_file_to_follow": "Selecione um arquivo para ativar o modo seguir",
@@ -1363,6 +1391,8 @@
     "ui_url_security": "Usar um caminho URL não padrão e difícil de adivinhar melhora a segurança.",
     "use_custom_ssl": "Se deve usar um certificado SSL personalizado em vez do Let's Encrypt.",
     "use_lets_encrypt_staging": "Se deve usar o ambiente de staging do Let's Encrypt para testes (gera certificados não confiáveis).",
+    "use_proxy_protocol": "Ativar comunicação via protocolo PROXY.",
+    "use_real_ip": "Usar IP Real",
     "username_length": "O nome de usuário deve ter entre 1 e 256 caracteres.",
     "view_full_url": "Clique para ver a URL completa",
     "wildcard_certificates": "Gerar certificados wildcard (*.dominio.com). Requer desafio DNS.",
