@@ -1612,7 +1612,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.6.10 # Use the latest version but always pin the version for a better stability/security
+        image: crowdsecurity/crowdsec:v1.6.11 # Use the latest version but always pin the version for a better stability/security
         volumes:
           - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
           - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
