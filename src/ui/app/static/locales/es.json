@@ -121,8 +121,8 @@
     "select_page": "Seleccionar Página",
     "service": "Servicio",
     "set_1h": "Establecer 1 Hora",
-    "set_24h": "Establecer 24 Horas",
     "set_1w": "Establecer 1 Semana",
+    "set_24h": "Establecer 24 Horas",
     "set_permanent": "Establecer Permanente",
     "setup": "Configurar",
     "show": "Mostrar",
@@ -514,7 +514,7 @@
     "select_rows_instances_0": "No hay Instancias seleccionadas",
     "select_rows_instances_1": "1 Instancia seleccionada",
     "select_rows_instances_plural": "%d Instancias seleccionadas",
-    "select_rows_items_0": "No hay elementos seleccionados",
+    "select_rows_items_0": "Ningún elemento seleccionado",
     "select_rows_items_1": "1 elemento seleccionado",
     "select_rows_items_plural": "%d elementos seleccionados",
     "select_rows_jobs_0": "No hay Tareas seleccionadas",
@@ -546,10 +546,10 @@
   },
   "duration": {
     "1_hour": "1 Hora",
-    "24_hours": "24 Horas",
     "1_week": "1 Semana",
-    "permanent": "Permanente",
-    "custom": "Personalizado"
+    "24_hours": "24 Horas",
+    "custom": "Personalizado",
+    "permanent": "Permanente"
   },
   "error": {
     "401": {
@@ -646,6 +646,10 @@
       "password": "Contraseña",
       "permanent_ban": "Bloqueo Permanente",
       "raw_configuration": "Configuración sin Procesar",
+      "real_ip_from": "IP real desde",
+      "real_ip_from_urls": "IP real desde",
+      "real_ip_header": "Cabecera de IP real",
+      "real_ip_recursive": "IP real recursiva",
       "reason": "Motivo",
       "secret_token": "Token Secreto",
       "server_name": "Nombre del Servidor",
@@ -656,6 +660,8 @@
       "ui_url": "URL UI",
       "use_custom_ssl": "Usar SSL Personalizado",
       "use_lets_encrypt_staging": "Usar Let's Encrypt Staging",
+      "use_proxy_protocol": "Usar protocolo PROXY",
+      "use_real_ip": "Usar IP Real",
       "username": "Nombre de usuario",
       "wildcard_certificates": "Certificados Wildcard"
     },
@@ -801,8 +807,8 @@
     "mode_selection": "Selección de Modo",
     "more": "Más...",
     "plugin_activated": "Plugin Activado",
-    "plugin_deactivated": "Plugin Desactivado",
     "plugin_activated_global": "Plugin Activado Globalmente",
+    "plugin_deactivated": "Plugin Desactivado",
     "plugin_deactivated_global": "Plugin Desactivado Globalmente",
     "plugins": "Plugins",
     "plugins_pages": "Páginas de Plugins",
@@ -956,6 +962,7 @@
     "last_30d": "Últimos 30 días",
     "last_7d": "Últimos 7 días",
     "last_run": "Última Ejecución",
+    "last_run_state": "Estado de la Última Ejecución",
     "last_seen": "Visto por Última Vez",
     "last_update": "Última Actualización",
     "loading": "Cargando Paneles de Búsqueda...",
@@ -1002,12 +1009,28 @@
       "section": {
         "custom_certificate": "Certificado Personalizado",
         "lets_encrypt": "Let's Encrypt",
+        "real_ip": "IP Real",
         "reverse_proxy": "Proxy Inverso"
       },
       "subtitle": "Configura los ajustes específicos de la interfaz web.",
       "title": "Ajustes de UI"
     },
     "step3": {
+      "title": "Actualizar a PRO",
+      "subtitle": "Desbloquea funciones avanzadas y aprovecha al máximo BunkerWeb.",
+      "label": {
+        "pro_benefits": "Beneficios PRO"
+      },
+      "pro_benefit_1_title": "Acceso a todas las funciones PRO",
+      "pro_benefit_1_description": "Desbloquea todas las funciones avanzadas, incluidas herramientas mejoradas de seguridad, rendimiento y gestión.",
+      "pro_benefit_2_title": "Soporte técnico de los mantenedores",
+      "pro_benefit_2_description": "Obtén soporte prioritario del equipo de BunkerWeb para cualquier problema o pregunta que puedas tener.",
+      "pro_benefit_3_title": "Desarrollo personalizado",
+      "pro_benefit_3_description": "Soluciones a medida para satisfacer tus necesidades específicas.",
+      "pro_benefit_4_title": "Consultoría personalizada",
+      "pro_benefit_4_description": "Asesoramiento experto para optimizar tu configuración de BunkerWeb."
+    },
+    "step4": {
       "label": {
         "final_url": "URL de la UI de BunkerWeb"
       },
@@ -1016,6 +1039,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 Ya existe un usuario administrador. Por favor, continúa al siguiente paso.",
+      "pro_license_key_exists": "⭐ Ya hay una clave de licencia PRO configurada, por favor, continúa al siguiente paso.",
       "reverse_proxy_configured": "↪️ Ya existe un proxy inverso configurado para la interfaz web. Por favor, continúa al siguiente paso.",
       "secure_password": "Contraseña Segura",
       "unique_server_name": "Nombre de Servidor Único"
@@ -1252,6 +1276,10 @@
     "pro_feature": "Esta es una característica PRO.",
     "readonly_db_action_disabled": "Deshabilitado: La base de datos está en modo de solo lectura.",
     "readonly_user_action_disabled": "Deshabilitado: Tu cuenta es de solo lectura, acción '{{action}}' deshabilitada.",
+    "real_ip_from": "Lista de IPs/redes de confianza, separadas por espacios, de donde provienen las solicitudes proxy.",
+    "real_ip_from_urls": "Lista de URLs que contienen IPs/redes de confianza, separadas por espacios, de donde provienen las solicitudes proxy. También soporta URLs file:// y autenticación básica usando el esquema http://user:pass@url.",
+    "real_ip_header": "Cabecera HTTP que contiene la IP real o el valor especial proxy_protocol para el protocolo PROXY.",
+    "real_ip_recursive": "Realizar una búsqueda recursiva en el contenedor de la cabecera de la dirección IP.",
     "remove_ban_entry": "Eliminar esta entrada de bloqueo de la lista.",
     "reset_template_settings": "Restablecer todas las configuraciones en la vista de plantilla actual a sus valores predeterminados.",
     "select_file_to_follow": "Seleccionar un archivo para habilitar el modo seguimiento",
@@ -1364,6 +1392,8 @@
     "ui_url_security": "Usar una ruta URL no estándar y difícil de adivinar mejora la seguridad.",
     "use_custom_ssl": "Si se debe usar un certificado SSL personalizado en lugar de Let's Encrypt.",
     "use_lets_encrypt_staging": "Si se debe usar el entorno de staging de Let's Encrypt para pruebas (genera certificados no confiables).",
+    "use_proxy_protocol": "Habilitar la comunicación del protocolo PROXY.",
+    "use_real_ip": "Usar IP Real",
     "username_length": "El nombre de usuario debe tener entre 1 y 256 caracteres.",
     "view_full_url": "Haz clic para ver la URL completa",
     "wildcard_certificates": "Generar certificados wildcard (*.dominio.com). Requiere desafío DNS.",

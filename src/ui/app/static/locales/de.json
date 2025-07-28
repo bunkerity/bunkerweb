@@ -121,8 +121,8 @@
     "select_page": "Seite auswählen",
     "service": "Dienst",
     "set_1h": "1 Stunde einstellen",
-    "set_24h": "24 Stunden einstellen",
     "set_1w": "1 Woche einstellen",
+    "set_24h": "24 Stunden einstellen",
     "set_permanent": "Permanent einstellen",
     "setup": "Einrichten",
     "show": "Anzeigen",
@@ -546,10 +546,10 @@
   },
   "duration": {
     "1_hour": "1 Stunde",
-    "24_hours": "24 Stunden",
     "1_week": "1 Woche",
-    "permanent": "Permanent",
-    "custom": "Benutzerdefiniert"
+    "24_hours": "24 Stunden",
+    "custom": "Benutzerdefiniert",
+    "permanent": "Permanent"
   },
   "error": {
     "401": {
@@ -646,6 +646,10 @@
       "password": "Passwort",
       "permanent_ban": "Dauerhafte Sperre",
       "raw_configuration": "Rohkonfiguration",
+      "real_ip_from": "Echte IP von",
+      "real_ip_from_urls": "Echte IP von",
+      "real_ip_header": "Echte IP-Header",
+      "real_ip_recursive": "Echte IP rekursiv",
       "reason": "Grund",
       "secret_token": "Geheimer Token",
       "server_name": "Servername",
@@ -656,6 +660,8 @@
       "ui_url": "UI-URL",
       "use_custom_ssl": "Benutzerdefiniertes SSL verwenden",
       "use_lets_encrypt_staging": "Let's Encrypt Staging verwenden",
+      "use_proxy_protocol": "PROXY-Protokoll verwenden",
+      "use_real_ip": "Echte IP verwenden",
       "username": "Benutzername",
       "wildcard_certificates": "Wildcard-Zertifikate"
     },
@@ -668,8 +674,8 @@
       "multivalue_enter_value": "Wert eingeben...",
       "plugin_search": "Plugins suchen...",
       "search": "Suchen...",
-      "select_service": "Dienst auswählen",
       "secret_token": "Geheimer Token",
+      "select_service": "Dienst auswählen",
       "username_example": "maxmustermann"
     },
     "validation": {
@@ -801,8 +807,8 @@
     "mode_selection": "Modusauswahl",
     "more": "Mehr...",
     "plugin_activated": "Plugin aktiviert",
-    "plugin_deactivated": "Plugin deaktiviert",
     "plugin_activated_global": "Plugin global aktiviert",
+    "plugin_deactivated": "Plugin deaktiviert",
     "plugin_deactivated_global": "Plugin global deaktiviert",
     "plugins": "Plugins",
     "plugins_pages": "Plugin-Seiten",
@@ -956,6 +962,7 @@
     "last_30d": "Letzte 30 Tage",
     "last_7d": "Letzte 7 Tage",
     "last_run": "Letzter Lauf",
+    "last_run_state": "Status des letzten Laufs",
     "last_seen": "Zuletzt gesehen",
     "last_update": "Letzte Aktualisierung",
     "loading": "Suchbereiche werden geladen...",
@@ -1002,12 +1009,28 @@
       "section": {
         "custom_certificate": "Benutzerdefiniertes Zertifikat",
         "lets_encrypt": "Let's Encrypt",
+        "real_ip": "Echte IP",
         "reverse_proxy": "Reverse Proxy"
       },
       "subtitle": "Konfigurieren Sie spezifische Einstellungen für die Web-UI.",
       "title": "UI-Einstellungen"
     },
     "step3": {
+      "title": "Auf PRO upgraden",
+      "subtitle": "Schalten Sie erweiterte Funktionen frei und holen Sie das Beste aus BunkerWeb heraus.",
+      "label": {
+        "pro_benefits": "PRO-Vorteile"
+      },
+      "pro_benefit_1_title": "Zugriff auf alle PRO-Funktionen",
+      "pro_benefit_1_description": "Schalten Sie alle erweiterten Funktionen frei, einschließlich verbesserter Sicherheit, Leistung und Verwaltungstools.",
+      "pro_benefit_2_title": "Technischer Support von den Maintainern",
+      "pro_benefit_2_description": "Erhalten Sie priorisierten Support vom BunkerWeb-Team für alle Probleme oder Fragen, die Sie haben.",
+      "pro_benefit_3_title": "Benutzerdefinierte Entwicklung",
+      "pro_benefit_3_description": "Maßgeschneiderte Lösungen, um Ihre spezifischen Bedürfnisse zu erfüllen.",
+      "pro_benefit_4_title": "Benutzerdefinierte Beratung",
+      "pro_benefit_4_description": "Expertenrat zur Optimierung Ihres BunkerWeb-Setups."
+    },
+    "step4": {
       "label": {
         "final_url": "BunkerWeb UI URL"
       },
@@ -1016,6 +1039,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 Ein Admin-Benutzer existiert bereits. Bitte fahren Sie mit dem nächsten Schritt fort.",
+      "pro_license_key_exists": "⭐ Ein PRO-Lizenzschlüssel ist bereits konfiguriert, bitte fahren Sie mit dem nächsten Schritt fort.",
       "reverse_proxy_configured": "↪️ Ein Reverse Proxy ist bereits für die Web-Oberfläche konfiguriert. Bitte fahren Sie mit dem nächsten Schritt fort.",
       "secure_password": "Sicheres Passwort",
       "unique_server_name": "Eindeutiger Servername"
@@ -1252,6 +1276,10 @@
     "pro_feature": "Dies ist eine PRO-Funktion.",
     "readonly_db_action_disabled": "Deaktiviert: Die Datenbank befindet sich im schreibgeschützten Modus.",
     "readonly_user_action_disabled": "Deaktiviert: Ihr Konto ist schreibgeschützt, Aktion '{{action}}' deaktiviert.",
+    "real_ip_from": "Liste vertrauenswürdiger IPs / Netzwerke, durch Leerzeichen getrennt, von denen die weitergeleiteten Anfragen stammen.",
+    "real_ip_from_urls": "Liste von URLs, die vertrauenswürdige IPs / Netzwerke enthalten, durch Leerzeichen getrennt, von denen die weitergeleiteten Anfragen stammen. Unterstützt auch file:// URLs und Basic Auth über das http://user:pass@url Schema.",
+    "real_ip_header": "HTTP-Header, der die echte IP oder den speziellen Wert proxy_protocol für das PROXY-Protokoll enthält.",
+    "real_ip_recursive": "Führt eine rekursive Suche im Header-Container der IP-Adresse durch.",
     "remove_ban_entry": "Diesen Sperreintrag aus der Liste entfernen.",
     "reset_template_settings": "Alle Einstellungen in der aktuellen Vorlagenansicht auf ihre Standardwerte zurücksetzen.",
     "select_file_to_follow": "Wählen Sie eine Datei aus, um den Folgemodus zu aktivieren",
@@ -1364,6 +1392,8 @@
     "ui_url_security": "Die Verwendung eines nicht standardmäßigen, schwer zu erratenden URL-Pfads erhöht die Sicherheit.",
     "use_custom_ssl": "Ob anstelle von Let's Encrypt ein benutzerdefiniertes SSL-Zertifikat verwendet werden soll.",
     "use_lets_encrypt_staging": "Ob die Let's Encrypt Staging-Umgebung für Tests verwendet werden soll (erzeugt nicht vertrauenswürdige Zertifikate).",
+    "use_proxy_protocol": "PROXY-Protokoll-Kommunikation aktivieren.",
+    "use_real_ip": "Echte IP verwenden",
     "username_length": "Der Benutzername muss zwischen 1 und 256 Zeichen lang sein.",
     "view_full_url": "Klicken, um die vollständige URL anzuzeigen",
     "wildcard_certificates": "Wildcard-Zertifikate generieren (*.domain.com). Erfordert DNS-Challenge.",

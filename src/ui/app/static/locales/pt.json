@@ -506,7 +506,7 @@
     "select_rows_bans_1": "1 Bloqueio selecionado",
     "select_rows_bans_plural": "%d Bloqueios selecionados",
     "select_rows_cache_0": "Nenhum Arquivo de Cache selecionado",
-    "select_rows_cache_1": "1 Arquivo de Caché selecionado",
+    "select_rows_cache_1": "1 Arquivo de Cache selecionado",
     "select_rows_cache_plural": "%d Arquivos de Cache selecionados",
     "select_rows_configs_0": "Nenhuma Configuração Personalizada selecionada",
     "select_rows_configs_1": "1 Configuração Personalizada selecionada",
@@ -646,6 +646,10 @@
       "password": "Senha",
       "permanent_ban": "Banimento Permanente",
       "raw_configuration": "Configuração Bruta",
+      "real_ip_from": "IP real de",
+      "real_ip_from_urls": "IP real de",
+      "real_ip_header": "Cabeçalho de IP real",
+      "real_ip_recursive": "IP real recursivo",
       "reason": "Motivo",
       "secret_token": "Token Secreto",
       "server_name": "Nome do Servidor",
@@ -656,6 +660,8 @@
       "ui_url": "URL UI",
       "use_custom_ssl": "Usar SSL Personalizado",
       "use_lets_encrypt_staging": "Usar Let's Encrypt Staging",
+      "use_proxy_protocol": "Usar protocolo PROXY",
+      "use_real_ip": "Usar IP Real",
       "username": "Nome de usuário",
       "wildcard_certificates": "Certificados Wildcard"
     },
@@ -700,14 +706,6 @@
       "success": "Sucesso"
     }
   },
-  "logs": {
-    "eventsource_failed": "A conexão EventSource falhou",
-    "parse_error": "Falha ao analisar dados do stream: {{error}}",
-    "stream_error": "Erro de stream: {{message}}",
-    "stream_init": "Stream inicializado, tamanho do arquivo: {{size}}",
-    "stream_initialized": "Stream inicializado com atualização, tamanho do arquivo: {{size}}",
-    "trimmed_notice": "--- {{count}} linhas de log mais antigas foram removidas por desempenho ---"
-  },
   "link": {
     "back_to_login": "Voltar ao Login",
     "forgot_password": "Esqueceu a Senha?",
@@ -718,6 +716,14 @@
     "read_more": "Ler Mais",
     "see_more": "Ver Mais",
     "upgrade": "Atualizar?"
+  },
+  "logs": {
+    "eventsource_failed": "A conexão EventSource falhou",
+    "parse_error": "Falha ao analisar dados do stream: {{error}}",
+    "stream_error": "Erro de stream: {{message}}",
+    "stream_init": "Stream inicializado, tamanho do arquivo: {{size}}",
+    "stream_initialized": "Stream inicializado com atualização, tamanho do arquivo: {{size}}",
+    "trimmed_notice": "--- {{count}} linhas de log mais antigas foram removidas por desempenho ---"
   },
   "modal": {
     "body": {
@@ -800,6 +806,7 @@
     "misc": "Diversos",
     "mode_selection": "Seleção de Modo",
     "more": "Mais...",
+    "new": "Novo",
     "plugin_activated": "Plugin Ativado",
     "plugin_activated_global": "Plugin Ativado Globalmente",
     "plugin_deactivated": "Plugin Desativado",
@@ -955,9 +962,11 @@
     "last_24h": "Últimas 24 horas",
     "last_30d": "Últimos 30 dias",
     "last_7d": "Últimos 7 dias",
-    "last_run": "Estado da Última Execução",
+    "last_run": "Última Execução",
+    "last_run_state": "Estado da Última Execução",
     "last_seen": "Visto pela Última Vez",
     "last_update": "Última Atualização",
+    "loading": "Carregando Painéis de Pesquisa...",
     "method": "Método",
     "next_24h": "Próximas 24 horas",
     "next_30d": "Próximos 30 dias",
@@ -1001,12 +1010,28 @@
       "section": {
         "custom_certificate": "Certificado Personalizado",
         "lets_encrypt": "Let's Encrypt",
+        "real_ip": "IP Real",
         "reverse_proxy": "Proxy Reverso"
       },
       "subtitle": "Configure as definições específicas da interface web.",
       "title": "Definições da UI"
     },
     "step3": {
+      "title": "Atualizar para PRO",
+      "subtitle": "Desbloqueie recursos avançados e aproveite ao máximo o BunkerWeb.",
+      "label": {
+        "pro_benefits": "Benefícios PRO"
+      },
+      "pro_benefit_1_title": "Acesso a todos os recursos PRO",
+      "pro_benefit_1_description": "Desbloqueie todos os recursos avançados, incluindo ferramentas aprimoradas de segurança, desempenho e gerenciamento.",
+      "pro_benefit_2_title": "Suporte técnico dos mantenedores",
+      "pro_benefit_2_description": "Obtenha suporte prioritário da equipe do BunkerWeb para quaisquer problemas ou dúvidas que possa ter.",
+      "pro_benefit_3_title": "Desenvolvimento personalizado",
+      "pro_benefit_3_description": "Soluções sob medida para atender às suas necessidades específicas.",
+      "pro_benefit_4_title": "Consultoria personalizada",
+      "pro_benefit_4_description": "Aconselhamento especializado para otimizar sua configuração do BunkerWeb."
+    },
+    "step4": {
       "label": {
         "final_url": "URL da UI do BunkerWeb"
       },
@@ -1015,6 +1040,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 Já existe um usuário administrador. Por favor, prossiga para o próximo passo.",
+      "pro_license_key_exists": "⭐ Uma chave de licença PRO já está configurada, por favor, prossiga para o próximo passo.",
       "reverse_proxy_configured": "↪️ Já existe um proxy reverso configurado para a interface web. Por favor, prossiga para o próximo passo.",
       "secure_password": "Senha Segura",
       "unique_server_name": "Nome do Servidor Único"
@@ -1251,6 +1277,10 @@
     "pro_feature": "Este é um recurso PRO.",
     "readonly_db_action_disabled": "Desabilitado: O banco de dados está em modo somente leitura.",
     "readonly_user_action_disabled": "Desabilitado: Sua conta é somente leitura, ação '{{action}}' desabilitada.",
+    "real_ip_from": "Lista de IPs/redes confiáveis, separadas por espaços, de onde vêm as solicitações via proxy.",
+    "real_ip_from_urls": "Lista de URLs contendo IPs/redes confiáveis, separadas por espaços, de onde vêm as solicitações via proxy. Também suporta URLs file:// e autenticação básica usando o esquema http://user:pass@url.",
+    "real_ip_header": "Cabeçalho HTTP contendo o IP real ou o valor especial proxy_protocol para o protocolo PROXY.",
+    "real_ip_recursive": "Realizar uma pesquisa recursiva no contêiner do cabeçalho de endereço IP.",
     "remove_ban_entry": "Remover esta entrada de bloqueio da lista.",
     "reset_template_settings": "Restabelecer todas as configurações na vista de modelo atual para os seus valores padrão.",
     "select_file_to_follow": "Selecione um arquivo para habilitar o modo de seguir",
@@ -1363,6 +1393,8 @@
     "ui_url_security": "Usar um caminho URL não padrão e difícil de adivinhar melhora a segurança.",
     "use_custom_ssl": "Se deve usar um certificado SSL personalizado em vez do Let's Encrypt.",
     "use_lets_encrypt_staging": "Se deve usar o ambiente de staging do Let's Encrypt para testes (gera certificados não confiáveis).",
+    "use_proxy_protocol": "Ativar comunicação via protocolo PROXY.",
+    "use_real_ip": "Usar IP Real",
     "username_length": "O nome de usuário deve ter entre 1 e 256 caracteres.",
     "view_full_url": "Clique para ver a URL completa",
     "wildcard_certificates": "Gerar certificados wildcard (*.dominio.com). Requer desafio DNS.",
