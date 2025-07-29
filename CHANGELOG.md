@@ -2,6 +2,7 @@
 
 ## v1.6.3 - ????/??/??
 
+- [BUGFIX] Fix HTTP/3 not working on default server as the `reuseport` directive was missing in the `default-server-http.conf` file.
 - [UI] Fix missing settings when cloning a service in the web UI
 - [FEATURE] Add the possibility to add headers and a footers to the `robots.txt` file using the `ROBOTSTXT_HEADER` and `ROBOTSTXT_FOOTER` settings. (Can be Base64 encoded)
 
