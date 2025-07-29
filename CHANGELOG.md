@@ -7,6 +7,7 @@
 - [FEATURE] Add the possibility to add headers and a footers to the `robots.txt` file using the `ROBOTSTXT_HEADER` and `ROBOTSTXT_FOOTER` settings. (Can be Base64 encoded)
 - [FEATURE] Add `domainoffensive.de` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `Dynu` as a DNS provider in the `letsencrypt` plugin
+- [DEPS] Update lua-resty-session version to v4.1.3
 
 ## v1.6.3-rc2 - 2025/07/29
 
