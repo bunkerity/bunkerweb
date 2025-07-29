@@ -48,7 +48,7 @@
       "help": "The DNS provider to use for DNS challenges.",
       "id": "auto-lets-encrypt-dns-provider",
       "label": "DNS Provider",
-      "regex": "^(bunny|cloudflare|desec|digitalocean|dnsimple|dnsmadeeasy|gehirn|google|infomaniak|ionos|linode|luadns|njalla|nsone|ovh|rfc2136|route53|sakuracloud|scaleway)?$",
+      "regex": "^(bunny|cloudflare|desec|digitalocean|domainoffensive|dnsimple|dnsmadeeasy|gehirn|google|infomaniak|ionos|linode|luadns|njalla|nsone|ovh|rfc2136|route53|sakuracloud|scaleway)?$",
       "type": "select",
       "select": [
         "",
@@ -56,6 +56,7 @@
         "cloudflare",
         "desec",
         "digitalocean",
+        "domainoffensive",
         "dnsimple",
         "dnsmadeeasy",
         "gehirn",

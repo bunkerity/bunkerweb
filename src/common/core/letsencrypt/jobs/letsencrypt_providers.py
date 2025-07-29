@@ -132,6 +132,23 @@ class DigitalOceanProvider(Provider):
         return ["--dns-digitalocean"]
 
 
+class DomainOffensiveProvider(Provider):
+    """Domain Offensive DNS provider."""
+
+    dns_domainoffensive_api_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_domainoffensive_api_token": ("dns_domainoffensive_api_token", "domainoffensive_api_token", "api_token"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--authenticator", "dns-domainoffensive"]
+
+
 class DnsimpleProvider(Provider):
     """DNSimple DNS provider."""
 
