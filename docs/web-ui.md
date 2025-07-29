@@ -114,7 +114,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.3-rc1
+        image: bunkerity/bunkerweb:1.6.3-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -132,7 +132,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -160,12 +160,12 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.3-rc1
+        image: bunkerity/bunkerweb-ui:1.6.3-rc2
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
-          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         volumes:
           - bw-logs:/var/log/bunkerweb # This is the volume used to store the logs
         restart: "unless-stopped"
@@ -239,7 +239,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.3-rc1
+        image: bunkerity/bunkerweb:1.6.3-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -258,7 +258,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -278,7 +278,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.3-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.3-rc2
         depends_on:
           - bunkerweb
           - bw-docker
@@ -297,12 +297,12 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.3-rc1
+        image: bunkerity/bunkerweb-ui:1.6.3-rc2
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the admin user
-          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         volumes:
           - bw-logs:/var/log/bunkerweb
         restart: "unless-stopped"
@@ -451,6 +451,18 @@ Please note that when your username or password is updated, you will be logout f
 
 ### Two-Factor authentication
 
+!!! tip "Mandatory encryption keys"
+
+    When enabling 2FA, you must provide at least one encryption key. This key will be used to encrypt your TOTP secrets.
+
+    The recommended way to generate a valid key is to use the `passlib` package:
+
+    ```shell
+    python3 -c "from passlib import totp; print(totp.generate_secret())"
+    ```
+
+    Set the generated key in the `TOTP_ENCRYPTION_KEYS` environment variable of the web UI. You can also set multiple keys separated by spaces or as a dictionary (for backward compatibility).
+
 !!! warning "Lost secret key"
 
     In case you lost your secret key, two options are available:
@@ -514,7 +526,7 @@ The web UI can be deployed and configured without going through the setup wizard
     - `ADMIN_USERNAME`: username to access the web UI.
     - `ADMIN_PASSWORD`: password to access the web UI.
     - `FLASK_SECRET`: a secret key used to encrypt the session cookie (if not set, a random key will be generated).
-    - `TOTP_SECRETS`: a list of TOTP secrets separated by spaces or a dictionary (e.g.: `{"1": "mysecretkey"}` or `mysecretkey` or `mysecretkey mysecretkey1`). **We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys** (if not set, a random number of secret keys will be generated). Check out the [passlib documentation](https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets) for more information.
+    - `TOTP_ENCRYPTION_KEYS` (or `TOTP_SECRETS`): a list of TOTP encryption keys separated by spaces or a dictionary (e.g.: `{"1": "mysecretkey"}` or `mysecretkey` or `mysecretkey mysecretkey1`). **We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys** (if not set, a random number of secret keys will be generated). Check out the [passlib documentation](https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets) for more information.
     - `LISTEN_ADDR`: the address where the web UI will listen (default is `0.0.0.0` in **Docker images** and `127.0.0.1` on **Linux installations**).
     - `LISTEN_PORT`: the port where the web UI will listen (default is `7000`).
     - `MAX_WORKERS`: the number of workers used by the web UI (default is the number of CPUs).
@@ -535,7 +547,7 @@ The web UI can be deployed and configured without going through the setup wizard
     python3 -c "import secrets; print(secrets.token_hex(64))"
     ```
 
-    You can generate valid space-separated **TOTP_SECRETS** using the following command (you will need the `passlib` package):
+    You can generate valid space-separated **TOTP_ENCRYPTION_KEYS** using the following command (you will need the `passlib` package):
 
     ```shell
     python3 -c "from passlib import totp; print(totp.generate_secret())"
@@ -557,12 +569,12 @@ The web UI can be deployed and configured without going through the setup wizard
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
-    TOTP_SECRETS=mysecret
+    TOTP_ENCRYPTION_KEYS=mysecret
     ```
 
     Replace the `changeme` data with your own values.
 
-    Remember to set a stronger secret key for the `TOTP_SECRETS`.
+    Remember to set a stronger secret key for the `TOTP_ENCRYPTION_KEYS`.
 
     Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service:
 
@@ -613,7 +625,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc2/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -624,7 +636,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.3-rc1
+        image: bunkerity/bunkerweb:1.6.3-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -636,7 +648,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc2
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -658,12 +670,12 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.3-rc1
+        image: bunkerity/bunkerweb-ui:1.6.3-rc2
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
-          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         networks:
           - bw-universe
           - bw-db
@@ -721,7 +733,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc2/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -733,7 +745,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.3-rc1
+        image: bunkerity/bunkerweb:1.6.3-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -748,7 +760,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc2
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -762,7 +774,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.3-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.3-rc2
         depends_on:
           - bw-docker
         environment:
@@ -796,12 +808,12 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.3-rc1
+        image: bunkerity/bunkerweb-ui:1.6.3-rc2
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
-          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         labels:
           - "bunkerweb.SERVER_NAME=www.example.com"
           - "bunkerweb.USE_TEMPLATE=ui"
@@ -839,7 +851,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc2/misc/integrations) of the repository.
 
     Here is the corresponding part of your values.yaml file that you can use:
 
@@ -885,7 +897,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc1/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc2/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -897,7 +909,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.3-rc1
+        image: bunkerity/bunkerweb:1.6.3-rc2
         ports:
           - published: 80
             target: 8080
@@ -926,7 +938,7 @@ The web UI can be deployed and configured without going through the setup wizard
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.3-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.3-rc2
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -942,7 +954,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.3-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.3-rc2
         environment:
           <<: *ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -987,12 +999,12 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.3-rc1
+        image: bunkerity/bunkerweb-ui:1.6.3-rc2
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
           ADMIN_PASSWORD: "changeme" # Remember to set a stronger password for the changeme user
-          TOTP_SECRETS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
+          TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
         networks:
           - bw-universe
           - bw-db
@@ -1047,7 +1059,7 @@ The BunkerWeb UI supports multiple languages. Translations are managed in the `s
 - German (de)
 - Italian (it)
 
-See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.3-rc1/src/ui/app/static/locales/README.md) for details on translation provenance and review status.
+See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.3-rc2/src/ui/app/static/locales/README.md) for details on translation provenance and review status.
 
 ### Contributing Translations
 
@@ -1063,4 +1075,4 @@ We welcome contributions to improve or add new locale files!
 
 For updates, edit the relevant file and update the provenance table as needed.
 
-See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.3-rc1/src/ui/app/static/locales/README.md) for full guidelines.
+See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.3-rc2/src/ui/app/static/locales/README.md) for full guidelines.

@@ -33,7 +33,7 @@
     "link": {
       "here": "这里"
     },
-    "pro": "升级到 PRO 版本，充分利用 BunkerWeb。更多信息和免费试用请点击<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">这里</a>。",
+    "pro": "升级至 PRO 版本，充分利用 BunkerWeb。更多信息和免费试用请点击<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#pro\">这里</a>。",
     "support": "需要 BunkerWeb 的高级支持或定制咨询服务？查看我们的<a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">专业服务</a>。"
   },
   "breadcrumb": {
@@ -90,6 +90,7 @@
     "entire_config": "完整配置",
     "export": "导出",
     "filters_suffix": " 过滤器",
+    "follow": "跟随",
     "github_stars": "星标",
     "go_back": "返回",
     "hide": "隐藏",
@@ -120,8 +121,8 @@
     "select_page": "选择页面",
     "service": "服务",
     "set_1h": "设置 1 小时",
-    "set_24h": "设置 24 小时",
     "set_1w": "设置 1 周",
+    "set_24h": "设置 24 小时",
     "set_permanent": "设置永久",
     "setup": "设置",
     "show": "显示",
@@ -545,10 +546,10 @@
   },
   "duration": {
     "1_hour": "1 小时",
-    "24_hours": "24 小时",
     "1_week": "1 周",
-    "permanent": "永久",
-    "custom": "自定义"
+    "24_hours": "24 小时",
+    "custom": "自定义",
+    "permanent": "永久"
   },
   "error": {
     "401": {
@@ -645,6 +646,10 @@
       "password": "密码",
       "permanent_ban": "永久封禁",
       "raw_configuration": "原始配置",
+      "real_ip_from": "真实 IP 来源",
+      "real_ip_from_urls": "真实 IP 来源",
+      "real_ip_header": "真实 IP 标头",
+      "real_ip_recursive": "递归搜索真实 IP",
       "reason": "原因",
       "secret_token": "密钥",
       "server_name": "服务器名称",
@@ -655,6 +660,8 @@
       "ui_url": "UI URL",
       "use_custom_ssl": "使用自定义 SSL",
       "use_lets_encrypt_staging": "使用 Let's Encrypt Staging",
+      "use_proxy_protocol": "使用 PROXY 协议",
+      "use_real_ip": "使用真实 IP",
       "username": "用户名",
       "wildcard_certificates": "通配符证书"
     },
@@ -667,8 +674,8 @@
       "multivalue_enter_value": "输入值...",
       "plugin_search": "搜索插件...",
       "search": "搜索...",
-      "select_service": "选择服务",
       "secret_token": "密钥",
+      "select_service": "选择服务",
       "username_example": "张三"
     },
     "validation": {
@@ -799,9 +806,10 @@
     "misc": "杂项",
     "mode_selection": "模式选择",
     "more": "更多...",
+    "new": "新建",
     "plugin_activated": "插件已激活",
-    "plugin_deactivated": "插件已停用",
     "plugin_activated_global": "插件已全局激活",
+    "plugin_deactivated": "插件已停用",
     "plugin_deactivated_global": "插件已全局停用",
     "plugins": "插件",
     "plugins_pages": "插件页面",
@@ -954,7 +962,7 @@
     "last_24h": "过去 24 小时",
     "last_30d": "过去 30 天",
     "last_7d": "过去 7 天",
-    "last_run": "上次运行状态",
+    "last_run": "上次运行",
     "last_run_state": "上次运行状态",
     "last_seen": "最后出现",
     "last_update": "最后更新",
@@ -1002,12 +1010,28 @@
       "section": {
         "custom_certificate": "自定义证书",
         "lets_encrypt": "Let's Encrypt",
+        "real_ip": "真实 IP",
         "reverse_proxy": "反向代理"
       },
       "subtitle": "配置 Web UI 特定设置。",
       "title": "UI 设置"
     },
     "step3": {
+      "title": "升级到 PRO",
+      "subtitle": "解锁高级功能，充分利用 BunkerWeb。",
+      "label": {
+        "pro_benefits": "PRO 权益"
+      },
+      "pro_benefit_1_title": "访问所有 PRO 功能",
+      "pro_benefit_1_description": "解锁所有高级功能，包括增强的安全性、性能和管理工具。",
+      "pro_benefit_2_title": "来自维护者的技术支持",
+      "pro_benefit_2_description": "对于您可能遇到的任何问题或疑问，从 BunkerWeb 团队获得优先支持。",
+      "pro_benefit_3_title": "定制开发",
+      "pro_benefit_3_description": "量身定制的解决方案，满足您的特定需求。",
+      "pro_benefit_4_title": "定制咨询",
+      "pro_benefit_4_description": "优化您的 BunkerWeb 设置的专家建议。"
+    },
+    "step4": {
       "label": {
         "final_url": "BunkerWeb UI URL"
       },
@@ -1016,6 +1040,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 管理员用户已存在。请继续下一步。",
+      "pro_license_key_exists": "⭐ PRO 许可证密钥已配置，请继续下一步。",
       "reverse_proxy_configured": "↪️ Web 界面已配置反向代理。请继续下一步。",
       "secure_password": "安全密码",
       "unique_server_name": "唯一服务器名称"
@@ -1219,10 +1244,10 @@
     "follow_latest_page_only": "跟随模式仅在最新页面可用",
     "global_config_source": "值继承自全局配置。",
     "instance_not_up": "实例 {{hostname}} 当前未响应 ('up')。",
+    "latest_version_installed": "您正在运行最新版本。",
     "lets_encrypt_custom_profile": "用于 Let's Encrypt 的自定义配置文件（例如 'my_custom_profile'）。",
     "lets_encrypt_disable_public_suffixes": "禁用针对符合公共后缀列表的域名的证书请求（推荐）。",
     "lets_encrypt_profile": "用于 Let's Encrypt 的配置文件（classic、tlsserver、shortlived）。",
-    "latest_version_installed": "您正在运行最新版本。",
     "license_key": "您的 BunkerWeb PRO 许可证密钥。",
     "link": {
       "access_plugin_page": "访问 {{name}} 页面",
@@ -1252,6 +1277,10 @@
     "pro_feature": "这是一个 PRO 功能。",
     "readonly_db_action_disabled": "已禁用：数据库处于只读模式。",
     "readonly_user_action_disabled": "已禁用：您的帐户是只读的，操作 '{{action}}' 已禁用。",
+    "real_ip_from": "受信任的 IP / 网络列表（以空格分隔），代理请求的来源。",
+    "real_ip_from_urls": "包含受信任的 IP / 网络的 URL 列表（以空格分隔），代理请求的来源。还支持 file:// URL 和使用 http://user:pass@url 格式的基本身份验证。",
+    "real_ip_header": "包含真实 IP 或 PROXY 协议的特殊值 proxy_protocol 的 HTTP 标头。",
+    "real_ip_recursive": "在包含 IP 地址的标头中执行递归搜索。",
     "remove_ban_entry": "从列表中移除此封禁条目。",
     "reset_template_settings": "将当前模板视图中的所有设置重置为其默认值。",
     "select_file_to_follow": "选择一个文件以启用跟随模式",
@@ -1364,6 +1393,8 @@
     "ui_url_security": "使用非标准、难以猜测的 URL 路径可增强安全性。",
     "use_custom_ssl": "是否使用自定义 SSL 证书而不是 Let's Encrypt。",
     "use_lets_encrypt_staging": "是否使用 Let's Encrypt 的 staging 环境进行测试（生成不受信任的证书）。",
+    "use_proxy_protocol": "启用 PROXY 协议通信。",
+    "use_real_ip": "使用真实 IP",
     "username_length": "用户名必须在 1 到 256 个字符之间。",
     "view_full_url": "点击查看完整 URL",
     "wildcard_certificates": "生成通配符证书 (*.domain.com)。需要 DNS 质询。",

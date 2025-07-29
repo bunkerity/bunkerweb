@@ -13,10 +13,18 @@ from app.dependencies import DATA
 from app.utils import LIB_DIR, LOGGER, stop
 
 
-if not LIB_DIR.joinpath(".totp_secrets.json").is_file():
-    LOGGER.error("The .totp_secrets.json file is missing, exiting ...")
+# Try to load the new .totp_encryption_keys.json file first, fallback to .totp_secrets.json for backward compatibility
+encryption_keys_path = LIB_DIR.joinpath(".totp_encryption_keys.json")
+secrets_path = LIB_DIR.joinpath(".totp_secrets.json")
+
+if encryption_keys_path.is_file():
+    TOTP_ENCRYPTION_KEYS = json_loads(encryption_keys_path.read_text(encoding="utf-8"))
+elif secrets_path.is_file():
+    LOGGER.warning("The .totp_encryption_keys.json file is missing, using legacy .totp_secrets.json for backward compatibility.")
+    TOTP_ENCRYPTION_KEYS = json_loads(secrets_path.read_text(encoding="utf-8"))
+else:
+    LOGGER.error("Neither .totp_encryption_keys.json nor .totp_secrets.json file found, exiting ...")
     stop(1)
-TOTP_SECRETS = json_loads(LIB_DIR.joinpath(".totp_secrets.json").read_text(encoding="utf-8"))
 
 
 class Totp:
@@ -25,7 +33,7 @@ class Totp:
         secrets are used to encrypt the per-user totp_secret on disk.
         recovery_codes_keys are used to encrypt the per-user recovery codes on disk.
         """
-        self._totp = TOTP.using(secrets=TOTP_SECRETS, issuer="BunkerWeb UI")
+        self._totp = TOTP.using(secrets=TOTP_ENCRYPTION_KEYS, issuer="BunkerWeb UI")
 
     def generate_totp_secret(self) -> str:
         """Create new user-unique totp_secret."""

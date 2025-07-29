@@ -14,8 +14,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import post
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash
-from logger import setup_logger
+from common_utils import bytes_hash  # type: ignore
+from logger import setup_logger  # type: ignore
 from jobs import Job
 
 LOGGER = setup_logger("ROBOTSTXT.DarkVisitors")

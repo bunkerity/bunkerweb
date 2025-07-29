@@ -121,8 +121,8 @@
     "select_page": "Seleziona Pagina",
     "service": "Servizio",
     "set_1h": "Imposta 1 Ora",
-    "set_24h": "Imposta 24 Ore",
     "set_1w": "Imposta 1 Settimana",
+    "set_24h": "Imposta 24 Ore",
     "set_permanent": "Imposta Permanente",
     "setup": "Configura",
     "show": "Mostra",
@@ -465,7 +465,7 @@
     "info_empty_configs": "Nessuna Configurazione Personalizzata disponibile",
     "info_empty_instances": "Nessuna Istanza disponibile",
     "info_empty_items": "Nessun elemento disponibile",
-    "info_empty_jobs": "Nessuna Tarefa disponibile",
+    "info_empty_jobs": "Nessun processo disponibile",
     "info_empty_plugins": "Nessun Plugin disponibile",
     "info_empty_reports": "Nessun Report disponibile",
     "info_empty_services": "Nessun Servizio disponibile",
@@ -474,13 +474,13 @@
     "info_filtered_configs": "(filtrato da _MAX_ Configurazioni Personalizzate totali)",
     "info_filtered_instances": "(filtrato da _MAX_ Istanze totali)",
     "info_filtered_items": "(filtrato da _MAX_ elementi totali)",
-    "info_filtered_jobs": "(filtrato da _MAX_ Tarefas totais)",
+    "info_filtered_jobs": "(filtrato da _MAX_ processi totali)",
     "info_filtered_plugins": "(filtrato da _MAX_ Plugins totali)",
     "info_filtered_reports": "(filtrato da _MAX_ Reports totali)",
     "info_filtered_services": "(filtrato da _MAX_ Servizi totali)",
     "info_instances": "Mostrando da {{start}} a {{end}} di {{total}} Istanze",
     "info_items": "Mostrando da {{start}} a {{end}} di {{total}} elementi",
-    "info_jobs": "Mostrando da {{start}} a {{end}} di {{total}} Tarefas",
+    "info_jobs": "Mostrando da {{start}} a {{end}} di {{total}} processi",
     "info_plugins": "Mostrando da {{start}} a {{end}} di {{total}} Plugins",
     "info_reports": "Mostrando da {{start}} a {{end}} di {{total}} Reports",
     "info_services": "Mostrando da {{start}} a {{end}} di {{total}} Servizi",
@@ -490,7 +490,7 @@
     "length_menu_configs": "Mostra _MENU_ Configurazioni Personalizzate",
     "length_menu_instances": "Mostra _MENU_ Istanze",
     "length_menu_items": "Mostra _MENU_ elementi",
-    "length_menu_jobs": "Mostra _MENU_ Tarefas",
+    "length_menu_jobs": "Mostra _MENU_ processi",
     "length_menu_plugins": "Mostra _MENU_ Plugins",
     "length_menu_reports": "Mostra _MENU_ Reports",
     "length_menu_services": "Mostra _MENU_ Servizi",
@@ -517,9 +517,9 @@
     "select_rows_items_0": "Nessun elemento selezionato",
     "select_rows_items_1": "1 elemento selezionato",
     "select_rows_items_plural": "%d elementi selezionati",
-    "select_rows_jobs_0": "Nessuna Tarefa selezionata",
-    "select_rows_jobs_1": "1 Tarefa selezionata",
-    "select_rows_jobs_plural": "%d Tarefas selezionate",
+    "select_rows_jobs_0": "Nessun processo selezionato",
+    "select_rows_jobs_1": "1 processo selezionato",
+    "select_rows_jobs_plural": "%d processi selezionati",
     "select_rows_plugins_0": "Nessun Plugin selezionato",
     "select_rows_plugins_1": "1 Plugin selezionato",
     "select_rows_plugins_plural": "%d Plugins selezionati",
@@ -534,7 +534,7 @@
     "zero_records_configs": "Nessuna Configurazione Personalizzata corrispondente trovata",
     "zero_records_instances": "Nessuna Istanza corrispondente trovata",
     "zero_records_items": "Nessun elemento corrispondente trovato",
-    "zero_records_jobs": "Nessuna Tarefa corrispondente trovata",
+    "zero_records_jobs": "Nessun processo corrispondente trovato",
     "zero_records_plugins": "Nessun Plugin corrispondente trovato",
     "zero_records_reports": "Nessun Report corrispondente trovato",
     "zero_records_services": "Nessun Servizio corrispondente trovato"
@@ -546,10 +546,10 @@
   },
   "duration": {
     "1_hour": "1 Ora",
-    "24_hours": "24 Ore",
     "1_week": "1 Settimana",
-    "permanent": "Permanente",
-    "custom": "Personalizzato"
+    "24_hours": "24 Ore",
+    "custom": "Personalizzato",
+    "permanent": "Permanente"
   },
   "error": {
     "401": {
@@ -646,6 +646,10 @@
       "password": "Password",
       "permanent_ban": "Blocco Permanente",
       "raw_configuration": "Configurazione Grezza",
+      "real_ip_from": "IP Reale da",
+      "real_ip_from_urls": "IP Reale da",
+      "real_ip_header": "Header IP Reale",
+      "real_ip_recursive": "IP Reale ricorsivo",
       "reason": "Motivo",
       "secret_token": "Token Segreto",
       "server_name": "Nome Server",
@@ -656,6 +660,8 @@
       "ui_url": "URL UI",
       "use_custom_ssl": "Usa SSL Personalizzato",
       "use_lets_encrypt_staging": "Usa Let's Encrypt Staging",
+      "use_proxy_protocol": "Usa protocollo PROXY",
+      "use_real_ip": "Usa IP Reale",
       "username": "Nome utente",
       "wildcard_certificates": "Certificati Wildcard"
     },
@@ -668,8 +674,8 @@
       "multivalue_enter_value": "Inserisci valore...",
       "plugin_search": "Cerca plugin...",
       "search": "Cerca...",
-      "select_service": "Seleziona Servizio",
       "secret_token": "Token Segreto",
+      "select_service": "Seleziona Servizio",
       "username_example": "mariorossi"
     },
     "validation": {
@@ -700,14 +706,6 @@
       "success": "Successo"
     }
   },
-  "logs": {
-    "eventsource_failed": "Connessione EventSource fallita",
-    "parse_error": "Errore nell'analisi dei dati del flusso: {{error}}",
-    "stream_error": "Errore del flusso: {{message}}",
-    "stream_init": "Flusso inizializzato, dimensione file: {{size}}",
-    "stream_initialized": "Flusso inizializzato con aggiornamento, dimensione file: {{size}}",
-    "trimmed_notice": "--- {{count}} righe di log più vecchie sono state rimosse per le prestazioni ---"
-  },
   "link": {
     "back_to_login": "Torna al Login",
     "forgot_password": "Password Dimenticata?",
@@ -718,6 +716,14 @@
     "read_more": "Leggi di Più",
     "see_more": "Vedi Altro",
     "upgrade": "Aggiornare?"
+  },
+  "logs": {
+    "eventsource_failed": "Connessione EventSource fallita",
+    "parse_error": "Errore nell'analisi dei dati del flusso: {{error}}",
+    "stream_error": "Errore del flusso: {{message}}",
+    "stream_init": "Flusso inizializzato, dimensione file: {{size}}",
+    "stream_initialized": "Flusso inizializzato con aggiornamento, dimensione file: {{size}}",
+    "trimmed_notice": "--- {{count}} righe di log più vecchie sono state rimosse per le prestazioni ---"
   },
   "modal": {
     "body": {
@@ -761,8 +767,8 @@
       "delete_instance": "Elimina Istanze",
       "from_plugin": "da Plugin",
       "full_url": "URL Completo",
-      "job_history": "Ultime 10 Esecuzioni Tarefas",
-      "job_history_count": "Ultime {{count}} esecuzioni della Tarefa",
+      "job_history": "Ultime 10 Esecuzioni dei Processi",
+      "job_history_count": "Ultime {{count}} esecuzioni del Processo",
       "recovery_codes": "Codici di Recupero",
       "reset_template_config": "Ripristinare Configurazione Modello?",
       "server_name_not_unique": "Nome Server non è Unico",
@@ -800,9 +806,10 @@
     "misc": "Varie",
     "mode_selection": "Selezione Modalità",
     "more": "Altro...",
+    "new": "Nuovo",
     "plugin_activated": "Plugin Attivato",
-    "plugin_deactivated": "Plugin Disattivato",
     "plugin_activated_global": "Plugin Attivato Globalmente",
+    "plugin_deactivated": "Plugin Disattivato",
     "plugin_deactivated_global": "Plugin Disattivato Globalmente",
     "plugins": "Plugin",
     "plugins_pages": "Pagine Plugin",
@@ -951,7 +958,7 @@
     "health": "Salute",
     "interval": "Intervallo",
     "ip_address": "Indirizzo IP",
-    "job_name": "Nome Tarefa",
+    "job_name": "Nome Processo",
     "last_24h": "Ultime 24 ore",
     "last_30d": "Ultimi 30 giorni",
     "last_7d": "Ultimi 7 giorni",
@@ -1002,12 +1009,28 @@
       "section": {
         "custom_certificate": "Certificato Personalizzato",
         "lets_encrypt": "Let's Encrypt",
+        "real_ip": "IP Reale",
         "reverse_proxy": "Proxy Inverso"
       },
       "subtitle": "Configura le impostazioni specifiche della UI web.",
       "title": "Impostazioni UI"
     },
     "step3": {
+      "title": "Aggiorna a PRO",
+      "subtitle": "Sblocca funzionalità avanzate e ottieni il massimo da BunkerWeb.",
+      "label": {
+        "pro_benefits": "Vantaggi PRO"
+      },
+      "pro_benefit_1_title": "Accesso a tutte le funzionalità PRO",
+      "pro_benefit_1_description": "Sblocca tutte le funzionalità avanzate, inclusi strumenti di sicurezza, prestazioni e gestione migliorati.",
+      "pro_benefit_2_title": "Supporto tecnico dai manutentori",
+      "pro_benefit_2_description": "Ottieni supporto prioritario dal team di BunkerWeb per qualsiasi problema o domanda.",
+      "pro_benefit_3_title": "Sviluppo personalizzato",
+      "pro_benefit_3_description": "Soluzioni su misura per soddisfare le tue esigenze specifiche.",
+      "pro_benefit_4_title": "Consulenza personalizzata",
+      "pro_benefit_4_description": "Consulenza esperta per ottimizzare la tua configurazione di BunkerWeb."
+    },
+    "step4": {
       "label": {
         "final_url": "URL UI BunkerWeb"
       },
@@ -1016,6 +1039,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 Esiste già un utente amministratore. Procedi al passo successivo.",
+      "pro_license_key_exists": "⭐ Una chiave di licenza PRO è già configurata, procedi al passo successivo.",
       "reverse_proxy_configured": "↪️ Un proxy inverso è già configurato per l'interfaccia web. Procedi al passo successivo.",
       "secure_password": "Password Sicura",
       "unique_server_name": "Nome Server Unico"
@@ -1113,7 +1137,7 @@
       "id": "ID",
       "interval": "Intervallo",
       "ip_address": "Indirizzo IP",
-      "job_name": "Nome Tarefa",
+      "job_name": "Nome Processo",
       "last_run": "Ultima Esecuzione",
       "last_seen": "Visto l'Ultima Volta",
       "last_update": "Ultimo Aggiornamento",
@@ -1174,7 +1198,7 @@
       "reload_instance": "Ricarica Istanza {{hostname}}",
       "reset_default": "Ripristina valore predefinito",
       "reset_global": "Ripristina valore globale",
-      "run_job": "Esegui Tarefa {{job}}",
+      "run_job": "Esegui Processo {{job}}",
       "stop_instance": "Ferma Istanza {{hostname}}",
       "unban_ip": "Sblocca {{ip}}"
     },
@@ -1219,10 +1243,10 @@
     "follow_latest_page_only": "La modalità seguimento è disponibile solo sull'ultima pagina",
     "global_config_source": "Valore ereditato dalla configurazione globale.",
     "instance_not_up": "L'istanza {{hostname}} non risponde attualmente ('up').",
+    "latest_version_installed": "Stai usando l'ultima versione.",
     "lets_encrypt_custom_profile": "Il profilo personalizzato da utilizzare per Let's Encrypt (es. 'my_custom_profile').",
     "lets_encrypt_disable_public_suffixes": "Disabilita le richieste di certificati per i domini che corrispondono alla Public Suffix List (consigliato).",
     "lets_encrypt_profile": "Il profilo da utilizzare per Let's Encrypt (classic, tlsserver, shortlived).",
-    "latest_version_installed": "Stai usando l'ultima versione.",
     "license_key": "La tua chiave di licenza BunkerWeb PRO.",
     "link": {
       "access_plugin_page": "Accedi alla Pagina {{name}}",
@@ -1244,14 +1268,18 @@
     },
     "multisite_setting": "Questa è un'impostazione multisito, che influisce su più servizi se definita globalmente.",
     "new_version_available": "È disponibile una nuova versione!",
-    "no_cache": "Nessun file di cache trovato per questa tarefa.",
-    "no_history": "Nessuna cronologia di esecuzione trovata per questa tarefa.",
+    "no_cache": "Nessun file di cache trovato per questo processo.",
+    "no_history": "Nessuna cronologia di esecuzione trovata per questo processo.",
     "no_log_files": "Nessun file di log disponibile.",
     "no_page_available": "Nessuna pagina dedicata disponibile per questo plugin.",
     "password_requirements": "La password deve avere almeno 8 caratteri e includere 1 lettera maiuscola, 1 numero e 1 carattere speciale.",
-    "pro_feature": "Questo è un fitur PRO.",
+    "pro_feature": "Questa è una funzionalità PRO.",
     "readonly_db_action_disabled": "Disabilitato: Il database è in modalità sola lettura.",
     "readonly_user_action_disabled": "Disabilitato: Il tuo account è di sola lettura, azione '{{action}}' disabilitata.",
+    "real_ip_from": "Elenco di IP/reti attendibili, separati da spazi, da cui provengono le richieste proxy.",
+    "real_ip_from_urls": "Elenco di URL contenenti IP/reti attendibili, separati da spazi, da cui provengono le richieste proxy. Supporta anche URL file:// e autenticazione di base utilizzando lo schema http://user:pass@url.",
+    "real_ip_header": "Intestazione HTTP contenente l'IP reale o il valore speciale proxy_protocol per il protocollo PROXY.",
+    "real_ip_recursive": "Esegui una ricerca ricorsiva nel contenitore dell'intestazione dell'indirizzo IP.",
     "remove_ban_entry": "Rimuovi questa voce di blocco dalla lista.",
     "reset_template_settings": "Ripristina tutte le impostazioni nella vista del modello corrente ai loro valori predefiniti.",
     "select_file_to_follow": "Seleziona un file per abilitare la modalità seguimento",
@@ -1280,9 +1308,9 @@
         "checksum": "Checksum del file cache",
         "details": "Mostra dettagli file cache",
         "file_name": "Nome file cache",
-        "job_name": "Tarefa che ha generato questo file cache",
+        "job_name": "Processo che ha generato questo file cache",
         "last_update": "Data e ora dell'ultimo aggiornamento del file cache",
-        "plugin": "Plugin associato alla tarefa che ha generato questo file cache",
+        "plugin": "Plugin associato al processo che ha generato questo file cache",
         "service": "Servizio associato a questo file cache (o Globale)"
       },
       "configs": {
@@ -1309,15 +1337,15 @@
         "type": "Tipo dell'Istanza (es. Container, Statico)"
       },
       "jobs": {
-        "actions": "Azioni disponibili per questa Tarefa",
-        "async": "Indica se la Tarefa viene eseguita in modo asincrono",
-        "details": "Mostra dettagli Tarefa",
-        "interval": "Frequenza di esecuzione della Tarefa",
-        "last_run": "Stato dell'ultima esecuzione della Tarefa (Successo/Fallimento)",
-        "name": "Nome Tarefa",
-        "plugin": "Plugin associato alla Tarefa",
-        "reload": "Indica se la Tarefa attiva un ricaricamento di BunkerWeb",
-        "select_all": "Seleziona tutte le Tarefas"
+        "actions": "Azioni disponibili per questo Processo",
+        "async": "Indica se il Processo viene eseguito in modo asincrono",
+        "details": "Mostra dettagli Processo",
+        "interval": "Frequenza di esecuzione del Processo",
+        "last_run": "Stato dell'ultima esecuzione del Processo (Successo/Fallimento)",
+        "name": "Nome Processo",
+        "plugin": "Plugin associato al Processo",
+        "reload": "Indica se il Processo attiva un ricaricamento di BunkerWeb",
+        "select_all": "Seleziona tutti i Processi"
       },
       "plugins": {
         "actions": "Azioni disponibili per questo Plugin",
@@ -1364,6 +1392,8 @@
     "ui_url_security": "L'uso di un percorso URL non standard e difficile da indovinare migliora la sicurezza.",
     "use_custom_ssl": "Se usare un certificato SSL personalizzato invece di Let's Encrypt.",
     "use_lets_encrypt_staging": "Se usare l'ambiente di staging di Let's Encrypt per i test (genera certificati non attendibili).",
+    "use_proxy_protocol": "Abilita la comunicazione tramite protocollo PROXY.",
+    "use_real_ip": "Usa IP Reale",
     "username_length": "Il nome utente deve avere tra 1 e 256 caratteri.",
     "view_full_url": "Clicca per visualizzare l'URL completo",
     "wildcard_certificates": "Genera certificati wildcard (*.dominio.com). Richiede sfida DNS.",

@@ -48,10 +48,18 @@ def setup_page():
             "CUSTOM_SSL_KEY",
             "CUSTOM_SSL_CERT_DATA",
             "CUSTOM_SSL_KEY_DATA",
+            "PRO_LICENSE_KEY",
+            "USE_REAL_IP",
+            "USE_PROXY_PROTOCOL",
+            "REAL_IP_FROM",
+            "REAL_IP_HEADER",
+            "REAL_IP_RECURSIVE",
+            "REAL_IP_FROM_URLS",
         ),
     )
 
     admin_user = DB.get_ui_user()
+    pro_license_key = db_config.get("PRO_LICENSE_KEY", getenv("PRO_LICENSE_KEY", ""))
 
     ui_reverse_proxy = None
     ui_reverse_proxy_url = None
@@ -97,6 +105,10 @@ def setup_page():
 
         if not any(key in request.form for key in required_keys):
             return handle_error(f"Missing either one of the following parameters: {', '.join(required_keys)}.", "setup")
+
+        if not pro_license_key and request.form.get("pro_license_key", ""):
+            global_config = DB.get_config(global_only=True)
+            BW_CONFIG.edit_global_conf(global_config | {"PRO_LICENSE_KEY": request.form["pro_license_key"]}, check_changes=False)
 
         if not admin_user:
             if len(request.form["admin_username"]) > 256:
@@ -160,7 +172,7 @@ def setup_page():
                 "USE_REVERSE_PROXY": "yes",
                 "REVERSE_PROXY_HOST": request.form["ui_host"],
                 "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
-                "AUTO_LETS_ENCRYPT": "yes" if request.form.get("auto_lets_encrypt", "no") == "yes" else "no",
+                "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
                 "USE_LETS_ENCRYPT_STAGING": request.form["lets_encrypt_staging"],
                 "USE_LETS_ENCRYPT_WILDCARD": request.form["lets_encrypt_wildcard"],
                 "EMAIL_LETS_ENCRYPT": request.form["email_lets_encrypt"],
@@ -170,6 +182,12 @@ def setup_page():
                 "LETS_ENCRYPT_DISABLE_PUBLIC_SUFFIXES": request.form.get("lets_encrypt_disable_public_suffixes", "yes"),
                 "LETS_ENCRYPT_DNS_PROVIDER": request.form["lets_encrypt_dns_provider"],
                 "LETS_ENCRYPT_DNS_PROPAGATION": request.form["lets_encrypt_dns_propagation"],
+                "USE_REAL_IP": request.form.get("use_real_ip", "no"),
+                "USE_PROXY_PROTOCOL": request.form.get("use_proxy_protocol", "no"),
+                "REAL_IP_FROM": request.form.get("real_ip_from", "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"),
+                "REAL_IP_HEADER": request.form.get("real_ip_header", "X-Forwarded-For"),
+                "REAL_IP_RECURSIVE": request.form.get("real_ip_recursive", "yes"),
+                "REAL_IP_FROM_URLS": request.form.get("real_ip_from_urls", ""),
             }
 
             lets_encrypt_dns_credential_items = request.form.getlist("lets_encrypt_dns_credential_items")
@@ -261,6 +279,13 @@ def setup_page():
         custom_ssl_key=db_config.get("CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")),
         custom_ssl_cert_data=db_config.get("CUSTOM_SSL_CERT_DATA", getenv("CUSTOM_SSL_CERT_DATA", "")),
         custom_ssl_key_data=db_config.get("CUSTOM_SSL_KEY_DATA", getenv("CUSTOM_SSL_KEY_DATA", "")),
+        pro_license_key=db_config.get("PRO_LICENSE_KEY", getenv("PRO_LICENSE_KEY", "")),
+        use_real_ip=db_config.get("USE_REAL_IP", getenv("USE_REAL_IP", "no")),
+        use_proxy_protocol=db_config.get("USE_PROXY_PROTOCOL", getenv("USE_PROXY_PROTOCOL", "no")),
+        real_ip_from=db_config.get("REAL_IP_FROM", getenv("REAL_IP_FROM", "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8")),
+        real_ip_header=db_config.get("REAL_IP_HEADER", getenv("REAL_IP_HEADER", "X-Forwarded-For")),
+        real_ip_recursive=db_config.get("REAL_IP_RECURSIVE", getenv("REAL_IP_RECURSIVE", "yes")),
+        real_ip_from_urls=db_config.get("REAL_IP_FROM_URLS", getenv("REAL_IP_FROM_URLS", "")),
         # totp_qr_image=totp_qr_image,
         # totp_secret=TOTP.get_totp_pretty_key(session.get("tmp_totp_secret", "")),
     )

@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:9b4929a72599b6c6389ece4ecbf415fd1355129f22bb92bb137eea098f05e975 AS builder
+FROM python:3.13-alpine@sha256:37b14db89f587f9eaa890e4a442a3fe55db452b69cca1403cc730bd0fbdc8aaf AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -35,7 +35,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.13-alpine@sha256:9b4929a72599b6c6389ece4ecbf415fd1355129f22bb92bb137eea098f05e975
+FROM python:3.13-alpine@sha256:37b14db89f587f9eaa890e4a442a3fe55db452b69cca1403cc730bd0fbdc8aaf
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -46,7 +46,7 @@ RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariad
   adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "sqlite-libs>=3.49.2-r1" # CVE-2025-6965
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -74,7 +74,7 @@ COPY --chown=root:scheduler --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/
 COPY --chown=root:scheduler --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.3-rc1"
+LABEL version="1.6.3-rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="scheduler"
 

@@ -293,7 +293,7 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
     ignored_plugins = set()
     if original_path.is_dir():
         for file in original_path.glob("*"):
-            with suppress(StopIteration, IndexError):
+            with suppress(StopIteration, IndexError, FileNotFoundError):
                 index = next(i for i, plugin in enumerate(plugins) if plugin["id"] == file.name)
 
                 with BytesIO() as plugin_content:
