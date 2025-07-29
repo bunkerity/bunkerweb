@@ -185,6 +185,23 @@ class DnsMadeEasyProvider(Provider):
         return ["--dns-dnsmadeeasy"]
 
 
+class DynuProvider(Provider):
+    """Dynu DNS provider."""
+
+    dns_dynu_auth_token: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_dynu_auth_token": ("dns_dynu_auth_token", "dynu_auth_token", "auth_token"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--authenticator", "dns-dynu"]
+
+
 class GehirnProvider(Provider):
     """Gehirn DNS provider."""
 

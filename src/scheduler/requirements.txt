@@ -15,6 +15,7 @@ acme==4.1.1 \
     #   certbot-dns-dnsimple
     #   certbot-dns-dnsmadeeasy
     #   certbot-dns-domainoffensive
+    #   certbot-dns-dynu
     #   certbot-dns-gehirn
     #   certbot-dns-google
     #   certbot-dns-ionos
@@ -64,6 +65,7 @@ certbot==4.1.1 \
     #   certbot-dns-dnsimple
     #   certbot-dns-dnsmadeeasy
     #   certbot-dns-domainoffensive
+    #   certbot-dns-dynu
     #   certbot-dns-gehirn
     #   certbot-dns-google
     #   certbot-dns-infomaniak
@@ -104,6 +106,9 @@ certbot-dns-dnsmadeeasy==4.1.1 \
 certbot-dns-domainoffensive==2.0.0 \
     --hash=sha256:bfe7cb33eee6bc48e62437c811d0605cf974f723e211ac27fc396615ff5a2a05 \
     --hash=sha256:e2da1d4f9bd46456578c15f3a30ac4f767871a7a671c6c0d25efd6502670b0ff
+    # via -r requirements.in
+certbot-dns-dynu==0.0.6.post2502111739272536 \
+    --hash=sha256:3bca6343a5e962bdc666301228dcc73c6b3ebef9f2921d8afe1a56f1450d9229
     # via -r requirements.in
 certbot-dns-gehirn==4.1.1 \
     --hash=sha256:305ff044228fe757f3a3ad5d7e1baba802a7a2eb0cd45ebf33c952e72945994a \
@@ -390,6 +395,7 @@ dns-lexicon==3.21.1 \
     # via
     #   certbot-dns-dnsimple
     #   certbot-dns-dnsmadeeasy
+    #   certbot-dns-dynu
     #   certbot-dns-gehirn
     #   certbot-dns-linode
     #   certbot-dns-luadns
@@ -401,6 +407,7 @@ dnspython==2.7.0 \
     --hash=sha256:b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86 \
     --hash=sha256:ce9c432eda0dc91cf618a5cedf1a4e142651196bbcd2c80e89ed5a907e5cfaf1
     # via
+    #   certbot-dns-dynu
     #   certbot-dns-rfc2136
     #   dns-lexicon
 filelock==3.18.0 \
@@ -814,6 +821,7 @@ requests==2.32.4 \
     #   certbot-dns-bunny
     #   certbot-dns-desec
     #   certbot-dns-domainoffensive
+    #   certbot-dns-dynu
     #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-scaleway
