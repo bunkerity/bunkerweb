@@ -4605,11 +4605,13 @@ To enable this, you need to sign up at [darkvisitors.com](https://darkvisitors.c
 | ------------------------------------ | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `USE_ROBOTSTXT`                      | `no`    | multisite | No       | Enables or disables the `robots.txt` feature.                                                                                         |
 | `ROBOTSTXT_DARKVISITORS_TOKEN`       |         | multisite | No       | Bearer token for the DarkVisitors API.                                                                                                |
-| `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` |         | multisite | No       | Comma-separated list of agent types (e.g., `AI_Data_Scraper`) to include from DarkVisitors.                                           |
+| `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` |         | multisite | No       | Comma-separated list of agent types (e.g., `AI Data Scraper`) to include from DarkVisitors.                                           |
 | `ROBOTSTXT_DARKVISITORS_DISALLOW`    | `/`     | multisite | No       | A string specifying which URLs are disallowed. This value will be sent as the disallow field when contacting the DarkVisitors API.    |
 | `ROBOTSTXT_COMMUNITY_LISTS`          |         | multisite | No       | Space-separated list of community-maintained rule set IDs to include.                                                                 |
 | `ROBOTSTXT_URLS`                     |         | multisite | No       | Space-separated list of URLs to fetch additional `robots.txt` rules from. Supports `file://` and basic auth (`http://user:pass@url`). |
 | `ROBOTSTXT_RULE`                     |         | multisite | Yes      | A single rule for `robots.txt`.                                                                                                       |
+| `ROBOTSTXT_HEADER`                   |         | multisite | Yes      | Header for `robots.txt` file (before rules). Can be Base64 encoded.                                                                   |
+| `ROBOTSTXT_FOOTER`                   |         | multisite | Yes      | Footer for `robots.txt` file (after rules). Can be Base64 encoded.                                                                    |
 | `ROBOTSTXT_IGNORE_RULES`             |         | multisite | Yes      | A single PCRE regex pattern to ignore rules.                                                                                          |
 | `ROBOTSTXT_SITEMAP`                  |         | multisite | Yes      | A single sitemap URL.                                                                                                                 |
 
@@ -4644,6 +4646,17 @@ ROBOTSTXT_URLS: "https://example.com/my-custom-rules.txt"
 ROBOTSTXT_RULE: "User-agent: MyOwnBot"
 ROBOTSTXT_RULE_1: "Disallow: /admin"
 ROBOTSTXT_IGNORE_RULES: "User-agent: Googlebot-Image"
+ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
+```
+
+**With Header and Footer**
+
+```yaml
+USE_ROBOTSTXT: "yes"
+ROBOTSTXT_HEADER: "# This is a custom header"
+ROBOTSTXT_RULE: "User-agent: *"
+ROBOTSTXT_RULE_1: "Disallow: /private"
+ROBOTSTXT_FOOTER: "# This is a custom footer"
 ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ```
 
