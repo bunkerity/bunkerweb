@@ -1,6 +1,28 @@
 # Changelog
 
-## v1.6.3-rc1 - ????/??/??
+## v1.6.3 - ????/??/??
+
+- [BUGFIX] Fix HTTP/3 not working on default server as the `reuseport` directive was missing in the `default-server-http.conf` file.
+- [UI] Fix missing settings when cloning a service in the web UI
+- [FEATURE] Add the possibility to add headers and a footers to the `robots.txt` file using the `ROBOTSTXT_HEADER` and `ROBOTSTXT_FOOTER` settings. (Can be Base64 encoded)
+- [FEATURE] Add `domainoffensive.de` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `Dynu` as a DNS provider in the `letsencrypt` plugin
+- [DEPS] Update lua-resty-session version to v4.1.3
+- [DEPS] Update lua-resty-redis version to v0.33
+
+## v1.6.3-rc2 - 2025/07/29
+
+- [BUGFIX] Fix errors with the `Custom SSL certificate` job when a lot of environment variables are set in the scheduler.
+- [BUGFIX] Fix shenanigans regarding external/PRO plugins in Linux integration.
+- [FEATURE] Update Laurent Minne's blacklist URL to the new one: <https://github.com/duggytuxy/Data-Shield_IPv4_Blocklist>
+- [UI] Add PRO activation step in the setup wizard to allow users to activate the PRO version during the initial setup.
+- [UI] Simplify configuration step in setup wizard by adding a new `Advanced settings` section to allow users to configure advanced settings like `SERVER_NAME`, and the `Let's Encrypt` plugin.
+- [UI] Add a new alias to the `TOTP_SECRETS` environment variable: `TOTP_ENCRYPTION_KEYS` to make more sense in the context of the TOTP feature.
+- [UI] Add a force recheck PRO plugins button in the web UI to allow users to force a recheck of the PRO plugins status.
+- [LINUX] Add CrowdSec automatic installation/configuration in the easy-install script for Linux distributions.
+- [ALL-IN-ONE] Update CrowdSec to version v1.6.11.
+
+## v1.6.3-rc1 - 2025/07/19
 
 - [BUGFIX] Update scheduler environment variables handling to avoid issues when there are too many environment variables set.
 - [BUGFIX] Fix `Let's Encrypt` credential files being removed upon reload of the scheduler creating issues with the certificate renewal.
@@ -21,7 +43,7 @@
 - [LINUX] Drop support of Fedora 40
 - [DEPS] Updated NGINX version to 1.28.0 for Fedora integration now that it is available in the repositories.
 
-## v1.6.2 - ????/??/??
+## v1.6.2 - 2025/07/08
 
 - [SECURITY] Introduce ModSecurity exclusion rules targeting the password input upon login, preventing false-positive blocks on valid complex passwords while preserving strict overall request inspection.
 - [SECURITY] Add new ModSecurity exclusion rule to prevent false positives on the `/instances/new` endpoint, specifically for the `hostname` argument, ensuring that legitimate requests are not blocked while maintaining security.

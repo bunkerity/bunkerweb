@@ -631,6 +631,7 @@ local derive_pbkdf2_hmac_sha256 do
         iter = 10000,
         salt = "",
         pass = "",
+        pkcs5 = 1, -- Disables the SP800-132 compliance checks on FIPS-mode
       }
     end
     derive_pbkdf2_hmac_sha256 = derive_pbkdf2_hmac_sha256_real
