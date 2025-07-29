@@ -8,6 +8,7 @@
 - [FEATURE] Add `domainoffensive.de` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `Dynu` as a DNS provider in the `letsencrypt` plugin
 - [DEPS] Update lua-resty-session version to v4.1.3
+- [DEPS] Update lua-resty-redis version to v0.33
 
 ## v1.6.3-rc2 - 2025/07/29
 
