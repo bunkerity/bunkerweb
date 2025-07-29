@@ -1,0 +1,62 @@
+/* zoom on image, custom z-index */
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+  z-index: 999;
+}
+
+/* avoid font to pop on family change */
+* {
+  font-display: swap;
+}
+
+:root {
+  --md-primary-fg-color: #125678;
+  --md-text-font: "Roboto";
+}
+
+.md-footer {
+  background-color: #125678;
+}
+
+/* better link contrast */
+article a {
+  color: #2388bb;
+}
+
+/* highlight content links */
+article a,
+article p > a {
+  text-decoration: underline;
+}
+
+/* header list links and config tabs stay default  */
+article li > a,
+article label > a {
+  text-decoration: none;
+}
+
+/* lighter base tab color */
+nav.md-tabs ul li a {
+  opacity: 0.9;
+}
+
+/* active desktop tabs nav */
+nav.md-tabs ul li.md-tabs__item--active a {
+  color: #36ce7a;
+  font-weight: bold;
+}
+
+nav.md-tabs ul li.md-tabs__item--active a:hover {
+  filter: brightness(0.9);
+}
+
+/*
+@font-face {
+	font-family: Consolas, monaco, monospace;
+}
+
+@font-face {
+	font-family: "TitleFont";
+	src: "assets/font-title.woff";
+}
+*/
