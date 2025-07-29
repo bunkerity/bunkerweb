@@ -201,6 +201,7 @@ def services_service_page(service: str):
         del variables["csrf_token"]
 
         mode = request.args.get("mode", "easy")
+        clone = request.args.get("clone", "")
 
         if mode == "raw":
             server_name = variables.get("SERVER_NAME", variables.get("OLD_SERVER_NAME", "")).split(" ")[0]
@@ -213,8 +214,17 @@ def services_service_page(service: str):
 
         is_draft = variables.pop("IS_DRAFT", "no") == "yes"
 
-        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str):
+        def update_service(service: str, variables: Dict[str, str], is_draft: bool, mode: str, clone: str):
             wait_applying()
+
+            if clone and service == "new":
+                cloned_service_config = {k: v for k, v in DB.get_config(methods=False, with_drafts=True, service=clone).items()}
+
+                for key, value in cloned_service_config.items():
+                    if key in variables:
+                        continue
+
+                    variables[key] = value
 
             # Edit check fields and remove already existing ones
             if service != "new":
@@ -345,7 +355,7 @@ def services_service_page(service: str):
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=update_service, args=(service, variables.copy(), is_draft, mode)).start()
+        Thread(target=update_service, args=(service, variables.copy(), is_draft, mode, clone)).start()
 
         new_service = False
         if service == "new":
@@ -390,6 +400,9 @@ def services_service_page(service: str):
                 original_value = db_config.get(key, {}).get("value")
                 db_config[key] = setting | {"clone": original_value != setting.get("value")}
             db_config["SERVER_NAME"].update({"value": "", "clone": False})
+            for key, value in DB.get_custom_configs(with_drafts=True, as_dict=True).items():
+                if key.startswith(f"{clone}_"):
+                    db_custom_configs[key.replace(f"{clone}_", f"{service}_", 1)] = value
     else:
         db_config = DB.get_config(methods=True, with_drafts=True, service=service)
 

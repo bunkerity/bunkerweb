@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.3-rc2 - ????/??/??
+## v1.6.3 - ????/??/??
+
+- [UI] Fix missing settings when cloning a service in the web UI
+
+## v1.6.3-rc2 - 2025/07/29
 
 - [BUGFIX] Fix errors with the `Custom SSL certificate` job when a lot of environment variables are set in the scheduler.
 - [BUGFIX] Fix shenanigans regarding external/PRO plugins in Linux integration.
