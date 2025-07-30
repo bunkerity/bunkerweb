@@ -181,7 +181,13 @@ function limit:access()
 				rate
 			)
 		end
-		return self:ret(true, msg, HTTP_TOO_MANY_REQUESTS)
+		local data = {
+			uri = uri,
+			current_rate = current_rate,
+			rate_time = rate_time,
+			rate = rate,
+		}
+		return self:ret(true, msg, HTTP_TOO_MANY_REQUESTS, nil, data)
 	end
 
 	local msg = string.format(
