@@ -725,8 +725,53 @@ $(document).ready(() => {
     $(this).removeClass("is-valid");
   });
 
-  const performGlobalSearch = () => {
+  const filterPluginList = () => {
     const keyword = $pluginKeywordSearch.val().toLowerCase().trim();
+    let firstVisible = null;
+    let visibleItems = 0;
+
+    $pluginItems.each(function () {
+      const $item = $(this);
+      const typeMatches =
+        currentType === "all" || $item.data("type") === currentType;
+
+      const pluginId = $item.data("plugin");
+      const pluginName = $item.find(".fw-bold").text().toLowerCase();
+      const pluginDesc = $item
+        .find("small.text-muted.d-block")
+        .data("description")
+        .toLowerCase();
+      const keywordMatches =
+        keyword === "" ||
+        pluginId.includes(keyword) ||
+        pluginName.includes(keyword) ||
+        pluginDesc.includes(keyword);
+
+      if (typeMatches && keywordMatches) {
+        $item.removeClass("visually-hidden");
+        if (!firstVisible) {
+          firstVisible = $item;
+        }
+        visibleItems++;
+      } else {
+        $item.addClass("visually-hidden");
+      }
+    });
+
+    $(".no-plugin-items").toggle(visibleItems === 0);
+
+    const $activeNav = $(".plugin-navigation-item.active");
+    if (
+      firstVisible &&
+      ($activeNav.length === 0 || $activeNav.hasClass("visually-hidden"))
+    ) {
+      const tab = bootstrap.Tab.getOrCreateInstance(firstVisible[0]);
+      tab.show();
+    }
+  };
+
+  const performSettingsSearch = () => {
+    const keyword = $pluginKeywordSearchTop.val().toLowerCase().trim();
 
     // Clear highlights from all tabs
     $(".tab-content .tab-pane .setting-highlight").removeClass(
@@ -734,30 +779,9 @@ $(document).ready(() => {
     );
 
     if (keyword === "") {
-      // If search is cleared, show all plugins respecting the type filter
-      let firstVisible = null;
-      $pluginItems.each(function () {
-        const $item = $(this);
-        const typeMatches =
-          currentType === "all" || $item.data("type") === currentType;
-        $item.toggleClass("visually-hidden", !typeMatches);
-        if (typeMatches && !firstVisible) {
-          firstVisible = $item;
-        }
-      });
-      $(".no-plugin-items").hide();
-      const $activeNav = $(".plugin-navigation-item.active");
-      if (
-        firstVisible &&
-        ($activeNav.length === 0 || $activeNav.hasClass("visually-hidden"))
-      ) {
-        const tab = bootstrap.Tab.getOrCreateInstance(firstVisible[0]);
-        tab.show();
-      }
       return;
     }
 
-    const matchingPlugins = new Set();
     let bestMatch = null;
 
     // Find all plugins with matching settings or metadata
@@ -792,7 +816,6 @@ $(document).ready(() => {
       });
 
       if (matchedSettings.length > 0 || pluginMetaMatch) {
-        matchingPlugins.add(pluginId);
         if (!bestMatch) {
           bestMatch = {
             pluginId: pluginId,
@@ -804,23 +827,7 @@ $(document).ready(() => {
       }
     });
 
-    // Filter the sidebar plugin list
-    $pluginItems.each(function () {
-      const $item = $(this);
-      const pluginId = $item.data("plugin");
-      const typeMatches =
-        currentType === "all" || $item.data("type") === currentType;
-
-      if (typeMatches && matchingPlugins.has(pluginId)) {
-        $item.removeClass("visually-hidden");
-      } else {
-        $item.addClass("visually-hidden");
-      }
-    });
-
-    const $noPluginItems = $(".no-plugin-items");
     if (bestMatch) {
-      $noPluginItems.hide();
       const bestMatchNavItem = $(`#plugin-nav-${bestMatch.pluginId}`);
 
       const doHighlight = () => {
@@ -836,22 +843,15 @@ $(document).ready(() => {
         const tab = bootstrap.Tab.getOrCreateInstance(bestMatchNavItem[0]);
         tab.show();
       }
-    } else {
-      $noPluginItems.show();
     }
   };
 
-  const debouncedGlobalSearch = debounce(performGlobalSearch, 200);
+  const debouncedFilterPluginList = debounce(filterPluginList, 200);
+  const debouncedSettingsSearch = debounce(performSettingsSearch, 200);
 
-  $pluginKeywordSearch.on("input", (e) => {
-    $pluginKeywordSearchTop.val($(e.target).val());
-    debouncedGlobalSearch();
-  });
+  $pluginKeywordSearch.on("input", debouncedFilterPluginList);
 
-  $pluginKeywordSearchTop.on("input", (e) => {
-    $pluginKeywordSearch.val($(e.target).val());
-    debouncedGlobalSearch();
-  });
+  $pluginKeywordSearchTop.on("input", debouncedSettingsSearch);
 
   $pluginTypeSelect.on("change", function () {
     currentType = $(this).val();
@@ -859,7 +859,7 @@ $(document).ready(() => {
       currentType === "all" ? { type: null } : { type: currentType };
 
     updateUrlParams(params);
-    performGlobalSearch(); // Not debounced for instant feedback
+    filterPluginList(); // Not debounced for instant feedback
   });
 
   $(document).on("click", ".show-multiple", function () {
