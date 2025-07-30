@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.3 - ????/??/??
+## v1.6.3-rc3 - ????/??/??
 
 - [BUGFIX] Fix HTTP/3 not working on default server as the `reuseport` directive was missing in the `default-server-http.conf` file.
 - [UI] Fix missing settings when cloning a service in the web UI
@@ -13,6 +13,8 @@
 - [UI] Enhance keywords search in the settings UI to make it more intuitive and user-friendly
 - [DEPS] Update lua-resty-session version to v4.1.3
 - [DEPS] Update lua-resty-redis version to v0.33
+- [CONTRIBUTION] Thank you [Michal-Koeckeis-Fresel](https://github.com/Michal-Koeckeis-Fresel) for your contribution to the `Let's Encrypt` plugin.
+- [CONTRIBUTION] Thank you [killmasta93](https://github.com/killmasta93) for your contribution regarding the integrations examples.
 
 ## v1.6.3-rc2 - 2025/07/29
 
