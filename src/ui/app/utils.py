@@ -194,7 +194,16 @@ def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[s
 
 
 def get_blacklisted_settings(global_config: bool = False) -> Set[str]:
-    blacklisted_settings = {"IS_LOADING", "AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "IS_DRAFT", "BUNKERWEB_INSTANCES"}
+    blacklisted_settings = {
+        "IS_LOADING",
+        "AUTOCONF_MODE",
+        "SWARM_MODE",
+        "KUBERNETES_MODE",
+        "IS_DRAFT",
+        "BUNKERWEB_INSTANCES",
+        "DATABASE_URI",
+        "DATABASE_URI_READONLY",
+    }
     if global_config:
         blacklisted_settings.update({"SERVER_NAME", "USE_TEMPLATE"})
     return blacklisted_settings
