@@ -24,6 +24,7 @@ $(document).ready(() => {
   const $serviceMethodInput = $("#service-method");
   const $pluginTypeSelect = $("#plugin-type-select");
   const $pluginKeywordSearch = $("#plugin-keyword-search");
+  const $pluginKeywordSearchTop = $("#plugin-keyword-search-top");
   const $pluginItems = $(".plugin-navigation-item");
   const $templateSearch = $("#template-search");
   const $templateDropdownMenu = $("#templates-dropdown-menu");
@@ -675,6 +676,17 @@ $(document).ready(() => {
     },
   );
 
+  $(".plugin-navigation-item").on("click", function (e) {
+    e.preventDefault();
+    const tab = bootstrap.Tab.getOrCreateInstance(this);
+    tab.show();
+  });
+
+  $(".plugin-navigation-item").on("shown.bs.tab", function (e) {
+    const targetClass = $(e.target).data("bs-target");
+    handleTabChange(targetClass);
+  });
+
   // Update the mode change handler to validate before switching from easy mode
   $('.mode-selection-menu button[data-bs-toggle="tab"]').on(
     "click",
@@ -713,73 +725,142 @@ $(document).ready(() => {
     $(this).removeClass("is-valid");
   });
 
+  const performGlobalSearch = () => {
+    const keyword = $pluginKeywordSearch.val().toLowerCase().trim();
+
+    // Clear highlights from all tabs
+    $(".tab-content .tab-pane .setting-highlight").removeClass(
+      "setting-highlight setting-highlight-fade",
+    );
+
+    if (keyword === "") {
+      // If search is cleared, show all plugins respecting the type filter
+      let firstVisible = null;
+      $pluginItems.each(function () {
+        const $item = $(this);
+        const typeMatches =
+          currentType === "all" || $item.data("type") === currentType;
+        $item.toggleClass("visually-hidden", !typeMatches);
+        if (typeMatches && !firstVisible) {
+          firstVisible = $item;
+        }
+      });
+      $(".no-plugin-items").hide();
+      const $activeNav = $(".plugin-navigation-item.active");
+      if (
+        firstVisible &&
+        ($activeNav.length === 0 || $activeNav.hasClass("visually-hidden"))
+      ) {
+        const tab = bootstrap.Tab.getOrCreateInstance(firstVisible[0]);
+        tab.show();
+      }
+      return;
+    }
+
+    const matchingPlugins = new Set();
+    let bestMatch = null;
+
+    // Find all plugins with matching settings or metadata
+    $("div[id^='navs-plugins-']").each(function () {
+      const $pluginContainer = $(this);
+      const pluginId = $pluginContainer.attr("id").replace("navs-plugins-", "");
+
+      // Search plugin metadata
+      const $navItem = $(`#plugin-nav-${pluginId}`);
+      const pluginName = $navItem.find(".fw-bold").text().toLowerCase();
+      const pluginDesc = $navItem
+        .find("small.text-muted.d-block")
+        .data("description")
+        .toLowerCase();
+      const pluginMetaMatch =
+        pluginId.toLowerCase().includes(keyword) ||
+        pluginName.includes(keyword) ||
+        pluginDesc.includes(keyword);
+
+      // Search settings within the plugin
+      const $settingLabels = $pluginContainer.find("label.form-label");
+      const matchedSettings = $settingLabels.filter(function () {
+        const $label = $(this);
+        const labelText = $label.text().toLowerCase();
+        const $settingContainer = $label.closest("[class*='col-12']");
+        const helpText = (
+          $settingContainer
+            .find(".badge[data-bs-original-title]")
+            .attr("data-bs-original-title") || ""
+        ).toLowerCase();
+        return labelText.includes(keyword) || helpText.includes(keyword);
+      });
+
+      if (matchedSettings.length > 0 || pluginMetaMatch) {
+        matchingPlugins.add(pluginId);
+        if (!bestMatch) {
+          bestMatch = {
+            pluginId: pluginId,
+            settings: matchedSettings.map(function () {
+              return $(this).closest("[class*='col-12']")[0];
+            }),
+          };
+        }
+      }
+    });
+
+    // Filter the sidebar plugin list
+    $pluginItems.each(function () {
+      const $item = $(this);
+      const pluginId = $item.data("plugin");
+      const typeMatches =
+        currentType === "all" || $item.data("type") === currentType;
+
+      if (typeMatches && matchingPlugins.has(pluginId)) {
+        $item.removeClass("visually-hidden");
+      } else {
+        $item.addClass("visually-hidden");
+      }
+    });
+
+    const $noPluginItems = $(".no-plugin-items");
+    if (bestMatch) {
+      $noPluginItems.hide();
+      const bestMatchNavItem = $(`#plugin-nav-${bestMatch.pluginId}`);
+
+      const doHighlight = () => {
+        if (bestMatch.settings.length > 0) {
+          highlightSettings($(bestMatch.settings));
+        }
+      };
+
+      if (bestMatchNavItem.hasClass("active")) {
+        doHighlight();
+      } else {
+        bestMatchNavItem.one("shown.bs.tab", doHighlight);
+        const tab = bootstrap.Tab.getOrCreateInstance(bestMatchNavItem[0]);
+        tab.show();
+      }
+    } else {
+      $noPluginItems.show();
+    }
+  };
+
+  const debouncedGlobalSearch = debounce(performGlobalSearch, 200);
+
+  $pluginKeywordSearch.on("input", (e) => {
+    $pluginKeywordSearchTop.val($(e.target).val());
+    debouncedGlobalSearch();
+  });
+
+  $pluginKeywordSearchTop.on("input", (e) => {
+    $pluginKeywordSearch.val($(e.target).val());
+    debouncedGlobalSearch();
+  });
+
   $pluginTypeSelect.on("change", function () {
     currentType = $(this).val();
     const params =
       currentType === "all" ? { type: null } : { type: currentType };
 
     updateUrlParams(params);
-
-    $pluginItems.each(function () {
-      const typeMatches =
-        currentType === "all" || $(this).data("type") === currentType;
-      if (typeMatches) {
-        $(this).removeClass("visually-hidden");
-      } else {
-        $(this).addClass("visually-hidden");
-      }
-    });
-
-    // Check if the currently selected plugin is now hidden due to type filter
-    const $activeNav = $(".plugin-navigation-item.active");
-    if (
-      $activeNav.hasClass("visually-hidden") ||
-      (currentType !== "all" && $activeNav.data("type") !== currentType)
-    ) {
-      // If hidden or type doesn't match, select the first visible plugin
-      const $firstVisibleNav = $(".plugin-navigation-item")
-        .not(".visually-hidden")
-        .first();
-      if ($firstVisibleNav.length) {
-        $firstVisibleNav.trigger("click");
-      }
-    }
+    performGlobalSearch(); // Not debounced for instant feedback
   });
-
-  $pluginKeywordSearch.on(
-    "input",
-    debounce((e) => {
-      const keyword = e.target.value.toLowerCase().trim();
-      const $sidebarItems = $(".step-navigation-list .plugin-navigation-item");
-      if (!keyword) {
-        $sidebarItems.removeClass("visually-hidden");
-        return;
-      }
-      let found = false;
-      $sidebarItems.each(function () {
-        const $item = $(this);
-        const pluginId = $item.data("plugin") || "";
-        const pluginName = $item.find(".fw-bold").text().toLowerCase();
-        const pluginDesc = $item
-          .find("small.text-muted.d-block")
-          .data("description")
-          .toLowerCase();
-        const match =
-          pluginId.toLowerCase().includes(keyword) ||
-          pluginName.includes(keyword) ||
-          pluginDesc.includes(keyword);
-        if (match) {
-          $item.css("display", "");
-          if (!found) {
-            $item.trigger("click");
-            found = true;
-          }
-        } else {
-          $item.addClass("visually-hidden");
-        }
-      });
-    }, 100),
-  );
 
   $(document).on("click", ".show-multiple", function () {
     const currentTextKey =
