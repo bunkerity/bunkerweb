@@ -41,7 +41,7 @@ services:
       - bw-universe
 
   mymagento:
-    image: bitnami/magento:2
+    image: bitnami/magento-archived:2
     volumes:
       - magento-data:/bitnami/magento
     environment:

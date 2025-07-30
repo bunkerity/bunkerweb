@@ -1,4 +1,3 @@
 #!/bin/bash
 
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install -f magento-chart-values.yml magento bitnami/magento
+helm install -f magento-chart-values.yml magento oci://registry-1.docker.io/bitnamicharts/magento
