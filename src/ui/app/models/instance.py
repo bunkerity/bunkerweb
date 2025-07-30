@@ -332,6 +332,21 @@ class InstancesUtils:
                 return {}
 
             try:
+                if plugin_id == "requests":
+                    requests_data = redis_client.lrange("requests", 0, -1)
+                    requests_list = []
+                    seen_ids = set()
+                    for item in requests_data:
+                        try:
+                            request = loads(item.decode("utf-8"))
+                            req_id = request.get("id")
+                            if req_id not in seen_ids:
+                                seen_ids.add(req_id)
+                                requests_list.append(request)
+                        except Exception:
+                            continue
+                    return {"requests": requests_list}
+
                 redis_metrics = {}
                 # Get all metric keys for this plugin from all workers
                 pattern = f"metrics:{plugin_id}_*"
@@ -427,11 +442,11 @@ class InstancesUtils:
                 return {}
 
             instance_data = instance_metrics.get(instance.hostname, {})
-            if not isinstance(instance_data.get("msg"), dict) or instance_data.get("status") != "success":
+            if not isinstance(instance_data.get("data"), dict) or instance_data.get("status") != "success":
                 self.__db.logger.warning(f"Can't get metrics from {instance.hostname}: {instance_data.get('msg')} - {instance_data.get('status')}")
                 return {}
 
-            return instance_data["msg"]
+            return instance_data["data"]
 
         # Initialize metrics
         metrics = {}

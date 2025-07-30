@@ -40,7 +40,7 @@ http {
       storage  = "cookie",
     })
   }
-  
+
   server {
     listen       8080;
     server_name  localhost;
@@ -64,7 +64,7 @@ http {
         session:set_subject("OpenResty Fan")
         session:set("quote", "The quick brown fox jumps over the lazy dog")
         local ok, err = session:save()
-       
+
         ngx.say(string.format([[
           <html>
           <body>
@@ -79,7 +79,7 @@ http {
     location /started {
       content_by_lua_block {
         local session, err = require "resty.session".start()
-        
+
         ngx.say(string.format([[
           <html>
           <body>
@@ -95,14 +95,14 @@ http {
         ))
       }
     }
-    
+
     location /modify {
       content_by_lua_block {
         local session, err = require "resty.session".start()
         session:set_subject("Lua Fan")
         session:set("quote", "Lorem ipsum dolor sit amet")
         local _, err_save = session:save()
-        
+
         ngx.say(string.format([[
           <html>
           <body>
@@ -113,7 +113,7 @@ http {
         ]], err or err_save or "no error"))
       }
     }
-    
+
     location /modified {
       content_by_lua_block {
         local session, err = require "resty.session".start()
@@ -133,7 +133,7 @@ http {
         ))
       }
     }
-    
+
     location /destroy {
       content_by_lua_block {
         local ok, err = require "resty.session".destroy()
@@ -148,7 +148,7 @@ http {
         ]], err or "no error"))
       }
     }
-    
+
     location /destroyed {
       content_by_lua_block {
         local session, err = require "resty.session".open()
@@ -165,9 +165,9 @@ http {
           err or "no error"
         ))
       }
-    }    
+    }
   }
-}  
+}
 ```
 
 
@@ -823,7 +823,7 @@ local session = require "resty.session".new()
 local ok, err = session:open()
 if ok then
   -- session exists
-  
+
 else
   -- session did not exists or was invalid
 end
@@ -1242,7 +1242,7 @@ and
 
 ```
 [ PAYLOAD --]
-[ Data  *B  ]   
+[ Data  *B  ]
 ```
 
 Both the `HEADER` and `PAYLOAD` are base64 url-encoded before putting in a `Set-Cookie` header.
@@ -1257,7 +1257,7 @@ Header fields explained:
 - Flags: binary packed flags (short) in a two byte little endian form.
 - SID: `32` bytes of crypto random data (Session ID).
 - Created at: binary packed secs from epoch in a little endian form, truncated to 5 bytes.
-- Rolling Offset: binary packed secs from creation time in a little endian form (integer). 
+- Rolling Offset: binary packed secs from creation time in a little endian form (integer).
 - Size: binary packed data size in a three byte little endian form.
 - Tag: `16` bytes of authentication tag from AES-256-GCM encryption of the data.
 - Idling Offset: binary packed secs from creation time + rolling offset in a little endian form, truncated to 3 bytes.
@@ -1269,7 +1269,7 @@ Header fields explained:
 1. Initial keying material (IKM):
    1. derive IKM from `secret` by hashing `secret` with SHA-256, or
    2. use 32 byte IKM when passed to library with `ikm`
-2. Generate 32 bytes of crypto random session id (`sid`) 
+2. Generate 32 bytes of crypto random session id (`sid`)
 3. Derive 32 byte encryption key and 12 byte initialization vector with HKDF using SHA-256 (on FIPS-mode it uses PBKDF2 with SHA-256 instead)
    1. Use HKDF extract to derive a new key from `ikm` to get `key` (this step can be done just once per `ikm`):
       - output length: `32`
@@ -1308,9 +1308,12 @@ The `PBKDF2` settings:
 - password: `<key>`
 - salt: `"encryption:<sid>"`
 - iterations: `<1000|10000|100000|1000000>`
+- pkcs5: `1` (FIPS compliant in our use case, but is needed to disable `SP800-132` based verifications, such as iteration count, see: https://docs.openssl.org/master/man7/provider-kdf/#kdf-parameters)
 
 Iteration counts are based on `remember_safety` setting (`"Low"`, `"Medium"`, `"High"`, `"Very High"`),
 if `remember_safety` is set to `"None"`, we will use the HDKF as above.
+
+*Note:* For backwards compatibility, we disabled the SP800-132 compliance checks on FIPS-mode. This checks that the salt length is at least 128 bits, the derived key length is at least 112 bits, and that the iteration count is at least 1000. These checks are disabled by default in OpenSSL's default provider, but are enabled by default in the FIPS provider.
 
 
 # Cookie Header Authentication

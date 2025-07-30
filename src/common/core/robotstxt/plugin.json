@@ -41,7 +41,7 @@
       "help": "List of URLs, separated with spaces, containing robots.txt rules. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
       "id": "robotstxt-urls",
       "label": "Robots.txt URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
       "type": "multivalue",
       "separator": " "
     },
@@ -54,6 +54,26 @@
       "regex": "^.*$",
       "type": "text",
       "multiple": "robotstxt-rule"
+    },
+    "ROBOTSTXT_HEADER": {
+      "context": "multisite",
+      "default": "",
+      "help": "Header for robots.txt file (before rules). Can be Base64 encoded.",
+      "id": "robotstxt-header",
+      "label": "Robots.txt header",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "robotstxt-header"
+    },
+    "ROBOTSTXT_FOOTER": {
+      "context": "multisite",
+      "default": "",
+      "help": "Footer for robots.txt file (after rules). Can be Base64 encoded.",
+      "id": "robotstxt-footer",
+      "label": "Robots.txt footer",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "robotstxt-footer"
     },
     "ROBOTSTXT_SITEMAP": {
       "context": "multisite",

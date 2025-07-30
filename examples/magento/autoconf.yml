@@ -1,6 +1,6 @@
 services:
   mymagento:
-    image: bitnami/magento:2
+    image: bitnami/magento-archived:2
     networks:
       bw-services:
         aliases:

@@ -103,10 +103,14 @@
                        data-i18n="form.placeholder.plugin_search">
             </div>
             <ol class="list-group step-navigation-list" role="tablist">
+                <li class="list-group-item no-plugin-items border-0 p-2" style="display: none;">
+                    <span class="text-muted ms-2" data-i18n="status.no_item">No items found.</span>
+                </li>
                 {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
                     <li class="list-group-item plugin-navigation-item border-0 d-flex align-items-center p-2 cursor-pointer{% if loop.index == 1 %} show active{% endif %}"
                         role="tab"
                         id="plugin-nav-{{ plugin }}"
+                        data-bs-target="#navs-plugins-{{ plugin }}"
                         data-plugin="{{ plugin }}"
                         data-plugin-id="navs-plugins-{{ plugin }}"
                         data-type="{{ plugin_data['type'] }}"
