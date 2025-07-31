@@ -5,6 +5,16 @@
   "version": "1.0",
   "stream": "no",
   "settings": {
+    "REDIRECT_FROM": {
+      "context": "multisite",
+      "default": "/",
+      "help": "Path to redirect from.",
+      "id": "redirect-from",
+      "label": "Redirect from",
+      "regex": "^.+",
+      "type": "text",
+      "multiple": "redirect"
+    },
     "REDIRECT_TO": {
       "context": "multisite",
       "default": "",
@@ -12,7 +22,8 @@
       "id": "redirect-to",
       "label": "Redirect to",
       "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
-      "type": "text"
+      "type": "text",
+      "multiple": "redirect"
     },
     "REDIRECT_TO_REQUEST_URI": {
       "context": "multisite",
@@ -21,7 +32,8 @@
       "id": "redirect-to-request-uri",
       "label": "Append request URI",
       "regex": "^(yes|no)$",
-      "type": "check"
+      "type": "check",
+      "multiple": "redirect"
     },
     "REDIRECT_TO_STATUS_CODE": {
       "context": "multisite",
@@ -31,7 +43,8 @@
       "label": "Append request URI",
       "regex": "^(301|302)$",
       "type": "select",
-      "select": ["301", "302"]
+      "select": ["301", "302"],
+      "multiple": "redirect"
     }
   }
 }

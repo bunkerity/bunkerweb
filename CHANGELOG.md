@@ -2,6 +2,7 @@
 
 ## v1.6.3 - ????/??/??
 
+- [FEATURE] Enhance `Redirect` plugin to support multiple source/destination paths
 - [UI] Always display the selected service and selected type when editing/creating a custom configuration
 - [UI] Add global configuration fetching functionality to easy mode
 
