@@ -89,6 +89,7 @@
     "enable_totp": "TOTP'yi Etkinleştir",
     "entire_config": "Tüm Yapılandırma",
     "export": "Dışa Aktar",
+    "fetch_global": "Küresel Yapılandırmayı Getir",
     "filters_suffix": " Filtreler",
     "follow": "Takip Et",
     "github_stars": "Yıldızlar",
@@ -1240,6 +1241,7 @@
     "email_lets_encrypt": "Let's Encrypt ile sertifika yönetimi ve bildirimler için kaydedilecek e-posta adresi.",
     "email_length": "E-posta 1 ile 256 karakter arasında olmalıdır.",
     "follow_latest_page_only": "Takip modu sadece son sayfada kullanılabilir",
+    "fetch_global_settings": "Küresel ayarları al ve bunları mevcut şablona uygula",
     "global_config_source": "Değer küresel yapılandırmadan miras alınmıştır.",
     "instance_not_up": "Örnek {{hostname}} şu anda yanıt vermiyor ('açık' değil).",
     "latest_version_installed": "En son sürümü kullanıyorsunuz.",
@@ -1394,6 +1396,7 @@
     "use_proxy_protocol": "PROXY protokolü iletişimini etkinleştirin.",
     "use_real_ip": "Gerçek IP Kullan",
     "username_length": "Kullanıcı adı 1 ile 256 karakter arasında olmalıdır.",
+    "value_from_global": "Küresel yapılandırmadan değer alın",
     "view_full_url": "Tam URL'yi görüntülemek için tıklayın",
     "wildcard_certificates": "Wildcard sertifikalar (*.alanadiniz.com) oluşturun. DNS doğrulaması gerektirir.",
     "wildcard_dns_only": "Wildcard sertifikalar yalnızca DNS doğrulama türü ile desteklenir."

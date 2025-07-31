@@ -1,8 +1,9 @@
 # Changelog
 
-## v1.6.3
+## v1.6.3 - ????/??/??
 
 - [UI] Always display the selected service and selected type when editing/creating a custom configuration
+- [UI] Add global configuration fetching functionality to easy mode
 
 ## v1.6.3-rc3 - 2025/07/30
 

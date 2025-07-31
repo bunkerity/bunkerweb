@@ -50,6 +50,17 @@
                 <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.reset">Reset</span>
             </span>
         </button>
+        <button id="fetch-global-config"
+                type="button"
+                class="btn btn-sm btn-outline-info me-3"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-bs-original-title="Fetch global settings and apply them to the current template"
+                data-i18n="tooltip.fetch_global_settings">
+            <i class="bx bx-sm bx-download"></i>
+            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.fetch_global">Fetch Global</span>
+        </span>
+    </button>
         {% if current_endpoint != "global-config" %}
             <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
                 <button type="button"
@@ -213,6 +224,13 @@
                                                                             <span class="bx bx-globe bx-xs"></span>
                                                                         </span>
                                                                     {% endif %}
+                                                                    <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1 visually-hidden global-override-badge"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="Value from global configuration"
+                                                                          data-i18n="tooltip.value_from_global">
+                                                                        <i class="bx bx-download bx-xs"></i>
+                                                                    </span>
                                                                     {% if setting_value != template_data["settings"].get(setting, setting_default) %}
                                                                         <span class="badge badge-center rounded-pill bg-warning-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                               data-bs-toggle="tooltip"

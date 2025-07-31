@@ -89,6 +89,7 @@
     "enable_totp": "TOTP فعال کریں",
     "entire_config": "مکمل کنفیگریشن",
     "export": "برآمد کریں",
+    "fetch_global": "عالمی کنفیگریشن حاصل کریں",
     "filters_suffix": " فلٹرز",
     "follow": "فالو کریں",
     "github_stars": "ستارے",
@@ -1240,6 +1241,7 @@
     "email_lets_encrypt": "Let's Encrypt کے ساتھ سرٹیفکیٹ کے انتظام اور اطلاعات کے لیے رجسٹر کرنے والا ای میل ایڈریس۔",
     "email_length": "ای میل 1 اور 256 حروف کے درمیان ہونا چاہیے۔",
     "follow_latest_page_only": "فالو موڈ صرف تازہ ترین صفحے پر دستیاب ہے",
+    "fetch_global_settings": "گلوبل سیٹنگز کو بازیافت کریں اور انہیں موجودہ ٹیمپلیٹ پر لاگو کریں",
     "global_config_source": "قدر عالمی کنفیگریشن سے وراثت میں ملی ہے۔",
     "instance_not_up": "انسٹینس {{hostname}} فی الحال جواب نہیں دے رہا ہے ('up')۔",
     "latest_version_installed": "آپ تازہ ترین ورژن چلا رہے ہیں۔",
@@ -1394,6 +1396,7 @@
     "use_proxy_protocol": "PROXY پروٹوکول مواصلات کو فعال کریں۔",
     "use_real_ip": "اصل IP استعمال کریں",
     "username_length": "صارف نام 1 اور 256 حروف کے درمیان ہونا چاہیے۔",
+    "value_from_global": "گلوبل کنفیگریشن سے ویلیو",
     "view_full_url": "مکمل URL دیکھنے کے لیے کلک کریں",
     "wildcard_certificates": "وائلڈ کارڈ سرٹیفکیٹس (*.domain.com) بنائیں۔ DNS چیلنج درکار ہے۔",
     "wildcard_dns_only": "وائلڈ کارڈ سرٹیفکیٹس صرف DNS چیلنج قسم کے ساتھ معاون ہیں۔"
