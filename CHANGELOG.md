@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.3-rc3 - ????/??/??
+## v1.6.3
+
+- [UI] Always display the selected service and selected type when editing/creating a custom configuration
+
+## v1.6.3-rc3 - 2025/07/30
 
 - [BUGFIX] Fix HTTP/3 not working on default server as the `reuseport` directive was missing in the `default-server-http.conf` file.
 - [UI] Fix missing settings when cloning a service in the web UI
