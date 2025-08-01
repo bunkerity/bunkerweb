@@ -568,12 +568,6 @@ source: appsec
         fi
     } > "$CROWDSEC_ENV_TMP"
 
-    echo -e "${YELLOW}--- Step 6: Restart and enable services ---${NC}"
-    print_step "Restarting services and enabling at boot"
-    run_cmd systemctl restart crowdsec
-    sleep 2
-    systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
-
     echo
     echo -e "${GREEN}CrowdSec installed successfully${NC}"
     echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#crowdsec"
@@ -754,33 +748,25 @@ main() {
         "manager")
             print_status "Installation Type: Manager"
             export MANAGER_MODE=yes
-            export WORKER_MODE=no
             ;;
         "worker")
             print_status "Installation Type: Worker"
-            export MANAGER_MODE=no
             export WORKER_MODE=yes
             ;;
         "scheduler")
             print_status "Installation Type: Scheduler only"
-            export MANAGER_MODE=no
-            export WORKER_MODE=no
             export SERVICE_BUNKERWEB=no
             export SERVICE_SCHEDULER=yes
             export SERVICE_UI=no
             ;;
         "ui")
             print_status "Installation Type: Web UI only"
-            export MANAGER_MODE=no
-            export WORKER_MODE=no
             export SERVICE_BUNKERWEB=no
             export SERVICE_SCHEDULER=no
             export SERVICE_UI=yes
             ;;
         "full"|"")
             print_status "Installation Type: Full Stack"
-            export MANAGER_MODE=no
-            export WORKER_MODE=no
             ;;
     esac
 
@@ -834,6 +820,12 @@ main() {
             install_bunkerweb_rpm
             ;;
     esac
+
+    if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+        run_cmd systemctl restart crowdsec
+        sleep 2
+        systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
+    fi
 
     # Show final information
     show_final_info
