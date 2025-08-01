@@ -124,7 +124,7 @@ $(document).ready(function () {
   layout.topStart.buttons = [
     {
       extend: "colvis",
-      columns: "th:not(:nth-child(-n+3))",
+      columns: "th:not(:nth-child(-n+1))",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
         "button.columns",
         "Columns",
