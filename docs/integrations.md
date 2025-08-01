@@ -512,10 +512,8 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 41
-- Fedora 42
-- Red Hat Enterprise Linux (RHEL) 8.10
-- Red Hat Enterprise Linux (RHEL) 9.6
+- Fedora 41 and 42
+- Red Hat Enterprise Linux (RHEL) 8 and 9
 
 ### Easy installation script
 
@@ -523,67 +521,99 @@ For a simplified installation experience, BunkerWeb provides an easy install scr
 
 #### Quick start
 
-Download and run the installation script:
+To get started, download the installation script and its checksum, then verify the script's integrity before running it.
 
 ```bash
-wget https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.3-rc3/misc/install-bunkerweb.sh
+# Download the script and its checksum
+wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.3-rc3/install-bunkerweb.sh
+wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.3-rc3/install-bunkerweb.sh.sha256
+
+# Verify the checksum
+sha256sum -c install-bunkerweb.sh.sha256
+
+# If the check is successful, run the script
 chmod +x install-bunkerweb.sh
 sudo ./install-bunkerweb.sh
 ```
 
-!!! warning "Security Notice"
-    Before running any installation script, especially with elevated privileges, it's recommended to review the script content first.
+!!! danger "Security Notice"
+    **Always verify the integrity of the installation script before running it.**
 
-    ```bash
-    cat install-bunkerweb.sh
-    ```
+    Download the checksum file and use a tool like `sha256sum` to confirm the script has not been altered or tampered with.
 
-#### Interactive installation
+    If the checksum verification fails, **do not execute the script**—it may be unsafe.
 
-By default, the script runs in interactive mode and will:
+#### How It Works
 
-1. **Detect your operating system** and verify compatibility
-2. **Ask about the setup wizard** - choose whether to enable the web-based configuration interface
-3. **Show RHEL database recommendations** (if applicable) for external database support
-4. **Install NGINX** with the correct version for your distribution
-5. **Install BunkerWeb** and configure all services
-6. **Provide next steps** based on your configuration choices
+The easy install script is a powerful tool designed to streamline the setup of BunkerWeb on a fresh Linux system. It automates the following key steps:
 
-#### Command line options
+1.  **System Analysis**: Detects your operating system and verifies it against the list of supported distributions.
+2.  **Installation Customization**: In interactive mode, it prompts you to choose an installation type (All-In-One, Manager, Worker, etc.) and decide whether to enable the web-based setup wizard.
+3.  **Optional Integrations**: Offers to automatically install and configure the [CrowdSec Security Engine](#crowdsec-integration-with-the-script).
+4.  **Dependency Management**: Installs the correct version of NGINX required by BunkerWeb from official sources and locks the version to prevent unintended upgrades.
+5.  **BunkerWeb Installation**: Adds the BunkerWeb package repository, installs the necessary packages, and locks the version.
+6.  **Service Configuration**: Sets up and enables the `systemd` services corresponding to your chosen installation type.
+7.  **Post-install Guidance**: Provides clear next steps to help you get started with your new BunkerWeb instance.
 
-The script supports various options for different installation scenarios:
+#### Interactive Installation
+
+When run without any options, the script enters an interactive mode that guides you through the setup process. You will be asked to make the following choices:
+
+1.  **Installation Type**: Select the components you want to install.
+    *   **Full Stack (default)**: An all-in-one installation including BunkerWeb, the Scheduler, and the Web UI.
+    *   **Manager**: Installs the Scheduler and Web UI, intended to manage one or more remote BunkerWeb workers.
+    *   **Worker**: Installs only the BunkerWeb instance, which can be managed by a remote Manager.
+    *   **Scheduler Only**: Installs only the Scheduler component.
+    *   **Web UI Only**: Installs only the Web UI component.
+2.  **Setup Wizard**: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.
+3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection.
+4.  **CrowdSec AppSec**: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.
+
+#### Command-Line Options
+
+For non-interactive or automated setups, the script can be controlled with command-line flags:
+
+| Option                  | Description                                                              |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `--full`                | Full stack installation (BunkerWeb, Scheduler, UI). This is the default. |
+| `--manager`             | Installs the Scheduler and UI to manage remote workers.                  |
+| `--worker`              | Installs only the BunkerWeb instance.                                    |
+| `--scheduler-only`      | Installs only the Scheduler component.                                   |
+| `--ui-only`             | Installs only the Web UI component.                                      |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.3-rc3`).          |
+| `-w, --enable-wizard`   | Enables the setup wizard.                                                |
+| `-n, --no-wizard`       | Disables the setup wizard.                                               |
+| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.      |
+| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version.    |
+| `-h, --help`            | Displays the help message with all available options.                    |
+
+**Example Usage:**
 
 ```bash
-# Interactive installation (default)
+# Run in interactive mode (recommended for most users)
 sudo ./install-bunkerweb.sh
 
-# Non-interactive with defaults (wizard enabled)
+# Non-interactive installation with defaults (full stack, wizard enabled)
 sudo ./install-bunkerweb.sh --yes
 
-# Install without the setup wizard
-sudo ./install-bunkerweb.sh --no-wizard
+# Install a Worker node without the setup wizard
+sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Install a specific version
-sudo ./install-bunkerweb.sh --version 1.6.0
-
-# Force installation on unsupported OS versions
-sudo ./install-bunkerweb.sh --force
-
-# Show help
-./install-bunkerweb.sh --help
+sudo ./install-bunkerweb.sh --version 1.6.3-rc3
 ```
 
-#### What the script does
+#### CrowdSec Integration with the Script
 
-The easy install script automatically:
+If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:
 
-- **Validates OS compatibility** and warns about unsupported versions
-- **Installs NGINX** from official repositories with the correct version
-- **Adds BunkerWeb repositories** for your distribution
-- **Installs BunkerWeb packages** and locks versions to prevent accidental upgrades
-- **Configures systemd services** (bunkerweb, bunkerweb-scheduler, bunkerweb-ui)
-- **Sets up the setup wizard** (if enabled) for easy web-based configuration
-- **Provides comprehensive next steps** and resource links
+- It adds the official CrowdSec repository and installs the agent.
+- It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (`access.log`, `error.log`, and `modsec_audit.log`).
+- It installs essential collections (`crowdsecurity/nginx`) and parsers (`crowdsecurity/geoip-enrich`).
+- It registers a bouncer for BunkerWeb and automatically configures the API key in `/etc/bunkerweb/variables.env`.
+- If you also select the **AppSec Component**, it installs the `appsec-virtual-patching` and `appsec-generic-rules` collections and configures the AppSec endpoint for BunkerWeb.
+
+This provides a seamless, out-of-the-box integration for powerful intrusion prevention.
 
 #### RHEL considerations
 
