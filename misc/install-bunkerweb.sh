@@ -20,6 +20,7 @@ FORCE_INSTALL="no"
 INTERACTIVE_MODE="yes"
 CROWDSEC_INSTALL="no"
 CROWDSEC_APPSEC_INSTALL="no"
+INSTALL_TYPE=""
 
 # Function to print colored output
 print_status() {
@@ -89,62 +90,95 @@ ask_user_preferences() {
         print_step "Configuration Options"
         echo
 
-        # Ask about setup wizard
-        if [ -z "$ENABLE_WIZARD" ]; then
+        # Ask about installation type
+        if [ -z "$INSTALL_TYPE" ]; then
             echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🧙 BunkerWeb Setup Wizard${NC}"
+            echo -e "${BLUE}📦 Installation Type${NC}"
             echo -e "${BLUE}========================================${NC}"
-            echo "The BunkerWeb setup wizard provides a web-based interface to:"
-            echo "  • Complete initial configuration easily"
-            echo "  • Set up your first protected service"
-            echo "  • Configure SSL/TLS certificates"
-            echo "  • Access the management interface"
+            echo "Choose the type of installation based on your needs:"
+            echo "  1) Full Stack (default): All-in-one installation (BunkerWeb, Scheduler, UI)."
+            echo "  2) Manager: Installs Scheduler and UI to manage remote BunkerWeb workers."
+            echo "  3) Worker: Installs only the BunkerWeb instance, to be managed remotely."
+            echo "  4) Scheduler Only: Installs only the Scheduler component."
+            echo "  5) Web UI Only: Installs only the Web UI component."
             echo
             while true; do
-                echo -e "${YELLOW}Would you like to enable the setup wizard? (Y/n):${NC} "
+                echo -e "${YELLOW}Select installation type (1-5) [1]:${NC} "
                 read -p "" -r
+                REPLY=${REPLY:-1}
                 case $REPLY in
-                    [Yy]*|"")
-                        ENABLE_WIZARD="yes"
-                        break
-                        ;;
-                    [Nn]*)
-                        ENABLE_WIZARD="no"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
+                    1) INSTALL_TYPE="full"; break ;;
+                    2) INSTALL_TYPE="manager"; break ;;
+                    3) INSTALL_TYPE="worker"; break ;;
+                    4) INSTALL_TYPE="scheduler"; break ;;
+                    5) INSTALL_TYPE="ui"; break ;;
+                    *) echo "Invalid option. Please choose a number between 1 and 5." ;;
                 esac
             done
         fi
 
+        # Ask about setup wizard
+        if [ -z "$ENABLE_WIZARD" ]; then
+            if [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "scheduler" ]; then
+                ENABLE_WIZARD="no"
+            else
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}🧙 BunkerWeb Setup Wizard${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "The BunkerWeb setup wizard provides a web-based interface to:"
+                echo "  • Complete initial configuration easily"
+                echo "  • Set up your first protected service"
+                echo "  • Configure SSL/TLS certificates"
+                echo "  • Access the management interface"
+                echo
+                while true; do
+                    echo -e "${YELLOW}Would you like to enable the setup wizard? (Y/n):${NC} "
+                    read -p "" -r
+                    case $REPLY in
+                        [Yy]*|"")
+                            ENABLE_WIZARD="yes"
+                            break
+                            ;;
+                        [Nn]*)
+                            ENABLE_WIZARD="no"
+                            break
+                            ;;
+                        *)
+                            echo "Please answer yes (y) or no (n)."
+                            ;;
+                    esac
+                done
+            fi
+        fi
+
         # Ask about CrowdSec installation
-        if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🦙 CrowdSec Intrusion Prevention${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "CrowdSec is a community-powered, open-source intrusion prevention engine that analyzes logs in real time to detect, block and share intelligence on malicious IPs."
-            echo "It seamlessly integrates with BunkerWeb for automated threat remediation."
-            echo
-            while true; do
-                echo -e "${YELLOW}Would you like to automatically install and configure CrowdSec? (Y/n):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Yy]*|"")
-                        CROWDSEC_INSTALL="yes"
-                        break
-                        ;;
-                    [Nn]*)
-                        CROWDSEC_INSTALL="no"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
-                esac
-            done
+        if [ "$INSTALL_TYPE" != "worker" ] && [ "$INSTALL_TYPE" != "scheduler" ] && [ "$INSTALL_TYPE" != "ui" ]; then
+            if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
+                echo
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}🦙 CrowdSec Intrusion Prevention${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "CrowdSec is a community-powered, open-source intrusion prevention engine that analyzes logs in real time to detect, block and share intelligence on malicious IPs."
+                echo "It seamlessly integrates with BunkerWeb for automated threat remediation."
+                echo
+                while true; do
+                    echo -e "${YELLOW}Would you like to automatically install and configure CrowdSec? (Y/n):${NC} "
+                    read -p "" -r
+                    case $REPLY in
+                        [Yy]*|"")
+                            CROWDSEC_INSTALL="yes"
+                            break
+                            ;;
+                        [Nn]*)
+                            CROWDSEC_INSTALL="no"
+                            break
+                            ;;
+                        *)
+                            echo "Please answer yes (y) or no (n)."
+                            ;;
+                    esac
+                done
+            fi
         fi
 
         # Ask about AppSec installation if CrowdSec is chosen
@@ -178,6 +212,13 @@ ask_user_preferences() {
         echo
         print_status "Configuration summary:"
         echo "  🛡 BunkerWeb version: $BUNKERWEB_VERSION"
+        case "$INSTALL_TYPE" in
+            "full"|"") echo "  📦 Installation type: Full Stack" ;;
+            "manager") echo "  📦 Installation type: Manager" ;;
+            "worker") echo "  📦 Installation type: Worker" ;;
+            "scheduler") echo "  📦 Installation type: Scheduler Only" ;;
+            "ui") echo "  📦 Installation type: Web UI Only" ;;
+        esac
         echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
         echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
         echo "  🟢 NGINX version: $NGINX_VERSION"
@@ -239,8 +280,8 @@ check_supported_os() {
             NGINX_VERSION="1.28.0-1~$DISTRO_CODENAME"
             ;;
         "fedora")
-            if [[ "$DISTRO_VERSION" != "40" && "$DISTRO_VERSION" != "41" && "$DISTRO_VERSION" != "42" ]]; then
-                print_warning "Only Fedora 40, 41, and 42 are officially supported"
+            if [[ "$DISTRO_VERSION" != "41" && "$DISTRO_VERSION" != "42" ]]; then
+                print_warning "Only Fedora 41 and 42 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -265,7 +306,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12, Ubuntu 22.04/24.04, Fedora 40/41/42, RHEL 8/9"
+            print_error "Supported distributions: Debian 12, Ubuntu 22.04/24.04, Fedora 41/42, RHEL 8/9"
             exit 1
             ;;
     esac
@@ -618,6 +659,13 @@ usage() {
     echo "  -f, --force              Force installation on unsupported OS versions"
     echo "  -h, --help               Show this help message"
     echo
+    echo "Installation types:"
+    echo "  --full                   Full stack installation (default)"
+    echo "  --manager                Manager installation (Scheduler + UI)"
+    echo "  --worker                 Worker installation (BunkerWeb only)"
+    echo "  --scheduler-only         Scheduler only installation"
+    echo "  --ui-only                Web UI only installation"
+    echo
     echo "Examples:"
     echo "  $0                       # Interactive installation"
     echo "  $0 --no-wizard           # Install without setup wizard"
@@ -655,6 +703,26 @@ while [[ $# -gt 0 ]]; do
             usage
             exit 0
             ;;
+        --full)
+            INSTALL_TYPE="full"
+            shift
+            ;;
+        --manager)
+            INSTALL_TYPE="manager"
+            shift
+            ;;
+        --worker)
+            INSTALL_TYPE="worker"
+            shift
+            ;;
+        --scheduler-only)
+            INSTALL_TYPE="scheduler"
+            shift
+            ;;
+        --ui-only)
+            INSTALL_TYPE="ui"
+            shift
+            ;;
         *)
             print_error "Unknown option: $1"
             usage
@@ -680,6 +748,46 @@ main() {
 
     # Ask user preferences in interactive mode
     ask_user_preferences
+
+    # Set environment variables based on installation type
+    case "$INSTALL_TYPE" in
+        "manager")
+            print_status "Installation Type: Manager"
+            export MANAGER_MODE=yes
+            export WORKER_MODE=no
+            ;;
+        "worker")
+            print_status "Installation Type: Worker"
+            export MANAGER_MODE=no
+            export WORKER_MODE=yes
+            ;;
+        "scheduler")
+            print_status "Installation Type: Scheduler only"
+            export MANAGER_MODE=no
+            export WORKER_MODE=no
+            export SERVICE_BUNKERWEB=no
+            export SERVICE_SCHEDULER=yes
+            export SERVICE_UI=no
+            ;;
+        "ui")
+            print_status "Installation Type: Web UI only"
+            export MANAGER_MODE=no
+            export WORKER_MODE=no
+            export SERVICE_BUNKERWEB=no
+            export SERVICE_SCHEDULER=no
+            export SERVICE_UI=yes
+            ;;
+        "full"|"")
+            print_status "Installation Type: Full Stack"
+            export MANAGER_MODE=no
+            export WORKER_MODE=no
+            ;;
+    esac
+
+    # Pass UI_WIZARD to postinstall script
+    if [ "$ENABLE_WIZARD" = "no" ]; then
+        export UI_WIZARD=no
+    fi
 
     print_status "Installing BunkerWeb $BUNKERWEB_VERSION"
     print_status "Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"

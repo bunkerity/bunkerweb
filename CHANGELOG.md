@@ -5,6 +5,7 @@
 - [FEATURE] Enhance `Redirect` plugin to support multiple source/destination paths
 - [UI] Always display the selected service and selected type when editing/creating a custom configuration
 - [UI] Add global configuration fetching functionality to easy mode
+- [LINUX] Add installation type to the post-install script to allow users to choose among `all-in-one` (Full installation), `manager` (Scheduler and UI), `worker` (BunkerWeb only), `scheduler` (Scheduler only), and `ui` (UI only) installation types.
 
 ## v1.6.3-rc3 - 2025/07/30
 
