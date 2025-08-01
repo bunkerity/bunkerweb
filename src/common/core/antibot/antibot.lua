@@ -361,7 +361,7 @@ function antibot:prepare_challenge()
 		elseif session_update.type == "javascript" then
 			session_update.random = rand(20)
 		elseif session_update.type == "captcha" then
-			session_update.captcha = rand(6, true)
+			session_update.captcha = rand(6, true, self.variables["ANTIBOT_CAPTCHA_ALPHABET"])
 		end
 
 		-- Update session data with all changes at once

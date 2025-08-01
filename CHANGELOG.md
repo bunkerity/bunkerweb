@@ -3,6 +3,7 @@
 ## v1.6.3 - ????/??/??
 
 - [FEATURE] Enhance `Redirect` plugin to support multiple source/destination paths
+- [FEATURE] Enhance `Antibot` CAPTCHA functionality with customizable character set via the `ANTIBOT_CAPTCHA_ALPHABET` setting, allowing users to define a custom alphabet for CAPTCHA generation.
 - [UI] Always display the selected service and selected type when editing/creating a custom configuration
 - [UI] Add global configuration fetching functionality to easy mode
 - [LINUX] Add installation type to the post-install script to allow users to choose among `all-in-one` (Full installation), `manager` (Scheduler and UI), `worker` (BunkerWeb only), `scheduler` (Scheduler only), and `ui` (UI only) installation types.
