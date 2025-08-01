@@ -21,6 +21,7 @@ INTERACTIVE_MODE="yes"
 CROWDSEC_INSTALL="no"
 CROWDSEC_APPSEC_INSTALL="no"
 INSTALL_TYPE=""
+BUNKERWEB_INSTANCES_INPUT=""
 
 # Function to print colored output
 print_status() {
@@ -114,6 +115,26 @@ ask_user_preferences() {
                     5) INSTALL_TYPE="ui"; break ;;
                     *) echo "Invalid option. Please choose a number between 1 and 5." ;;
                 esac
+            done
+        fi
+
+        if [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🔗 BunkerWeb Instances Configuration${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "Please provide the list of BunkerWeb instances (workers) to manage."
+            echo "Format: a space-separated list of IP addresses or hostnames."
+            echo "Example: 192.168.1.10 192.168.1.11"
+            echo
+            while true; do
+                echo -e "${YELLOW}Enter BunkerWeb instances:${NC} "
+                read -p "" -r BUNKERWEB_INSTANCES_INPUT
+                if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                    break
+                else
+                    print_warning "This field cannot be empty for Manager/Scheduler installations."
+                fi
             done
         fi
 
@@ -219,6 +240,9 @@ ask_user_preferences() {
             "scheduler") echo "  📦 Installation type: Scheduler Only" ;;
             "ui") echo "  📦 Installation type: Web UI Only" ;;
         esac
+        if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+            echo "  🔗 BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
+        fi
         echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
         echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
         echo "  🟢 NGINX version: $NGINX_VERSION"
@@ -742,6 +766,11 @@ main() {
 
     # Ask user preferences in interactive mode
     ask_user_preferences
+
+    if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+        # Use a temporary file to pass the setting to the postinstall script
+        echo "BUNKERWEB_INSTANCES=$BUNKERWEB_INSTANCES_INPUT" > /var/tmp/bunkerweb_instances.env
+    fi
 
     # Set environment variables based on installation type
     case "$INSTALL_TYPE" in

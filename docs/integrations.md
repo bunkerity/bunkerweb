@@ -569,6 +569,9 @@ When run without any options, the script enters an interactive mode that guides 
 3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection.
 4.  **CrowdSec AppSec**: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.
 
+!!! info "Manager and Scheduler installations"
+    If you choose the **Manager** or **Scheduler Only** installation type, you will also be prompted to provide the IP addresses or hostnames of your BunkerWeb worker instances.
+
 #### Command-Line Options
 
 For non-interactive or automated setups, the script can be controlled with command-line flags:
