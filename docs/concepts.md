@@ -146,6 +146,11 @@ Under the hood, whenever you edit a setting or add a new configuration, BunkerWe
 
 Configuring the database is straightforward using the `DATABASE_URI` setting, which follows the specified formats for each supported database:
 
+!!! warning
+    When using the Docker Integration, you must set the `DATABASE_URI` environment variable in all BunkerWeb containers (except the BunkerWeb container itself), to ensure that all components can access the database correctly. This is crucial for maintaining the integrity and functionality of the system.
+
+    In all cases, ensure that `DATABASE_URI` is set before starting BunkerWeb, as it is required for proper operation.
+
 - **SQLite**: `sqlite:///var/lib/bunkerweb/db.sqlite3`
 - **MariaDB**: `mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db`
 - **MySQL**: `mysql+pymysql://bunkerweb:changeme@bw-db:3306/db`
