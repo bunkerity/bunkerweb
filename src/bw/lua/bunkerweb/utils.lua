@@ -596,19 +596,26 @@ utils.get_asn = function(ip)
 	return result.autonomous_system_number, "success"
 end
 
-utils.rand = function(nb, no_numbers)
+utils.rand = function(nb, no_numbers, alphabet)
 	local charset = {}
-	if not no_numbers then
-		for i = 48, 57 do
+	if alphabet then
+		-- Use custom alphabet
+		for i = 1, #alphabet do
+			table.insert(charset, alphabet:sub(i, i))
+		end
+	else
+		if not no_numbers then
+			for i = 48, 57 do
+				table.insert(charset, char(i))
+			end -- Numbers
+		end
+		for i = 65, 90 do
 			table.insert(charset, char(i))
-		end -- Numbers
+		end -- Uppercase
+		for i = 97, 122 do
+			table.insert(charset, char(i))
+		end -- Lowercase
 	end
-	for i = 65, 90 do
-		table.insert(charset, char(i))
-	end -- Uppercase
-	for i = 97, 122 do
-		table.insert(charset, char(i))
-	end -- Lowercase
 
 	local result = {}
 	for _ = 1, nb do

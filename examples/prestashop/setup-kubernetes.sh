@@ -1,4 +1,3 @@
 #!/bin/bash
 
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install -f prestashop-chart-values.yml prestashop bitnami/prestashop
+helm install -f prestashop-chart-values.yml prestashop oci://registry-1.docker.io/bitnamicharts/prestashop

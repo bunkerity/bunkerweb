@@ -100,6 +100,8 @@ def global_config_page():
                 message="Saving global configuration",
             )
         )
+    elif request.args.get("as_json", "false").lower() == "true":
+        return global_config
 
     mode = request.args.get("mode", "advanced")
     search_type = request.args.get("type", "all")

@@ -89,6 +89,7 @@
     "enable_totp": "Enable TOTP",
     "entire_config": "Entire Config",
     "export": "Export",
+    "fetch_global": "Fetch Global Config",
     "filters_suffix": " Filters",
     "follow": "Follow",
     "force_check": "Force check",
@@ -1244,6 +1245,7 @@
     "email_lets_encrypt": "The email address to register with Let's Encrypt for certificate management and notifications.",
     "email_length": "Email must be between 1 and 256 characters.",
     "follow_latest_page_only": "Follow mode is only available on the latest page",
+    "fetch_global_settings": "Fetch global settings and apply them to the current template",
     "global_config_source": "Value inherited from global configuration.",
     "instance_not_up": "Instance {{hostname}} is currently not responding ('up').",
     "lets_encrypt_custom_profile": "The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile').",
@@ -1398,6 +1400,7 @@
     "use_proxy_protocol": "Enable PROXY protocol communication.",
     "use_real_ip": "Use Real IP",
     "username_length": "Username must be between 1 and 256 characters.",
+    "value_from_global": "Value from global configuration",
     "view_full_url": "Click to view full URL",
     "wildcard_certificates": "Generate wildcard certificates (*.domain.com). Requires DNS challenge.",
     "wildcard_dns_only": "Wildcard certificates are only supported with the DNS challenge type."

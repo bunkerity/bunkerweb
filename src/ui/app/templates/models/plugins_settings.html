@@ -103,7 +103,8 @@
                        data-i18n="form.placeholder.plugin_search">
             </div>
             <ol class="list-group step-navigation-list" role="tablist">
-                <li class="list-group-item no-plugin-items border-0 p-2" style="display: none;">
+                <li class="list-group-item no-plugin-items border-0 p-2"
+                    style="display: none">
                     <span class="text-muted ms-2" data-i18n="status.no_item">No items found.</span>
                 </li>
                 {% for plugin, plugin_data in plugins.items() if get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}

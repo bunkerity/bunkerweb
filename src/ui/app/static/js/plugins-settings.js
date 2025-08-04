@@ -1505,6 +1505,156 @@ $(document).ready(() => {
     resetTemplateConfig();
   });
 
+  $("#fetch-global-config").on("click", function () {
+    if (isReadOnly) {
+      alert(t("alert.readonly_mode"));
+      return;
+    }
+
+    $.ajax({
+      url: `${window.location.pathname
+        .split("/")
+        .slice(0, -2)
+        .join("/")}/global-config?as_json=true`,
+      type: "GET",
+      success: function (globalConfig) {
+        const templateContainer = $(`#navs-templates-${currentTemplate}`);
+
+        const settingsInTemplate = new Set();
+        templateContainer.find(".plugin-setting").each(function () {
+          settingsInTemplate.add($(this).attr("name"));
+        });
+
+        for (const settingName in globalConfig) {
+          if (settingsInTemplate.has(settingName)) {
+            if (settingName === "SERVER_NAME") {
+              continue;
+            }
+            const settingData = globalConfig[settingName];
+            const settingValue = settingData.value;
+            const $input = templateContainer.find(`[name="${settingName}"]`);
+
+            if (!$input.length) continue;
+
+            const defaultValue = $input.data("default");
+            if (settingValue === defaultValue) {
+              continue;
+            }
+
+            const $settingContainer = $input.closest(".col-12");
+            const $badge = $settingContainer.find(".global-override-badge");
+            if ($badge.length) {
+              $badge.removeClass("visually-hidden");
+            }
+
+            const inputType = $input.attr("type");
+
+            if ($input.is("select")) {
+              $input.val(settingValue).trigger("change");
+            } else if (inputType === "checkbox") {
+              $input.prop("checked", settingValue === "yes").trigger("change");
+            } else if ($input.hasClass("multivalue-hidden-input")) {
+              const $container = $input.closest(".multivalue-container");
+              const separator = $container.data("separator") || " ";
+              const values = settingValue
+                ? settingValue.split(separator)
+                : [""];
+              $container.find(".multivalue-input-group").remove();
+              $container.find(".multivalue-toggle").remove();
+
+              const $inputsContainer = $container.find(".multivalue-inputs");
+              values.forEach((value, index) => {
+                const inputGroupHtml = `
+                  <div class="input-group mb-2 multivalue-input-group">
+                    <input type="text"
+                           class="form-control multivalue-input"
+                           value="${value.trim()}"
+                           placeholder="Enter value..."
+                           data-i18n="form.placeholder.multivalue_enter_value">
+                    <button type="button"
+                            class="btn btn-outline-success add-multivalue-item">
+                      <i class="bx bx-plus"></i>
+                    </button>
+                    ${
+                      index > 0 || values.length > 1
+                        ? `
+                    <button type="button"
+                            class="btn btn-outline-danger remove-multivalue-item">
+                      <i class="bx bx-x"></i>
+                    </button>
+                    `
+                        : ""
+                    }
+                  </div>
+                `;
+                $inputsContainer.append(inputGroupHtml);
+              });
+              updateMultivalueHiddenInput($container);
+            } else if (
+              $input.is('input[type="hidden"]') &&
+              $input.closest(".dropdown").find(".multiselect-toggle").length
+            ) {
+              $input.val(settingValue).trigger("input");
+              const selectedValues = settingValue
+                ? settingValue.split(" ")
+                : [];
+              const $dropdown = $input.closest(".dropdown");
+              $dropdown.find(".form-check-input").each(function () {
+                const $checkbox = $(this);
+                const checkboxVal = $checkbox.val();
+                $checkbox.prop("checked", selectedValues.includes(checkboxVal));
+              });
+              const selectedCount = selectedValues.filter((v) => v).length;
+              const $label = $dropdown.find(".multiselect-toggle label");
+              $label.text(`(${selectedCount} selected)`);
+            }
+          }
+        }
+
+        const feedbackToast = $("#feedback-toast").clone();
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
+        feedbackToast.find("span").text("Success");
+        feedbackToast
+          .find(".fw-medium")
+          .text("Global settings applied")
+          .attr("data-i18n", "toast.global_settings_applied_title");
+        feedbackToast
+          .find("div.toast-body")
+          .text(
+            "Global settings have been successfully fetched and applied to the current form.",
+          )
+          .attr("data-i18n", "toast.global_settings_applied_body");
+        feedbackToast.removeClass("border-warning").addClass("border-success");
+        feedbackToast
+          .find(".toast-header")
+          .removeClass("text-warning")
+          .addClass("text-success");
+        feedbackToast.appendTo("#feedback-toast-container");
+        feedbackToast.toast("show");
+      },
+      error: function () {
+        const feedbackToast = $("#feedback-toast").clone();
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
+        feedbackToast.find("span").text("Error");
+        feedbackToast
+          .find(".fw-medium")
+          .text("Failed to fetch global settings")
+          .attr("data-i18n", "toast.global_settings_failed_title");
+        feedbackToast
+          .find("div.toast-body")
+          .text("An error occurred while fetching global settings.")
+          .attr("data-i18n", "toast.global_settings_failed_body");
+        feedbackToast.removeClass("border-warning").addClass("border-danger");
+        feedbackToast
+          .find(".toast-header")
+          .removeClass("text-warning")
+          .addClass("text-danger");
+        feedbackToast.appendTo("#feedback-toast-container");
+        feedbackToast.toast("show");
+      },
+    });
+  });
+
   if (
     (usedTemplate === "" || usedTemplate === "ui") &&
     currentMode === "easy"

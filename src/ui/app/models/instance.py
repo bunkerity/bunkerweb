@@ -442,11 +442,19 @@ class InstancesUtils:
                 return {}
 
             instance_data = instance_metrics.get(instance.hostname, {})
-            if not isinstance(instance_data.get("data"), dict) or instance_data.get("status") != "success":
-                self.__db.logger.warning(f"Can't get metrics from {instance.hostname}: {instance_data.get('msg')} - {instance_data.get('status')}")
+            status = instance_data.get("status")
+
+            if status != "success":
+                self.__db.logger.warning(f"Can't get metrics from {instance.hostname}: {instance_data.get('msg')} - {status}")
                 return {}
 
-            return instance_data["data"]
+            # Handle both nested data structure and direct data response
+            if "data" in instance_data and isinstance(instance_data["data"], dict):
+                return instance_data["data"]
+            elif isinstance(instance_data.get("msg"), dict):
+                return instance_data["msg"]
+            # For direct response format (like redis metrics)
+            return {k: v for k, v in instance_data.items() if k not in ("status", "msg")}
 
         # Initialize metrics
         metrics = {}

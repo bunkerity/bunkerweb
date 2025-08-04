@@ -63,7 +63,7 @@ services:
       - bw-universe
 
   bw-redis:
-    image: bitnami/redis:7.2
+    image: bitnami/redis:8.0
     volumes:
       - ./acl:/acl
       - ./tls:/tls
@@ -83,7 +83,7 @@ services:
       - bw-services
 
   bw-redis-slave:
-    image: bitnami/redis:7.2
+    image: bitnami/redis:8.0
     volumes:
       - ./acl:/acl
       - ./tls:/tls
@@ -110,7 +110,7 @@ services:
       replicas: 2
 
   bw-redis-sentinel:
-    image: bitnami/redis-sentinel:7.2
+    image: bitnami/redis-sentinel:8.0
     command: /opt/bitnami/scripts/redis-sentinel/run.sh --aclfile /acl/sentinel.acl
     volumes:
       - ./acl:/acl

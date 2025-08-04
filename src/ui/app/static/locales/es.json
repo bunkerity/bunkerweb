@@ -89,6 +89,7 @@
     "enable_totp": "Activar TOTP",
     "entire_config": "Configuración Completa",
     "export": "Exportar",
+    "fetch_global": "Obtener Configuración Global",
     "filters_suffix": " Filtros",
     "follow": "Seguir",
     "github_stars": "Estrellas",
@@ -1241,6 +1242,7 @@
     "email_lets_encrypt": "La dirección de correo electrónico para registrarse con Let's Encrypt para la gestión de certificados y notificaciones.",
     "email_length": "El correo electrónico debe tener entre 1 y 256 caracteres.",
     "follow_latest_page_only": "El modo seguimiento solo está disponible en la última página",
+    "fetch_global_settings": "Obtener configuraciones globales y aplicarlas a la plantilla actual",
     "global_config_source": "Valor heredado de la configuración global.",
     "instance_not_up": "La instancia {{hostname}} no responde actualmente ('up').",
     "lets_encrypt_custom_profile": "El perfil personalizado a utilizar para Let's Encrypt (por ejemplo, 'mi_perfil_personalizado').",
@@ -1395,6 +1397,7 @@
     "use_proxy_protocol": "Habilitar la comunicación del protocolo PROXY.",
     "use_real_ip": "Usar IP Real",
     "username_length": "El nombre de usuario debe tener entre 1 y 256 caracteres.",
+    "value_from_global": "Valor de la configuración global",
     "view_full_url": "Haz clic para ver la URL completa",
     "wildcard_certificates": "Generar certificados wildcard (*.dominio.com). Requiere desafío DNS.",
     "wildcard_dns_only": "Los certificados wildcard solo son compatibles con el tipo de desafío DNS."

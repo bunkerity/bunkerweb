@@ -89,6 +89,7 @@
     "enable_totp": "تمكين TOTP",
     "entire_config": "التكوين الكامل",
     "export": "تصدير",
+    "fetch_global": "جلب التكوين العالمي",
     "filters_suffix": " مرشحات",
     "follow": "متابعة",
     "github_stars": "نجوم",
@@ -1241,6 +1242,7 @@
     "email_lets_encrypt": "عنوان البريد الإلكتروني المطلوب تسجيله لدى Let's Encrypt لإدارة الشهادات والإشعارات.",
     "email_length": "يجب أن يكون البريد الإلكتروني بين 1 و 256 حرفًا.",
     "follow_latest_page_only": "وضع المتابعة متاح فقط في الصفحة الأحدث",
+    "fetch_global_settings": "جلب التكوينات العالمية وتطبيقها على القالب الحالي",
     "global_config_source": "القيمة موروثة من التكوين العام.",
     "instance_not_up": "المثيل {{hostname}} لا يستجيب حاليًا ('up').",
     "lets_encrypt_custom_profile": "ملف التعريف المخصص الذي سيتم استخدامه لـ Let's Encrypt (مثل 'my_custom_profile').",
@@ -1395,6 +1397,7 @@
     "use_proxy_protocol": "تمكين اتصال بروتوكول PROXY.",
     "use_real_ip": "استخدام IP الحقيقي",
     "username_length": "يجب أن يتراوح طول اسم المستخدم بين 1 و 256 حرفًا.",
+    "value_from_global": "القيمة من التكوين العالمي",
     "view_full_url": "انقر لعرض URL الكامل",
     "wildcard_certificates": "إنشاء شهادات wildcard (*.domain.com). يتطلب تحدي DNS.",
     "wildcard_dns_only": "شهادات Wildcard مدعومة فقط مع نوع تحدي DNS."

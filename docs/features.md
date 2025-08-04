@@ -334,12 +334,24 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     - Fully self-hosted, eliminating the need for third-party APIs.
     - Dynamically generated challenges ensure uniqueness for each user session.
+    - Uses a customizable character set for CAPTCHA generation.
+
+    **Supported Characters:**
+
+    The CAPTCHA system supports the following character types:
+
+    - **Letters:** All lowercase (a-z) and uppercase (A-Z) letters
+    - **Numbers:** 2, 3, 4, 5, 6, 7, 8, 9 (excludes 0 and 1 to avoid confusion)
+    - **Special characters:** ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„```
+
+    To have the complete set of supported characters, refer to the [Font charmap](https://www.dafont.com/moms-typewriter.charmap?back=theme) of the font used for the CAPTCHA.
 
     **Configuration Settings:**
 
-    | Setting       | Default | Context   | Multiple | Description                                                           |
-    | ------------- | ------- | --------- | -------- | --------------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `captcha` to enable the Captcha challenge. |
+    | Setting                    | Default                                                | Context   | Multiple | Description                                                                                                                                                                                                                    |
+    | -------------------------- | ------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`              | `no`                                                   | multisite | no       | **Enable Antibot:** Set to `captcha` to enable the Captcha challenge.                                                                                                                                                          |
+    | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no       | **Captcha Alphabet:** A string of characters to use for generating the CAPTCHA. Supported characters: all letters (a-z, A-Z), numbers 2-9 (excludes 0 and 1), and special characters: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
@@ -444,7 +456,10 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"
     ANTIBOT_TIME_VALID: "86400"
+    ANTIBOT_CAPTCHA_ALPHABET: "23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     ```
+
+    Note: The example above uses numbers 2-9 and all letters, which are the most commonly used characters for CAPTCHA challenges. You can customize the alphabet to include special characters as needed.
 
 === "reCAPTCHA Challenge"
 
@@ -1563,7 +1578,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.3-rc3
+        image: bunkerity/bunkerweb:1.6.3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1580,7 +1595,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -3913,7 +3928,7 @@ Follow these steps to configure and use the Real IP feature:
 
 STREAM support :x:
 
-The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one site to another, supporting both full-domain redirects and path-preserving redirections.
+The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one URL to another, supporting both full-domain redirects, specific path redirects and path-preserving redirections.
 
 **How it works:**
 
@@ -3927,18 +3942,20 @@ The Redirect plugin provides simple and efficient HTTP redirection capabilities 
 
 Follow these steps to configure and use the Redirect feature:
 
-1. **Set the destination URL:** Configure the target URL where visitors should be redirected using the `REDIRECT_TO` setting.
-2. **Choose redirection type:** Decide whether to preserve the original request path with the `REDIRECT_TO_REQUEST_URI` setting.
-3. **Select status code:** Set the appropriate HTTP status code with the `REDIRECT_TO_STATUS_CODE` setting to indicate permanent or temporary redirection.
-4. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected based on your settings.
+1. **Set the source path:** Configure the path to redirect from using the `REDIRECT_FROM` setting (e.g. `/`, `/old-page`).
+2. **Set the destination URL:** Configure the target URL where visitors should be redirected using the `REDIRECT_TO` setting.
+3. **Choose redirection type:** Decide whether to preserve the original request path with the `REDIRECT_TO_REQUEST_URI` setting.
+4. **Select status code:** Set the appropriate HTTP status code with the `REDIRECT_TO_STATUS_CODE` setting to indicate permanent or temporary redirection.
+5. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected based on your settings.
 
 ### Configuration Settings
 
 | Setting                   | Default | Context   | Multiple | Description                                                                                                         |
 | ------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_TO`             |         | multisite | no       | **Destination URL:** The target URL where visitors will be redirected. Leave empty to disable redirection.          |
-| `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | no       | **Preserve Path:** When set to `yes`, appends the original request URI to the destination URL.                      |
-| `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | no       | **HTTP Status Code:** The HTTP status code to use for redirection. Options: `301` (permanent) or `302` (temporary). |
+| `REDIRECT_FROM`           | `/`     | multisite | yes      | **Path to redirect from:** The path that will be redirected.                                                        |
+| `REDIRECT_TO`             |         | multisite | yes      | **Destination URL:** The target URL where visitors will be redirected. Leave empty to disable redirection.          |
+| `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | yes      | **Preserve Path:** When set to `yes`, appends the original request URI to the destination URL.                      |
+| `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | yes      | **HTTP Status Code:** The HTTP status code to use for redirection. Options: `301` (permanent) or `302` (temporary). |
 
 !!! tip "Choosing the Right Status Code"
     - Use `301` (Moved Permanently) when the redirect is permanent, such as for domain migrations or establishing canonical URLs. This helps search engines update their indexes.
@@ -3948,6 +3965,30 @@ Follow these steps to configure and use the Redirect feature:
     When `REDIRECT_TO_REQUEST_URI` is set to `yes`, BunkerWeb preserves the original request path. For example, if a user visits `https://old-domain.com/blog/post-1` and you've set up a redirect to `https://new-domain.com`, they'll be redirected to `https://new-domain.com/blog/post-1`.
 
 ### Example Configurations
+
+=== "Multiple Paths Redirect"
+
+    A configuration that redirects multiple paths to different destinations:
+
+    ```yaml
+    # Redirect /blog to a new blog domain
+    REDIRECT_FROM: "/blog/"
+    REDIRECT_TO: "https://blog.example.com/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
+
+    # Redirect /shop to another domain
+    REDIRECT_FROM_2: "/shop/"
+    REDIRECT_TO_2: "https://shop.example.com/"
+    REDIRECT_TO_REQUEST_URI_2: "no"
+    REDIRECT_TO_STATUS_CODE_2: "301"
+
+    # Redirect the rest of the site
+    REDIRECT_FROM_3: "/"
+    REDIRECT_TO_3: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI_3: "no"
+    REDIRECT_TO_STATUS_CODE_3: "301"
+    ```
 
 === "Simple Domain Redirect"
 

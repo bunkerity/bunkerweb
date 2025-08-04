@@ -1,4 +1,4 @@
-The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one site to another, supporting both full-domain redirects and path-preserving redirections.
+The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one URL to another, supporting both full-domain redirects, specific path redirects and path-preserving redirections.
 
 **How it works:**
 
@@ -12,18 +12,20 @@ The Redirect plugin provides simple and efficient HTTP redirection capabilities 
 
 Follow these steps to configure and use the Redirect feature:
 
-1. **Set the destination URL:** Configure the target URL where visitors should be redirected using the `REDIRECT_TO` setting.
-2. **Choose redirection type:** Decide whether to preserve the original request path with the `REDIRECT_TO_REQUEST_URI` setting.
-3. **Select status code:** Set the appropriate HTTP status code with the `REDIRECT_TO_STATUS_CODE` setting to indicate permanent or temporary redirection.
-4. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected based on your settings.
+1. **Set the source path:** Configure the path to redirect from using the `REDIRECT_FROM` setting (e.g. `/`, `/old-page`).
+2. **Set the destination URL:** Configure the target URL where visitors should be redirected using the `REDIRECT_TO` setting.
+3. **Choose redirection type:** Decide whether to preserve the original request path with the `REDIRECT_TO_REQUEST_URI` setting.
+4. **Select status code:** Set the appropriate HTTP status code with the `REDIRECT_TO_STATUS_CODE` setting to indicate permanent or temporary redirection.
+5. **Let BunkerWeb handle the rest:** Once configured, all requests to the site will be automatically redirected based on your settings.
 
 ### Configuration Settings
 
 | Setting                   | Default | Context   | Multiple | Description                                                                                                         |
 | ------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `REDIRECT_TO`             |         | multisite | no       | **Destination URL:** The target URL where visitors will be redirected. Leave empty to disable redirection.          |
-| `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | no       | **Preserve Path:** When set to `yes`, appends the original request URI to the destination URL.                      |
-| `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | no       | **HTTP Status Code:** The HTTP status code to use for redirection. Options: `301` (permanent) or `302` (temporary). |
+| `REDIRECT_FROM`           | `/`     | multisite | yes      | **Path to redirect from:** The path that will be redirected.                                                        |
+| `REDIRECT_TO`             |         | multisite | yes      | **Destination URL:** The target URL where visitors will be redirected. Leave empty to disable redirection.          |
+| `REDIRECT_TO_REQUEST_URI` | `no`    | multisite | yes      | **Preserve Path:** When set to `yes`, appends the original request URI to the destination URL.                      |
+| `REDIRECT_TO_STATUS_CODE` | `301`   | multisite | yes      | **HTTP Status Code:** The HTTP status code to use for redirection. Options: `301` (permanent) or `302` (temporary). |
 
 !!! tip "Choosing the Right Status Code"
     - Use `301` (Moved Permanently) when the redirect is permanent, such as for domain migrations or establishing canonical URLs. This helps search engines update their indexes.
@@ -33,6 +35,30 @@ Follow these steps to configure and use the Redirect feature:
     When `REDIRECT_TO_REQUEST_URI` is set to `yes`, BunkerWeb preserves the original request path. For example, if a user visits `https://old-domain.com/blog/post-1` and you've set up a redirect to `https://new-domain.com`, they'll be redirected to `https://new-domain.com/blog/post-1`.
 
 ### Example Configurations
+
+=== "Multiple Paths Redirect"
+
+    A configuration that redirects multiple paths to different destinations:
+
+    ```yaml
+    # Redirect /blog to a new blog domain
+    REDIRECT_FROM: "/blog/"
+    REDIRECT_TO: "https://blog.example.com/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
+
+    # Redirect /shop to another domain
+    REDIRECT_FROM_2: "/shop/"
+    REDIRECT_TO_2: "https://shop.example.com/"
+    REDIRECT_TO_REQUEST_URI_2: "no"
+    REDIRECT_TO_STATUS_CODE_2: "301"
+
+    # Redirect the rest of the site
+    REDIRECT_FROM_3: "/"
+    REDIRECT_TO_3: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI_3: "no"
+    REDIRECT_TO_STATUS_CODE_3: "301"
+    ```
 
 === "Simple Domain Redirect"
 

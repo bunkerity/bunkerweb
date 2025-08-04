@@ -34,7 +34,7 @@
                                 aria-haspopup="true"
                                 aria-expanded="false">
                             <i class="bx bx-cube"></i>
-                            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.service">Service</span></span>
+                            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.service">Service</span>: <span id="service-display">{{ config_service or "Global" }}</span></span>
                         </button>
                         <ul id="services-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"
@@ -79,7 +79,7 @@
                                 aria-haspopup="true"
                                 aria-expanded="false">
                             <i class="bx bx-window"></i>
-                            <span class="d-none d-md-inline">&nbsp;<span data-i18n="form.label.config_type">Config Type</span></span>
+                            <span class="d-none d-md-inline">&nbsp;<span data-i18n="form.label.config_type">Config Type</span>: <span id="type-display">{{ type if type else "HTTP" }}</span></span>
                         </button>
                         <ul id="types-dropdown-menu"
                             class="dropdown-menu nav-pills max-vh-60 overflow-auto pt-0"

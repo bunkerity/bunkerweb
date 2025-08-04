@@ -89,6 +89,7 @@
     "enable_totp": "启用 TOTP",
     "entire_config": "完整配置",
     "export": "导出",
+    "fetch_global": "获取全局配置",
     "filters_suffix": " 过滤器",
     "follow": "跟随",
     "github_stars": "星标",
@@ -1242,6 +1243,7 @@
     "email_lets_encrypt": "用于向 Let's Encrypt 注册以进行证书管理和通知的电子邮件地址。",
     "email_length": "电子邮件必须在 1 到 256 个字符之间。",
     "follow_latest_page_only": "跟随模式仅在最新页面可用",
+    "fetch_global_settings": "获取全局设置并应用于当前模板",
     "global_config_source": "值继承自全局配置。",
     "instance_not_up": "实例 {{hostname}} 当前未响应 ('up')。",
     "latest_version_installed": "您正在运行最新版本。",
@@ -1396,6 +1398,7 @@
     "use_proxy_protocol": "启用 PROXY 协议通信。",
     "use_real_ip": "使用真实 IP",
     "username_length": "用户名必须在 1 到 256 个字符之间。",
+    "value_from_global": "来自全局配置的值",
     "view_full_url": "点击查看完整 URL",
     "wildcard_certificates": "生成通配符证书 (*.domain.com)。需要 DNS 质询。",
     "wildcard_dns_only": "通配符证书仅支持 DNS 质询类型。"

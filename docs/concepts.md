@@ -105,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc3/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.3/examples) directory of the repository.
 
 ## Custom configurations
 
@@ -126,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc3/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.3/examples) directory of the repository.
 
 ## Database
 
@@ -145,6 +145,11 @@ BunkerWeb securely stores its current configuration in a backend database, which
 Under the hood, whenever you edit a setting or add a new configuration, BunkerWeb automatically stores the changes in the database, ensuring data persistence and consistency. BunkerWeb supports multiple backend database options, including SQLite, MariaDB, MySQL, and PostgreSQL.
 
 Configuring the database is straightforward using the `DATABASE_URI` setting, which follows the specified formats for each supported database:
+
+!!! warning
+    When using the Docker Integration, you must set the `DATABASE_URI` environment variable in all BunkerWeb containers (except the BunkerWeb container itself), to ensure that all components can access the database correctly. This is crucial for maintaining the integrity and functionality of the system.
+
+    In all cases, ensure that `DATABASE_URI` is set before starting BunkerWeb, as it is required for proper operation.
 
 - **SQLite**: `sqlite:///var/lib/bunkerweb/db.sqlite3`
 - **MariaDB**: `mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db`

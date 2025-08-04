@@ -50,30 +50,41 @@
                 <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.reset">Reset</span>
             </span>
         </button>
-        {% if current_endpoint != "global-config" %}
-            <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
-                <button type="button"
-                        class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
-                    <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
-                    <span class="d-none d-md-inline">&nbsp;
-                        {% if is_draft == 'yes' %}
-                            <span data-i18n="status.draft">Draft</span>
-                        {% else %}
-                            <span data-i18n="status.online">Online</span>
-                        {% endif %}
-                    </span>
-                </button>
-            </div>
-        {% endif %}
-        <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
-             {% endif %}>
+        <button id="fetch-global-config"
+                type="button"
+                class="btn btn-sm btn-outline-info me-3"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-bs-original-title="Fetch global settings and apply them to the current template"
+                data-i18n="tooltip.fetch_global_settings">
+            <i class="bx bx-sm bx-download"></i>
+            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.fetch_global">Fetch Global</span>
+        </span>
+    </button>
+    {% if current_endpoint != "global-config" %}
+        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
-                    class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
-                <i class="bx bx-save bx-sm"></i>
-                <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                    class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
+                <span class="d-none d-md-inline">&nbsp;
+                    {% if is_draft == 'yes' %}
+                        <span data-i18n="status.draft">Draft</span>
+                    {% else %}
+                        <span data-i18n="status.online">Online</span>
+                    {% endif %}
+                </span>
             </button>
         </div>
+    {% endif %}
+    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+         {% endif %}>
+        <button type="button"
+                class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
+            <i class="bx bx-save bx-sm"></i>
+            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+        </button>
     </div>
+</div>
 </div>
 </div>
 <div class="card tab-content m-1 p-2 position-relative">
@@ -213,6 +224,13 @@
                                                                             <span class="bx bx-globe bx-xs"></span>
                                                                         </span>
                                                                     {% endif %}
+                                                                    <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1 visually-hidden global-override-badge"
+                                                                          data-bs-toggle="tooltip"
+                                                                          data-bs-placement="top"
+                                                                          data-bs-original-title="Value from global configuration"
+                                                                          data-i18n="tooltip.value_from_global">
+                                                                        <i class="bx bx-download bx-xs"></i>
+                                                                    </span>
                                                                     {% if setting_value != template_data["settings"].get(setting, setting_default) %}
                                                                         <span class="badge badge-center rounded-pill bg-warning-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
                                                                               data-bs-toggle="tooltip"
