@@ -333,6 +333,7 @@ class InstancesUtils:
 
             try:
                 if plugin_id == "requests":
+                    # Requests are always saved to Redis
                     requests_data = redis_client.lrange("requests", 0, -1)
                     requests_list = []
                     seen_ids = set()
@@ -346,6 +347,33 @@ class InstancesUtils:
                         except Exception:
                             continue
                     return {"requests": requests_list}
+                elif plugin_id == "errors":
+                    # Check if METRICS_SAVE_TO_REDIS is enabled for errors
+                    config = self.__db.get_config()
+                    metrics_save_to_redis = config.get("METRICS_SAVE_TO_REDIS", {}).get("value", "no")
+                    if metrics_save_to_redis.lower() != "yes":
+                        return {}
+
+                    # For errors, get all counter_* keys and aggregate them
+                    pattern = "metrics:errors_counter_*"
+                    keys = redis_client.keys(pattern)
+                    error_counters = {}
+                    for key in keys:
+                        try:
+                            key_str = key.decode("utf-8") if isinstance(key, bytes) else key
+                            # Extract the error code from the key
+                            error_code = key_str.split("counter_")[1].split(":")[0]
+                            value = redis_client.get(key)
+                            if value is not None:
+                                count = int(value.decode("utf-8"))
+                                counter_key = f"counter_{error_code}"
+                                if counter_key in error_counters:
+                                    error_counters[counter_key] += count
+                                else:
+                                    error_counters[counter_key] = count
+                        except Exception:
+                            continue
+                    return error_counters
 
                 redis_metrics = {}
                 # Get all metric keys for this plugin from all workers
@@ -464,9 +492,9 @@ class InstancesUtils:
         if redis_client and not hostname:
             redis_metrics = get_redis_metrics()
             if redis_metrics:
-                # For requests specifically, if we have Redis data, don't fetch from instances
-                # to avoid duplicates since Redis already contains the aggregated data
-                if plugin_id == "requests" and redis_metrics:
+                # For requests (always in Redis) and errors (when METRICS_SAVE_TO_REDIS is enabled),
+                # if we have Redis data, don't fetch from instances to avoid duplicates
+                if (plugin_id == "requests" or (plugin_id == "errors" and redis_metrics)) and redis_metrics:
                     return redis_metrics
                 metrics = aggregate_metrics(metrics, redis_metrics)
 
@@ -478,8 +506,14 @@ class InstancesUtils:
                 metrics = aggregate_metrics(metrics, instance_metrics)
         else:
             # Only fetch from instances if we don't have Redis data for requests
-            # or if we're looking for non-request metrics
-            if not (redis_client and plugin_id == "requests" and metrics):
+            # or if errors metrics are not saved to Redis
+            should_fetch_from_instances = True
+            if redis_client and plugin_id == "requests" and metrics:
+                should_fetch_from_instances = False
+            elif redis_client and plugin_id == "errors" and metrics:
+                should_fetch_from_instances = False
+
+            if should_fetch_from_instances:
                 for instance in instances or self.get_instances(status="up"):
                     instance_metrics = get_instance_metrics(instance)
                     metrics = aggregate_metrics(metrics, instance_metrics)
