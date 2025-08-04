@@ -1130,6 +1130,11 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </ul>
 <p>Under the hood, whenever you edit a setting or add a new configuration, BunkerWeb automatically stores the changes in the database, ensuring data persistence and consistency. BunkerWeb supports multiple backend database options, including SQLite, MariaDB, MySQL, and PostgreSQL.</p>
 <p>Configuring the database is straightforward using the <code>DATABASE_URI</code> setting, which follows the specified formats for each supported database:</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using the Docker Integration, you must set the <code>DATABASE_URI</code> environment variable in all BunkerWeb containers (except the BunkerWeb container itself), to ensure that all components can access the database correctly. This is crucial for maintaining the integrity and functionality of the system.</p>
+<p>In all cases, ensure that <code>DATABASE_URI</code> is set before starting BunkerWeb, as it is required for proper operation.</p>
+</div>
 <ul>
 <li><strong>SQLite</strong>: <code>sqlite:///var/lib/bunkerweb/db.sqlite3</code></li>
 <li><strong>MariaDB</strong>: <code>mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db</code></li>
@@ -1715,66 +1720,139 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Debian 12 "Bookworm"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 41</li>
-<li>Fedora 42</li>
-<li>Red Hat Enterprise Linux (RHEL) 8.10</li>
-<li>Red Hat Enterprise Linux (RHEL) 9.6</li>
+<li>Fedora 41 and 42</li>
+<li>Red Hat Enterprise Linux (RHEL) 8 and 9</li>
 </ul>
 <h3 id="integrations-easy-installation-script">Easy installation script</h3>
 <p>For a simplified installation experience, BunkerWeb provides an easy install script that automatically handles the entire setup process, including NGINX installation, repository configuration, and service setup.</p>
 <h4 id="integrations-quick-start">Quick start</h4>
-<p>Download and run the installation script:</p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/vtesting/misc/install-bunkerweb.sh
+<p>To get started, download the installation script and its checksum, then verify the script's integrity before running it.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+
+<span class="c1"># Verify the checksum</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
+
+<span class="c1"># If the check is successful, run the script</span>
 chmod<span class="w"> </span>+x<span class="w"> </span>install-bunkerweb.sh
 sudo<span class="w"> </span>./install-bunkerweb.sh
 </code></pre></div>
-<div class="admonition warning">
+<div class="admonition danger">
 <p class="admonition-title">Security Notice</p>
-<p>Before running any installation script, especially with elevated privileges, it's recommended to review the script content first.</p>
-<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>install-bunkerweb.sh
-</code></pre></div>
+<p><strong>Always verify the integrity of the installation script before running it.</strong></p>
+<p>Download the checksum file and use a tool like <code>sha256sum</code> to confirm the script has not been altered or tampered with.</p>
+<p>If the checksum verification fails, <strong>do not execute the script</strong>—it may be unsafe.</p>
 </div>
-<h4 id="integrations-interactive-installation">Interactive installation</h4>
-<p>By default, the script runs in interactive mode and will:</p>
+<h4 id="integrations-how-it-works">How It Works</h4>
+<p>The easy install script is a powerful tool designed to streamline the setup of BunkerWeb on a fresh Linux system. It automates the following key steps:</p>
 <ol>
-<li><strong>Detect your operating system</strong> and verify compatibility</li>
-<li><strong>Ask about the setup wizard</strong> - choose whether to enable the web-based configuration interface</li>
-<li><strong>Show RHEL database recommendations</strong> (if applicable) for external database support</li>
-<li><strong>Install NGINX</strong> with the correct version for your distribution</li>
-<li><strong>Install BunkerWeb</strong> and configure all services</li>
-<li><strong>Provide next steps</strong> based on your configuration choices</li>
+<li><strong>System Analysis</strong>: Detects your operating system and verifies it against the list of supported distributions.</li>
+<li><strong>Installation Customization</strong>: In interactive mode, it prompts you to choose an installation type (All-In-One, Manager, Worker, etc.) and decide whether to enable the web-based setup wizard.</li>
+<li><strong>Optional Integrations</strong>: Offers to automatically install and configure the <a href="#integrations-crowdsec-integration-with-the-script">CrowdSec Security Engine</a>.</li>
+<li><strong>Dependency Management</strong>: Installs the correct version of NGINX required by BunkerWeb from official sources and locks the version to prevent unintended upgrades.</li>
+<li><strong>BunkerWeb Installation</strong>: Adds the BunkerWeb package repository, installs the necessary packages, and locks the version.</li>
+<li><strong>Service Configuration</strong>: Sets up and enables the <code>systemd</code> services corresponding to your chosen installation type.</li>
+<li><strong>Post-install Guidance</strong>: Provides clear next steps to help you get started with your new BunkerWeb instance.</li>
 </ol>
-<h4 id="integrations-command-line-options">Command line options</h4>
-<p>The script supports various options for different installation scenarios:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Interactive installation (default)</span>
+<h4 id="integrations-interactive-installation">Interactive Installation</h4>
+<p>When run without any options, the script enters an interactive mode that guides you through the setup process. You will be asked to make the following choices:</p>
+<ol>
+<li><strong>Installation Type</strong>: Select the components you want to install.<ul>
+<li><strong>Full Stack (default)</strong>: An all-in-one installation including BunkerWeb, the Scheduler, and the Web UI.</li>
+<li><strong>Manager</strong>: Installs the Scheduler and Web UI, intended to manage one or more remote BunkerWeb workers.</li>
+<li><strong>Worker</strong>: Installs only the BunkerWeb instance, which can be managed by a remote Manager.</li>
+<li><strong>Scheduler Only</strong>: Installs only the Scheduler component.</li>
+<li><strong>Web UI Only</strong>: Installs only the Web UI component.</li>
+</ul>
+</li>
+<li><strong>Setup Wizard</strong>: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.</li>
+<li><strong>CrowdSec Integration</strong>: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection.</li>
+<li><strong>CrowdSec AppSec</strong>: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Manager and Scheduler installations</p>
+<p>If you choose the <strong>Manager</strong> or <strong>Scheduler Only</strong> installation type, you will also be prompted to provide the IP addresses or hostnames of your BunkerWeb worker instances.</p>
+</div>
+<h4 id="integrations-command-line-options">Command-Line Options</h4>
+<p>For non-interactive or automated setups, the script can be controlled with command-line flags:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--full</code></td>
+<td>Full stack installation (BunkerWeb, Scheduler, UI). This is the default.</td>
+</tr>
+<tr>
+<td><code>--manager</code></td>
+<td>Installs the Scheduler and UI to manage remote workers.</td>
+</tr>
+<tr>
+<td><code>--worker</code></td>
+<td>Installs only the BunkerWeb instance.</td>
+</tr>
+<tr>
+<td><code>--scheduler-only</code></td>
+<td>Installs only the Scheduler component.</td>
+</tr>
+<tr>
+<td><code>--ui-only</code></td>
+<td>Installs only the Web UI component.</td>
+</tr>
+<tr>
+<td><code>-v, --version VERSION</code></td>
+<td>Specifies the BunkerWeb version to install (e.g., <code>testing</code>).</td>
+</tr>
+<tr>
+<td><code>-w, --enable-wizard</code></td>
+<td>Enables the setup wizard.</td>
+</tr>
+<tr>
+<td><code>-n, --no-wizard</code></td>
+<td>Disables the setup wizard.</td>
+</tr>
+<tr>
+<td><code>-y, --yes</code></td>
+<td>Runs in non-interactive mode using default answers for all prompts.</td>
+</tr>
+<tr>
+<td><code>-f, --force</code></td>
+<td>Forces the installation to proceed even on an unsupported OS version.</td>
+</tr>
+<tr>
+<td><code>-h, --help</code></td>
+<td>Displays the help message with all available options.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run in interactive mode (recommended for most users)</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh
 
-<span class="c1"># Non-interactive with defaults (wizard enabled)</span>
+<span class="c1"># Non-interactive installation with defaults (full stack, wizard enabled)</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes
 
-<span class="c1"># Install without the setup wizard</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--no-wizard
+<span class="c1"># Install a Worker node without the setup wizard</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--worker<span class="w"> </span>--no-wizard
 
 <span class="c1"># Install a specific version</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.0
-
-<span class="c1"># Force installation on unsupported OS versions</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--force
-
-<span class="c1"># Show help</span>
-./install-bunkerweb.sh<span class="w"> </span>--help
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span>testing
 </code></pre></div>
-<h4 id="integrations-what-the-script-does">What the script does</h4>
-<p>The easy install script automatically:</p>
+<h4 id="integrations-crowdsec-integration-with-the-script">CrowdSec Integration with the Script</h4>
+<p>If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:</p>
 <ul>
-<li><strong>Validates OS compatibility</strong> and warns about unsupported versions</li>
-<li><strong>Installs NGINX</strong> from official repositories with the correct version</li>
-<li><strong>Adds BunkerWeb repositories</strong> for your distribution</li>
-<li><strong>Installs BunkerWeb packages</strong> and locks versions to prevent accidental upgrades</li>
-<li><strong>Configures systemd services</strong> (bunkerweb, bunkerweb-scheduler, bunkerweb-ui)</li>
-<li><strong>Sets up the setup wizard</strong> (if enabled) for easy web-based configuration</li>
-<li><strong>Provides comprehensive next steps</strong> and resource links</li>
+<li>It adds the official CrowdSec repository and installs the agent.</li>
+<li>It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (<code>access.log</code>, <code>error.log</code>, and <code>modsec_audit.log</code>).</li>
+<li>It installs essential collections (<code>crowdsecurity/nginx</code>) and parsers (<code>crowdsecurity/geoip-enrich</code>).</li>
+<li>It registers a bouncer for BunkerWeb and automatically configures the API key in <code>/etc/bunkerweb/variables.env</code>.</li>
+<li>If you also select the <strong>AppSec Component</strong>, it installs the <code>appsec-virtual-patching</code> and <code>appsec-generic-rules</code> collections and configures the AppSec endpoint for BunkerWeb.</li>
 </ul>
+<p>This provides a seamless, out-of-the-box integration for powerful intrusion prevention.</p>
 <h4 id="integrations-rhel-considerations">RHEL considerations</h4>
 <div class="admonition warning">
 <p class="admonition-title">External database support on RHEL-based systems</p>
@@ -4400,7 +4478,16 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <ul>
 <li>Fully self-hosted, eliminating the need for third-party APIs.</li>
 <li>Dynamically generated challenges ensure uniqueness for each user session.</li>
+<li>Uses a customizable character set for CAPTCHA generation.</li>
 </ul>
+<p><strong>Supported Characters:</strong></p>
+<p>The CAPTCHA system supports the following character types:</p>
+<ul>
+<li><strong>Letters:</strong> All lowercase (a-z) and uppercase (A-Z) letters</li>
+<li><strong>Numbers:</strong> 2, 3, 4, 5, 6, 7, 8, 9 (excludes 0 and 1 to avoid confusion)</li>
+<li><strong>Special characters:</strong> <code>+-/=%"'&amp;_(),.;:?!§`^ÄÖÜßäöüé''‚""„</code></li>
+</ul>
+<p>To have the complete set of supported characters, refer to the <a href="https://www.dafont.com/moms-typewriter.charmap?back=theme">Font charmap</a> of the font used for the CAPTCHA.</p>
 <p><strong>Configuration Settings:</strong></p>
 <table>
 <thead>
@@ -4419,6 +4506,13 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <td>multisite</td>
 <td>no</td>
 <td><strong>Enable Antibot:</strong> Set to <code>captcha</code> to enable the Captcha challenge.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_CAPTCHA_ALPHABET</code></td>
+<td><code>abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Captcha Alphabet:</strong> A string of characters to use for generating the CAPTCHA. Supported characters: all letters (a-z, A-Z), numbers 2-9 (excludes 0 and 1), and special characters: <code>+-/=%"'&amp;_(),.;:?!§`^ÄÖÜßäöüé''‚""„</code></td>
 </tr>
 </tbody>
 </table>
@@ -4626,7 +4720,9 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <span class="nt">ANTIBOT_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/challenge&quot;</span>
 <span class="nt">ANTIBOT_TIME_RESOLVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60&quot;</span>
 <span class="nt">ANTIBOT_TIME_VALID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;86400&quot;</span>
+<span class="nt">ANTIBOT_CAPTCHA_ALPHABET</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span>
 </code></pre></div>
+<p>Note: The example above uses numbers 2-9 and all letters, which are the most commonly used characters for CAPTCHA challenges. You can customize the alphabet to include special characters as needed.</p>
 </div>
 <div class="tabbed-block">
 <p>Example configuration for enabling the reCAPTCHA challenge:</p>
@@ -9788,7 +9884,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <h2 id="features-redirect">Redirect</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
-<p>The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one site to another, supporting both full-domain redirects and path-preserving redirections.</p>
+<p>The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one URL to another, supporting both full-domain redirects, specific path redirects and path-preserving redirections.</p>
 <p><strong>How it works:</strong></p>
 <ol>
 <li>When a visitor accesses your website, BunkerWeb verifies whether a redirection is configured.</li>
@@ -9800,6 +9896,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <h3 id="features-how-to-use_24">How to Use</h3>
 <p>Follow these steps to configure and use the Redirect feature:</p>
 <ol>
+<li><strong>Set the source path:</strong> Configure the path to redirect from using the <code>REDIRECT_FROM</code> setting (e.g. <code>/</code>, <code>/old-page</code>).</li>
 <li><strong>Set the destination URL:</strong> Configure the target URL where visitors should be redirected using the <code>REDIRECT_TO</code> setting.</li>
 <li><strong>Choose redirection type:</strong> Decide whether to preserve the original request path with the <code>REDIRECT_TO_REQUEST_URI</code> setting.</li>
 <li><strong>Select status code:</strong> Set the appropriate HTTP status code with the <code>REDIRECT_TO_STATUS_CODE</code> setting to indicate permanent or temporary redirection.</li>
@@ -9818,24 +9915,31 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </thead>
 <tbody>
 <tr>
+<td><code>REDIRECT_FROM</code></td>
+<td><code>/</code></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Path to redirect from:</strong> The path that will be redirected.</td>
+</tr>
+<tr>
 <td><code>REDIRECT_TO</code></td>
 <td></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td><strong>Destination URL:</strong> The target URL where visitors will be redirected. Leave empty to disable redirection.</td>
 </tr>
 <tr>
 <td><code>REDIRECT_TO_REQUEST_URI</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td><strong>Preserve Path:</strong> When set to <code>yes</code>, appends the original request URI to the destination URL.</td>
 </tr>
 <tr>
 <td><code>REDIRECT_TO_STATUS_CODE</code></td>
 <td><code>301</code></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td><strong>HTTP Status Code:</strong> The HTTP status code to use for redirection. Options: <code>301</code> (permanent) or <code>302</code> (temporary).</td>
 </tr>
 </tbody>
@@ -9852,8 +9956,29 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>When <code>REDIRECT_TO_REQUEST_URI</code> is set to <code>yes</code>, BunkerWeb preserves the original request path. For example, if a user visits <code>https://old-domain.com/blog/post-1</code> and you've set up a redirect to <code>https://new-domain.com</code>, they'll be redirected to <code>https://new-domain.com/blog/post-1</code>.</p>
 </div>
 <h3 id="features-example-configurations_26">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:4"><input checked="checked" id="features-__tabbed_35_1" name="features-__tabbed_35" type="radio" /><input id="features-__tabbed_35_2" name="features-__tabbed_35" type="radio" /><input id="features-__tabbed_35_3" name="features-__tabbed_35" type="radio" /><input id="features-__tabbed_35_4" name="features-__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="features-__tabbed_35_1">Simple Domain Redirect</label><label for="features-__tabbed_35_2">Path-Preserving Redirect</label><label for="features-__tabbed_35_3">Temporary Redirect</label><label for="features-__tabbed_35_4">Subdomain Consolidation</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:5"><input checked="checked" id="features-__tabbed_35_1" name="features-__tabbed_35" type="radio" /><input id="features-__tabbed_35_2" name="features-__tabbed_35" type="radio" /><input id="features-__tabbed_35_3" name="features-__tabbed_35" type="radio" /><input id="features-__tabbed_35_4" name="features-__tabbed_35" type="radio" /><input id="features-__tabbed_35_5" name="features-__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="features-__tabbed_35_1">Multiple Paths Redirect</label><label for="features-__tabbed_35_2">Simple Domain Redirect</label><label for="features-__tabbed_35_3">Path-Preserving Redirect</label><label for="features-__tabbed_35_4">Temporary Redirect</label><label for="features-__tabbed_35_5">Subdomain Consolidation</label></div>
 <div class="tabbed-content">
+<div class="tabbed-block">
+<p>A configuration that redirects multiple paths to different destinations:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Redirect /blog to a new blog domain</span>
+<span class="nt">REDIRECT_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/blog/&quot;</span>
+<span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://blog.example.com/&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+
+<span class="c1"># Redirect /shop to another domain</span>
+<span class="nt">REDIRECT_FROM_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/shop/&quot;</span>
+<span class="nt">REDIRECT_TO_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://shop.example.com/&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+
+<span class="c1"># Redirect the rest of the site</span>
+<span class="nt">REDIRECT_FROM_3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="nt">REDIRECT_TO_3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://new-domain.com&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI_3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE_3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+</code></pre></div>
+</div>
 <div class="tabbed-block">
 <p>A configuration that redirects all visitors to a new domain:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://new-domain.com&quot;</span>

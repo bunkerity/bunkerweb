@@ -1136,6 +1136,11 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </ul>
 <p>Under the hood, whenever you edit a setting or add a new configuration, BunkerWeb automatically stores the changes in the database, ensuring data persistence and consistency. BunkerWeb supports multiple backend database options, including SQLite, MariaDB, MySQL, and PostgreSQL.</p>
 <p>Configuring the database is straightforward using the <code>DATABASE_URI</code> setting, which follows the specified formats for each supported database:</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using the Docker Integration, you must set the <code>DATABASE_URI</code> environment variable in all BunkerWeb containers (except the BunkerWeb container itself), to ensure that all components can access the database correctly. This is crucial for maintaining the integrity and functionality of the system.</p>
+<p>In all cases, ensure that <code>DATABASE_URI</code> is set before starting BunkerWeb, as it is required for proper operation.</p>
+</div>
 <ul>
 <li><strong>SQLite</strong>: <code>sqlite:///var/lib/bunkerweb/db.sqlite3</code></li>
 <li><strong>MariaDB</strong>: <code>mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db</code></li>

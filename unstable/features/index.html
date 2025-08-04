@@ -3621,7 +3621,16 @@
 <ul>
 <li>Fully self-hosted, eliminating the need for third-party APIs.</li>
 <li>Dynamically generated challenges ensure uniqueness for each user session.</li>
+<li>Uses a customizable character set for CAPTCHA generation.</li>
 </ul>
+<p><strong>Supported Characters:</strong></p>
+<p>The CAPTCHA system supports the following character types:</p>
+<ul>
+<li><strong>Letters:</strong> All lowercase (a-z) and uppercase (A-Z) letters</li>
+<li><strong>Numbers:</strong> 2, 3, 4, 5, 6, 7, 8, 9 (excludes 0 and 1 to avoid confusion)</li>
+<li><strong>Special characters:</strong> <code>+-/=%"'&amp;_(),.;:?!§`^ÄÖÜßäöüé''‚""„</code></li>
+</ul>
+<p>To have the complete set of supported characters, refer to the <a href="https://www.dafont.com/moms-typewriter.charmap?back=theme">Font charmap</a> of the font used for the CAPTCHA.</p>
 <p><strong>Configuration Settings:</strong></p>
 <table>
 <thead>
@@ -3640,6 +3649,13 @@
 <td>multisite</td>
 <td>no</td>
 <td><strong>Enable Antibot:</strong> Set to <code>captcha</code> to enable the Captcha challenge.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_CAPTCHA_ALPHABET</code></td>
+<td><code>abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</code></td>
+<td>multisite</td>
+<td>no</td>
+<td><strong>Captcha Alphabet:</strong> A string of characters to use for generating the CAPTCHA. Supported characters: all letters (a-z, A-Z), numbers 2-9 (excludes 0 and 1), and special characters: <code>+-/=%"'&amp;_(),.;:?!§`^ÄÖÜßäöüé''‚""„</code></td>
 </tr>
 </tbody>
 </table>
@@ -3847,7 +3863,9 @@
 <span class="nt">ANTIBOT_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/challenge&quot;</span>
 <span class="nt">ANTIBOT_TIME_RESOLVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60&quot;</span>
 <span class="nt">ANTIBOT_TIME_VALID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;86400&quot;</span>
+<span class="nt">ANTIBOT_CAPTCHA_ALPHABET</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span>
 </code></pre></div>
+<p>Note: The example above uses numbers 2-9 and all letters, which are the most commonly used characters for CAPTCHA challenges. You can customize the alphabet to include special characters as needed.</p>
 </div>
 <div class="tabbed-block">
 <p>Example configuration for enabling the reCAPTCHA challenge:</p>
@@ -9009,7 +9027,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <h2 id="redirect">Redirect</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
-<p>The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one site to another, supporting both full-domain redirects and path-preserving redirections.</p>
+<p>The Redirect plugin provides simple and efficient HTTP redirection capabilities for your BunkerWeb-protected websites. This feature enables you to easily redirect visitors from one URL to another, supporting both full-domain redirects, specific path redirects and path-preserving redirections.</p>
 <p><strong>How it works:</strong></p>
 <ol>
 <li>When a visitor accesses your website, BunkerWeb verifies whether a redirection is configured.</li>
@@ -9021,6 +9039,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <h3 id="how-to-use_24">How to Use</h3>
 <p>Follow these steps to configure and use the Redirect feature:</p>
 <ol>
+<li><strong>Set the source path:</strong> Configure the path to redirect from using the <code>REDIRECT_FROM</code> setting (e.g. <code>/</code>, <code>/old-page</code>).</li>
 <li><strong>Set the destination URL:</strong> Configure the target URL where visitors should be redirected using the <code>REDIRECT_TO</code> setting.</li>
 <li><strong>Choose redirection type:</strong> Decide whether to preserve the original request path with the <code>REDIRECT_TO_REQUEST_URI</code> setting.</li>
 <li><strong>Select status code:</strong> Set the appropriate HTTP status code with the <code>REDIRECT_TO_STATUS_CODE</code> setting to indicate permanent or temporary redirection.</li>
@@ -9039,24 +9058,31 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </thead>
 <tbody>
 <tr>
+<td><code>REDIRECT_FROM</code></td>
+<td><code>/</code></td>
+<td>multisite</td>
+<td>yes</td>
+<td><strong>Path to redirect from:</strong> The path that will be redirected.</td>
+</tr>
+<tr>
 <td><code>REDIRECT_TO</code></td>
 <td></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td><strong>Destination URL:</strong> The target URL where visitors will be redirected. Leave empty to disable redirection.</td>
 </tr>
 <tr>
 <td><code>REDIRECT_TO_REQUEST_URI</code></td>
 <td><code>no</code></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td><strong>Preserve Path:</strong> When set to <code>yes</code>, appends the original request URI to the destination URL.</td>
 </tr>
 <tr>
 <td><code>REDIRECT_TO_STATUS_CODE</code></td>
 <td><code>301</code></td>
 <td>multisite</td>
-<td>no</td>
+<td>yes</td>
 <td><strong>HTTP Status Code:</strong> The HTTP status code to use for redirection. Options: <code>301</code> (permanent) or <code>302</code> (temporary).</td>
 </tr>
 </tbody>
@@ -9073,8 +9099,29 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>When <code>REDIRECT_TO_REQUEST_URI</code> is set to <code>yes</code>, BunkerWeb preserves the original request path. For example, if a user visits <code>https://old-domain.com/blog/post-1</code> and you've set up a redirect to <code>https://new-domain.com</code>, they'll be redirected to <code>https://new-domain.com/blog/post-1</code>.</p>
 </div>
 <h3 id="example-configurations_26">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:4"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Simple Domain Redirect</label><label for="__tabbed_35_2">Path-Preserving Redirect</label><label for="__tabbed_35_3">Temporary Redirect</label><label for="__tabbed_35_4">Subdomain Consolidation</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:5"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><input id="__tabbed_35_5" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Multiple Paths Redirect</label><label for="__tabbed_35_2">Simple Domain Redirect</label><label for="__tabbed_35_3">Path-Preserving Redirect</label><label for="__tabbed_35_4">Temporary Redirect</label><label for="__tabbed_35_5">Subdomain Consolidation</label></div>
 <div class="tabbed-content">
+<div class="tabbed-block">
+<p>A configuration that redirects multiple paths to different destinations:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Redirect /blog to a new blog domain</span>
+<span class="nt">REDIRECT_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/blog/&quot;</span>
+<span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://blog.example.com/&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+
+<span class="c1"># Redirect /shop to another domain</span>
+<span class="nt">REDIRECT_FROM_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/shop/&quot;</span>
+<span class="nt">REDIRECT_TO_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://shop.example.com/&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE_2</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+
+<span class="c1"># Redirect the rest of the site</span>
+<span class="nt">REDIRECT_FROM_3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="nt">REDIRECT_TO_3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://new-domain.com&quot;</span>
+<span class="nt">REDIRECT_TO_REQUEST_URI_3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="nt">REDIRECT_TO_STATUS_CODE_3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;301&quot;</span>
+</code></pre></div>
+</div>
 <div class="tabbed-block">
 <p>A configuration that redirects all visitors to a new domain:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_TO</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://new-domain.com&quot;</span>

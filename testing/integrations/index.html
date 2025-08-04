@@ -921,9 +921,18 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How It Works
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#interactive-installation" class="md-nav__link">
     <span class="md-ellipsis">
-      Interactive installation
+      Interactive Installation
     </span>
   </a>
   
@@ -932,16 +941,16 @@
           <li class="md-nav__item">
   <a href="#command-line-options" class="md-nav__link">
     <span class="md-ellipsis">
-      Command line options
+      Command-Line Options
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#what-the-script-does" class="md-nav__link">
+  <a href="#crowdsec-integration-with-the-script" class="md-nav__link">
     <span class="md-ellipsis">
-      What the script does
+      CrowdSec Integration with the Script
     </span>
   </a>
   
@@ -1845,66 +1854,139 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Debian 12 "Bookworm"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
 <li>Ubuntu 24.04 "Noble"</li>
-<li>Fedora 41</li>
-<li>Fedora 42</li>
-<li>Red Hat Enterprise Linux (RHEL) 8.10</li>
-<li>Red Hat Enterprise Linux (RHEL) 9.6</li>
+<li>Fedora 41 and 42</li>
+<li>Red Hat Enterprise Linux (RHEL) 8 and 9</li>
 </ul>
 <h3 id="easy-installation-script">Easy installation script</h3>
 <p>For a simplified installation experience, BunkerWeb provides an easy install script that automatically handles the entire setup process, including NGINX installation, repository configuration, and service setup.</p>
 <h4 id="quick-start">Quick start</h4>
-<p>Download and run the installation script:</p>
-<div class="highlight"><pre><span></span><code>wget<span class="w"> </span>https://raw.githubusercontent.com/bunkerity/bunkerweb/vtesting/misc/install-bunkerweb.sh
+<p>To get started, download the installation script and its checksum, then verify the script's integrity before running it.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+
+<span class="c1"># Verify the checksum</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
+
+<span class="c1"># If the check is successful, run the script</span>
 chmod<span class="w"> </span>+x<span class="w"> </span>install-bunkerweb.sh
 sudo<span class="w"> </span>./install-bunkerweb.sh
 </code></pre></div>
-<div class="admonition warning">
+<div class="admonition danger">
 <p class="admonition-title">Security Notice</p>
-<p>Before running any installation script, especially with elevated privileges, it's recommended to review the script content first.</p>
-<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>install-bunkerweb.sh
-</code></pre></div>
+<p><strong>Always verify the integrity of the installation script before running it.</strong></p>
+<p>Download the checksum file and use a tool like <code>sha256sum</code> to confirm the script has not been altered or tampered with.</p>
+<p>If the checksum verification fails, <strong>do not execute the script</strong>—it may be unsafe.</p>
 </div>
-<h4 id="interactive-installation">Interactive installation</h4>
-<p>By default, the script runs in interactive mode and will:</p>
+<h4 id="how-it-works">How It Works</h4>
+<p>The easy install script is a powerful tool designed to streamline the setup of BunkerWeb on a fresh Linux system. It automates the following key steps:</p>
 <ol>
-<li><strong>Detect your operating system</strong> and verify compatibility</li>
-<li><strong>Ask about the setup wizard</strong> - choose whether to enable the web-based configuration interface</li>
-<li><strong>Show RHEL database recommendations</strong> (if applicable) for external database support</li>
-<li><strong>Install NGINX</strong> with the correct version for your distribution</li>
-<li><strong>Install BunkerWeb</strong> and configure all services</li>
-<li><strong>Provide next steps</strong> based on your configuration choices</li>
+<li><strong>System Analysis</strong>: Detects your operating system and verifies it against the list of supported distributions.</li>
+<li><strong>Installation Customization</strong>: In interactive mode, it prompts you to choose an installation type (All-In-One, Manager, Worker, etc.) and decide whether to enable the web-based setup wizard.</li>
+<li><strong>Optional Integrations</strong>: Offers to automatically install and configure the <a href="#crowdsec-integration-with-the-script">CrowdSec Security Engine</a>.</li>
+<li><strong>Dependency Management</strong>: Installs the correct version of NGINX required by BunkerWeb from official sources and locks the version to prevent unintended upgrades.</li>
+<li><strong>BunkerWeb Installation</strong>: Adds the BunkerWeb package repository, installs the necessary packages, and locks the version.</li>
+<li><strong>Service Configuration</strong>: Sets up and enables the <code>systemd</code> services corresponding to your chosen installation type.</li>
+<li><strong>Post-install Guidance</strong>: Provides clear next steps to help you get started with your new BunkerWeb instance.</li>
 </ol>
-<h4 id="command-line-options">Command line options</h4>
-<p>The script supports various options for different installation scenarios:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Interactive installation (default)</span>
+<h4 id="interactive-installation">Interactive Installation</h4>
+<p>When run without any options, the script enters an interactive mode that guides you through the setup process. You will be asked to make the following choices:</p>
+<ol>
+<li><strong>Installation Type</strong>: Select the components you want to install.<ul>
+<li><strong>Full Stack (default)</strong>: An all-in-one installation including BunkerWeb, the Scheduler, and the Web UI.</li>
+<li><strong>Manager</strong>: Installs the Scheduler and Web UI, intended to manage one or more remote BunkerWeb workers.</li>
+<li><strong>Worker</strong>: Installs only the BunkerWeb instance, which can be managed by a remote Manager.</li>
+<li><strong>Scheduler Only</strong>: Installs only the Scheduler component.</li>
+<li><strong>Web UI Only</strong>: Installs only the Web UI component.</li>
+</ul>
+</li>
+<li><strong>Setup Wizard</strong>: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.</li>
+<li><strong>CrowdSec Integration</strong>: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection.</li>
+<li><strong>CrowdSec AppSec</strong>: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Manager and Scheduler installations</p>
+<p>If you choose the <strong>Manager</strong> or <strong>Scheduler Only</strong> installation type, you will also be prompted to provide the IP addresses or hostnames of your BunkerWeb worker instances.</p>
+</div>
+<h4 id="command-line-options">Command-Line Options</h4>
+<p>For non-interactive or automated setups, the script can be controlled with command-line flags:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--full</code></td>
+<td>Full stack installation (BunkerWeb, Scheduler, UI). This is the default.</td>
+</tr>
+<tr>
+<td><code>--manager</code></td>
+<td>Installs the Scheduler and UI to manage remote workers.</td>
+</tr>
+<tr>
+<td><code>--worker</code></td>
+<td>Installs only the BunkerWeb instance.</td>
+</tr>
+<tr>
+<td><code>--scheduler-only</code></td>
+<td>Installs only the Scheduler component.</td>
+</tr>
+<tr>
+<td><code>--ui-only</code></td>
+<td>Installs only the Web UI component.</td>
+</tr>
+<tr>
+<td><code>-v, --version VERSION</code></td>
+<td>Specifies the BunkerWeb version to install (e.g., <code>testing</code>).</td>
+</tr>
+<tr>
+<td><code>-w, --enable-wizard</code></td>
+<td>Enables the setup wizard.</td>
+</tr>
+<tr>
+<td><code>-n, --no-wizard</code></td>
+<td>Disables the setup wizard.</td>
+</tr>
+<tr>
+<td><code>-y, --yes</code></td>
+<td>Runs in non-interactive mode using default answers for all prompts.</td>
+</tr>
+<tr>
+<td><code>-f, --force</code></td>
+<td>Forces the installation to proceed even on an unsupported OS version.</td>
+</tr>
+<tr>
+<td><code>-h, --help</code></td>
+<td>Displays the help message with all available options.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run in interactive mode (recommended for most users)</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh
 
-<span class="c1"># Non-interactive with defaults (wizard enabled)</span>
+<span class="c1"># Non-interactive installation with defaults (full stack, wizard enabled)</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes
 
-<span class="c1"># Install without the setup wizard</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--no-wizard
+<span class="c1"># Install a Worker node without the setup wizard</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--worker<span class="w"> </span>--no-wizard
 
 <span class="c1"># Install a specific version</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.0
-
-<span class="c1"># Force installation on unsupported OS versions</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--force
-
-<span class="c1"># Show help</span>
-./install-bunkerweb.sh<span class="w"> </span>--help
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span>testing
 </code></pre></div>
-<h4 id="what-the-script-does">What the script does</h4>
-<p>The easy install script automatically:</p>
+<h4 id="crowdsec-integration-with-the-script">CrowdSec Integration with the Script</h4>
+<p>If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:</p>
 <ul>
-<li><strong>Validates OS compatibility</strong> and warns about unsupported versions</li>
-<li><strong>Installs NGINX</strong> from official repositories with the correct version</li>
-<li><strong>Adds BunkerWeb repositories</strong> for your distribution</li>
-<li><strong>Installs BunkerWeb packages</strong> and locks versions to prevent accidental upgrades</li>
-<li><strong>Configures systemd services</strong> (bunkerweb, bunkerweb-scheduler, bunkerweb-ui)</li>
-<li><strong>Sets up the setup wizard</strong> (if enabled) for easy web-based configuration</li>
-<li><strong>Provides comprehensive next steps</strong> and resource links</li>
+<li>It adds the official CrowdSec repository and installs the agent.</li>
+<li>It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (<code>access.log</code>, <code>error.log</code>, and <code>modsec_audit.log</code>).</li>
+<li>It installs essential collections (<code>crowdsecurity/nginx</code>) and parsers (<code>crowdsecurity/geoip-enrich</code>).</li>
+<li>It registers a bouncer for BunkerWeb and automatically configures the API key in <code>/etc/bunkerweb/variables.env</code>.</li>
+<li>If you also select the <strong>AppSec Component</strong>, it installs the <code>appsec-virtual-patching</code> and <code>appsec-generic-rules</code> collections and configures the AppSec endpoint for BunkerWeb.</li>
 </ul>
+<p>This provides a seamless, out-of-the-box integration for powerful intrusion prevention.</p>
 <h4 id="rhel-considerations">RHEL considerations</h4>
 <div class="admonition warning">
 <p class="admonition-title">External database support on RHEL-based systems</p>
