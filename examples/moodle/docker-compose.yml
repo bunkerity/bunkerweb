@@ -38,7 +38,7 @@ services:
       - bw-universe
 
   mymoodle:
-    image: bitnami/moodle:5
+    image: bitnami/moodle:5.0
     depends_on:
       - mydb
     volumes:
