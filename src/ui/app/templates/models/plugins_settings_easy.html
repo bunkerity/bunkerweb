@@ -61,30 +61,30 @@
             <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.fetch_global">Fetch Global</span>
         </span>
     </button>
-        {% if current_endpoint != "global-config" %}
-            <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
-                <button type="button"
-                        class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
-                    <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
-                    <span class="d-none d-md-inline">&nbsp;
-                        {% if is_draft == 'yes' %}
-                            <span data-i18n="status.draft">Draft</span>
-                        {% else %}
-                            <span data-i18n="status.online">Online</span>
-                        {% endif %}
-                    </span>
-                </button>
-            </div>
-        {% endif %}
-        <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
-             {% endif %}>
+    {% if current_endpoint != "global-config" %}
+        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
-                    class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
-                <i class="bx bx-save bx-sm"></i>
-                <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                    class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
+                <span class="d-none d-md-inline">&nbsp;
+                    {% if is_draft == 'yes' %}
+                        <span data-i18n="status.draft">Draft</span>
+                    {% else %}
+                        <span data-i18n="status.online">Online</span>
+                    {% endif %}
+                </span>
             </button>
         </div>
+    {% endif %}
+    <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+         {% endif %}>
+        <button type="button"
+                class="btn btn-sm btn-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
+            <i class="bx bx-save bx-sm"></i>
+            <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+        </button>
     </div>
+</div>
 </div>
 </div>
 <div class="card tab-content m-1 p-2 position-relative">

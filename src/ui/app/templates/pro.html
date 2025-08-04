@@ -203,8 +203,10 @@
                     </div>
                     <div class="card-body position-relative">
                         <div class="d-flex flex-column justify-content-center align-items-center h-100 text-center">
-                            <p data-i18n="pro.force_check.description">Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.</p>
-                            <form method="POST" action="{{ url_for('pro') }}/force-check">
+                            <p data-i18n="pro.force_check.description">
+                                Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available.
+                            </p>
+                            <form method="POST" action="{{ url_for("pro") }}/force-check">
                                 <input type="hidden"
                                        id="csrf_token"
                                        name="csrf_token"
