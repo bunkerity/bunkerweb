@@ -2182,7 +2182,7 @@ class Database:
                             break
 
                 if matched_group is not None:
-                    multiple.setdefault(matched_group, {}).setdefault(window, set()).add(match.group("suffix"))
+                    multiple.setdefault(matched_group, {}).setdefault(window, set()).add(int(match.group("suffix")))
 
             if new_value is not None:
                 config[key] = new_value
@@ -2198,7 +2198,7 @@ class Database:
 
                     for window, suffixes in multiple[group_key].items():
                         template = templates.get(window, "") or templates.get("global", "")
-                        for suffix in suffixes:
+                        for suffix in map(int, suffixes):
                             if window == "global" or service:
                                 key = f"{setting.id}_{suffix}"
                             else:
