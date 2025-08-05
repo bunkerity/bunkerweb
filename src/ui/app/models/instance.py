@@ -347,13 +347,13 @@ class InstancesUtils:
                         except Exception:
                             continue
                     return {"requests": requests_list}
-                elif plugin_id == "errors":
-                    # Check if METRICS_SAVE_TO_REDIS is enabled for errors
-                    config = self.__db.get_config()
-                    metrics_save_to_redis = config.get("METRICS_SAVE_TO_REDIS", {}).get("value", "no")
-                    if metrics_save_to_redis.lower() != "yes":
-                        return {}
 
+                # Check if METRICS_SAVE_TO_REDIS is enabled for errors
+                config = self.__db.get_config(global_only=True, methods=False)
+                if config.get("METRICS_SAVE_TO_REDIS", "yes").lower() != "yes":
+                    return {}
+
+                if plugin_id == "errors":
                     # For errors, get all counter_* keys and aggregate them
                     pattern = "metrics:errors_counter_*"
                     keys = redis_client.keys(pattern)
