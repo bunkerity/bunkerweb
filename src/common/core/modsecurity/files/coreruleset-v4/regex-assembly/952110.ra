@@ -3,10 +3,12 @@
 
 ##!+ i
 
-java[a-z\.]+Exception
-java[a-z\.]+Error
-org\.[a-z\.]+Exception
-com\.[a-z\.]+Exception
+##! Word boundaries are used to reduce false positives.
+
+\bjava[a-z\.]+Exception\b
+\bjava[a-z\.]+Error\b
+\borg\.[a-z\.]+Exception\b
+\bcom\.[a-z\.]+Exception\b
 ##! Java stack strace errors
-Exception in thread "[^"]*"
-at\s+(?:java|javax|jakarta|org|com)
+\bException in thread "[^"]*"\b
+\bat\s+(?:java|javax|jakarta|org|com)\b

@@ -1,0 +1,109 @@
+#### Core Ruby Errors
+NoMethodError
+NameError
+ArgumentError
+TypeError
+RuntimeError
+StandardError
+SyntaxError
+LoadError
+IndexError
+RangeError
+LocalJumpError
+SystemExit
+SecurityError
+NotImplementedError
+ScriptError
+ZeroDivisionError
+
+#### Ruby on Rails Errors
+ActionController::RoutingError
+ActionController::InvalidAuthenticityToken
+ActionController::ParameterMissing
+ActionController::UnknownFormat
+ActionController::BadRequest
+ActionController::UrlGenerationError
+ActionController::RedirectBackError
+ActionController::InvalidCrossOriginRequest
+ActiveRecord::RecordNotFound
+ActiveRecord::RecordInvalid
+ActiveRecord::StatementInvalid
+ActiveRecord::RecordNotUnique
+ActiveRecord::ConnectionTimeoutError
+ActiveRecord::SerializationTypeMismatch
+ActiveRecord::Deadlocked
+ActiveRecord::SubclassNotFound
+ActiveModel::ForbiddenAttributesError
+ActiveSupport::MessageVerifier::InvalidSignature
+ActiveSupport::DeprecationException
+
+#### Database & ORM Errors (ActiveRecord, PostgreSQL, MySQL, SQLite)*
+PG::ConnectionBad
+PG::UndefinedTable
+PG::UndefinedColumn
+PG::SyntaxError
+PG::UniqueViolation
+PG::CheckViolation
+PG::ForeignKeyViolation
+PG::NotNullViolation
+PG::InvalidTextRepresentation
+PG::CharacterNotInRepertoire
+Mysql2::Error
+Mysql2::TimeoutError
+SQLite3::BusyException
+SQLite3::ConstraintException
+
+#### Rack Middleware & Web Server Errors (Puma, Unicorn, Thin, WEBrick)
+Rack::Timeout::RequestTimeoutException
+Rack::Lint::LintError
+Rack::QueryParser::ParameterTypeError
+Puma::HttpParserError
+Unicorn::ClientShutdown
+Thin::ConnectionError
+WEBrick::HTTPStatus::InternalServerError
+
+#### JSON, Serialization, and Parsing Errors*
+JSON::ParserError
+JSON::GeneratorError
+Oj::ParseError
+Oj::GeneratorError
+
+#### Network & HTTP Client Errors
+SocketError
+EOFError
+OpenSSL::SSL::SSLError
+Timeout::Error
+Net::ReadTimeout
+Net::OpenTimeout
+Net::HTTPBadResponse
+Net::HTTPHeaderSyntaxError
+
+#### File Handling & System Errors
+Errno::ENOENT
+Errno::EACCES
+Errno::ECONNREFUSED
+Errno::ETIMEDOUT
+Errno::EPIPE
+Errno::EMFILE
+SystemCallError
+
+#### Authentication & Security Errors*
+Devise::Unauthorized
+JWT::DecodeError
+JWT::ExpiredSignature
+BCrypt::Errors::InvalidHash
+
+#### Threading & Concurrency Errors
+ThreadError
+FiberError
+Mutex::LockError
+
+#### View Rendering Errors
+ActionView::Template::Error
+ActionView::MissingTemplate
+ActionView::MissingPartial
+ActionView::Template::Handlers::ERB::ERBError
+ActionView::SyntaxErrorInTemplate
+ActionView::Template::Handlers::Builder::TemplateError
+ActionView::Helpers::NumberHelper::InvalidNumberError
+ActionView::TemplateError

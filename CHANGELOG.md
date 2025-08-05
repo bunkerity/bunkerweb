@@ -10,6 +10,7 @@
 - [UI] Fix metrics retrieval in the web UI to ensure that metrics are correctly displayed and updated
 - [LINUX] Add installation type to the post-install script to allow users to choose among `all-in-one` (Full installation), `manager` (Scheduler and UI), `worker` (BunkerWeb only), `scheduler` (Scheduler only), and `ui` (UI only) installation types.
 - [ALL-IN-ONE] In entrypoint script, create redis directory if it does not exist to avoid issues with Redis not starting properly.
+- [DEPS] Update coreruleset-v4 version to v4.17.0
 - [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the web UI's `reports` page.
 
 ## v1.6.3-rc3 - 2025/07/30

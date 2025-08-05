@@ -1,0 +1,10 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##!> define backslash (?:\x5c|%(?:2f|5c))
+
+{{backslash}}[^{]+\{
+{{backslash}}[^=]+=
+{{backslash}}[^|]+\|
