@@ -15,16 +15,12 @@ home = Blueprint("home", __name__)
 def home_page():
     requests = BW_INSTANCES_UTILS.get_metrics("requests").get("requests", [])
 
-    # Get all blocked requests and filter unique ones
-    seen_ids = set()
-    blocked_requests = [request for request in requests if request.get("id") not in seen_ids and not seen_ids.add(request.get("id"))]
-
     request_countries = {}
     request_ips = {}
     current_date = datetime.now().astimezone()
     time_buckets = {(current_date - timedelta(hours=i)).replace(minute=0, second=0, microsecond=0): 0 for i in range(24)}
 
-    for request in blocked_requests:
+    for request in requests:
         timestamp = datetime.fromtimestamp(request["date"]).astimezone()
         bucket = timestamp.replace(minute=0, second=0, microsecond=0)
         if bucket < current_date - timedelta(hours=24):

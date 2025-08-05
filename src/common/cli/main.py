@@ -38,7 +38,7 @@ if __name__ == "__main__":
         parser_ban.add_argument(
             "-exp",
             type=int,
-            help=f"banning time in seconds (default: {ban_time}, use -1 for permanent ban)",
+            help=f"banning time in seconds (default: {ban_time}, set it to 0 for permanent ban)",
             default=ban_time,
         )
         parser_ban.add_argument(

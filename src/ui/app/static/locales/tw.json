@@ -89,7 +89,9 @@
     "enable_totp": "啟用 TOTP",
     "entire_config": "完整設定",
     "export": "匯出",
+    "fetch_global": "取得全域設定",
     "filters_suffix": " 過濾器",
+    "follow": "追蹤",
     "github_stars": "星號",
     "go_back": "返回",
     "hide": "隱藏",
@@ -120,8 +122,8 @@
     "select_page": "選取頁面",
     "service": "服務",
     "set_1h": "設定 1 小時",
-    "set_24h": "設定 24 小時",
     "set_1w": "設定 1 週",
+    "set_24h": "設定 24 小時",
     "set_permanent": "設定永久",
     "setup": "設定",
     "show": "顯示",
@@ -134,8 +136,7 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段",
-    "follow": "跟隨"
+    "wipe_other_sessions": "清除其他工作階段"
   },
   "country": {
     "AD": "安道爾",
@@ -367,7 +368,7 @@
     "TT": "千里達及托巴哥",
     "TV": "吐瓦魯",
     "TW": "台灣",
-    "TZ": "坦尚尼亚",
+    "TZ": "坦尚尼亞",
     "UA": "烏克蘭",
     "UG": "烏干達",
     "UM": "美國本土外小島嶼",
@@ -546,10 +547,10 @@
   },
   "duration": {
     "1_hour": "1 小時",
-    "24_hours": "24 小時",
     "1_week": "1 週",
-    "permanent": "永久",
-    "custom": "自訂"
+    "24_hours": "24 小時",
+    "custom": "自訂",
+    "permanent": "永久"
   },
   "error": {
     "401": {
@@ -646,6 +647,10 @@
       "password": "密碼",
       "permanent_ban": "永久封鎖",
       "raw_configuration": "原始設定",
+      "real_ip_from": "真實 IP 來源",
+      "real_ip_from_urls": "真實 IP 來源",
+      "real_ip_header": "真實 IP 標頭",
+      "real_ip_recursive": "遞迴搜尋真實 IP",
       "reason": "原因",
       "secret_token": "密鑰",
       "server_name": "伺服器名稱",
@@ -656,6 +661,8 @@
       "ui_url": "UI URL",
       "use_custom_ssl": "使用自訂 SSL",
       "use_lets_encrypt_staging": "使用 Let's Encrypt Staging",
+      "use_proxy_protocol": "使用 PROXY 協定",
+      "use_real_ip": "使用真實 IP",
       "username": "使用者名稱",
       "wildcard_certificates": "萬用字元憑證"
     },
@@ -668,8 +675,8 @@
       "multivalue_enter_value": "輸入值...",
       "plugin_search": "搜尋外掛程式...",
       "search": "搜尋...",
-      "select_service": "選擇服務",
       "secret_token": "密鑰",
+      "select_service": "選擇服務",
       "username_example": "王小明"
     },
     "validation": {
@@ -699,6 +706,14 @@
       "start_date": "開始日期",
       "success": "成功"
     }
+  },
+  "logs": {
+    "eventsource_failed": "EventSource 連線失敗",
+    "parse_error": "解析串流資料失敗：{{error}}",
+    "stream_error": "串流錯誤：{{message}}",
+    "stream_init": "串流已初始化，檔案大小：{{size}}",
+    "stream_initialized": "串流已初始化並重新整理，檔案大小：{{size}}",
+    "trimmed_notice": "--- 為了效能，已移除 {{count}} 筆較舊的日誌行 ---"
   },
   "link": {
     "back_to_login": "返回登入",
@@ -792,9 +807,10 @@
     "misc": "雜項",
     "mode_selection": "模式選擇",
     "more": "更多...",
+    "new": "新增",
     "plugin_activated": "外掛程式已啟用",
-    "plugin_deactivated": "外掛程式已停用",
     "plugin_activated_global": "外掛程式已全域啟用",
+    "plugin_deactivated": "外掛程式已停用",
     "plugin_deactivated_global": "外掛程式已全域停用",
     "plugins": "外掛程式",
     "plugins_pages": "外掛程式頁面",
@@ -947,7 +963,7 @@
     "last_24h": "過去 24 小時",
     "last_30d": "過去 30 天",
     "last_7d": "過去 7 天",
-    "last_run_state": "上次執行狀態",
+    "last_run": "上次執行狀態",
     "last_seen": "最後出現",
     "last_update": "最後更新",
     "loading": "正在載入搜尋窗格...",
@@ -994,12 +1010,28 @@
       "section": {
         "custom_certificate": "自訂憑證",
         "lets_encrypt": "Let's Encrypt",
+        "real_ip": "真實 IP",
         "reverse_proxy": "反向代理"
       },
       "subtitle": "設定 Web UI 特定設定。",
       "title": "UI 設定"
     },
     "step3": {
+      "title": "升級至 PRO",
+      "subtitle": "解鎖進階功能，充分利用 BunkerWeb。",
+      "label": {
+        "pro_benefits": "PRO 方案優勢"
+      },
+      "pro_benefit_1_title": "存取所有 PRO 功能",
+      "pro_benefit_1_description": "解鎖所有進階功能，包括強化的安全性、效能和管理工具。",
+      "pro_benefit_2_title": "由維護人員提供技術支援",
+      "pro_benefit_2_description": "對於您可能遇到的任何問題或疑問，從 BunkerWeb 團隊獲得優先支援。",
+      "pro_benefit_3_title": "客製化開發",
+      "pro_benefit_3_description": "量身打造的解決方案，以滿足您的特定需求。",
+      "pro_benefit_4_title": "客製化諮詢",
+      "pro_benefit_4_description": "優化您的 BunkerWeb 設定的專家建議。"
+    },
+    "step4": {
       "label": {
         "final_url": "BunkerWeb UI URL"
       },
@@ -1008,6 +1040,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 管理員使用者已存在。請繼續下一步。",
+      "pro_license_key_exists": "⭐ PRO 授權金鑰已設定，請繼續下一步。",
       "reverse_proxy_configured": "↪️ Web 介面已設定反向代理。請繼續下一步。",
       "secure_password": "安全密碼",
       "unique_server_name": "唯一伺服器名稱"
@@ -1208,12 +1241,14 @@
     "draft_toggle_disabled": "草稿模式只能在透過 UI 建立的服務上切換。",
     "email_lets_encrypt": "用於向 Let's Encrypt 註冊以進行憑證管理和通知的電子郵件地址。",
     "email_length": "電子郵件必須在 1 到 256 個字元之間。",
+    "follow_latest_page_only": "追蹤模式僅在最新頁面可用",
+    "fetch_global_settings": "取得全域設定並應用於當前範本",
     "global_config_source": "值繼承自全域設定。",
     "instance_not_up": "執行個體 {{hostname}} 目前未回應 ('up')。",
+    "latest_version_installed": "您正在執行最新版本。",
     "lets_encrypt_custom_profile": "用於 Let's Encrypt 的自訂設定檔（例如 'my_custom_profile'）。",
     "lets_encrypt_disable_public_suffixes": "停用符合公共字尾清單（PSL）的網域的憑證請求（建議啟用）。",
     "lets_encrypt_profile": "用於 Let's Encrypt 的設定檔（classic、tlsserver、shortlived）。",
-    "latest_version_installed": "您正在執行最新版本。",
     "license_key": "您的 BunkerWeb PRO 授權金鑰。",
     "link": {
       "access_plugin_page": "存取 {{name}} 頁面",
@@ -1243,8 +1278,13 @@
     "pro_feature": "這是一個 PRO 功能。",
     "readonly_db_action_disabled": "已停用：資料庫處於唯讀模式。",
     "readonly_user_action_disabled": "已停用：您的帳戶是唯讀的，操作 '{{action}}' 已停用。",
+    "real_ip_from": "受信任的 IP / 網路清單（以空格分隔），代理請求的來源。",
+    "real_ip_from_urls": "包含受信任的 IP / 網路的 URL 清單（以空格分隔），代理請求的來源。也支援 file:// URL 和使用 http://user:pass@url 格式的基本驗證。",
+    "real_ip_header": "包含真實 IP 或 PROXY 協定的特殊值 proxy_protocol 的 HTTP 標頭。",
+    "real_ip_recursive": "在包含 IP 位址的標頭中執行遞迴搜尋。",
     "remove_ban_entry": "從清單中移除此封鎖項目。",
     "reset_template_settings": "將目前範本檢視中的所有設定重設為其預設值。",
+    "select_file_to_follow": "選取檔案以啟用追蹤模式",
     "server_name": "此服務的主要網域名稱或伺服器名稱。",
     "stream_support": {
       "no": "不支援 STREAM 模式。",
@@ -1354,7 +1394,10 @@
     "ui_url_security": "使用非標準、難以猜測的 URL 路徑可增強安全性。",
     "use_custom_ssl": "是否使用自訂 SSL 憑證而不是 Let's Encrypt。",
     "use_lets_encrypt_staging": "是否使用 Let's Encrypt 的 staging 環境進行測試（產生不受信任的憑證）。",
+    "use_proxy_protocol": "啟用 PROXY 協定通訊。",
+    "use_real_ip": "使用真實 IP",
     "username_length": "使用者名稱必須在 1 到 256 個字元之間。",
+    "value_from_global": "來自全域設定的值",
     "view_full_url": "點擊檢視完整 URL",
     "wildcard_certificates": "產生萬用字元憑證 (*.domain.com)。需要 DNS 挑戰。",
     "wildcard_dns_only": "萬用字元憑證僅支援 DNS 挑戰類型。"
@@ -1372,13 +1415,5 @@
     "pattern": "請輸入有效的 {{field}} 值。",
     "required": "{{field}} 是必填項。",
     "service_required_for_ban": "對於特定於服務的封鎖，必須選取一個服務。"
-  },
-  "logs": {
-    "eventsource_failed": "EventSource 連線失敗",
-    "parse_error": "解析串流資料失敗：{{error}}",
-    "stream_error": "串流錯誤：{{message}}",
-    "stream_init": "串流已初始化，檔案大小：{{size}}",
-    "stream_initialized": "串流已初始化並重新整理，檔案大小：{{size}}",
-    "trimmed_notice": "--- {{count}} 條較舊的日誌行已為了效能而移除 ---"
   }
 }

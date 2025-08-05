@@ -127,18 +127,12 @@ class Instance:
             return f"IP {ip} has been banned {scope_text} on instance {self.hostname} for {exp} seconds{f' with reason: {reason}' if reason else ''}."
         return f"Can't ban {ip} on instance {self.hostname}"
 
-    def unban(self, ip: str, service: str = None) -> str:
+    def unban(self, ip: str, service: str = None, ban_scope: str = "global") -> str:
         try:
             # Prepare request data
-            data = {"ip": ip}
-
-            # Only include service if it's specified and not a placeholder
+            data = {"ip": ip, "ban_scope": ban_scope}
             if service and service not in ("unknown", "Web UI", "default server"):
                 data["service"] = service
-                data["ban_scope"] = "service"
-            else:
-                data["ban_scope"] = "global"
-
             result = self.apiCaller.send_to_apis("POST", "/unban", data=data)[0]
         except BaseException as e:
             service_text = f" for service {service}" if service else ""
@@ -225,8 +219,10 @@ class InstancesUtils:
             if instance.ban(ip, exp, reason, service, ban_scope).startswith("Can't ban")
         ] or ""
 
-    def unban(self, ip: str, service: str = None, *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
-        return [instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service).startswith("Can't unban")] or ""
+    def unban(self, ip: str, service: str = None, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+        return [
+            instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service, ban_scope).startswith("Can't unban")
+        ] or ""
 
     def get_bans(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get unique bans from all instances or a specific instance and sort them by expiration date"""
@@ -336,6 +332,49 @@ class InstancesUtils:
                 return {}
 
             try:
+                if plugin_id == "requests":
+                    # Requests are always saved to Redis
+                    requests_data = redis_client.lrange("requests", 0, -1)
+                    requests_list = []
+                    seen_ids = set()
+                    for item in requests_data:
+                        try:
+                            request = loads(item.decode("utf-8"))
+                            req_id = request.get("id")
+                            if req_id not in seen_ids:
+                                seen_ids.add(req_id)
+                                requests_list.append(request)
+                        except Exception:
+                            continue
+                    return {"requests": requests_list}
+
+                # Check if METRICS_SAVE_TO_REDIS is enabled for errors
+                config = self.__db.get_config(global_only=True, methods=False)
+                if config.get("METRICS_SAVE_TO_REDIS", "yes").lower() != "yes":
+                    return {}
+
+                if plugin_id == "errors":
+                    # For errors, get all counter_* keys and aggregate them
+                    pattern = "metrics:errors_counter_*"
+                    keys = redis_client.keys(pattern)
+                    error_counters = {}
+                    for key in keys:
+                        try:
+                            key_str = key.decode("utf-8") if isinstance(key, bytes) else key
+                            # Extract the error code from the key
+                            error_code = key_str.split("counter_")[1].split(":")[0]
+                            value = redis_client.get(key)
+                            if value is not None:
+                                count = int(value.decode("utf-8"))
+                                counter_key = f"counter_{error_code}"
+                                if counter_key in error_counters:
+                                    error_counters[counter_key] += count
+                                else:
+                                    error_counters[counter_key] = count
+                        except Exception:
+                            continue
+                    return error_counters
+
                 redis_metrics = {}
                 # Get all metric keys for this plugin from all workers
                 pattern = f"metrics:{plugin_id}_*"
@@ -431,11 +470,19 @@ class InstancesUtils:
                 return {}
 
             instance_data = instance_metrics.get(instance.hostname, {})
-            if not isinstance(instance_data.get("msg"), dict) or instance_data.get("status") != "success":
-                self.__db.logger.warning(f"Can't get metrics from {instance.hostname}: {instance_data.get('msg')} - {instance_data.get('status')}")
+            status = instance_data.get("status")
+
+            if status != "success":
+                self.__db.logger.warning(f"Can't get metrics from {instance.hostname}: {instance_data.get('msg')} - {status}")
                 return {}
 
-            return instance_data["msg"]
+            # Handle both nested data structure and direct data response
+            if "data" in instance_data and isinstance(instance_data["data"], dict):
+                return instance_data["data"]
+            elif isinstance(instance_data.get("msg"), dict):
+                return instance_data["msg"]
+            # For direct response format (like redis metrics)
+            return {k: v for k, v in instance_data.items() if k not in ("status", "msg")}
 
         # Initialize metrics
         metrics = {}
@@ -445,9 +492,9 @@ class InstancesUtils:
         if redis_client and not hostname:
             redis_metrics = get_redis_metrics()
             if redis_metrics:
-                # For requests specifically, if we have Redis data, don't fetch from instances
-                # to avoid duplicates since Redis already contains the aggregated data
-                if plugin_id == "requests" and redis_metrics:
+                # For requests (always in Redis) and errors (when METRICS_SAVE_TO_REDIS is enabled),
+                # if we have Redis data, don't fetch from instances to avoid duplicates
+                if (plugin_id == "requests" or (plugin_id == "errors" and redis_metrics)) and redis_metrics:
                     return redis_metrics
                 metrics = aggregate_metrics(metrics, redis_metrics)
 
@@ -459,8 +506,14 @@ class InstancesUtils:
                 metrics = aggregate_metrics(metrics, instance_metrics)
         else:
             # Only fetch from instances if we don't have Redis data for requests
-            # or if we're looking for non-request metrics
-            if not (redis_client and plugin_id == "requests" and metrics):
+            # or if errors metrics are not saved to Redis
+            should_fetch_from_instances = True
+            if redis_client and plugin_id == "requests" and metrics:
+                should_fetch_from_instances = False
+            elif redis_client and plugin_id == "errors" and metrics:
+                should_fetch_from_instances = False
+
+            if should_fetch_from_instances:
                 for instance in instances or self.get_instances(status="up"):
                     instance_metrics = get_instance_metrics(instance)
                     metrics = aggregate_metrics(metrics, instance_metrics)

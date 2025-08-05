@@ -190,7 +190,7 @@ try:
                                 LOGGER.error(f"Error while opening file {url[7:]} : {e}")
                                 failed_urls.add(url)
                                 if url_file not in urls:
-                                    aggregated_recap["failed_count"] += 1
+                                    aggregated_recap[kind]["failed_count"] += 1
                                 failed = True
                         else:
                             max_retries = 3

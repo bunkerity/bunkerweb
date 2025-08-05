@@ -1,4 +1,3 @@
 #!/bin/bash
 
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install -f redmine-chart-values.yml redmine bitnami/redmine
+helm install -f redmine-chart-values.yml redmine oci://registry-1.docker.io/bitnamicharts/redmine

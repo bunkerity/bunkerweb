@@ -1,9 +1,17 @@
 ---
+ci:
+    autofix_commit_msg: |
+        chore(formatting): auto fixes from pre-commit hooks
+
+        for more information, see https://pre-commit.ci
+    autofix_prs: true
+    skip: []
+    submodules: false
 # Update the rev variable with the release version that you want, from the yamllint repo
 # You can pass your custom .yamllint with args attribute.
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v5.0.0
   hooks:
     - id: check-yaml
       args: [--allow-multiple-documents]
@@ -11,3 +19,18 @@ repos:
     - id: trailing-whitespace
       exclude: '^regex-assembly/'
       args: [--markdown-linebreak-ext=md]
+- repo: https://github.com/adrienverge/yamllint.git
+  rev: v1.37.1
+  hooks:
+    - id: yamllint
+      args: [-f=github, -c=.yamllint.yml]
+      files: '\.ya?ml$'
+- repo: local
+  hooks:
+    - id: run-crs-toolchain
+      name: run-crs-toolchain
+      entry: crs-toolchain regex update --all -l error
+      additional_dependencies: ['github.com/coreruleset/crs-toolchain/v2@v2.4.0']
+      language: golang
+      pass_filenames: false
+      files: '^regex-assembly/'

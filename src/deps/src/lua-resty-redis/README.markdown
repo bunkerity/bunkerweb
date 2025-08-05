@@ -443,7 +443,7 @@ Running this example gives the output like this:
     2: publish: 1
     1: receive: ["message","dog","Hello"]
 
-The following class methods are provieded:
+The following class methods are provided:
 
 [Back to TOC](#table-of-contents)
 

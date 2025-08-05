@@ -45,20 +45,21 @@ try:
 
     JOB = Job(LOGGER, __file__)
 
-    env = {
+    cmd_env = {
         "PATH": getenv("PATH", ""),
         "PYTHONPATH": getenv("PYTHONPATH", ""),
         "RELOAD_MIN_TIMEOUT": getenv("RELOAD_MIN_TIMEOUT", "5"),
         "DISABLE_CONFIGURATION_TESTING": getenv("DISABLE_CONFIGURATION_TESTING", "no").lower(),
     }
-    env["PYTHONPATH"] = env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in env["PYTHONPATH"] else "")
-    if getenv("DATABASE_URI"):
-        env["DATABASE_URI"] = getenv("DATABASE_URI")
+    cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
+    if getenv("DATABASE_URI", ""):
+        cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
 
     process = Popen(
         [
             CERTBOT_BIN,
             "renew",
+            "-n",
             "--no-random-sleep-on-renew",
             "--config-dir",
             DATA_PATH.as_posix(),
@@ -71,7 +72,7 @@ try:
         stdin=DEVNULL,
         stderr=PIPE,
         universal_newlines=True,
-        env=env,
+        env=cmd_env,
     )
     while process.poll() is None:
         if process.stderr:

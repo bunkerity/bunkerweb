@@ -24,6 +24,7 @@ $(document).ready(() => {
   const $serviceMethodInput = $("#service-method");
   const $pluginTypeSelect = $("#plugin-type-select");
   const $pluginKeywordSearch = $("#plugin-keyword-search");
+  const $pluginKeywordSearchTop = $("#plugin-keyword-search-top");
   const $pluginItems = $(".plugin-navigation-item");
   const $templateSearch = $("#template-search");
   const $templateDropdownMenu = $("#templates-dropdown-menu");
@@ -435,12 +436,6 @@ $(document).ready(() => {
           settingValue = $this.is(":checked") ? "yes" : "no";
         }
 
-        // Check if it's a multiple setting with numeric suffix
-        const isMultipleSetting =
-          settingName &&
-          $this.attr("id").startsWith("multiple-") &&
-          /_\d+$/.test(settingName);
-
         appendHiddenInput(form, settingName, settingValue);
       });
 
@@ -681,6 +676,17 @@ $(document).ready(() => {
     },
   );
 
+  $(".plugin-navigation-item").on("click", function (e) {
+    e.preventDefault();
+    const tab = bootstrap.Tab.getOrCreateInstance(this);
+    tab.show();
+  });
+
+  $(".plugin-navigation-item").on("shown.bs.tab", function (e) {
+    const targetClass = $(e.target).data("bs-target");
+    handleTabChange(targetClass);
+  });
+
   // Update the mode change handler to validate before switching from easy mode
   $('.mode-selection-menu button[data-bs-toggle="tab"]').on(
     "click",
@@ -719,73 +725,142 @@ $(document).ready(() => {
     $(this).removeClass("is-valid");
   });
 
+  const filterPluginList = () => {
+    const keyword = $pluginKeywordSearch.val().toLowerCase().trim();
+    let firstVisible = null;
+    let visibleItems = 0;
+
+    $pluginItems.each(function () {
+      const $item = $(this);
+      const typeMatches =
+        currentType === "all" || $item.data("type") === currentType;
+
+      const pluginId = $item.data("plugin");
+      const pluginName = $item.find(".fw-bold").text().toLowerCase();
+      const pluginDesc = $item
+        .find("small.text-muted.d-block")
+        .data("description")
+        .toLowerCase();
+      const keywordMatches =
+        keyword === "" ||
+        pluginId.includes(keyword) ||
+        pluginName.includes(keyword) ||
+        pluginDesc.includes(keyword);
+
+      if (typeMatches && keywordMatches) {
+        $item.removeClass("visually-hidden");
+        if (!firstVisible) {
+          firstVisible = $item;
+        }
+        visibleItems++;
+      } else {
+        $item.addClass("visually-hidden");
+      }
+    });
+
+    $(".no-plugin-items").toggle(visibleItems === 0);
+
+    const $activeNav = $(".plugin-navigation-item.active");
+    if (
+      firstVisible &&
+      ($activeNav.length === 0 || $activeNav.hasClass("visually-hidden"))
+    ) {
+      const tab = bootstrap.Tab.getOrCreateInstance(firstVisible[0]);
+      tab.show();
+    }
+  };
+
+  const performSettingsSearch = () => {
+    const keyword = $pluginKeywordSearchTop.val().toLowerCase().trim();
+
+    // Clear highlights from all tabs
+    $(".tab-content .tab-pane .setting-highlight").removeClass(
+      "setting-highlight setting-highlight-fade",
+    );
+
+    if (keyword === "") {
+      return;
+    }
+
+    let bestMatch = null;
+
+    // Find all plugins with matching settings or metadata
+    $("div[id^='navs-plugins-']").each(function () {
+      const $pluginContainer = $(this);
+      const pluginId = $pluginContainer.attr("id").replace("navs-plugins-", "");
+
+      // Search plugin metadata
+      const $navItem = $(`#plugin-nav-${pluginId}`);
+      const pluginName = $navItem.find(".fw-bold").text().toLowerCase();
+      const pluginDesc = $navItem
+        .find("small.text-muted.d-block")
+        .data("description")
+        .toLowerCase();
+      const pluginMetaMatch =
+        pluginId.toLowerCase().includes(keyword) ||
+        pluginName.includes(keyword) ||
+        pluginDesc.includes(keyword);
+
+      // Search settings within the plugin
+      const $settingLabels = $pluginContainer.find("label.form-label");
+      const matchedSettings = $settingLabels.filter(function () {
+        const $label = $(this);
+        const labelText = $label.text().toLowerCase();
+        const $settingContainer = $label.closest("[class*='col-12']");
+        const helpText = (
+          $settingContainer
+            .find(".badge[data-bs-original-title]")
+            .attr("data-bs-original-title") || ""
+        ).toLowerCase();
+        return labelText.includes(keyword) || helpText.includes(keyword);
+      });
+
+      if (matchedSettings.length > 0 || pluginMetaMatch) {
+        if (!bestMatch) {
+          bestMatch = {
+            pluginId: pluginId,
+            settings: matchedSettings.map(function () {
+              return $(this).closest("[class*='col-12']")[0];
+            }),
+          };
+        }
+      }
+    });
+
+    if (bestMatch) {
+      const bestMatchNavItem = $(`#plugin-nav-${bestMatch.pluginId}`);
+
+      const doHighlight = () => {
+        if (bestMatch.settings.length > 0) {
+          highlightSettings($(bestMatch.settings));
+        }
+      };
+
+      if (bestMatchNavItem.hasClass("active")) {
+        doHighlight();
+      } else {
+        bestMatchNavItem.one("shown.bs.tab", doHighlight);
+        const tab = bootstrap.Tab.getOrCreateInstance(bestMatchNavItem[0]);
+        tab.show();
+      }
+    }
+  };
+
+  const debouncedFilterPluginList = debounce(filterPluginList, 200);
+  const debouncedSettingsSearch = debounce(performSettingsSearch, 200);
+
+  $pluginKeywordSearch.on("input", debouncedFilterPluginList);
+
+  $pluginKeywordSearchTop.on("input", debouncedSettingsSearch);
+
   $pluginTypeSelect.on("change", function () {
     currentType = $(this).val();
     const params =
       currentType === "all" ? { type: null } : { type: currentType };
 
     updateUrlParams(params);
-
-    $pluginItems.each(function () {
-      const typeMatches =
-        currentType === "all" || $(this).data("type") === currentType;
-      if (typeMatches) {
-        $(this).removeClass("visually-hidden");
-      } else {
-        $(this).addClass("visually-hidden");
-      }
-    });
-
-    // Check if the currently selected plugin is now hidden due to type filter
-    const $activeNav = $(".plugin-navigation-item.active");
-    if (
-      $activeNav.hasClass("visually-hidden") ||
-      (currentType !== "all" && $activeNav.data("type") !== currentType)
-    ) {
-      // If hidden or type doesn't match, select the first visible plugin
-      const $firstVisibleNav = $(".plugin-navigation-item")
-        .not(".visually-hidden")
-        .first();
-      if ($firstVisibleNav.length) {
-        $firstVisibleNav.trigger("click");
-      }
-    }
+    filterPluginList(); // Not debounced for instant feedback
   });
-
-  $pluginKeywordSearch.on(
-    "input",
-    debounce((e) => {
-      const keyword = e.target.value.toLowerCase().trim();
-      const $sidebarItems = $(".step-navigation-list .plugin-navigation-item");
-      if (!keyword) {
-        $sidebarItems.removeClass("visually-hidden");
-        return;
-      }
-      let found = false;
-      $sidebarItems.each(function () {
-        const $item = $(this);
-        const pluginId = $item.data("plugin") || "";
-        const pluginName = $item.find(".fw-bold").text().toLowerCase();
-        const pluginDesc = $item
-          .find("small.text-muted.d-block")
-          .data("description")
-          .toLowerCase();
-        const match =
-          pluginId.toLowerCase().includes(keyword) ||
-          pluginName.includes(keyword) ||
-          pluginDesc.includes(keyword);
-        if (match) {
-          $item.css("display", "");
-          if (!found) {
-            $item.trigger("click");
-            found = true;
-          }
-        } else {
-          $item.addClass("visually-hidden");
-        }
-      });
-    }, 100),
-  );
 
   $(document).on("click", ".show-multiple", function () {
     const currentTextKey =
@@ -1261,9 +1336,7 @@ $(document).ready(() => {
     $(".toggle-draft").html(
       `<i class="bx bx-sm bx-${
         isDraft ? "globe" : "file-blank"
-      }"></i>&nbsp; <span data-i18n="${newStatusKey}">${t(
-        newStatusKey,
-      )}</span>`,
+      }"></i>&nbsp; <span data-i18n="${newStatusKey}">${t(newStatusKey)}</span>`,
     );
   });
 
@@ -1432,60 +1505,155 @@ $(document).ready(() => {
     resetTemplateConfig();
   });
 
-  $('div[id^="multiple-"]')
-    .filter(function () {
-      return /^multiple-.*-\d+$/.test($(this).attr("id"));
-    })
-    .each(function () {
-      let defaultValues = true;
-      let disabled = false;
-      $(this)
-        .find("input, select")
-        .each(function () {
-          const type = $(this).attr("type");
-          const defaultVal = $(this).data("default");
+  $("#fetch-global-config").on("click", function () {
+    if (isReadOnly) {
+      alert(t("alert.readonly_mode"));
+      return;
+    }
 
-          if ($(this).prop("disabled")) {
-            disabled = true;
-          }
+    $.ajax({
+      url: `${window.location.pathname
+        .split("/")
+        .slice(0, -2)
+        .join("/")}/global-config?as_json=true`,
+      type: "GET",
+      success: function (globalConfig) {
+        const templateContainer = $(`#navs-templates-${currentTemplate}`);
 
-          // Check for select element
-          if ($(this).is("select")) {
-            const selectedVal = $(this).find("option:selected").val();
-            if (selectedVal != defaultVal) {
-              defaultValues = false;
-            }
-          } else if (type === "checkbox") {
-            const isChecked =
-              $(this).prop("checked") === (defaultVal === "yes");
-            if (!isChecked) {
-              defaultValues = false;
-            }
-          } else {
-            const isMatchingValue = $(this).val() == defaultVal;
-            if (!isMatchingValue) {
-              defaultValues = false;
-            }
-          }
+        const settingsInTemplate = new Set();
+        templateContainer.find(".plugin-setting").each(function () {
+          settingsInTemplate.add($(this).attr("name"));
         });
 
-      if (defaultValues) $(`#show-${$(this).attr("id")}`).trigger("click");
-      if (disabled && $(`#remove-${$(this).attr("id")}`).length) {
-        $(`#remove-${$(this).attr("id")}`).addClass("disabled");
-        $(`#remove-${$(this).attr("id")}`)
-          .parent()
-          .attr("title", t("tooltip.cannot_remove_disabled"));
+        for (const settingName in globalConfig) {
+          if (settingsInTemplate.has(settingName)) {
+            if (settingName === "SERVER_NAME") {
+              continue;
+            }
+            const settingData = globalConfig[settingName];
+            const settingValue = settingData.value;
+            const $input = templateContainer.find(`[name="${settingName}"]`);
 
-        new bootstrap.Tooltip(
-          $(`#remove-${$(this).attr("id")}`)
-            .parent()
-            .get(0),
-          {
-            placement: "top",
-          },
-        );
-      }
+            if (!$input.length) continue;
+
+            const defaultValue = $input.data("default");
+            if (settingValue === defaultValue) {
+              continue;
+            }
+
+            const $settingContainer = $input.closest(".col-12");
+            const $badge = $settingContainer.find(".global-override-badge");
+            if ($badge.length) {
+              $badge.removeClass("visually-hidden");
+            }
+
+            const inputType = $input.attr("type");
+
+            if ($input.is("select")) {
+              $input.val(settingValue).trigger("change");
+            } else if (inputType === "checkbox") {
+              $input.prop("checked", settingValue === "yes").trigger("change");
+            } else if ($input.hasClass("multivalue-hidden-input")) {
+              const $container = $input.closest(".multivalue-container");
+              const separator = $container.data("separator") || " ";
+              const values = settingValue
+                ? settingValue.split(separator)
+                : [""];
+              $container.find(".multivalue-input-group").remove();
+              $container.find(".multivalue-toggle").remove();
+
+              const $inputsContainer = $container.find(".multivalue-inputs");
+              values.forEach((value, index) => {
+                const inputGroupHtml = `
+                  <div class="input-group mb-2 multivalue-input-group">
+                    <input type="text"
+                           class="form-control multivalue-input"
+                           value="${value.trim()}"
+                           placeholder="Enter value..."
+                           data-i18n="form.placeholder.multivalue_enter_value">
+                    <button type="button"
+                            class="btn btn-outline-success add-multivalue-item">
+                      <i class="bx bx-plus"></i>
+                    </button>
+                    ${
+                      index > 0 || values.length > 1
+                        ? `
+                    <button type="button"
+                            class="btn btn-outline-danger remove-multivalue-item">
+                      <i class="bx bx-x"></i>
+                    </button>
+                    `
+                        : ""
+                    }
+                  </div>
+                `;
+                $inputsContainer.append(inputGroupHtml);
+              });
+              updateMultivalueHiddenInput($container);
+            } else if (
+              $input.is('input[type="hidden"]') &&
+              $input.closest(".dropdown").find(".multiselect-toggle").length
+            ) {
+              $input.val(settingValue).trigger("input");
+              const selectedValues = settingValue
+                ? settingValue.split(" ")
+                : [];
+              const $dropdown = $input.closest(".dropdown");
+              $dropdown.find(".form-check-input").each(function () {
+                const $checkbox = $(this);
+                const checkboxVal = $checkbox.val();
+                $checkbox.prop("checked", selectedValues.includes(checkboxVal));
+              });
+              const selectedCount = selectedValues.filter((v) => v).length;
+              const $label = $dropdown.find(".multiselect-toggle label");
+              $label.text(`(${selectedCount} selected)`);
+            }
+          }
+        }
+
+        const feedbackToast = $("#feedback-toast").clone();
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
+        feedbackToast.find("span").text("Success");
+        feedbackToast
+          .find(".fw-medium")
+          .text("Global settings applied")
+          .attr("data-i18n", "toast.global_settings_applied_title");
+        feedbackToast
+          .find("div.toast-body")
+          .text(
+            "Global settings have been successfully fetched and applied to the current form.",
+          )
+          .attr("data-i18n", "toast.global_settings_applied_body");
+        feedbackToast.removeClass("border-warning").addClass("border-success");
+        feedbackToast
+          .find(".toast-header")
+          .removeClass("text-warning")
+          .addClass("text-success");
+        feedbackToast.appendTo("#feedback-toast-container");
+        feedbackToast.toast("show");
+      },
+      error: function () {
+        const feedbackToast = $("#feedback-toast").clone();
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
+        feedbackToast.find("span").text("Error");
+        feedbackToast
+          .find(".fw-medium")
+          .text("Failed to fetch global settings")
+          .attr("data-i18n", "toast.global_settings_failed_title");
+        feedbackToast
+          .find("div.toast-body")
+          .text("An error occurred while fetching global settings.")
+          .attr("data-i18n", "toast.global_settings_failed_body");
+        feedbackToast.removeClass("border-warning").addClass("border-danger");
+        feedbackToast
+          .find(".toast-header")
+          .removeClass("text-warning")
+          .addClass("text-danger");
+        feedbackToast.appendTo("#feedback-toast-container");
+        feedbackToast.toast("show");
+      },
     });
+  });
 
   if (
     (usedTemplate === "" || usedTemplate === "ui") &&
@@ -1950,24 +2118,18 @@ $(document).ready(() => {
   isInit = false;
 
   // Multivalue functionality
-  // Function to toggle visibility of multivalue items
-  const toggleMultivalueVisibility = ($container) => {
+  const toggleMultivalueVisibility = ($container, isToggleAction = false) => {
     const $inputGroups = $container.find(".multivalue-input-group");
     const visibleLimit = 5;
 
     if ($inputGroups.length <= visibleLimit) {
-      // Remove toggle if we have 5 or fewer items
       $container.find(".multivalue-toggle").remove();
       $inputGroups.show();
       return;
     }
 
-    // Check if toggle already exists
     let $toggle = $container.find(".multivalue-toggle");
-    const toggleExists = $toggle.length > 0;
-
-    if (!toggleExists) {
-      // Create the toggle button
+    if (!$toggle.length) {
       const toggleHtml = `
         <div class="multivalue-toggle mt-2 mb-2">
           <button type="button" class="btn btn-sm btn-outline-secondary multivalue-toggle-btn">
@@ -1980,31 +2142,38 @@ $(document).ready(() => {
       `;
       $container.find(".multivalue-inputs").after(toggleHtml);
       $toggle = $container.find(".multivalue-toggle");
-
-      // Initially show the button in collapsed state
-      $inputGroups.slice(visibleLimit).hide();
-      return;
+    } else {
+      // Update count
+      $toggle.find(".hidden-count").text($inputGroups.length - visibleLimit);
     }
 
-    const $toggleBtn = $toggle.find(".multivalue-toggle-btn");
-    const $toggleText = $toggle.find(".toggle-text");
+    const $toggleBtn = $container.find(".multivalue-toggle-btn");
+    const $toggleText = $container.find(".toggle-text");
+    let isExpanded = $toggleBtn.hasClass("expanded");
 
-    const isExpanded = $toggleBtn.hasClass("expanded");
+    if (isToggleAction) {
+      isExpanded = !isExpanded;
+      $toggleBtn.toggleClass("expanded", isExpanded);
+    }
 
     if (isExpanded) {
-      // Collapse: show only first 5
+      $inputGroups.show();
+      $toggleText.text("Show less");
+      $toggleBtn
+        .find("i")
+        .removeClass("bx-chevron-down")
+        .addClass("bx-chevron-up");
+    } else {
       $inputGroups.slice(visibleLimit).hide();
       $toggleText.html(
         `Show all (<span class="hidden-count">${
           $inputGroups.length - visibleLimit
         }</span> more)`,
       );
-      $toggleBtn.removeClass("expanded");
-    } else {
-      // Expand: show all
-      $inputGroups.show();
-      $toggleText.text("Show less");
-      $toggleBtn.addClass("expanded");
+      $toggleBtn
+        .find("i")
+        .removeClass("bx-chevron-up")
+        .addClass("bx-chevron-down");
     }
   };
 
@@ -2022,11 +2191,6 @@ $(document).ready(() => {
 
     $hiddenInput.val(values.join(separator));
     $hiddenInput.trigger("change");
-
-    // Only update visibility toggle if not during initialization
-    if (!$container.hasClass("initializing")) {
-      toggleMultivalueVisibility($container);
-    }
   };
 
   const addMultivalueItem = ($container, value = "", $insertAfter = null) => {
@@ -2036,8 +2200,6 @@ $(document).ready(() => {
 
     if (isDisabled) return;
 
-    let $newInputGroup;
-
     const inputGroupHtml = `
       <div class="input-group mb-2 multivalue-input-group">
         <input type="text"
@@ -2045,12 +2207,10 @@ $(document).ready(() => {
                value="${value}"
                placeholder="Enter value..."
                data-i18n="form.placeholder.multivalue_enter_value">
-
         <button type="button"
                 class="btn btn-outline-success add-multivalue-item">
           <i class="bx bx-plus"></i>
         </button>
-
         <button type="button"
                 class="btn btn-outline-danger remove-multivalue-item">
           <i class="bx bx-x"></i>
@@ -2059,76 +2219,61 @@ $(document).ready(() => {
     `;
 
     if ($insertAfter && $insertAfter.length) {
-      // Insert after the specified element
       $insertAfter.after(inputGroupHtml);
-      $newInputGroup = $insertAfter.next();
     } else {
-      // Fallback: append to the end
       const $inputsContainer = $container.find(".multivalue-inputs");
       $inputsContainer.append(inputGroupHtml);
-      $newInputGroup = $inputsContainer.children().last();
     }
 
-    // Focus on the new input
-    $newInputGroup.find(".multivalue-input").focus();
-
-    // Focus on the new input (find the one that was just added)
-    const $newInput =
-      $insertAfter && $insertAfter.length
-        ? $insertAfter.next().find(".multivalue-input")
-        : $container.find(".multivalue-input").last();
-
+    const $newInput = $container.find(".multivalue-input").last();
     $newInput.focus();
 
     updateMultivalueHiddenInput($container);
+    toggleMultivalueVisibility($container, false);
+
+    const numItemsAfter = $container.find(".multivalue-input-group").length;
+    if (numItemsAfter > 5) {
+      const $toggleBtn = $container.find(".multivalue-toggle-btn");
+      if ($toggleBtn.length && !$toggleBtn.hasClass("expanded")) {
+        toggleMultivalueVisibility($container, true);
+      }
+    }
   };
 
   const removeMultivalueItem = ($inputGroup, $container) => {
-    // Don't remove if it's the only item
     if ($container.find(".multivalue-input-group").length <= 1) {
-      // Just clear the value instead of removing
       $inputGroup.find(".multivalue-input").val("");
       updateMultivalueHiddenInput($container);
       return;
     }
 
+    const wasExpanded = $container
+      .find(".multivalue-toggle-btn")
+      .hasClass("expanded");
+
     $inputGroup.remove();
     updateMultivalueHiddenInput($container);
-  }; // Initialize existing multivalue containers
+    toggleMultivalueVisibility($container, false);
+
+    if (wasExpanded) {
+      const $toggleBtn = $container.find(".multivalue-toggle-btn");
+      if ($toggleBtn.length && !$toggleBtn.hasClass("expanded")) {
+        toggleMultivalueVisibility($container, true);
+      }
+    }
+  };
+
+  // Initialize existing multivalue containers
   $(".multivalue-container").each(function () {
     const $container = $(this);
-    const $inputGroups = $container.find(".multivalue-input-group");
-
-    // Mark as initializing to prevent toggle updates
-    $container.addClass("initializing");
-
-    // Set initial collapsed state if more than 5 items
-    if ($inputGroups.length > 5) {
-      $inputGroups.slice(5).hide();
-      // Create toggle button in collapsed state
-      const toggleHtml = `
-        <div class="multivalue-toggle mt-2 mb-2">
-          <button type="button" class="btn btn-sm btn-outline-secondary multivalue-toggle-btn">
-            <i class="bx bx-chevron-down me-1"></i>
-            <span class="toggle-text">Show all (<span class="hidden-count">${
-              $inputGroups.length - 5
-            }</span> more)</span>
-          </button>
-        </div>
-      `;
-      $container.find(".multivalue-inputs").after(toggleHtml);
-    }
-
     updateMultivalueHiddenInput($container);
-
-    // Remove initializing flag
-    $container.removeClass("initializing");
+    toggleMultivalueVisibility($container, false);
   });
 
   // Handle multivalue toggle button clicks
   $(document).on("click", ".multivalue-toggle-btn", function () {
     const $container = $(this).closest(".multivalue-container");
-    toggleMultivalueVisibility($container);
+    toggleMultivalueVisibility($container, true);
   });
 
   // Handle add button clicks

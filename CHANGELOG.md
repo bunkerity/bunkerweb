@@ -1,6 +1,68 @@
 # Changelog
 
-## v1.6.2 - ????/??/??
+## v1.6.3 - ????/??/??
+
+- [BUGFIX] Fix errors with `PostgreSQL` database, ensuring that suffixes are stored as integers for consistency.
+- [FEATURE] Enhance `Redirect` plugin to support multiple source/destination paths
+- [FEATURE] Enhance `Antibot` CAPTCHA functionality with customizable character set via the `ANTIBOT_CAPTCHA_ALPHABET` setting, allowing users to define a custom alphabet for CAPTCHA generation.
+- [UI] Always display the selected service and selected type when editing/creating a custom configuration
+- [UI] Add global configuration fetching functionality to easy mode
+- [UI] Fix metrics retrieval in the web UI to ensure that metrics are correctly displayed and updated
+- [LINUX] Add installation type to the post-install script to allow users to choose among `all-in-one` (Full installation), `manager` (Scheduler and UI), `worker` (BunkerWeb only), `scheduler` (Scheduler only), and `ui` (UI only) installation types.
+- [ALL-IN-ONE] In entrypoint script, create redis directory if it does not exist to avoid issues with Redis not starting properly.
+- [DEPS] Update coreruleset-v4 version to v4.17.0
+- [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the web UI's `reports` page.
+
+## v1.6.3-rc3 - 2025/07/30
+
+- [BUGFIX] Fix HTTP/3 not working on default server as the `reuseport` directive was missing in the `default-server-http.conf` file.
+- [UI] Fix missing settings when cloning a service in the web UI
+- [FEATURE] Add the possibility to add headers and a footers to the `robots.txt` file using the `ROBOTSTXT_HEADER` and `ROBOTSTXT_FOOTER` settings. (Can be Base64 encoded)
+- [FEATURE] Add `domainoffensive.de` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add `Dynu` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add a reason when a request is rate-limited in the `Rate Limiting` plugin, allowing users to understand why their request was blocked.
+- [UI] De-duplicate metrics about requests on the home page to avoid counting the same request multiple times
+- [UI] Enhance plugin filtering to avoid two plugins being displayed at the same time when filtering by name
+- [UI] Enhance keywords search in the settings UI to make it more intuitive and user-friendly
+- [DEPS] Update lua-resty-session version to v4.1.3
+- [DEPS] Update lua-resty-redis version to v0.33
+- [CONTRIBUTION] Thank you [Michal-Koeckeis-Fresel](https://github.com/Michal-Koeckeis-Fresel) for your contribution to the `Let's Encrypt` plugin.
+- [CONTRIBUTION] Thank you [killmasta93](https://github.com/killmasta93) for your contribution regarding the integrations examples.
+
+## v1.6.3-rc2 - 2025/07/29
+
+- [BUGFIX] Fix errors with the `Custom SSL certificate` job when a lot of environment variables are set in the scheduler.
+- [BUGFIX] Fix shenanigans regarding external/PRO plugins in Linux integration.
+- [FEATURE] Update Laurent Minne's blacklist URL to the new one: <https://github.com/duggytuxy/Data-Shield_IPv4_Blocklist>
+- [UI] Add PRO activation step in the setup wizard to allow users to activate the PRO version during the initial setup.
+- [UI] Simplify configuration step in setup wizard by adding a new `Advanced settings` section to allow users to configure advanced settings like `SERVER_NAME`, and the `Let's Encrypt` plugin.
+- [UI] Add a new alias to the `TOTP_SECRETS` environment variable: `TOTP_ENCRYPTION_KEYS` to make more sense in the context of the TOTP feature.
+- [UI] Add a force recheck PRO plugins button in the web UI to allow users to force a recheck of the PRO plugins status.
+- [LINUX] Add CrowdSec automatic installation/configuration in the easy-install script for Linux distributions.
+- [ALL-IN-ONE] Update CrowdSec to version v1.6.11.
+
+## v1.6.3-rc1 - 2025/07/19
+
+- [BUGFIX] Update scheduler environment variables handling to avoid issues when there are too many environment variables set.
+- [BUGFIX] Fix `Let's Encrypt` credential files being removed upon reload of the scheduler creating issues with the certificate renewal.
+- [BUGFIX] Change `BAD_BEHAVIOR_BAN_SCOPE` setting context from `multisite` to `global`.
+- [BUGFIX] Update template data handling to use template_data instead of template when updating external plugins.
+- [BUGFIX] Fix unban functionality to correctly handle global bans in the web UI.
+- [FEATURE] Add `BunnyNet` as a DNS provider in the `letsencrypt` plugin
+- [FEATURE] Add new `robotstxt` plugin to manage the robots.txt file from settings and serve it
+- [UI] Fix shenanigans when fetching the latest version in the web UI.
+- [UI] Fix the fact that the "global" choice wasn't categorized as is in the web UI when editing a custom configuration.
+- [UI] Fix multivalue toggle button functionality and transition effects
+- [UI] Enhance ModSecurity Reporting: Add Anomaly Score Handling
+- [UI] Improve multiple setting handling in plugin settings template for better UI interaction (always show the first group, hide others by default)
+- [DOCS] Update error handling documentation to clarify custom error page placement and ROOT_FOLDER settings.
+- [MISC] Enhance plugin command execution with error handling and available commands listing
+- [MISC] Streamline ban management by utilizing utility functions for adding and removing bans
+- [MISC] Reorder session data retrieval in antibot access method for improved clarity and flow
+- [LINUX] Drop support of Fedora 40
+- [DEPS] Updated NGINX version to 1.28.0 for Fedora integration now that it is available in the repositories.
+
+## v1.6.2 - 2025/07/08
 
 - [SECURITY] Introduce ModSecurity exclusion rules targeting the password input upon login, preventing false-positive blocks on valid complex passwords while preserving strict overall request inspection.
 - [SECURITY] Add new ModSecurity exclusion rule to prevent false positives on the `/instances/new` endpoint, specifically for the `hostname` argument, ensuring that legitimate requests are not blocked while maintaining security.

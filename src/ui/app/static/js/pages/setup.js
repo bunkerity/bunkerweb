@@ -2,7 +2,7 @@ $(document).ready(() => {
   // Initialize variables
   let toastNum = 1;
   let currentStep = 1;
-  const CHECK_STEP = 3;
+  const CHECK_STEP = 4;
   const uiUser = $("#ui_user").val() === "yes";
   const uiReverseProxy = $("#ui_reverse_proxy").val() === "yes";
 
@@ -311,7 +311,7 @@ $(document).ready(() => {
       $previousStepButton.removeClass("disabled");
     }
 
-    if (currentStep === 3) {
+    if (currentStep === 4) {
       $nextStepButton.addClass("d-none");
       $saveSettingsButton.removeClass("d-none");
       populateOverview();
@@ -527,6 +527,12 @@ $(document).ready(() => {
 
       if (!isStepValid) return;
 
+      if (newStep !== 1) {
+        $(".join-newsletter").addClass("visually-hidden");
+      } else {
+        $(".join-newsletter").removeClass("visually-hidden");
+      }
+
       currentStep = newStep;
       navigateToStep(newStep);
     } else {
@@ -570,7 +576,7 @@ $(document).ready(() => {
   // Save Settings Button Click
   $saveSettingsButton.on("click", function (e) {
     e.preventDefault();
-    if (currentStep !== 3) return;
+    if (currentStep !== 4) return;
     const $subscribeNewsletter = $("#setup-subscribe-newsletter");
     if ($subscribeNewsletter.prop("checked")) {
       const $email = $("#email");
@@ -606,6 +612,9 @@ $(document).ready(() => {
 
     // Append the Theme
     formData.append("theme", $("[name='theme']").val());
+
+    // Append the PRO License Key
+    formData.append("pro_license_key", $("#PRO_LICENSE_KEY").val());
 
     const server_name = getServerName();
     const ui_url = $("#REVERSE_PROXY_URL").val();
@@ -685,6 +694,23 @@ $(document).ready(() => {
       formData.append("custom_ssl_key", $("#CUSTOM_SSL_KEY").val());
       formData.append("custom_ssl_cert_data", $("#CUSTOM_SSL_CERT_DATA").val());
       formData.append("custom_ssl_key_data", $("#CUSTOM_SSL_KEY_DATA").val());
+
+      // Real IP settings
+      formData.append(
+        "use_real_ip",
+        $("#USE_REAL_IP").prop("checked") ? "yes" : "no",
+      );
+      formData.append(
+        "use_proxy_protocol",
+        $("#USE_PROXY_PROTOCOL").prop("checked") ? "yes" : "no",
+      );
+      formData.append("real_ip_from", $("#REAL_IP_FROM").val());
+      formData.append("real_ip_header", $("#REAL_IP_HEADER").val());
+      formData.append(
+        "real_ip_recursive",
+        $("#REAL_IP_RECURSIVE").prop("checked") ? "yes" : "no",
+      );
+      formData.append("real_ip_from_urls", $("#REAL_IP_FROM_URLS").val());
     }
 
     // Remove beforeunload event to prevent prompt on form submission
@@ -741,6 +767,10 @@ $(document).ready(() => {
     const isNext = $(this).hasClass("next-step");
     const confirmDNS = this.id === "confirm-dns";
     handleStepNavigation(isNext, confirmDNS);
+  });
+
+  $("#advanced-settings-toggle").on("click", function () {
+    $(this).find("i").toggleClass("bx-chevron-down bx-chevron-up");
   });
 
   $(document).on("keydown", ".plugin-setting", function (e) {

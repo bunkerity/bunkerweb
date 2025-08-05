@@ -138,9 +138,9 @@
     },
     {
       "id": "lua-resty-redis",
-      "name": "lua-resty-redis v0.32",
+      "name": "lua-resty-redis v0.33",
       "url": "https://github.com/openresty/lua-resty-redis.git",
-      "commit": "11609088f4265a111d42203c6631e5fd0e86baf0",
+      "commit": "3fdc727f176f565adca8c2b350a636bd74e93de2",
       "post_install": "rm -r src/deps/src/lua-resty-redis/t"
     },
     {
@@ -152,9 +152,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.1.2",
+      "name": "lua-resty-session v4.1.3",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "f4b773244f7841bbc4065ffe15c422a1bd67efaa",
+      "commit": "c98014399817025620a064535cb43e785720adc0",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {
@@ -247,18 +247,11 @@
       "post_install": "rm -r src/deps/src/modsecurity-nginx/tests && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h.rej && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch || rm src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.orig src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c.rej && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch || rm src/deps/src/modsecurity-nginx/config.orig src/deps/src/modsecurity-nginx/config.rej"
     },
     {
-      "id": "nginx-1.26",
-      "name": "Nginx v1.26.3",
-      "url": "https://github.com/nginx/nginx.git",
-      "commit": "1be0fb0c9f9bc3489c7b40576efd6afe6b2eccd5",
-      "post_install": "rm -r src/deps/src/nginx-1.26/docs"
-    },
-    {
-      "id": "nginx-1.28",
+      "id": "nginx",
       "name": "Nginx v1.28.0",
       "url": "https://github.com/nginx/nginx.git",
       "commit": "481d28cb4e04c8096b9b6134856891dc52ecc68f",
-      "post_install": "rm -r src/deps/src/nginx-1.28/docs"
+      "post_install": "rm -r src/deps/src/nginx/docs"
     },
     {
       "id": "nginx_cookie_flag_module",

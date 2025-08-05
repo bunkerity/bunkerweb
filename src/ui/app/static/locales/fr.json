@@ -25,8 +25,8 @@
     "from_template": "Depuis un modèle",
     "new_version": "Nouvelle version",
     "no_template": "Pas de Modèle",
-    "unread_notifications": "Notifications non lues",
-    "unread_news": "Actualités non lues"
+    "unread_news": "Actualités non lues",
+    "unread_notifications": "Notifications non lues"
   },
   "banner": {
     "community": "Faites partie de la communauté Bunker en rejoignant le <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">chat Discord</a> et en nous suivant sur <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",
@@ -54,7 +54,7 @@
     "plugins": "Plugins",
     "plugins_pages": "Pages des Plugins",
     "pro": "Pro",
-    "profile": "Profile",
+    "profile": "Profil",
     "reports": "Rapports",
     "services": "Services",
     "support": "Support",
@@ -89,6 +89,7 @@
     "enable_totp": "Activer TOTP",
     "entire_config": "Config Entière",
     "export": "Exporter",
+    "fetch_global": "Récupérer la configuration globale",
     "filters_suffix": " Filtres",
     "follow": "Suivre",
     "github_stars": "Étoiles",
@@ -121,8 +122,8 @@
     "select_page": "Choisir Page",
     "service": "Service",
     "set_1h": "Définir 1 Heure",
-    "set_24h": "Définir 24 Heures",
     "set_1w": "Définir 1 Semaine",
+    "set_24h": "Définir 24 Heures",
     "set_permanent": "Définir Permanent",
     "setup": "Configuration",
     "show": "Afficher",
@@ -546,10 +547,10 @@
   },
   "duration": {
     "1_hour": "1 Heure",
-    "24_hours": "24 Heures",
     "1_week": "1 Semaine",
-    "permanent": "Permanent",
-    "custom": "Personnalisé"
+    "24_hours": "24 Heures",
+    "custom": "Personnalisé",
+    "permanent": "Permanent"
   },
   "error": {
     "401": {
@@ -646,6 +647,10 @@
       "password": "Mot de Passe",
       "permanent_ban": "Bannissement Permanent",
       "raw_configuration": "Configuration Brute",
+      "real_ip_from": "IP réelle de",
+      "real_ip_from_urls": "IP réelle de",
+      "real_ip_header": "En-tête de l'IP réelle",
+      "real_ip_recursive": "IP réelle récursive",
       "reason": "Raison",
       "secret_token": "Jeton Secret",
       "server_name": "Nom du Serveur",
@@ -656,6 +661,8 @@
       "ui_url": "URL UI",
       "use_custom_ssl": "Utiliser SSL Personnalisé",
       "use_lets_encrypt_staging": "Utiliser Let's Encrypt Staging",
+      "use_proxy_protocol": "Utiliser le protocole PROXY",
+      "use_real_ip": "Utiliser l'IP réelle",
       "username": "Nom d'utilisateur",
       "wildcard_certificates": "Certificats Wildcard"
     },
@@ -668,8 +675,8 @@
       "multivalue_enter_value": "Entrez une valeur...",
       "plugin_search": "Rechercher des plugins...",
       "search": "Rechercher...",
-      "select_service": "Sélectionner un Service",
       "secret_token": "Jeton Secret",
+      "select_service": "Sélectionner un Service",
       "username_example": "jeandupon"
     },
     "validation": {
@@ -801,8 +808,8 @@
     "mode_selection": "Sélection du Mode",
     "more": "Plus...",
     "plugin_activated": "Plugin activé",
-    "plugin_deactivated": "Plugin désactivé",
     "plugin_activated_global": "Plugin activé globalement",
+    "plugin_deactivated": "Plugin désactivé",
     "plugin_deactivated_global": "Plugin désactivé globalement",
     "plugins": "Plugins",
     "plugins_pages": "Pages des Plugins",
@@ -1001,12 +1008,28 @@
       "section": {
         "custom_certificate": "Certificat Personnalisé",
         "lets_encrypt": "Let's Encrypt",
+        "real_ip": "IP Réelle",
         "reverse_proxy": "Proxy Inverse"
       },
       "subtitle": "Configurez les paramètres spécifiques à l'interface Web.",
       "title": "Paramètres UI"
     },
     "step3": {
+      "title": "Passer à PRO",
+      "subtitle": "Débloquez des fonctionnalités avancées et tirez le meilleur parti de BunkerWeb.",
+      "label": {
+        "pro_benefits": "Avantages PRO"
+      },
+      "pro_benefit_1_title": "Accès à toutes les fonctionnalités PRO",
+      "pro_benefit_1_description": "Débloquez toutes les fonctionnalités avancées, y compris des outils de sécurité, de performance et de gestion améliorés.",
+      "pro_benefit_2_title": "Support technique des mainteneurs",
+      "pro_benefit_2_description": "Obtenez un support prioritaire de l'équipe BunkerWeb pour tout problème ou question que vous pourriez avoir.",
+      "pro_benefit_3_title": "Développement personnalisé",
+      "pro_benefit_3_description": "Solutions sur mesure pour répondre à vos besoins spécifiques.",
+      "pro_benefit_4_title": "Conseil personnalisé",
+      "pro_benefit_4_description": "Conseils d'experts pour optimiser votre configuration BunkerWeb."
+    },
+    "step4": {
       "label": {
         "final_url": "URL de l'UI BunkerWeb"
       },
@@ -1015,6 +1038,7 @@
     },
     "status": {
       "admin_user_exists": "🧑‍🚀 Un utilisateur admin existe déjà. Veuillez passer à l'étape suivante.",
+      "pro_license_key_exists": "⭐ Une clé de licence PRO est déjà configurée, veuillez passer à l'étape suivante.",
       "reverse_proxy_configured": "↪️ Un proxy inverse est déjà configuré pour l'interface web. Veuillez passer à l'étape suivante.",
       "secure_password": "Mot de Passe Sécurisé",
       "unique_server_name": "Nom de Serveur Unique"
@@ -1216,6 +1240,7 @@
     "email_lets_encrypt": "L'adresse email à enregistrer auprès de Let's Encrypt pour la gestion des certificats et les notifications.",
     "email_length": "L'email doit contenir entre 1 et 256 caractères.",
     "follow_latest_page_only": "Le mode suivi n'est disponible que sur la dernière page",
+    "fetch_global_settings": "Récupérer les paramètres globaux et les appliquer au modèle actuel",
     "global_config_source": "Valeur héritée de la configuration globale.",
     "instance_not_up": "L'instance {{hostname}} ne répond pas actuellement ('up').",
     "lets_encrypt_custom_profile": "Le profil personnalisé à utiliser pour Let's Encrypt (ex : 'mon_profil_personnalise').",
@@ -1251,6 +1276,10 @@
     "pro_feature": "Ceci est une fonctionnalité PRO.",
     "readonly_db_action_disabled": "Désactivé : La base de données est en lecture seule, action '{{action}}' désactivée.",
     "readonly_user_action_disabled": "Désactivé : Votre compte est en lecture seule, action '{{action}}' désactivée.",
+    "real_ip_from": "Liste des adresses IP / réseaux de confiance, séparés par des espaces, d'où proviennent les requêtes proxy.",
+    "real_ip_from_urls": "Liste des URL contenant des adresses IP / réseaux de confiance, séparées par des espaces, d'où proviennent les requêtes proxy. Prend également en charge les URL file:// et l'authentification basique via le schéma http://user:pass@url.",
+    "real_ip_header": "En-tête HTTP contenant l'IP réelle ou la valeur spéciale proxy_protocol pour le protocole PROXY.",
+    "real_ip_recursive": "Effectuer une recherche récursive dans l'adresse IP du conteneur d'en-tête.",
     "remove_ban_entry": "Retirer cette entrée de bannissement de la liste.",
     "reset_template_settings": "Réinitialiser tous les paramètres de la vue modèle actuelle à leurs valeurs par défaut.",
     "select_file_to_follow": "Sélectionner un fichier pour activer le mode suivi",
@@ -1363,7 +1392,10 @@
     "ui_url_security": "Utiliser un chemin d'URL non standard et difficile à deviner améliore la sécurité.",
     "use_custom_ssl": "Indique s'il faut utiliser un certificat SSL personnalisé au lieu de Let's Encrypt.",
     "use_lets_encrypt_staging": "Indique s'il faut utiliser l'environnement de staging Let's Encrypt pour les tests (génère des certificats non fiables).",
+    "use_proxy_protocol": "Activer la communication du protocole PROXY.",
+    "use_real_ip": "Utiliser l'IP réelle",
     "username_length": "Le nom d'utilisateur doit contenir entre 1 et 256 caractères.",
+    "value_from_global": "Valeur de la configuration globale",
     "view_full_url": "Cliquez pour voir l'URL complète",
     "wildcard_certificates": "Générer des certificats wildcard (*.domaine.com). Nécessite le challenge DNS.",
     "wildcard_dns_only": "Les certificats wildcard ne sont supportés qu'avec le type de challenge DNS."

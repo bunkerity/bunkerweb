@@ -74,6 +74,7 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "8": True,
     },
     "reports": {
+        "3": True,
         "4": True,
         "5": False,
         "6": True,
@@ -194,7 +195,16 @@ def get_filtered_settings(settings: dict, global_config: bool = False) -> Dict[s
 
 
 def get_blacklisted_settings(global_config: bool = False) -> Set[str]:
-    blacklisted_settings = {"IS_LOADING", "AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE", "IS_DRAFT", "BUNKERWEB_INSTANCES"}
+    blacklisted_settings = {
+        "IS_LOADING",
+        "AUTOCONF_MODE",
+        "SWARM_MODE",
+        "KUBERNETES_MODE",
+        "IS_DRAFT",
+        "BUNKERWEB_INSTANCES",
+        "DATABASE_URI",
+        "DATABASE_URI_READONLY",
+    }
     if global_config:
         blacklisted_settings.update({"SERVER_NAME", "USE_TEMPLATE"})
     return blacklisted_settings
@@ -222,11 +232,19 @@ def get_latest_stable_release():
     response = get("https://api.github.com/repos/bunkerity/bunkerweb/releases", headers={"User-Agent": "BunkerWeb"}, timeout=3)
     response.raise_for_status()
     releases = response.json()
+    latest_release = None
 
-    for release in releases:
+    for release in reversed(releases):
         if not release["prerelease"]:
-            return release
-    return None
+            latest_release = release
+
+    if not latest_release:
+        LOGGER.error("Failed to fetch latest release information")
+        latest_release = "unknown"
+    else:
+        latest_release = latest_release["tag_name"].removeprefix("v")
+
+    return latest_release
 
 
 def flash(message: str, category: str = "success", i18n_key: Optional[str] = None, *, save: bool = True) -> None:

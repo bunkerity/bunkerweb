@@ -38,7 +38,7 @@ start() {
             echo "ADMIN_USERNAME="
             echo "ADMIN_PASSWORD="
             echo "# FLASK_SECRET=changeme"
-            echo "# TOTP_SECRETS=changeme"
+            echo "# TOTP_ENCRYPTION_KEYS=changeme"
             echo "LISTEN_ADDR=127.0.0.1"
             echo "# LISTEN_PORT=7000"
             echo "FORWARDED_ALLOW_IPS=127.0.0.1"

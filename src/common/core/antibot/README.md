@@ -119,12 +119,24 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     - Fully self-hosted, eliminating the need for third-party APIs.
     - Dynamically generated challenges ensure uniqueness for each user session.
+    - Uses a customizable character set for CAPTCHA generation.
+
+    **Supported Characters:**
+
+    The CAPTCHA system supports the following character types:
+
+    - **Letters:** All lowercase (a-z) and uppercase (A-Z) letters
+    - **Numbers:** 2, 3, 4, 5, 6, 7, 8, 9 (excludes 0 and 1 to avoid confusion)
+    - **Special characters:** ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„```
+
+    To have the complete set of supported characters, refer to the [Font charmap](https://www.dafont.com/moms-typewriter.charmap?back=theme) of the font used for the CAPTCHA.
 
     **Configuration Settings:**
 
-    | Setting       | Default | Context   | Multiple | Description                                                           |
-    | ------------- | ------- | --------- | -------- | --------------------------------------------------------------------- |
-    | `USE_ANTIBOT` | `no`    | multisite | no       | **Enable Antibot:** Set to `captcha` to enable the Captcha challenge. |
+    | Setting                    | Default                                                | Context   | Multiple | Description                                                                                                                                                                                                                    |
+    | -------------------------- | ------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`              | `no`                                                   | multisite | no       | **Enable Antibot:** Set to `captcha` to enable the Captcha challenge.                                                                                                                                                          |
+    | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no       | **Captcha Alphabet:** A string of characters to use for generating the CAPTCHA. Supported characters: all letters (a-z, A-Z), numbers 2-9 (excludes 0 and 1), and special characters: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
@@ -229,7 +241,10 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"
     ANTIBOT_TIME_VALID: "86400"
+    ANTIBOT_CAPTCHA_ALPHABET: "23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     ```
+
+    Note: The example above uses numbers 2-9 and all letters, which are the most commonly used characters for CAPTCHA challenges. You can customize the alphabet to include special characters as needed.
 
 === "reCAPTCHA Challenge"
 

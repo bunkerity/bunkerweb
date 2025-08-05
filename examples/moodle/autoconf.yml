@@ -1,6 +1,6 @@
 services:
   mymoodle:
-    image: bitnami/moodle:4
+    image: bitnami/moodle:5.0
     networks:
       bw-services:
         aliases:

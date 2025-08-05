@@ -1,0 +1,143 @@
+{
+  "id": "robotstxt",
+  "name": "Robots.txt",
+  "description": "Manage the robots.txt file. Standard for controlling web crawler access to your site.",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "USE_ROBOTSTXT": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable robots.txt file.",
+      "id": "use-robotstxt",
+      "label": "Use robots.txt",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "ROBOTSTXT_COMMUNITY_LISTS": {
+      "context": "multisite",
+      "default": "",
+      "help": "Select community-maintained lists to include in robots.txt.",
+      "id": "robotstxt-community-lists",
+      "label": "Community robots.txt lists",
+      "regex": "^.*$",
+      "type": "multiselect",
+      "multiselect": [
+        {
+          "id": "ai-robots-txt",
+          "label": "This list contains AI-related crawlers of all types, regardless of purpose.",
+          "value": "https://raw.githubusercontent.com/ai-robots-txt/ai.robots.txt/refs/heads/main/robots.txt"
+        },
+        {
+          "id": "robots-disallowed",
+          "label": "The RobotsDisallowed project is a harvest of the robots.txt disallowed directories of the world's top websites - specifically those of the Alexa 100K and the Majestic 100K.",
+          "value": "https://raw.githubusercontent.com/danielmiessler/RobotsDisallowed/refs/heads/master/curated.txt"
+        }
+      ]
+    },
+    "ROBOTSTXT_URLS": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of URLs, separated with spaces, containing robots.txt rules. Also supports file:// URLs and and auth basic using http://user:pass@url scheme.",
+      "id": "robotstxt-urls",
+      "label": "Robots.txt URLs",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*) *)*$",
+      "type": "multivalue",
+      "separator": " "
+    },
+    "ROBOTSTXT_RULE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Rules for robots.txt (one per line).",
+      "id": "robotstxt-rule",
+      "label": "Robots.txt rule",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "robotstxt-rule"
+    },
+    "ROBOTSTXT_HEADER": {
+      "context": "multisite",
+      "default": "",
+      "help": "Header for robots.txt file (before rules). Can be Base64 encoded.",
+      "id": "robotstxt-header",
+      "label": "Robots.txt header",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "robotstxt-header"
+    },
+    "ROBOTSTXT_FOOTER": {
+      "context": "multisite",
+      "default": "",
+      "help": "Footer for robots.txt file (after rules). Can be Base64 encoded.",
+      "id": "robotstxt-footer",
+      "label": "Robots.txt footer",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "robotstxt-footer"
+    },
+    "ROBOTSTXT_SITEMAP": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitemap URL(s) to include in robots.txt.",
+      "id": "robotstxt-sitemap",
+      "label": "Robots.txt sitemap",
+      "regex": "^(https?://\\S+)?$",
+      "type": "text",
+      "multiple": "robotstxt-sitemap"
+    },
+    "ROBOTSTXT_IGNORE_RULES": {
+      "context": "multisite",
+      "default": "",
+      "help": "Rule (PCRE regex) to ignore. Can be specified multiple times.",
+      "id": "robotstxt-ignore-rules",
+      "label": "Ignore rule",
+      "regex": "^.*$",
+      "type": "text",
+      "multiple": "robotstxt-ignore-rules"
+    },
+    "ROBOTSTXT_DARKVISITORS_TOKEN": {
+      "context": "multisite",
+      "default": "",
+      "help": "Bearer token for the DarkVisitors API.",
+      "id": "robotstxt-darkvisitors-token",
+      "label": "DarkVisitors API Token",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "ROBOTSTXT_DARKVISITORS_AGENT_TYPES": {
+      "context": "multisite",
+      "default": "",
+      "help": "Comma-separated list of agent types to include in the DarkVisitors agent_types field when contacting the DarkVisitors API.",
+      "id": "robotstxt-darkvisitors-agent-types",
+      "label": "DarkVisitors Agent Types",
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": ","
+    },
+    "ROBOTSTXT_DARKVISITORS_DISALLOW": {
+      "context": "multisite",
+      "default": "/",
+      "help": "A string specifying which URLs are disallowed. This value will be sent as the disallow field when contacting the DarkVisitors API.",
+      "id": "robotstxt-darkvisitors-disallow",
+      "label": "DarkVisitors Disallow",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "robots-txt-download",
+      "file": "robots-txt-download.py",
+      "every": "hour",
+      "reload": true,
+      "async": true
+    },
+    {
+      "name": "robots-txt-darkvisitors",
+      "file": "robots-txt-darkvisitors.py",
+      "every": "hour",
+      "reload": true,
+      "async": true
+    }
+  ]
+}
