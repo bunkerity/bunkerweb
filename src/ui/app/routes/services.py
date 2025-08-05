@@ -221,7 +221,7 @@ def services_service_page(service: str):
                 cloned_service_config = {k: v for k, v in DB.get_config(methods=False, with_drafts=True, service=clone).items()}
 
                 for key, value in cloned_service_config.items():
-                    if key in variables:
+                    if key in variables or key in ("SERVER_NAME", "OLD_SERVER_NAME", "IS_DRAFT", "USE_UI"):
                         continue
 
                     variables[key] = value
@@ -400,6 +400,7 @@ def services_service_page(service: str):
                 original_value = db_config.get(key, {}).get("value")
                 db_config[key] = setting | {"clone": original_value != setting.get("value")}
             db_config["SERVER_NAME"].update({"value": "", "clone": False})
+            db_config["USE_UI"].update({"value": "no", "clone": False})
             for key, value in DB.get_custom_configs(with_drafts=True, as_dict=True).items():
                 if key.startswith(f"{clone}_"):
                     db_custom_configs[key.replace(f"{clone}_", f"{service}_", 1)] = value
