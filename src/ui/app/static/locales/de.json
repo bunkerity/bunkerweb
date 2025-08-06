@@ -447,7 +447,7 @@
       },
       "top_blocked_ips": {
         "title": "Top 10 blockierte IPs",
-        "most_blocked": "Meistgesperrte IP"
+        "most_blocked": "Meistblockierte IP"
       }
     },
     "map": {
