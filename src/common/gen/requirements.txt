@@ -296,9 +296,9 @@ pytz==2025.2 \
     --hash=sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3 \
     --hash=sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00
     # via -r requirements.in
-redis==6.2.0 \
-    --hash=sha256:c8ddf316ee0aab65f04a11229e94a64b2618451dab7a67cb2f77eb799d872d5e \
-    --hash=sha256:e821f129b75dde6cb99dd35e5c76e8c49512a5a0d8dfdc560b2fbd44b85ca977
+redis==6.3.0 \
+    --hash=sha256:3000dbe532babfb0999cdab7b3e5744bcb23e51923febcfaeb52c8cfb29632ef \
+    --hash=sha256:92f079d656ded871535e099080f70fab8e75273c0236797126ac60242d638e9b
     # via -r requirements.in
 requests==2.32.4 \
     --hash=sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c \
