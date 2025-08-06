@@ -7,3 +7,4 @@ env/
 src/deps/tmp_venv/
 tests/
 **/Dockerfile
+src/common/core/*/README.md
