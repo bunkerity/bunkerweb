@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.3 - ????/??/??
+## v1.6.4-rc1 - ????/??/??
+
+- [DEPS] Update coreruleset-v4 version to v4.17.1
+
+## v1.6.3 - 2025/08/05
 
 - [BUGFIX] Fix errors with `PostgreSQL` database, ensuring that suffixes are stored as integers for consistency.
 - [FEATURE] Enhance `Redirect` plugin to support multiple source/destination paths
