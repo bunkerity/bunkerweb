@@ -105,6 +105,15 @@
       "label": "Web hook body",
       "regex": "^.*$",
       "type": "text"
+    },
+    "ADIDOS_LOG": {
+      "context": "global",
+      "default": "no",
+      "help": "Enable load-based antibot control.",
+      "id": "adidos-log",
+      "label": "Enable logging",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   },
   "jobs": [

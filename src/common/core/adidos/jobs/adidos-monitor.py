@@ -10,14 +10,49 @@ from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 import subprocess
 import json
+import requests
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 
-LOGGER = setup_logger("ADIDOS.monitor", getenv("LOG_LEVEL", "info"))
+# LOGGER = setup_logger("ADIDOS.monitor", getenv("LOG_LEVEL", "info"))
+LOG_LEVEL = "info" if getenv("ADIDOS_LOG") == "yes" else getenv("LOG_LEVEL", "error")
+
+LOGGER = setup_logger("ADIDOS.monitor", LOG_LEVEL)
+
 exit_status = 0
+
+def send_webhook(message):
+    """Send webhook notification"""
+    webhook_url = getenv("ADIDOS_WEB_HOOK_URL")
+    webhook_body = getenv("ADIDOS_WEB_HOOK_BODY")
+    
+    if not webhook_url or not webhook_body:
+        LOGGER.debug("Webhook URL or body not configured, skipping webhook")
+        return
+    
+    try:
+        # Replace placeholder with actual message
+        body = webhook_body.replace("{{MESSAGE}}", message)
+        
+        # Try to parse as JSON, if fails send as plain text
+        try:
+            json_body = json.loads(body)
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(webhook_url, json=json_body, headers=headers, timeout=10)
+        except json.JSONDecodeError:
+            headers = {'Content-Type': 'text/plain'}
+            response = requests.post(webhook_url, data=body, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            LOGGER.info(f"Webhook sent successfully: {message}")
+        else:
+            LOGGER.error(f"Webhook failed with status {response.status_code}: {response.text}")
+            
+    except Exception as e:
+        LOGGER.error(f"Failed to send webhook: {e}")
 
 try:
     LOGGER.info("ADIDOS monitoring is started")
@@ -96,8 +131,10 @@ try:
             cached_antibot = "no"
             last_activation = datetime.now()
     else:
-        cached_antibot = "no"
+        cached_antibot = "yes"
         last_activation = datetime.now()
+        cache_data = f"{cached_antibot},{datetime.now().isoformat()}"
+        JOB.cache_file("antibot_state", cache_data.encode())
 
     # Decision logic
     should_enable = False
@@ -109,7 +146,7 @@ try:
         new_antibot_state = "yes"
         LOGGER.info(
             f"Load {current_load}% >= {high_threshold}%, should enable antibot")
-    elif current_load <= low_threshold and current_antibot != "no":
+    elif current_load <= low_threshold and current_antibot == "yes":
         # Check cooldown period
         time_since_activation = datetime.now() - last_activation
         if time_since_activation >= timedelta(minutes=cooldown_minutes):
@@ -143,6 +180,8 @@ try:
                     f"Failed to save antibot state to database: {result}")
             else:
                 LOGGER.info("Antibot state successfully saved to database")
+                # Send webhook notification
+                send_webhook(f"ADIDOS: antibot enabled, current load {current_load}%")
         except Exception as e:
             LOGGER.error(f"Exception while saving to database: {e}")
 
@@ -163,6 +202,12 @@ try:
                     f"Failed to save antibot state to database: {result}")
             else:
                 LOGGER.info("Antibot state successfully saved to database")
+                # Send webhook notification
+                time_since_activation = datetime.now() - last_activation
+                hours = int(time_since_activation.total_seconds() // 3600)
+                minutes = int((time_since_activation.total_seconds() % 3600) // 60)
+                time_format = f"{hours:02d}h {minutes:02d}m" if hours > 0 else f"{minutes} minutes"
+                send_webhook(f"ADIDOS: antibot disabled after {time_format} activity, current load {current_load}%")
         except Exception as e:
             LOGGER.error(f"Exception while saving to database: {e}")
     else:
