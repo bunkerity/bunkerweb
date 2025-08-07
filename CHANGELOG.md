@@ -2,6 +2,7 @@
 
 ## v1.6.4-rc1 - ????/??/??
 
+- [BUGFIX] Fix connection error shenanigans regarding the `Let's Encrypt` plugin when generating wildcard domains by adding the `--expand` flag to the certbot command.
 - [UI] Fix 500 error with TMP-UI fallback
 - [DEPS] Update coreruleset-v4 version to v4.17.1
 
