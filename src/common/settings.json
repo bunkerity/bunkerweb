@@ -53,8 +53,7 @@
     "id": "server-name",
     "label": "Server name",
     "regex": "^(?!.*\\.\\.)(?:(\\b[^\\s+\\/:A-Z]{1,255}\\b)(?:\\s+\\b[^\\s+\\/:A-Z]{1,255}\\b)*)?$",
-    "type": "multivalue",
-    "separator": " "
+    "type": "text"
   },
   "WORKER_PROCESSES": {
     "context": "global",
