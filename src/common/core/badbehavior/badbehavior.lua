@@ -89,7 +89,7 @@ function badbehavior:log()
 		ip = self.ctx.bw.remote_addr,
 		server_name = self.ctx.bw.server_name,
 		status = status,
-		method = self.ctx.bw.request_method,
+		method = self.ctx.bw.request_method or "-",
 		url = request_uri,
 	})
 	return self:ret(true, "success")
