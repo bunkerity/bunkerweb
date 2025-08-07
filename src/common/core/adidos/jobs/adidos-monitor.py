@@ -85,7 +85,7 @@ try:
         "-o", "StrictHostKeyChecking=no",
         "-o", "ConnectTimeout=10",
         monitor_host,
-        "top -bn1 | grep 'Cpu(s)' | awk '{print $2}' | cut -d'%' -f1"
+        "top -bn1 | grep 'Cpu(s)' | awk '{print $8}' | cut -d'%' -f1 | awk '{print 100-$1}'"
     ]
 
     try:
