@@ -9,7 +9,7 @@ from logging import Logger
 from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
-from re import compile as re_compile, error as RegexError, search as re_search
+from re import compile as re_compile, error as RegexError, search as re_search, escape
 from sys import path as sys_path
 from tarfile import open as tar_open
 from typing import Dict, List, Literal, Optional, Tuple, Union
@@ -108,6 +108,65 @@ class Configurator:
 
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
         self.__servers = self.__map_servers()
+
+    def __normalize_multivalue_separators(self, value: str, separator: str) -> str:
+        """
+        Normalize consecutive separators in multivalue settings to single separators.
+
+        Args:
+            value: The setting value to normalize
+            separator: The separator character(s) used for this multivalue setting
+
+        Returns:
+            The normalized value with consecutive separators replaced by single separators
+        """
+        if not value or not separator:
+            return value
+
+        # Create a regex pattern to match one or more consecutive separators
+        # Escape special regex characters in the separator
+        escaped_separator = escape(separator)
+        pattern = f"(?:{escaped_separator})+"
+
+        # Replace consecutive separators with a single separator
+        # Also trim leading/trailing separators to clean up the value
+        return re_compile(pattern).sub(separator, value).strip(separator)
+
+    def __apply_multivalue_normalization(self, variable: str, value: str, default_settings: List[Dict[str, str]]) -> str:
+        """
+        Apply multivalue separator normalization if the variable is a multivalue setting.
+
+        Args:
+            variable: The variable name
+            value: The variable value
+            default_settings: List of default settings dictionaries
+
+        Returns:
+            The normalized value if it's a multivalue setting, otherwise the original value
+        """
+        # Find the actual setting name (might be prefixed for multisite)
+        real_var = variable
+        if self.__multisite:
+            _, real_var = self.__var_is_prefixed(variable)
+
+        # Find the setting definition
+        for settings in default_settings:
+            if real_var in settings:
+                setting_data = settings[real_var]
+                if setting_data.get("type") == "multivalue":
+                    separator = setting_data.get("separator", " ")
+                    return self.__normalize_multivalue_separators(value, separator)
+                break
+
+            # Check for multiple settings (e.g., SETTING_1, SETTING_2)
+            for setting_name, setting_data in settings.items():
+                if "multiple" in setting_data and re_search(f"^{setting_name}_[0-9]+$", real_var):
+                    if setting_data.get("type") == "multivalue":
+                        separator = setting_data.get("separator", " ")
+                        return self.__normalize_multivalue_separators(value, separator)
+                    break
+
+        return value
 
     def get_settings(self) -> Dict[str, str]:
         return self.__settings.copy()
@@ -261,7 +320,9 @@ class Configurator:
 
             ret, err = self.__check_var(variable)
             if ret:
-                config[variable] = value
+                # Apply multivalue separator normalization if needed
+                normalized_value = self.__apply_multivalue_normalization(variable, value, default_settings)
+                config[variable] = normalized_value
             elif variable == "SERVER_NAME":
                 self.__logger.critical(f"Invalid SERVER_NAME (check for duplicates or invalid characters) : {err} - {value = !r}")
                 exit(1)
@@ -295,7 +356,12 @@ class Configurator:
                             if setting == "SERVER_NAME":
                                 config[key] = server_name
                             elif setting in config:
-                                config[key] = service_template_settings.get(setting, config[setting])
+                                value_to_set = service_template_settings.get(setting, config[setting])
+                                # Apply multivalue normalization for service-specific configs
+                                if data.get("type") == "multivalue":
+                                    separator = data.get("separator", " ")
+                                    value_to_set = self.__normalize_multivalue_separators(value_to_set, separator)
+                                config[key] = value_to_set
 
         return config
 

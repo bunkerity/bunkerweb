@@ -1370,6 +1370,29 @@ class Database:
 
             return is_default_value(value, key, setting, template_default, suffix, is_global)
 
+        def normalize_multivalue_separators(value: str, separator: str) -> str:
+            """
+            Normalize consecutive separators in multivalue settings to single separators.
+
+            Args:
+                value: The setting value to normalize
+                separator: The separator character(s) used for this multivalue setting
+
+            Returns:
+                The normalized value with consecutive separators replaced by single separators
+            """
+            if not value or not separator:
+                return value
+
+            # Create a regex pattern to match one or more consecutive separators
+            # Escape special regex characters in the separator
+            escaped_separator = escape(separator)
+            pattern = f"(?:{escaped_separator})+"
+
+            # Replace consecutive separators with a single separator
+            # Also trim leading/trailing separators to clean up the value
+            return re_compile(pattern).sub(separator, value).strip(separator)
+
         with self._db_session() as session:
             if self.readonly:
                 return "The database is read-only, the changes will not be saved"
@@ -1509,8 +1532,11 @@ class Database:
                             global_config[key] = value
 
                     # Collect necessary data before threading
-                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id).all()
-                    settings_dict = {s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id} for s in settings_data}
+                    settings_data = session.query(Settings.id, Settings.default, Settings.plugin_id, Settings.type, Settings.separator).all()
+                    settings_dict = {
+                        s.id: {"default": self._empty_if_none(s.default), "plugin_id": s.plugin_id, "type": s.type, "separator": s.separator}
+                        for s in settings_data
+                    }
 
                     # Collect existing service settings
                     existing_service_settings = session.query(
@@ -1552,6 +1578,10 @@ class Database:
                             if not setting:
                                 self.logger.debug(f"Setting {key} does not exist")
                                 continue
+
+                            # Normalize multivalue separators for security
+                            if setting["type"] == "multivalue" and setting["separator"]:
+                                value = normalize_multivalue_separators(value, setting["separator"])
 
                             if server_name not in db_ids:
                                 self.logger.debug(f"Adding service {server_name}")
@@ -1630,6 +1660,10 @@ class Database:
                             if not setting:
                                 self.logger.debug(f"Setting {key} does not exist")
                                 continue
+
+                            # Normalize multivalue separators for security
+                            if setting["type"] == "multivalue" and setting["separator"]:
+                                value = normalize_multivalue_separators(value, setting["separator"])
 
                             global_value = session.query(Global_values.value, Global_values.method).filter_by(setting_id=key, suffix=suffix).first()
 
@@ -1718,10 +1752,19 @@ class Database:
                             suffix = int(key.split("_")[-1])
                             key = key[: -len(str(suffix)) - 1]
 
-                        setting = session.query(Settings).with_entities(Settings.default, Settings.plugin_id).filter_by(id=key).first()
+                        setting = (
+                            session.query(Settings)
+                            .with_entities(Settings.default, Settings.plugin_id, Settings.type, Settings.separator)
+                            .filter_by(id=key)
+                            .first()
+                        )
 
                         if not setting:
                             continue
+
+                        # Normalize multivalue separators for security
+                        if setting.type == "multivalue" and setting.separator:
+                            value = normalize_multivalue_separators(value, setting.separator)
 
                         global_value = (
                             session.query(Global_values)
