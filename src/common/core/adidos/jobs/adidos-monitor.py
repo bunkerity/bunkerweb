@@ -181,7 +181,7 @@ try:
             else:
                 LOGGER.info("Antibot state successfully saved to database")
                 # Send webhook notification
-                send_webhook(f"ADIDOS: antibot enabled, current load {current_load}%")
+                send_webhook(f"🛡️ ADIDOS: antibot enabled, current load {current_load}%")
         except Exception as e:
             LOGGER.error(f"Exception while saving to database: {e}")
 
@@ -212,7 +212,7 @@ try:
                 hours = int(time_since_activation.total_seconds() // 3600)
                 minutes = int((time_since_activation.total_seconds() % 3600) // 60)
                 time_format = f"{hours:02d}h {minutes:02d}m" if hours > 0 else f"{minutes} minutes"
-                send_webhook(f"ADIDOS: antibot disabled after {time_format} activity, current load {current_load}%")
+                send_webhook(f"✅ ADIDOS: antibot disabled after {time_format} activity, current load {current_load}%")
         except Exception as e:
             LOGGER.error(f"Exception while saving to database: {e}")
     else:
