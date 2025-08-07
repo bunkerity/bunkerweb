@@ -190,6 +190,11 @@ try:
         # Clear activation time from cache
         cache_data = f"no,{datetime.now().isoformat()}"
         JOB.cache_file("antibot_state", cache_data.encode())
+        
+        # Get config and services for disabling
+        config = DB.get_config(with_drafts=True)
+        services = getenv("ADIDOS_SERVICES", "").split(" ")
+        config_update = config
 
         # Save to database
         try:
