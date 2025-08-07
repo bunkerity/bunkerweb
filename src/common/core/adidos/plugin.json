@@ -87,6 +87,24 @@
       "regex": "^.*$",
       "type": "multivalue",
       "separator": " "
+    },
+    "ADIDOS_WEB_HOOK_URL": {
+      "context": "global",
+      "default": "https://ashoo:ashooPaZZword@n8n.its.bz/webhook/ashoo-telegram-send",
+      "help": "Web hook URL-address used to POST message",
+      "id": "adidos-seb-hook-url",
+      "label": "Web hook URL",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ADIDOS_WEB_HOOK_BODY": {
+      "context": "global",
+      "default": "{\"chat\": \"<TG_CHAT_ID>\", \"text\": \"{{MESSAGE}}\"}",
+      "help": "Web hook body template used to POST message",
+      "id": "adidos-web-hook-body",
+      "label": "Web hook body",
+      "regex": "^.*$",
+      "type": "text"
     }
   },
   "jobs": [
