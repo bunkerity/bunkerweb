@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.4-rc1 - ????/??/??
+
+- [BUGFIX] Fix limit zones for HTTP/3 connections in `limitconn.conf` to ensure proper connection limiting for HTTP/3 requests.
+
 ## v1.6.3 - 2025/08/05
 
 - [BUGFIX] Fix connection error shenanigans regarding the `Let's Encrypt` plugin when generating wildcard domains by adding the `--expand` flag to the certbot command.
