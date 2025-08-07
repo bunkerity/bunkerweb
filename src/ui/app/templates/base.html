@@ -88,7 +88,7 @@
         <input type="hidden" id="user-read-only" value="{{ user_readonly }}" />
         <input type="hidden" id="theme" value="{{ theme }}" />
         <input type="hidden" id="language" value="{{ language }}" />
-        <textarea id="supported-languages-json" class="visually-hidden">{{ supported_languages|tojson }}</textarea>
+        <textarea id="supported-languages-json" class="visually-hidden">{{ (supported_languages or {})|tojson }}</textarea>
         <input type="hidden"
                id="bw-logo"
                value="{{ url_for('static', filename='img/logo-menu.png') }}" />

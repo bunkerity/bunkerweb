@@ -1,16 +1,18 @@
 # Changelog
 
-## v1.6.3 - ????/??/??
+## v1.6.3 - 2025/08/05
 
+- [BUGFIX] Fix connection error shenanigans regarding the `Let's Encrypt` plugin when generating wildcard domains by adding the `--expand` flag to the certbot command.
 - [BUGFIX] Fix errors with `PostgreSQL` database, ensuring that suffixes are stored as integers for consistency.
 - [FEATURE] Enhance `Redirect` plugin to support multiple source/destination paths
 - [FEATURE] Enhance `Antibot` CAPTCHA functionality with customizable character set via the `ANTIBOT_CAPTCHA_ALPHABET` setting, allowing users to define a custom alphabet for CAPTCHA generation.
 - [UI] Always display the selected service and selected type when editing/creating a custom configuration
 - [UI] Add global configuration fetching functionality to easy mode
 - [UI] Fix metrics retrieval in the web UI to ensure that metrics are correctly displayed and updated
+- [UI] Fix 500 error with TMP-UI fallback
 - [LINUX] Add installation type to the post-install script to allow users to choose among `all-in-one` (Full installation), `manager` (Scheduler and UI), `worker` (BunkerWeb only), `scheduler` (Scheduler only), and `ui` (UI only) installation types.
 - [ALL-IN-ONE] In entrypoint script, create redis directory if it does not exist to avoid issues with Redis not starting properly.
-- [DEPS] Update coreruleset-v4 version to v4.17.0
+- [DEPS] Update coreruleset-v4 version to v4.17.1
 - [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the web UI's `reports` page.
 
 ## v1.6.3-rc3 - 2025/07/30

@@ -866,11 +866,12 @@ Follow these steps to configure and use the Blacklist feature:
 
     The `BLACKLIST_COMMUNITY_LISTS` setting allows you to select from curated blacklist sources. Available options include:
 
-    | ID                                  | Description                                                                                                                                                                                                              | Source                                                                                                                          |
-    | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-    | `ip:laurent-minne-fr-be-agressive`  | Intelligence Blocklist (IPv4): Botnets, RaT, CVE's RCE, Scanners. DST = FR - BE                                                                                                                                          | `https://raw.githubusercontent.com/duggytuxy/Intelligence_IPv4_Blocklist/refs/heads/main/agressive_ips_dst_fr_be_blocklist.txt` |
-    | `ip:danmeuk-tor-exit`               | Tor Exit Nodes IPs (dan.me.uk)                                                                                                                                                                                           | `https://www.dan.me.uk/torlist/?exit`                                                                                           |
-    | `ua:mitchellkrogza-bad-user-agents` | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list`  |
+    | ID                                                                                                                           | Description                                                                                                                                                                                                              | Source                                                                                                                         |
+    | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+    | `ip:laurent-minne-data-shield-aggressive`                                                                                    | Data-Shield IPv4 Blocklist. DST = Europa                                                                                                                                                                                 |
+    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt` |
+    | `ip:danmeuk-tor-exit`                                                                                                        | Tor Exit Nodes IPs (dan.me.uk)                                                                                                                                                                                           | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
+    | `ua:mitchellkrogza-bad-user-agents`                                                                                          | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, with anti-DDOS, Wordpress Theme Detector Blocking and Fail2Ban Jail for Repeat Offenders | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
 
     **Configuration:** Specify multiple lists separated by spaces. For example:
     ```yaml
@@ -2664,7 +2665,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 
 | Provider          | Description      | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Documentation                                                                                         |
 | ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `bunny`           | bunny.net        | `dns_bunny_api_key`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst)                        |
+| `bunny`           | bunny.net        | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst)                        |
 | `cloudflare`      | Cloudflare       | either `api_token`<br>or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)                             |
 | `desec`           | deSEC            | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)                    |
 | `digitalocean`    | DigitalOcean     | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                           |
@@ -2707,7 +2708,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
     EMAIL_LETS_ENCRYPT: "admin@example.com"
     LETS_ENCRYPT_CHALLENGE: "dns"
     LETS_ENCRYPT_DNS_PROVIDER: "cloudflare"
-    LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "dns_cloudflare_api_token YOUR_API_TOKEN"
+    LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "api_token YOUR_API_TOKEN"
     USE_LETS_ENCRYPT_WILDCARD: "yes"
     ```
 
@@ -2745,7 +2746,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
     EMAIL_LETS_ENCRYPT: "admin@example.com"
     LETS_ENCRYPT_CHALLENGE: "dns"
     LETS_ENCRYPT_DNS_PROVIDER: "digitalocean"
-    LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "dns_digitalocean_token YOUR_API_TOKEN"
+    LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "token YOUR_API_TOKEN"
     LETS_ENCRYPT_DNS_PROPAGATION: "120"
     ```
 
@@ -3454,7 +3455,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.17.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.17.0) (**default**).
+- **`4`**: Stable [v4.17.1](https://github.com/coreruleset/coreruleset/releases/tag/v4.17.1) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"
