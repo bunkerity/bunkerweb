@@ -52,7 +52,7 @@
     "help": "List of the virtual hosts served by bunkerweb. (separated by space)",
     "id": "server-name",
     "label": "Server name",
-    "regex": "^(?!.*\\.\\.)(?:(\\b[^\\s\\/:A-Z]{1,255}\\b)(?:\\s\\b[^\\s\\/:A-Z]{1,255}\\b)*)?$",
+    "regex": "^(?!.*\\.\\.)(?:(\\b[^\\s+\\/:A-Z]{1,255}\\b)(?:\\s+\\b[^\\s+\\/:A-Z]{1,255}\\b)*)?$",
     "type": "multivalue",
     "separator": " "
   },
