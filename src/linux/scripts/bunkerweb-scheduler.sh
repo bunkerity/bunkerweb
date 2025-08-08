@@ -14,11 +14,11 @@ function get_env_var() {
     local value
 
     # First try scheduler.env
-    value=$(grep "^${var_name}=" /etc/bunkerweb/scheduler.env 2>/dev/null | cut -d '=' -f 2)
+    value=$(grep "^${var_name}=" /etc/bunkerweb/scheduler.env 2>/dev/null | cut -d '=' -f 2-)
 
     # If not found, try variables.env
     if [ -z "$value" ] && [ -f /etc/bunkerweb/variables.env ]; then
-        value=$(grep "^${var_name}=" /etc/bunkerweb/variables.env 2>/dev/null | cut -d '=' -f 2)
+        value=$(grep "^${var_name}=" /etc/bunkerweb/variables.env 2>/dev/null | cut -d '=' -f 2-)
     fi
 
     # Return default if still not found
