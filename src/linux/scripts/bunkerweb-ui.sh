@@ -92,7 +92,7 @@ start() {
         rm -f /var/tmp/bunkerweb/ui.error
     fi
 
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.TmpUiLogger --config /usr/share/bunkerweb/ui/utils/tmp-gunicorn.conf.py"
+    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.TmpUiLogger --config /usr/share/bunkerweb/ui/utils/tmp-gunicorn.conf.py -D"
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.UiLogger --config /usr/share/bunkerweb/ui/utils/gunicorn.conf.py"
 }
 
