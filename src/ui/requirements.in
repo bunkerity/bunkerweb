@@ -11,5 +11,5 @@ psutil==7.0.0
 python_dateutil==2.9.0.post0
 qrcode==8.2
 regex==2024.11.6
-urllib3<2.0.0
+urllib3<3.0.0
 user_agents==2.2.0
