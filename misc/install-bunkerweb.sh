@@ -119,23 +119,25 @@ ask_user_preferences() {
         fi
 
         if [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🔗 BunkerWeb Instances Configuration${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "Please provide the list of BunkerWeb instances (workers) to manage."
-            echo "Format: a space-separated list of IP addresses or hostnames."
-            echo "Example: 192.168.1.10 192.168.1.11"
-            echo
-            while true; do
-                echo -e "${YELLOW}Enter BunkerWeb instances:${NC} "
-                read -p "" -r BUNKERWEB_INSTANCES_INPUT
-                if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
-                    break
-                else
-                    print_warning "This field cannot be empty for Manager/Scheduler installations."
-                fi
-            done
+            if [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                echo
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}🔗 BunkerWeb Instances Configuration${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "Please provide the list of BunkerWeb instances (workers) to manage."
+                echo "Format: a space-separated list of IP addresses or hostnames."
+                echo "Example: 192.168.1.10 192.168.1.11"
+                echo
+                while true; do
+                    echo -e "${YELLOW}Enter BunkerWeb instances:${NC} "
+                    read -p "" -r BUNKERWEB_INSTANCES_INPUT
+                    if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                        break
+                    else
+                        print_warning "This field cannot be empty for Manager/Scheduler installations."
+                    fi
+                done
+            fi
         fi
 
         # Ask about setup wizard
@@ -200,6 +202,9 @@ ask_user_preferences() {
                     esac
                 done
             fi
+        else
+            # CrowdSec not applicable for worker, scheduler-only, or ui-only installations
+            CROWDSEC_INSTALL="no"
         fi
 
         # Ask about AppSec installation if CrowdSec is chosen
@@ -675,7 +680,9 @@ usage() {
     echo "  -n, --no-wizard          Disable the setup wizard"
     echo "  -y, --yes                Non-interactive mode, use defaults"
     echo "  -f, --force              Force installation on unsupported OS versions"
+    echo "  -q, --quiet              Silent installation (suppress output)"
     echo "  -h, --help               Show this help message"
+    echo "      --dry-run            Show what would be installed without doing it"
     echo
     echo "Installation types:"
     echo "  --full                   Full stack installation (default)"
@@ -684,12 +691,27 @@ usage() {
     echo "  --scheduler-only         Scheduler only installation"
     echo "  --ui-only                Web UI only installation"
     echo
+    echo "Security integrations:"
+    echo "  --crowdsec               Install and configure CrowdSec"
+    echo "  --no-crowdsec            Skip CrowdSec installation"
+    echo "  --crowdsec-appsec        Install CrowdSec with AppSec component"
+    echo
+    echo "Advanced options:"
+    echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
+    echo "                           (required for --manager and --scheduler-only)"
+    echo
     echo "Examples:"
     echo "  $0                       # Interactive installation"
     echo "  $0 --no-wizard           # Install without setup wizard"
     echo "  $0 --version 1.6.0       # Install specific version"
     echo "  $0 --yes                 # Non-interactive with defaults"
     echo "  $0 --force               # Force install on unsupported OS"
+    echo "  $0 --manager --instances \"192.168.1.10 192.168.1.11\""
+    echo "                           # Manager setup with worker instances"
+    echo "  $0 --worker --no-wizard  # Worker-only installation"
+    echo "  $0 --crowdsec-appsec     # Full installation with CrowdSec AppSec"
+    echo "  $0 --quiet --yes         # Silent non-interactive installation"
+    echo "  $0 --dry-run             # Preview installation without executing"
     echo
 }
 
@@ -697,7 +719,7 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--version)
-            BUNKERWEB_VERSION="1.6.3"
+            BUNKERWEB_VERSION="$2"
             shift 2
             ;;
         -w|--enable-wizard)
@@ -741,6 +763,39 @@ while [[ $# -gt 0 ]]; do
             INSTALL_TYPE="ui"
             shift
             ;;
+        --crowdsec)
+            CROWDSEC_INSTALL="yes"
+            shift
+            ;;
+        --no-crowdsec)
+            CROWDSEC_INSTALL="no"
+            shift
+            ;;
+        --crowdsec-appsec)
+            CROWDSEC_INSTALL="yes"
+            CROWDSEC_APPSEC_INSTALL="yes"
+            shift
+            ;;
+        --instances)
+            BUNKERWEB_INSTANCES_INPUT="$2"
+            shift 2
+            ;;
+        -q|--quiet)
+            exec >/dev/null 2>&1
+            shift
+            ;;
+        --dry-run)
+            echo "Dry run mode - would install BunkerWeb $BUNKERWEB_VERSION"
+            detect_os
+            check_supported_os
+            echo "Installation type: ${INSTALL_TYPE:-full}"
+            echo "Setup wizard: ${ENABLE_WIZARD:-auto}"
+            echo "CrowdSec: ${CROWDSEC_INSTALL:-no}"
+            if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                echo "BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
+            fi
+            exit 0
+            ;;
         *)
             print_error "Unknown option: $1"
             usage
@@ -748,6 +803,25 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Validate instances option usage
+if [ -n "$BUNKERWEB_INSTANCES_INPUT" ] && [[ "$INSTALL_TYPE" != "manager" && "$INSTALL_TYPE" != "scheduler" ]]; then
+    print_error "The --instances option can only be used with --manager or --scheduler-only installation types"
+    exit 1
+fi
+
+# Validate required instances for manager/scheduler in non-interactive mode
+if [ "$INTERACTIVE_MODE" = "no" ] && [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]] && [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
+    print_error "The --instances option is required when using --manager or --scheduler-only in non-interactive mode"
+    print_error "Example: --manager --instances \"192.168.1.10 192.168.1.11\""
+    exit 1
+fi
+
+# Validate CrowdSec options usage
+if [[ "$CROWDSEC_INSTALL" = "yes" || "$CROWDSEC_APPSEC_INSTALL" = "yes" ]] && [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" ]]; then
+    print_error "CrowdSec options (--crowdsec, --crowdsec-appsec) can only be used with --full or --manager installation types"
+    exit 1
+fi
 
 # Main installation function
 main() {

@@ -576,19 +576,42 @@ When run without any options, the script enters an interactive mode that guides 
 
 For non-interactive or automated setups, the script can be controlled with command-line flags:
 
-| Option                  | Description                                                              |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `--full`                | Full stack installation (BunkerWeb, Scheduler, UI). This is the default. |
-| `--manager`             | Installs the Scheduler and UI to manage remote workers.                  |
-| `--worker`              | Installs only the BunkerWeb instance.                                    |
-| `--scheduler-only`      | Installs only the Scheduler component.                                   |
-| `--ui-only`             | Installs only the Web UI component.                                      |
-| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.3`).          |
-| `-w, --enable-wizard`   | Enables the setup wizard.                                                |
-| `-n, --no-wizard`       | Disables the setup wizard.                                               |
-| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.      |
-| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version.    |
-| `-h, --help`            | Displays the help message with all available options.                    |
+**General Options:**
+
+| Option                  | Description                                                           |
+| ----------------------- | --------------------------------------------------------------------- |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.3`).           |
+| `-w, --enable-wizard`   | Enables the setup wizard.                                             |
+| `-n, --no-wizard`       | Disables the setup wizard.                                            |
+| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
+| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
+| `-q, --quiet`           | Silent installation (suppress output).                                |
+| `-h, --help`            | Displays the help message with all available options.                 |
+| `--dry-run`             | Show what would be installed without doing it.                        |
+
+**Installation Types:**
+
+| Option             | Description                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `--full`           | Full stack installation (BunkerWeb, Scheduler, UI). This is the default. |
+| `--manager`        | Installs the Scheduler and UI to manage remote workers.                  |
+| `--worker`         | Installs only the BunkerWeb instance.                                    |
+| `--scheduler-only` | Installs only the Scheduler component.                                   |
+| `--ui-only`        | Installs only the Web UI component.                                      |
+
+**Security Integrations:**
+
+| Option              | Description                                                         |
+| ------------------- | ------------------------------------------------------------------- |
+| `--crowdsec`        | Install and configure CrowdSec security engine.                     |
+| `--no-crowdsec`     | Skip CrowdSec installation.                                         |
+| `--crowdsec-appsec` | Install CrowdSec with AppSec component (includes WAF capabilities). |
+
+**Advanced Options:**
+
+| Option                  | Description                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `--instances "IP1 IP2"` | Space-separated list of BunkerWeb instances (required for manager/scheduler modes). |
 
 **Example Usage:**
 
@@ -604,6 +627,40 @@ sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Install a specific version
 sudo ./install-bunkerweb.sh --version 1.6.3
+
+# Manager setup with remote worker instances (instances required)
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
+
+# Full installation with CrowdSec and AppSec
+sudo ./install-bunkerweb.sh --crowdsec-appsec
+
+# Silent non-interactive installation
+sudo ./install-bunkerweb.sh --quiet --yes
+
+# Preview installation without executing
+sudo ./install-bunkerweb.sh --dry-run
+
+# Error: CrowdSec cannot be used with worker installations
+# sudo ./install-bunkerweb.sh --worker --crowdsec  # This will fail
+
+# Error: Instances required for manager in non-interactive mode
+# sudo ./install-bunkerweb.sh --manager --yes  # This will fail without --instances
+```
+
+!!! warning "Important Notes on Option Compatibility"
+
+    **CrowdSec Limitations:**
+    - CrowdSec options (`--crowdsec`, `--crowdsec-appsec`) are only compatible with `--full` (default) and `--manager` installation types
+    - They cannot be used with `--worker`, `--scheduler-only`, or `--ui-only` installations
+
+    **Instances Requirements:**
+    - The `--instances` option is only valid with `--manager` and `--scheduler-only` installation types
+    - When using `--manager` or `--scheduler-only` with `--yes` (non-interactive mode), the `--instances` option is mandatory
+    - Format: `--instances "192.168.1.10 192.168.1.11 192.168.1.12"`
+
+    **Interactive vs Non-Interactive:**
+    - Interactive mode (default) will prompt for missing required values
+    - Non-interactive mode (`--yes`) requires all necessary options to be provided via command line
 ```
 
 #### CrowdSec Integration with the Script
