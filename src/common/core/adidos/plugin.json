@@ -1,8 +1,10 @@
 {
   "id": "Adidos",
   "name": "Adidos",
-  "description": "Monitor remote server load and control antibot based on load metrics.",
-  "version": "1.1",
+  "description": "Adaptive DDoS Protection System",
+  "category": "antibot",
+  "help": "Monitor remote server system load and enable|disable antibot feature based on load metrics.",
+  "version": "1.2",
   "stream": "no",
   "settings": {
     "USE_ADIDOS": {
@@ -88,6 +90,15 @@
       "type": "multivalue",
       "separator": " "
     },
+    "ADIDOS_USE_WEBHOOK": {
+      "context": "global",
+      "default": "no",
+      "help": "Enable webhook notification.",
+      "id": "adidos-use-webhook",
+      "label": "Use webhook",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "ADIDOS_WEB_HOOK_URL": {
       "context": "global",
       "default": "https://ashoo:ashooPaZZword@n8n.its.bz/webhook/ashoo-telegram-send",
@@ -109,7 +120,7 @@
     "ADIDOS_LOG": {
       "context": "global",
       "default": "no",
-      "help": "Enable load-based antibot control.",
+      "help": "Enable load-based antibot control log.",
       "id": "adidos-log",
       "label": "Enable logging",
       "regex": "^(yes|no)$",

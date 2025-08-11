@@ -24,35 +24,43 @@ LOGGER = setup_logger("ADIDOS.monitor", LOG_LEVEL)
 
 exit_status = 0
 
+
 def send_webhook(message):
     """Send webhook notification"""
+    # Check if webhooks are enabled
+    use_webhook = getenv("ADIDOS_USE_WEBHOOK", "no").lower() == "yes"
+    if not use_webhook:
+        LOGGER.debug("Webhooks are disabled, skipping webhook")
+        return
+
     webhook_url = getenv("ADIDOS_WEB_HOOK_URL")
     webhook_body = getenv("ADIDOS_WEB_HOOK_BODY")
-    
+
     if not webhook_url or not webhook_body:
         LOGGER.debug("Webhook URL or body not configured, skipping webhook")
         return
-    
+
     try:
         # Replace placeholder with actual message
         body = webhook_body.replace("{{MESSAGE}}", message)
-        
+
         # Try to parse as JSON, if fails send as plain text
         try:
             json_body = json.loads(body)
-            headers = {'Content-Type': 'application/json'}
+            headers = {"Content-Type": "application/json"}
             response = requests.post(webhook_url, json=json_body, headers=headers, timeout=10)
         except json.JSONDecodeError:
-            headers = {'Content-Type': 'text/plain'}
+            headers = {"Content-Type": "text/plain"}
             response = requests.post(webhook_url, data=body, headers=headers, timeout=10)
-        
+
         if response.status_code == 200:
             LOGGER.info(f"Webhook sent successfully: {message}")
         else:
             LOGGER.error(f"Webhook failed with status {response.status_code}: {response.text}")
-            
+
     except Exception as e:
         LOGGER.error(f"Failed to send webhook: {e}")
+
 
 try:
     LOGGER.info("ADIDOS monitoring is started")
@@ -64,8 +72,7 @@ try:
 
     # Configuration
     monitor_host = getenv("ADIDOS_HOST", "85.198.111.8")
-    ssh_key_path = getenv(
-        "ADIDOS_SSH_KEY", "/usr/share/bunkerweb/scheduler/.ssh/id_rsa")
+    ssh_key_path = getenv("ADIDOS_SSH_KEY", "/usr/share/bunkerweb/scheduler/.ssh/id_rsa")
     high_threshold = float(getenv("ADIDOS_THRESHOLD_HIGH", "80"))
     low_threshold = float(getenv("ADIDOS_THRESHOLD_LOW", "50"))
     cooldown_minutes = int(getenv("ADIDOS_COOLDOWN_MINUTES", "5"))
@@ -81,16 +88,18 @@ try:
     # Get current load via SSH
     ssh_cmd = [
         "ssh",
-        "-i", ssh_key_path,
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "ConnectTimeout=10",
+        "-i",
+        ssh_key_path,
+        "-o",
+        "StrictHostKeyChecking=no",
+        "-o",
+        "ConnectTimeout=10",
         monitor_host,
-        "top -bn1 | grep 'Cpu(s)' | awk '{print $8}' | cut -d'%' -f1 | awk '{print 100-$1}'"
+        "top -bn1 | grep 'Cpu(s)' | awk '{print $8}' | cut -d'%' -f1 | awk '{print 100-$1}'",
     ]
 
     try:
-        result = subprocess.run(
-            ssh_cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(ssh_cmd, capture_output=True, text=True, timeout=30)
         if result.returncode != 0:
             LOGGER.error(f"SSH command failed: {result.stderr}")
             sys_exit(1)
@@ -110,15 +119,14 @@ try:
                 cached_data = cached_state.split(",")
             elif isinstance(cached_state, bytes):
                 cached_data = cached_state.decode().split(",")
-            elif isinstance(cached_state, dict) and 'data' in cached_state:
+            elif isinstance(cached_state, dict) and "data" in cached_state:
                 # Handle dict format
-                if isinstance(cached_state['data'], bytes):
-                    cached_data = cached_state['data'].decode().split(",")
+                if isinstance(cached_state["data"], bytes):
+                    cached_data = cached_state["data"].decode().split(",")
                 else:
-                    cached_data = str(cached_state['data']).split(",")
+                    cached_data = str(cached_state["data"]).split(",")
             else:
-                raise ValueError(
-                    f"Unexpected cached_state type: {type(cached_state)}")
+                raise ValueError(f"Unexpected cached_state type: {type(cached_state)}")
 
             if len(cached_data) >= 2:
                 cached_antibot, last_activation_str = cached_data[0], cached_data[1]
@@ -144,19 +152,16 @@ try:
     if current_load >= high_threshold and current_antibot == "no":
         should_enable = True
         new_antibot_state = "yes"
-        LOGGER.info(
-            f"Load {current_load}% >= {high_threshold}%, should enable antibot")
+        LOGGER.info(f"Load {current_load}% >= {high_threshold}%, should enable antibot")
     elif current_load <= low_threshold and current_antibot == "yes":
         # Check cooldown period
         time_since_activation = datetime.now() - last_activation
         if time_since_activation >= timedelta(minutes=cooldown_minutes):
             should_disable = True
             new_antibot_state = "no"
-            LOGGER.info(
-                f"Load {current_load}% <= {low_threshold}% and cooldown passed, should disable antibot")
+            LOGGER.info(f"Load {current_load}% <= {low_threshold}% and cooldown passed, should disable antibot")
         else:
-            LOGGER.info(
-                f"Load low but cooldown period not passed ({time_since_activation} < {cooldown_minutes}min)")
+            LOGGER.info(f"Load low but cooldown period not passed ({time_since_activation} < {cooldown_minutes}min)")
 
     # Apply changes
     if should_enable:
@@ -173,11 +178,9 @@ try:
             captcha_type = getenv("ADIDOS_CAPTCHA_TYPE", "captcha")
             for service in services:
                 config_update[f"{service}_USE_ANTIBOT"] = captcha_type
-            result = DB.save_config(
-                config_update, method="scheduler", changed=True)
+            result = DB.save_config(config_update, method="scheduler", changed=True)
             if isinstance(result, str):
-                LOGGER.warning(
-                    f"Failed to save antibot state to database: {result}")
+                LOGGER.warning(f"Failed to save antibot state to database: {result}")
             else:
                 LOGGER.info("Antibot state successfully saved to database")
                 # Send webhook notification
@@ -190,7 +193,7 @@ try:
         # Clear activation time from cache
         cache_data = f"no,{datetime.now().isoformat()}"
         JOB.cache_file("antibot_state", cache_data.encode())
-        
+
         # Get config and services for disabling
         config = DB.get_config(with_drafts=True)
         services = getenv("ADIDOS_SERVICES", "").split(" ")
@@ -200,11 +203,9 @@ try:
         try:
             for service in services:
                 config_update[f"{service}_USE_ANTIBOT"] = "no"
-            result = DB.save_config(
-                config_update, method="scheduler", changed=True)
+            result = DB.save_config(config_update, method="scheduler", changed=True)
             if isinstance(result, str):
-                LOGGER.warning(
-                    f"Failed to save antibot state to database: {result}")
+                LOGGER.warning(f"Failed to save antibot state to database: {result}")
             else:
                 LOGGER.info("Antibot state successfully saved to database")
                 # Send webhook notification
@@ -216,8 +217,7 @@ try:
         except Exception as e:
             LOGGER.error(f"Exception while saving to database: {e}")
     else:
-        LOGGER.info(
-            f"Decision: No change needed (current: {current_antibot}, load: {current_load}%)")
+        LOGGER.info(f"Decision: No change needed (current: {current_antibot}, load: {current_load}%)")
 
 except SystemExit as e:
     LOGGER.info(f"Nothing to do, exit status: {e.code}")
