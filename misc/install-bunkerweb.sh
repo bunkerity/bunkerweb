@@ -322,8 +322,8 @@ check_supported_os() {
             ;;
         "rhel"|"rocky"|"almalinux")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
-            if [[ "$major_version" != "8" && "$major_version" != "9" ]]; then
-                print_warning "Only RHEL 8 and 9 are officially supported"
+            if [[ "$major_version" != "8" && "$major_version" != "9" && "$major_version" != "10" ]]; then
+                print_warning "Only RHEL 8, 9, and 10 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -335,7 +335,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12, Ubuntu 22.04/24.04, Fedora 41/42, RHEL 8/9"
+            print_error "Supported distributions: Debian 12, Ubuntu 22.04/24.04, Fedora 41/42, RHEL 8/9/10"
             exit 1
             ;;
     esac

@@ -114,7 +114,17 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora-41, fedora-42, rhel, rhel9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian,
+            fedora-41,
+            fedora-42,
+            rhel-8,
+            rhel-9,
+            rhel-10,
+            ubuntu-jammy,
+          ]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: latest
@@ -126,9 +136,11 @@ jobs:
             package: rpm
           - linux: fedora-42
             package: rpm
-          - linux: rhel
+          - linux: rhel-8
             package: rpm
-          - linux: rhel9
+          - linux: rhel-9
+            package: rpm
+          - linux: rhel-10
             package: rpm
           - linux: ubuntu-jammy
             package: deb
@@ -214,7 +226,17 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora-41, fedora-42, el, el9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian,
+            fedora-41,
+            fedora-42,
+            el-8,
+            el-9,
+            el-10,
+            ubuntu-jammy,
+          ]
         arch: [amd64, arm64]
         include:
           - release: latest
@@ -239,15 +261,20 @@ jobs:
             suffix: "1."
             version: 42
             package: rpm
-          - linux: el
+          - linux: el-8
             separator: "-"
             suffix: "1."
             version: 8
             package: rpm
-          - linux: el9
+          - linux: el-9
             separator: "-"
             suffix: "1."
             version: 9
+            package: rpm
+          - linux: el-10
+            separator: "-"
+            suffix: "1."
+            version: 10
             package: rpm
           - linux: ubuntu-jammy
             separator: _
@@ -266,10 +293,13 @@ jobs:
           - linux: fedora-42
             arch: amd64
             package_arch: x86_64
-          - linux: el
+          - linux: el-8
             arch: amd64
             package_arch: x86_64
-          - linux: el9
+          - linux: el-9
+            arch: amd64
+            package_arch: x86_64
+          - linux: el-10
             arch: amd64
             package_arch: x86_64
           - linux: ubuntu-jammy
@@ -287,10 +317,13 @@ jobs:
           - linux: fedora-42
             arch: arm64
             package_arch: aarch64
-          - linux: el
+          - linux: el-8
             arch: arm64
             package_arch: aarch64
-          - linux: el9
+          - linux: el-9
+            arch: arm64
+            package_arch: aarch64
+          - linux: el-10
             arch: arm64
             package_arch: aarch64
           - linux: ubuntu-jammy

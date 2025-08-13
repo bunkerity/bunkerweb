@@ -3,6 +3,7 @@
 ## v1.6.4-rc1 - ????/??/??
 
 - [BUGFIX] Fix limit zones for HTTP/3 connections in `limitconn.conf` to ensure proper connection limiting for HTTP/3 requests.
+- [LINUX] Support RHEL 10.0
 
 ## v1.6.3 - 2025/08/05
 

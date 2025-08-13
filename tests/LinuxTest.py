@@ -66,12 +66,15 @@ class LinuxTest(Test):
                     LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
             elif distro == "centos" or distro.startswith(("rhel", "fedora")):
                 if distro.startswith("rhel"):
-                    if distro == "rhel":
+                    if distro == "rhel-8":
                         LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm")
                         LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm")
-                    elif distro == "rhel9":
+                    elif distro == "rhel-9":
                         LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm")
                         LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm")
+                    elif distro == "rhel-10":
+                        LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm")
+                        LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-10.rpm")
                     LinuxTest.docker_exec(distro, "dnf module reset php -y")
                     LinuxTest.docker_exec(distro, "dnf module enable php:remi-8.3 -y")
 

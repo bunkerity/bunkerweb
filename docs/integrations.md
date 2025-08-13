@@ -513,7 +513,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
 - Fedora 41 and 42
-- Red Hat Enterprise Linux (RHEL) 8 and 9
+- Red Hat Enterprise Linux (RHEL) 8, 9 and 10
 
 ### Easy installation script
 

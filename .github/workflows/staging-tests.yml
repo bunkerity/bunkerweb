@@ -84,12 +84,15 @@ jobs:
       - name: Pull BW linux fedora 42 test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/fedora-42-tests:testing && docker tag ghcr.io/bunkerity/fedora-42-tests:testing local/fedora-42:latest
-      - name: Pull BW linux rhel test image
+      - name: Pull BW linux rhel-8 test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
-      - name: Pull BW linux rhel9 test image
+        run: docker pull ghcr.io/bunkerity/rhel-8-tests:testing && docker tag ghcr.io/bunkerity/rhel-8-tests:testing local/rhel-8:latest
+      - name: Pull BW linux rhel-9 test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel9-tests:testing && docker tag ghcr.io/bunkerity/rhel9-tests:testing local/rhel9:latest
+        run: docker pull ghcr.io/bunkerity/rhel-9-tests:testing && docker tag ghcr.io/bunkerity/rhel-9-tests:testing local/rhel-9:latest
+      - name: Pull BW linux rhel-10 test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/rhel-10-tests:testing && docker tag ghcr.io/bunkerity/rhel-10-tests:testing local/rhel-10:latest
       - name: Pull BW linux ubuntu jammy test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/ubuntu-jammy-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-jammy-tests:testing local/ubuntu-jammy:latest
@@ -139,15 +142,21 @@ jobs:
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux rhel tests
+      - name: Run Linux rhel-8 tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-8"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux rhel9 tests
+      - name: Run Linux rhel-9 tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel9"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-9"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux rhel-10 tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-10"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
