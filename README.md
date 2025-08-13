@@ -252,8 +252,9 @@ You will find more information about BunkerWeb Cloud beta [here](https://www.bun
 List of supported Linux distros:
 
 - Debian 12 "Bookworm"
-- Ubuntu 22.04 "Noble"
-- Ubuntu 24.04 "Jammy"
+- Debian 13 "Trixie"
+- Ubuntu 22.04 "Jammy"
+- Ubuntu 24.04 "Noble"
 - Fedora 41
 - Fedora 42
 - RHEL 8.10

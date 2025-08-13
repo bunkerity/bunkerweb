@@ -510,6 +510,7 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 architectures) include:
 
 - Debian 12 "Bookworm"
+- Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
 - Fedora 41 and 42
@@ -713,7 +714,7 @@ Depending on your choices during installation:
 
 Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
-=== "Debian"
+=== "Debian Bookworm/Trixie"
 
     The first step is to add NGINX official repository:
 

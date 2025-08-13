@@ -12,7 +12,7 @@ class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro, domains={}):
         super().__init__(name, "linux", timeout, tests, delay=20)
         self._domains = domains
-        if distro not in ("ubuntu", "debian", "fedora-41", "fedora-42", "centos", "ubuntu-jammy") and not distro.startswith("rhel"):
+        if distro not in ("ubuntu", "debian-bookworm", "debian-trixie", "fedora-41", "fedora-42", "centos", "ubuntu-jammy") and not distro.startswith("rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
 
@@ -25,7 +25,7 @@ class LinuxTest(Test):
             proc = run(cmd, shell=True)
             if proc.returncode != 0:
                 raise Exception("docker run failed (linux stack)")
-            if distro in ("ubuntu", "debian", "ubuntu-jammy"):
+            if distro in ("ubuntu", "debian-bookworm", "debian-trixie", "ubuntu-jammy"):
                 cmd = "echo force-bad-version >> /etc/dpkg/dpkg.cfg ; apt install -y /opt/\\$(ls /opt | grep deb)"
             elif distro == "centos" or distro.startswith(("rhel", "fedora")):
                 cmd = "dnf install -y /opt/\\$(ls /opt | grep rpm)"
@@ -38,7 +38,7 @@ class LinuxTest(Test):
             proc = LinuxTest.docker_exec(distro, "systemctl start bunkerweb-scheduler")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl start failed (linux stack)")
-            if distro in ("ubuntu", "debian", "ubuntu-jammy"):
+            if distro in ("ubuntu", "debian-bookworm", "debian-trixie", "ubuntu-jammy"):
                 LinuxTest.docker_exec(
                     distro,
                     "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip",
@@ -50,7 +50,7 @@ class LinuxTest(Test):
                         "/etc/php/8.3/fpm/pool.d/www.conf",
                     )
                     LinuxTest.docker_exec(distro, "systemctl stop php8.3-fpm ; systemctl start php8.3-fpm")
-                elif distro == "debian":
+                elif distro in ("debian-bookworm", "debian-trixie"):
                     LinuxTest.docker_cp(
                         distro,
                         "./tests/www-deb.conf",

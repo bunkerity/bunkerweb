@@ -75,9 +75,12 @@ jobs:
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-tests:testing local/ubuntu:latest
-      - name: Pull BW linux debian test image
+      - name: Pull BW linux debian Bookworm test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity/debian-tests:testing local/debian:latest
+        run: docker pull ghcr.io/bunkerity/debian-bookworm-tests:testing && docker tag ghcr.io/bunkerity/debian-bookworm-tests:testing local/debian-bookworm:latest
+      - name: Pull BW linux debian Trixie test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/debian-trixie-tests:testing && docker tag ghcr.io/bunkerity/debian-trixie-tests:testing local/debian-trixie:latest
       - name: Pull BW linux fedora 41 test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/fedora-41-tests:testing && docker tag ghcr.io/bunkerity/fedora-41-tests:testing local/fedora-41:latest
@@ -121,9 +124,15 @@ jobs:
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux debian tests
+      - name: Run Linux debian Bookworm tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-bookworm"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux debian Trixie tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-trixie"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

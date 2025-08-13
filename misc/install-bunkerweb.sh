@@ -285,8 +285,8 @@ show_rhel_database_warning() {
 check_supported_os() {
     case "$DISTRO_ID" in
         "debian")
-            if [ "$DISTRO_VERSION" != "12" ]; then
-                print_warning "Only Debian 12 (Bookworm) is officially supported"
+            if [[ "$DISTRO_VERSION" != "12" && "$DISTRO_VERSION" != "13" ]]; then
+                print_warning "Only Debian 12 (Bookworm) and 13 (Trixie) are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -335,7 +335,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12, Ubuntu 22.04/24.04, Fedora 41/42, RHEL 8/9"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 41/42, RHEL 8/9"
             exit 1
             ;;
     esac

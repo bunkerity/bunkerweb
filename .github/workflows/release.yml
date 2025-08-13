@@ -114,13 +114,25 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora-41, fedora-42, rhel, rhel9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian-bookworm,
+            debian-trixie,
+            fedora-41,
+            fedora-42,
+            rhel,
+            rhel9,
+            ubuntu-jammy,
+          ]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: latest
           - linux: ubuntu
             package: deb
-          - linux: debian
+          - linux: debian-bookworm
+            package: deb
+          - linux: debian-trixie
             package: deb
           - linux: fedora-41
             package: rpm
@@ -214,7 +226,17 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora-41, fedora-42, el, el9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian-bookworm,
+            debian-trixie,
+            fedora-41,
+            fedora-42,
+            el,
+            el9,
+            ubuntu-jammy,
+          ]
         arch: [amd64, arm64]
         include:
           - release: latest
@@ -224,10 +246,15 @@ jobs:
             suffix: ""
             version: noble
             package: deb
-          - linux: debian
+          - linux: debian-bookworm
             separator: _
             suffix: ""
             version: bookworm
+            package: deb
+          - linux: debian-trixie
+            separator: _
+            suffix: ""
+            version: trixie
             package: deb
           - linux: fedora-41
             separator: "-"
@@ -257,7 +284,10 @@ jobs:
           - linux: ubuntu
             arch: amd64
             package_arch: amd64
-          - linux: debian
+          - linux: debian-bookworm
+            arch: amd64
+            package_arch: amd64
+          - linux: debian-trixie
             arch: amd64
             package_arch: amd64
           - linux: fedora-41
@@ -278,7 +308,10 @@ jobs:
           - linux: ubuntu
             arch: arm64
             package_arch: arm64
-          - linux: debian
+          - linux: debian-bookworm
+            arch: arm64
+            package_arch: arm64
+          - linux: debian-trixie
             arch: arm64
             package_arch: arm64
           - linux: fedora-41

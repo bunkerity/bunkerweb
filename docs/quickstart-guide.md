@@ -49,7 +49,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3/exa
 
     Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
-    === "Debian"
+    === "Debian Bookworm/Trixie"
 
         The first step is to add the official NGINX repository:
 

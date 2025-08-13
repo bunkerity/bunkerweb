@@ -1,9 +1,9 @@
-FROM debian:bookworm-slim@sha256:2424c1850714a4d94666ec928e24d86de958646737b1d113f5b2207be44d37d8 AS builder
+FROM debian:trixie-slim@sha256:cc92da07b99dd5c078cb5583fdb4ba639c7c9c14eb78508a2be285ca67cc738a AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
     apt install -y --no-install-recommends gnupg2 ca-certificates \
-    bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3 python3-dev python3-pip python3-distutils python3-venv -y
+    bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libgd-dev python3 python3-dev python3-pip python3-venv -y
 
 ENV OS=debian
 ENV NGINX_VERSION=1.28.0
@@ -75,7 +75,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
     echo "Skipping JS minification"; \
     fi
 
-FROM debian:bookworm-slim@sha256:2424c1850714a4d94666ec928e24d86de958646737b1d113f5b2207be44d37d8
+FROM debian:trixie-slim@sha256:cc92da07b99dd5c078cb5583fdb4ba639c7c9c14eb78508a2be285ca67cc738a
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -107,7 +107,7 @@ COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 # Copy Linux files
 COPY --chmod=740 src/linux/scripts scripts
 COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
-COPY src/linux/fpm-debian /usr/share/.fpm
+COPY src/linux/fpm-debian-trixie /usr/share/.fpm
 COPY --chmod=644 src/linux/*.service /lib/systemd/system/
 COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 
