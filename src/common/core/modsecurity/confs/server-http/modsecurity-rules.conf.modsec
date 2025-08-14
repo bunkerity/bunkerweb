@@ -34,8 +34,18 @@ SecRequestBodyLimit {{ MAX_CLIENT_SIZE }}
 SecRequestBodyLimit 13107200
   {% endif %}
 
-# Maximum data size for requests without files
+# Maximum data size for requests without files (Generated from MODSECURITY_REQ_BODY_NO_FILES_LIMIT)
+  {% if MODSECURITY_REQ_BODY_NO_FILES_LIMIT.endswith("k") or MODSECURITY_REQ_BODY_NO_FILES_LIMIT.endswith("K") -%}
+SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT[:-1] | int * 1024 }}
+  {% elif MODSECURITY_REQ_BODY_NO_FILES_LIMIT.endswith("m") or MODSECURITY_REQ_BODY_NO_FILES_LIMIT.endswith("M") -%}
+SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT[:-1] | int * 1024 * 1024 }}
+  {% elif MODSECURITY_REQ_BODY_NO_FILES_LIMIT.endswith("g") or MODSECURITY_REQ_BODY_NO_FILES_LIMIT.endswith("G") -%}
+SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT[:-1] | int * 1024 * 1024 * 1024 }}
+  {% elif MODSECURITY_REQ_BODY_NO_FILES_LIMIT.isdigit() -%}
 SecRequestBodyNoFilesLimit {{ MODSECURITY_REQ_BODY_NO_FILES_LIMIT }}
+  {% else -%}
+SecRequestBodyNoFilesLimit 13107200
+  {% endif %}
 
 # Reject requests if bigger than max data size
 SecRequestBodyLimitAction Reject
