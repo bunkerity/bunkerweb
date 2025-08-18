@@ -45,19 +45,34 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora-41, fedora-42, rhel, rhel9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian-bookworm,
+            debian-trixie,
+            fedora-41,
+            fedora-42,
+            rhel-8,
+            rhel-9,
+            rhel-10,
+            ubuntu-jammy,
+          ]
         include:
           - linux: ubuntu
             package: deb
-          - linux: debian
+          - linux: debian-bookworm
+            package: deb
+          - linux: debian-trixie
             package: deb
           - linux: fedora-41
             package: rpm
           - linux: fedora-42
             package: rpm
-          - linux: rhel
+          - linux: rhel-8
             package: rpm
-          - linux: rhel9
+          - linux: rhel-9
+            package: rpm
+          - linux: rhel-10
             package: rpm
           - linux: ubuntu-jammy
             package: deb
@@ -161,7 +176,18 @@ jobs:
     needs: [staging-tests]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora-41, fedora-42, el, el9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian-bookworm,
+            debian-trixie,
+            fedora-41,
+            fedora-42,
+            el-8,
+            el-9,
+            el-10,
+            ubuntu-jammy,
+          ]
         arch: [amd64]
         include:
           - release: testing
@@ -172,11 +198,17 @@ jobs:
             suffix: ""
             version: noble
             package: deb
-          - linux: debian
+          - linux: debian-bookworm
             package_arch: amd64
             separator: _
             suffix: ""
             version: bookworm
+            package: deb
+          - linux: debian-trixie
+            package_arch: amd64
+            separator: _
+            suffix: ""
+            version: trixie
             package: deb
           - linux: fedora-41
             package_arch: x86_64
@@ -190,17 +222,23 @@ jobs:
             suffix: "1."
             version: 42
             package: rpm
-          - linux: el
+          - linux: el-8
             package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 8
             package: rpm
-          - linux: el9
+          - linux: el-9
             package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 9
+            package: rpm
+          - linux: el-10
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 10
             package: rpm
           - linux: ubuntu-jammy
             package_arch: amd64

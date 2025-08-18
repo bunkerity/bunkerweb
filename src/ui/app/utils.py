@@ -7,6 +7,7 @@ from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
 from typing import Dict, Optional, Set, Union
+from urllib.parse import unquote
 
 from bcrypt import checkpw, gensalt, hashpw
 from flask import flash as flask_flash, session
@@ -74,6 +75,7 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "8": True,
     },
     "reports": {
+        "2": True,
         "3": True,
         "4": True,
         "5": False,
@@ -103,6 +105,7 @@ ALWAYS_USED_PLUGINS = (
     "sessions",
     "ssl",
 )
+
 PLUGINS_SPECIFICS = {
     "COUNTRY": {"BLACKLIST_COUNTRY": "", "WHITELIST_COUNTRY": ""},
     "CUSTOMCERT": {"USE_CUSTOM_SSL": "no"},
@@ -283,3 +286,26 @@ def is_plugin_active(plugin_id: str, plugin_name: str, config: dict) -> bool:
         return False
 
     return plugin_id in ALWAYS_USED_PLUGINS or plugin_used(plugin_id)
+
+
+def _sanitize_internal_next(next_url, default):
+    """Return safe internal path; raise ValueError if invalid."""
+    if next_url is None:
+        return default
+    if not isinstance(next_url, str):
+        raise ValueError("next must be str")
+    candidate = next_url.strip()
+    if not candidate.startswith("/"):
+        raise ValueError("must start with /")
+    if candidate.startswith("//"):
+        raise ValueError("protocol-relative not allowed")
+    if "://" in candidate:
+        raise ValueError("scheme not allowed")
+    if len(candidate) > 4096:  # temporary upper bound before decode to avoid abuse
+        raise ValueError("too long")
+    decoded = unquote(candidate)[:4096]
+    if decoded.startswith("//") or "://" in decoded:
+        raise ValueError("encoded protocol-relative or scheme not allowed")
+    if any(ord(c) < 32 for c in decoded):
+        raise ValueError("control chars not allowed")
+    return decoded or default

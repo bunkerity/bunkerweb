@@ -40,52 +40,54 @@ jobs:
     steps:
       # Prepare
       - name: Check out repository code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Install ruby
-        uses: ruby/setup-ruby@2a7b30092b0caf9c046252510f9273b4875f3db9 # v1.254.0
+        uses: ruby/setup-ruby@829114fc20da43a41d27359103ec7a63020954d4 # v1.255.0
         with:
           ruby-version: "3.0"
       - name: Install packagecloud
         run: gem install package_cloud
-      # Download packages
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        if: inputs.LINUX != 'el' && inputs.LINUX != 'el9'
+      # Compute dynamic variables to remove per-distro duplication
+      - name: Compute distribution & artifact names
+        id: compute
+        shell: bash
+        run: |
+          LINUX="${{ inputs.LINUX }}"
+          VERSION="${{ inputs.VERSION }}"
+          if [[ "$LINUX" =~ ^el-([0-9]+)$ ]]; then
+            DIST="el/${BASH_REMATCH[1]}"
+            ARTIFACT_NAME="package-rh${LINUX}-${{ inputs.PACKAGE_ARCH }}"
+          elif [[ "$LINUX" == ubuntu-* ]]; then
+            # Expect format ubuntu-<codename>
+            CODENAME=${LINUX#ubuntu-}
+            DIST="ubuntu/${CODENAME}"
+            ARTIFACT_NAME="package-${LINUX}-${{ inputs.PACKAGE_ARCH }}"
+          elif [[ "$LINUX" == fedora-* ]]; then
+            FEDVER=${LINUX#fedora-}
+            DIST="fedora/${FEDVER}"
+            ARTIFACT_NAME="package-${LINUX}-${{ inputs.PACKAGE_ARCH }}"
+          elif [[ "$LINUX" == debian-* ]]; then
+            # Expect format debian-<codename>
+            CODENAME=${LINUX#debian-}
+            DIST="debian/${CODENAME}"
+            ARTIFACT_NAME="package-${LINUX}-${{ inputs.PACKAGE_ARCH }}"
+          else
+            DIST="${LINUX}/${VERSION}"
+            ARTIFACT_NAME="package-${LINUX}-${{ inputs.PACKAGE_ARCH }}"
+          fi
+          echo "DIST=$DIST" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
+          echo "dist=$DIST" >> $GITHUB_OUTPUT
+          echo "artifact=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+      # Download packages (single generic step)
+      - name: Download package artifact
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
-          name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
+          name: ${{ env.ARTIFACT_NAME }}
           path: /tmp/${{ inputs.LINUX }}
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        if: inputs.LINUX == 'el' || inputs.LINUX == 'el9'
-        with:
-          name: package-rh${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
-          path: /tmp/${{ inputs.LINUX }}
-      # Remove existing packages
-      - name: Remove existing package
-        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy' && inputs.LINUX != 'fedora-41' && inputs.LINUX != 'fedora-42'
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
-        continue-on-error: true
-        env:
-          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Remove existing package el9
-        if: inputs.LINUX == 'el9'
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/el/9 bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
-        continue-on-error: true
-        env:
-          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Remove existing package ubuntu-jammy
-        if: inputs.LINUX == 'ubuntu-jammy'
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/ubuntu/jammy bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
-        continue-on-error: true
-        env:
-          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Remove existing package fedora-41
-        if: inputs.LINUX == 'fedora-41'
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/fedora/41 bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
-        continue-on-error: true
-        env:
-          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Remove existing package fedora-42
-        if: inputs.LINUX == 'fedora-42'
-        run: package_cloud yank bunkerity/${{ inputs.REPO }}/fedora/42 bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+      # Yank existing package (generic)
+      - name: Yank existing package
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ env.DIST }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
@@ -93,49 +95,12 @@ jobs:
       - name: Rename package
         if: inputs.BW_VERSION == '1.5'
         run: sudo apt update && sudo apt install -y rename && rename 's/dev/1.5-dev/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
-      # Push package
+      # Push package (single generic step)
       - name: Push package to packagecloud
-        if: inputs.LINUX != 'el9' && inputs.LINUX != 'ubuntu-jammy' && inputs.LINUX != 'fedora-41' && inputs.LINUX != 'fedora-42'
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
         with:
           PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
-          PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}
-          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push package to packagecloud for el9
-        if: inputs.LINUX == 'el9'
-        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
-        with:
-          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
-          PACKAGECLOUD-USERNAME: bunkerity
-          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
-          PACKAGECLOUD-DISTRIB: el/9
-          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push package to packagecloud for ubuntu-jammy
-        if: inputs.LINUX == 'ubuntu-jammy'
-        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
-        with:
-          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
-          PACKAGECLOUD-USERNAME: bunkerity
-          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
-          PACKAGECLOUD-DISTRIB: ubuntu/jammy
-          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push package to packagecloud for fedora-41
-        if: inputs.LINUX == 'fedora-41'
-        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
-        with:
-          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
-          PACKAGECLOUD-USERNAME: bunkerity
-          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
-          PACKAGECLOUD-DISTRIB: fedora/41
-          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-      - name: Push package to packagecloud for fedora-42
-        if: inputs.LINUX == 'fedora-42'
-        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
-        with:
-          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
-          PACKAGECLOUD-USERNAME: bunkerity
-          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
-          PACKAGECLOUD-DISTRIB: fedora/42
+          PACKAGECLOUD-DISTRIB: ${{ env.DIST }}
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

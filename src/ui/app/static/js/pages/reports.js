@@ -235,7 +235,7 @@ $(document).ready(function () {
   const reports_config = {
     tableSelector: "#reports",
     tableName: "reports",
-    columnVisibilityCondition: (column) => column > 2 && column < 13,
+    columnVisibilityCondition: (column) => column > 1 && column < 13,
     dataTableOptions: {
       columnDefs: [
         { orderable: false, targets: -1 },

@@ -37,6 +37,7 @@ from app.utils import (
     COLUMNS_PREFERENCES_DEFAULTS,
     LIB_DIR,
     LOGGER,
+    _sanitize_internal_next,
     flash,
     get_blacklisted_settings,
     get_filtered_settings,
@@ -666,7 +667,13 @@ def before_request():
             # Case not login page, keep on 2FA before any other access
             if not session.get("totp_validated", False) and bool(current_user.totp_secret) and "/totp" not in request.path:
                 if not request.path.endswith("/login"):
-                    return redirect(url_for("totp.totp_page", next=request.form.get("next")))
+                    raw_next = request.values.get("next")
+                    try:
+                        safe_next = _sanitize_internal_next(raw_next, url_for("home.home_page"))
+                    except Exception:
+                        safe_next = url_for("home.home_page")
+
+                    return redirect(url_for("totp.totp_page", next=safe_next))
                 passed = False
             elif (app.config["CHECK_PRIVATE_IP"] or not ip_address(request.remote_addr).is_private) and session["ip"] != request.remote_addr:
                 LOGGER.warning(f"User {current_user.get_id()} tried to access his session with a different IP address.")
@@ -862,9 +869,11 @@ def index():
 @login_required
 def loading():
     home_url = url_for("home.home_page")
-    next_url = request.values.get("next", None) or home_url
 
-    if not next_url.startswith(home_url.replace("/home", "/", 1).replace("//", "/")):
+    raw_next = request.values.get("next")
+    try:
+        next_url = _sanitize_internal_next(raw_next, home_url)
+    except ValueError:
         return Response(status=400)
 
     return render_template("loading.html", message=request.values.get("message", "Loading..."), next=next_url)
