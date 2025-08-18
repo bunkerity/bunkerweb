@@ -3,7 +3,7 @@
 --license agpl3
 --version %VERSION%
 --architecture %ARCH%
---depends bash --depends python3 --depends procps --depends python3-pip --depends 'nginx = 1.28.0-1~bookworm' --depends libcurl4 --depends libgeoip-dev --depends libxml2 --depends libyajl2 --depends libmagic1 --depends net-tools --depends sudo --depends lsof --depends libpq5 --depends libpcre3 --depends libcap2-bin --depends logrotate --depends mariadb-client --depends postgresql-client --depends sqlite3 --depends unzip --depends tar
+--depends bash --depends python3 --depends procps --depends python3-pip --depends 'nginx = 1.28.0-1~bookworm' --depends libcurl4 --depends libgeoip-dev --depends libxml2 --depends libyajl2 --depends libmagic1 --depends net-tools --depends sudo --depends lsof --depends libpq5 --depends libpcre3 --depends libcap2-bin --depends logrotate --depends mariadb-client --depends postgresql-client --depends sqlite3 --depends unzip --depends tar --depends libgd3
 --description "BunkerWeb %VERSION% for Debian 12"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
