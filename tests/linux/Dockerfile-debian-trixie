@@ -34,7 +34,7 @@ RUN apt update && \
     apt-get update && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~${VERSION_CODENAME}
 
-COPY ./package-debian/*.deb /opt
+COPY ./package-debian-trixie/*.deb /opt
 
 VOLUME ["/sys/fs/cgroup"]
 
