@@ -51,8 +51,8 @@ do_and_check_cmd chmod +x "build.sh"
 do_and_check_cmd ./build.sh
 do_and_check_cmd sh build.sh
 ARGS="--disable-dependency-tracking --disable-static --disable-examples --disable-doxygen-doc --disable-doxygen-html --disable-valgrind-memcheck --disable-valgrind-helgrind --prefix=/usr/share/bunkerweb/deps --with-maxmind=/usr/share/bunkerweb/deps"
-if [ "$OS" == "rhel" ] && [ "$OS_VERSION" == "10" ]; then
-  ARGS="$ARGS --with-pcre2"
+if { [ "$OS" == "rhel" ] && [ "$OS_VERSION" == "10" ]; } || { [ "$OS" == "debian" ] && [ "$OS_VERSION" == "13" ]; }; then
+	ARGS="$ARGS --with-pcre2"
 fi
 # shellcheck disable=SC2086
 do_and_check_cmd ./configure $ARGS
@@ -210,7 +210,7 @@ do_and_check_cmd mv /tmp/bunkerweb/deps/src/brotli /tmp/bunkerweb/deps/src/ngx_b
 echo "ℹ️ Compiling and installing dynamic modules"
 CONFARGS="$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p')"
 CONFARGS="${CONFARGS/-Os -fomit-frame-pointer -g/-Os}"
-if [ "$OS" == "rhel" ] && [ "$OS_VERSION" == "10" ]; then
+if { [ "$OS" == "rhel" ] && [ "$OS_VERSION" == "10" ]; } || { [ "$OS" == "debian" ] && [ "$OS_VERSION" == "13" ]; }; then
 	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt=-Wl/--with-ld-opt='-lpcre2-8 -Wl'/")"
 	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='-Wl/--with-ld-opt='-lpcre2-8 -Wl/")"
 else
