@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.4-rc1 - ????/??/??
+## v1.6.4 - ????/??/??
 
 - [SECURITY] Fix open-redirection vulnerability in the Web UI regarding the `next` parameter in the loading process.
 - [FEATURE] Enhance `ModSecurity` plugin to support human-readable size values for request body limits (requests without files)
