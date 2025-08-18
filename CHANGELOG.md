@@ -2,7 +2,7 @@
 
 ## v1.6.4 - ????/??/??
 
-- [SECURITY] Fix open-redirection vulnerability in the Web UI regarding the `next` parameter in the loading process.
+- [SECURITY] Fix open-redirection vulnerability in the Web UI regarding the `next` parameter in the loading process ([CVE-2025-8066](https://github.com/bunkerity/bunkerweb/security/advisories/GHSA-xxx9-3fh5-g585)).
 - [FEATURE] Enhance `ModSecurity` plugin to support human-readable size values for request body limits (requests without files)
 - [BUGFIX] Fix limit zones for HTTP/3 connections in `limitconn.conf` to ensure proper connection limiting for HTTP/3 requests.
 - [LINUX] Support RHEL 10.0
