@@ -43,27 +43,20 @@ class LinuxTest(Test):
                     distro,
                     "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip",
                 )
-                if distro == "ubuntu":
+                php_versions = {
+                    "debian-trixie": "8.4",
+                    "ubuntu": "8.3",
+                    "debian-bookworm": "8.2",
+                    "ubuntu-jammy": "8.1",
+                }
+                php_ver = php_versions.get(distro)
+                if php_ver:
                     LinuxTest.docker_cp(
                         distro,
                         "./tests/www-deb.conf",
-                        "/etc/php/8.3/fpm/pool.d/www.conf",
+                        f"/etc/php/{php_ver}/fpm/pool.d/www.conf",
                     )
-                    LinuxTest.docker_exec(distro, "systemctl stop php8.3-fpm ; systemctl start php8.3-fpm")
-                elif distro in ("debian-bookworm", "debian-trixie"):
-                    LinuxTest.docker_cp(
-                        distro,
-                        "./tests/www-deb.conf",
-                        "/etc/php/8.2/fpm/pool.d/www.conf",
-                    )
-                    LinuxTest.docker_exec(distro, "systemctl stop php8.2-fpm ; systemctl start php8.2-fpm")
-                elif distro == "ubuntu-jammy":
-                    LinuxTest.docker_cp(
-                        distro,
-                        "./tests/www-deb.conf",
-                        "/etc/php/8.1/fpm/pool.d/www.conf",
-                    )
-                    LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
+                    LinuxTest.docker_exec(distro, f"systemctl restart php{php_ver}-fpm")
             elif distro == "centos" or distro.startswith(("rhel", "fedora")):
                 if distro.startswith("rhel"):
                     if distro == "rhel-8":
