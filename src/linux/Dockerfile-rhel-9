@@ -1,4 +1,4 @@
-FROM redhat/ubi9:9.6@sha256:61bf5be4fcf7fa4d1ce6c8c0376dcb8b06e68aae6a0a54c4cf39c06116684962 AS builder
+FROM redhat/ubi9:9.6@sha256:8851294389a8641bd6efcd60f615c69e54fb0e2216ec8259448b35e3d9a11b06 AS builder
 
 ENV OS=rhel
 ENV NGINX_VERSION=1.28.0
@@ -79,7 +79,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
   echo "Skipping JS minification"; \
   fi
 
-FROM redhat/ubi9:9.6@sha256:61bf5be4fcf7fa4d1ce6c8c0376dcb8b06e68aae6a0a54c4cf39c06116684962
+FROM redhat/ubi9:9.6@sha256:8851294389a8641bd6efcd60f615c69e54fb0e2216ec8259448b35e3d9a11b06
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

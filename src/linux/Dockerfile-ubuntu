@@ -1,4 +1,4 @@
-FROM ubuntu:noble@sha256:a08e551cb33850e4740772b38217fc1796a66da2506d312abe51acda354ff061 AS builder
+FROM ubuntu:noble@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9 AS builder
 
 # Install dependencies
 RUN apt update && \
@@ -75,7 +75,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
     echo "Skipping JS minification"; \
     fi
 
-FROM ubuntu:noble@sha256:a08e551cb33850e4740772b38217fc1796a66da2506d312abe51acda354ff061
+FROM ubuntu:noble@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
