@@ -6,6 +6,7 @@
 - [FEATURE] Enhance `ModSecurity` plugin to support human-readable size values for request body limits (requests without files)
 - [BUGFIX] Fix limit zones for HTTP/3 connections in `limitconn.conf` to ensure proper connection limiting for HTTP/3 requests.
 - [LINUX] Support RHEL 10.0
+- [LINUX] Support Debian 13 (Trixie)
 
 ## v1.6.3 - 2025/08/05
 
