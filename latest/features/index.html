@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
     
     
       
@@ -5437,7 +5437,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.4</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5454,7 +5454,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.4</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -7574,6 +7574,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>Dynamically resolve upstream hostnames.</td>
 </tr>
 <tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Keepalive timeout for upstream connections.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
+<td><code>1h</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Keepalive time for upstream connections.</td>
+</tr>
+<tr>
 <td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
 <td><code>/status</code></td>
 <td>global</td>
@@ -8418,7 +8432,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <td><code>131072</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Request Body Limit:</strong> Maximum size (in bytes) for request bodies that don't include file uploads.</td>
+<td><strong>Request Body Limit (No Files):</strong> Maximum size for request bodies without file uploads. Accepts plain bytes or human‑readable suffix (<code>k</code>, <code>m</code>, <code>g</code>), e.g. <code>131072</code>, <code>256k</code>, <code>1m</code>, <code>2g</code>.</td>
 </tr>
 <tr>
 <td><code>USE_MODSECURITY_CRS_PLUGINS</code></td>
@@ -8602,6 +8616,10 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </code></pre></div>
 </div>
 </div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Human-readable size values</p>
+<p>For size settings like <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code>, the suffixes <code>k</code>, <code>m</code>, and <code>g</code> (case-insensitive) are supported and represent kibibytes, mebibytes, and gibibytes (multiples of 1024). Examples: <code>256k</code> = 262144, <code>1m</code> = 1048576, <code>2g</code> = 2147483648.</p>
 </div>
 <h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
@@ -11404,10 +11422,10 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
