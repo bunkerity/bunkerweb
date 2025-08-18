@@ -144,6 +144,7 @@ services:
 
   bw-db:
     image: mariadb:11
+    command: --max-allowed-packet=67108864
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: "db"

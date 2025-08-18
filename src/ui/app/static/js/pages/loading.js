@@ -10,9 +10,17 @@ $(document).ready(function () {
   // Function to validate and sanitize the URL
   function sanitizeUrl(url) {
     try {
-      // Ensure the URL is either relative or shares the same origin
-      const validUrl = new URL(url, window.location.origin);
-      return validUrl.href;
+      if (!url) return null;
+      // Disallow protocol-relative or scheme-specified values early
+      if (/^\s*\/\//.test(url) || /:\/\//.test(url)) return null;
+      // Ensure single leading slash path
+      const rel = url.trim();
+      if (!rel.startsWith("/") || rel.startsWith("//")) return null;
+      // Construct URL relative to origin to normalize
+      const validUrl = new URL(rel, window.location.origin);
+      // Enforce same origin and that original was a simple path (no scheme injected)
+      if (validUrl.origin !== window.location.origin) return null;
+      return validUrl.pathname + validUrl.search + validUrl.hash;
     } catch (e) {
       console.error("Invalid URL detected:", url);
     }

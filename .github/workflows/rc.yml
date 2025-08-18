@@ -104,21 +104,36 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora-41, fedora-42, rhel, rhel9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian-bookworm,
+            debian-trixie,
+            fedora-41,
+            fedora-42,
+            rhel-8,
+            rhel-9,
+            rhel-10,
+            ubuntu-jammy,
+          ]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: rc
           - linux: ubuntu
             package: deb
-          - linux: debian
+          - linux: debian-bookworm
+            package: deb
+          - linux: debian-trixie
             package: deb
           - linux: fedora-41
             package: rpm
           - linux: fedora-42
             package: rpm
-          - linux: rhel
+          - linux: rhel-8
             package: rpm
-          - linux: rhel9
+          - linux: rhel-9
+            package: rpm
+          - linux: rhel-10
             package: rpm
           - linux: ubuntu-jammy
             package: deb
@@ -145,7 +160,7 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
@@ -204,7 +219,18 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora-41, fedora-42, el, el9, ubuntu-jammy]
+        linux:
+          [
+            ubuntu,
+            debian-bookworm,
+            debian-trixie,
+            fedora-41,
+            fedora-42,
+            el-8,
+            el-9,
+            el-10,
+            ubuntu-jammy,
+          ]
         arch: [amd64, arm64]
         include:
           - release: latest
@@ -214,10 +240,15 @@ jobs:
             suffix: ""
             version: noble
             package: deb
-          - linux: debian
+          - linux: debian-bookworm
             separator: _
             suffix: ""
             version: bookworm
+            package: deb
+          - linux: debian-trixie
+            separator: _
+            suffix: ""
+            version: trixie
             package: deb
           - linux: fedora-41
             separator: "-"
@@ -229,15 +260,20 @@ jobs:
             suffix: "1."
             version: 42
             package: rpm
-          - linux: el
+          - linux: el-8
             separator: "-"
             suffix: "1."
             version: 8
             package: rpm
-          - linux: el9
+          - linux: el-9
             separator: "-"
             suffix: "1."
             version: 9
+            package: rpm
+          - linux: el-10
+            separator: "-"
+            suffix: "1."
+            version: 10
             package: rpm
           - linux: ubuntu-jammy
             separator: _
@@ -247,7 +283,10 @@ jobs:
           - linux: ubuntu
             arch: amd64
             package_arch: amd64
-          - linux: debian
+          - linux: debian-bookworm
+            arch: amd64
+            package_arch: amd64
+          - linux: debian-trixie
             arch: amd64
             package_arch: amd64
           - linux: fedora-41
@@ -256,10 +295,13 @@ jobs:
           - linux: fedora-42
             arch: amd64
             package_arch: x86_64
-          - linux: el
+          - linux: el-8
             arch: amd64
             package_arch: x86_64
-          - linux: el9
+          - linux: el-9
+            arch: amd64
+            package_arch: x86_64
+          - linux: el-10
             arch: amd64
             package_arch: x86_64
           - linux: ubuntu-jammy
@@ -268,7 +310,10 @@ jobs:
           - linux: ubuntu
             arch: arm64
             package_arch: arm64
-          - linux: debian
+          - linux: debian-bookworm
+            arch: arm64
+            package_arch: arm64
+          - linux: debian-trixie
             arch: arm64
             package_arch: arm64
           - linux: fedora-41
@@ -277,10 +322,13 @@ jobs:
           - linux: fedora-42
             arch: arm64
             package_arch: aarch64
-          - linux: el
+          - linux: el-8
             arch: arm64
             package_arch: aarch64
-          - linux: el9
+          - linux: el-9
+            arch: arm64
+            package_arch: aarch64
+          - linux: el-10
             arch: arm64
             package_arch: aarch64
           - linux: ubuntu-jammy

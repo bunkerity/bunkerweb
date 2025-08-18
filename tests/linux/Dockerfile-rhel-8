@@ -1,4 +1,4 @@
-FROM redhat/ubi8-init:8.10@sha256:96952e21d1ba8ad87835ba0b62f0c5664d73f26264501e1ff49e7c42fbbd3a0d
+FROM redhat/ubi8-init:8.10@sha256:3510d89e60b3e7ff75f4235a63db710127ab0a30ef7bb7d9095c3d232f41523e
 
 ENV NGINX_VERSION=1.28.0
 
@@ -18,4 +18,4 @@ RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noar
     dnf install php-fpm yum-utils -y && \
     dnf install -y https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm
 
-COPY ./package-rhel/*.rpm /opt
+COPY ./package-rhel-8/*.rpm /opt

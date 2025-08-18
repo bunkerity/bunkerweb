@@ -1,0 +1,124 @@
+FROM redhat/ubi9:9.6@sha256:8851294389a8641bd6efcd60f615c69e54fb0e2216ec8259448b35e3d9a11b06 AS builder
+
+ENV OS=rhel
+ENV NGINX_VERSION=1.28.0
+
+# Copy rocky repo
+COPY src/linux/rocky-9.repo /etc/yum.repos.d/rocky.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/rocky.repo
+
+# Copy RPM-GPG-KEY-Rocky-9
+COPY src/linux/RPM-GPG-KEY-Rocky-9 /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
+
+# Import RPM-GPG-KEY-Rocky-9
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
+
+# Install Nginx, fpm and dependencies
+RUN dnf install -y wget make yum-utils && \
+  dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+  rpm -e --nodeps openssl-fips-provider-so && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python39 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
+  dnf install -y https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
+
+WORKDIR /tmp/bunkerweb/deps
+
+# Copy dependencies sources folder
+COPY src/deps/misc misc
+COPY src/deps/src src
+COPY src/deps/deps.json deps.json
+COPY --chmod=644 src/deps/install.sh install.sh
+
+# Compile and install dependencies
+RUN bash install.sh
+
+# Copy dependencies sources folder
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
+COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
+COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
+
+WORKDIR /usr/share/bunkerweb
+
+# Compile and install dependencies
+RUN export MAKEFLAGS="-j$(nproc)" && \
+  mkdir -p deps/python && \
+  python3 -m ensurepip --upgrade && \
+  python3 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+  python3 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+
+RUN dnf install -y pigz && \
+  tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
+  rm -rf deps
+
+# Copy files
+# can't exclude deps from . so we are copying everything by hand
+COPY src/bw/loading loading
+COPY src/bw/lua lua
+COPY src/bw/misc misc
+COPY src/common/api api
+COPY src/common/cli cli
+COPY src/common/confs confs
+COPY src/common/core core
+COPY src/common/db db
+COPY src/common/gen gen
+COPY src/common/helpers helpers
+COPY src/common/settings.json settings.json
+COPY src/common/utils utils
+COPY src/scheduler scheduler
+COPY src/VERSION VERSION
+COPY src/ui ui
+
+# Minify JS files (can be skipped with SKIP_MINIFY=yes)
+ARG SKIP_MINIFY=no
+RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+  dnf install -y nodejs npm parallel && \
+  npm install -g uglify-js && \
+  find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
+  else \
+  echo "Skipping JS minification"; \
+  fi
+
+FROM redhat/ubi9:9.6@sha256:8851294389a8641bd6efcd60f615c69e54fb0e2216ec8259448b35e3d9a11b06
+
+# Set default umask to prevent huge recursive chmod increasing the final image size
+RUN umask 027
+
+# Install fpm
+RUN dnf install -y wget redhat-rpm-config rpm-build yum-utils gcc make && \
+  wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+  rpm -Uvh epel-release*rpm && \
+  dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
+  dnf install -y ruby-devel && \
+  gem install fpm && \
+  dnf -y --setopt=install_weak_deps=False autoremove && \
+  dnf clean all && \
+  rm -rf /var/cache/dnf
+
+# Copy dependencies
+COPY --from=builder --chown=0:101 /etc/nginx /etc/nginx
+COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+
+WORKDIR /usr/share/bunkerweb
+
+# Setup BunkerWeb
+RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
+  echo "Linux" > INTEGRATION && \
+  mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
+  for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+  touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
+
+COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
+
+# Copy Linux files
+COPY --chmod=740 src/linux/scripts scripts
+COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
+COPY src/linux/fpm-rhel-9 /usr/share/.fpm
+COPY --chmod=644 src/linux/*.service /lib/systemd/system/
+COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
+
+# Generate RPM at startup
+VOLUME /data
+WORKDIR /usr/share/
+ENTRYPOINT [ "./fpm.sh", "rpm" ]

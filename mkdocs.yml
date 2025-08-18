@@ -40,6 +40,7 @@ extra_css:
 
 extra_javascript:
   - assets/extra.js
+  - https://chatbot.bunkerweb.io/static/js/chatbot.js
 
 markdown_extensions:
   - attr_list

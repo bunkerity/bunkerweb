@@ -1,0 +1,41 @@
+FROM debian:trixie-slim@sha256:c85a2732e97694ea77237c61304b3bb410e0e961dd6ee945997a06c788c545bb
+
+ENV container=docker
+ENV LC_ALL=C
+ENV DEBIAN_FRONTEND=noninteractive
+ENV OS=debian
+ENV NGINX_VERSION=1.28.0
+ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
+
+RUN apt-get update \
+    && apt-get install -y systemd systemd-sysv \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN cd /lib/systemd/system/sysinit.target.wants/ \
+    && rm $(ls | grep -v systemd-tmpfiles-setup)
+
+RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/basic.target.wants/* \
+    /lib/systemd/system/anaconda.target.wants/* \
+    /lib/systemd/system/plymouth* \
+    /lib/systemd/system/systemd-update-utmp*
+
+RUN apt update && \
+    apt-get install php-fpm curl gnupg2 ca-certificates python3-pip -y && \
+    curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor --output /usr/share/keyrings/nginx-archive-keyring.gpg && \
+    gpg --batch --no-default-keyring --keyring /usr/share/keyrings/nginx-archive-keyring.gpg --list-keys --with-colons | awk -F: '/^fpr:/ { print $10 }' | grep -qx "$EXPECTED_FPR" || { echo "ERROR: expected fingerprint $EXPECTED_FPR not found in keyring" >&2; exit 1; } && \
+    . /etc/os-release && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] https://nginx.org/packages/${OS} ${VERSION_CODENAME} nginx" | tee /etc/apt/sources.list.d/nginx.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~${VERSION_CODENAME}
+
+COPY ./package-debian-trixie/*.deb /opt
+
+VOLUME ["/sys/fs/cgroup"]
+
+CMD ["/lib/systemd/systemd"]

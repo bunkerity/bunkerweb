@@ -45,7 +45,7 @@
     "global_config": "Globale Konfiguration",
     "home": "Startseite",
     "instances": "Instanzen",
-    "jobs": "Aufträge",
+    "jobs": "Aufgaben",
     "logs": "Logs",
     "misc": "Verschiedenes",
     "mode_selection": "Modusauswahl",
@@ -447,7 +447,7 @@
       },
       "top_blocked_ips": {
         "title": "Top 10 blockierte IPs",
-        "most_blocked": "Am häufigsten blockierte IP"
+        "most_blocked": "Meistblockierte IP"
       }
     },
     "map": {

@@ -13,7 +13,7 @@ from flask_login import current_user
 # from app.models.totp import totp as TOTP
 
 from app.dependencies import BW_CONFIG, DATA, DB
-from app.utils import LOGGER, USER_PASSWORD_RX, gen_password_hash
+from app.utils import LOGGER, USER_PASSWORD_RX, gen_password_hash, _sanitize_internal_next
 
 from app.routes.utils import REVERSE_PROXY_PATH, handle_error
 
@@ -320,9 +320,17 @@ def setup_loading():
     ):
         return Response(status=400)
 
+    # Support an optional next parameter but sanitize (falls back to login)
+    default_next = url_for("login.login_page")
+    requested_next = request.args.get("next")
+    try:
+        safe_next = _sanitize_internal_next(requested_next, default_next)
+    except Exception:
+        safe_next = default_next
+
     return render_template(
         "loading.html",
         message="Setting up Web UI...",
         target_endpoint=target_endpoint,
-        next=target_endpoint.replace("/check", "/login") if target_endpoint else url_for("login.login_page"),
+        next=safe_next,
     )

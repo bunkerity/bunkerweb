@@ -89,9 +89,8 @@ function start() {
         while IFS='=' read -r key value; do
             # Skip empty lines and comments
             [[ -z "$key" || "$key" =~ ^# ]] && continue
-            # Trim whitespace
+            # Trim whitespace from key
             key=$(echo "$key" | xargs)
-            value=$(echo "$value" | xargs)
             # Only process recognized keys
             if [[ -n "${defaults[$key]}" ]]; then
                 # Set variable if defined and non-empty in the file

@@ -1,4 +1,4 @@
-FROM redhat/ubi8:8.10@sha256:b5cf5cbc9a2bb40b5216a3d15fd71ae9bda1491ab374246523dcdfa2e468fc5b AS builder
+FROM redhat/ubi8:8.10@sha256:4f0a4e4deb450583408a06165e92a4dcd4f0740a23815f3326fc5c97ee9ca768 AS builder
 
 ENV OS=rhel
 ENV NGINX_VERSION=1.28.0
@@ -78,7 +78,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
   echo "Skipping JS minification"; \
   fi
 
-FROM redhat/ubi8:8.10@sha256:b5cf5cbc9a2bb40b5216a3d15fd71ae9bda1491ab374246523dcdfa2e468fc5b
+FROM redhat/ubi8:8.10@sha256:4f0a4e4deb450583408a06165e92a4dcd4f0740a23815f3326fc5c97ee9ca768
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -111,7 +111,7 @@ COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 # Copy Linux files
 COPY --chmod=740 src/linux/scripts scripts
 COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
-COPY src/linux/fpm-rhel /usr/share/.fpm
+COPY src/linux/fpm-rhel-8 /usr/share/.fpm
 COPY --chmod=644 src/linux/*.service /lib/systemd/system/
 COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
 

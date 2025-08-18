@@ -1,0 +1,21 @@
+FROM redhat/ubi10-init:10.0@sha256:c7df6520a93e4c3c603cc2ef388f5c5b6e2e582dde586a112dc5f929aa535396
+
+ENV NGINX_VERSION=1.28.0
+
+# Copy rocky repo
+COPY src/linux/rocky-10.repo /etc/yum.repos.d/rocky.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/rocky.repo
+
+# Copy RPM-GPG-KEY-Rocky-10
+COPY src/linux/RPM-GPG-KEY-Rocky-10 /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-10
+
+# Import RPM-GPG-KEY-Rocky-10
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-10
+
+COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
+
+RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm -y && \
+    dnf install php-fpm yum-utils -y && \
+    dnf install -y https://nginx.org/packages/rhel/10/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el10.ngx.$(uname -m).rpm
+
+COPY ./package-rhel-10/*.rpm /opt

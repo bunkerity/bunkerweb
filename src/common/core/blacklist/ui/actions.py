@@ -5,9 +5,9 @@ from traceback import format_exc
 def pre_render(**kwargs):
     logger = getLogger("UI")
     ret = {
-        "counter_failed_url": {
+        "counter_failed_uri": {
             "value": 0,
-            "title": "URL",
+            "title": "URI",
             "subtitle": "Denied",
             "subtitle_color": "error",
             "svg_color": "danger",
