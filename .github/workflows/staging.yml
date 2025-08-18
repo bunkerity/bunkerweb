@@ -52,8 +52,9 @@ jobs:
             debian-trixie,
             fedora-41,
             fedora-42,
-            rhel,
-            rhel9,
+            rhel-8,
+            rhel-9,
+            rhel-10,
             ubuntu-jammy,
           ]
         include:
@@ -67,9 +68,11 @@ jobs:
             package: rpm
           - linux: fedora-42
             package: rpm
-          - linux: rhel
+          - linux: rhel-8
             package: rpm
-          - linux: rhel9
+          - linux: rhel-9
+            package: rpm
+          - linux: rhel-10
             package: rpm
           - linux: ubuntu-jammy
             package: deb
@@ -180,8 +183,9 @@ jobs:
             debian-trixie,
             fedora-41,
             fedora-42,
-            el,
-            el9,
+            el-8,
+            el-9,
+            el-10,
             ubuntu-jammy,
           ]
         arch: [amd64]
@@ -218,17 +222,23 @@ jobs:
             suffix: "1."
             version: 42
             package: rpm
-          - linux: el
+          - linux: el-8
             package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 8
             package: rpm
-          - linux: el9
+          - linux: el-9
             package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 9
+            package: rpm
+          - linux: el-10
+            package_arch: x86_64
+            separator: "-"
+            suffix: "1."
+            version: 10
             package: rpm
           - linux: ubuntu-jammy
             package_arch: amd64

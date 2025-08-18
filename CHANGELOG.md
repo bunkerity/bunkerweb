@@ -1,8 +1,11 @@
 # Changelog
 
-## v1.6.4-rc1 - ????/??/??
+## v1.6.4 - ????/??/??
 
+- [SECURITY] Fix open-redirection vulnerability in the Web UI regarding the `next` parameter in the loading process.
+- [FEATURE] Enhance `ModSecurity` plugin to support human-readable size values for request body limits (requests without files)
 - [BUGFIX] Fix limit zones for HTTP/3 connections in `limitconn.conf` to ensure proper connection limiting for HTTP/3 requests.
+- [LINUX] Support RHEL 10.0
 
 ## v1.6.3 - 2025/08/05
 

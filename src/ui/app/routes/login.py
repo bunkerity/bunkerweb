@@ -5,7 +5,7 @@ from flask import Blueprint, current_app, flash as flask_flash, redirect, render
 from flask_login import current_user, login_user
 
 from app.dependencies import DB
-from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, flash
+from app.utils import BISCUIT_PRIVATE_KEY_FILE, LOGGER, flash, _sanitize_internal_next
 from app.models.biscuit import BiscuitTokenFactory, PrivateKey
 
 login = Blueprint("login", __name__)
@@ -87,9 +87,18 @@ def login_page():
                     "warning",
                 )
 
-            # redirect him to the page he originally wanted or to the home page
-            next_url = request.args.get("next", "").split("?next=")[-1] or url_for("home.home_page")
-            return redirect(url_for("loading", next=next_url))
+            # Internal redirect target
+            raw_next = request.args.get("next") or ""
+            # Support nested ?next= chaining
+            if "?next=" in raw_next:
+                raw_next = raw_next.split("?next=")[-1]
+
+            try:
+                safe_next = _sanitize_internal_next(raw_next, url_for("home.home_page"))
+            except Exception:
+                safe_next = url_for("home.home_page")
+
+            return redirect(url_for("loading", next=safe_next))
         else:
             flask_flash("Invalid username or password", "error")
             fail = True

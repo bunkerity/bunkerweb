@@ -18,4 +18,4 @@ RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noar
     dnf install php-fpm yum-utils -y && \
     dnf install -y https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
 
-COPY ./package-rhel9/*.rpm /opt
+COPY ./package-rhel-9/*.rpm /opt
