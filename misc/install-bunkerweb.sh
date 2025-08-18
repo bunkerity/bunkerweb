@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default values
-BUNKERWEB_VERSION="1.6.3"
+BUNKERWEB_VERSION="1.6.4"
 NGINX_VERSION=""
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
@@ -719,7 +719,7 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--version)
-            BUNKERWEB_VERSION="$2"
+            BUNKERWEB_VERSION="1.6.4"
             shift 2
             ;;
         -w|--enable-wizard)
