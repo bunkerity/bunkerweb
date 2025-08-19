@@ -192,8 +192,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
           - bw-db
 
       bw-syslog:
-        image: balabit/syslog-ng:4.8.0
-        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        image: balabit/syslog-ng:4.9.0
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts
@@ -346,8 +345,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
           - bw-docker
 
       bw-syslog:
-        image: balabit/syslog-ng:4.8.0
-        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        image: balabit/syslog-ng:4.9.0
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts

@@ -1642,8 +1642,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.8.0
-        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        image: balabit/syslog-ng:4.9.0
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts
