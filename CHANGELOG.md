@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.4 - ????/??/??
+## v1.6.5-c1 - ????/??/??
+
+- [LINUX] Add upgrade capability to the easy-install script for seamless in-place updates
+
+## v1.6.4 - 2025/08/18
 
 - [SECURITY] Fix open-redirection vulnerability in the Web UI regarding the `next` parameter in the loading process ([CVE-2025-8066](https://github.com/bunkerity/bunkerweb/security/advisories/GHSA-xxx9-3fh5-g585)).
 - [FEATURE] Enhance `ModSecurity` plugin to support human-readable size values for request body limits (requests without files)
