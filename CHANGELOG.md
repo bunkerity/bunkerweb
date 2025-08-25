@@ -3,6 +3,7 @@
 ## v1.6.5-c1 - ????/??/??
 
 - [LINUX] Add upgrade capability to the easy-install script for seamless in-place updates
+- [UI] Always display all multiple settings to avoid confusion
 
 ## v1.6.4 - 2025/08/18
 
