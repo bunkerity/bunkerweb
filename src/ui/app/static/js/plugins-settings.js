@@ -770,79 +770,107 @@ $(document).ready(() => {
     }
   };
 
-  const performSettingsSearch = () => {
-    const keyword = $pluginKeywordSearchTop.val().toLowerCase().trim();
+  // Helpers near your other utils
+  const safeLower = (v) => (v == null ? "" : String(v)).toLowerCase();
+  const scoreMatch = (text, kw) => {
+    text = safeLower(text);
+    if (!kw || !text) return 0;
+    if (text === kw) return 100;
+    if (text.startsWith(kw)) return 60;
+    if (text.includes(kw)) return 30;
+    return 0;
+  };
 
-    // Clear highlights from all tabs
+  const performSettingsSearch = () => {
+    const keyword = safeLower($pluginKeywordSearchTop.val()).trim();
+
+    // Clear any previous highlight
     $(".tab-content .tab-pane .setting-highlight").removeClass(
       "setting-highlight setting-highlight-fade",
     );
 
-    if (keyword === "") {
-      return;
-    }
+    if (!keyword) return;
 
-    let bestMatch = null;
+    const activePlugin = currentPlugin; // kept up to date in handleTabChange
+    let best = null;
 
-    // Find all plugins with matching settings or metadata
     $("div[id^='navs-plugins-']").each(function () {
       const $pluginContainer = $(this);
       const pluginId = $pluginContainer.attr("id").replace("navs-plugins-", "");
 
-      // Search plugin metadata
+      // --- Plugin meta (left nav item) ---
       const $navItem = $(`#plugin-nav-${pluginId}`);
-      const pluginName = $navItem.find(".fw-bold").text().toLowerCase();
-      const pluginDesc = $navItem
-        .find("small.text-muted.d-block")
-        .data("description")
-        .toLowerCase();
-      const pluginMetaMatch =
-        pluginId.toLowerCase().includes(keyword) ||
-        pluginName.includes(keyword) ||
-        pluginDesc.includes(keyword);
+      const pluginName = safeLower($navItem.find(".fw-bold").text());
+      const pluginDesc = safeLower(
+        $navItem.find("small.text-muted.d-block").data("description"),
+      );
+      const metaScore =
+        scoreMatch(pluginId, keyword) +
+        scoreMatch(pluginName, keyword) +
+        scoreMatch(pluginDesc, keyword);
 
-      // Search settings within the plugin
-      const $settingLabels = $pluginContainer.find("label.form-label");
-      const matchedSettings = $settingLabels.filter(function () {
-        const $label = $(this);
-        const labelText = $label.text().toLowerCase();
-        const $settingContainer = $label.closest("[class*='col-12']");
-        const helpText = (
-          $settingContainer
-            .find(".badge[data-bs-original-title]")
-            .attr("data-bs-original-title") || ""
-        ).toLowerCase();
-        return labelText.includes(keyword) || helpText.includes(keyword);
-      });
+      // --- Settings in this plugin ---
+      // We look at: friendly header label, the floating setting key label, and the *help* badge tooltip.
+      const settings = [];
+      $pluginContainer
+        .find("[class*='col-12']") // each setting block container
+        .each(function () {
+          const $block = $(this);
 
-      if (matchedSettings.length > 0 || pluginMetaMatch) {
-        if (!bestMatch) {
-          bestMatch = {
-            pluginId: pluginId,
-            settings: matchedSettings.map(function () {
-              return $(this).closest("[class*='col-12']")[0];
-            }),
-          };
-        }
+          // Friendly label (header)
+          const headerLabel = safeLower(
+            $block.find("label.form-label").first().text(),
+          );
+
+          // Setting key (floating label inside control)
+          const settingKey = safeLower(
+            $block.find("label.text-truncate").first().text(),
+          );
+
+          // Help tooltip (only the help badge with question mark icon)
+          const helpBadge = $block.find(".bx-question-mark").closest(".badge");
+          const helpText = safeLower(helpBadge.attr("data-bs-original-title"));
+
+          // Compute the best score for this block
+          const s = Math.max(
+            scoreMatch(headerLabel, keyword),
+            scoreMatch(settingKey, keyword),
+            Math.floor(scoreMatch(helpText, keyword) / 2), // help less weighted
+          );
+
+          if (s > 0) {
+            settings.push({ node: $block[0], score: s });
+          }
+        });
+
+      // Total score with strong bias for the active plugin
+      const bias = pluginId === activePlugin ? 1000 : 0;
+      const settingsTotal = settings.reduce((sum, x) => sum + x.score, 0);
+      const total = bias + metaScore + settingsTotal;
+
+      // Sort settings by their own score (best first)
+      settings.sort((a, b) => b.score - a.score);
+
+      if (!best || total > best.total) {
+        best = { pluginId, total, settings };
       }
     });
 
-    if (bestMatch) {
-      const bestMatchNavItem = $(`#plugin-nav-${bestMatch.pluginId}`);
+    if (!best) return;
 
-      const doHighlight = () => {
-        if (bestMatch.settings.length > 0) {
-          highlightSettings($(bestMatch.settings));
-        }
-      };
-
-      if (bestMatchNavItem.hasClass("active")) {
-        doHighlight();
-      } else {
-        bestMatchNavItem.one("shown.bs.tab", doHighlight);
-        const tab = bootstrap.Tab.getOrCreateInstance(bestMatchNavItem[0]);
-        tab.show();
+    const $bestNav = $(`#plugin-nav-${best.pluginId}`);
+    const doHighlight = () => {
+      if (best.settings.length) {
+        // Convert to DOM nodes array for jQuery
+        highlightSettings($(best.settings.map((s) => s.node)));
       }
+    };
+
+    if ($bestNav.hasClass("active")) {
+      doHighlight();
+    } else {
+      $bestNav.one("shown.bs.tab", doHighlight);
+      bootstrap.Tab.getOrCreateInstance($bestNav[0]).show();
     }
   };
 
