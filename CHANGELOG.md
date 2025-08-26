@@ -3,6 +3,7 @@
 ## v1.6.5-c1 - ????/??/??
 
 - [LINUX] Add upgrade capability to the easy-install script for seamless in-place updates
+- [BUGFIX] Update default algorithm for Let's Encrypt's `RFC2136` DNS provider from HMAC-SHA512 to HMAC-MD5
 - [UI] Always display all multiple settings to avoid confusion
 
 ## v1.6.4 - 2025/08/18
