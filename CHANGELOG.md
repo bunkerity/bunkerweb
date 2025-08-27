@@ -5,6 +5,7 @@
 - [BUGFIX] Update default algorithm for Let's Encrypt's `RFC2136` DNS provider from HMAC-SHA512 to HMAC-MD5
 - [BUGFIX] Fix issue with loading environment variables in the `robotstxt` plugin
 - [LINUX] Add upgrade capability to the easy-install script for seamless in-place updates
+- [LINUX] Fix logrotation of certbot logs, they know gets automatically deleted after 7 days
 - [UI] Always display all multiple settings to avoid confusion
 
 ## v1.6.4 - 2025/08/18
