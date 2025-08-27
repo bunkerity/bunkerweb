@@ -8,6 +8,8 @@
 - [LINUX] Fix logrotation of certbot logs, they know gets automatically deleted after 7 days
 - [UI] Always display all multiple settings to avoid confusion
 - [UI] Update step navigation buttons to use visually-hidden class for better accessibility
+- [UI] Fixed an issue where certain settings were reset when editing a service based on a template
+- [UI] Fixed an issue where non-template custom configurations were removed when editing a service using a template
 
 ## v1.6.4 - 2025/08/18
 
