@@ -7,6 +7,7 @@
 - [LINUX] Add upgrade capability to the easy-install script for seamless in-place updates
 - [LINUX] Fix logrotation of certbot logs, they know gets automatically deleted after 7 days
 - [UI] Always display all multiple settings to avoid confusion
+- [UI] Update step navigation buttons to use visually-hidden class for better accessibility
 
 ## v1.6.4 - 2025/08/18
 

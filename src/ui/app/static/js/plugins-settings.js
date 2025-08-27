@@ -160,12 +160,32 @@ $(document).ready(() => {
         }, 150);
 
         // Update button states
-        $(`#navs-templates-${currentTemplate} .previous-step`).addClass(
-          "disabled",
-        );
-        $(`#navs-templates-${currentTemplate} .next-step`).removeClass(
-          "disabled",
-        );
+        if (
+          !$(`#navs-templates-${currentTemplate} .previous-step`).hasClass(
+            "visually-hidden",
+          )
+        ) {
+          $(`#navs-templates-${currentTemplate} .previous-step`).addClass(
+            "visually-hidden",
+          );
+        }
+
+        if (
+          $(`.step-navigation-item[data-template="${currentTemplate}"]`)
+            .length > 1
+        ) {
+          $(`#navs-templates-${currentTemplate} .next-step`).removeClass(
+            "visually-hidden",
+          );
+        } else if (
+          !$(`#navs-templates-${currentTemplate} .next-step`).hasClass(
+            "visually-hidden",
+          )
+        ) {
+          $(`#navs-templates-${currentTemplate} .next-step`).addClass(
+            "visually-hidden",
+          );
+        }
       }
     }, 100);
   };
@@ -1391,139 +1411,6 @@ $(document).ready(() => {
       });
   });
 
-  $(document).on("click", ".next-step, .previous-step", function () {
-    const isNext = $(this).hasClass("next-step");
-    const template = $(this).data("template");
-
-    // Determine the new step
-    const newStep = isNext ? currentStep + 1 : currentStep - 1;
-
-    // Validate current step if going forward
-    if (isNext) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent proceeding to the next step
-        return;
-      }
-    }
-
-    // Trigger click on the target step navigation item
-    $(
-      `.step-navigation-item[data-step="${newStep}"][data-template="${template}"]`,
-    ).trigger("click");
-  });
-
-  // Update the step navigation item click handler to manage button states
-  $(document).on("click", ".step-navigation-item", function () {
-    const targetStep = parseInt($(this).data("step"));
-    const template = $(this).data("template");
-    const stepId = $(this).data("step-id");
-
-    // Don't proceed if already on this step
-    if (targetStep === currentStep) return;
-
-    // If trying to navigate to a future step, validate current step first
-    if (targetStep > currentStep) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent navigation if validation fails
-        return;
-      }
-
-      // Validate all steps between current and target
-      for (let step = currentStep + 1; step < targetStep; step++) {
-        const stepToValidateId = `navs-steps-${template}-${step}`;
-        const stepToValidateContainer = $(`#${stepToValidateId}`);
-        if (!validateCurrentStepInputs(stepToValidateContainer)) {
-          // Show the invalid step instead of the requested one
-          $(
-            `.step-navigation-item[data-step="${step}"][data-template="${template}"]`,
-          ).trigger("click");
-          return;
-        }
-      }
-    }
-
-    // Update active state in step navigation
-    $(`.step-navigation-item[data-template="${template}"]`).removeClass(
-      "active",
-    );
-    $(`.step-navigation-item[data-template="${template}"] .step-number`)
-      .addClass("disabled btn-outline-primary")
-      .removeClass("btn-primary");
-    $(`.step-navigation-item[data-template="${template}"] .fw-bold`)
-      .removeClass("text-primary")
-      .addClass("text-muted");
-
-    $(this).addClass("active");
-    $(this).find(".step-number").removeClass("disabled");
-    $(this).find(".fw-bold").removeClass("text-muted").addClass("text-primary");
-
-    // Update currentStep
-    currentStep = targetStep;
-
-    // Handle tab pane display - properly using Bootstrap's fade functionality
-    // First hide all step panes
-    $(
-      `#navs-templates-${template} .template-steps-content .tab-pane`,
-    ).removeClass("show active");
-
-    // Then show the target step pane
-    $(`#${stepId}`).addClass("show active");
-
-    // Update previous/next button states
-    const totalSteps = $(
-      `.step-navigation-item[data-template="${template}"]`,
-    ).length;
-    const $previousBtn = $(`#navs-templates-${template}`).find(
-      ".previous-step",
-    );
-    const $nextBtn = $(`#navs-templates-${template}`).find(".next-step");
-
-    $previousBtn.toggleClass("disabled", currentStep === 1);
-    $nextBtn.toggleClass("disabled", currentStep === totalSteps);
-
-    // Scroll the step content into view
-    $(`#${stepId}`)[0].scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  // Simplify the next/previous step handlers - they should just trigger the appropriate step navigation item
-  $(document).on("click", ".next-step, .previous-step", function () {
-    if ($(this).hasClass("disabled")) return; // Don't do anything if button is disabled
-
-    const isNext = $(this).hasClass("next-step");
-    const template = $(this).data("template");
-
-    // Determine the new step
-    const newStep = isNext ? currentStep + 1 : currentStep - 1;
-
-    // Validate current step if going forward
-    if (isNext) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent proceeding to the next step
-        return;
-      }
-    }
-
-    // Find and trigger click on the target step navigation item
-    const $targetStepItem = $(
-      `.step-navigation-item[data-step="${newStep}"][data-template="${template}"]`,
-    );
-    if ($targetStepItem.length) {
-      $targetStepItem.trigger("click");
-    }
-  });
-
   $("#reset-template-config").on("click", function () {
     const reset_modal = $("#modal-reset-template-config");
     reset_modal.modal("show");
@@ -1839,10 +1726,6 @@ $(document).ready(() => {
     }
   });
 
-  // Remove all previously attached handlers to avoid duplication
-  $(document).off("click", ".step-navigation-item");
-  $(document).off("click", ".next-step, .previous-step");
-
   // Helper functions for styling step buttons and navigation
   const stepButtonStyles = {
     // Active states
@@ -1975,13 +1858,8 @@ $(document).ready(() => {
     const $previousBtn = $(`#navs-templates-${template} .previous-step`);
     const $nextBtn = $(`#navs-templates-${template} .next-step`);
 
-    $previousBtn.toggleClass("disabled", targetStep === 1);
-    $nextBtn.toggleClass("disabled", targetStep === totalSteps);
-
-    // Scroll into view after transition is complete
-    setTimeout(() => {
-      $(`#${stepId}`)[0].scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 350); // Give enough time for the fade-in to complete
+    $previousBtn.toggleClass("visually-hidden", targetStep === 1);
+    $nextBtn.toggleClass("visually-hidden", targetStep === totalSteps);
   };
 
   // Unified and improved step navigation handler
@@ -1994,8 +1872,11 @@ $(document).ready(() => {
       const isNextButton = $(this).hasClass("next-step");
       const isPrevButton = $(this).hasClass("previous-step");
 
-      // Skip action if button is disabled
-      if ((isNextButton || isPrevButton) && $(this).hasClass("disabled")) {
+      // Skip action if button is visually-hidden
+      if (
+        (isNextButton || isPrevButton) &&
+        $(this).hasClass("visually-hidden")
+      ) {
         return;
       }
 
