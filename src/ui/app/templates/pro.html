@@ -101,6 +101,32 @@
                 </div>
             </div>
         </div>
+        {% if not is_pro_version %}
+            <div class="col-12 col-xl-4">
+                <div class="card p-4 position-relative h-100 border border-primary-subtle">
+                    <i class='bx bx-gift bx-sm position-absolute top-0 end-0 m-3 text-primary'></i>
+                    <div class="card-header p-2">
+                        <div class="card-title">
+                            <h5 class="me-2 don-jose mb-0">
+                                🎁 <span class="text-primary shine">Free Trial</span>
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="card-body position-relative d-flex flex-column justify-content-center align-items-center text-center courier-prime">
+                        <p class="fw-semibold mb-3">
+                            Test <span class="text-primary">BunkerWeb PRO</span> for <strong>free</strong> for <strong>30 days</strong>!
+                        </p>
+                        <p class="mb-3">
+                            Use the code <code class="fw-bold text-primary">freetrial</code> during checkout on the panel.
+                        </p>
+                        <a href="https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=ui"
+                           class="btn btn-primary text-uppercase don-jose"
+                           target="_blank"
+                           rel="noopener">Redeem Free Trial</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
         <div class="col-12 col-xl-4">
             <div class="card p-4 position-relative h-100">
                 <i class='bx bx-calendar bx-sm position-absolute top-0 end-0 m-3 {% if is_expired %}text-warning{% else %}text-primary{% endif %}'></i>
