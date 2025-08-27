@@ -662,7 +662,6 @@ sudo ./install-bunkerweb.sh --dry-run
     **Interactive vs Non-Interactive:**
     - Interactive mode (default) will prompt for missing required values
     - Non-interactive mode (`--yes`) requires all necessary options to be provided via command line
-```
 
 #### CrowdSec Integration with the Script
 
