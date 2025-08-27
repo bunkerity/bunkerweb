@@ -2521,7 +2521,7 @@ With this plugin, administrators can effortlessly create, update, and disable us
 
 #### Features
 
-- **User Account Operations:** Create, edit, and delete user accounts with ease.
+- **User Account Operations:** Import in CSV/XSLX format, Create, edit, and delete user accounts with ease.
 - **Role-Based Access Control:** Assign and modify user roles to manage permissions and access levels.
 - **2FA Management:** Disable two-factor authentication based on administrative decisions.
 - **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
