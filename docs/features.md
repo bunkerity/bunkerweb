@@ -1616,6 +1616,8 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"

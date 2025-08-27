@@ -180,6 +180,8 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -322,6 +324,8 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -680,6 +684,8 @@ The web UI can be deployed and configured without going through the setup wizard
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -795,6 +801,8 @@ The web UI can be deployed and configured without going through the setup wizard
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -981,6 +989,8 @@ The web UI can be deployed and configured without going through the setup wizard
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
