@@ -216,6 +216,8 @@ spec:
         - name: bunkerweb-db
           image: mariadb:11
           imagePullPolicy: Always
+          args:
+            - "--max-allowed-packet=67108864"
           env:
             - name: MYSQL_RANDOM_ROOT_PASSWORD
               value: "yes"
