@@ -113,6 +113,7 @@ services:
     environment:
       <<: *env
       CHECK_PRIVATE_IP: "no"
+      FLASK_SECRET: "secret"
       DEBUG: "1"
       MAX_WORKERS: "1"
       MAX_THREADS: "4"
