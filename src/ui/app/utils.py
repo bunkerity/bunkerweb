@@ -6,6 +6,7 @@ from os.path import sep
 from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
+from time import sleep
 from typing import Dict, Optional, Set, Union
 from urllib.parse import unquote
 
@@ -127,6 +128,17 @@ def stop(status, _stop: bool = True):
             pid, _ = p.communicate()
         call(["kill", "-SIGTERM", pid.strip().decode().split("\n")[0]])
     _exit(status)
+
+
+def restart_workers():
+    sleep(3)
+    pid_file = Path(sep, "var", "run", "bunkerweb", "ui.pid")
+    if pid_file.is_file():
+        pid = pid_file.read_bytes()
+    else:
+        p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+        pid, _ = p.communicate()
+    call(["kill", "-HUP", pid.strip().decode().split("\n")[0]])
 
 
 def handle_stop(signum, frame):
