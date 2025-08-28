@@ -2,6 +2,7 @@
 
 ## v1.6.5-c1 - ????/??/??
 
+- [FEATURE] Enhance update-check job to utilize cached GitHub release data and improve error handling
 - [BUGFIX] Update default algorithm for Let's Encrypt's `RFC2136` DNS provider from HMAC-SHA512 to HMAC-MD5
 - [BUGFIX] Fix issue with loading environment variables in the `robotstxt` plugin
 - [LINUX] Add upgrade capability to the easy-install script for seamless in-place updates
