@@ -748,10 +748,15 @@
       "services_deletion_confirmation": "Seçili servisleri silmek istediğinizden emin misiniz?",
       "unban_confirmation_alert": "Seçili IP adresinin yasağını kaldırmak istediğinizden emin misiniz?",
       "unban_confirmation_alert_plural": "Seçili IP adreslerinin yasağını kaldırmak istediğinizden emin misiniz?",
-      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:"
+      "update_duration_alert": "Seçili yasaklamalar için yeni bir süre seçin:",
+      "fetch_global_config_bold": "Bu, genel yapılandırmayı alıp mevcut şablona uygulayacaktır.",
+      "fetch_global_config_point_1": "Yalnızca bu şablonda bulunan ayarlar güncellenir.",
+      "fetch_global_config_point_2": "Varsayılanlarla aynı olan değerler yok sayılır.",
+      "fetch_global_config_point_3": "SERVER_NAME asla üzerine yazılmaz."
     },
     "button": {
-      "reset_template_confirm": "Şablon Yapılandırmasını Sıfırla"
+      "reset_template_confirm": "Şablon Yapılandırmasını Sıfırla",
+      "fetch_global_config_confirm": "Genel ayarları uygula"
     },
     "section": {
       "ban_details": "Yasaklama Detayları",
@@ -772,6 +777,7 @@
       "job_history_count": "İşin Son {{count}} Çalıştırması",
       "recovery_codes": "Kurtarma Kodları",
       "reset_template_config": "Şablon Yapılandırması Sıfırlansın mı?",
+      "fetch_global_config": "Genel ayarlar uygulansın mı?",
       "server_name_not_unique": "Sunucu Adı Benzersiz Değil",
       "update_duration": "Yasaklama Süresini Güncelle"
     }
@@ -1182,7 +1188,11 @@
       "ping_failed": "Ping başarısız",
       "ping_succeed": "Ping başarılı"
     },
-    "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!"
+    "ip_unbanned": "IP adresinin yasağı başarıyla kaldırıldı!",
+    "global_settings_applied_title": "Genel ayarlar uygulandı",
+    "global_settings_applied_body": "Genel ayarlar başarıyla alındı ve mevcut forma uygulandı.",
+    "global_settings_failed_title": "Genel ayarlar alınamadı",
+    "global_settings_failed_body": "Genel ayarlar alınırken bir hata oluştu."
   },
   "tooltip": {
     "auto_lets_encrypt": "Otomatik olarak Let's Encrypt sertifikası isteyip istemediği.",
@@ -1198,6 +1208,7 @@
       "reload_instance": "Örneği Yeniden Yükle: {{hostname}}",
       "reset_default": "Varsayılana sıfırla",
       "reset_global": "Küresel değere sıfırla",
+      "value_from_global": "Genel yapılandırmadan gelen değer",
       "run_job": "İşi Çalıştır: {{job}}",
       "stop_instance": "Örneği Durdur: {{hostname}}",
       "unban_ip": "{{ip}} yasağını kaldır"

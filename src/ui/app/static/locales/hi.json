@@ -748,10 +748,15 @@
       "services_deletion_confirmation": "क्या आप वाकई चयनित सेवाओं को हटाना चाहते हैं?",
       "unban_confirmation_alert": "क्या आप वाकई चयनित आईपी पते का प्रतिबंध हटाना चाहते हैं?",
       "unban_confirmation_alert_plural": "क्या आप वाकई चयनित आईपी पतों का प्रतिबंध हटाना चाहते हैं?",
-      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:"
+      "update_duration_alert": "चयनित प्रतिबंधों के लिए एक नई अवधि का चयन करें:",
+      "fetch_global_config_bold": "यह वैश्विक कॉन्फ़िगरेशन को प्राप्त करेगा और वर्तमान टेम्पलेट पर लागू करेगा।",
+      "fetch_global_config_point_1": "केवल इस टेम्पलेट में मौजूद सेटिंग्स अपडेट होती हैं।",
+      "fetch_global_config_point_2": "जो मान डिफ़ॉल्ट के समान हैं उन्हें नज़रअंदाज़ किया जाता है।",
+      "fetch_global_config_point_3": "SERVER_NAME कभी ओवरराइट नहीं किया जाता।"
     },
     "button": {
-      "reset_template_confirm": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें"
+      "reset_template_confirm": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें",
+      "fetch_global_config_confirm": "ग्लोबल सेटिंग्स लागू करें"
     },
     "section": {
       "ban_details": "प्रतिबंध विवरण",
@@ -772,6 +777,7 @@
       "job_history_count": "कार्य {{count}} निष्पादन",
       "recovery_codes": "पुनर्प्राप्ति कोड",
       "reset_template_config": "टेम्पलेट कॉन्फ़िगरेशन रीसेट करें?",
+      "fetch_global_config": "ग्लोबल सेटिंग्स लागू करें?",
       "server_name_not_unique": "सर्वर का नाम अद्वितीय नहीं है",
       "update_duration": "प्रतिबंध अवधि अपडेट करें"
     }
@@ -1181,7 +1187,11 @@
       "ping_failed": "पिंग विफल",
       "ping_succeed": "पिंग सफल"
     },
-    "ip_unbanned": "आईपी पते का प्रतिबंध सफलतापूर्वक हटाया गया!"
+    "ip_unbanned": "आईपी पते का प्रतिबंध सफलतापूर्वक हटाया गया!",
+    "global_settings_applied_title": "ग्लोबल सेटिंग्स लागू की गईं",
+    "global_settings_applied_body": "ग्लोबल सेटिंग्स सफलतापूर्वक प्राप्त की गईं और वर्तमान फ़ॉर्म पर लागू की गईं।",
+    "global_settings_failed_title": "ग्लोबल सेटिंग्स प्राप्त करने में विफल",
+    "global_settings_failed_body": "ग्लोबल सेटिंग्स प्राप्त करते समय एक त्रुटि हुई।"
   },
   "tooltip": {
     "auto_lets_encrypt": "क्या स्वचालित रूप से Let's Encrypt प्रमाणपत्र का अनुरोध करना है।",
@@ -1197,6 +1207,7 @@
       "reload_instance": "इंस्टेंस {{hostname}} पुनः लोड करें",
       "reset_default": "डिफ़ॉल्ट मान पर रीसेट करें",
       "reset_global": "वैश्विक मान पर रीसेट करें",
+      "value_from_global": "ग्लोबल कॉन्फ़िगरेशन से मान",
       "run_job": "कार्य {{job}} चलाएं",
       "stop_instance": "इंस्टेंस {{hostname}} रोकें",
       "unban_ip": "{{ip}} का प्रतिबंध हटाएं"

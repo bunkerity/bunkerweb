@@ -748,10 +748,15 @@
       "services_deletion_confirmation": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি মুছতে চান?",
       "unban_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানা থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
       "unban_confirmation_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানাগুলি থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
-      "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:"
+      "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:",
+      "fetch_global_config_bold": "এটি গ্লোবাল কনফিগারেশন আনবে এবং বর্তমান টেমপ্লেটে প্রয়োগ করবে।",
+      "fetch_global_config_point_1": "শুধুমাত্র এই টেমপ্লেটে থাকা সেটিংস আপডেট হবে।",
+      "fetch_global_config_point_2": "ডিফল্টের সাথে একই মান উপেক্ষা করা হবে।",
+      "fetch_global_config_point_3": "SERVER_NAME কখনও ওভাররাইট করা হবে না।"
     },
     "button": {
-      "reset_template_confirm": "টেমপ্লেট কনফিগারেশন রিসেট করুন"
+      "reset_template_confirm": "টেমপ্লেট কনফিগারেশন রিসেট করুন",
+      "fetch_global_config_confirm": "গ্লোবাল সেটিংস প্রয়োগ করুন"
     },
     "section": {
       "ban_details": "নিষেধাজ্ঞার বিবরণ",
@@ -772,6 +777,7 @@
       "job_history_count": "কার্যের শেষ {{count}}টি সম্পাদন",
       "recovery_codes": "পুনরুদ্ধার কোড",
       "reset_template_config": "টেমপ্লেট কনফিগারেশন রিসেট করবেন?",
+      "fetch_global_config": "গ্লোবাল সেটিংস প্রয়োগ করবেন?",
       "server_name_not_unique": "সার্ভারের নাম অনন্য নয়",
       "update_duration": "নিষেধাজ্ঞার সময়কাল আপডেট করুন"
     }
@@ -1182,7 +1188,11 @@
       "ping_failed": "পিং ব্যর্থ হয়েছে",
       "ping_succeed": "পিং সফল হয়েছে"
     },
-    "ip_unbanned": "আইপি ঠিকানা সফলভাবে নিষেধাজ্ঞা মুক্ত করা হয়েছে!"
+    "ip_unbanned": "আইপি ঠিকানা সফলভাবে নিষেধাজ্ঞা মুক্ত করা হয়েছে!",
+    "global_settings_applied_title": "গ্লোবাল সেটিংস প্রয়োগ হয়েছে",
+    "global_settings_applied_body": "গ্লোবাল সেটিংস সফলভাবে আনা হয়েছে এবং বর্তমান ফর্মে প্রয়োগ করা হয়েছে।",
+    "global_settings_failed_title": "গ্লোবাল সেটিংস আনতে ব্যর্থ",
+    "global_settings_failed_body": "গ্লোবাল সেটিংস আনতে গিয়ে একটি ত্রুটি ঘটেছে।"
   },
   "tooltip": {
     "auto_lets_encrypt": "স্বয়ংক্রিয়ভাবে একটি Let's Encrypt শংসাপত্র অনুরোধ করতে হবে কিনা।",
@@ -1198,6 +1208,7 @@
       "reload_instance": "ইনস্ট্যান্স {{hostname}} পুনরায় লোড করুন",
       "reset_default": "ডিফল্ট মানে রিসেট করুন",
       "reset_global": "গ্লোবাল মানে রিসেট করুন",
+      "value_from_global": "গ্লোবাল কনফিগারেশন থেকে মান",
       "run_job": "কার্য {{job}} চালান",
       "stop_instance": "ইনস্ট্যান্স {{hostname}} বন্ধ করুন",
       "unban_ip": "{{ip}} থেকে নিষেধাজ্ঞা সরান"

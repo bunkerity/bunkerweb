@@ -748,10 +748,15 @@
       "services_deletion_confirmation": "¿Estás seguro de que quieres eliminar los servicios seleccionados?",
       "unban_confirmation_alert": "¿Estás seguro de que quieres desbloquear la dirección IP seleccionada?",
       "unban_confirmation_alert_plural": "¿Estás seguro de que quieres desbloquear las direcciones IP seleccionadas?",
-      "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:"
+      "update_duration_alert": "Selecciona una nueva duración para los bloqueos seleccionados:",
+      "fetch_global_config_bold": "Esto obtendrá la configuración global y la aplicará a la plantilla actual.",
+      "fetch_global_config_point_1": "Solo se actualizan los ajustes presentes en esta plantilla.",
+      "fetch_global_config_point_2": "Se ignoran los valores idénticos a los predeterminados.",
+      "fetch_global_config_point_3": "SERVER_NAME nunca se sobrescribe."
     },
     "button": {
-      "reset_template_confirm": "Restablecer Configuración de Plantilla"
+      "reset_template_confirm": "Restablecer Configuración de Plantilla",
+      "fetch_global_config_confirm": "Aplicar configuración global"
     },
     "section": {
       "ban_details": "Detalles del Bloqueo",
@@ -772,6 +777,7 @@
       "job_history_count": "Últimas {{count}} ejecuciones de la Tarea",
       "recovery_codes": "Códigos de Recuperación",
       "reset_template_config": "¿Restablecer Configuración de Plantilla?",
+      "fetch_global_config": "¿Aplicar configuración global?",
       "server_name_not_unique": "El Nombre del Servidor no es Único",
       "update_duration": "Actualizar Duración del Bloqueo"
     }
@@ -1183,7 +1189,11 @@
       "ping_failed": "Ping fallido",
       "ping_succeed": "Ping exitoso"
     },
-    "ip_unbanned": "¡Dirección IP desbloqueada con éxito!"
+    "ip_unbanned": "¡Dirección IP desbloqueada con éxito!",
+    "global_settings_applied_title": "Configuración global aplicada",
+    "global_settings_applied_body": "La configuración global se ha obtenido y aplicado correctamente al formulario actual.",
+    "global_settings_failed_title": "Error al obtener la configuración global",
+    "global_settings_failed_body": "Se produjo un error al obtener la configuración global."
   },
   "tooltip": {
     "auto_lets_encrypt": "Si se debe solicitar automáticamente un certificado Let's Encrypt.",
@@ -1199,6 +1209,7 @@
       "reload_instance": "Recargar Instancia {{hostname}}",
       "reset_default": "Restablecer al valor predeterminado",
       "reset_global": "Restablecer al valor global",
+      "value_from_global": "Valor de la configuración global",
       "run_job": "Ejecutar Tarea {{job}}",
       "stop_instance": "Detener Instancia {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}"

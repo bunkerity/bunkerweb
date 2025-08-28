@@ -748,10 +748,15 @@
       "services_deletion_confirmation": "Вы уверены, что хотите удалить выбранные сервисы?",
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
-      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:"
+      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
+      "fetch_global_config_bold": "Это загрузит глобальную конфигурацию и применит её к текущему шаблону.",
+      "fetch_global_config_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
+      "fetch_global_config_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
+      "fetch_global_config_point_3": "SERVER_NAME никогда не перезаписывается."
     },
     "button": {
-      "reset_template_confirm": "Сбросить конфигурацию шаблона"
+      "reset_template_confirm": "Сбросить конфигурацию шаблона",
+      "fetch_global_config_confirm": "Применить глобальные настройки"
     },
     "section": {
       "ban_details": "Детали бана",
@@ -772,6 +777,7 @@
       "job_history_count": "Последние {{count}} выполнений задачи",
       "recovery_codes": "Коды восстановления",
       "reset_template_config": "Сбросить конфигурацию шаблона?",
+      "fetch_global_config": "Применить глобальные настройки?",
       "server_name_not_unique": "Имя сервера не уникально",
       "update_duration": "Обновить срок бана"
     }
@@ -1182,7 +1188,11 @@
       "ping_failed": "Пинг не удался",
       "ping_succeed": "Пинг успешен"
     },
-    "ip_unbanned": "IP-адрес успешно разбанен!"
+    "ip_unbanned": "IP-адрес успешно разбанен!",
+    "global_settings_applied_title": "Применены глобальные настройки",
+    "global_settings_applied_body": "Глобальные параметры были успешно получены и применены к форме.",
+    "global_settings_failed_title": "Не удалось получить глобальные настройки",
+    "global_settings_failed_body": "Произошла ошибка при получении глобальных параметров."
   },
   "tooltip": {
     "auto_lets_encrypt": "Автоматически запрашивать сертификат Let's Encrypt.",
@@ -1198,6 +1208,7 @@
       "reload_instance": "Перезагрузить экземпляр {{hostname}}",
       "reset_default": "Сбросить до значения по умолчанию",
       "reset_global": "Сбросить до глобального значения",
+      "value_from_global": "Значение из глобальной конфигурации",
       "run_job": "Запустить задачу {{job}}",
       "stop_instance": "Остановить экземпляр {{hostname}}",
       "unban_ip": "Разбанить {{ip}}"

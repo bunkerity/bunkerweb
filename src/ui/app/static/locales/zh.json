@@ -748,10 +748,15 @@
       "services_deletion_confirmation": "您确定要删除选定的服务吗？",
       "unban_confirmation_alert": "您确定要解禁选定的 IP 地址吗？",
       "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？",
-      "update_duration_alert": "请为选定的封禁选择新的期限："
+      "update_duration_alert": "请为选定的封禁选择新的期限：",
+      "fetch_global_config_bold": "这将获取全局配置并将其应用到当前模板。",
+      "fetch_global_config_point_1": "仅更新本模板中存在的设置。",
+      "fetch_global_config_point_2": "与默认值相同的值会被忽略。",
+      "fetch_global_config_point_3": "SERVER_NAME 永不会被覆盖。"
     },
     "button": {
-      "reset_template_confirm": "重置模板配置"
+      "reset_template_confirm": "重置模板配置",
+      "fetch_global_config_confirm": "应用全局设置"
     },
     "section": {
       "ban_details": "封禁详情",
@@ -772,6 +777,7 @@
       "job_history_count": "任务 {{count}} 次执行",
       "recovery_codes": "恢复代码",
       "reset_template_config": "重置模板配置？",
+      "fetch_global_config": "应用全局设置？",
       "server_name_not_unique": "服务器名称不是唯一的",
       "update_duration": "更新封禁期限"
     }
@@ -1184,7 +1190,11 @@
       "ping_failed": "Ping 失败",
       "ping_succeed": "Ping 成功"
     },
-    "ip_unbanned": "IP 地址已成功解禁！"
+    "ip_unbanned": "IP 地址已成功解禁！",
+    "global_settings_applied_title": "全局设置已应用",
+    "global_settings_applied_body": "已成功获取全局设置并应用到当前表单。",
+    "global_settings_failed_title": "获取全局设置失败",
+    "global_settings_failed_body": "获取全局设置时发生错误。"
   },
   "tooltip": {
     "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",
@@ -1200,6 +1210,7 @@
       "reload_instance": "重新加载实例 {{hostname}}",
       "reset_default": "重置为默认值",
       "reset_global": "重置为全局值",
+      "value_from_global": "来自全局配置的值",
       "run_job": "运行任务 {{job}}",
       "stop_instance": "停止实例 {{hostname}}",
       "unban_ip": "解禁 {{ip}}"

@@ -748,10 +748,15 @@
       "services_deletion_confirmation": "Tem certeza de que deseja eliminar os serviços selecionados?",
       "unban_confirmation_alert": "Tem certeza de que deseja desbloquear o endereço IP selecionado?",
       "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?",
-      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:"
+      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:",
+      "fetch_global_config_bold": "Isso buscará a configuração global e a aplicará ao modelo atual.",
+      "fetch_global_config_point_1": "Apenas as definições presentes neste modelo são atualizadas.",
+      "fetch_global_config_point_2": "Valores idênticos aos padrões são ignorados.",
+      "fetch_global_config_point_3": "SERVER_NAME nunca é substituído."
     },
     "button": {
-      "reset_template_confirm": "Redefinir Configuração do Modelo"
+      "reset_template_confirm": "Redefinir Configuração do Modelo",
+      "fetch_global_config_confirm": "Aplicar configurações globais"
     },
     "section": {
       "ban_details": "Detalhes do Bloqueio",
@@ -772,6 +777,7 @@
       "job_history_count": "Últimas {{count}} execuções da Tarefa",
       "recovery_codes": "Códigos de Recuperação",
       "reset_template_config": "Redefinir Configuração do Modelo?",
+      "fetch_global_config": "Aplicar configurações globais?",
       "server_name_not_unique": "Nome do Servidor não é Único",
       "update_duration": "Atualizar Duração do Bloqueio"
     }
@@ -1184,7 +1190,11 @@
       "ping_failed": "Ping falhou",
       "ping_succeed": "Ping bem-sucedido"
     },
-    "ip_unbanned": "Endereço IP desbloqueado com sucesso!"
+    "ip_unbanned": "Endereço IP desbloqueado com sucesso!",
+    "global_settings_applied_title": "Configurações globais aplicadas",
+    "global_settings_applied_body": "As configurações globais foram recuperadas e aplicadas com sucesso ao formulário.",
+    "global_settings_failed_title": "Falha ao recuperar as configurações globais",
+    "global_settings_failed_body": "Ocorreu um erro ao recuperar as configurações globais."
   },
   "tooltip": {
     "auto_lets_encrypt": "Se deve solicitar automaticamente um certificado Let's Encrypt.",
@@ -1200,6 +1210,7 @@
       "reload_instance": "Recarregar Instância {{hostname}}",
       "reset_default": "Restabelecer valor padrão",
       "reset_global": "Restabelecer valor global",
+      "value_from_global": "Valor da configuração global",
       "run_job": "Executar Tarefa {{job}}",
       "stop_instance": "Parar Instância {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}"

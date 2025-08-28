@@ -85,6 +85,10 @@ $(document).ready(() => {
 
   const resetTemplateConfig = () => {
     const templateContainer = $(`#navs-templates-${currentTemplate}`);
+    // Hide any override badges shown after fetching global config
+    templateContainer
+      .find(".global-override-badge")
+      .addClass("visually-hidden");
     templateContainer.find("input, select").each(function () {
       const type = $(this).attr("type");
       const isNewEndpoint = window.location.pathname.endsWith("/new");
@@ -1425,7 +1429,12 @@ $(document).ready(() => {
       alert(t("alert.readonly_mode"));
       return;
     }
+    const fetchModal = $("#modal-fetch-global-config");
+    // Ensure modal is attached to body to avoid z-index/overflow issues
+    fetchModal.appendTo("body").modal("show");
+  });
 
+  $("#confirm-fetch-global-config").on("click", function () {
     $.ajax({
       url: `${window.location.pathname
         .split("/")
@@ -1522,6 +1531,9 @@ $(document).ready(() => {
               const selectedCount = selectedValues.filter((v) => v).length;
               const $label = $dropdown.find(".multiselect-toggle label");
               $label.text(`(${selectedCount} selected)`);
+            } else {
+              // Handle simple text-like inputs and textareas
+              $input.val(settingValue).trigger("input");
             }
           }
         }
