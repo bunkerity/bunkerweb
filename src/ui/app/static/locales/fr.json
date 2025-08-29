@@ -136,7 +136,8 @@
     "upload_photo": "Télécharger Nouvelle Photo",
     "view_details": "Voir les détails",
     "view_raw_data": "Voir les données brutes",
-    "wipe_other_sessions": "Effacer les Autres Sessions"
+    "wipe_other_sessions": "Effacer les Autres Sessions",
+    "force_update": "Forcer la mise à jour"
   },
   "country": {
     "AD": "Andorre",
@@ -748,10 +749,15 @@
       "services_deletion_confirmation": "Êtes-vous sûr de vouloir supprimer les services sélectionnés ?",
       "unban_confirmation_alert": "Êtes-vous sûr de vouloir débannir l'adresse IP sélectionnée ?",
       "unban_confirmation_alert_plural": "Êtes-vous sûr de vouloir débannir les adresses IP sélectionnées ?",
-      "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :"
+      "update_duration_alert": "Sélectionnez une nouvelle durée pour les bannissements sélectionnés :",
+      "fetch_global_config_bold": "Cela récupérera la configuration globale et l'appliquera au modèle actuel.",
+      "fetch_global_config_point_1": "Seuls les paramètres présents dans ce modèle sont mis à jour.",
+      "fetch_global_config_point_2": "Les valeurs identiques aux valeurs par défaut sont ignorées.",
+      "fetch_global_config_point_3": "SERVER_NAME n'est jamais remplacé."
     },
     "button": {
-      "reset_template_confirm": "Réinitialiser la Configuration du Modèle"
+      "reset_template_confirm": "Réinitialiser la Configuration du Modèle",
+      "fetch_global_config_confirm": "Appliquer les paramètres globaux"
     },
     "section": {
       "ban_details": "Détails du Bannissement",
@@ -772,6 +778,7 @@
       "job_history_count": "{{count}} dernières exécutions de la Tâche",
       "recovery_codes": "Codes de Récupération",
       "reset_template_config": "Réinitialiser la Configuration du Modèle ?",
+      "fetch_global_config": "Appliquer les paramètres globaux ?",
       "server_name_not_unique": "Le Nom du Serveur n'est pas Unique",
       "update_duration": "Mettre à Jour la Durée du Bannissement"
     }
@@ -866,6 +873,14 @@
       "expires_in": "Expire dans",
       "title": "Date d'Expiration Pro",
       "unknown": "Date d'expiration inconnue"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Forcer la mise à jour",
+      "description": "Ignorer les vérifications et forcer le téléchargement des plugins PRO. Si ce n’est pas possible, l’état actuel est conservé."
     },
     "key": {
       "title": {
@@ -1181,7 +1196,11 @@
       "ping_failed": "Échec du Ping",
       "ping_succeed": "Ping réussi"
     },
-    "ip_unbanned": "Adresse IP débannie avec succès !"
+    "ip_unbanned": "Adresse IP débannie avec succès !",
+    "global_settings_applied_title": "Paramètres globaux appliqués",
+    "global_settings_applied_body": "Les paramètres globaux ont été récupérés et appliqués avec succès au formulaire.",
+    "global_settings_failed_title": "Échec de la récupération des paramètres globaux",
+    "global_settings_failed_body": "Une erreur s'est produite lors de la récupération des paramètres globaux."
   },
   "tooltip": {
     "auto_lets_encrypt": "Indique s'il faut demander automatiquement un certificat Let's Encrypt.",
@@ -1197,9 +1216,12 @@
       "reload_instance": "Recharger l'Instance {{hostname}}",
       "reset_default": "Réinitialiser à la valeur par défaut",
       "reset_global": "Réinitialiser à la valeur globale",
+      "value_from_global": "Valeur provenant de la configuration globale",
       "run_job": "Exécuter la Tâche {{job}}",
       "stop_instance": "Arrêter l'Instance {{hostname}}",
-      "unban_ip": "Débannir {{ip}}"
+      "unban_ip": "Débannir {{ip}}",
+      "force_check": "Planifie une vérification ; télécharge seulement s'il y a des mises à jour.",
+      "force_update": "Ignore les vérifications et force le téléchargement des plugins PRO ; conserve l'état actuel en cas d'échec."
     },
     "cannot_delete_original_ban": "Impossible de supprimer l'entrée de bannissement originale.",
     "cannot_remove_disabled": "Impossible de supprimer car un ou plusieurs paramètres sont désactivés.",

@@ -85,7 +85,7 @@
       "type": "text",
       "multiple": "robotstxt-sitemap"
     },
-    "ROBOTSTXT_IGNORE_RULES": {
+    "ROBOTSTXT_IGNORE_RULE": {
       "context": "multisite",
       "default": "",
       "help": "Rule (PCRE regex) to ignore. Can be specified multiple times.",

@@ -460,7 +460,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.4"
+                return "1.6.5-rc1"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -476,6 +476,7 @@ class Database:
             "non_draft_services": 0,
             "pro_overlapped": False,
             "last_pro_check": None,
+            "force_pro_update": False,
             "failover": False,
             "failover_message": "",
             "first_config_saved": False,
@@ -492,7 +493,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.4",
+            "version": "1.6.5-rc1",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }

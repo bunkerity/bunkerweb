@@ -136,7 +136,8 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段"
+    "wipe_other_sessions": "清除其他工作階段",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "安道爾",
@@ -748,10 +749,15 @@
       "services_deletion_confirmation": "您確定要刪除選定的服務嗎？",
       "unban_confirmation_alert": "您確定要解除封鎖選定的 IP 位址嗎？",
       "unban_confirmation_alert_plural": "您確定要解除封鎖選定的 IP 位址嗎？",
-      "update_duration_alert": "請為選定的封鎖選擇新的期限："
+      "update_duration_alert": "請為選定的封鎖選擇新的期限：",
+      "fetch_global_config_bold": "這將取得全域設定並套用到目前的樣板。",
+      "fetch_global_config_point_1": "只會更新此樣板中存在的設定。",
+      "fetch_global_config_point_2": "與預設值相同的數值會被忽略。",
+      "fetch_global_config_point_3": "SERVER_NAME 永不會被覆寫。"
     },
     "button": {
-      "reset_template_confirm": "重設範本設定"
+      "reset_template_confirm": "重設範本設定",
+      "fetch_global_config_confirm": "套用全域設定"
     },
     "section": {
       "ban_details": "封鎖詳情",
@@ -772,6 +778,7 @@
       "job_history_count": "任務 {{count}} 次執行",
       "recovery_codes": "恢復碼",
       "reset_template_config": "重設範本設定？",
+      "fetch_global_config": "要套用全域設定嗎？",
       "server_name_not_unique": "伺服器名稱不是唯一的",
       "update_duration": "更新封鎖期限"
     }
@@ -867,6 +874,14 @@
       "expires_in": "有效期至",
       "title": "Pro 到期日期",
       "unknown": "未知的到期日期"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
     },
     "key": {
       "title": {
@@ -1183,7 +1198,11 @@
       "ping_failed": "Ping 失敗",
       "ping_succeed": "Ping 成功"
     },
-    "ip_unbanned": "IP 位址已成功解除封鎖！"
+    "ip_unbanned": "IP 位址已成功解除封鎖！",
+    "global_settings_applied_title": "全域設定已套用",
+    "global_settings_applied_body": "已成功取得全域設定並套用到目前的表單。",
+    "global_settings_failed_title": "取得全域設定失敗",
+    "global_settings_failed_body": "取得全域設定時發生錯誤。"
   },
   "tooltip": {
     "auto_lets_encrypt": "是否自動請求 Let's Encrypt 憑證。",
@@ -1199,9 +1218,12 @@
       "reload_instance": "重新載入執行個體 {{hostname}}",
       "reset_default": "重設為預設值",
       "reset_global": "重設為全域值",
+      "value_from_global": "來自全域設定的值",
       "run_job": "執行任務 {{job}}",
       "stop_instance": "停止執行個體 {{hostname}}",
-      "unban_ip": "解除封鎖 {{ip}}"
+      "unban_ip": "解除封鎖 {{ip}}",
+      "force_check": "排程檢查；僅在有更新時下載。",
+      "force_update": "略過檢查並強制下載 PRO 外掛；失敗時保留目前狀態。"
     },
     "cannot_delete_original_ban": "無法刪除原始封鎖項目。",
     "cannot_remove_disabled": "無法移除，因為一或多個設定已停用。",

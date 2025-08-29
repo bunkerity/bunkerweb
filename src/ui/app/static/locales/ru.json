@@ -136,7 +136,8 @@
     "upload_photo": "Загрузить новое фото",
     "view_details": "Просмотреть детали",
     "view_raw_data": "Просмотреть необработанные данные",
-    "wipe_other_sessions": "Очистить другие сессии"
+    "wipe_other_sessions": "Очистить другие сессии",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "Андорра",
@@ -748,10 +749,15 @@
       "services_deletion_confirmation": "Вы уверены, что хотите удалить выбранные сервисы?",
       "unban_confirmation_alert": "Вы уверены, что хотите разбанить выбранный IP-адрес?",
       "unban_confirmation_alert_plural": "Вы уверены, что хотите разбанить выбранные IP-адреса?",
-      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:"
+      "update_duration_alert": "Выберите новую продолжительность для выбранных банов:",
+      "fetch_global_config_bold": "Это загрузит глобальную конфигурацию и применит её к текущему шаблону.",
+      "fetch_global_config_point_1": "Обновляются только параметры, присутствующие в этом шаблоне.",
+      "fetch_global_config_point_2": "Значения, совпадающие со значениями по умолчанию, игнорируются.",
+      "fetch_global_config_point_3": "SERVER_NAME никогда не перезаписывается."
     },
     "button": {
-      "reset_template_confirm": "Сбросить конфигурацию шаблона"
+      "reset_template_confirm": "Сбросить конфигурацию шаблона",
+      "fetch_global_config_confirm": "Применить глобальные настройки"
     },
     "section": {
       "ban_details": "Детали бана",
@@ -772,6 +778,7 @@
       "job_history_count": "Последние {{count}} выполнений задачи",
       "recovery_codes": "Коды восстановления",
       "reset_template_config": "Сбросить конфигурацию шаблона?",
+      "fetch_global_config": "Применить глобальные настройки?",
       "server_name_not_unique": "Имя сервера не уникально",
       "update_duration": "Обновить срок бана"
     }
@@ -867,6 +874,14 @@
       "expires_in": "Истекает через",
       "title": "Дата истечения Pro",
       "unknown": "Неизвестная дата истечения"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
     },
     "key": {
       "title": {
@@ -1182,7 +1197,11 @@
       "ping_failed": "Пинг не удался",
       "ping_succeed": "Пинг успешен"
     },
-    "ip_unbanned": "IP-адрес успешно разбанен!"
+    "ip_unbanned": "IP-адрес успешно разбанен!",
+    "global_settings_applied_title": "Применены глобальные настройки",
+    "global_settings_applied_body": "Глобальные параметры были успешно получены и применены к форме.",
+    "global_settings_failed_title": "Не удалось получить глобальные настройки",
+    "global_settings_failed_body": "Произошла ошибка при получении глобальных параметров."
   },
   "tooltip": {
     "auto_lets_encrypt": "Автоматически запрашивать сертификат Let's Encrypt.",
@@ -1198,9 +1217,12 @@
       "reload_instance": "Перезагрузить экземпляр {{hostname}}",
       "reset_default": "Сбросить до значения по умолчанию",
       "reset_global": "Сбросить до глобального значения",
+      "value_from_global": "Значение из глобальной конфигурации",
       "run_job": "Запустить задачу {{job}}",
       "stop_instance": "Остановить экземпляр {{hostname}}",
-      "unban_ip": "Разбанить {{ip}}"
+      "unban_ip": "Разбанить {{ip}}",
+      "force_check": "Запланировать проверку; загрузка только при наличии обновлений.",
+      "force_update": "Пропускает проверки и принудительно скачивает PRO-плагины; сохраняет текущее состояние при сбое."
     },
     "cannot_delete_original_ban": "Невозможно удалить исходную запись бана.",
     "cannot_remove_disabled": "Невозможно удалить, так как одна или несколько настроек отключены.",

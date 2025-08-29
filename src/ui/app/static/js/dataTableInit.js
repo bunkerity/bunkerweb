@@ -275,6 +275,57 @@ function initializeDataTable(config) {
 
       saveColumnsPreferences();
     });
+
+    // Override the default colvisRestore to respect server defaults
+    dataTable.on(
+      "buttons-action.dt",
+      function (e, buttonApi, dtApi, node, config) {
+        const isRestore =
+          (config && config.extend === "colvisRestore") ||
+          (config &&
+            typeof config.className === "string" &&
+            config.className.includes("buttons-colvisRestore"));
+        if (!isRestore) return;
+
+        // Apply default visibility from server-provided COLUMNS_PREFERENCES_DEFAULTS
+        Object.entries(defaultColsVisibility).forEach(([key, value]) => {
+          const colIdx = parseInt(key, 10);
+          if (
+            typeof columnVisibilityCondition === "function" &&
+            !columnVisibilityCondition(colIdx)
+          ) {
+            return;
+          }
+          // Update local model then apply visibility
+          columnVisibility[colIdx] = value;
+          if (dataTable.column(colIdx).visible() !== value) {
+            dataTable.column(colIdx).visible(value, false); // defer draw
+          }
+        });
+
+        // Sync localStorage to reflect default state
+        const isDefault =
+          JSON.stringify(columnVisibility) ===
+          JSON.stringify(defaultColsVisibility);
+        if (isDefault) {
+          localStorage.removeItem(`bw-${tableName}-columns`);
+        } else {
+          localStorage.setItem(
+            `bw-${tableName}-columns`,
+            JSON.stringify(columnVisibility),
+          );
+        }
+
+        // Persist preferences to backend if applicable
+        if (!dbReadOnly && Object.keys(originalColumnsPreferences).length > 0) {
+          saveColumnsPreferences();
+        }
+
+        // Redraw once after batch changes and re-apply translations
+        dataTable.columns.adjust().draw(false);
+        applyTranslations();
+      },
+    );
   }
 
   // Page length change event
@@ -352,14 +403,7 @@ function initializeDataTable(config) {
     }
   });
 
-  dataTable.on(
-    "buttons-action.dt",
-    function (e, buttonApi, dtApi, node, config) {
-      if (config.className.includes("buttons-colvisRestore")) {
-        applyTranslations();
-      }
-    },
-  );
+  // Note: colvisRestore handling moved earlier to respect defaults
 
   dataTable.columns.adjust().responsive.recalc();
 

@@ -141,20 +141,24 @@
                             <div class="col-12 col-lg-9 ps-0 pe-0">
                                 <div class="tab-content template-steps-content p-3 align-items-center mw-100{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
                                     <div class="d-flex justify-content-between pb-3">
-                                        <button class="btn btn-primary btn-prev previous-step disabled"
-                                                data-template="{{ template }}"
-                                                type="button">
-                                            <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
-                                            <span class="align-middle d-sm-inline-block d-none me-sm-1"
-                                                  data-i18n="step.previous">Previous</span>
-                                        </button>
-                                        <button class="btn btn-primary btn-next next-step{% if template_data['steps']|length == 1 %} disabled{% endif %}"
-                                                data-template="{{ template }}"
-                                                type="button">
-                                            <span class="align-middle d-sm-inline-block d-none me-sm-1"
-                                                  data-i18n="step.next">Next</span>
-                                            <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
-                                        </button>
+                                        <div>
+                                            <button class="btn btn-primary btn-prev previous-step visually-hidden"
+                                                    data-template="{{ template }}"
+                                                    type="button">
+                                                <i class="bx bx-chevron-left bx-sm ms-sm-n2"></i>
+                                                <span class="align-middle d-sm-inline-block d-none me-sm-1"
+                                                      data-i18n="step.previous">Previous</span>
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-primary btn-next next-step{% if template_data['steps']|length == 1 %} visually-hidden{% endif %}"
+                                                    data-template="{{ template }}"
+                                                    type="button">
+                                                <span class="align-middle d-sm-inline-block d-none me-sm-1"
+                                                      data-i18n="step.next">Next</span>
+                                                <i class="bx bx-chevron-right bx-sm me-sm-n2"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="step-content-wrapper">
                                         {% for step in template_data["steps"] %}
@@ -357,6 +361,43 @@
                         class="btn btn-outline-danger me-2"
                         data-bs-dismiss="modal"
                         data-i18n="modal.button.reset_template_confirm">Reset template configuration</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade"
+     id="modal-fetch-global-config"
+     data-bs-backdrop="static"
+     tabindex="-1"
+     aria-hidden="true"
+     role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" data-i18n="modal.title.fetch_global_config">Apply global settings?</h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        data-i18n="aria.label.close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <div class="fw-bold" data-i18n="modal.body.fetch_global_config_bold">
+                        This will fetch the global configuration and apply it to the current template.
+                    </div>
+                    <ul class="mt-2 mb-0 ps-3">
+                        <li data-i18n="modal.body.fetch_global_config_point_1">Only settings present in this template are updated.</li>
+                        <li data-i18n="modal.body.fetch_global_config_point_2">Values identical to defaults are ignored.</li>
+                        <li data-i18n="modal.body.fetch_global_config_point_3">SERVER_NAME is never overridden.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button id="confirm-fetch-global-config"
+                        class="btn btn-outline-info"
+                        data-bs-dismiss="modal"
+                        data-i18n="modal.button.fetch_global_config_confirm">Apply global settings</button>
             </div>
         </div>
     </div>

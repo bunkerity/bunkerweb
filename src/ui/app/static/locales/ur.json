@@ -136,7 +136,8 @@
     "upload_photo": "نئی تصویر اپ لوڈ کریں",
     "view_details": "تفصیلات دیکھیں",
     "view_raw_data": "خام ڈیٹا دیکھیں",
-    "wipe_other_sessions": "دیگر سیشنز صاف کریں"
+    "wipe_other_sessions": "دیگر سیشنز صاف کریں",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "انڈورا",
@@ -748,10 +749,15 @@
       "services_deletion_confirmation": "کیا آپ واقعی منتخب کردہ خدمات حذف کرنا چاہتے ہیں؟",
       "unban_confirmation_alert": "کیا آپ واقعی منتخب کردہ IP ایڈریس سے پابندی ہٹانا چاہتے ہیں؟",
       "unban_confirmation_alert_plural": "کیا آپ واقعی منتخب کردہ IP ایڈریسز سے پابندی ہٹانا چاہتے ہیں؟",
-      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:"
+      "update_duration_alert": "منتخب پابندیوں کے لیے نئی مدت منتخب کریں:",
+      "fetch_global_config_bold": "یہ عالمی کنفیگریشن حاصل کرے گا اور موجودہ ٹیمپلیٹ پر لاگو کرے گا۔",
+      "fetch_global_config_point_1": "صرف وہ سیٹنگز اپڈیٹ ہوتی ہیں جو اس ٹیمپلیٹ میں موجود ہیں۔",
+      "fetch_global_config_point_2": "جو قدریں ڈیفالٹ کے برابر ہوں انہیں نظر انداز کیا جاتا ہے۔",
+      "fetch_global_config_point_3": "SERVER_NAME کو کبھی اوور رائٹ نہیں کیا جاتا۔"
     },
     "button": {
-      "reset_template_confirm": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں"
+      "reset_template_confirm": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں",
+      "fetch_global_config_confirm": "گلوبل سیٹنگز لاگو کریں"
     },
     "section": {
       "ban_details": "پابندی کی تفصیلات",
@@ -772,6 +778,7 @@
       "job_history_count": "ٹاسک کی آخری {{count}} ایگزیکیوشنز",
       "recovery_codes": "ریکوری کوڈز",
       "reset_template_config": "ٹیمپلیٹ کنفیگریشن ری سیٹ کریں؟",
+      "fetch_global_config": "گلوبل سیٹنگز لاگو کی جائیں؟",
       "server_name_not_unique": "سرور کا نام منفرد نہیں ہے",
       "update_duration": "پابندی کی مدت اپ ڈیٹ کریں"
     }
@@ -867,6 +874,14 @@
       "expires_in": "ختم ہونے میں",
       "title": "پرو کی میعاد ختم ہونے کی تاریخ",
       "unknown": "نامعلوم میعاد ختم ہونے کی تاریخ"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
     },
     "key": {
       "title": {
@@ -1182,7 +1197,11 @@
       "ping_failed": "پنگ ناکام",
       "ping_succeed": "پنگ کامیاب"
     },
-    "ip_unbanned": "IP ایڈریس سے پابندی کامیابی سے ہٹا دی گئی!"
+    "ip_unbanned": "IP ایڈریس سے پابندی کامیابی سے ہٹا دی گئی!",
+    "global_settings_applied_title": "گلوبل سیٹنگز لاگو ہو گئیں",
+    "global_settings_applied_body": "گلوبل سیٹنگز کامیابی سے حاصل کر لی گئی ہیں اور موجودہ فارم پر لاگو کر دی گئی ہیں۔",
+    "global_settings_failed_title": "گلوبل سیٹنگز حاصل کرنے میں ناکامی",
+    "global_settings_failed_body": "گلوبل سیٹنگز حاصل کرتے وقت ایک خرابی پیش آئی۔"
   },
   "tooltip": {
     "auto_lets_encrypt": "کیا خود بخود Let's Encrypt سرٹیفکیٹ کی درخواست کرنی ہے۔",
@@ -1198,9 +1217,12 @@
       "reload_instance": "انسٹینس {{hostname}} دوبارہ لوڈ کریں",
       "reset_default": "ڈیفالٹ قدر پر ری سیٹ کریں",
       "reset_global": "عالمی قدر پر ری سیٹ کریں",
+      "value_from_global": "عالمی کنفیگریشن سے قدر",
       "run_job": "ٹاسک {{job}} چلائیں",
       "stop_instance": "انسٹینس {{hostname}} روکیں",
-      "unban_ip": "{{ip}} سے پابندی ہٹائیں"
+      "unban_ip": "{{ip}} سے پابندی ہٹائیں",
+      "force_check": "چیک شیڈول کرتا ہے؛ صرف اپڈیٹس ہونے پر ڈاؤن لوڈ کرتا ہے۔",
+      "force_update": "چیکس کو چھوڑ کر PRO پلگ انز کا فورس ڈاؤن لوڈ؛ ناکامی پر موجودہ حالت برقرار رہتی ہے۔"
     },
     "cannot_delete_original_ban": "اصل پابندی اندراج کو حذف نہیں کیا جا سکتا۔",
     "cannot_remove_disabled": "ہٹایا نہیں جا سکتا کیونکہ ایک یا زیادہ سیٹنگز غیر فعال ہیں۔",

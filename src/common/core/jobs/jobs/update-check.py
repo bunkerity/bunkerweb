@@ -1,27 +1,42 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
+from datetime import datetime, timedelta
+from json import dumps, loads
 from os import sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
 
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from requests import get
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, RequestException
 
 from common_utils import get_version  # type: ignore
 from logger import setup_logger  # type: ignore
+from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("UPDATE-CHECK")
 status = 0
 
 try:
+    JOB = Job(LOGGER, __file__)
 
     def get_latest_stable_release():
+        # Try cache first to respect a 1-hour cooldown with metadata, similar to mmdb-asn job
+        job_cache = JOB.get_cache("latest_release.json", with_info=True, with_data=True)
+        if isinstance(job_cache, dict):
+            last_update = job_cache.get("last_update")
+            if last_update and datetime.now().astimezone().timestamp() - last_update < timedelta(hours=1).total_seconds():
+                LOGGER.info("Using cached GitHub release (fresh < 1h)")
+                data = job_cache.get("data") or b"{}"
+                with suppress(BaseException):
+                    return loads(data)
+
         max_retries = 3
         retry_count = 0
         while retry_count < max_retries:
@@ -34,13 +49,37 @@ try:
                     raise e
                 LOGGER.warning(f"Connection refused, retrying in 3 seconds... ({retry_count}/{max_retries})")
                 sleep(3)
-        response.raise_for_status()
-        releases = response.json()
+        try:
+            response.raise_for_status()
+            releases = response.json()
+        except RequestException:
+            LOGGER.debug(format_exc())
+            # Best-effort fallback to cached info (may be stale)
+            if isinstance(job_cache, dict) and job_cache.get("data"):
+                LOGGER.warning("GitHub API error, falling back to cached release info")
+                with suppress(BaseException):
+                    return loads(job_cache.get("data") or b"{}")
+            raise
 
+        latest = None
         for release in releases:
             if not release["prerelease"]:
-                return release
-        return None
+                latest = release
+                break
+
+        # If no stable release found, fallback to cache if available
+        if latest is None:
+            if isinstance(job_cache, dict) and job_cache.get("data"):
+                LOGGER.warning("No stable release found from API, using cached info")
+                with suppress(BaseException):
+                    return loads(job_cache.get("data") or b"{}")
+            return None
+
+        # Cache the latest stable release for 1 hour to avoid rate limits
+        with suppress(BaseException):
+            JOB.cache_file("latest_release.json", dumps(latest).encode())
+
+        return latest
 
     latest_release = get_latest_stable_release()
 

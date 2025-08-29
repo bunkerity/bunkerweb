@@ -312,7 +312,6 @@
                                         {% for setting_suffix, settings in multiples.items() %}
                                             <div class="row multiple-container pt-2 pb-2">
                                                 {% set setting_id_suffix = "-" + setting_suffix %}
-                                                {% set is_first = loop.first %}
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <h6 class="mb-0 me-2">
                                                         {{ multiple.replace('-', ' ') | capitalize }}
@@ -338,119 +337,113 @@
                                                         {% endif %}
                                                         <button id="show-multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
                                                                 type="button"
-                                                                class="btn btn-xs btn-text-secondary rounded-pill show-multiple p-0{% if not is_first %} collapsed{% endif %}"
+                                                                class="btn btn-xs btn-text-secondary rounded-pill show-multiple p-0"
                                                                 data-bs-toggle="collapse"
                                                                 data-bs-target="#multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                                aria-expanded="{{ 'true' if is_first else 'false' }}"
+                                                                aria-expanded="true"
                                                                 aria-controls="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}">
-                                                            <i class="bx bx-{% if is_first %}show-alt{% else %}hide{% endif %} bx-sm"></i>&nbsp;<span data-i18n="button.multiple_{% if is_first %}hide{% else %}show{% endif %}">
-                                                            {% if is_first %}
-                                                                HIDE
-                                                            {% else %}
-                                                                SHOW
-                                                            {% endif %}
-                                                        </span>
-                                                    </button>
+                                                            <i class="bx bx-show-alt bx-sm"></i>&nbsp;<span data-i18n="button.multiple_hide">HIDE</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div id="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
-                                                 class="collapse{% if is_first %} show{% endif %} multiple-collapse pt-0">
-                                                <div class="row g-2 gx-6 mt-2 pt-2">
-                                                    {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
-                                                        {% set setting_config = config.get(setting, {}) %}
-                                                        {% set setting_default = setting_data.get("default", "") %}
-                                                        {% set setting_value = setting_config.get("value", setting_default) %}
-                                                        {% set setting_method = setting_config.get("method", "default") %}
-                                                        {% set setting_template = setting_config.get("template", "") %}
-                                                        {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                                                        {% if current_endpoint == "new" or clone %}
-                                                            {% set setting_method = "default" %}
-                                                            {% set disabled = false %}
-                                                        {% endif %}
-                                                        {% if is_readonly %}
-                                                            {% set disabled = true %}
-                                                            {% set setting_method = "readonly" %}
-                                                        {% endif %}
-                                                        {% if plugin_data["type"] == "pro" and not is_pro_version %}
-                                                            {% set disabled = true %}
-                                                            {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
-                                                        {% endif %}
-                                                        <div class="col-12{% if settings|length > 1 %} col-md-6{% endif %}{% if settings|length > 2 and not multiple_multiples %} col-lg-4{% endif %} pb-2"
-                                                             {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
-                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                <label id="label-multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
-                                                                       for="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
-                                                                       class="form-label fw-semibold text-truncate">
-                                                                    {{ setting_data["label"] }}
-                                                                </label>
-                                                                <div class="d-flex align-items-center">
-                                                                    {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
-                                                                        <a role="badge"
-                                                                           href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
-                                                                           class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
-                                                                           data-bs-toggle="tooltip"
-                                                                           data-bs-placement="top"
-                                                                           data-bs-original-title="Multisite setting"
-                                                                           target="_blank"
-                                                                           rel="noopener">
-                                                                            <span class="bx bx-server bx-xs"></span>
-                                                                        </a>
-                                                                    {% endif %}
-                                                                    {% if setting_template %}
-                                                                        <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                <div id="multiple-{{ plugin }}-{{ multiple }}-{{ setting_suffix }}"
+                                                     class="collapse show multiple-collapse pt-0">
+                                                    <div class="row g-2 gx-6 mt-2 pt-2">
+                                                        {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
+                                                            {% set setting_config = config.get(setting, {}) %}
+                                                            {% set setting_default = setting_data.get("default", "") %}
+                                                            {% set setting_value = setting_config.get("value", setting_default) %}
+                                                            {% set setting_method = setting_config.get("method", "default") %}
+                                                            {% set setting_template = setting_config.get("template", "") %}
+                                                            {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                                            {% if current_endpoint == "new" or clone %}
+                                                                {% set setting_method = "default" %}
+                                                                {% set disabled = false %}
+                                                            {% endif %}
+                                                            {% if is_readonly %}
+                                                                {% set disabled = true %}
+                                                                {% set setting_method = "readonly" %}
+                                                            {% endif %}
+                                                            {% if plugin_data["type"] == "pro" and not is_pro_version %}
+                                                                {% set disabled = true %}
+                                                                {% set setting_method = "<i class='bx bx-diamond bx-xs'></i><span>Pro feature</span>" %}
+                                                            {% endif %}
+                                                            <div class="col-12{% if settings|length > 1 %} col-md-6{% endif %}{% if settings|length > 2 and not multiple_multiples %} col-lg-4{% endif %} pb-2"
+                                                                 {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <label id="label-multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
+                                                                           for="multiple-setting-{{ plugin }}-{{ setting_data['id'] }}-{{ setting_suffix }}"
+                                                                           class="form-label fw-semibold text-truncate">
+                                                                        {{ setting_data["label"] }}
+                                                                    </label>
+                                                                    <div class="d-flex align-items-center">
+                                                                        {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
+                                                                            <a role="badge"
+                                                                               href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
+                                                                               class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                               data-bs-toggle="tooltip"
+                                                                               data-bs-placement="top"
+                                                                               data-bs-original-title="Multisite setting"
+                                                                               target="_blank"
+                                                                               rel="noopener">
+                                                                                <span class="bx bx-server bx-xs"></span>
+                                                                            </a>
+                                                                        {% endif %}
+                                                                        {% if setting_template %}
+                                                                            <span class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="From template: {{ setting_template }}">
+                                                                                <span class="bx bx-spreadsheet bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        {% if setting_config.get("clone") %}
+                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Cloned from service {{ clone }}">
+                                                                                <span class="bx bx-copy-alt bx-xs"></span>
+                                                                            </span>
+                                                                        {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
+                                                                            <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="From global configuration">
+                                                                                <span class="bx bx-globe bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
                                                                               data-bs-toggle="tooltip"
                                                                               data-bs-placement="top"
-                                                                              data-bs-original-title="From template: {{ setting_template }}">
-                                                                            <span class="bx bx-spreadsheet bx-xs"></span>
+                                                                              data-bs-original-title="{{ setting_data['help'] }}">
+                                                                            <span class="bx bx-question-mark bx-xs"></span>
                                                                         </span>
-                                                                    {% endif %}
-                                                                    {% if setting_config.get("clone") %}
-                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
-                                                                              data-bs-toggle="tooltip"
-                                                                              data-bs-placement="top"
-                                                                              data-bs-original-title="Cloned from service {{ clone }}">
-                                                                            <span class="bx bx-copy-alt bx-xs"></span>
-                                                                        </span>
-                                                                    {% elif current_endpoint != "global-config" and setting_config.get("global") and setting_value != setting_default %}
-                                                                        <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
-                                                                              data-bs-toggle="tooltip"
-                                                                              data-bs-placement="top"
-                                                                              data-bs-original-title="From global configuration">
-                                                                            <span class="bx bx-globe bx-xs"></span>
-                                                                        </span>
-                                                                    {% endif %}
-                                                                    <span class="badge rounded-pill bg-secondary-subtle text-dark d-flex align-items-center justify-content-center p-1"
-                                                                          data-bs-toggle="tooltip"
-                                                                          data-bs-placement="top"
-                                                                          data-bs-original-title="{{ setting_data['help'] }}">
-                                                                        <span class="bx bx-question-mark bx-xs"></span>
-                                                                    </span>
+                                                                    </div>
                                                                 </div>
+                                                                {% if setting_data["type"] == "select" %}
+                                                                    {% include "models/select_setting.html" %}
+                                                                {% elif setting_data["type"] == "multiselect" %}
+                                                                    {% include "models/multiselect_setting.html" %}
+                                                                {% elif setting_data["type"] == "multivalue" %}
+                                                                    {% include "models/multivalue_setting.html" %}
+                                                                {% elif setting_data["type"] == "check" %}
+                                                                    {% include "models/checkbox_setting.html" %}
+                                                                {% else %}
+                                                                    {% include "models/input_setting.html" %}
+                                                                {% endif %}
                                                             </div>
-                                                            {% if setting_data["type"] == "select" %}
-                                                                {% include "models/select_setting.html" %}
-                                                            {% elif setting_data["type"] == "multiselect" %}
-                                                                {% include "models/multiselect_setting.html" %}
-                                                            {% elif setting_data["type"] == "multivalue" %}
-                                                                {% include "models/multivalue_setting.html" %}
-                                                            {% elif setting_data["type"] == "check" %}
-                                                                {% include "models/checkbox_setting.html" %}
-                                                            {% else %}
-                                                                {% include "models/input_setting.html" %}
-                                                            {% endif %}
-                                                        </div>
-                                                    {% endfor %}
+                                                        {% endfor %}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-        {% endif %}
-    {% endfor %}
-</div>
+            {% endif %}
+        {% endfor %}
+    </div>
 </div>

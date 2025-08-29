@@ -1,6 +1,20 @@
 # Changelog
 
-## v1.6.4 - ????/??/??
+## v1.6.5-c1 - ????/??/??
+
+- [FEATURE] Enhance update-check job to utilize cached GitHub release data and improve error handling
+- [BUGFIX] Update default algorithm for Let's Encrypt's `RFC2136` DNS provider from HMAC-SHA512 to HMAC-MD5
+- [BUGFIX] Fix issue with loading environment variables in the `robotstxt` plugin
+- [LINUX] Add upgrade capability to the easy-install script for seamless in-place updates
+- [LINUX] Fix logrotation of certbot logs, they know gets automatically deleted after 7 days
+- [UI] Always display all multiple settings to avoid confusion
+- [UI] Update step navigation buttons to use visually-hidden class for better accessibility
+- [UI] Fixed an issue where certain settings were reset when editing a service based on a template
+- [UI] Fixed an issue where non-template custom configurations were removed when editing a service using a template
+- [UI] Add Free Trial promotion card to pro.html for non-pro users
+- [UI] Add Force update button on PRO page to force the download of PRO plugins without checking for updates.
+
+## v1.6.4 - 2025/08/18
 
 - [SECURITY] Fix open-redirection vulnerability in the Web UI regarding the `next` parameter in the loading process ([CVE-2025-8066](https://github.com/bunkerity/bunkerweb/security/advisories/GHSA-xxx9-3fh5-g585)).
 - [FEATURE] Enhance `ModSecurity` plugin to support human-readable size values for request body limits (requests without files)

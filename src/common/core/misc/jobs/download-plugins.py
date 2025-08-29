@@ -110,7 +110,7 @@ try:
             # Download Plugin file
             try:
                 if plugin_urls.startswith("file://"):
-                    content = Path(plugin_urls[7:]).read_bytes()
+                    content.write(Path(plugin_urls[7:]).read_bytes())
                 else:
                     max_retries = 3
                     retry_count = 0
@@ -134,7 +134,7 @@ try:
                         if chunk:
                             content.write(chunk)
 
-                    content.seek(0)
+                content.seek(0)
             except BaseException as e:
                 LOGGER.debug(format_exc())
                 LOGGER.error(f"Exception while downloading plugin(s) from {plugin_url} :\n{e}")

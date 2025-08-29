@@ -10,7 +10,7 @@ from flask_login import login_required
 from app.dependencies import BW_CONFIG, DATA, DB
 
 from app.routes.utils import CUSTOM_CONF_RX, handle_error, verify_data_in_form, wait_applying
-from app.utils import get_blacklisted_settings
+from app.utils import LOGGER, get_blacklisted_settings
 
 services = Blueprint("services", __name__)
 
@@ -274,15 +274,23 @@ def services_service_page(service: str):
                             "method": "ui",
                         }
 
+                if service != "new":
+                    for setting, value in db_config.items():
+                        if setting not in variables:
+                            variables[setting] = value["value"]
+
                 for db_custom_config, data in db_custom_configs.copy().items():
                     if data["method"] == "default" and data["template"]:
+                        LOGGER.debug(f"Removing default custom config {db_custom_config} because it is not used anymore.")
                         del db_custom_configs[db_custom_config]
                         continue
 
-                    if db_custom_config.startswith(f"{service}_") and db_custom_config.replace(f"{service}_", "", 1) not in new_configs:
+                    if db_custom_config.startswith(f"{service}_") and db_custom_config.replace(f"{service}_", "", 1) not in new_configs and data["template"]:
+                        LOGGER.debug(f"Removing custom config {db_custom_config} because it is not used anymore.")
                         configs_changed = True
                         del db_custom_configs[db_custom_config]
                         continue
+
                     db_custom_configs[db_custom_config] = {
                         "service_id": data["service_id"],
                         "type": data["type"],
