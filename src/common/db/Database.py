@@ -476,6 +476,7 @@ class Database:
             "non_draft_services": 0,
             "pro_overlapped": False,
             "last_pro_check": None,
+            "force_pro_update": False,
             "failover": False,
             "failover_message": "",
             "first_config_saved": False,

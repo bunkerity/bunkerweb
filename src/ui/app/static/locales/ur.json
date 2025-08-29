@@ -136,7 +136,8 @@
     "upload_photo": "نئی تصویر اپ لوڈ کریں",
     "view_details": "تفصیلات دیکھیں",
     "view_raw_data": "خام ڈیٹا دیکھیں",
-    "wipe_other_sessions": "دیگر سیشنز صاف کریں"
+    "wipe_other_sessions": "دیگر سیشنز صاف کریں",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "انڈورا",
@@ -874,6 +875,14 @@
       "title": "پرو کی میعاد ختم ہونے کی تاریخ",
       "unknown": "نامعلوم میعاد ختم ہونے کی تاریخ"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "کلید فعال کریں",
@@ -1211,7 +1220,9 @@
       "value_from_global": "عالمی کنفیگریشن سے قدر",
       "run_job": "ٹاسک {{job}} چلائیں",
       "stop_instance": "انسٹینس {{hostname}} روکیں",
-      "unban_ip": "{{ip}} سے پابندی ہٹائیں"
+      "unban_ip": "{{ip}} سے پابندی ہٹائیں",
+      "force_check": "چیک شیڈول کرتا ہے؛ صرف اپڈیٹس ہونے پر ڈاؤن لوڈ کرتا ہے۔",
+      "force_update": "چیکس کو چھوڑ کر PRO پلگ انز کا فورس ڈاؤن لوڈ؛ ناکامی پر موجودہ حالت برقرار رہتی ہے۔"
     },
     "cannot_delete_original_ban": "اصل پابندی اندراج کو حذف نہیں کیا جا سکتا۔",
     "cannot_remove_disabled": "ہٹایا نہیں جا سکتا کیونکہ ایک یا زیادہ سیٹنگز غیر فعال ہیں۔",

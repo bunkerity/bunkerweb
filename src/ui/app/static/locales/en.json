@@ -93,6 +93,7 @@
     "filters_suffix": " Filters",
     "follow": "Follow",
     "force_check": "Force check",
+    "force_update": "Force update",
     "github_stars": "Stars",
     "go_back": "Go Back",
     "hide": "Hide",
@@ -878,6 +879,10 @@
       "title": "Force check",
       "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
     },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "Activate Key",
@@ -1215,7 +1220,9 @@
       "value_from_global": "Value from global configuration",
       "run_job": "Run Job {{job}}",
       "stop_instance": "Stop Instance {{hostname}}",
-      "unban_ip": "Unban {{ip}}"
+      "unban_ip": "Unban {{ip}}",
+      "force_check": "Schedules a check; downloads only if updates exist.",
+      "force_update": "Skips checks and forces PRO plugin download; keeps current state on failure."
     },
     "cannot_delete_original_ban": "Cannot delete the original Ban entry.",
     "cannot_remove_disabled": "Cannot remove because one or more settings are disabled.",

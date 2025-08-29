@@ -12,6 +12,7 @@
 - [UI] Fixed an issue where certain settings were reset when editing a service based on a template
 - [UI] Fixed an issue where non-template custom configurations were removed when editing a service using a template
 - [UI] Add Free Trial promotion card to pro.html for non-pro users
+- [UI] Add Force update button on PRO page to force the download of PRO plugins without checking for updates.
 
 ## v1.6.4 - 2025/08/18
 

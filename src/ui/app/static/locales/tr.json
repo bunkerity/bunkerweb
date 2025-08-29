@@ -136,7 +136,8 @@
     "upload_photo": "Yeni Fotoğraf Yükle",
     "view_details": "Detayları Görüntüle",
     "view_raw_data": "Ham Veriyi Görüntüle",
-    "wipe_other_sessions": "Diğer Oturumları Sonlandır"
+    "wipe_other_sessions": "Diğer Oturumları Sonlandır",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "Andorra",
@@ -874,6 +875,14 @@
       "title": "Pro Bitiş Tarihi",
       "unknown": "Bilinmeyen bitiş tarihi"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "Anahtarı Etkinleştir",
@@ -1211,7 +1220,9 @@
       "value_from_global": "Genel yapılandırmadan gelen değer",
       "run_job": "İşi Çalıştır: {{job}}",
       "stop_instance": "Örneği Durdur: {{hostname}}",
-      "unban_ip": "{{ip}} yasağını kaldır"
+      "unban_ip": "{{ip}} yasağını kaldır",
+      "force_check": "Bir kontrol planlar; yalnızca güncellemeler varsa indirir.",
+      "force_update": "Kontrolleri atlar ve PRO eklentileri indirmeyi zorlar; hata olursa mevcut durumu korur."
     },
     "cannot_delete_original_ban": "Orijinal Yasaklama girdisi silinemez.",
     "cannot_remove_disabled": "Bir veya daha fazla ayar devre dışı olduğu için kaldırılamaz.",

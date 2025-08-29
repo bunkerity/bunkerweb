@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from datetime import datetime
 from io import BytesIO
 from os import getenv, sep
@@ -106,8 +107,12 @@ try:
     db_metadata = db.get_metadata()
     current_date = datetime.now().astimezone()
     pro_license_key = getenv("PRO_LICENSE_KEY", "").strip()
+    force_update = bool(db_metadata.get("force_pro_update", False))
+    if force_update:
+        with suppress(BaseException):
+            db.set_metadata({"force_pro_update": False})
 
-    LOGGER.info("Checking BunkerWeb Pro status...")
+    LOGGER.info("Checking BunkerWeb Pro status..." if not force_update else "Force update requested: skipping status check and metadata update")
 
     data = {
         "integration": get_integration(),
@@ -133,7 +138,7 @@ try:
     temp_dir = TMP_DIR.joinpath(str(uuid4()))
     temp_dir.mkdir(parents=True, exist_ok=True)
 
-    if pro_license_key:
+    if pro_license_key and not force_update:
         LOGGER.info("BunkerWeb Pro license provided, checking if it's valid...")
         headers["Authorization"] = f"Bearer {pro_license_key}"
         max_retries = 3
@@ -180,23 +185,32 @@ try:
 
     db_metadata = db.get_metadata()
 
-    # ? If we already checked today, skip the check and if the metadata is the same, skip the check
-    if (
-        pro_license_key == db_metadata.get("pro_license", "")
-        and metadata.get("is_pro", False) == db_metadata["is_pro"]
-        and (not metadata.get("pro_overlapped", False) or metadata.get("non_draft_services", 0) == db_metadata.get("non_draft_services", 0))
-        and db_metadata["last_pro_check"]
-        and current_date.replace(hour=0, minute=0, second=0, microsecond=0) == db_metadata["last_pro_check"].replace(hour=0, minute=0, second=0, microsecond=0)
-    ):
-        LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
-        sys_exit(0)
+    # Skip daily/license checks if forced
+    if not force_update:
+        # If we already checked today and metadata unchanged, skip
+        if (
+            pro_license_key == db_metadata.get("pro_license", "")
+            and metadata.get("is_pro", False) == db_metadata["is_pro"]
+            and (not metadata.get("pro_overlapped", False) or metadata.get("non_draft_services", 0) == db_metadata.get("non_draft_services", 0))
+            and db_metadata["last_pro_check"]
+            and current_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            == db_metadata["last_pro_check"].replace(hour=0, minute=0, second=0, microsecond=0)
+        ):
+            LOGGER.info("Skipping the check for BunkerWeb Pro license (already checked today)")
+            sys_exit(0)
 
-    default_metadata["last_pro_check"] = current_date
-    metadata = default_metadata | metadata
-    db.set_metadata(metadata)
+        default_metadata["last_pro_check"] = current_date
+        metadata = default_metadata | metadata
+        db.set_metadata(metadata)
 
-    if metadata["is_pro"] != db_metadata["is_pro"]:
-        clean_pro_plugins(db)
+        if metadata["is_pro"] != db_metadata["is_pro"]:
+            clean_pro_plugins(db)
+    else:
+        # In force mode, keep current metadata and status
+        metadata = {"is_pro": db_metadata["is_pro"], "pro_overlapped": db_metadata.get("pro_overlapped", False)}
+        # Ensure Authorization header is present if we have a key
+        if pro_license_key:
+            headers["Authorization"] = f"Bearer {pro_license_key}"
 
     if metadata["is_pro"]:
         LOGGER.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated Pro plugins...")
@@ -227,14 +241,18 @@ try:
                     resp_data = json_load(resp_content)
 
                 clean = resp_data.get("action") == "clean"
-
-            if clean:
-                metadata = default_metadata.copy()
-                db.set_metadata(metadata)
-                clean_pro_plugins(db)
-            else:
-                LOGGER.warning("Skipping the check for new or updated Pro plugins...")
+            # In force mode, keep current state, do not clean or change metadata
+            if force_update:
+                LOGGER.warning("Skipping forced update due to access denied; keeping current PRO plugins state.")
                 sys_exit(0)
+            else:
+                if clean:
+                    metadata = default_metadata.copy()
+                    db.set_metadata(metadata)
+                    clean_pro_plugins(db)
+                else:
+                    LOGGER.warning("Skipping the check for new or updated Pro plugins...")
+                    sys_exit(0)
         elif resp.status_code == 429:
             LOGGER.warning("Too many requests to the remote server while checking BunkerWeb Pro plugins, please try again later")
             sys_exit(0)
@@ -258,6 +276,7 @@ try:
         else:
             LOGGER.info("If you wish to purchase a BunkerWeb Pro license, please visit https://panel.bunkerweb.io/")
             message = "No BunkerWeb Pro license key provided"
+        # In force mode, still try preview download (keeps current if it fails)
         LOGGER.warning(f"{message}, only checking if there are new or updated preview versions of Pro plugins...")
 
         max_retries = 3

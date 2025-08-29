@@ -136,7 +136,8 @@
     "upload_photo": "Carica Nuova Foto",
     "view_details": "Visualizza Dettagli",
     "view_raw_data": "Visualizza Dati Grezzi",
-    "wipe_other_sessions": "Pulisci Altre Sessioni"
+    "wipe_other_sessions": "Pulisci Altre Sessioni",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "Andorra",
@@ -874,6 +875,14 @@
       "title": "Data Scadenza Pro",
       "unknown": "Data di scadenza sconosciuta"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "Attiva Chiave",
@@ -1212,7 +1221,9 @@
       "value_from_global": "Valore dalla configurazione globale",
       "run_job": "Esegui Processo {{job}}",
       "stop_instance": "Ferma Istanza {{hostname}}",
-      "unban_ip": "Sblocca {{ip}}"
+      "unban_ip": "Sblocca {{ip}}",
+      "force_check": "Pianifica un controllo; scarica solo se ci sono aggiornamenti.",
+      "force_update": "Salta i controlli e forza il download dei plugin PRO; mantiene lo stato attuale in caso di errore."
     },
     "cannot_delete_original_ban": "Impossibile eliminare la voce di blocco originale.",
     "cannot_remove_disabled": "Impossibile rimuovere perché una o più impostazioni sono disabilitate.",

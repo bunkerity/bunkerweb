@@ -136,7 +136,8 @@
     "upload_photo": "上传新照片",
     "view_details": "查看详情",
     "view_raw_data": "查看原始数据",
-    "wipe_other_sessions": "清除其他会话"
+    "wipe_other_sessions": "清除其他会话",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "安道尔",
@@ -874,6 +875,14 @@
       "title": "Pro 到期日期",
       "unknown": "未知的到期日期"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "激活密钥",
@@ -1213,7 +1222,9 @@
       "value_from_global": "来自全局配置的值",
       "run_job": "运行任务 {{job}}",
       "stop_instance": "停止实例 {{hostname}}",
-      "unban_ip": "解禁 {{ip}}"
+      "unban_ip": "解禁 {{ip}}",
+      "force_check": "安排检查；仅在有更新时下载。",
+      "force_update": "跳过检查并强制下载 PRO 插件；失败时保留当前状态。"
     },
     "cannot_delete_original_ban": "无法删除原始封禁条目。",
     "cannot_remove_disabled": "无法移除，因为一个或多个设置被禁用。",

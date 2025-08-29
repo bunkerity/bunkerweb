@@ -136,7 +136,8 @@
     "upload_photo": "Subir Nueva Foto",
     "view_details": "Ver Detalles",
     "view_raw_data": "Ver Datos sin Procesar",
-    "wipe_other_sessions": "Limpiar Otras Sesiones"
+    "wipe_other_sessions": "Limpiar Otras Sesiones",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "Andorra",
@@ -873,6 +874,14 @@
       "title": "Fecha de Expiración Pro",
       "unknown": "Fecha de expiración desconocida"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "Activar Clave",
@@ -1212,7 +1221,9 @@
       "value_from_global": "Valor de la configuración global",
       "run_job": "Ejecutar Tarea {{job}}",
       "stop_instance": "Detener Instancia {{hostname}}",
-      "unban_ip": "Desbloquear {{ip}}"
+      "unban_ip": "Desbloquear {{ip}}",
+      "force_check": "Programa una verificación; descarga solo si hay actualizaciones.",
+      "force_update": "Omite verificaciones y fuerza la descarga de plugins PRO; mantiene el estado actual si falla."
     },
     "cannot_delete_original_ban": "No se puede eliminar la entrada de bloqueo original.",
     "cannot_remove_disabled": "No se puede eliminar porque una o más configuraciones están deshabilitadas.",

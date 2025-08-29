@@ -136,7 +136,8 @@
     "upload_photo": "Neues Foto hochladen",
     "view_details": "Details anzeigen",
     "view_raw_data": "Rohdaten anzeigen",
-    "wipe_other_sessions": "Andere Sitzungen löschen"
+    "wipe_other_sessions": "Andere Sitzungen löschen",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "Andorra",
@@ -873,6 +874,14 @@
       "title": "Pro-Ablaufdatum",
       "unknown": "Unbekanntes Ablaufdatum"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "Schlüssel aktivieren",
@@ -1212,7 +1221,9 @@
       "value_from_global": "Wert aus globaler Konfiguration",
       "run_job": "Auftrag {{job}} ausführen",
       "stop_instance": "Instanz {{hostname}} stoppen",
-      "unban_ip": "{{ip}} entsperren"
+      "unban_ip": "{{ip}} entsperren",
+      "force_check": "Prüfung planen; lädt nur bei verfügbaren Updates herunter.",
+      "force_update": "Überspringt Prüfungen und erzwingt den Download von PRO-Plugins; behält aktuellen Zustand bei Fehler bei."
     },
     "cannot_delete_original_ban": "Der ursprüngliche Sperreintrag kann nicht gelöscht werden.",
     "cannot_remove_disabled": "Kann nicht entfernt werden, da eine oder mehrere Einstellungen deaktiviert sind.",

@@ -136,7 +136,8 @@
     "upload_photo": "تحميل صورة جديدة",
     "view_details": "عرض التفاصيل",
     "view_raw_data": "عرض البيانات الخام",
-    "wipe_other_sessions": "مسح الجلسات الأخرى"
+    "wipe_other_sessions": "مسح الجلسات الأخرى",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "أندورا",
@@ -873,6 +874,14 @@
       "title": "تاريخ انتهاء صلاحية Pro",
       "unknown": "تاريخ انتهاء صلاحية غير معروف"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "تفعيل المفتاح",
@@ -1212,7 +1221,9 @@
       "value_from_global": "قيمة من الإعدادات العامة",
       "run_job": "تشغيل المهمة {{job}}",
       "stop_instance": "إيقاف المثيل {{hostname}}",
-      "unban_ip": "رفع الحظر عن {{ip}}"
+      "unban_ip": "رفع الحظر عن {{ip}}",
+      "force_check": "جدولة تحقق؛ يتم التنزيل فقط إذا كانت هناك تحديثات.",
+      "force_update": "يتجاوز عمليات التحقق ويفرض تنزيل إضافات PRO؛ يحافظ على الحالة الحالية عند الفشل."
     },
     "cannot_delete_original_ban": "لا يمكن حذف إدخال الحظر الأصلي.",
     "cannot_remove_disabled": "لا يمكن الإزالة لأن إعدادًا واحدًا أو أكثر معطل.",

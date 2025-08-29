@@ -136,7 +136,8 @@
     "upload_photo": "Télécharger Nouvelle Photo",
     "view_details": "Voir les détails",
     "view_raw_data": "Voir les données brutes",
-    "wipe_other_sessions": "Effacer les Autres Sessions"
+    "wipe_other_sessions": "Effacer les Autres Sessions",
+    "force_update": "Forcer la mise à jour"
   },
   "country": {
     "AD": "Andorre",
@@ -873,6 +874,14 @@
       "title": "Date d'Expiration Pro",
       "unknown": "Date d'expiration inconnue"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Forcer la mise à jour",
+      "description": "Ignorer les vérifications et forcer le téléchargement des plugins PRO. Si ce n’est pas possible, l’état actuel est conservé."
+    },
     "key": {
       "title": {
         "activate": "Activer la Clé",
@@ -1210,7 +1219,9 @@
       "value_from_global": "Valeur provenant de la configuration globale",
       "run_job": "Exécuter la Tâche {{job}}",
       "stop_instance": "Arrêter l'Instance {{hostname}}",
-      "unban_ip": "Débannir {{ip}}"
+      "unban_ip": "Débannir {{ip}}",
+      "force_check": "Planifie une vérification ; télécharge seulement s'il y a des mises à jour.",
+      "force_update": "Ignore les vérifications et force le téléchargement des plugins PRO ; conserve l'état actuel en cas d'échec."
     },
     "cannot_delete_original_ban": "Impossible de supprimer l'entrée de bannissement originale.",
     "cannot_remove_disabled": "Impossible de supprimer car un ou plusieurs paramètres sont désactivés.",

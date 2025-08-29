@@ -136,7 +136,8 @@
     "upload_photo": "नई फ़ोटो अपलोड करें",
     "view_details": "विवरण देखें",
     "view_raw_data": "रॉ डेटा देखें",
-    "wipe_other_sessions": "अन्य सत्र साफ़ करें"
+    "wipe_other_sessions": "अन्य सत्र साफ़ करें",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "अंडोरा",
@@ -873,6 +874,14 @@
       "title": "प्रो समाप्ति तिथि",
       "unknown": "अज्ञात समाप्ति तिथि"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "कुंजी सक्रिय करें",
@@ -1210,7 +1219,9 @@
       "value_from_global": "ग्लोबल कॉन्फ़िगरेशन से मान",
       "run_job": "कार्य {{job}} चलाएं",
       "stop_instance": "इंस्टेंस {{hostname}} रोकें",
-      "unban_ip": "{{ip}} का प्रतिबंध हटाएं"
+      "unban_ip": "{{ip}} का प्रतिबंध हटाएं",
+      "force_check": "एक जांच शेड्यूल करता है; केवल अपडेट होने पर डाउनलोड करता है।",
+      "force_update": "जांचों को छोड़कर PRO प्लगइन्स का फोर्स डाउनलोड; विफल होने पर वर्तमान स्थिति बनी रहती है।"
     },
     "cannot_delete_original_ban": "मूल प्रतिबंध प्रविष्टि को हटाया नहीं जा सकता।",
     "cannot_remove_disabled": "हटाया नहीं जा सकता क्योंकि एक या अधिक सेटिंग्स अक्षम हैं।",

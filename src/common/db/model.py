@@ -342,6 +342,7 @@ class Metadata(Base):
     instances_changed = Column(Boolean, default=False, nullable=True)
     last_instances_change = Column(DateTime(timezone=True), nullable=True)
     reload_ui_plugins = Column(Boolean, default=False, nullable=True)
+    force_pro_update = Column(Boolean, default=False, nullable=True)
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)

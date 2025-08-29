@@ -136,7 +136,8 @@
     "upload_photo": "上傳新相片",
     "view_details": "檢視詳情",
     "view_raw_data": "檢視原始資料",
-    "wipe_other_sessions": "清除其他工作階段"
+    "wipe_other_sessions": "清除其他工作階段",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "安道爾",
@@ -874,6 +875,14 @@
       "title": "Pro 到期日期",
       "unknown": "未知的到期日期"
     },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
+    },
     "key": {
       "title": {
         "activate": "啟用金鑰",
@@ -1212,7 +1221,9 @@
       "value_from_global": "來自全域設定的值",
       "run_job": "執行任務 {{job}}",
       "stop_instance": "停止執行個體 {{hostname}}",
-      "unban_ip": "解除封鎖 {{ip}}"
+      "unban_ip": "解除封鎖 {{ip}}",
+      "force_check": "排程檢查；僅在有更新時下載。",
+      "force_update": "略過檢查並強制下載 PRO 外掛；失敗時保留目前狀態。"
     },
     "cannot_delete_original_ban": "無法刪除原始封鎖項目。",
     "cannot_remove_disabled": "無法移除，因為一或多個設定已停用。",
