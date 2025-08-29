@@ -83,41 +83,8 @@
             <i class="bx bx-save bx-sm"></i>
             <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
         </button>
-</div>
-
-<div class="modal fade"
-     id="modal-fetch-global-config"
-     data-bs-backdrop="static"
-     tabindex="-1"
-     aria-hidden="true"
-     role="dialog">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" data-i18n="modal.title.fetch_global_config">Apply global settings?</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n="aria.label.close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-info" role="alert">
-          <div class="fw-bold" data-i18n="modal.body.fetch_global_config_bold">This will fetch the global configuration and apply it to the current template.</div>
-          <ul class="mt-2 mb-0 ps-3">
-            <li data-i18n="modal.body.fetch_global_config_point_1">Only settings present in this template are updated.</li>
-            <li data-i18n="modal.body.fetch_global_config_point_2">Values identical to defaults are ignored.</li>
-            <li data-i18n="modal.body.fetch_global_config_point_3">SERVER_NAME is never overridden.</li>
-          </ul>
-        </div>
-      </div>
-      <div class="modal-footer justify-content-center">
-        <button id="confirm-fetch-global-config" class="btn btn-outline-info" data-bs-dismiss="modal" data-i18n="modal.button.fetch_global_config_confirm">Apply global settings</button>
-      </div>
     </div>
-  </div>
 </div>
-
-</div>
-</div>
-
-
 </div>
 </div>
 <div class="card tab-content m-1 p-2 position-relative">
@@ -394,6 +361,43 @@
                         class="btn btn-outline-danger me-2"
                         data-bs-dismiss="modal"
                         data-i18n="modal.button.reset_template_confirm">Reset template configuration</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade"
+     id="modal-fetch-global-config"
+     data-bs-backdrop="static"
+     tabindex="-1"
+     aria-hidden="true"
+     role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" data-i18n="modal.title.fetch_global_config">Apply global settings?</h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        data-i18n="aria.label.close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <div class="fw-bold" data-i18n="modal.body.fetch_global_config_bold">
+                        This will fetch the global configuration and apply it to the current template.
+                    </div>
+                    <ul class="mt-2 mb-0 ps-3">
+                        <li data-i18n="modal.body.fetch_global_config_point_1">Only settings present in this template are updated.</li>
+                        <li data-i18n="modal.body.fetch_global_config_point_2">Values identical to defaults are ignored.</li>
+                        <li data-i18n="modal.body.fetch_global_config_point_3">SERVER_NAME is never overridden.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button id="confirm-fetch-global-config"
+                        class="btn btn-outline-info"
+                        data-bs-dismiss="modal"
+                        data-i18n="modal.button.fetch_global_config_confirm">Apply global settings</button>
             </div>
         </div>
     </div>
