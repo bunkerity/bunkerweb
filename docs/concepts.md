@@ -65,7 +65,7 @@ You can also use the search bar and directly specify a setting name:
 
 !!! info "Going further"
 
-    The complete list of available settings with descriptions and possible values is available in the [settings section](features.md) of the documentation.
+    The complete list of available settings with descriptions and possible values is available in the [feature section](features.md) of the documentation.
 
 ## Multisite mode
 
@@ -105,7 +105,7 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/examples) directory of the repository.
 
 ## Custom configurations
 
@@ -126,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/examples) directory of the repository.
 
 ## Database
 
@@ -188,7 +188,7 @@ If you are using the web User Interface, you can manage scheduler jobs by clicki
   <figcaption>Manage jobs from the web UI</figcaption>
 </figure>
 
-**Instances health check**
+### Instances health check
 
 Since version 1.6.0, the scheduler possesses a built-in health check system that monitors the health of instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will resume sending the configuration.
 

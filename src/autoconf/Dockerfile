@@ -67,7 +67,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.4"
+LABEL version="1.6.5-rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="autoconf"
 
