@@ -2748,6 +2748,8 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -3694,7 +3696,7 @@ USE_IPV6=yes
 <p>With this plugin, administrators can effortlessly create, update, and disable user accounts, manage user roles, toggle two-factor authentication (2FA), and view detailed user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.</p>
 <h4 id="features_1">Features</h4>
 <ul>
-<li><strong>User Account Operations:</strong> Create, edit, and delete user accounts with ease.</li>
+<li><strong>User Account Operations:</strong> Import in CSV/XSLX format, Create, edit, and delete user accounts with ease.</li>
 <li><strong>Role-Based Access Control:</strong> Assign and modify user roles to manage permissions and access levels.</li>
 <li><strong>2FA Management:</strong> Disable two-factor authentication based on administrative decisions.</li>
 <li><strong>Comprehensive User Insights:</strong> Monitor key user data including last login times, account creation dates, and active/inactive status.</li>

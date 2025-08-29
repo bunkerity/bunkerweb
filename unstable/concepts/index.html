@@ -759,6 +759,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Scheduler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instances-health-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instances health check
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1069,7 +1084,7 @@ USE_BROTLI=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>The complete list of available settings with descriptions and possible values is available in the <a href="../features/">settings section</a> of the documentation.</p>
+<p>The complete list of available settings with descriptions and possible values is available in the <a href="../features/">feature section</a> of the documentation.</p>
 </div>
 <h2 id="multisite-mode">Multisite mode</h2>
 <p>Understanding the multisite mode is essential when utilizing BunkerWeb. As our primary focus is safeguarding web applications, our solution is intricately linked to the concept of "virtual hosts" or "vhosts" (more info <a href="https://en.wikipedia.org/wiki/Virtual_hosting">here</a>). These virtual hosts enable the serving of multiple web applications from a single instance or cluster.</p>
@@ -1178,7 +1193,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Manage jobs from the web UI</figcaption>
 </figure>
-<p><strong>Instances health check</strong></p>
+<h3 id="instances-health-check">Instances health check</h3>
 <p>Since version 1.6.0, the scheduler possesses a built-in health check system that monitors the health of instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will resume sending the configuration.</p>
 <p>The health check interval is set by the <code>HEALTHCHECK_INTERVAL</code> environment variable, with a default value of <code>30</code>, meaning the scheduler will check the health of the instances every 30 seconds.</p>
 <h2 id="templates">Templates</h2>

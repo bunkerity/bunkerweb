@@ -942,7 +942,7 @@
 <p><strong>Block bots</strong> with <strong>challenge-based verification</strong>: Keep malicious bots at bay by challenging them to solve puzzles such as cookies, JavaScript tests, captchas, hCaptcha, reCAPTCHA, or Turnstile, effectively blocking unauthorized access.</p>
 </li>
 <li>
-<p><strong>Block known bad IPs</strong> with external blacklists and DNSBL: Utilize external blacklists and DNS-based blackhole lists (DNSBL) to proactively block known malicious IP addresses, bolstering your defense against potential threats.</p>
+<p><strong>Block known bad IPs</strong> with external blacklists and <strong>DNSBL</strong>: Utilize external blacklists and DNS-based blackhole lists (DNSBL) to proactively block known malicious IP addresses, bolstering your defense against potential threats.</p>
 </li>
 <li>
 <p><strong>And much more...</strong>: BunkerWeb is packed with a plethora of additional security features that go beyond this list, providing you with comprehensive protection and peace of mind.</p>
@@ -979,7 +979,7 @@
 <h2 id="index-pro-version">PRO version</h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO free trial</p>
-<p>Want to quickly test BunkerWeb PRO for one month? Use the code <code>freetrial</code> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb panel</a> or by clicking <a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">here</a> to directly to apply the promo code (will be effective at checkout).</p>
+<p>Want to quickly test BunkerWeb PRO for one month? Use the code <code>freetrial</code> when placing your order on the <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> or by clicking <a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">here</a> to directly to apply the promo code (will be effective at checkout).</p>
 </div>
 <p>When using BunkerWeb, you have the choice of the version you want to use: open-source or PRO.</p>
 <p>Whether it's enhanced security, an enriched user experience, or technical monitoring, the BunkerWeb PRO version allows you to fully benefit from BunkerWeb and meet your professional needs.</p>
@@ -1009,7 +1009,7 @@
 <ul>
 <li><a href="https://discord.com/invite/fTf46FmtyD"><strong>Discord</strong></a></li>
 <li><a href="https://www.linkedin.com/company/bunkerity/"><strong>LinkedIn</strong></a></li>
-<li><a href="https://twitter.com/bunkerity"><strong>Twitter</strong></a></li>
+<li><a href="https://x.com/bunkerity"><strong>X (Formerly Twitter)</strong></a></li>
 <li><a href="https://www.reddit.com/r/BunkerWeb/"><strong>Reddit</strong></a></li>
 </ul></section><section class="print-page" id="concepts" heading-number="2"><h1 id="concepts-concepts">Concepts</h1>
 <h2 id="concepts-architecture">Architecture</h2>
@@ -1063,7 +1063,7 @@ USE_BROTLI=no
 </figure>
 <div class="admonition info">
 <p class="admonition-title">Going further</p>
-<p>The complete list of available settings with descriptions and possible values is available in the <a href="#features">settings section</a> of the documentation.</p>
+<p>The complete list of available settings with descriptions and possible values is available in the <a href="#features">feature section</a> of the documentation.</p>
 </div>
 <h2 id="concepts-multisite-mode">Multisite mode</h2>
 <p>Understanding the multisite mode is essential when utilizing BunkerWeb. As our primary focus is safeguarding web applications, our solution is intricately linked to the concept of "virtual hosts" or "vhosts" (more info <a href="https://en.wikipedia.org/wiki/Virtual_hosting">here</a>). These virtual hosts enable the serving of multiple web applications from a single instance or cluster.</p>
@@ -1172,7 +1172,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Manage jobs from the web UI</figcaption>
 </figure>
-<p><strong>Instances health check</strong></p>
+<h3 id="concepts-instances-health-check">Instances health check</h3>
 <p>Since version 1.6.0, the scheduler possesses a built-in health check system that monitors the health of instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will resume sending the configuration.</p>
 <p>The health check interval is set by the <code>HEALTHCHECK_INTERVAL</code> environment variable, with a default value of <code>30</code>, meaning the scheduler will check the health of the instances every 30 seconds.</p>
 <h2 id="concepts-templates">Templates</h2>
@@ -1313,7 +1313,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <ul>
 <li><code>SERVICE_UI=yes</code> (default) - Enables the web UI service</li>
 <li><code>SERVICE_SCHEDULER=yes</code> (default) - Enables the Scheduler service</li>
-<li><code>SERVICE_AUTOCONF=no</code> (default) - Enables the autoconf service</li>
+<li><code>AUTOCONF_MODE=no</code> (default) - Enables the autoconf service</li>
 <li><code>USE_REDIS=yes</code> (default) - Enables the built-in <a href="#integrations-redis-integration">Redis</a> instance</li>
 <li><code>USE_CROWDSEC=no</code> (default) - <a href="#integrations-crowdsec-integration">CrowdSec</a> integration is disabled by default</li>
 </ul>
@@ -1933,245 +1933,185 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dry-
 - Interactive mode (default) will prompt for missing required values
 - Non-interactive mode (<code>--yes</code>) requires all necessary options to be provided via command line</p>
 </div>
-<div class="highlight"><pre><span></span><code>#### CrowdSec Integration with the Script
-
-If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:
-
-- It adds the official CrowdSec repository and installs the agent.
-- It creates a new acquisition file to make CrowdSec parse BunkerWeb&#39;s logs (`access.log`, `error.log`, and `modsec_audit.log`).
-- It installs essential collections (`crowdsecurity/nginx`) and parsers (`crowdsecurity/geoip-enrich`).
-- It registers a bouncer for BunkerWeb and automatically configures the API key in `/etc/bunkerweb/variables.env`.
-- If you also select the **AppSec Component**, it installs the `appsec-virtual-patching` and `appsec-generic-rules` collections and configures the AppSec endpoint for BunkerWeb.
-
-This provides a seamless, out-of-the-box integration for powerful intrusion prevention.
-
-#### RHEL considerations
-
-!!! warning &quot;External database support on RHEL-based systems&quot;
-    If you plan to use an external database (recommended for production), you must install the appropriate database client package:
-
-    ```bash
-    # For MariaDB
-    sudo dnf install mariadb
-
-    # For MySQL
-    sudo dnf install mysql
-
-    # For PostgreSQL
-    sudo dnf install postgresql
-    ```
-
-    This is required for the BunkerWeb Scheduler to connect to your external database.
-
-#### After installation
-
-Depending on your choices during installation:
-
-**With setup wizard enabled:**
-
-1. Access the setup wizard at: `https://your-server-ip/setup`
-2. Follow the guided configuration to set up your first protected service
-3. Configure SSL/TLS certificates and other security settings
-
-**Without setup wizard:**
-
-1. Edit `/etc/bunkerweb/variables.env` to configure BunkerWeb manually
-2. Add your server settings and protected services
-3. Restart the scheduler: `sudo systemctl restart bunkerweb-scheduler`
-
-### Installation using package manager
-
-Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
-
-=== &quot;Debian Bookworm/Trixie&quot;
-
-    The first step is to add NGINX official repository:
-
-    ```shell
-    sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring &amp;&amp; \
-    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null &amp;&amp; \
-    echo &quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-    http://nginx.org/packages/debian `lsb_release -cs` nginx&quot; \
-    | sudo tee /etc/apt/sources.list.d/nginx.list
-    ```
-
-    You should now be able to install NGINX 1.28.0:
-
-    ```shell
-    sudo apt update &amp;&amp; \
-    sudo apt install -y --allow-downgrades nginx=1.28.0-1~$(lsb_release -cs)
-    ```
-
-    !!! warning &quot;Testing/dev version&quot;
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo &quot;force-bad-version&quot; | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
-    !!! example &quot;Disable the setup wizard&quot;
-        If you don&#39;t want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
-
-        ```shell
-        export UI_WIZARD=no
-        ```
-
-    And finally install BunkerWeb testing:
-
-    ```shell
-    curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash &amp;&amp; \
-    sudo apt update &amp;&amp; \
-    sudo -E apt install -y --allow-downgrades bunkerweb=testing
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
-
-    ```shell
-    sudo apt-mark hold nginx bunkerweb
-    ```
-
-=== &quot;Ubuntu&quot;
-
-    The first step is to add NGINX official repository:
-
-    ```shell
-    sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring &amp;&amp; \
-    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null &amp;&amp; \
-    echo &quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-    http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot; \
-    | sudo tee /etc/apt/sources.list.d/nginx.list
-    ```
-
-    You should now be able to install NGINX 1.28.0:
-
-    ```shell
-    sudo apt update &amp;&amp; \
-    sudo apt install -y --allow-downgrades nginx=1.28.0-1~$(lsb_release -cs)
-    ```
-
-    !!! warning &quot;Testing/dev version&quot;
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo &quot;force-bad-version&quot; | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
-    !!! example &quot;Disable the setup wizard&quot;
-        If you don&#39;t want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
-
-        ```shell
-        export UI_WIZARD=no
-        ```
-
-    And finally install BunkerWeb testing:
-
-    ```shell
-    curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash &amp;&amp; \
-    sudo apt update &amp;&amp; \
-    sudo -E apt install -y --allow-downgrades bunkerweb=testing
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
-
-    ```shell
-    sudo apt-mark hold nginx bunkerweb
-    ```
-
-=== &quot;Fedora&quot;
-
-    !!! info &quot;Fedora Update Testing&quot;
-        If you can&#39;t find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository:
-
-        ```shell
-        sudo dnf config-manager setopt updates-testing.enabled=1
-        ```
-
-    Fedora already provides NGINX 1.28.0 that we support
-
-    ```shell
-    sudo dnf install -y --allowerasing nginx-1.28.0
-    ```
-
-    !!! example &quot;Disable the setup wizard&quot;
-        If you don&#39;t want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
-
-        ```shell
-        export UI_WIZARD=no
-        ```
-
-    And finally install BunkerWeb testing:
-
-    ```shell
-    curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash &amp;&amp; \
-    sudo dnf makecache &amp;&amp; \
-    sudo -E dnf install -y --allowerasing bunkerweb-testing
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
-
-    ```shell
-    sudo dnf versionlock add nginx &amp;&amp; \
-    sudo dnf versionlock add bunkerweb
-    ```
-
-=== &quot;RedHat&quot;
-
-    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo`:
-
-    ```conf
-    [nginx-stable]
-    name=nginx stable repo
-    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-    gpgcheck=1
-    enabled=1
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-
-    [nginx-mainline]
-    name=nginx mainline repo
-    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
-    gpgcheck=1
-    enabled=0
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-    ```
-
-    You should now be able to install NGINX 1.28.0:
-
-    ```shell
-    sudo dnf install --allowerasing nginx-1.28.0
-    ```
-
-    !!! example &quot;Disable the setup wizard&quot;
-        If you don&#39;t want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
-
-        ```shell
-        export UI_WIZARD=no
-        ```
-
-    And finally install BunkerWeb testing:
-
-    ```shell
-    curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash &amp;&amp; \
-    sudo dnf check-update &amp;&amp; \
-    sudo -E dnf install -y --allowerasing bunkerweb-testing
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
-
-    ```shell
-    sudo dnf versionlock add nginx &amp;&amp; \
-    sudo dnf versionlock add bunkerweb
-    ```
-
-### Configuration and service
-
-Manual configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file:
-
-```conf
-MY_SETTING_1=value1
+<h4 id="integrations-crowdsec-integration-with-the-script">CrowdSec Integration with the Script</h4>
+<p>If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:</p>
+<ul>
+<li>It adds the official CrowdSec repository and installs the agent.</li>
+<li>It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (<code>access.log</code>, <code>error.log</code>, and <code>modsec_audit.log</code>).</li>
+<li>It installs essential collections (<code>crowdsecurity/nginx</code>) and parsers (<code>crowdsecurity/geoip-enrich</code>).</li>
+<li>It registers a bouncer for BunkerWeb and automatically configures the API key in <code>/etc/bunkerweb/variables.env</code>.</li>
+<li>If you also select the <strong>AppSec Component</strong>, it installs the <code>appsec-virtual-patching</code> and <code>appsec-generic-rules</code> collections and configures the AppSec endpoint for BunkerWeb.</li>
+</ul>
+<p>This provides a seamless, out-of-the-box integration for powerful intrusion prevention.</p>
+<h4 id="integrations-rhel-considerations">RHEL considerations</h4>
+<div class="admonition warning">
+<p class="admonition-title">External database support on RHEL-based systems</p>
+<p>If you plan to use an external database (recommended for production), you must install the appropriate database client package:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># For MariaDB</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>mariadb
+
+<span class="c1"># For MySQL</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>mysql
+
+<span class="c1"># For PostgreSQL</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>postgresql
+</code></pre></div>
+<p>This is required for the BunkerWeb Scheduler to connect to your external database.</p>
+</div>
+<h4 id="integrations-after-installation">After installation</h4>
+<p>Depending on your choices during installation:</p>
+<p><strong>With setup wizard enabled:</strong></p>
+<ol>
+<li>Access the setup wizard at: <code>https://your-server-ip/setup</code></li>
+<li>Follow the guided configuration to set up your first protected service</li>
+<li>Configure SSL/TLS certificates and other security settings</li>
+</ol>
+<p><strong>Without setup wizard:</strong></p>
+<ol>
+<li>Edit <code>/etc/bunkerweb/variables.env</code> to configure BunkerWeb manually</li>
+<li>Add your server settings and protected services</li>
+<li>Restart the scheduler: <code>sudo systemctl restart bunkerweb-scheduler</code></li>
+</ol>
+<h3 id="integrations-installation-using-package-manager">Installation using package manager</h3>
+<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="integrations-__tabbed_1_1" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_2" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_3" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_4" name="integrations-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="integrations-__tabbed_1_1">Debian Bookworm/Trixie</label><label for="integrations-__tabbed_1_2">Ubuntu</label><label for="integrations-__tabbed_1_3">Fedora</label><label for="integrations-__tabbed_1_4">RedHat</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>The first step is to add NGINX official repository:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gnupg2<span class="w"> </span>ca-certificates<span class="w"> </span>lsb-release<span class="w"> </span>debian-archive-keyring<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/usr/share/keyrings/nginx-archive-keyring.gpg<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
+<span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
+</code></pre></div>
+<p>You should now be able to install NGINX 1.28.0:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Testing/dev version</p>
+<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;force-bad-version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
+</code></pre></div>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Disable the setup wizard</p>
+<p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
+</code></pre></div>
+</div>
+<p>And finally install BunkerWeb testing:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+</code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>The first step is to add NGINX official repository:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gnupg2<span class="w"> </span>ca-certificates<span class="w"> </span>lsb-release<span class="w"> </span>ubuntu-keyring<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/usr/share/keyrings/nginx-archive-keyring.gpg<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
+<span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
+</code></pre></div>
+<p>You should now be able to install NGINX 1.28.0:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Testing/dev version</p>
+<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;force-bad-version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
+</code></pre></div>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Disable the setup wizard</p>
+<p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
+</code></pre></div>
+</div>
+<p>And finally install BunkerWeb testing:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+</code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition info">
+<p class="admonition-title">Fedora Update Testing</p>
+<p>If you can't find the NGINX version listed in the stable repository, you can enable the <code>updates-testing</code> repository:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
+</code></pre></div>
+</div>
+<p>Fedora already provides NGINX 1.28.0 that we support</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.0
+</code></pre></div>
+<div class="admonition example">
+<p class="admonition-title">Disable the setup wizard</p>
+<p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
+</code></pre></div>
+</div>
+<p>And finally install BunkerWeb testing:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-testing
+</code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>The first step is to add NGINX official repository. Create the following file at <code>/etc/yum.repos.d/nginx.repo</code>:</p>
+<div class="highlight"><pre><span></span><code>[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+
+[nginx-mainline]
+name=nginx mainline repo
+baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+</code></pre></div>
+<p>You should now be able to install NGINX 1.28.0:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.0
+</code></pre></div>
+<div class="admonition example">
+<p class="admonition-title">Disable the setup wizard</p>
+<p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
+</code></pre></div>
+</div>
+<p>And finally install BunkerWeb testing:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-testing
+</code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="integrations-configuration-and-service">Configuration and service</h3>
+<p>Manual configuration of BunkerWeb is done by editing the <code>/etc/bunkerweb/variables.env</code> file:</p>
+<div class="highlight"><pre><span></span><code>MY_SETTING_1=value1
 MY_SETTING_2=value2
 ...
 </code></pre></div>
@@ -2179,7 +2119,7 @@ MY_SETTING_2=value2
 <p>If you manually edit the BunkerWeb configuration using <code>/etc/bunkerweb/variables.env</code> a restart of the <code>bunkerweb-scheduler</code> service will be enough to generate and reload the configuration without any downtime. But depending on the case (such as changing listening ports) you might need to restart the <code>bunkerweb</code> service.</p>
 <h3 id="integrations-high-availability">High availability</h3>
 <p>The scheduler can be detached from the BunkerWeb instance to provide high availability. In this case, the scheduler will be installed on a separate server and will be able to manage multiple BunkerWeb instances.</p>
-<p><strong>Manager</strong></p>
+<h4 id="integrations-manager">Manager</h4>
 <p>To install only the scheduler on a server, you can export the following variables before executing the BunkerWeb installation:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">MANAGER_MODE</span><span class="o">=</span>yes
 <span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
@@ -2189,7 +2129,7 @@ MY_SETTING_2=value2
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_BUNKERWEB</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>no
 </code></pre></div>
-<p><strong>Worker</strong></p>
+<h4 id="integrations-worker">Worker</h4>
 <p>On another server, to install only BunkerWeb, you can export the following variables before executing the BunkerWeb installation:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">WORKER_MODE</span><span class="o">=</span>yes
 </code></pre></div>
@@ -2198,7 +2138,7 @@ MY_SETTING_2=value2
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_SCHEDULER</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>no
 </code></pre></div>
-<p><strong>Web UI</strong></p>
+<h4 id="integrations-web-ui">Web UI</h4>
 <p>The Web UI can be installed on a separate server to provide a dedicated interface for managing BunkerWeb instances. To install only the Web UI, you can export the following variables before executing the BunkerWeb installation:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_BUNKERWEB</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_SCHEDULER</span><span class="o">=</span>no
@@ -2292,6 +2232,8 @@ MY_SETTING_2=value2
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -2402,7 +2344,7 @@ MY_SETTING_2=value2
 <p>Clustered database backends setup are out-of-the-scope of this documentation.</p>
 </div>
 <p>Please ensure that the autoconf services have access to the Kubernetes API. It is recommended to utilize <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">RBAC authorization</a> for this purpose.</p>
-<div class="admonition warn">
+<div class="admonition warning">
 <p class="admonition-title">Custom CA for Kubernetes API</p>
 <p>If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the <code>KUBERNETES_SSL_CA_CERT</code> environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the <code>KUBERNETES_SSL_VERIFY</code> environment variable of the ingress controller to <code>no</code> (default is <code>yes</code>).</p>
 </div>
@@ -2539,7 +2481,7 @@ MY_SETTING_2=value2
 <p class="admonition-title">Keeping both existing ingress controller and BunkerWeb</p>
 <p>This is a use-case where you want to keep an existing ingress controller such as the nginx one. Typical traffic flow will be: Load Balancer =&gt; Ingress Controller =&gt; BunkerWeb =&gt; Application.</p>
 </div>
-<p><strong>nginx ingress controller install</strong></p>
+<h4 id="integrations-nginx-ingress-controller-install">nginx ingress controller install</h4>
 <p>Install ingress nginx helm repo:</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>ingress-nginx<span class="w"> </span>https://kubernetes.github.io/ingress-nginx
 helm<span class="w"> </span>repo<span class="w"> </span>update
@@ -2711,7 +2653,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 </div>
 <div class="admonition tip">
 <p class="admonition-title">PRO support</p>
-<p><strong>If you need Swarm support</strong>, please contact us at <a href="mailto:contact@bunkerity.com">contact@bunkerity.com</a> or via the <a href="https://panel.bunkerweb.io/contact.php">contact form</a>.</p>
+<p><strong>If you need Swarm support</strong>, please contact us at <a href="mailto:contact@bunkerity.com">contact@bunkerity.com</a> or via the <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact form</a>.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Docker autoconf</p>
@@ -2821,6 +2763,8 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -2967,7 +2911,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <li>Azure ARM Template</li>
 <li>Azure portal via the Marketplace</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="integrations-__tabbed_1_1" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_2" name="integrations-__tabbed_1" type="radio" /><input id="integrations-__tabbed_1_3" name="integrations-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="integrations-__tabbed_1_1">Cloud Shell</label><label for="integrations-__tabbed_1_2">ARM Template</label><label for="integrations-__tabbed_1_3">Marketplace</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="integrations-__tabbed_2_1" name="integrations-__tabbed_2" type="radio" /><input id="integrations-__tabbed_2_2" name="integrations-__tabbed_2" type="radio" /><input id="integrations-__tabbed_2_3" name="integrations-__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="integrations-__tabbed_2_1">Cloud Shell</label><label for="integrations-__tabbed_2_2">ARM Template</label><label for="integrations-__tabbed_2_3">Marketplace</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Create a resource group. Replace value <code>RG_NAME</code></p>
@@ -3032,118 +2976,23 @@ To deploy a virtual machine, you need Microsoft.Compute/virtualMachines/write an
 <p>The All-In-One image comes with several built-in services, which can be controlled using environment variables. See the <a href="#integrations-all-in-one-aio-image">All-In-One (AIO) Image section</a> of the integrations page for more details.</p>
 </div>
 <div class="tabbed-block">
-<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="quickstart-guide-__tabbed_2_1" name="quickstart-guide-__tabbed_2" type="radio" /><input id="quickstart-guide-__tabbed_2_2" name="quickstart-guide-__tabbed_2" type="radio" /><input id="quickstart-guide-__tabbed_2_3" name="quickstart-guide-__tabbed_2" type="radio" /><input id="quickstart-guide-__tabbed_2_4" name="quickstart-guide-__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_2_1">Debian Bookworm/Trixie</label><label for="quickstart-guide-__tabbed_2_2">Ubuntu</label><label for="quickstart-guide-__tabbed_2_3">Fedora</label><label for="quickstart-guide-__tabbed_2_4">RedHat</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p>The first step is to add the official NGINX repository:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gnupg2<span class="w"> </span>ca-certificates<span class="w"> </span>lsb-release<span class="w"> </span>debian-archive-keyring<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="se">\</span>
-<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/usr/share/keyrings/nginx-archive-keyring.gpg<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
-<span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
-</code></pre></div>
-<p>You should now be able to install NGINX 1.28.0:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
-</code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">Testing/dev version</p>
-<p>If you use the <code>testing</code> or <code>dev</code> version, you need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;force-bad-version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
-</code></pre></div>
-</div>
-<p>And finally install BunkerWeb testing:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
-</code></pre></div>
-<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>The first step is to add the official NGINX repository:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gnupg2<span class="w"> </span>ca-certificates<span class="w"> </span>lsb-release<span class="w"> </span>ubuntu-keyring<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="se">\</span>
-<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/usr/share/keyrings/nginx-archive-keyring.gpg<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
-<span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
-</code></pre></div>
-<p>You should now be able to install NGINX 1.28.0:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
-</code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">Testing/dev version</p>
-<p>If you use the <code>testing</code> or <code>dev</code> version, you need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;force-bad-version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
-</code></pre></div>
-</div>
-<p>And finally install BunkerWeb testing:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
-</code></pre></div>
-<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="admonition info">
-<p class="admonition-title">Fedora Update Testing</p>
-<p>If you cannot find the NGINX version listed in the stable repository, you can enable the <code>updates-testing</code> repository:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
-</code></pre></div>
-</div>
-<p>Fedora already provides NGINX 1.28.0 that we support</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx-1.28.0
-</code></pre></div>
-<p>And finally install BunkerWeb testing:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
-</code></pre></div>
-<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>The first step is to add the NGINX official repository. Create the following file at <code>/etc/yum.repos.d/nginx.repo</code>:</p>
-<div class="highlight"><pre><span></span><code>[nginx-stable]
-name=nginx stable repo
-baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-gpgcheck=1
-enabled=1
-gpgkey=https://nginx.org/keys/nginx_signing.key
-module_hotfixes=true
+<p>Use the Easy Install script to set up BunkerWeb on supported Linux distributions. It automatically installs and configures NGINX, adds the BunkerWeb repository, and sets up the required services.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
-[nginx-mainline]
-name=nginx mainline repo
-baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
-gpgcheck=1
-enabled=0
-gpgkey=https://nginx.org/keys/nginx_signing.key
-module_hotfixes=true
+<span class="c1"># Verify the checksum</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
+
+<span class="c1"># If the check is successful, run the script</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>install-bunkerweb.sh
+sudo<span class="w"> </span>./install-bunkerweb.sh
 </code></pre></div>
-<p>You should now be able to install NGINX 1.28.0:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>nginx-1.28.0
-</code></pre></div>
-<p>And finally install BunkerWeb testing:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bunkerweb-testing
-</code></pre></div>
-<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
-</code></pre></div>
+<div class="admonition danger">
+<p class="admonition-title">Security Notice</p>
+<p>Always verify the script integrity with the provided checksum before executing it.</p>
 </div>
-</div>
-</div>
+<p>For advanced installation methods (package manager, installation types, non-interactive flags, CrowdSec integration, etc.), see the <a href="#integrations-linux">Linux Integration</a>.</p>
 </div>
 <div class="tabbed-block">
 <p>Here is the full docker compose file that you can use; please note that we will later connect the web service to the <code>bw-services</code> network:</p>
@@ -3537,7 +3386,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </figure>
 <p>Once you're on the setup page, you can enter the <strong>administrator username, email, and password</strong> and click on the "Next" button.</p>
 <h3 id="quickstart-guide-configure-the-reverse-proxy-https-and-other-advanced-settings">Configure the Reverse Proxy, HTTPS and other advanced settings</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="quickstart-guide-__tabbed_3_1" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_2" name="quickstart-guide-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_3_1">Basic setup</label><label for="quickstart-guide-__tabbed_3_2">Advanced setup</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="quickstart-guide-__tabbed_2_1" name="quickstart-guide-__tabbed_2" type="radio" /><input id="quickstart-guide-__tabbed_2_2" name="quickstart-guide-__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_2_1">Basic setup</label><label for="quickstart-guide-__tabbed_2_2">Advanced setup</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>The next step will ask you to enter the <strong>server name</strong> (domain/FQDN) that the web UI will use.</p>
@@ -3553,8 +3402,8 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <p>If you expand the <code>Advanced settings</code> section, you can also configure the following options:</p>
 <ul>
 <li><strong>Reverse Proxy</strong>: Tweak the Reverse Proxy settings for your administrator interface (e.g., if you want to use a path).</li>
-<li><a href="#features-real-ip">Real IP</a>: Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).</li>
-<li><a href="#features-custom-ssl-certificate">Custom Certificate</a>: Upload a custom TLS certificate if you don't want to use Let's Encrypt.</li>
+<li><a href="#features-real-ip"><strong>Real IP</strong></a>: Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).</li>
+<li><a href="#features-custom-ssl-certificate"><strong>Custom Certificate</strong></a>: Upload a custom TLS certificate if you don't want to use Let's Encrypt.</li>
 </ul>
 <p><figure markdown>
   <img align="center" alt="Setup Wizard step 2" src="../assets/img/ui-wizard-step2-advanced.png" />
@@ -3591,7 +3440,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <figcaption>Web interface home</figcaption>
 </figure>
 <h2 id="quickstart-guide-creating-a-new-service">Creating a new service</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:7"><input checked="checked" id="quickstart-guide-__tabbed_4_1" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_2" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_3" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_4" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_5" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_6" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_7" name="quickstart-guide-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_4_1">Web UI</label><label for="quickstart-guide-__tabbed_4_2">All-in-one</label><label for="quickstart-guide-__tabbed_4_3">Linux variables.env file</label><label for="quickstart-guide-__tabbed_4_4">Docker</label><label for="quickstart-guide-__tabbed_4_5">Docker autoconf labels</label><label for="quickstart-guide-__tabbed_4_6">Kubernetes annotations</label><label for="quickstart-guide-__tabbed_4_7">Swarm labels</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="quickstart-guide-__tabbed_3_1" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_2" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_3" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_4" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_5" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_6" name="quickstart-guide-__tabbed_3" type="radio" /><input id="quickstart-guide-__tabbed_3_7" name="quickstart-guide-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_3_1">Web UI</label><label for="quickstart-guide-__tabbed_3_2">All-in-one</label><label for="quickstart-guide-__tabbed_3_3">Linux variables.env file</label><label for="quickstart-guide-__tabbed_3_4">Docker</label><label for="quickstart-guide-__tabbed_3_5">Docker autoconf labels</label><label for="quickstart-guide-__tabbed_3_6">Kubernetes annotations</label><label for="quickstart-guide-__tabbed_3_7">Swarm labels</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can create a new service by navigating to the <code>Services</code> section of the web interface and clicking on the <code>➕ Create new service</code> button.</p>
@@ -3605,7 +3454,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <p class="admonition-title">Draft service</p>
 <p>You can create a draft service to save your progress and come back to it later. Just click on the <code>🌐 Online</code> button to toggle the service to draft mode.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="quickstart-guide-__tabbed_5_1" name="quickstart-guide-__tabbed_5" type="radio" /><input id="quickstart-guide-__tabbed_5_2" name="quickstart-guide-__tabbed_5" type="radio" /><input id="quickstart-guide-__tabbed_5_3" name="quickstart-guide-__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_5_1">Easy mode</label><label for="quickstart-guide-__tabbed_5_2">Advanced mode</label><label for="quickstart-guide-__tabbed_5_3">Raw mode</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="quickstart-guide-__tabbed_4_1" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_2" name="quickstart-guide-__tabbed_4" type="radio" /><input id="quickstart-guide-__tabbed_4_3" name="quickstart-guide-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_4_1">Easy mode</label><label for="quickstart-guide-__tabbed_4_2">Advanced mode</label><label for="quickstart-guide-__tabbed_4_3">Raw mode</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>In this mode, you can choose among the available templates and fill in the required fields.</p>
@@ -6487,6 +6336,8 @@ log {
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -6513,8 +6364,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
-<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
@@ -8578,6 +8428,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>global</td>
 <td>yes</td>
 <td>Load balancing mode (round-robin or sticky).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Sticky session method (ip or cookie).</td>
 </tr>
 <tr>
 <td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
@@ -11261,7 +11118,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Custom URLs:</strong> Rules are fetched from user-provided URLs (specified by <code>ROBOTSTXT_URLS</code>).</li>
 <li><strong>Manual Rules:</strong> Rules defined directly via <code>ROBOTSTXT_RULE</code> environment variables are added.</li>
 </ol>
-<p>All rules from these sources are combined. After aggregation, <code>ROBOTSTXT_IGNORE_RULES</code> are applied to filter out any unwanted rules using PCRE regex patterns. Finally, if no rules remain after this entire process, a default <code>User-agent: *</code> and <code>Disallow: /</code> rule is automatically applied to ensure a basic level of protection. Optional sitemap URLs (specified by <code>ROBOTSTXT_SITEMAP</code>) are also included in the final <code>robots.txt</code> output.</p>
+<p>All rules from these sources are combined. After aggregation, <code>ROBOTSTXT_IGNORE_RULE</code> are applied to filter out any unwanted rules using PCRE regex patterns. Finally, if no rules remain after this entire process, a default <code>User-agent: *</code> and <code>Disallow: /</code> rule is automatically applied to ensure a basic level of protection. Optional sitemap URLs (specified by <code>ROBOTSTXT_SITEMAP</code>) are also included in the final <code>robots.txt</code> output.</p>
 <h3 id="features-dynamic-bot-circumvention-with-darkvisitors-api">Dynamic Bot Circumvention with DarkVisitors API</h3>
 <p><a href="https://darkvisitors.com/">DarkVisitors</a> is a service that provides a dynamic <code>robots.txt</code> file to help block known malicious bots and AI crawlers. By integrating with DarkVisitors, BunkerWeb can automatically fetch and serve an up-to-date <code>robots.txt</code> that helps protect your site from unwanted automated traffic.</p>
 <p>To enable this, you need to sign up at <a href="https://darkvisitors.com/docs/robots-txt">darkvisitors.com</a> and obtain a bearer token.</p>
@@ -11275,7 +11132,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Manual Rules:</strong> Use <code>ROBOTSTXT_RULE</code> for individual rules (multiple rules can be specified with <code>ROBOTSTXT_RULE_N</code>).</li>
 </ul>
 </li>
-<li><strong>Filter rules (optional):</strong> Use <code>ROBOTSTXT_IGNORE_RULES_N</code> to exclude specific rules by regex pattern.</li>
+<li><strong>Filter rules (optional):</strong> Use <code>ROBOTSTXT_IGNORE_RULE_N</code> to exclude specific rules by regex pattern.</li>
 <li><strong>Add sitemaps (optional):</strong> Use <code>ROBOTSTXT_SITEMAP_N</code> for sitemap URLs.</li>
 <li><strong>Obtain the generated robots.txt file:</strong> Once BunkerWeb is running with the above settings, you can access the dynamically generated <code>robots.txt</code> file by making an HTTP GET request to <code>http(s)://your-domain.com/robots.txt</code>.</li>
 </ol>
@@ -11355,7 +11212,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>Footer for <code>robots.txt</code> file (after rules). Can be Base64 encoded.</td>
 </tr>
 <tr>
-<td><code>ROBOTSTXT_IGNORE_RULES</code></td>
+<td><code>ROBOTSTXT_IGNORE_RULE</code></td>
 <td></td>
 <td>multisite</td>
 <td>Yes</td>
@@ -11382,7 +11239,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">ROBOTSTXT_DARKVISITORS_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-darkvisitors-token-here&quot;</span>
 <span class="nt">ROBOTSTXT_DARKVISITORS_AGENT_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AI</span><span class="nv"> </span><span class="s">Data</span><span class="nv"> </span><span class="s">Scraper&quot;</span>
 <span class="nt">ROBOTSTXT_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;robots-disallowed&quot;</span>
-<span class="nt">ROBOTSTXT_IGNORE_RULES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
+<span class="nt">ROBOTSTXT_IGNORE_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
 </code></pre></div>
 <p><strong>Combined Configuration</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -11391,7 +11248,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">ROBOTSTXT_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/my-custom-rules.txt&quot;</span>
 <span class="nt">ROBOTSTXT_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">MyOwnBot&quot;</span>
 <span class="nt">ROBOTSTXT_RULE_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Disallow:</span><span class="nv"> </span><span class="s">/admin&quot;</span>
-<span class="nt">ROBOTSTXT_IGNORE_RULES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
+<span class="nt">ROBOTSTXT_IGNORE_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
 <span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span>
 </code></pre></div>
 <p><strong>With Header and Footer</strong></p>
@@ -13797,6 +13654,8 @@ find<span class="w"> </span>./www<span class="w"> </span>-type<span class="w"> <
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -14743,7 +14602,7 @@ USE_IPV6=yes
 <p>With this plugin, administrators can effortlessly create, update, and disable user accounts, manage user roles, toggle two-factor authentication (2FA), and view detailed user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.</p>
 <h4 id="advanced-features_1">Features</h4>
 <ul>
-<li><strong>User Account Operations:</strong> Create, edit, and delete user accounts with ease.</li>
+<li><strong>User Account Operations:</strong> Import in CSV/XSLX format, Create, edit, and delete user accounts with ease.</li>
 <li><strong>Role-Based Access Control:</strong> Assign and modify user roles to manage permissions and access levels.</li>
 <li><strong>2FA Management:</strong> Disable two-factor authentication based on administrative decisions.</li>
 <li><strong>Comprehensive User Insights:</strong> Monitor key user data including last login times, account creation dates, and active/inactive status.</li>
@@ -14921,6 +14780,8 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -14933,8 +14794,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
-<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
@@ -15061,6 +14921,8 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -15084,8 +14946,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 
 <span class="w">  </span><span class="nt">bw-syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
-<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
@@ -15367,6 +15228,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -15472,6 +15335,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -15643,6 +15508,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -15734,11 +15601,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p>For updates, edit the relevant file and update the provenance table as needed.</p>
 <p>See the <a href="https://github.com/bunkerity/bunkerweb/raw/vtesting/src/ui/app/static/locales/README.md">locales/README.md</a> for full guidelines.</p></section><section class="print-page" id="upgrading" heading-number="8"><h1 id="upgrading-upgrading">Upgrading</h1>
 <h2 id="upgrading-upgrade-from-16x">Upgrade from 1.6.X</h2>
-<div class="admonition warning">
-<p class="admonition-title">Read me first</p>
-<p>We often add new features and settings to BunkerWeb. We recommend you read the <a href="#features">settings</a> sections of the documentation or the GitHub releases to see what's new.</p>
-</div>
 <h3 id="upgrading-procedure">Procedure</h3>
+<h4 id="upgrading-docker">Docker</h4>
 <ol>
 <li>
 <p><strong>Backup the database</strong>:</p>
@@ -15746,15 +15610,204 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.</li>
 <li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="upgrading-__tabbed_1_1" name="upgrading-__tabbed_1" type="radio" /><input id="upgrading-__tabbed_1_2" name="upgrading-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_1_1">Docker</label><label for="upgrading-__tabbed_1_2">Linux</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>cp<span class="w"> </span>&lt;scheduler_container&gt;:/path/to/backup/directory<span class="w"> </span>/path/to/backup/directory
 </code></pre></div>
+</li>
+<li>
+<p><strong>Upgrade BunkerWeb</strong>:</p>
+<ul>
+<li>
+<p>Upgrade BunkerWeb to the latest version.</p>
+<ol>
+<li>
+<p><strong>Update the Docker Compose file</strong>: Update the Docker Compose file to use the new version of the BunkerWeb image.
+    <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:testing</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Restart the containers</strong>: Restart the containers to apply the changes.
+    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div></p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Check the logs</strong>: Check the logs of the scheduler service to ensure that the migration was successful.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>&lt;scheduler_container&gt;
+</code></pre></div>
+</li>
+<li>
+<p><strong>Verify the database</strong>: Verify that the database upgrade was successful by checking the data and configurations in the new database container.</p>
+</li>
+</ol>
+<h4 id="upgrading-linux">Linux</h4>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="upgrading-__tabbed_1_1" name="upgrading-__tabbed_1" type="radio" /><input id="upgrading-__tabbed_1_2" name="upgrading-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_1_1">Easy upgrade using the install script</label><label for="upgrading-__tabbed_1_2">Manual</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ul>
+<li>
+<p><strong>Quick start</strong>:</p>
+<p>To get started, download the installation script and its checksum, then verify the script's integrity before running it.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.tag_name<span class="k">)</span>
+
+<span class="c1"># Download the script and its checksum</span>
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
+
+<span class="c1"># Verify the checksum</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
+
+<span class="c1"># If the check is successful, run the script</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>install-bunkerweb.sh
+sudo<span class="w"> </span>./install-bunkerweb.sh
+</code></pre></div>
+<div class="admonition danger">
+<p class="admonition-title">Security Notice</p>
+<p><strong>Always verify the integrity of the installation script before running it.</strong></p>
+<p>Download the checksum file and use a tool like <code>sha256sum</code> to confirm the script has not been altered or tampered with.</p>
+<p>If the checksum verification fails, <strong>do not execute the script</strong>—it may be unsafe.</p>
+</div>
+</li>
+<li>
+<p><strong>How it works</strong>:</p>
+<p>The same multi‑purpose install script used for fresh installs can also perform an in‑place upgrade. When it detects an existing installation and a different target version, it switches to upgrade mode and applies the following workflow:</p>
+<ol>
+<li>Detection &amp; validation<ul>
+<li>Detects OS / version and confirms support matrix.</li>
+<li>Reads currently installed BunkerWeb version from <code>/usr/share/bunkerweb/VERSION</code>.</li>
+</ul>
+</li>
+<li>Upgrade scenario decision<ul>
+<li>If the requested version equals the installed one it aborts (unless you explicitly re-run for status).</li>
+<li>If versions differ it flags an upgrade.</li>
+</ul>
+</li>
+<li>(Optional) Automatic pre‑upgrade backup<ul>
+<li>If <code>bwcli</code> and the scheduler are available and auto‑backup is enabled, it creates a backup via the built‑in backup plugin.</li>
+<li>Destination: either the directory you supplied with <code>--backup-dir</code> or a generated path like <code>/var/tmp/bunkerweb-backup-YYYYmmdd-HHMMSS</code>.</li>
+<li>You can disable this with <code>--no-auto-backup</code> (manual backup then becomes your responsibility).</li>
+</ul>
+</li>
+<li>Service quiescing<ul>
+<li>Stops <code>bunkerweb</code>, <code>bunkerweb-ui</code>, and <code>bunkerweb-scheduler</code> to ensure a consistent upgrade (matches the manual procedure recommendations).</li>
+</ul>
+</li>
+<li>Package locks removal<ul>
+<li>Temporarily removes <code>apt-mark hold</code> / <code>dnf versionlock</code> on <code>bunkerweb</code> and <code>nginx</code> so the targeted version can be installed.</li>
+</ul>
+</li>
+<li>Upgrade execution<ul>
+<li>Installs only the new BunkerWeb package version (NGINX is not reinstalled in upgrade mode unless missing—this avoids touching a correctly pinned NGINX).</li>
+<li>Re‑applies holds/versionlocks to freeze the upgraded versions.</li>
+</ul>
+</li>
+<li>Finalization &amp; status<ul>
+<li>Displays systemd status for core services and next steps.</li>
+<li>Leaves your configuration and database intact—only the application code and managed files are updated.</li>
+</ul>
+</li>
+</ol>
+<p>Key behaviors / notes:</p>
+<ul>
+<li>The script does NOT modify your <code>/etc/bunkerweb/variables.env</code> or database content.</li>
+<li>If automatic backup failed (or was disabled) you can still do a manual restore using the Rollback section below.</li>
+<li>Upgrade mode intentionally avoids reinstalling or downgrading NGINX outside the supported pinned version already present.</li>
+<li>Logs for troubleshooting remain in <code>/var/log/bunkerweb/</code>.</li>
+</ul>
+<p>Rollback summary:</p>
+<ul>
+<li>Use the generated backup directory (or your manual backup) + the steps in the Rollback section to restore DB, then reinstall the previous image / package version and re‑lock packages.</li>
+</ul>
+</li>
+<li>
+<p><strong>Command-Line Options</strong>:</p>
+<p>You can drive unattended upgrades with the same flags used for installation. The most relevant for upgrades:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-v, --version &lt;X.Y.Z&gt;</code></td>
+<td>Target BunkerWeb version to upgrade to.</td>
+</tr>
+<tr>
+<td><code>-y, --yes</code></td>
+<td>Non‑interactive (assumes upgrade confirmation and enables auto backup unless <code>--no-auto-backup</code>).</td>
+</tr>
+<tr>
+<td><code>--backup-dir &lt;PATH&gt;</code></td>
+<td>Destination for the automatic pre‑upgrade backup. Created if missing.</td>
+</tr>
+<tr>
+<td><code>--no-auto-backup</code></td>
+<td>Skip automatic backup (NOT recommended). You must have a manual backup.</td>
+</tr>
+<tr>
+<td><code>-q, --quiet</code></td>
+<td>Suppress output (combine with logging / monitoring).</td>
+</tr>
+<tr>
+<td><code>-f, --force</code></td>
+<td>Proceed on an otherwise unsupported OS version.</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Show detected environment, intended actions, then exit without changing anything.</td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Upgrade to testing interactively (will prompt for backup)</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span>testing
+
+<span class="c1"># Non-interactive upgrade with automatic backup to custom directory</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span>testing<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
+
+<span class="c1"># Silent unattended upgrade (logs suppressed) – relies on default auto-backup</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span>testing<span class="w"> </span>-y<span class="w"> </span>-q
+
+<span class="c1"># Perform a dry run (plan) without applying changes</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span>testing<span class="w"> </span>--dry-run
+
+<span class="c1"># Upgrade skipping automatic backup (NOT recommended)</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span>testing<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Skipping backups</p>
+<p>Using <code>--no-auto-backup</code> without having a verified manual backup may result in irreversible data loss if the upgrade encounters issues. Always keep at least one recent, tested backup.</p>
+</div>
+</li>
+</ul>
 </div>
 <div class="tabbed-block">
+<ol>
+<li>
+<p><strong>Backup the database</strong>:</p>
+<ul>
+<li>Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.</li>
+<li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
+</ul>
 <div class="admonition warning">
 <p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.10 users</p>
 <p>If you are using <strong>RHEL 8.10</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
@@ -15798,45 +15851,12 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 </div>
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
 </code></pre></div>
-</div>
-</div>
-</div>
 </li>
 <li>
 <p><strong>Upgrade BunkerWeb</strong>:</p>
 <ul>
 <li>
 <p>Upgrade BunkerWeb to the latest version.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="upgrading-__tabbed_3_1" name="upgrading-__tabbed_3" type="radio" /><input id="upgrading-__tabbed_3_2" name="upgrading-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_3_1">Docker</label><label for="upgrading-__tabbed_3_2">Linux</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<ol>
-<li>
-<p><strong>Update the Docker Compose file</strong>: Update the Docker Compose file to use the new version of the BunkerWeb image.
-    <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:testing</span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:testing</span>
-<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Restart the containers</strong>: Restart the containers to apply the changes.
-    <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>down
-docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
-</code></pre></div></p>
-</li>
-</ol>
-</div>
-<div class="tabbed-block">
 <ol>
 <li>
 <p><strong>Stop the services</strong>:
@@ -15847,7 +15867,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </li>
 <li>
 <p><strong>Update BunkerWeb</strong>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="upgrading-__tabbed_4_1" name="upgrading-__tabbed_4" type="radio" /><input id="upgrading-__tabbed_4_2" name="upgrading-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_4_1">Debian/Ubuntu</label><label for="upgrading-__tabbed_4_2">Fedora/RedHat</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="upgrading-__tabbed_3_1" name="upgrading-__tabbed_3" type="radio" /><input id="upgrading-__tabbed_3_2" name="upgrading-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_3_1">Debian/Ubuntu</label><label for="upgrading-__tabbed_3_2">Fedora/RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>First, if you have previously held the BunkerWeb package, unhold it :</p>
@@ -15893,31 +15913,21 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </code></pre></div></p>
 </li>
 </ol>
-</div>
-</div>
-</div>
 </li>
 </ul>
 </li>
 <li>
 <p><strong>Check the logs</strong>: Check the logs of the scheduler service to ensure that the migration was successful.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="upgrading-__tabbed_5_1" name="upgrading-__tabbed_5" type="radio" /><input id="upgrading-__tabbed_5_2" name="upgrading-__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_5_1">Docker</label><label for="upgrading-__tabbed_5_2">Linux</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>&lt;scheduler_container&gt;
-</code></pre></div>
-</div>
-<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>journalctl<span class="w"> </span>-u<span class="w"> </span>bunkerweb<span class="w"> </span>--no-pager
 </code></pre></div>
-</div>
-</div>
-</div>
 </li>
 <li>
 <p><strong>Verify the database</strong>: Verify that the database upgrade was successful by checking the data and configurations in the new database container.</p>
 </li>
 </ol>
+</div>
+</div>
+</div>
 <h3 id="upgrading-rollback">Rollback</h3>
 <div class="admonition failure">
 <p class="admonition-title">In case of issues</p>
@@ -15929,7 +15939,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 <li><a href="https://discord.bunkerity.com">Join the BunkerWeb Discord server</a></li>
 </ul>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="upgrading-__tabbed_6_1" name="upgrading-__tabbed_6" type="radio" /><input id="upgrading-__tabbed_6_2" name="upgrading-__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_6_1">Docker</label><label for="upgrading-__tabbed_6_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="upgrading-__tabbed_4_1" name="upgrading-__tabbed_4" type="radio" /><input id="upgrading-__tabbed_4_2" name="upgrading-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_4_1">Docker</label><label for="upgrading-__tabbed_4_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -15941,7 +15951,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </li>
 <li>
 <p><strong>Restore the backup</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="upgrading-__tabbed_7_1" name="upgrading-__tabbed_7" type="radio" /><input id="upgrading-__tabbed_7_2" name="upgrading-__tabbed_7" type="radio" /><input id="upgrading-__tabbed_7_3" name="upgrading-__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_7_1">SQLite</label><label for="upgrading-__tabbed_7_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_7_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="upgrading-__tabbed_5_1" name="upgrading-__tabbed_5" type="radio" /><input id="upgrading-__tabbed_5_2" name="upgrading-__tabbed_5" type="radio" /><input id="upgrading-__tabbed_5_3" name="upgrading-__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_5_1">SQLite</label><label for="upgrading-__tabbed_5_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_5_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -16048,7 +16058,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </li>
 <li>
 <p><strong>Restore the backup</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="upgrading-__tabbed_8_1" name="upgrading-__tabbed_8" type="radio" /><input id="upgrading-__tabbed_8_2" name="upgrading-__tabbed_8" type="radio" /><input id="upgrading-__tabbed_8_3" name="upgrading-__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_8_1">SQLite</label><label for="upgrading-__tabbed_8_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_8_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="upgrading-__tabbed_6_1" name="upgrading-__tabbed_6" type="radio" /><input id="upgrading-__tabbed_6_2" name="upgrading-__tabbed_6" type="radio" /><input id="upgrading-__tabbed_6_3" name="upgrading-__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_6_1">SQLite</label><label for="upgrading-__tabbed_6_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_6_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3
@@ -16144,10 +16154,10 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <li>Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.</li>
 <li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="upgrading-__tabbed_9_1" name="upgrading-__tabbed_9" type="radio" /><input id="upgrading-__tabbed_9_2" name="upgrading-__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_9_1">1.5.7 and later</label><label for="upgrading-__tabbed_9_2">1.5.6 and earlier</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="upgrading-__tabbed_7_1" name="upgrading-__tabbed_7" type="radio" /><input id="upgrading-__tabbed_7_2" name="upgrading-__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_7_1">1.5.7 and later</label><label for="upgrading-__tabbed_7_2">1.5.6 and earlier</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="upgrading-__tabbed_10_1" name="upgrading-__tabbed_10" type="radio" /><input id="upgrading-__tabbed_10_2" name="upgrading-__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_10_1">Docker</label><label for="upgrading-__tabbed_10_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="upgrading-__tabbed_8_1" name="upgrading-__tabbed_8" type="radio" /><input id="upgrading-__tabbed_8_2" name="upgrading-__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_8_1">Docker</label><label for="upgrading-__tabbed_8_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>&lt;scheduler_container&gt;<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
@@ -16159,7 +16169,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <div class="admonition warning">
 <p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.10 users</p>
 <p>If you are using <strong>RHEL 8.10</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="upgrading-__tabbed_11_1" name="upgrading-__tabbed_11" type="radio" /><input id="upgrading-__tabbed_11_2" name="upgrading-__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_11_1">MySQL/MariaDB</label><label for="upgrading-__tabbed_11_2">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="upgrading-__tabbed_9_1" name="upgrading-__tabbed_9" type="radio" /><input id="upgrading-__tabbed_9_2" name="upgrading-__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_9_1">MySQL/MariaDB</label><label for="upgrading-__tabbed_9_2">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -16204,10 +16214,10 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="12:4"><input checked="checked" id="upgrading-__tabbed_12_1" name="upgrading-__tabbed_12" type="radio" /><input id="upgrading-__tabbed_12_2" name="upgrading-__tabbed_12" type="radio" /><input id="upgrading-__tabbed_12_3" name="upgrading-__tabbed_12" type="radio" /><input id="upgrading-__tabbed_12_4" name="upgrading-__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_12_1">SQLite</label><label for="upgrading-__tabbed_12_2">MariaDB</label><label for="upgrading-__tabbed_12_3">MySQL</label><label for="upgrading-__tabbed_12_4">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:4"><input checked="checked" id="upgrading-__tabbed_10_1" name="upgrading-__tabbed_10" type="radio" /><input id="upgrading-__tabbed_10_2" name="upgrading-__tabbed_10" type="radio" /><input id="upgrading-__tabbed_10_3" name="upgrading-__tabbed_10" type="radio" /><input id="upgrading-__tabbed_10_4" name="upgrading-__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_10_1">SQLite</label><label for="upgrading-__tabbed_10_2">MariaDB</label><label for="upgrading-__tabbed_10_3">MySQL</label><label for="upgrading-__tabbed_10_4">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="upgrading-__tabbed_13_1" name="upgrading-__tabbed_13" type="radio" /><input id="upgrading-__tabbed_13_2" name="upgrading-__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_13_1">Docker</label><label for="upgrading-__tabbed_13_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="upgrading-__tabbed_11_1" name="upgrading-__tabbed_11" type="radio" /><input id="upgrading-__tabbed_11_2" name="upgrading-__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_11_1">Docker</label><label for="upgrading-__tabbed_11_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>We first need to install the <code>sqlite</code> package in the container.</p>
@@ -16225,7 +16235,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="upgrading-__tabbed_14_1" name="upgrading-__tabbed_14" type="radio" /><input id="upgrading-__tabbed_14_2" name="upgrading-__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_14_1">Docker</label><label for="upgrading-__tabbed_14_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="upgrading-__tabbed_12_1" name="upgrading-__tabbed_12" type="radio" /><input id="upgrading-__tabbed_12_2" name="upgrading-__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_12_1">Docker</label><label for="upgrading-__tabbed_12_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>mariadb-dump<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
@@ -16239,7 +16249,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="upgrading-__tabbed_15_1" name="upgrading-__tabbed_15" type="radio" /><input id="upgrading-__tabbed_15_2" name="upgrading-__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_15_1">Docker</label><label for="upgrading-__tabbed_15_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="upgrading-__tabbed_13_1" name="upgrading-__tabbed_13" type="radio" /><input id="upgrading-__tabbed_13_2" name="upgrading-__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_13_1">Docker</label><label for="upgrading-__tabbed_13_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">MYSQL_PWD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>mysqldump<span class="w"> </span>-u<span class="w"> </span>&lt;username&gt;<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
@@ -16253,7 +16263,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="upgrading-__tabbed_16_1" name="upgrading-__tabbed_16" type="radio" /><input id="upgrading-__tabbed_16_2" name="upgrading-__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_16_1">Docker</label><label for="upgrading-__tabbed_16_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="upgrading-__tabbed_14_1" name="upgrading-__tabbed_14" type="radio" /><input id="upgrading-__tabbed_14_2" name="upgrading-__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_14_1">Docker</label><label for="upgrading-__tabbed_14_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>-e<span class="w"> </span><span class="nv">PGPASSWORD</span><span class="o">=</span>&lt;database_password&gt;<span class="w"> </span>&lt;database_container&gt;<span class="w"> </span>pg_dump<span class="w"> </span>-U<span class="w"> </span>&lt;username&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database_name&gt;<span class="w"> </span>&gt;<span class="w"> </span>/path/to/backup/directory/backup.sql
@@ -16277,7 +16287,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <ul>
 <li>
 <p>Upgrade BunkerWeb to the latest version.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="upgrading-__tabbed_17_1" name="upgrading-__tabbed_17" type="radio" /><input id="upgrading-__tabbed_17_2" name="upgrading-__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_17_1">Docker</label><label for="upgrading-__tabbed_17_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="upgrading-__tabbed_15_1" name="upgrading-__tabbed_15" type="radio" /><input id="upgrading-__tabbed_15_2" name="upgrading-__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_15_1">Docker</label><label for="upgrading-__tabbed_15_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -16312,11 +16322,12 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <p><strong>Stop the services</strong>:
     <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb
 sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-ui
+sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div></p>
 </li>
 <li>
 <p><strong>Update BunkerWeb</strong>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="upgrading-__tabbed_18_1" name="upgrading-__tabbed_18" type="radio" /><input id="upgrading-__tabbed_18_2" name="upgrading-__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_18_1">Debian/Ubuntu</label><label for="upgrading-__tabbed_18_2">Fedora/RedHat</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="upgrading-__tabbed_16_1" name="upgrading-__tabbed_16" type="radio" /><input id="upgrading-__tabbed_16_2" name="upgrading-__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_16_1">Debian/Ubuntu</label><label for="upgrading-__tabbed_16_2">Fedora/RedHat</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>First, if you have previously held the BunkerWeb package, unhold it :</p>
@@ -16355,6 +16366,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 <p><strong>Start the services</strong>:
         <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb
 sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-ui
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>bunkerweb-scheduler
 </code></pre></div>
         Or reboot the system:
         <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>reboot
@@ -16369,7 +16381,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </li>
 <li>
 <p><strong>Check the logs</strong>: Check the logs of the scheduler service to ensure that the migration was successful.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="upgrading-__tabbed_19_1" name="upgrading-__tabbed_19" type="radio" /><input id="upgrading-__tabbed_19_2" name="upgrading-__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_19_1">Docker</label><label for="upgrading-__tabbed_19_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="upgrading-__tabbed_17_1" name="upgrading-__tabbed_17" type="radio" /><input id="upgrading-__tabbed_17_2" name="upgrading-__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_17_1">Docker</label><label for="upgrading-__tabbed_17_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>&lt;scheduler_container&gt;
@@ -16397,7 +16409,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 <li><a href="https://discord.bunkerity.com">Join the BunkerWeb Discord server</a></li>
 </ul>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="upgrading-__tabbed_20_1" name="upgrading-__tabbed_20" type="radio" /><input id="upgrading-__tabbed_20_2" name="upgrading-__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_20_1">Docker</label><label for="upgrading-__tabbed_20_2">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="upgrading-__tabbed_18_1" name="upgrading-__tabbed_18" type="radio" /><input id="upgrading-__tabbed_18_2" name="upgrading-__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_18_1">Docker</label><label for="upgrading-__tabbed_18_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -16409,7 +16421,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w
 </li>
 <li>
 <p><strong>Restore the backup</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="upgrading-__tabbed_21_1" name="upgrading-__tabbed_21" type="radio" /><input id="upgrading-__tabbed_21_2" name="upgrading-__tabbed_21" type="radio" /><input id="upgrading-__tabbed_21_3" name="upgrading-__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_21_1">SQLite</label><label for="upgrading-__tabbed_21_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_21_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="upgrading-__tabbed_19_1" name="upgrading-__tabbed_19" type="radio" /><input id="upgrading-__tabbed_19_2" name="upgrading-__tabbed_19" type="radio" /><input id="upgrading-__tabbed_19_3" name="upgrading-__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_19_1">SQLite</label><label for="upgrading-__tabbed_19_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_19_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
@@ -16516,7 +16528,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </li>
 <li>
 <p><strong>Restore the backup</strong>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="upgrading-__tabbed_22_1" name="upgrading-__tabbed_22" type="radio" /><input id="upgrading-__tabbed_22_2" name="upgrading-__tabbed_22" type="radio" /><input id="upgrading-__tabbed_22_3" name="upgrading-__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_22_1">SQLite</label><label for="upgrading-__tabbed_22_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_22_3">PostgreSQL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="upgrading-__tabbed_20_1" name="upgrading-__tabbed_20" type="radio" /><input id="upgrading-__tabbed_20_2" name="upgrading-__tabbed_20" type="radio" /><input id="upgrading-__tabbed_20_3" name="upgrading-__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="upgrading-__tabbed_20_1">SQLite</label><label for="upgrading-__tabbed_20_2">MySQL/MariaDB</label><label for="upgrading-__tabbed_20_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/var/lib/bunkerweb/db.sqlite3

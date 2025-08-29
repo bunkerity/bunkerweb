@@ -5474,6 +5474,8 @@ log {
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -5500,8 +5502,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.8.0</span>
-<span class="w">    </span><span class="c1"># image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
 <span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># Bind to low ports</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># Send broadcasts</span>
@@ -7565,6 +7566,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>global</td>
 <td>yes</td>
 <td>Load balancing mode (round-robin or sticky).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Sticky session method (ip or cookie).</td>
 </tr>
 <tr>
 <td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
@@ -10248,7 +10256,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Custom URLs:</strong> Rules are fetched from user-provided URLs (specified by <code>ROBOTSTXT_URLS</code>).</li>
 <li><strong>Manual Rules:</strong> Rules defined directly via <code>ROBOTSTXT_RULE</code> environment variables are added.</li>
 </ol>
-<p>All rules from these sources are combined. After aggregation, <code>ROBOTSTXT_IGNORE_RULES</code> are applied to filter out any unwanted rules using PCRE regex patterns. Finally, if no rules remain after this entire process, a default <code>User-agent: *</code> and <code>Disallow: /</code> rule is automatically applied to ensure a basic level of protection. Optional sitemap URLs (specified by <code>ROBOTSTXT_SITEMAP</code>) are also included in the final <code>robots.txt</code> output.</p>
+<p>All rules from these sources are combined. After aggregation, <code>ROBOTSTXT_IGNORE_RULE</code> are applied to filter out any unwanted rules using PCRE regex patterns. Finally, if no rules remain after this entire process, a default <code>User-agent: *</code> and <code>Disallow: /</code> rule is automatically applied to ensure a basic level of protection. Optional sitemap URLs (specified by <code>ROBOTSTXT_SITEMAP</code>) are also included in the final <code>robots.txt</code> output.</p>
 <h3 id="dynamic-bot-circumvention-with-darkvisitors-api">Dynamic Bot Circumvention with DarkVisitors API</h3>
 <p><a href="https://darkvisitors.com/">DarkVisitors</a> is a service that provides a dynamic <code>robots.txt</code> file to help block known malicious bots and AI crawlers. By integrating with DarkVisitors, BunkerWeb can automatically fetch and serve an up-to-date <code>robots.txt</code> that helps protect your site from unwanted automated traffic.</p>
 <p>To enable this, you need to sign up at <a href="https://darkvisitors.com/docs/robots-txt">darkvisitors.com</a> and obtain a bearer token.</p>
@@ -10262,7 +10270,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Manual Rules:</strong> Use <code>ROBOTSTXT_RULE</code> for individual rules (multiple rules can be specified with <code>ROBOTSTXT_RULE_N</code>).</li>
 </ul>
 </li>
-<li><strong>Filter rules (optional):</strong> Use <code>ROBOTSTXT_IGNORE_RULES_N</code> to exclude specific rules by regex pattern.</li>
+<li><strong>Filter rules (optional):</strong> Use <code>ROBOTSTXT_IGNORE_RULE_N</code> to exclude specific rules by regex pattern.</li>
 <li><strong>Add sitemaps (optional):</strong> Use <code>ROBOTSTXT_SITEMAP_N</code> for sitemap URLs.</li>
 <li><strong>Obtain the generated robots.txt file:</strong> Once BunkerWeb is running with the above settings, you can access the dynamically generated <code>robots.txt</code> file by making an HTTP GET request to <code>http(s)://your-domain.com/robots.txt</code>.</li>
 </ol>
@@ -10342,7 +10350,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <td>Footer for <code>robots.txt</code> file (after rules). Can be Base64 encoded.</td>
 </tr>
 <tr>
-<td><code>ROBOTSTXT_IGNORE_RULES</code></td>
+<td><code>ROBOTSTXT_IGNORE_RULE</code></td>
 <td></td>
 <td>multisite</td>
 <td>Yes</td>
@@ -10369,7 +10377,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">ROBOTSTXT_DARKVISITORS_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-darkvisitors-token-here&quot;</span>
 <span class="nt">ROBOTSTXT_DARKVISITORS_AGENT_TYPES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AI</span><span class="nv"> </span><span class="s">Data</span><span class="nv"> </span><span class="s">Scraper&quot;</span>
 <span class="nt">ROBOTSTXT_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;robots-disallowed&quot;</span>
-<span class="nt">ROBOTSTXT_IGNORE_RULES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
+<span class="nt">ROBOTSTXT_IGNORE_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
 </code></pre></div>
 <p><strong>Combined Configuration</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10378,7 +10386,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">ROBOTSTXT_URLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/my-custom-rules.txt&quot;</span>
 <span class="nt">ROBOTSTXT_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">MyOwnBot&quot;</span>
 <span class="nt">ROBOTSTXT_RULE_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Disallow:</span><span class="nv"> </span><span class="s">/admin&quot;</span>
-<span class="nt">ROBOTSTXT_IGNORE_RULES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
+<span class="nt">ROBOTSTXT_IGNORE_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">Googlebot-Image&quot;</span>
 <span class="nt">ROBOTSTXT_SITEMAP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/sitemap.xml&quot;</span>
 </code></pre></div>
 <p><strong>With Header and Footer</strong></p>

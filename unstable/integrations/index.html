@@ -947,8 +947,53 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#crowdsec-integration-with-the-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      CrowdSec Integration with the Script
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rhel-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      RHEL considerations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      After installation
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation-using-package-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation using package manager
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-and-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration and service
+    </span>
+  </a>
   
 </li>
         
@@ -958,6 +1003,39 @@
       High availability
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="High availability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manager
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Worker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      Web UI
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1084,6 +1162,21 @@
       Use with existing ingress controller
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Use with existing ingress controller">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nginx-ingress-controller-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      nginx ingress controller install
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1402,7 +1495,7 @@
 <ul>
 <li><code>SERVICE_UI=yes</code> (default) - Enables the web UI service</li>
 <li><code>SERVICE_SCHEDULER=yes</code> (default) - Enables the Scheduler service</li>
-<li><code>SERVICE_AUTOCONF=no</code> (default) - Enables the autoconf service</li>
+<li><code>AUTOCONF_MODE=no</code> (default) - Enables the autoconf service</li>
 <li><code>USE_REDIS=yes</code> (default) - Enables the built-in <a href="#redis-integration">Redis</a> instance</li>
 <li><code>USE_CROWDSEC=no</code> (default) - <a href="#crowdsec-integration">CrowdSec</a> integration is disabled by default</li>
 </ul>
@@ -2022,245 +2115,185 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dry-
 - Interactive mode (default) will prompt for missing required values
 - Non-interactive mode (<code>--yes</code>) requires all necessary options to be provided via command line</p>
 </div>
-<div class="highlight"><pre><span></span><code>#### CrowdSec Integration with the Script
-
-If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:
-
-- It adds the official CrowdSec repository and installs the agent.
-- It creates a new acquisition file to make CrowdSec parse BunkerWeb&#39;s logs (`access.log`, `error.log`, and `modsec_audit.log`).
-- It installs essential collections (`crowdsecurity/nginx`) and parsers (`crowdsecurity/geoip-enrich`).
-- It registers a bouncer for BunkerWeb and automatically configures the API key in `/etc/bunkerweb/variables.env`.
-- If you also select the **AppSec Component**, it installs the `appsec-virtual-patching` and `appsec-generic-rules` collections and configures the AppSec endpoint for BunkerWeb.
-
-This provides a seamless, out-of-the-box integration for powerful intrusion prevention.
-
-#### RHEL considerations
-
-!!! warning &quot;External database support on RHEL-based systems&quot;
-    If you plan to use an external database (recommended for production), you must install the appropriate database client package:
-
-    ```bash
-    # For MariaDB
-    sudo dnf install mariadb
-
-    # For MySQL
-    sudo dnf install mysql
-
-    # For PostgreSQL
-    sudo dnf install postgresql
-    ```
-
-    This is required for the BunkerWeb Scheduler to connect to your external database.
-
-#### After installation
-
-Depending on your choices during installation:
-
-**With setup wizard enabled:**
-
-1. Access the setup wizard at: `https://your-server-ip/setup`
-2. Follow the guided configuration to set up your first protected service
-3. Configure SSL/TLS certificates and other security settings
-
-**Without setup wizard:**
-
-1. Edit `/etc/bunkerweb/variables.env` to configure BunkerWeb manually
-2. Add your server settings and protected services
-3. Restart the scheduler: `sudo systemctl restart bunkerweb-scheduler`
-
-### Installation using package manager
-
-Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
-
-=== &quot;Debian Bookworm/Trixie&quot;
-
-    The first step is to add NGINX official repository:
-
-    ```shell
-    sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring &amp;&amp; \
-    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null &amp;&amp; \
-    echo &quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-    http://nginx.org/packages/debian `lsb_release -cs` nginx&quot; \
-    | sudo tee /etc/apt/sources.list.d/nginx.list
-    ```
-
-    You should now be able to install NGINX 1.28.0:
-
-    ```shell
-    sudo apt update &amp;&amp; \
-    sudo apt install -y --allow-downgrades nginx=1.28.0-1~$(lsb_release -cs)
-    ```
-
-    !!! warning &quot;Testing/dev version&quot;
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo &quot;force-bad-version&quot; | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
-    !!! example &quot;Disable the setup wizard&quot;
-        If you don&#39;t want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
-
-        ```shell
-        export UI_WIZARD=no
-        ```
-
-    And finally install BunkerWeb testing:
-
-    ```shell
-    curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash &amp;&amp; \
-    sudo apt update &amp;&amp; \
-    sudo -E apt install -y --allow-downgrades bunkerweb=testing
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
-
-    ```shell
-    sudo apt-mark hold nginx bunkerweb
-    ```
-
-=== &quot;Ubuntu&quot;
-
-    The first step is to add NGINX official repository:
-
-    ```shell
-    sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring &amp;&amp; \
-    curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg &gt;/dev/null &amp;&amp; \
-    echo &quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-    http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot; \
-    | sudo tee /etc/apt/sources.list.d/nginx.list
-    ```
-
-    You should now be able to install NGINX 1.28.0:
-
-    ```shell
-    sudo apt update &amp;&amp; \
-    sudo apt install -y --allow-downgrades nginx=1.28.0-1~$(lsb_release -cs)
-    ```
-
-    !!! warning &quot;Testing/dev version&quot;
-        If you use the `testing` or `dev` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-        ```shell
-        echo &quot;force-bad-version&quot; | sudo tee -a /etc/dpkg/dpkg.cfg
-        ```
-
-    !!! example &quot;Disable the setup wizard&quot;
-        If you don&#39;t want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
-
-        ```shell
-        export UI_WIZARD=no
-        ```
-
-    And finally install BunkerWeb testing:
-
-    ```shell
-    curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash &amp;&amp; \
-    sudo apt update &amp;&amp; \
-    sudo -E apt install -y --allow-downgrades bunkerweb=testing
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
-
-    ```shell
-    sudo apt-mark hold nginx bunkerweb
-    ```
-
-=== &quot;Fedora&quot;
-
-    !!! info &quot;Fedora Update Testing&quot;
-        If you can&#39;t find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository:
-
-        ```shell
-        sudo dnf config-manager setopt updates-testing.enabled=1
-        ```
-
-    Fedora already provides NGINX 1.28.0 that we support
-
-    ```shell
-    sudo dnf install -y --allowerasing nginx-1.28.0
-    ```
-
-    !!! example &quot;Disable the setup wizard&quot;
-        If you don&#39;t want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
-
-        ```shell
-        export UI_WIZARD=no
-        ```
-
-    And finally install BunkerWeb testing:
-
-    ```shell
-    curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash &amp;&amp; \
-    sudo dnf makecache &amp;&amp; \
-    sudo -E dnf install -y --allowerasing bunkerweb-testing
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
-
-    ```shell
-    sudo dnf versionlock add nginx &amp;&amp; \
-    sudo dnf versionlock add bunkerweb
-    ```
-
-=== &quot;RedHat&quot;
-
-    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo`:
-
-    ```conf
-    [nginx-stable]
-    name=nginx stable repo
-    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-    gpgcheck=1
-    enabled=1
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-
-    [nginx-mainline]
-    name=nginx mainline repo
-    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
-    gpgcheck=1
-    enabled=0
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-    ```
-
-    You should now be able to install NGINX 1.28.0:
-
-    ```shell
-    sudo dnf install --allowerasing nginx-1.28.0
-    ```
-
-    !!! example &quot;Disable the setup wizard&quot;
-        If you don&#39;t want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:
-
-        ```shell
-        export UI_WIZARD=no
-        ```
-
-    And finally install BunkerWeb testing:
-
-    ```shell
-    curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash &amp;&amp; \
-    sudo dnf check-update &amp;&amp; \
-    sudo -E dnf install -y --allowerasing bunkerweb-testing
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
-
-    ```shell
-    sudo dnf versionlock add nginx &amp;&amp; \
-    sudo dnf versionlock add bunkerweb
-    ```
-
-### Configuration and service
-
-Manual configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file:
-
-```conf
-MY_SETTING_1=value1
+<h4 id="crowdsec-integration-with-the-script">CrowdSec Integration with the Script</h4>
+<p>If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:</p>
+<ul>
+<li>It adds the official CrowdSec repository and installs the agent.</li>
+<li>It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (<code>access.log</code>, <code>error.log</code>, and <code>modsec_audit.log</code>).</li>
+<li>It installs essential collections (<code>crowdsecurity/nginx</code>) and parsers (<code>crowdsecurity/geoip-enrich</code>).</li>
+<li>It registers a bouncer for BunkerWeb and automatically configures the API key in <code>/etc/bunkerweb/variables.env</code>.</li>
+<li>If you also select the <strong>AppSec Component</strong>, it installs the <code>appsec-virtual-patching</code> and <code>appsec-generic-rules</code> collections and configures the AppSec endpoint for BunkerWeb.</li>
+</ul>
+<p>This provides a seamless, out-of-the-box integration for powerful intrusion prevention.</p>
+<h4 id="rhel-considerations">RHEL considerations</h4>
+<div class="admonition warning">
+<p class="admonition-title">External database support on RHEL-based systems</p>
+<p>If you plan to use an external database (recommended for production), you must install the appropriate database client package:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># For MariaDB</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>mariadb
+
+<span class="c1"># For MySQL</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>mysql
+
+<span class="c1"># For PostgreSQL</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>postgresql
+</code></pre></div>
+<p>This is required for the BunkerWeb Scheduler to connect to your external database.</p>
+</div>
+<h4 id="after-installation">After installation</h4>
+<p>Depending on your choices during installation:</p>
+<p><strong>With setup wizard enabled:</strong></p>
+<ol>
+<li>Access the setup wizard at: <code>https://your-server-ip/setup</code></li>
+<li>Follow the guided configuration to set up your first protected service</li>
+<li>Configure SSL/TLS certificates and other security settings</li>
+</ol>
+<p><strong>Without setup wizard:</strong></p>
+<ol>
+<li>Edit <code>/etc/bunkerweb/variables.env</code> to configure BunkerWeb manually</li>
+<li>Add your server settings and protected services</li>
+<li>Restart the scheduler: <code>sudo systemctl restart bunkerweb-scheduler</code></li>
+</ol>
+<h3 id="installation-using-package-manager">Installation using package manager</h3>
+<p>Please ensure that you have <strong>NGINX 1.28.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Debian Bookworm/Trixie</label><label for="__tabbed_1_2">Ubuntu</label><label for="__tabbed_1_3">Fedora</label><label for="__tabbed_1_4">RedHat</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>The first step is to add NGINX official repository:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gnupg2<span class="w"> </span>ca-certificates<span class="w"> </span>lsb-release<span class="w"> </span>debian-archive-keyring<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/usr/share/keyrings/nginx-archive-keyring.gpg<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
+<span class="s2">http://nginx.org/packages/debian `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
+</code></pre></div>
+<p>You should now be able to install NGINX 1.28.0:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Testing/dev version</p>
+<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;force-bad-version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
+</code></pre></div>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Disable the setup wizard</p>
+<p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
+</code></pre></div>
+</div>
+<p>And finally install BunkerWeb testing:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+</code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>The first step is to add NGINX official repository:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gnupg2<span class="w"> </span>ca-certificates<span class="w"> </span>lsb-release<span class="w"> </span>ubuntu-keyring<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+curl<span class="w"> </span>https://nginx.org/keys/nginx_signing.key<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/usr/share/keyrings/nginx-archive-keyring.gpg<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \</span>
+<span class="s2">http://nginx.org/packages/ubuntu `lsb_release -cs` nginx&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/nginx.list
+</code></pre></div>
+<p>You should now be able to install NGINX 1.28.0:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">nginx</span><span class="o">=</span><span class="m">1</span>.28.0-1~<span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Testing/dev version</p>
+<p>If you use the <code>testing</code> or <code>dev</code> version, you will need to add the <code>force-bad-version</code> directive to your <code>/etc/dpkg/dpkg.cfg</code> file before installing BunkerWeb.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;force-bad-version&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/dpkg/dpkg.cfg
+</code></pre></div>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Disable the setup wizard</p>
+<p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
+</code></pre></div>
+</div>
+<p>And finally install BunkerWeb testing:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span>testing
+</code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>apt upgrade</code>, you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition info">
+<p class="admonition-title">Fedora Update Testing</p>
+<p>If you can't find the NGINX version listed in the stable repository, you can enable the <code>updates-testing</code> repository:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>config-manager<span class="w"> </span>setopt<span class="w"> </span>updates-testing.enabled<span class="o">=</span><span class="m">1</span>
+</code></pre></div>
+</div>
+<p>Fedora already provides NGINX 1.28.0 that we support</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.0
+</code></pre></div>
+<div class="admonition example">
+<p class="admonition-title">Disable the setup wizard</p>
+<p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
+</code></pre></div>
+</div>
+<p>And finally install BunkerWeb testing:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-testing
+</code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>The first step is to add NGINX official repository. Create the following file at <code>/etc/yum.repos.d/nginx.repo</code>:</p>
+<div class="highlight"><pre><span></span><code>[nginx-stable]
+name=nginx stable repo
+baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+
+[nginx-mainline]
+name=nginx mainline repo
+baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+</code></pre></div>
+<p>You should now be able to install NGINX 1.28.0:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>--allowerasing<span class="w"> </span>nginx-1.28.0
+</code></pre></div>
+<div class="admonition example">
+<p class="admonition-title">Disable the setup wizard</p>
+<p>If you don't want to use the setup wizard of the web UI when BunkerWeb is installed, export the following variable:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
+</code></pre></div>
+</div>
+<p>And finally install BunkerWeb testing:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-testing
+</code></pre></div>
+<p>To prevent upgrading NGINX and/or BunkerWeb packages when executing <code>dnf upgrade</code>, you can use the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="configuration-and-service">Configuration and service</h3>
+<p>Manual configuration of BunkerWeb is done by editing the <code>/etc/bunkerweb/variables.env</code> file:</p>
+<div class="highlight"><pre><span></span><code>MY_SETTING_1=value1
 MY_SETTING_2=value2
 ...
 </code></pre></div>
@@ -2268,7 +2301,7 @@ MY_SETTING_2=value2
 <p>If you manually edit the BunkerWeb configuration using <code>/etc/bunkerweb/variables.env</code> a restart of the <code>bunkerweb-scheduler</code> service will be enough to generate and reload the configuration without any downtime. But depending on the case (such as changing listening ports) you might need to restart the <code>bunkerweb</code> service.</p>
 <h3 id="high-availability">High availability</h3>
 <p>The scheduler can be detached from the BunkerWeb instance to provide high availability. In this case, the scheduler will be installed on a separate server and will be able to manage multiple BunkerWeb instances.</p>
-<p><strong>Manager</strong></p>
+<h4 id="manager">Manager</h4>
 <p>To install only the scheduler on a server, you can export the following variables before executing the BunkerWeb installation:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">MANAGER_MODE</span><span class="o">=</span>yes
 <span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
@@ -2278,7 +2311,7 @@ MY_SETTING_2=value2
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_BUNKERWEB</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>no
 </code></pre></div>
-<p><strong>Worker</strong></p>
+<h4 id="worker">Worker</h4>
 <p>On another server, to install only BunkerWeb, you can export the following variables before executing the BunkerWeb installation:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">WORKER_MODE</span><span class="o">=</span>yes
 </code></pre></div>
@@ -2287,7 +2320,7 @@ MY_SETTING_2=value2
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_SCHEDULER</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>no
 </code></pre></div>
-<p><strong>Web UI</strong></p>
+<h4 id="web-ui">Web UI</h4>
 <p>The Web UI can be installed on a separate server to provide a dedicated interface for managing BunkerWeb instances. To install only the Web UI, you can export the following variables before executing the BunkerWeb installation:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_BUNKERWEB</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_SCHEDULER</span><span class="o">=</span>no
@@ -2381,6 +2414,8 @@ MY_SETTING_2=value2
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -2491,7 +2526,7 @@ MY_SETTING_2=value2
 <p>Clustered database backends setup are out-of-the-scope of this documentation.</p>
 </div>
 <p>Please ensure that the autoconf services have access to the Kubernetes API. It is recommended to utilize <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">RBAC authorization</a> for this purpose.</p>
-<div class="admonition warn">
+<div class="admonition warning">
 <p class="admonition-title">Custom CA for Kubernetes API</p>
 <p>If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the <code>KUBERNETES_SSL_CA_CERT</code> environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the <code>KUBERNETES_SSL_VERIFY</code> environment variable of the ingress controller to <code>no</code> (default is <code>yes</code>).</p>
 </div>
@@ -2628,7 +2663,7 @@ MY_SETTING_2=value2
 <p class="admonition-title">Keeping both existing ingress controller and BunkerWeb</p>
 <p>This is a use-case where you want to keep an existing ingress controller such as the nginx one. Typical traffic flow will be: Load Balancer =&gt; Ingress Controller =&gt; BunkerWeb =&gt; Application.</p>
 </div>
-<p><strong>nginx ingress controller install</strong></p>
+<h4 id="nginx-ingress-controller-install">nginx ingress controller install</h4>
 <p>Install ingress nginx helm repo:</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>ingress-nginx<span class="w"> </span>https://kubernetes.github.io/ingress-nginx
 helm<span class="w"> </span>repo<span class="w"> </span>update
@@ -2800,7 +2835,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 </div>
 <div class="admonition tip">
 <p class="admonition-title">PRO support</p>
-<p><strong>If you need Swarm support</strong>, please contact us at <a href="mailto:contact@bunkerity.com">contact@bunkerity.com</a> or via the <a href="https://panel.bunkerweb.io/contact.php">contact form</a>.</p>
+<p><strong>If you need Swarm support</strong>, please contact us at <a href="mailto:contact@bunkerity.com">contact@bunkerity.com</a> or via the <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contact form</a>.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Docker autoconf</p>
@@ -2910,6 +2945,8 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># We set the max allowed packet size to avoid issues with large queries</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
@@ -3056,7 +3093,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <li>Azure ARM Template</li>
 <li>Azure portal via the Marketplace</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Cloud Shell</label><label for="__tabbed_1_2">ARM Template</label><label for="__tabbed_1_3">Marketplace</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Cloud Shell</label><label for="__tabbed_2_2">ARM Template</label><label for="__tabbed_2_3">Marketplace</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Create a resource group. Replace value <code>RG_NAME</code></p>
