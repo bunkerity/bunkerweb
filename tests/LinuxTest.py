@@ -65,6 +65,10 @@ class LinuxTest(Test):
                     elif distro == "rhel-9":
                         LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm")
                         LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm")
+                        LinuxTest.docker_exec(distro, "dnf install -y python3.11")
+                        LinuxTest.docker_exec(distro, "update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1")
+                        LinuxTest.docker_exec(distro, "update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 2")
+                        LinuxTest.docker_exec(distro, "update-alternatives --set python3 /usr/bin/python3.11")
                     elif distro == "rhel-10":
                         LinuxTest.docker_exec(distro, "dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm")
                         LinuxTest.docker_exec(distro, "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-10.rpm")
