@@ -17,7 +17,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
 RUN dnf install -y wget make yum-utils && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
   rpm -e --nodeps openssl-fips-provider-so && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python39 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False openssl-libs openssl-devel readline-devel python3.11 python3.11-devel python3.11-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
   dnf install -y https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -43,9 +43,9 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p deps/python && \
-  python3 -m ensurepip --upgrade && \
-  python3 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-  python3 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+  python3.11 -m ensurepip --upgrade && \
+  python3.11 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+  python3.11 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 RUN dnf install -y pigz && \
   tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
