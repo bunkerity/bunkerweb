@@ -24,7 +24,7 @@
   height: 100vh;
 }
 .authentication-wrapper.authentication-basic .authentication-inner {
-  max-width: 460px;
+  max-width: 500px;
   position: relative;
 }
 .authentication-wrapper.authentication-basic .authentication-inner .card {
