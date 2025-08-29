@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.5-c1 - ????/??/??
+## v1.6.5-rc1 - ????/??/??
 
 - [FEATURE] Enhance update-check job to utilize cached GitHub release data and improve error handling
 - [BUGFIX] Update default algorithm for Let's Encrypt's `RFC2136` DNS provider from HMAC-SHA512 to HMAC-MD5
