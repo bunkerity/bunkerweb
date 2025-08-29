@@ -1,7 +1,7 @@
 bcrypt==4.3.0
 biscuit-python==0.3.2
 certbot==4.2.0
-Flask==3.1.1
+Flask==3.1.2
 Flask-Login==0.6.3
 Flask-Session[cachelib]==0.8.0
 Flask-WTF==1.2.2
@@ -10,6 +10,6 @@ pillow==11.3.0
 psutil==7.0.0
 python_dateutil==2.9.0.post0
 qrcode==8.2
-regex==2024.11.6
+regex==2025.7.34
 urllib3<2.0.0
 user_agents==2.2.0
