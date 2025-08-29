@@ -16,7 +16,7 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-8
 # Install Nginx, fpm and dependencies
 RUN dnf install -y wget make yum-utils && \
   dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
-  dnf install -y --setopt=install_weak_deps=False readline-devel python39 python39-devel python39-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
+  dnf install -y --setopt=install_weak_deps=False readline-devel python3.11 python3.11-devel python3.11-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
   dnf install -y https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm
 
 WORKDIR /tmp/bunkerweb/deps
@@ -42,9 +42,9 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p deps/python && \
-  easy_install-3.9 pip && \
-  pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+  python3.11 -m ensurepip && \
+  python3.11 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+  python3.11 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 RUN dnf install -y pigz && \
   tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
