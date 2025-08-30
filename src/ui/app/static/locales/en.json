@@ -89,9 +89,11 @@
     "enable_totp": "Enable TOTP",
     "entire_config": "Entire Config",
     "export": "Export",
+    "fetch_global": "Fetch Global Config",
     "filters_suffix": " Filters",
     "follow": "Follow",
     "force_check": "Force check",
+    "force_update": "Force update",
     "github_stars": "Stars",
     "go_back": "Go Back",
     "hide": "Hide",
@@ -748,10 +750,15 @@
       "services_deletion_confirmation": "Are you sure you want to delete the selected services?",
       "unban_confirmation_alert": "Are you sure you want to unban the selected IP address?",
       "unban_confirmation_alert_plural": "Are you sure you want to unban the selected IP addresses?",
-      "update_duration_alert": "Select a new duration for the selected bans:"
+      "update_duration_alert": "Select a new duration for the selected bans:",
+      "fetch_global_config_bold": "This will fetch the global configuration and apply it to the current template.",
+      "fetch_global_config_point_1": "Only settings present in this template are updated.",
+      "fetch_global_config_point_2": "Values identical to defaults are ignored.",
+      "fetch_global_config_point_3": "SERVER_NAME is never overridden."
     },
     "button": {
-      "reset_template_confirm": "Reset Template Configuration"
+      "reset_template_confirm": "Reset Template Configuration",
+      "fetch_global_config_confirm": "Apply global settings"
     },
     "section": {
       "ban_details": "Ban Details",
@@ -772,6 +779,7 @@
       "job_history_count": "Last {{count}} executions of Job",
       "recovery_codes": "Recovery Codes",
       "reset_template_config": "Reset Template Configuration?",
+      "fetch_global_config": "Apply Global Settings?",
       "server_name_not_unique": "Server Name Is Not Unique",
       "update_duration": "Update Ban Duration"
     }
@@ -870,6 +878,10 @@
     "force_check": {
       "title": "Force check",
       "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
     },
     "key": {
       "title": {
@@ -1185,7 +1197,11 @@
       "ping_failed": "Ping failed",
       "ping_succeed": "Ping successful"
     },
-    "ip_unbanned": "IP address unbanned successfully!"
+    "ip_unbanned": "IP address unbanned successfully!",
+    "global_settings_applied_title": "Global settings applied",
+    "global_settings_applied_body": "Global settings have been successfully fetched and applied to the current form.",
+    "global_settings_failed_title": "Failed to fetch global settings",
+    "global_settings_failed_body": "An error occurred while fetching global settings."
   },
   "tooltip": {
     "auto_lets_encrypt": "Whether to automatically request a Let's Encrypt certificate.",
@@ -1201,9 +1217,12 @@
       "reload_instance": "Reload Instance {{hostname}}",
       "reset_default": "Reset to default value",
       "reset_global": "Reset to global value",
+      "value_from_global": "Value from global configuration",
       "run_job": "Run Job {{job}}",
       "stop_instance": "Stop Instance {{hostname}}",
-      "unban_ip": "Unban {{ip}}"
+      "unban_ip": "Unban {{ip}}",
+      "force_check": "Schedules a check; downloads only if updates exist.",
+      "force_update": "Skips checks and forces PRO plugin download; keeps current state on failure."
     },
     "cannot_delete_original_ban": "Cannot delete the original Ban entry.",
     "cannot_remove_disabled": "Cannot remove because one or more settings are disabled.",
@@ -1244,6 +1263,7 @@
     "email_lets_encrypt": "The email address to register with Let's Encrypt for certificate management and notifications.",
     "email_length": "Email must be between 1 and 256 characters.",
     "follow_latest_page_only": "Follow mode is only available on the latest page",
+    "fetch_global_settings": "Fetch global settings and apply them to the current template",
     "global_config_source": "Value inherited from global configuration.",
     "instance_not_up": "Instance {{hostname}} is currently not responding ('up').",
     "lets_encrypt_custom_profile": "The custom profile to use for Let's Encrypt (e.g. 'my_custom_profile').",
@@ -1398,6 +1418,7 @@
     "use_proxy_protocol": "Enable PROXY protocol communication.",
     "use_real_ip": "Use Real IP",
     "username_length": "Username must be between 1 and 256 characters.",
+    "value_from_global": "Value from global configuration",
     "view_full_url": "Click to view full URL",
     "wildcard_certificates": "Generate wildcard certificates (*.domain.com). Requires DNS challenge.",
     "wildcard_dns_only": "Wildcard certificates are only supported with the DNS challenge type."

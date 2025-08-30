@@ -234,6 +234,22 @@ if [ -f /var/tmp/crowdsec.env ] && [ -f /etc/bunkerweb/variables.env ]; then
     rm -f /var/tmp/crowdsec.env
 fi
 
+# Fetch BunkerWeb instances config from /var/tmp/bunkerweb_instances.env and merge into variables.env if present
+if [ -f /var/tmp/bunkerweb_instances.env ] && [ -f /etc/bunkerweb/variables.env ]; then
+    echo "Adding BunkerWeb instances configuration from the easy-install script to /etc/bunkerweb/variables.env..."
+    while IFS= read -r line; do
+        key="${line%%=*}"
+        value="${line#*=}"
+        if grep -q "^${key}=" /etc/bunkerweb/variables.env; then
+            sed -i "s|^${key}=.*|${key}=${value}|" /etc/bunkerweb/variables.env
+        else
+            echo "${key}=${value}" >> /etc/bunkerweb/variables.env
+        fi
+    done < /var/tmp/bunkerweb_instances.env
+    echo "✔️ BunkerWeb instances configuration added to /etc/bunkerweb/variables.env"
+    rm -f /var/tmp/bunkerweb_instances.env
+fi
+
 if [ -f /var/tmp/bunkerweb_upgrade ]; then
     rm -f /var/tmp/bunkerweb_upgrade
     echo "BunkerWeb has been successfully upgraded! 🎉"

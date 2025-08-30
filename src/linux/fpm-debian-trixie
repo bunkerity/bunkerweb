@@ -3,11 +3,11 @@
 --license agpl3
 --version %VERSION%
 --architecture %ARCH%
---depends bash --depends python39 --depends 'nginx = 2:1.28.0' --depends libcurl-devel --depends libxml2 --depends yajl --depends file-libs --depends net-tools --depends gd --depends sudo --depends procps --depends lsof --depends libmaxminddb --depends libpq --depends libcap --depends openssl --depends sqlite --depends unzip --depends tar
---description "BunkerWeb %VERSION% for RHEL 9"
+--depends bash --depends python3 --depends procps --depends python3-pip --depends 'nginx = 1.28.0-1~trixie' --depends libcurl4 --depends libgeoip-dev --depends libxml2 --depends libyajl2 --depends libmagic1 --depends net-tools --depends sudo --depends lsof --depends libpq5 --depends libpcre2-8-0 --depends libcap2-bin --depends logrotate --depends mariadb-client --depends postgresql-client --depends sqlite3 --depends unzip --depends tar --depends libgd3
+--description "BunkerWeb %VERSION% for Debian 13"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
 --before-install /usr/share/bunkerweb/scripts/beforeInstall.sh
 --after-install /usr/share/bunkerweb/scripts/postinstall.sh
---after-remove /usr/share/bunkerweb/scripts/afterRemoveRPM.sh
+--after-remove /usr/share/bunkerweb/scripts/afterRemoveDEB.sh
 /usr/share/bunkerweb/=/usr/share/bunkerweb/ /usr/bin/bwcli=/usr/bin/bwcli /etc/bunkerweb/=/etc/bunkerweb /var/tmp/bunkerweb/=/var/tmp/bunkerweb /var/run/bunkerweb/=/var/run/bunkerweb /var/log/bunkerweb/=/var/log/bunkerweb /var/cache/bunkerweb/=/var/cache/bunkerweb /lib/systemd/system/bunkerweb.service=/lib/systemd/system/bunkerweb.service /lib/systemd/system/bunkerweb-ui.service=/lib/systemd/system/bunkerweb-ui.service /lib/systemd/system/bunkerweb-scheduler.service=/lib/systemd/system/bunkerweb-scheduler.service /var/lib/bunkerweb/=/var/lib/bunkerweb /etc/logrotate.d/bunkerweb=/etc/logrotate.d/bunkerweb

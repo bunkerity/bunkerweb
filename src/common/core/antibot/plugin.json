@@ -51,6 +51,15 @@
       "regex": "^[0-9]+$",
       "type": "text"
     },
+    "ANTIBOT_CAPTCHA_ALPHABET": {
+      "context": "multisite",
+      "default": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "help": "Custom alphabet to use for captcha generation. The captcha will be composed of random characters from this string. Supported characters: all letters (a-z, A-Z), numbers 2-9, and supported special characters (see documentation for full list).",
+      "id": "antibot-captcha-alphabet",
+      "label": "Captcha alphabet",
+      "regex": "^[a-zA-Z2-9+/=%\"'&_(),.;:?!§`^ÄÖÜßäöüé''‚\"\"„-]+$",
+      "type": "text"
+    },
     "ANTIBOT_IGNORE_URI": {
       "context": "multisite",
       "default": "",

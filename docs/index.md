@@ -49,7 +49,7 @@ Explore the impressive array of security features offered by BunkerWeb. While no
 
 - **Block bots** with **challenge-based verification**: Keep malicious bots at bay by challenging them to solve puzzles such as cookies, JavaScript tests, captchas, hCaptcha, reCAPTCHA, or Turnstile, effectively blocking unauthorized access.
 
-- **Block known bad IPs** with external blacklists and DNSBL: Utilize external blacklists and DNS-based blackhole lists (DNSBL) to proactively block known malicious IP addresses, bolstering your defense against potential threats.
+- **Block known bad IPs** with external blacklists and **DNSBL**: Utilize external blacklists and DNS-based blackhole lists (DNSBL) to proactively block known malicious IP addresses, bolstering your defense against potential threats.
 
 - **And much more...**: BunkerWeb is packed with a plethora of additional security features that go beyond this list, providing you with comprehensive protection and peace of mind.
 
@@ -92,7 +92,7 @@ If you are interested in the BunkerWeb Cloud offering, don't hesitate to [contac
 ## PRO version
 
 !!! tip "BunkerWeb PRO free trial"
-    Want to quickly test BunkerWeb PRO for one month? Use the code `freetrial` when placing your order on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) or by clicking [here](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) to directly to apply the promo code (will be effective at checkout).
+    Want to quickly test BunkerWeb PRO for one month? Use the code `freetrial` when placing your order on the [BunkerWeb Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) or by clicking [here](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) to directly to apply the promo code (will be effective at checkout).
 
 When using BunkerWeb, you have the choice of the version you want to use: open-source or PRO.
 
@@ -131,5 +131,5 @@ Community and social networks:
 
 - [**Discord**](https://discord.com/invite/fTf46FmtyD)
 - [**LinkedIn**](https://www.linkedin.com/company/bunkerity/)
-- [**Twitter**](https://twitter.com/bunkerity)
+- [**X (Formerly Twitter)**](https://x.com/bunkerity)
 - [**Reddit**](https://www.reddit.com/r/BunkerWeb/)

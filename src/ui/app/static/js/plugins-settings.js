@@ -85,6 +85,10 @@ $(document).ready(() => {
 
   const resetTemplateConfig = () => {
     const templateContainer = $(`#navs-templates-${currentTemplate}`);
+    // Hide any override badges shown after fetching global config
+    templateContainer
+      .find(".global-override-badge")
+      .addClass("visually-hidden");
     templateContainer.find("input, select").each(function () {
       const type = $(this).attr("type");
       const isNewEndpoint = window.location.pathname.endsWith("/new");
@@ -160,12 +164,32 @@ $(document).ready(() => {
         }, 150);
 
         // Update button states
-        $(`#navs-templates-${currentTemplate} .previous-step`).addClass(
-          "disabled",
-        );
-        $(`#navs-templates-${currentTemplate} .next-step`).removeClass(
-          "disabled",
-        );
+        if (
+          !$(`#navs-templates-${currentTemplate} .previous-step`).hasClass(
+            "visually-hidden",
+          )
+        ) {
+          $(`#navs-templates-${currentTemplate} .previous-step`).addClass(
+            "visually-hidden",
+          );
+        }
+
+        if (
+          $(`.step-navigation-item[data-template="${currentTemplate}"]`)
+            .length > 1
+        ) {
+          $(`#navs-templates-${currentTemplate} .next-step`).removeClass(
+            "visually-hidden",
+          );
+        } else if (
+          !$(`#navs-templates-${currentTemplate} .next-step`).hasClass(
+            "visually-hidden",
+          )
+        ) {
+          $(`#navs-templates-${currentTemplate} .next-step`).addClass(
+            "visually-hidden",
+          );
+        }
       }
     }, 100);
   };
@@ -770,79 +794,107 @@ $(document).ready(() => {
     }
   };
 
-  const performSettingsSearch = () => {
-    const keyword = $pluginKeywordSearchTop.val().toLowerCase().trim();
+  // Helpers near your other utils
+  const safeLower = (v) => (v == null ? "" : String(v)).toLowerCase();
+  const scoreMatch = (text, kw) => {
+    text = safeLower(text);
+    if (!kw || !text) return 0;
+    if (text === kw) return 100;
+    if (text.startsWith(kw)) return 60;
+    if (text.includes(kw)) return 30;
+    return 0;
+  };
 
-    // Clear highlights from all tabs
+  const performSettingsSearch = () => {
+    const keyword = safeLower($pluginKeywordSearchTop.val()).trim();
+
+    // Clear any previous highlight
     $(".tab-content .tab-pane .setting-highlight").removeClass(
       "setting-highlight setting-highlight-fade",
     );
 
-    if (keyword === "") {
-      return;
-    }
+    if (!keyword) return;
 
-    let bestMatch = null;
+    const activePlugin = currentPlugin; // kept up to date in handleTabChange
+    let best = null;
 
-    // Find all plugins with matching settings or metadata
     $("div[id^='navs-plugins-']").each(function () {
       const $pluginContainer = $(this);
       const pluginId = $pluginContainer.attr("id").replace("navs-plugins-", "");
 
-      // Search plugin metadata
+      // --- Plugin meta (left nav item) ---
       const $navItem = $(`#plugin-nav-${pluginId}`);
-      const pluginName = $navItem.find(".fw-bold").text().toLowerCase();
-      const pluginDesc = $navItem
-        .find("small.text-muted.d-block")
-        .data("description")
-        .toLowerCase();
-      const pluginMetaMatch =
-        pluginId.toLowerCase().includes(keyword) ||
-        pluginName.includes(keyword) ||
-        pluginDesc.includes(keyword);
+      const pluginName = safeLower($navItem.find(".fw-bold").text());
+      const pluginDesc = safeLower(
+        $navItem.find("small.text-muted.d-block").data("description"),
+      );
+      const metaScore =
+        scoreMatch(pluginId, keyword) +
+        scoreMatch(pluginName, keyword) +
+        scoreMatch(pluginDesc, keyword);
 
-      // Search settings within the plugin
-      const $settingLabels = $pluginContainer.find("label.form-label");
-      const matchedSettings = $settingLabels.filter(function () {
-        const $label = $(this);
-        const labelText = $label.text().toLowerCase();
-        const $settingContainer = $label.closest("[class*='col-12']");
-        const helpText = (
-          $settingContainer
-            .find(".badge[data-bs-original-title]")
-            .attr("data-bs-original-title") || ""
-        ).toLowerCase();
-        return labelText.includes(keyword) || helpText.includes(keyword);
-      });
+      // --- Settings in this plugin ---
+      // We look at: friendly header label, the floating setting key label, and the *help* badge tooltip.
+      const settings = [];
+      $pluginContainer
+        .find("[class*='col-12']") // each setting block container
+        .each(function () {
+          const $block = $(this);
 
-      if (matchedSettings.length > 0 || pluginMetaMatch) {
-        if (!bestMatch) {
-          bestMatch = {
-            pluginId: pluginId,
-            settings: matchedSettings.map(function () {
-              return $(this).closest("[class*='col-12']")[0];
-            }),
-          };
-        }
+          // Friendly label (header)
+          const headerLabel = safeLower(
+            $block.find("label.form-label").first().text(),
+          );
+
+          // Setting key (floating label inside control)
+          const settingKey = safeLower(
+            $block.find("label.text-truncate").first().text(),
+          );
+
+          // Help tooltip (only the help badge with question mark icon)
+          const helpBadge = $block.find(".bx-question-mark").closest(".badge");
+          const helpText = safeLower(helpBadge.attr("data-bs-original-title"));
+
+          // Compute the best score for this block
+          const s = Math.max(
+            scoreMatch(headerLabel, keyword),
+            scoreMatch(settingKey, keyword),
+            Math.floor(scoreMatch(helpText, keyword) / 2), // help less weighted
+          );
+
+          if (s > 0) {
+            settings.push({ node: $block[0], score: s });
+          }
+        });
+
+      // Total score with strong bias for the active plugin
+      const bias = pluginId === activePlugin ? 1000 : 0;
+      const settingsTotal = settings.reduce((sum, x) => sum + x.score, 0);
+      const total = bias + metaScore + settingsTotal;
+
+      // Sort settings by their own score (best first)
+      settings.sort((a, b) => b.score - a.score);
+
+      if (!best || total > best.total) {
+        best = { pluginId, total, settings };
       }
     });
 
-    if (bestMatch) {
-      const bestMatchNavItem = $(`#plugin-nav-${bestMatch.pluginId}`);
+    if (!best) return;
 
-      const doHighlight = () => {
-        if (bestMatch.settings.length > 0) {
-          highlightSettings($(bestMatch.settings));
-        }
-      };
-
-      if (bestMatchNavItem.hasClass("active")) {
-        doHighlight();
-      } else {
-        bestMatchNavItem.one("shown.bs.tab", doHighlight);
-        const tab = bootstrap.Tab.getOrCreateInstance(bestMatchNavItem[0]);
-        tab.show();
+    const $bestNav = $(`#plugin-nav-${best.pluginId}`);
+    const doHighlight = () => {
+      if (best.settings.length) {
+        // Convert to DOM nodes array for jQuery
+        highlightSettings($(best.settings.map((s) => s.node)));
       }
+    };
+
+    if ($bestNav.hasClass("active")) {
+      doHighlight();
+    } else {
+      $bestNav.one("shown.bs.tab", doHighlight);
+      bootstrap.Tab.getOrCreateInstance($bestNav[0]).show();
     }
   };
 
@@ -1363,139 +1415,6 @@ $(document).ready(() => {
       });
   });
 
-  $(document).on("click", ".next-step, .previous-step", function () {
-    const isNext = $(this).hasClass("next-step");
-    const template = $(this).data("template");
-
-    // Determine the new step
-    const newStep = isNext ? currentStep + 1 : currentStep - 1;
-
-    // Validate current step if going forward
-    if (isNext) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent proceeding to the next step
-        return;
-      }
-    }
-
-    // Trigger click on the target step navigation item
-    $(
-      `.step-navigation-item[data-step="${newStep}"][data-template="${template}"]`,
-    ).trigger("click");
-  });
-
-  // Update the step navigation item click handler to manage button states
-  $(document).on("click", ".step-navigation-item", function () {
-    const targetStep = parseInt($(this).data("step"));
-    const template = $(this).data("template");
-    const stepId = $(this).data("step-id");
-
-    // Don't proceed if already on this step
-    if (targetStep === currentStep) return;
-
-    // If trying to navigate to a future step, validate current step first
-    if (targetStep > currentStep) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent navigation if validation fails
-        return;
-      }
-
-      // Validate all steps between current and target
-      for (let step = currentStep + 1; step < targetStep; step++) {
-        const stepToValidateId = `navs-steps-${template}-${step}`;
-        const stepToValidateContainer = $(`#${stepToValidateId}`);
-        if (!validateCurrentStepInputs(stepToValidateContainer)) {
-          // Show the invalid step instead of the requested one
-          $(
-            `.step-navigation-item[data-step="${step}"][data-template="${template}"]`,
-          ).trigger("click");
-          return;
-        }
-      }
-    }
-
-    // Update active state in step navigation
-    $(`.step-navigation-item[data-template="${template}"]`).removeClass(
-      "active",
-    );
-    $(`.step-navigation-item[data-template="${template}"] .step-number`)
-      .addClass("disabled btn-outline-primary")
-      .removeClass("btn-primary");
-    $(`.step-navigation-item[data-template="${template}"] .fw-bold`)
-      .removeClass("text-primary")
-      .addClass("text-muted");
-
-    $(this).addClass("active");
-    $(this).find(".step-number").removeClass("disabled");
-    $(this).find(".fw-bold").removeClass("text-muted").addClass("text-primary");
-
-    // Update currentStep
-    currentStep = targetStep;
-
-    // Handle tab pane display - properly using Bootstrap's fade functionality
-    // First hide all step panes
-    $(
-      `#navs-templates-${template} .template-steps-content .tab-pane`,
-    ).removeClass("show active");
-
-    // Then show the target step pane
-    $(`#${stepId}`).addClass("show active");
-
-    // Update previous/next button states
-    const totalSteps = $(
-      `.step-navigation-item[data-template="${template}"]`,
-    ).length;
-    const $previousBtn = $(`#navs-templates-${template}`).find(
-      ".previous-step",
-    );
-    const $nextBtn = $(`#navs-templates-${template}`).find(".next-step");
-
-    $previousBtn.toggleClass("disabled", currentStep === 1);
-    $nextBtn.toggleClass("disabled", currentStep === totalSteps);
-
-    // Scroll the step content into view
-    $(`#${stepId}`)[0].scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  // Simplify the next/previous step handlers - they should just trigger the appropriate step navigation item
-  $(document).on("click", ".next-step, .previous-step", function () {
-    if ($(this).hasClass("disabled")) return; // Don't do anything if button is disabled
-
-    const isNext = $(this).hasClass("next-step");
-    const template = $(this).data("template");
-
-    // Determine the new step
-    const newStep = isNext ? currentStep + 1 : currentStep - 1;
-
-    // Validate current step if going forward
-    if (isNext) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent proceeding to the next step
-        return;
-      }
-    }
-
-    // Find and trigger click on the target step navigation item
-    const $targetStepItem = $(
-      `.step-navigation-item[data-step="${newStep}"][data-template="${template}"]`,
-    );
-    if ($targetStepItem.length) {
-      $targetStepItem.trigger("click");
-    }
-  });
-
   $("#reset-template-config").on("click", function () {
     const reset_modal = $("#modal-reset-template-config");
     reset_modal.modal("show");
@@ -1503,6 +1422,164 @@ $(document).ready(() => {
 
   $("#confirm-reset-template-config").on("click", function () {
     resetTemplateConfig();
+  });
+
+  $("#fetch-global-config").on("click", function () {
+    if (isReadOnly) {
+      alert(t("alert.readonly_mode"));
+      return;
+    }
+    const fetchModal = $("#modal-fetch-global-config");
+    // Ensure modal is attached to body to avoid z-index/overflow issues
+    fetchModal.appendTo("body").modal("show");
+  });
+
+  $("#confirm-fetch-global-config").on("click", function () {
+    $.ajax({
+      url: `${window.location.pathname
+        .split("/")
+        .slice(0, -2)
+        .join("/")}/global-config?as_json=true`,
+      type: "GET",
+      success: function (globalConfig) {
+        const templateContainer = $(`#navs-templates-${currentTemplate}`);
+
+        const settingsInTemplate = new Set();
+        templateContainer.find(".plugin-setting").each(function () {
+          settingsInTemplate.add($(this).attr("name"));
+        });
+
+        for (const settingName in globalConfig) {
+          if (settingsInTemplate.has(settingName)) {
+            if (settingName === "SERVER_NAME") {
+              continue;
+            }
+            const settingData = globalConfig[settingName];
+            const settingValue = settingData.value;
+            const $input = templateContainer.find(`[name="${settingName}"]`);
+
+            if (!$input.length) continue;
+
+            const defaultValue = $input.data("default");
+            if (settingValue === defaultValue) {
+              continue;
+            }
+
+            const $settingContainer = $input.closest(".col-12");
+            const $badge = $settingContainer.find(".global-override-badge");
+            if ($badge.length) {
+              $badge.removeClass("visually-hidden");
+            }
+
+            const inputType = $input.attr("type");
+
+            if ($input.is("select")) {
+              $input.val(settingValue).trigger("change");
+            } else if (inputType === "checkbox") {
+              $input.prop("checked", settingValue === "yes").trigger("change");
+            } else if ($input.hasClass("multivalue-hidden-input")) {
+              const $container = $input.closest(".multivalue-container");
+              const separator = $container.data("separator") || " ";
+              const values = settingValue
+                ? settingValue.split(separator)
+                : [""];
+              $container.find(".multivalue-input-group").remove();
+              $container.find(".multivalue-toggle").remove();
+
+              const $inputsContainer = $container.find(".multivalue-inputs");
+              values.forEach((value, index) => {
+                const inputGroupHtml = `
+                  <div class="input-group mb-2 multivalue-input-group">
+                    <input type="text"
+                           class="form-control multivalue-input"
+                           value="${value.trim()}"
+                           placeholder="Enter value..."
+                           data-i18n="form.placeholder.multivalue_enter_value">
+                    <button type="button"
+                            class="btn btn-outline-success add-multivalue-item">
+                      <i class="bx bx-plus"></i>
+                    </button>
+                    ${
+                      index > 0 || values.length > 1
+                        ? `
+                    <button type="button"
+                            class="btn btn-outline-danger remove-multivalue-item">
+                      <i class="bx bx-x"></i>
+                    </button>
+                    `
+                        : ""
+                    }
+                  </div>
+                `;
+                $inputsContainer.append(inputGroupHtml);
+              });
+              updateMultivalueHiddenInput($container);
+            } else if (
+              $input.is('input[type="hidden"]') &&
+              $input.closest(".dropdown").find(".multiselect-toggle").length
+            ) {
+              $input.val(settingValue).trigger("input");
+              const selectedValues = settingValue
+                ? settingValue.split(" ")
+                : [];
+              const $dropdown = $input.closest(".dropdown");
+              $dropdown.find(".form-check-input").each(function () {
+                const $checkbox = $(this);
+                const checkboxVal = $checkbox.val();
+                $checkbox.prop("checked", selectedValues.includes(checkboxVal));
+              });
+              const selectedCount = selectedValues.filter((v) => v).length;
+              const $label = $dropdown.find(".multiselect-toggle label");
+              $label.text(`(${selectedCount} selected)`);
+            } else {
+              // Handle simple text-like inputs and textareas
+              $input.val(settingValue).trigger("input");
+            }
+          }
+        }
+
+        const feedbackToast = $("#feedback-toast").clone();
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
+        feedbackToast.find("span").text("Success");
+        feedbackToast
+          .find(".fw-medium")
+          .text("Global settings applied")
+          .attr("data-i18n", "toast.global_settings_applied_title");
+        feedbackToast
+          .find("div.toast-body")
+          .text(
+            "Global settings have been successfully fetched and applied to the current form.",
+          )
+          .attr("data-i18n", "toast.global_settings_applied_body");
+        feedbackToast.removeClass("border-warning").addClass("border-success");
+        feedbackToast
+          .find(".toast-header")
+          .removeClass("text-warning")
+          .addClass("text-success");
+        feedbackToast.appendTo("#feedback-toast-container");
+        feedbackToast.toast("show");
+      },
+      error: function () {
+        const feedbackToast = $("#feedback-toast").clone();
+        feedbackToast.attr("id", `feedback-toast-${toastNum++}`);
+        feedbackToast.find("span").text("Error");
+        feedbackToast
+          .find(".fw-medium")
+          .text("Failed to fetch global settings")
+          .attr("data-i18n", "toast.global_settings_failed_title");
+        feedbackToast
+          .find("div.toast-body")
+          .text("An error occurred while fetching global settings.")
+          .attr("data-i18n", "toast.global_settings_failed_body");
+        feedbackToast.removeClass("border-warning").addClass("border-danger");
+        feedbackToast
+          .find(".toast-header")
+          .removeClass("text-warning")
+          .addClass("text-danger");
+        feedbackToast.appendTo("#feedback-toast-container");
+        feedbackToast.toast("show");
+      },
+    });
   });
 
   if (
@@ -1661,10 +1738,6 @@ $(document).ready(() => {
     }
   });
 
-  // Remove all previously attached handlers to avoid duplication
-  $(document).off("click", ".step-navigation-item");
-  $(document).off("click", ".next-step, .previous-step");
-
   // Helper functions for styling step buttons and navigation
   const stepButtonStyles = {
     // Active states
@@ -1797,13 +1870,8 @@ $(document).ready(() => {
     const $previousBtn = $(`#navs-templates-${template} .previous-step`);
     const $nextBtn = $(`#navs-templates-${template} .next-step`);
 
-    $previousBtn.toggleClass("disabled", targetStep === 1);
-    $nextBtn.toggleClass("disabled", targetStep === totalSteps);
-
-    // Scroll into view after transition is complete
-    setTimeout(() => {
-      $(`#${stepId}`)[0].scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 350); // Give enough time for the fade-in to complete
+    $previousBtn.toggleClass("visually-hidden", targetStep === 1);
+    $nextBtn.toggleClass("visually-hidden", targetStep === totalSteps);
   };
 
   // Unified and improved step navigation handler
@@ -1816,8 +1884,11 @@ $(document).ready(() => {
       const isNextButton = $(this).hasClass("next-step");
       const isPrevButton = $(this).hasClass("previous-step");
 
-      // Skip action if button is disabled
-      if ((isNextButton || isPrevButton) && $(this).hasClass("disabled")) {
+      // Skip action if button is visually-hidden
+      if (
+        (isNextButton || isPrevButton) &&
+        $(this).hasClass("visually-hidden")
+      ) {
         return;
       }
 

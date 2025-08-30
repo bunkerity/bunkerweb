@@ -89,6 +89,7 @@
     "enable_totp": "Abilita TOTP",
     "entire_config": "Configurazione Intera",
     "export": "Esporta",
+    "fetch_global": "Recupera Configurazione Globale",
     "filters_suffix": " Filtri",
     "follow": "Segui",
     "github_stars": "Stelle",
@@ -135,7 +136,8 @@
     "upload_photo": "Carica Nuova Foto",
     "view_details": "Visualizza Dettagli",
     "view_raw_data": "Visualizza Dati Grezzi",
-    "wipe_other_sessions": "Pulisci Altre Sessioni"
+    "wipe_other_sessions": "Pulisci Altre Sessioni",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "Andorra",
@@ -747,10 +749,15 @@
       "services_deletion_confirmation": "Sei sicuro di voler eliminare i servizi selezionati?",
       "unban_confirmation_alert": "Sei sicuro di voler sbloccare l'indirizzo IP selezionato?",
       "unban_confirmation_alert_plural": "Sei sicuro di voler sbloccare gli indirizzi IP selezionati?",
-      "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:"
+      "update_duration_alert": "Seleziona una nuova durata per i divieti selezionati:",
+      "fetch_global_config_bold": "Questo recupererà la configurazione globale e la applicherà al modello corrente.",
+      "fetch_global_config_point_1": "Vengono aggiornate solo le impostazioni presenti in questo modello.",
+      "fetch_global_config_point_2": "I valori identici ai predefiniti vengono ignorati.",
+      "fetch_global_config_point_3": "SERVER_NAME non viene mai sovrascritto."
     },
     "button": {
-      "reset_template_confirm": "Ripristina Configurazione Modello"
+      "reset_template_confirm": "Ripristina Configurazione Modello",
+      "fetch_global_config_confirm": "Applica impostazioni globali"
     },
     "section": {
       "ban_details": "Dettagli Blocco",
@@ -771,6 +778,7 @@
       "job_history_count": "Ultime {{count}} esecuzioni del Processo",
       "recovery_codes": "Codici di Recupero",
       "reset_template_config": "Ripristinare Configurazione Modello?",
+      "fetch_global_config": "Applicare le impostazioni globali?",
       "server_name_not_unique": "Nome Server non è Unico",
       "update_duration": "Aggiorna Durata Blocco"
     }
@@ -866,6 +874,14 @@
       "expires_in": "Scade tra",
       "title": "Data Scadenza Pro",
       "unknown": "Data di scadenza sconosciuta"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
     },
     "key": {
       "title": {
@@ -1182,7 +1198,11 @@
       "ping_failed": "Ping fallito",
       "ping_succeed": "Ping riuscito"
     },
-    "ip_unbanned": "Indirizzo IP sbloccato con successo!"
+    "ip_unbanned": "Indirizzo IP sbloccato con successo!",
+    "global_settings_applied_title": "Impostazioni globali applicate",
+    "global_settings_applied_body": "Le impostazioni globali sono state recuperate e applicate correttamente al modulo corrente.",
+    "global_settings_failed_title": "Recupero impostazioni globali non riuscito",
+    "global_settings_failed_body": "Si è verificato un errore durante il recupero delle impostazioni globali."
   },
   "tooltip": {
     "auto_lets_encrypt": "Se richiedere automaticamente un certificato Let's Encrypt.",
@@ -1198,9 +1218,12 @@
       "reload_instance": "Ricarica Istanza {{hostname}}",
       "reset_default": "Ripristina valore predefinito",
       "reset_global": "Ripristina valore globale",
+      "value_from_global": "Valore dalla configurazione globale",
       "run_job": "Esegui Processo {{job}}",
       "stop_instance": "Ferma Istanza {{hostname}}",
-      "unban_ip": "Sblocca {{ip}}"
+      "unban_ip": "Sblocca {{ip}}",
+      "force_check": "Pianifica un controllo; scarica solo se ci sono aggiornamenti.",
+      "force_update": "Salta i controlli e forza il download dei plugin PRO; mantiene lo stato attuale in caso di errore."
     },
     "cannot_delete_original_ban": "Impossibile eliminare la voce di blocco originale.",
     "cannot_remove_disabled": "Impossibile rimuovere perché una o più impostazioni sono disabilitate.",
@@ -1241,6 +1264,7 @@
     "email_lets_encrypt": "L'indirizzo email da registrare con Let's Encrypt per la gestione dei certificati e le notifiche.",
     "email_length": "L'email deve avere tra 1 e 256 caratteri.",
     "follow_latest_page_only": "La modalità seguimento è disponibile solo sull'ultima pagina",
+    "fetch_global_settings": "Recupera le impostazioni globali e applicale al modello attuale",
     "global_config_source": "Valore ereditato dalla configurazione globale.",
     "instance_not_up": "L'istanza {{hostname}} non risponde attualmente ('up').",
     "latest_version_installed": "Stai usando l'ultima versione.",
@@ -1395,6 +1419,7 @@
     "use_proxy_protocol": "Abilita la comunicazione tramite protocollo PROXY.",
     "use_real_ip": "Usa IP Reale",
     "username_length": "Il nome utente deve avere tra 1 e 256 caratteri.",
+    "value_from_global": "Valore dalla configurazione globale",
     "view_full_url": "Clicca per visualizzare l'URL completo",
     "wildcard_certificates": "Genera certificati wildcard (*.dominio.com). Richiede sfida DNS.",
     "wildcard_dns_only": "I certificati wildcard sono supportati solo con il tipo di sfida DNS."

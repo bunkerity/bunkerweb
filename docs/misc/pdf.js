@@ -28,6 +28,11 @@ footerHtml = `<div style="font-size: 10px; text-align: center; width: 100%;"><sp
 
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle2' });
+    // Remove chatbot container completely
+    await page.evaluate(() => {
+        const el = document.getElementById('chatbot-container');
+        if (el) el.remove();
+    });
     await page.pdf({
         path: pdfPath, // path to save pdf file
         format: 'A4', // page format

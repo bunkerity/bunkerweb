@@ -18,28 +18,32 @@ end
 local function urandom()
 	local seed = 1
 	local devurandom = io.open("/dev/urandom", "r")
-	local urandom = devurandom:read(32)
+	if not devurandom then
+		-- Fallback for systems without /dev/urandom
+		return math.random()
+	end
+	local urandom_data = devurandom:read(32)
 	devurandom:close()
 
-	for i = 1, string.len(urandom) do
-		local s = string.byte(urandom, i)
-		seed = seed + s
+	if urandom_data then
+		for i = 1, string.len(urandom_data) do
+			local s = string.byte(urandom_data, i)
+			seed = seed + s
+		end
 	end
 	return seed
 end
 
 
-local function random_char(length)
-	local set, char, uid
-	-- local set = [[1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]]
-	local set = [[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]]
+local function random_char(length, alphabet)
+	local char, uid
 	local captcha_t = {}
 
 	math.randomseed(urandom())
 
 	for c = 1, length do
-		local i = math.random(1, string.len(set))
-		table.insert(captcha_t, string.sub(set, i, i))
+		local i = math.random(1, string.len(alphabet))
+		table.insert(captcha_t, string.sub(alphabet, i, i))
 	end
 
 	return captcha_t
@@ -66,6 +70,10 @@ end
 
 function mt.__index:scribble(n)
 	self.cap.scribble = n or 20
+end
+
+function mt.__index:alphabet(s)
+	self.cap.alphabet = s
 end
 
 function mt.__index:length(l)
@@ -96,7 +104,11 @@ function mt.__index:generate()
 		if not self.cap.length then
 			self.cap.length = 6
 		end
-		captcha_t = random_char(self.cap.length)
+		if not self.cap.alphabet or self.cap.alphabet == "" then
+			-- Fallback alphabet if not provided
+			self.cap.alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		end
+		captcha_t = random_char(self.cap.length, self.cap.alphabet)
 		self:string(table.concat(captcha_t))
 	else
 		for i = 1, #self.cap.string do

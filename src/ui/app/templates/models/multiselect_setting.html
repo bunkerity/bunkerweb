@@ -1,5 +1,13 @@
 <div class="form-floating mt-1">
     <div class="dropdown">
+        <input type="hidden"
+               id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix }}"
+               name="{{ setting }}"
+               class="plugin-setting"
+               value="{{ setting_value }}"
+               data-original="{% if current_endpoint != 'new' %}{{ setting_value }}{% else %}{{ setting_default }}{% endif %}"
+               data-default="{{ setting_default }}"
+               {% if disabled %}disabled{% endif %}>
         <button class="form-control form-select dropdown-toggle multiselect-toggle"
                 type="button"
                 id="{{ setting_id_prefix }}{{ setting_data.id }}{{ setting_id_suffix }}_toggle"

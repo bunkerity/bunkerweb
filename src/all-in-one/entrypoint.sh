@@ -276,6 +276,7 @@ else
 fi
 
 if [ "${USE_REDIS}" = "yes" ] && { [ "${REDIS_HOST:-127.0.0.1}" = "127.0.0.1" ] || [ "${REDIS_HOST:-127.0.0.1}" = "localhost" ]; }; then
+	mkdir -p /var/lib/redis
 	export REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
 	# Enable autorestart for Redis service
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/redis.ini

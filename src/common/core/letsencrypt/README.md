@@ -84,7 +84,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
 
 | Provider          | Description      | Mandatory Settings                                                                                           | Optional Settings                                                                                                                                                                                                                                                        | Documentation                                                                                         |
 | ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `bunny`           | bunny.net        | `dns_bunny_api_key`                                                                                          |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst)                        |
+| `bunny`           | bunny.net        | `api_key`                                                                                                    |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/mwt/certbot-dns-bunny/blob/main/README.rst)                        |
 | `cloudflare`      | Cloudflare       | either `api_token`<br>or `email` and `api_key`                                                               |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-cloudflare.readthedocs.io/en/stable/)                             |
 | `desec`           | deSEC            | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://github.com/desec-io/certbot-dns-desec/blob/main/README.md)                    |
 | `digitalocean`    | DigitalOcean     | `token`                                                                                                      |                                                                                                                                                                                                                                                                          | [Documentation](https://certbot-dns-digitalocean.readthedocs.io/en/stable/)                           |
@@ -127,7 +127,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
     EMAIL_LETS_ENCRYPT: "admin@example.com"
     LETS_ENCRYPT_CHALLENGE: "dns"
     LETS_ENCRYPT_DNS_PROVIDER: "cloudflare"
-    LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "dns_cloudflare_api_token YOUR_API_TOKEN"
+    LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "api_token YOUR_API_TOKEN"
     USE_LETS_ENCRYPT_WILDCARD: "yes"
     ```
 
@@ -165,7 +165,7 @@ The Let's Encrypt plugin supports a wide range of DNS providers for DNS challeng
     EMAIL_LETS_ENCRYPT: "admin@example.com"
     LETS_ENCRYPT_CHALLENGE: "dns"
     LETS_ENCRYPT_DNS_PROVIDER: "digitalocean"
-    LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "dns_digitalocean_token YOUR_API_TOKEN"
+    LETS_ENCRYPT_DNS_CREDENTIAL_ITEM: "token YOUR_API_TOKEN"
     LETS_ENCRYPT_DNS_PROPAGATION: "120"
     ```
 

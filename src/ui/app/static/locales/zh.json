@@ -89,6 +89,7 @@
     "enable_totp": "启用 TOTP",
     "entire_config": "完整配置",
     "export": "导出",
+    "fetch_global": "获取全局配置",
     "filters_suffix": " 过滤器",
     "follow": "跟随",
     "github_stars": "星标",
@@ -135,7 +136,8 @@
     "upload_photo": "上传新照片",
     "view_details": "查看详情",
     "view_raw_data": "查看原始数据",
-    "wipe_other_sessions": "清除其他会话"
+    "wipe_other_sessions": "清除其他会话",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "安道尔",
@@ -747,10 +749,15 @@
       "services_deletion_confirmation": "您确定要删除选定的服务吗？",
       "unban_confirmation_alert": "您确定要解禁选定的 IP 地址吗？",
       "unban_confirmation_alert_plural": "您确定要解禁选定的 IP 地址吗？",
-      "update_duration_alert": "请为选定的封禁选择新的期限："
+      "update_duration_alert": "请为选定的封禁选择新的期限：",
+      "fetch_global_config_bold": "这将获取全局配置并将其应用到当前模板。",
+      "fetch_global_config_point_1": "仅更新本模板中存在的设置。",
+      "fetch_global_config_point_2": "与默认值相同的值会被忽略。",
+      "fetch_global_config_point_3": "SERVER_NAME 永不会被覆盖。"
     },
     "button": {
-      "reset_template_confirm": "重置模板配置"
+      "reset_template_confirm": "重置模板配置",
+      "fetch_global_config_confirm": "应用全局设置"
     },
     "section": {
       "ban_details": "封禁详情",
@@ -771,6 +778,7 @@
       "job_history_count": "任务 {{count}} 次执行",
       "recovery_codes": "恢复代码",
       "reset_template_config": "重置模板配置？",
+      "fetch_global_config": "应用全局设置？",
       "server_name_not_unique": "服务器名称不是唯一的",
       "update_duration": "更新封禁期限"
     }
@@ -866,6 +874,14 @@
       "expires_in": "有效期至",
       "title": "Pro 到期日期",
       "unknown": "未知的到期日期"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
     },
     "key": {
       "title": {
@@ -1183,7 +1199,11 @@
       "ping_failed": "Ping 失败",
       "ping_succeed": "Ping 成功"
     },
-    "ip_unbanned": "IP 地址已成功解禁！"
+    "ip_unbanned": "IP 地址已成功解禁！",
+    "global_settings_applied_title": "全局设置已应用",
+    "global_settings_applied_body": "已成功获取全局设置并应用到当前表单。",
+    "global_settings_failed_title": "获取全局设置失败",
+    "global_settings_failed_body": "获取全局设置时发生错误。"
   },
   "tooltip": {
     "auto_lets_encrypt": "是否自动请求 Let's Encrypt 证书。",
@@ -1199,9 +1219,12 @@
       "reload_instance": "重新加载实例 {{hostname}}",
       "reset_default": "重置为默认值",
       "reset_global": "重置为全局值",
+      "value_from_global": "来自全局配置的值",
       "run_job": "运行任务 {{job}}",
       "stop_instance": "停止实例 {{hostname}}",
-      "unban_ip": "解禁 {{ip}}"
+      "unban_ip": "解禁 {{ip}}",
+      "force_check": "安排检查；仅在有更新时下载。",
+      "force_update": "跳过检查并强制下载 PRO 插件；失败时保留当前状态。"
     },
     "cannot_delete_original_ban": "无法删除原始封禁条目。",
     "cannot_remove_disabled": "无法移除，因为一个或多个设置被禁用。",
@@ -1242,6 +1265,7 @@
     "email_lets_encrypt": "用于向 Let's Encrypt 注册以进行证书管理和通知的电子邮件地址。",
     "email_length": "电子邮件必须在 1 到 256 个字符之间。",
     "follow_latest_page_only": "跟随模式仅在最新页面可用",
+    "fetch_global_settings": "获取全局设置并应用于当前模板",
     "global_config_source": "值继承自全局配置。",
     "instance_not_up": "实例 {{hostname}} 当前未响应 ('up')。",
     "latest_version_installed": "您正在运行最新版本。",
@@ -1396,6 +1420,7 @@
     "use_proxy_protocol": "启用 PROXY 协议通信。",
     "use_real_ip": "使用真实 IP",
     "username_length": "用户名必须在 1 到 256 个字符之间。",
+    "value_from_global": "来自全局配置的值",
     "view_full_url": "点击查看完整 URL",
     "wildcard_certificates": "生成通配符证书 (*.domain.com)。需要 DNS 质询。",
     "wildcard_dns_only": "通配符证书仅支持 DNS 质询类型。"

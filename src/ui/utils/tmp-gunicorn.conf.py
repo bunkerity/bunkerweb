@@ -23,6 +23,7 @@ LISTEN_ADDR = getenv("LISTEN_ADDR", "0.0.0.0")
 LISTEN_PORT = getenv("LISTEN_PORT", "7000")
 FORWARDED_ALLOW_IPS = getenv("FORWARDED_ALLOW_IPS", "*")
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
+DEBUG = getenv("DEBUG", False)
 
 wsgi_app = "temp:app"
 proc_name = "bunkerweb-tmp-ui"
@@ -34,7 +35,7 @@ limit_request_line = 0
 limit_request_fields = 32768
 limit_request_field_size = 0
 reuse_port = True
-daemon = True
+daemon = bool(DEBUG)
 chdir = join(sep, "usr", "share", "bunkerweb", "ui")
 umask = 0x027
 pidfile = PID_FILE.as_posix()
@@ -52,7 +53,6 @@ threads = 2
 max_requests_jitter = 0
 graceful_timeout = 0
 
-DEBUG = getenv("DEBUG", False)
 
 loglevel = "debug" if DEBUG else LOG_LEVEL.lower()
 

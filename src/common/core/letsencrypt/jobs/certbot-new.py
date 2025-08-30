@@ -412,6 +412,7 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
         "--email",
         config["email"],
         "--break-my-certs",
+        "--expand",
     ]
 
     if LOG_LEVEL == "DEBUG":

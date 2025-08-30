@@ -430,7 +430,7 @@ $(function () {
   );
 
   const blockedRequests = Object.keys(requestsData).reduce((acc, key) => {
-    if ([403, 429, 444].includes(key)) {
+    if (["403", "429", "444"].includes(key)) {
       acc += parseInt(requestsData[key], 10); // Parse blocked requests as integer
     }
     return acc;

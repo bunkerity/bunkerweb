@@ -50,4 +50,4 @@ sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION\"@g" src/scheduler/Docker
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION\"@g" src/ui/Dockerfile
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION\"@g" src/autoconf/Dockerfile
 # easy-install script
-sed -i "s@BUNKERWEB_VERSION=.*@BUNKERWEB_VERSION=\"$NEW_VERSION\"@g" misc/install-bunkerweb.sh
+sed -i "s@DEFAULT_BUNKERWEB_VERSION=.*@DEFAULT_BUNKERWEB_VERSION=\"$NEW_VERSION\"@g" misc/install-bunkerweb.sh

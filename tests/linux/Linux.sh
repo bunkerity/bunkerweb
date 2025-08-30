@@ -22,20 +22,26 @@ function buildPackage() {
     if [ "$DISTRO" = "ubuntu" ]; then
       sudo docker build -t linux-ubuntu -f src/linux/Dockerfile-ubuntu .
     fi
-    if [ "$DISTRO" = "debian" ]; then
-      sudo docker build -t linux-debian -f src/linux/Dockerfile-debian .
+    if [ "$DISTRO" = "debian-bookworm" ]; then
+      sudo docker build -t linux-debian-bookworm -f src/linux/Dockerfile-debian-bookworm .
     fi
-    if [ "$DISTRO" = "centos" ]; then
-      sudo docker build -t linux-centos -f src/linux/Dockerfile-centos .
+    if [ "$DISTRO" = "debian-trixie" ]; then
+      sudo docker build -t linux-debian-trixie -f src/linux/Dockerfile-debian-trixie .
     fi
-    if [ "$DISTRO" = "fedora" ]; then
-      sudo docker build -t linux-fedora -f src/linux/Dockerfile-fedora .
+    if [ "$DISTRO" = "fedora-40" ]; then
+      sudo docker build -t linux-fedora-40 -f src/linux/Dockerfile-fedora-40 .
     fi
-    if [ "$DISTRO" = "rhel" ]; then
-      sudo docker build -t linux-rhel -f src/linux/Dockerfile-rhel .
+    if [ "$DISTRO" = "fedora-41" ]; then
+      sudo docker build -t linux-fedora-41 -f src/linux/Dockerfile-fedora-41 .
     fi
-    if [ "$DISTRO" = "rhel9" ]; then
-      sudo docker build -t linux-rhel9 -f src/linux/Dockerfile-rhel9 .
+    if [ "$DISTRO" = "rhel-8" ]; then
+      sudo docker build -t linux-rhel-8 -f src/linux/Dockerfile-rhel-8 .
+    fi
+    if [ "$DISTRO" = "rhel-9" ]; then
+      sudo docker build -t linux-rhel-9 -f src/linux/Dockerfile-rhel-9 .
+    fi
+    if [ "$DISTRO" = "rhel-10" ]; then
+      sudo docker build -t linux-rhel-10 -f src/linux/Dockerfile-rhel-10 .
     fi
     if [ "$DISTRO" = "ubuntu-jammy" ]; then
       sudo docker build -t linux-ubuntu-jammy -f src/linux/Dockerfile-ubuntu-jammy .
@@ -50,20 +56,26 @@ function createContainer() {
     if [ "$DISTRO" = "ubuntu" ]; then
       sudo docker run -v /tmp/ubuntu:/data linux-ubuntu
     fi
-    if [ "$DISTRO" = "debian" ]; then
-      sudo docker run -v /tmp/debian:/data linux-debian
+    if [ "$DISTRO" = "debian-bookworm" ]; then
+      sudo docker run -v /tmp/debian-bookworm:/data linux-debian-bookworm
     fi
-    if [ "$DISTRO" = "centos" ]; then
-      sudo docker run -v /tmp/centos:/data linux-centos
+    if [ "$DISTRO" = "debian-trixie" ]; then
+      sudo docker run -v /tmp/debian-trixie:/data linux-debian-trixie
     fi
-    if [ "$DISTRO" = "fedora" ]; then
-      sudo docker run -v /tmp/fedora:/data linux-fedora
+    if [ "$DISTRO" = "fedora-40" ]; then
+      sudo docker run -v /tmp/fedora-40:/data linux-fedora-40
     fi
-    if [ "$DISTRO" = "rhel" ]; then
-      sudo docker run -v /tmp/rhel:/data linux-rhel
+    if [ "$DISTRO" = "fedora-41" ]; then
+      sudo docker run -v /tmp/fedora-41:/data linux-fedora-41
     fi
-    if [ "$DISTRO" = "rhel9" ]; then
-      sudo docker run -v /tmp/rhel9:/data linux-rhel9
+    if [ "$DISTRO" = "rhel-8" ]; then
+      sudo docker run -v /tmp/rhel-8:/data linux-rhel-8
+    fi
+    if [ "$DISTRO" = "rhel-9" ]; then
+      sudo docker run -v /tmp/rhel-9:/data linux-rhel-9
+    fi
+    if [ "$DISTRO" = "rhel-10" ]; then
+      sudo docker run -v /tmp/rhel-10:/data linux-rhel-10
     fi
     if [ "$DISTRO" = "ubuntu-jammy" ]; then
       sudo docker run -v /tmp/ubuntu-jammy:/data linux-ubuntu-jammy
@@ -74,7 +86,7 @@ function createContainer() {
 # Retrieve $DISTRO from the user
 
 function retrieveDistro() {
-  echo "Which distro do you want to use? (ubuntu, debian, centos, fedora, rhel, rhel9)"
+  echo "Which distro do you want to use? (ubuntu, debian-bookworm, debian-trixie, fedora-40, fedora-41, rhel-8, rhel-9, rhel-10)"
   read -r DISTRO
 }
 

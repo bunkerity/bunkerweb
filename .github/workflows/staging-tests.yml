@@ -25,9 +25,9 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Login to ghcr
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -43,7 +43,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         if: inputs.TYPE == 'k8s'
-      - uses: actions/download-artifact@v4.3.0
+      - uses: actions/download-artifact@v5.0.0
         with:
           name: tf-k8s
           path: /tmp
@@ -70,26 +70,32 @@ jobs:
         if: inputs.TYPE == 'k8s'
         with:
           version: "v1.29.1"
-      - uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0
+      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-tests:testing local/ubuntu:latest
-      - name: Pull BW linux debian test image
+      - name: Pull BW linux debian Bookworm test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity/debian-tests:testing local/debian:latest
+        run: docker pull ghcr.io/bunkerity/debian-bookworm-tests:testing && docker tag ghcr.io/bunkerity/debian-bookworm-tests:testing local/debian-bookworm:latest
+      - name: Pull BW linux debian Trixie test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/debian-trixie-tests:testing && docker tag ghcr.io/bunkerity/debian-trixie-tests:testing local/debian-trixie:latest
       - name: Pull BW linux fedora 41 test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/fedora-41-tests:testing && docker tag ghcr.io/bunkerity/fedora-41-tests:testing local/fedora-41:latest
       - name: Pull BW linux fedora 42 test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/fedora-42-tests:testing && docker tag ghcr.io/bunkerity/fedora-42-tests:testing local/fedora-42:latest
-      - name: Pull BW linux rhel test image
+      - name: Pull BW linux rhel-8 test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
-      - name: Pull BW linux rhel9 test image
+        run: docker pull ghcr.io/bunkerity/rhel-8-tests:testing && docker tag ghcr.io/bunkerity/rhel-8-tests:testing local/rhel-8:latest
+      - name: Pull BW linux rhel-9 test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel9-tests:testing && docker tag ghcr.io/bunkerity/rhel9-tests:testing local/rhel9:latest
+        run: docker pull ghcr.io/bunkerity/rhel-9-tests:testing && docker tag ghcr.io/bunkerity/rhel-9-tests:testing local/rhel-9:latest
+      - name: Pull BW linux rhel-10 test image
+        if: inputs.TYPE == 'linux'
+        run: docker pull ghcr.io/bunkerity/rhel-10-tests:testing && docker tag ghcr.io/bunkerity/rhel-10-tests:testing local/rhel-10:latest
       - name: Pull BW linux ubuntu jammy test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/ubuntu-jammy-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-jammy-tests:testing local/ubuntu-jammy:latest
@@ -121,9 +127,15 @@ jobs:
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux debian tests
+      - name: Run Linux debian Bookworm tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-bookworm"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux debian Trixie tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "debian-trixie"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
@@ -139,15 +151,21 @@ jobs:
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux rhel tests
+      - name: Run Linux rhel-8 tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-8"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux rhel9 tests
+      - name: Run Linux rhel-9 tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel9"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-9"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux rhel-10 tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && chmod +x ./tests/main.py && ./tests/main.py "linux" "rhel-10"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

@@ -45,7 +45,7 @@
     "global_config": "Globale Konfiguration",
     "home": "Startseite",
     "instances": "Instanzen",
-    "jobs": "Aufträge",
+    "jobs": "Aufgaben",
     "logs": "Logs",
     "misc": "Verschiedenes",
     "mode_selection": "Modusauswahl",
@@ -89,6 +89,7 @@
     "enable_totp": "TOTP aktivieren",
     "entire_config": "Gesamte Konfiguration",
     "export": "Exportieren",
+    "fetch_global": "Globale Konfiguration abrufen",
     "filters_suffix": " Filter",
     "follow": "Folgen",
     "github_stars": "Sterne",
@@ -135,7 +136,8 @@
     "upload_photo": "Neues Foto hochladen",
     "view_details": "Details anzeigen",
     "view_raw_data": "Rohdaten anzeigen",
-    "wipe_other_sessions": "Andere Sitzungen löschen"
+    "wipe_other_sessions": "Andere Sitzungen löschen",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "Andorra",
@@ -446,7 +448,7 @@
       },
       "top_blocked_ips": {
         "title": "Top 10 blockierte IPs",
-        "most_blocked": "Am häufigsten blockierte IP"
+        "most_blocked": "Meistblockierte IP"
       }
     },
     "map": {
@@ -747,10 +749,15 @@
       "services_deletion_confirmation": "Sind Sie sicher, dass Sie die ausgewählten Dienste löschen möchten?",
       "unban_confirmation_alert": "Sind Sie sicher, dass Sie die Sperre für die ausgewählte IP-Adresse aufheben möchten?",
       "unban_confirmation_alert_plural": "Sind Sie sicher, dass Sie die Sperre für die ausgewählten IP-Adressen aufheben möchten?",
-      "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:"
+      "update_duration_alert": "Wählen Sie eine neue Dauer für die ausgewählten Sperren:",
+      "fetch_global_config_bold": "Dies ruft die globale Konfiguration ab und wendet sie auf die aktuelle Vorlage an.",
+      "fetch_global_config_point_1": "Nur in dieser Vorlage vorhandene Einstellungen werden aktualisiert.",
+      "fetch_global_config_point_2": "Werte, die den Standardwerten entsprechen, werden ignoriert.",
+      "fetch_global_config_point_3": "SERVER_NAME wird nie überschrieben."
     },
     "button": {
-      "reset_template_confirm": "Vorlagenkonfiguration zurücksetzen"
+      "reset_template_confirm": "Vorlagenkonfiguration zurücksetzen",
+      "fetch_global_config_confirm": "Globale Einstellungen anwenden"
     },
     "section": {
       "ban_details": "Sperrdetails",
@@ -771,6 +778,7 @@
       "job_history_count": "Letzte {{count}} Ausführungen von Auftrag",
       "recovery_codes": "Wiederherstellungscodes",
       "reset_template_config": "Vorlagenkonfiguration zurücksetzen?",
+      "fetch_global_config": "Globale Einstellungen anwenden?",
       "server_name_not_unique": "Servername ist nicht eindeutig",
       "update_duration": "Sperrdauer aktualisieren"
     }
@@ -865,6 +873,14 @@
       "expires_in": "Läuft ab in",
       "title": "Pro-Ablaufdatum",
       "unknown": "Unbekanntes Ablaufdatum"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
     },
     "key": {
       "title": {
@@ -1182,7 +1198,11 @@
       "ping_failed": "Ping fehlgeschlagen",
       "ping_succeed": "Ping erfolgreich"
     },
-    "ip_unbanned": "IP-Adresse erfolgreich entsperrt!"
+    "ip_unbanned": "IP-Adresse erfolgreich entsperrt!",
+    "global_settings_applied_title": "Globale Einstellungen angewendet",
+    "global_settings_applied_body": "Die globalen Einstellungen wurden erfolgreich abgerufen und auf das aktuelle Formular angewendet.",
+    "global_settings_failed_title": "Abrufen der globalen Einstellungen fehlgeschlagen",
+    "global_settings_failed_body": "Beim Abrufen der globalen Einstellungen ist ein Fehler aufgetreten."
   },
   "tooltip": {
     "auto_lets_encrypt": "Ob automatisch ein Let's Encrypt-Zertifikat angefordert werden soll.",
@@ -1198,9 +1218,12 @@
       "reload_instance": "Instanz {{hostname}} neu laden",
       "reset_default": "Auf Standardwert zurücksetzen",
       "reset_global": "Auf globalen Wert zurücksetzen",
+      "value_from_global": "Wert aus globaler Konfiguration",
       "run_job": "Auftrag {{job}} ausführen",
       "stop_instance": "Instanz {{hostname}} stoppen",
-      "unban_ip": "{{ip}} entsperren"
+      "unban_ip": "{{ip}} entsperren",
+      "force_check": "Prüfung planen; lädt nur bei verfügbaren Updates herunter.",
+      "force_update": "Überspringt Prüfungen und erzwingt den Download von PRO-Plugins; behält aktuellen Zustand bei Fehler bei."
     },
     "cannot_delete_original_ban": "Der ursprüngliche Sperreintrag kann nicht gelöscht werden.",
     "cannot_remove_disabled": "Kann nicht entfernt werden, da eine oder mehrere Einstellungen deaktiviert sind.",
@@ -1241,6 +1264,7 @@
     "email_lets_encrypt": "Die E-Mail-Adresse zur Registrierung bei Let's Encrypt für Zertifikatsverwaltung und Benachrichtigungen.",
     "email_length": "Die E-Mail muss zwischen 1 und 256 Zeichen lang sein.",
     "follow_latest_page_only": "Der Folgemodus ist nur auf der letzten Seite verfügbar",
+    "fetch_global_settings": "Globale Einstellungen abrufen und auf die aktuelle Vorlage anwenden",
     "global_config_source": "Wert von globaler Konfiguration geerbt.",
     "instance_not_up": "Instanz {{hostname}} antwortet derzeit nicht ('up').",
     "lets_encrypt_custom_profile": "Das benutzerdefinierte Profil, das für Let's Encrypt verwendet werden soll (z. B. 'mein_benutzerdefiniertes_profil').",
@@ -1395,6 +1419,7 @@
     "use_proxy_protocol": "PROXY-Protokoll-Kommunikation aktivieren.",
     "use_real_ip": "Echte IP verwenden",
     "username_length": "Der Benutzername muss zwischen 1 und 256 Zeichen lang sein.",
+    "value_from_global": "Wert aus der globalen Konfiguration",
     "view_full_url": "Klicken, um die vollständige URL anzuzeigen",
     "wildcard_certificates": "Wildcard-Zertifikate generieren (*.domain.com). Erfordert DNS-Challenge.",
     "wildcard_dns_only": "Wildcard-Zertifikate werden nur mit dem DNS-Challenge-Typ unterstützt."

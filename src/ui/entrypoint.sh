@@ -80,7 +80,7 @@ else
 fi
 
 # Start a temporary Gunicorn process with a special logger configuration.
-python3 -m gunicorn --logger-class utils.logger.TmpUiLogger --config utils/tmp-gunicorn.conf.py
+python3 -m gunicorn --logger-class utils.logger.TmpUiLogger --config utils/tmp-gunicorn.conf.py &
 
 # Start the main Gunicorn process with the standard logger configuration.
 python3 -m gunicorn --logger-class utils.logger.UiLogger --config utils/gunicorn.conf.py &

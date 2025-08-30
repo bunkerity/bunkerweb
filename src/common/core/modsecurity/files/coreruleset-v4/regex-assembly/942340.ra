@@ -9,6 +9,7 @@
 ##! Definitions and reusables
 ##!> define space_or_word_or_plus [\s\w+]+
 ##!> define quotes [\"'`]
+##!> define not_quotes [^\"'`]
 ##!> define digits \d+
 ##!> define space \s+
 ##!> define optional_space \s*?
@@ -90,8 +91,8 @@ in\s*?\(+\s*?select
   ##!> assemble
     is{{optional_space}}
     ##!=>
-    \d.+{{quotes}}?\w
-    [\d.]+{{optional_space}}\W.*?{{quotes}}
+    \d{{not_quotes}}+{{quotes}}?\w
+    [\d.]+{{optional_space}}\W{{not_quotes}}*{{quotes}}
   ##!<
 
   ##! ORIGINAL: :up:

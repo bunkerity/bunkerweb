@@ -89,6 +89,7 @@
     "enable_totp": "TOTP সক্ষম করুন",
     "entire_config": "সম্পূর্ণ কনফিগারেশন",
     "export": "রপ্তানি করুন",
+    "fetch_global": "গ্লোবাল কনফিগারেশন আনুন",
     "filters_suffix": " ফিল্টার",
     "follow": "অনুসরণ করুন",
     "github_stars": "স্টার",
@@ -135,7 +136,8 @@
     "upload_photo": "নতুন ছবি আপলোড করুন",
     "view_details": "বিস্তারিত দেখুন",
     "view_raw_data": "কাঁচা ডেটা দেখুন",
-    "wipe_other_sessions": "অন্যান্য সেশন মুছুন"
+    "wipe_other_sessions": "অন্যান্য সেশন মুছুন",
+    "force_update": "Force update"
   },
   "country": {
     "AD": "অ্যান্ডোরা",
@@ -747,10 +749,15 @@
       "services_deletion_confirmation": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত পরিষেবাগুলি মুছতে চান?",
       "unban_confirmation_alert": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানা থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
       "unban_confirmation_alert_plural": "আপনি কি নিশ্চিত যে আপনি নির্বাচিত আইপি ঠিকানাগুলি থেকে নিষেধাজ্ঞা উঠিয়ে নিতে চান?",
-      "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:"
+      "update_duration_alert": "নির্বাচিত নিষেধাজ্ঞার জন্য একটি নতুন সময়কাল নির্বাচন করুন:",
+      "fetch_global_config_bold": "এটি গ্লোবাল কনফিগারেশন আনবে এবং বর্তমান টেমপ্লেটে প্রয়োগ করবে।",
+      "fetch_global_config_point_1": "শুধুমাত্র এই টেমপ্লেটে থাকা সেটিংস আপডেট হবে।",
+      "fetch_global_config_point_2": "ডিফল্টের সাথে একই মান উপেক্ষা করা হবে।",
+      "fetch_global_config_point_3": "SERVER_NAME কখনও ওভাররাইট করা হবে না।"
     },
     "button": {
-      "reset_template_confirm": "টেমপ্লেট কনফিগারেশন রিসেট করুন"
+      "reset_template_confirm": "টেমপ্লেট কনফিগারেশন রিসেট করুন",
+      "fetch_global_config_confirm": "গ্লোবাল সেটিংস প্রয়োগ করুন"
     },
     "section": {
       "ban_details": "নিষেধাজ্ঞার বিবরণ",
@@ -771,6 +778,7 @@
       "job_history_count": "কার্যের শেষ {{count}}টি সম্পাদন",
       "recovery_codes": "পুনরুদ্ধার কোড",
       "reset_template_config": "টেমপ্লেট কনফিগারেশন রিসেট করবেন?",
+      "fetch_global_config": "গ্লোবাল সেটিংস প্রয়োগ করবেন?",
       "server_name_not_unique": "সার্ভারের নাম অনন্য নয়",
       "update_duration": "নিষেধাজ্ঞার সময়কাল আপডেট করুন"
     }
@@ -865,6 +873,14 @@
       "expires_in": "মেয়াদ শেষ হবে",
       "title": "প্রো মেয়াদ শেষের তারিখ",
       "unknown": "অজানা মেয়াদ শেষের তারিখ"
+    },
+    "force_check": {
+      "title": "Force check",
+      "description": "Force a new check for PRO plugins. This will trigger a new download of the plugins if new versions are available."
+    },
+    "force_update": {
+      "title": "Force update",
+      "description": "Skip checks and force download of PRO plugins. If forcing isn’t possible, the current state is kept."
     },
     "key": {
       "title": {
@@ -1181,7 +1197,11 @@
       "ping_failed": "পিং ব্যর্থ হয়েছে",
       "ping_succeed": "পিং সফল হয়েছে"
     },
-    "ip_unbanned": "আইপি ঠিকানা সফলভাবে নিষেধাজ্ঞা মুক্ত করা হয়েছে!"
+    "ip_unbanned": "আইপি ঠিকানা সফলভাবে নিষেধাজ্ঞা মুক্ত করা হয়েছে!",
+    "global_settings_applied_title": "গ্লোবাল সেটিংস প্রয়োগ হয়েছে",
+    "global_settings_applied_body": "গ্লোবাল সেটিংস সফলভাবে আনা হয়েছে এবং বর্তমান ফর্মে প্রয়োগ করা হয়েছে।",
+    "global_settings_failed_title": "গ্লোবাল সেটিংস আনতে ব্যর্থ",
+    "global_settings_failed_body": "গ্লোবাল সেটিংস আনতে গিয়ে একটি ত্রুটি ঘটেছে।"
   },
   "tooltip": {
     "auto_lets_encrypt": "স্বয়ংক্রিয়ভাবে একটি Let's Encrypt শংসাপত্র অনুরোধ করতে হবে কিনা।",
@@ -1197,9 +1217,12 @@
       "reload_instance": "ইনস্ট্যান্স {{hostname}} পুনরায় লোড করুন",
       "reset_default": "ডিফল্ট মানে রিসেট করুন",
       "reset_global": "গ্লোবাল মানে রিসেট করুন",
+      "value_from_global": "গ্লোবাল কনফিগারেশন থেকে মান",
       "run_job": "কার্য {{job}} চালান",
       "stop_instance": "ইনস্ট্যান্স {{hostname}} বন্ধ করুন",
-      "unban_ip": "{{ip}} থেকে নিষেধাজ্ঞা সরান"
+      "unban_ip": "{{ip}} থেকে নিষেধাজ্ঞা সরান",
+      "force_check": "একটি চেক নির্ধারণ করে; শুধুমাত্র আপডেট থাকলে ডাউনলোড করে।",
+      "force_update": "চেকগুলি স্কিপ করে PRO প্লাগইন জোরপূর্বক ডাউনলোড করে; ব্যর্থ হলে বর্তমান অবস্থা অপরিবর্তিত থাকে।"
     },
     "cannot_delete_original_ban": "মূল নিষেধাজ্ঞা এন্ট্রি মুছতে পারে না।",
     "cannot_remove_disabled": "অপসারণ করা যাবে না কারণ এক বা একাধিক সেটিংস নিষ্ক্রিয়।",
@@ -1240,6 +1263,7 @@
     "email_lets_encrypt": "শংসাপত্র পরিচালনা এবং বিজ্ঞপ্তির জন্য Let's Encrypt-এর সাথে নিবন্ধন করার ইমেল ঠিকানা।",
     "email_length": "ইমেল অবশ্যই ১ থেকে ২৫৬ অক্ষরের মধ্যে হতে হবে।",
     "follow_latest_page_only": "ফলো মোড শুধুমাত্র সর্বশেষ পৃষ্ঠায় উপলব্ধ",
+    "fetch_global_settings": "গ্লোবাল কনফিগারেশন আনুন এবং সেগুলি বর্তমান টেমপ্লেটে প্রয়োগ করুন",
     "global_config_source": "মান গ্লোবাল কনফিগারেশন থেকে উত্তরাধিকার সূত্রে প্রাপ্ত।",
     "instance_not_up": "ইনস্ট্যান্স {{hostname}} বর্তমানে প্রতিক্রিয়া দিচ্ছে না ('up')।",
     "lets_encrypt_custom_profile": "Let's Encrypt-এর জন্য ব্যবহারের কাস্টম প্রোফাইল (যেমন 'my_custom_profile')।",
@@ -1394,6 +1418,7 @@
     "use_proxy_protocol": "PROXY প্রোটোকল যোগাযোগ সক্ষম করুন।",
     "use_real_ip": "আসল আইপি ব্যবহার করুন",
     "username_length": "ব্যবহারকারীর নাম অবশ্যই ১ থেকে ২৫৬ অক্ষরের মধ্যে হতে হবে।",
+    "value_from_global": "গ্লোবাল কনফিগারেশন থেকে মান",
     "view_full_url": "সম্পূর্ণ URL দেখতে ক্লিক করুন",
     "wildcard_certificates": "ওয়াইল্ডকার্ড শংসাপত্র তৈরি করুন (*.domain.com)। DNS চ্যালেঞ্জ প্রয়োজন।",
     "wildcard_dns_only": "ওয়াইল্ডকার্ড শংসাপত্রগুলি কেবল DNS চ্যালেঞ্জ প্রকারের সাথে সমর্থিত।"

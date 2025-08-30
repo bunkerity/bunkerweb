@@ -1,4 +1,4 @@
-FROM redhat/ubi9-init:9.6@sha256:4b29d34b9e310f1b8fa93bb2c727a1efa43328f5d647d50ebefb82cc1c4197ff
+FROM redhat/ubi9-init:9.6@sha256:7d3a1f03bdcbe94597a4aa8267b02f7ea03a76a1b2445dd27256bc0ab08996a3
 
 ENV NGINX_VERSION=1.28.0
 
@@ -18,4 +18,4 @@ RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noar
     dnf install php-fpm yum-utils -y && \
     dnf install -y https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
 
-COPY ./package-rhel9/*.rpm /opt
+COPY ./package-rhel-9/*.rpm /opt

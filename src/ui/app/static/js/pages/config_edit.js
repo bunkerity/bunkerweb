@@ -113,6 +113,7 @@ $(document).ready(function () {
   $serviceDropdownItems.on("click", function () {
     const previousService = selectedService;
     selectedService = $(this).data("service");
+    $("#service-display").text($(this).text().trim());
     changeTypesVisibility();
     if (
       selectedService.toLowerCase() === "global" &&
@@ -141,14 +142,13 @@ $(document).ready(function () {
       const firstMultisiteType = $(
         `#types-dropdown-menu li.nav-item[data-context="multisite"]`,
       ).first();
+      const newTypeName = firstMultisiteType.text().trim();
       $("#select-type")
         .parent()
         .attr("data-bs-custom-class", "warning-tooltip")
         .attr(
           "data-bs-original-title",
-          `Switched to ${firstMultisiteType
-            .text()
-            .trim()} as ${selectedType} is not a valid multisite type.`,
+          `Switched to ${newTypeName} as ${selectedType} is not a valid multisite type.`,
         )
         .tooltip("show");
 
@@ -161,13 +161,15 @@ $(document).ready(function () {
       }, 2000);
 
       firstMultisiteType.find("button").tab("show");
-      selectedType = firstMultisiteType.text().trim();
+      selectedType = newTypeName;
+      $("#type-display").text(newTypeName);
     }
   });
 
   $typeDropdownItems.on("click", function () {
     editor.session.setMode("ace/mode/nginx");
     selectedType = $(this).text().trim();
+    $("#type-display").text(selectedType);
     // if (selectedType.startsWith("CRS") || selectedType.startsWith("MODSEC")) {
     //   editor.session.setMode("ace/mode/text"); // TODO: Support ModSecurity
     // } else {

@@ -22,6 +22,7 @@ from common_utils import handle_docker_secrets  # type: ignore
 from logger import setup_logger  # type: ignore
 
 from app.models.ui_database import UIDatabase
+from app.dependencies import reload_plugins
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
@@ -529,6 +530,8 @@ def on_starting(server):
                 exit(1)
             sleep(1)
         LOGGER.info("Temporary UI is stopped")
+
+    reload_plugins()
 
     LOGGER.info("UI is ready")
 

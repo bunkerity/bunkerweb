@@ -101,15 +101,15 @@ def pre_render(**kwargs):
             seen_ids = set()
             for increment in metrics["table_increments"]:
                 # Deduplicate based on ID only
-                if increment["id"] not in seen_ids:
+                if increment.get("id") and increment["id"] not in seen_ids:
                     seen_ids.add(increment["id"])
-                    list_data["date"].append(datetime.fromtimestamp(increment["date"]).isoformat())
-                    list_data["id"].append(increment["id"])
-                    list_data["ip"].append(increment["ip"])
-                    list_data["server_name"].append(increment["server_name"])
-                    list_data["method"].append(increment["method"])
-                    list_data["url"].append(increment["url"])
-                    list_data["status"].append(increment["status"])
+                    list_data["date"].append(datetime.fromtimestamp(increment.get("date", 0)).isoformat())
+                    list_data["id"].append(increment.get("id", ""))
+                    list_data["ip"].append(increment.get("ip", ""))
+                    list_data["server_name"].append(increment.get("server_name", ""))
+                    list_data["method"].append(increment.get("method", ""))
+                    list_data["url"].append(increment.get("url", ""))
+                    list_data["status"].append(increment.get("status", ""))
         ret["list_bad_behavior_history"]["data"] = list_data
 
     except BaseException as e:

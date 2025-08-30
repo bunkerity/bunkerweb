@@ -1,0 +1,95 @@
+# This file contains a list of common errors and exceptions encountered in ASP.NET applications.
+#
+### Core .NET Exceptions
+# - System.Exception Types: https://learn.microsoft.com/en-us/dotnet/api/system.exception?view=netframework-4.8#derived
+# - System Namespace: https://learn.microsoft.com/en-us/dotnet/api/system?view=netframework-4.8
+#
+### ASP.NET Specific Errors
+# - ASP.NET Error Handling: https://learn.microsoft.com/en-us/aspnet/web-forms/overview/older-versions-getting-started/aspnet-ajax/understanding-asp-net-ajax-debugging-capabilities
+# - HttpException Class: https://learn.microsoft.com/en-us/dotnet/api/system.web.httpexception?view=netframework-4.8
+#
+### MVC Errors
+# - System.Web.Mvc Namespace: https://learn.microsoft.com/en-us/dotnet/api/system.web.mvc?view=aspnet-mvc-5.2
+# - ASP.NET MVC Error Handling: https://learn.microsoft.com/en-us/aspnet/mvc/overview/older-versions-1/controllers-and-routing/handling-errors
+#
+### Entity Framework Errors
+# - System.Data.Entity.Core.EntityException: https://learn.microsoft.com/en-us/dotnet/api/system.data.entity.core.entityexception?view=entity-framework-6.2.0
+# - Entity Framework Exception Types: https://learn.microsoft.com/en-us/dotnet/api/system.data.entity.infrastructure?view=entity-framework-6.2.0
+#
+### Identity and Authentication Errors
+# - Microsoft.AspNet.Identity Namespace: https://learn.microsoft.com/en-us/previous-versions/aspnet/dn613291(v=vs.108)
+# - Microsoft.Owin.Security Namespace: https://learn.microsoft.com/en-us/previous-versions/dn308572(v=owin.2.0)
+#
+### Web API Errors
+# - System.Web.Http Namespace: https://learn.microsoft.com/en-us/dotnet/api/system.web.http?view=aspnetwebapi-5.2
+# - Exception Handling in ASP.NET Web API: https://learn.microsoft.com/en-us/aspnet/web-api/overview/error-handling/exception-handling
+
+#
+# Core .NET Exceptions
+System.NullReferenceException
+System.ArgumentException
+System.InvalidOperationException
+System.IndexOutOfRangeException
+System.IO.IOException
+System.Net.WebException
+System.OutOfMemoryException
+System.StackOverflowException
+System.FormatException
+System.DivideByZeroException
+System.ArgumentNullException
+System.ArgumentOutOfRangeException
+System.NotImplementedException
+System.NotSupportedException
+System.Data.SqlClient.SqlException
+System.UnauthorizedAccessException
+System.Security.SecurityException
+System.Web.HttpException
+
+# ASP.NET Specific Errors
+HttpException
+ViewStateException
+HttpRequestValidationException
+HttpCompileException
+HttpParseException
+HttpUnhandledException
+HttpRequestWrapper
+HttpResponseWrapper
+HttpServerUtilityWrapper
+HttpSessionStateWrapper
+HttpStaticObjectsCollectionWrapper
+
+# MVC Errors
+System.Web.Mvc.HttpAntiForgeryException
+System.Web.Mvc.Controller
+System.Web.Mvc.ActionResult
+System.Web.Mvc.ViewResult
+System.Web.Mvc.RedirectResult
+System.Web.Mvc.RedirectToRouteResult
+System.Web.Mvc.JsonResult
+System.Web.Mvc.ContentResult
+System.Web.Mvc.HttpStatusCodeResult
+System.Web.Mvc.FileResult
+System.Web.Mvc.View
+System.Web.Mvc.PartialViewResult
+
+# Entity Framework Errors
+System.Data.Entity.Core.EntityException
+System.Data.Entity.Infrastructure.DbUpdateException
+System.Data.Entity.Validation.DbEntityValidationException
+System.Data.Entity.Core.OptimisticConcurrencyException
+System.Data.Entity.Infrastructure.DbUpdateConcurrencyException
+
+# Identity and Authentication Errors
+Microsoft.AspNet.Identity.IdentityResult
+Microsoft.AspNet.Identity.UserManager
+Microsoft.AspNet.Identity.SignInManager
+Microsoft.AspNet.Identity.RoleManager
+Microsoft.AspNet.Identity.Owin
+Microsoft.Owin.Security
+Microsoft.Owin.Security.DataProtection
+
+# Web API Errors
+System.Web.Http.HttpResponseException
+System.Web.Http.HttpRequestException
+System.Web.Http.HttpError
+System.Web.Http.HttpRouteCollection

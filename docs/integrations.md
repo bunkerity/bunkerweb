@@ -36,7 +36,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.3-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.5-rc1
 ```
 
 By default, the container exposes:
@@ -50,7 +50,7 @@ The All-In-One image comes with several built-in services, which can be controll
 
 - `SERVICE_UI=yes` (default) - Enables the web UI service
 - `SERVICE_SCHEDULER=yes` (default) - Enables the Scheduler service
-- `SERVICE_AUTOCONF=no` (default) - Enables the autoconf service
+- `AUTOCONF_MODE=no` (default) - Enables the autoconf service
 - `USE_REDIS=yes` (default) - Enables the built-in [Redis](#redis-integration) instance
 - `USE_CROWDSEC=no` (default) - [CrowdSec](#crowdsec-integration) integration is disabled by default
 
@@ -84,7 +84,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.3-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.5-rc1
 ```
 
 * When `USE_CROWDSEC=yes`, the entrypoint will:
@@ -135,7 +135,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.3-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.5-rc1
 ```
 
 !!! info "How it works internally"
@@ -171,7 +171,7 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.3-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.5-rc1
 ```
 
 * **Local registration** is skipped when `CROWDSEC_API` is not `127.0.0.1` or `localhost`.
@@ -205,13 +205,13 @@ By accessing these prebuilt images from Docker Hub, you can quickly pull and run
 Whether you're conducting tests, developing applications, or deploying BunkerWeb in production, the Docker containerization option provides flexibility and ease of use. Embracing this method empowers you to take full advantage of BunkerWeb's features while leveraging the benefits of Docker technology.
 
 ```shell
-docker pull bunkerity/bunkerweb:1.6.3-rc3
+docker pull bunkerity/bunkerweb:1.6.5-rc1
 ```
 
 Docker images are also available on [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) and can be downloaded using the `ghcr.io` repository address:
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.3-rc3
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.5-rc1
 ```
 
 Key concepts for Docker integration include:
@@ -221,7 +221,7 @@ Key concepts for Docker integration include:
 - **Networks**: Docker networks play a vital role in the integration of BunkerWeb. These networks serve two main purposes: exposing ports to clients and connecting to upstream web services. By exposing ports, BunkerWeb can accept incoming requests from clients, allowing them to access the protected web services. Additionally, by connecting to upstream web services, BunkerWeb can efficiently route and manage traffic, providing enhanced security and performance.
 
 !!! info "Database backend"
-    Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc3/misc/integrations) of the repository for more information.
+    Please note that our instructions assume you are using SQLite as the default database backend, as configured by the `DATABASE_URI` setting. However, other database backends are also supported. See the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/misc/integrations) of the repository for more information.
 
 ### Environment variables
 
@@ -231,7 +231,7 @@ Settings are passed to the Scheduler using Docker environment variables:
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -272,7 +272,7 @@ This ensures sensitive settings are kept out of the environment and logs.
 The [scheduler](concepts.md#scheduler) runs in its own container, which is also available on Docker Hub:
 
 ```shell
-docker pull bunkerity/bunkerweb-scheduler:1.6.3-rc3
+docker pull bunkerity/bunkerweb-scheduler:1.6.5-rc1
 ```
 
 !!! info "BunkerWeb settings"
@@ -291,7 +291,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.3-rc3
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.3-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc1
         environment:
           # This will set the API settings for the BunkerWeb container
           <<: *bw-api-env
@@ -300,7 +300,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.3-rc3
           - bw-universe
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
         environment:
           # This will set the API settings for the Scheduler container
           <<: *bw-api-env
@@ -318,7 +318,7 @@ A volume is needed to store the SQLite database and backups used by the schedule
 ...
 services:
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
     volumes:
       - bw-storage:/data
 ...
@@ -401,7 +401,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.3-rc3
+    image: bunkerity/bunkerweb:1.6.5-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -414,7 +414,7 @@ services:
       - bw-universe
 ...
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
     environment:
       <<: *bw-api-env
       BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -447,7 +447,7 @@ x-bw-api-env: &bw-api-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.3-rc3
+    image: bunkerity/bunkerweb:1.6.5-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -460,7 +460,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
     depends_on:
       - bunkerweb
     environment:
@@ -510,12 +510,11 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 architectures) include:
 
 - Debian 12 "Bookworm"
+- Debian 13 "Trixie"
 - Ubuntu 22.04 "Jammy"
 - Ubuntu 24.04 "Noble"
-- Fedora 41
-- Fedora 42
-- Red Hat Enterprise Linux (RHEL) 8.10
-- Red Hat Enterprise Linux (RHEL) 9.6
+- Fedora 41 and 42
+- Red Hat Enterprise Linux (RHEL) 8, 9 and 10
 
 ### Easy installation script
 
@@ -523,67 +522,158 @@ For a simplified installation experience, BunkerWeb provides an easy install scr
 
 #### Quick start
 
-Download and run the installation script:
+To get started, download the installation script and its checksum, then verify the script's integrity before running it.
 
 ```bash
-wget https://raw.githubusercontent.com/bunkerity/bunkerweb/v1.6.3-rc3/misc/install-bunkerweb.sh
+# Download the script and its checksum
+wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc1/install-bunkerweb.sh
+wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc1/install-bunkerweb.sh.sha256
+
+# Verify the checksum
+sha256sum -c install-bunkerweb.sh.sha256
+
+# If the check is successful, run the script
 chmod +x install-bunkerweb.sh
 sudo ./install-bunkerweb.sh
 ```
 
-!!! warning "Security Notice"
-    Before running any installation script, especially with elevated privileges, it's recommended to review the script content first.
+!!! danger "Security Notice"
+    **Always verify the integrity of the installation script before running it.**
 
-    ```bash
-    cat install-bunkerweb.sh
-    ```
+    Download the checksum file and use a tool like `sha256sum` to confirm the script has not been altered or tampered with.
 
-#### Interactive installation
+    If the checksum verification fails, **do not execute the script**—it may be unsafe.
 
-By default, the script runs in interactive mode and will:
+#### How It Works
 
-1. **Detect your operating system** and verify compatibility
-2. **Ask about the setup wizard** - choose whether to enable the web-based configuration interface
-3. **Show RHEL database recommendations** (if applicable) for external database support
-4. **Install NGINX** with the correct version for your distribution
-5. **Install BunkerWeb** and configure all services
-6. **Provide next steps** based on your configuration choices
+The easy install script is a powerful tool designed to streamline the setup of BunkerWeb on a fresh Linux system. It automates the following key steps:
 
-#### Command line options
+1.  **System Analysis**: Detects your operating system and verifies it against the list of supported distributions.
+2.  **Installation Customization**: In interactive mode, it prompts you to choose an installation type (All-In-One, Manager, Worker, etc.) and decide whether to enable the web-based setup wizard.
+3.  **Optional Integrations**: Offers to automatically install and configure the [CrowdSec Security Engine](#crowdsec-integration-with-the-script).
+4.  **Dependency Management**: Installs the correct version of NGINX required by BunkerWeb from official sources and locks the version to prevent unintended upgrades.
+5.  **BunkerWeb Installation**: Adds the BunkerWeb package repository, installs the necessary packages, and locks the version.
+6.  **Service Configuration**: Sets up and enables the `systemd` services corresponding to your chosen installation type.
+7.  **Post-install Guidance**: Provides clear next steps to help you get started with your new BunkerWeb instance.
 
-The script supports various options for different installation scenarios:
+#### Interactive Installation
+
+When run without any options, the script enters an interactive mode that guides you through the setup process. You will be asked to make the following choices:
+
+1.  **Installation Type**: Select the components you want to install.
+    *   **Full Stack (default)**: An all-in-one installation including BunkerWeb, the Scheduler, and the Web UI.
+    *   **Manager**: Installs the Scheduler and Web UI, intended to manage one or more remote BunkerWeb workers.
+    *   **Worker**: Installs only the BunkerWeb instance, which can be managed by a remote Manager.
+    *   **Scheduler Only**: Installs only the Scheduler component.
+    *   **Web UI Only**: Installs only the Web UI component.
+2.  **Setup Wizard**: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.
+3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection.
+4.  **CrowdSec AppSec**: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.
+
+!!! info "Manager and Scheduler installations"
+    If you choose the **Manager** or **Scheduler Only** installation type, you will also be prompted to provide the IP addresses or hostnames of your BunkerWeb worker instances.
+
+#### Command-Line Options
+
+For non-interactive or automated setups, the script can be controlled with command-line flags:
+
+**General Options:**
+
+| Option                  | Description                                                           |
+| ----------------------- | --------------------------------------------------------------------- |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.5-rc1`).           |
+| `-w, --enable-wizard`   | Enables the setup wizard.                                             |
+| `-n, --no-wizard`       | Disables the setup wizard.                                            |
+| `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
+| `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
+| `-q, --quiet`           | Silent installation (suppress output).                                |
+| `-h, --help`            | Displays the help message with all available options.                 |
+| `--dry-run`             | Show what would be installed without doing it.                        |
+
+**Installation Types:**
+
+| Option             | Description                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `--full`           | Full stack installation (BunkerWeb, Scheduler, UI). This is the default. |
+| `--manager`        | Installs the Scheduler and UI to manage remote workers.                  |
+| `--worker`         | Installs only the BunkerWeb instance.                                    |
+| `--scheduler-only` | Installs only the Scheduler component.                                   |
+| `--ui-only`        | Installs only the Web UI component.                                      |
+
+**Security Integrations:**
+
+| Option              | Description                                                         |
+| ------------------- | ------------------------------------------------------------------- |
+| `--crowdsec`        | Install and configure CrowdSec security engine.                     |
+| `--no-crowdsec`     | Skip CrowdSec installation.                                         |
+| `--crowdsec-appsec` | Install CrowdSec with AppSec component (includes WAF capabilities). |
+
+**Advanced Options:**
+
+| Option                  | Description                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `--instances "IP1 IP2"` | Space-separated list of BunkerWeb instances (required for manager/scheduler modes). |
+
+**Example Usage:**
 
 ```bash
-# Interactive installation (default)
+# Run in interactive mode (recommended for most users)
 sudo ./install-bunkerweb.sh
 
-# Non-interactive with defaults (wizard enabled)
+# Non-interactive installation with defaults (full stack, wizard enabled)
 sudo ./install-bunkerweb.sh --yes
 
-# Install without the setup wizard
-sudo ./install-bunkerweb.sh --no-wizard
+# Install a Worker node without the setup wizard
+sudo ./install-bunkerweb.sh --worker --no-wizard
 
 # Install a specific version
-sudo ./install-bunkerweb.sh --version 1.6.0
+sudo ./install-bunkerweb.sh --version 1.6.5-rc1
 
-# Force installation on unsupported OS versions
-sudo ./install-bunkerweb.sh --force
+# Manager setup with remote worker instances (instances required)
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11"
 
-# Show help
-./install-bunkerweb.sh --help
+# Full installation with CrowdSec and AppSec
+sudo ./install-bunkerweb.sh --crowdsec-appsec
+
+# Silent non-interactive installation
+sudo ./install-bunkerweb.sh --quiet --yes
+
+# Preview installation without executing
+sudo ./install-bunkerweb.sh --dry-run
+
+# Error: CrowdSec cannot be used with worker installations
+# sudo ./install-bunkerweb.sh --worker --crowdsec  # This will fail
+
+# Error: Instances required for manager in non-interactive mode
+# sudo ./install-bunkerweb.sh --manager --yes  # This will fail without --instances
 ```
 
-#### What the script does
+!!! warning "Important Notes on Option Compatibility"
 
-The easy install script automatically:
+    **CrowdSec Limitations:**
+    - CrowdSec options (`--crowdsec`, `--crowdsec-appsec`) are only compatible with `--full` (default) and `--manager` installation types
+    - They cannot be used with `--worker`, `--scheduler-only`, or `--ui-only` installations
 
-- **Validates OS compatibility** and warns about unsupported versions
-- **Installs NGINX** from official repositories with the correct version
-- **Adds BunkerWeb repositories** for your distribution
-- **Installs BunkerWeb packages** and locks versions to prevent accidental upgrades
-- **Configures systemd services** (bunkerweb, bunkerweb-scheduler, bunkerweb-ui)
-- **Sets up the setup wizard** (if enabled) for easy web-based configuration
-- **Provides comprehensive next steps** and resource links
+    **Instances Requirements:**
+    - The `--instances` option is only valid with `--manager` and `--scheduler-only` installation types
+    - When using `--manager` or `--scheduler-only` with `--yes` (non-interactive mode), the `--instances` option is mandatory
+    - Format: `--instances "192.168.1.10 192.168.1.11 192.168.1.12"`
+
+    **Interactive vs Non-Interactive:**
+    - Interactive mode (default) will prompt for missing required values
+    - Non-interactive mode (`--yes`) requires all necessary options to be provided via command line
+
+#### CrowdSec Integration with the Script
+
+If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:
+
+- It adds the official CrowdSec repository and installs the agent.
+- It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (`access.log`, `error.log`, and `modsec_audit.log`).
+- It installs essential collections (`crowdsecurity/nginx`) and parsers (`crowdsecurity/geoip-enrich`).
+- It registers a bouncer for BunkerWeb and automatically configures the API key in `/etc/bunkerweb/variables.env`.
+- If you also select the **AppSec Component**, it installs the `appsec-virtual-patching` and `appsec-generic-rules` collections and configures the AppSec endpoint for BunkerWeb.
+
+This provides a seamless, out-of-the-box integration for powerful intrusion prevention.
 
 #### RHEL considerations
 
@@ -623,7 +713,7 @@ Depending on your choices during installation:
 
 Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
-=== "Debian"
+=== "Debian Bookworm/Trixie"
 
     The first step is to add NGINX official repository:
 
@@ -657,12 +747,12 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.3-rc3:
+    And finally install BunkerWeb 1.6.5-rc1:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.3-rc3
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.5-rc1
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -705,12 +795,12 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.3-rc3:
+    And finally install BunkerWeb 1.6.5-rc1:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
     sudo apt update && \
-    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.3-rc3
+    sudo -E apt install -y --allow-downgrades bunkerweb=1.6.5-rc1
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
@@ -741,12 +831,12 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.3-rc3:
+    And finally install BunkerWeb 1.6.5-rc1:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
   	sudo dnf makecache && \
-  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.3-rc3
+  	sudo -E dnf install -y --allowerasing bunkerweb-1.6.5-rc1
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -791,12 +881,12 @@ Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb
         export UI_WIZARD=no
         ```
 
-    And finally install BunkerWeb 1.6.3-rc3:
+    And finally install BunkerWeb 1.6.5-rc1:
 
     ```shell
     curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
     sudo dnf check-update && \
-    sudo -E dnf install -y --allowerasing bunkerweb-1.6.3-rc3
+    sudo -E dnf install -y --allowerasing bunkerweb-1.6.5-rc1
     ```
 
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
@@ -824,7 +914,7 @@ If you manually edit the BunkerWeb configuration using `/etc/bunkerweb/variables
 
 The scheduler can be detached from the BunkerWeb instance to provide high availability. In this case, the scheduler will be installed on a separate server and will be able to manage multiple BunkerWeb instances.
 
-**Manager**
+#### Manager
 
 To install only the scheduler on a server, you can export the following variables before executing the BunkerWeb installation:
 
@@ -841,7 +931,7 @@ export SERVICE_BUNKERWEB=no
 export SERVICE_UI=no
 ```
 
-**Worker**
+#### Worker
 
 On another server, to install only BunkerWeb, you can export the following variables before executing the BunkerWeb installation:
 
@@ -857,7 +947,7 @@ export SERVICE_SCHEDULER=no
 export SERVICE_UI=no
 ```
 
-**Web UI**
+#### Web UI
 
 The Web UI can be installed on a separate server to provide a dedicated interface for managing BunkerWeb instances. To install only the Web UI, you can export the following variables before executing the BunkerWeb installation:
 
@@ -889,7 +979,7 @@ By adopting this approach, you can enjoy real-time reconfiguration of BunkerWeb 
     The Docker autoconf integration implies the use of **multisite mode**. Please refer to the [multisite section](concepts.md#multisite-mode) of the documentation for more information.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc3/misc/integrations) of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/misc/integrations) of the repository for more information.
 
 To enable automated configuration updates, include an additional container called `bw-autoconf` in the stack. This container hosts the autoconf service, which manages dynamic configuration changes for BunkerWeb.
 
@@ -903,7 +993,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.3-rc3
+    image: bunkerity/bunkerweb:1.6.5-rc1
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -918,7 +1008,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -933,7 +1023,7 @@ services:
       - bw-db
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.3-rc3
+    image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
     depends_on:
       - bunkerweb
       - bw-docker
@@ -960,6 +1050,8 @@ services:
 
   bw-db:
     image: mariadb:11
+    # We set the max allowed packet size to avoid issues with large queries
+    command: --max-allowed-packet=67108864
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: "db"
@@ -1045,13 +1137,13 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.3-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
           - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance so the autoconf service can detect it
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.3-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
         environment:
           ...
           NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
@@ -1080,13 +1172,13 @@ For an optimal setup, it is recommended to define BunkerWeb as a **[DaemonSet](h
 Given the presence of multiple BunkerWeb instances, it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service. This service will be utilized by the instances to cache and share data among themselves. Further information about the Redis/Valkey settings can be found [here](features.md#redis).
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc3/misc/integrations) of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/misc/integrations) of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
 
 Please ensure that the autoconf services have access to the Kubernetes API. It is recommended to utilize [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for this purpose.
 
-!!! warn "Custom CA for Kubernetes API"
+!!! warning "Custom CA for Kubernetes API"
     If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the `KUBERNETES_SSL_CA_CERT` environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the `KUBERNETES_SSL_VERIFY` environment variable of the ingress controller to `no` (default is `yes`).
 
 Additionally, **it is crucial to set the `KUBERNETES_MODE` environment variable to `yes` when utilizing the Kubernetes integration**. This variable is mandatory for proper functionality.
@@ -1111,7 +1203,7 @@ The full list of values are listed in the [charts/bunkerweb/values.yaml file](ht
 
 #### Full YAML files
 
-Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc3/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
+Instead of using the helm chart, you can also use the YAML boilerplates inside the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/misc/integrations) of the GitHub repository. Please note that we highly recommend to use the helm chart instead.
 
 ### Ingress resources
 
@@ -1191,7 +1283,7 @@ metadata:
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.6.3-rc3
+              image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
               imagePullPolicy: Always
               env:
                 - name: NAMESPACES
@@ -1256,7 +1348,7 @@ If you use a custom domain name for your Kubernetes cluster different than the d
 
     This is a use-case where you want to keep an existing ingress controller such as the nginx one. Typical traffic flow will be: Load Balancer => Ingress Controller => BunkerWeb => Application.
 
-**nginx ingress controller install**
+#### nginx ingress controller install
 
 Install ingress nginx helm repo:
 
@@ -1335,11 +1427,11 @@ service:
 
 # BunkerWeb settings
 bunkerweb:
-  tag: 1.6.3-rc3
+  tag: 1.6.5-rc1
 
 # Scheduler settings
 scheduler:
-  tag: 1.6.3-rc3
+  tag: 1.6.5-rc1
   extraEnvs:
     # Enable real IP module to get real IP of clients
     - name: USE_REAL_IP
@@ -1347,11 +1439,11 @@ scheduler:
 
 # Controller settings
 controller:
-  tag: 1.6.3-rc3
+  tag: 1.6.5-rc1
 
 # UI settings
 ui:
-  tag: 1.6.3-rc3
+  tag: 1.6.5-rc1
 ```
 
 Install BunkerWeb with custom values:
@@ -1463,7 +1555,7 @@ You can visit `http(s)://myapp.example.com`, which is now protected with BunkerW
     The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](#kubernetes) instead.
 
 !!! tip "PRO support"
-    **If you need Swarm support**, please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) or via the [contact form](https://panel.bunkerweb.io/contact.php).
+    **If you need Swarm support**, please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) or via the [contact form](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
 
 !!! info "Docker autoconf"
     The Swarm integration is similar to the Docker autoconf one (but with services instead of containers). Please read the [Docker autoconf integration section](#docker-autoconf) first if needed.
@@ -1479,7 +1571,7 @@ Since multiple instances of BunkerWeb are running, a shared data store implement
 As for the database volume, the documentation does not specify a specific approach. Choosing either a shared folder or a specific driver for the database volume is dependent on your unique use-case and is left as an exercise for the reader.
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.3-rc3/misc/integrations) of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/misc/integrations) of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
 
@@ -1493,7 +1585,7 @@ x-bw-env: &bw-env
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.3-rc3
+    image: bunkerity/bunkerweb:1.6.5-rc1
     ports:
       - published: 80
         target: 8080
@@ -1522,7 +1614,7 @@ services:
         - "bunkerweb.INSTANCE=yes" # Mandatory label for the autoconf service to identify the BunkerWeb instance
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1543,7 +1635,7 @@ services:
           - "node.role == worker"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.6.3-rc3
+    image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
     environment:
       SWARM_MODE: "yes"
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
@@ -1579,6 +1671,8 @@ services:
 
   bw-db:
     image: mariadb:11
+    # We set the max allowed packet size to avoid issues with large queries
+    command: --max-allowed-packet=67108864
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: "db"
@@ -1690,7 +1784,7 @@ networks:
     ...
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.3-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc1
         ...
         deploy:
           mode: global
@@ -1702,7 +1796,7 @@ networks:
             - "bunkerweb.NAMESPACE=my-namespace" # Set the namespace for the BunkerWeb instance
       ...
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.3-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
         environment:
           NAMESPACES: "my-namespace my-other-namespace" # Only listen to these namespaces
           ...

@@ -17,7 +17,7 @@ function gen_package() {
     mode="$1"
     linux="$2"
     version="$(tr -d '\n' < VERSION)"
-    if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [[ "$linux" = rhel* ]] ; then
+    if [[ "$linux" = fedora* ]] || [[ "$linux" = rhel* ]] ; then
         type="rpm"
     else
         type="deb"
@@ -36,7 +36,7 @@ function build_image() {
 }
 
 if [ ! -d /opt/packages ] ; then
-    do_and_check_cmd sudo mkdir -p /opt/packages/{dev,prod}/{ubuntu,debian,fedora,centos}
+    do_and_check_cmd sudo mkdir -p /opt/packages/{dev,prod}/{ubuntu,debian-bookworm,debian-trixie,fedora-40,fedora-41,rhel-8,rhel-9,rhel-10}
     do_and_check_cmd sudo chmod -R 777 /opt/packages/
 fi
 
@@ -55,16 +55,16 @@ find /opt/packages/ -type f -exec rm -f {} \;
 # gen_package "$1" "debian"
 # echo "Building centos package ..."
 # gen_package "$1" "centos"
-echo "Building fedora 40 package ..."
-gen_package "$1" "fedora-40"
 echo "Building fedora 41 package ..."
 gen_package "$1" "fedora-41"
 echo "Building fedora 42 package ..."
 gen_package "$1" "fedora-42"
-echo "Building rhel package ..."
-gen_package "$1" "rhel"
-echo "Building rhel9 package ..."
-gen_package "$1" "rhel9"
+echo "Building rhel-8 package ..."
+gen_package "$1" "rhel-8"
+echo "Building rhel-9 package ..."
+gen_package "$1" "rhel-9"
+echo "Building rhel-10 package ..."
+gen_package "$1" "rhel-10"
 
 # Copy packages in the Docker context
 do_and_check_cmd cp -r "/opt/packages/$1" ./packages
@@ -76,15 +76,15 @@ do_and_check_cmd cp -r "/opt/packages/$1" ./packages
 # build_image "debian"
 # echo "Building centos test image ..."
 # build_image "centos"
-echo "Building fedora 40 test image ..."
-build_image "fedora-40"
 echo "Building fedora 41 test image ..."
 build_image "fedora-41"
 echo "Building fedora 42 test image ..."
 build_image "fedora-42"
-echo "Building rhel test image ..."
-build_image "rhel"
-echo "Building rhel9 test image ..."
-build_image "rhel9"
+echo "Building rhel-8 test image ..."
+build_image "rhel-8"
+echo "Building rhel-9 test image ..."
+build_image "rhel-9"
+echo "Building rhel-10 test image ..."
+build_image "rhel-10"
 
 exit 0

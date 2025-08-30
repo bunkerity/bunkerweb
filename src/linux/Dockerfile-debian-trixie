@@ -1,0 +1,118 @@
+FROM debian:trixie-slim@sha256:c85a2732e97694ea77237c61304b3bb410e0e961dd6ee945997a06c788c545bb AS builder
+
+# Install Nginx and dependencies
+RUN apt update && \
+    apt install -y --no-install-recommends gnupg2 ca-certificates \
+    bash curl libssl-dev git libpcre2-dev zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libgd-dev python3 python3-dev python3-pip python3-venv -y
+
+ENV OS=debian
+ENV OS_VERSION=13
+ENV NGINX_VERSION=1.28.0
+ENV EXPECTED_FPR=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
+
+# Install Nginx
+RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor --output /usr/share/keyrings/nginx-archive-keyring.gpg && \
+    gpg --batch --no-default-keyring --keyring /usr/share/keyrings/nginx-archive-keyring.gpg --list-keys --with-colons | awk -F: '/^fpr:/ { print $10 }' | grep -qx "$EXPECTED_FPR" || { echo "ERROR: expected fingerprint $EXPECTED_FPR not found in keyring" >&2; exit 1; } && \
+    . /etc/os-release && \
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] https://nginx.org/packages/${OS} ${VERSION_CODENAME} nginx" | tee /etc/apt/sources.list.d/nginx.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~${VERSION_CODENAME}
+
+WORKDIR /tmp/bunkerweb/deps
+
+# Copy dependencies sources folder
+COPY src/deps/misc misc
+COPY src/deps/src src
+COPY src/deps/deps.json deps.json
+COPY --chmod=644 src/deps/install.sh install.sh
+
+# Compile and install dependencies
+RUN bash install.sh
+
+# Copy dependencies sources folder
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
+COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
+COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
+
+WORKDIR /usr/share/bunkerweb
+
+# Compile and install dependencies
+RUN export MAKEFLAGS="-j$(nproc)" && \
+    mkdir -p deps/python && \
+    pip install --break-system-packages --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+    pip install --break-system-packages --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+
+RUN apt-get install -y pigz && \
+    tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
+    rm -rf deps
+
+# Copy files
+# can't exclude deps from . so we are copying everything by hand
+COPY src/bw/loading loading
+COPY src/bw/lua lua
+COPY src/bw/misc misc
+COPY src/common/api api
+COPY src/common/cli cli
+COPY src/common/confs confs
+COPY src/common/core core
+COPY src/common/db db
+COPY src/common/gen gen
+COPY src/common/helpers helpers
+COPY src/common/settings.json settings.json
+COPY src/common/utils utils
+COPY src/scheduler scheduler
+COPY src/VERSION VERSION
+COPY src/ui ui
+
+# Minify JS files (can be skipped with SKIP_MINIFY=yes)
+ARG SKIP_MINIFY=no
+RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+    apt-get install -y nodejs npm parallel && \
+    npm install -g uglify-js && \
+    find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
+    else \
+    echo "Skipping JS minification"; \
+    fi
+
+FROM debian:trixie-slim@sha256:c85a2732e97694ea77237c61304b3bb410e0e961dd6ee945997a06c788c545bb
+
+# Set default umask to prevent huge recursive chmod increasing the final image size
+RUN umask 027
+
+# Install fpm
+RUN apt-get update && \
+    apt-get -y install ruby ruby-dev rubygems build-essential autoconf libtool rpm binutils && \
+    gem install -N fpm && \
+    apt-get -f -y --auto-remove remove build-essential autoconf libtool && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy dependencies
+COPY --from=builder --chown=0:101 /etc/nginx /etc/nginx
+COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
+
+WORKDIR /usr/share/bunkerweb
+
+# Setup BunkerWeb
+RUN install -m 755 helpers/bwcli /usr/bin/bwcli && \
+    echo "Linux" > INTEGRATION && \
+    mkdir -p /etc/bunkerweb/configs /etc/bunkerweb/plugins /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/lib/bunkerweb /var/www/html && \
+    for dir in $(echo "plugins pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
+    touch /var/log/bunkerweb/error.log /var/log/bunkerweb/access.log /var/log/bunkerweb/modsec_audit.log
+
+COPY --chmod=660 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chmod=660 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
+
+# Copy Linux files
+COPY --chmod=740 src/linux/scripts scripts
+COPY --chmod=740 src/linux/fpm.sh /usr/share/fpm.sh
+COPY src/linux/fpm-debian-trixie /usr/share/.fpm
+COPY --chmod=644 src/linux/*.service /lib/systemd/system/
+COPY --chmod=644 src/linux/bunkerweb.logrotate /etc/logrotate.d/bunkerweb
+
+# Generate DEB at startup
+VOLUME /data
+WORKDIR /usr/share/
+ENTRYPOINT [ "./fpm.sh", "deb" ]

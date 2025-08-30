@@ -87,7 +87,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.3-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -104,7 +104,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.3-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -124,6 +124,8 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -150,8 +152,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.8.0
-        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        image: balabit/syslog-ng:4.9.0
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts

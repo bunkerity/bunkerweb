@@ -13,13 +13,21 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default values
-BUNKERWEB_VERSION="1.6.3-rc3"
+# Hardcoded default version (immutable reference)
+DEFAULT_BUNKERWEB_VERSION="1.6.5-rc1"
+# Mutable effective version (can be overridden by --version)
+BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
 INTERACTIVE_MODE="yes"
 CROWDSEC_INSTALL="no"
 CROWDSEC_APPSEC_INSTALL="no"
+INSTALL_TYPE=""
+BUNKERWEB_INSTANCES_INPUT=""
+UPGRADE_SCENARIO="no"
+BACKUP_DIRECTORY=""
+AUTO_BACKUP="yes"
 
 # Function to print colored output
 print_status() {
@@ -89,62 +97,120 @@ ask_user_preferences() {
         print_step "Configuration Options"
         echo
 
-        # Ask about setup wizard
-        if [ -z "$ENABLE_WIZARD" ]; then
+        # Ask about installation type
+        if [ -z "$INSTALL_TYPE" ]; then
             echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🧙 BunkerWeb Setup Wizard${NC}"
+            echo -e "${BLUE}📦 Installation Type${NC}"
             echo -e "${BLUE}========================================${NC}"
-            echo "The BunkerWeb setup wizard provides a web-based interface to:"
-            echo "  • Complete initial configuration easily"
-            echo "  • Set up your first protected service"
-            echo "  • Configure SSL/TLS certificates"
-            echo "  • Access the management interface"
+            echo "Choose the type of installation based on your needs:"
+            echo "  1) Full Stack (default): All-in-one installation (BunkerWeb, Scheduler, UI)."
+            echo "  2) Manager: Installs Scheduler and UI to manage remote BunkerWeb workers."
+            echo "  3) Worker: Installs only the BunkerWeb instance, to be managed remotely."
+            echo "  4) Scheduler Only: Installs only the Scheduler component."
+            echo "  5) Web UI Only: Installs only the Web UI component."
             echo
             while true; do
-                echo -e "${YELLOW}Would you like to enable the setup wizard? (Y/n):${NC} "
+                echo -e "${YELLOW}Select installation type (1-5) [1]:${NC} "
                 read -p "" -r
+                REPLY=${REPLY:-1}
                 case $REPLY in
-                    [Yy]*|"")
-                        ENABLE_WIZARD="yes"
-                        break
-                        ;;
-                    [Nn]*)
-                        ENABLE_WIZARD="no"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
+                    1) INSTALL_TYPE="full"; break ;;
+                    2) INSTALL_TYPE="manager"; break ;;
+                    3) INSTALL_TYPE="worker"; break ;;
+                    4) INSTALL_TYPE="scheduler"; break ;;
+                    5) INSTALL_TYPE="ui"; break ;;
+                    *) echo "Invalid option. Please choose a number between 1 and 5." ;;
                 esac
             done
         fi
 
+        if [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]]; then
+            if [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                echo
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}🔗 BunkerWeb Instances Configuration${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "Please provide the list of BunkerWeb instances (workers) to manage."
+                echo "Format: a space-separated list of IP addresses or hostnames."
+                echo "Example: 192.168.1.10 192.168.1.11"
+                echo
+                while true; do
+                    echo -e "${YELLOW}Enter BunkerWeb instances:${NC} "
+                    read -p "" -r BUNKERWEB_INSTANCES_INPUT
+                    if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                        break
+                    else
+                        print_warning "This field cannot be empty for Manager/Scheduler installations."
+                    fi
+                done
+            fi
+        fi
+
+        # Ask about setup wizard
+        if [ -z "$ENABLE_WIZARD" ]; then
+            if [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "scheduler" ]; then
+                ENABLE_WIZARD="no"
+            else
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}🧙 BunkerWeb Setup Wizard${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "The BunkerWeb setup wizard provides a web-based interface to:"
+                echo "  • Complete initial configuration easily"
+                echo "  • Set up your first protected service"
+                echo "  • Configure SSL/TLS certificates"
+                echo "  • Access the management interface"
+                echo
+                while true; do
+                    echo -e "${YELLOW}Would you like to enable the setup wizard? (Y/n):${NC} "
+                    read -p "" -r
+                    case $REPLY in
+                        [Yy]*|"")
+                            ENABLE_WIZARD="yes"
+                            break
+                            ;;
+                        [Nn]*)
+                            ENABLE_WIZARD="no"
+                            break
+                            ;;
+                        *)
+                            echo "Please answer yes (y) or no (n)."
+                            ;;
+                    esac
+                done
+            fi
+        fi
+
         # Ask about CrowdSec installation
-        if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
-            echo
-            echo -e "${BLUE}========================================${NC}"
-            echo -e "${BLUE}🦙 CrowdSec Intrusion Prevention${NC}"
-            echo -e "${BLUE}========================================${NC}"
-            echo "CrowdSec is a community-powered, open-source intrusion prevention engine that analyzes logs in real time to detect, block and share intelligence on malicious IPs."
-            echo "It seamlessly integrates with BunkerWeb for automated threat remediation."
-            echo
-            while true; do
-                echo -e "${YELLOW}Would you like to automatically install and configure CrowdSec? (Y/n):${NC} "
-                read -p "" -r
-                case $REPLY in
-                    [Yy]*|"")
-                        CROWDSEC_INSTALL="yes"
-                        break
-                        ;;
-                    [Nn]*)
-                        CROWDSEC_INSTALL="no"
-                        break
-                        ;;
-                    *)
-                        echo "Please answer yes (y) or no (n)."
-                        ;;
-                esac
-            done
+        if [ "$INSTALL_TYPE" != "worker" ] && [ "$INSTALL_TYPE" != "scheduler" ] && [ "$INSTALL_TYPE" != "ui" ]; then
+            if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
+                echo
+                echo -e "${BLUE}========================================${NC}"
+                echo -e "${BLUE}🦙 CrowdSec Intrusion Prevention${NC}"
+                echo -e "${BLUE}========================================${NC}"
+                echo "CrowdSec is a community-powered, open-source intrusion prevention engine that analyzes logs in real time to detect, block and share intelligence on malicious IPs."
+                echo "It seamlessly integrates with BunkerWeb for automated threat remediation."
+                echo
+                while true; do
+                    echo -e "${YELLOW}Would you like to automatically install and configure CrowdSec? (Y/n):${NC} "
+                    read -p "" -r
+                    case $REPLY in
+                        [Yy]*|"")
+                            CROWDSEC_INSTALL="yes"
+                            break
+                            ;;
+                        [Nn]*)
+                            CROWDSEC_INSTALL="no"
+                            break
+                            ;;
+                        *)
+                            echo "Please answer yes (y) or no (n)."
+                            ;;
+                    esac
+                done
+            fi
+        else
+            # CrowdSec not applicable for worker, scheduler-only, or ui-only installations
+            CROWDSEC_INSTALL="no"
         fi
 
         # Ask about AppSec installation if CrowdSec is chosen
@@ -178,6 +244,16 @@ ask_user_preferences() {
         echo
         print_status "Configuration summary:"
         echo "  🛡 BunkerWeb version: $BUNKERWEB_VERSION"
+        case "$INSTALL_TYPE" in
+            "full"|"") echo "  📦 Installation type: Full Stack" ;;
+            "manager") echo "  📦 Installation type: Manager" ;;
+            "worker") echo "  📦 Installation type: Worker" ;;
+            "scheduler") echo "  📦 Installation type: Scheduler Only" ;;
+            "ui") echo "  📦 Installation type: Web UI Only" ;;
+        esac
+        if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+            echo "  🔗 BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
+        fi
         echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
         echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
         echo "  🟢 NGINX version: $NGINX_VERSION"
@@ -215,8 +291,8 @@ show_rhel_database_warning() {
 check_supported_os() {
     case "$DISTRO_ID" in
         "debian")
-            if [ "$DISTRO_VERSION" != "12" ]; then
-                print_warning "Only Debian 12 (Bookworm) is officially supported"
+            if [[ "$DISTRO_VERSION" != "12" && "$DISTRO_VERSION" != "13" ]]; then
+                print_warning "Only Debian 12 (Bookworm) and 13 (Trixie) are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -239,8 +315,8 @@ check_supported_os() {
             NGINX_VERSION="1.28.0-1~$DISTRO_CODENAME"
             ;;
         "fedora")
-            if [[ "$DISTRO_VERSION" != "40" && "$DISTRO_VERSION" != "41" && "$DISTRO_VERSION" != "42" ]]; then
-                print_warning "Only Fedora 40, 41, and 42 are officially supported"
+            if [[ "$DISTRO_VERSION" != "41" && "$DISTRO_VERSION" != "42" ]]; then
+                print_warning "Only Fedora 41 and 42 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -252,8 +328,8 @@ check_supported_os() {
             ;;
         "rhel"|"rocky"|"almalinux")
             major_version=$(echo "$DISTRO_VERSION" | cut -d. -f1)
-            if [[ "$major_version" != "8" && "$major_version" != "9" ]]; then
-                print_warning "Only RHEL 8 and 9 are officially supported"
+            if [[ "$major_version" != "8" && "$major_version" != "9" && "$major_version" != "10" ]]; then
+                print_warning "Only RHEL 8, 9, and 10 are officially supported"
                 if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
                     read -p "Continue anyway? (y/N): " -r
                     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -265,7 +341,7 @@ check_supported_os() {
             ;;
         *)
             print_error "Unsupported operating system: $DISTRO_ID"
-            print_error "Supported distributions: Debian 12, Ubuntu 22.04/24.04, Fedora 40/41/42, RHEL 8/9"
+            print_error "Supported distributions: Debian 12/13, Ubuntu 22.04/24.04, Fedora 41/42, RHEL 8/9/10"
             exit 1
             ;;
     esac
@@ -527,12 +603,6 @@ source: appsec
         fi
     } > "$CROWDSEC_ENV_TMP"
 
-    echo -e "${YELLOW}--- Step 6: Restart and enable services ---${NC}"
-    print_step "Restarting services and enabling at boot"
-    run_cmd systemctl restart crowdsec
-    sleep 2
-    systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
-
     echo
     echo -e "${GREEN}CrowdSec installed successfully${NC}"
     echo "See BunkerWeb docs for more: https://docs.bunkerweb.io/latest/features/#crowdsec"
@@ -611,12 +681,32 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo
     echo "Options:"
-    echo "  -v, --version VERSION    BunkerWeb version to install (default: $BUNKERWEB_VERSION)"
+    echo "  -v, --version VERSION    BunkerWeb version to install (default: ${DEFAULT_BUNKERWEB_VERSION})"
     echo "  -w, --enable-wizard      Enable the setup wizard (default in interactive mode)"
     echo "  -n, --no-wizard          Disable the setup wizard"
     echo "  -y, --yes                Non-interactive mode, use defaults"
     echo "  -f, --force              Force installation on unsupported OS versions"
+    echo "  -q, --quiet              Silent installation (suppress output)"
     echo "  -h, --help               Show this help message"
+    echo "      --dry-run            Show what would be installed without doing it"
+    echo
+    echo "Installation types:"
+    echo "  --full                   Full stack installation (default)"
+    echo "  --manager                Manager installation (Scheduler + UI)"
+    echo "  --worker                 Worker installation (BunkerWeb only)"
+    echo "  --scheduler-only         Scheduler only installation"
+    echo "  --ui-only                Web UI only installation"
+    echo
+    echo "Security integrations:"
+    echo "  --crowdsec               Install and configure CrowdSec"
+    echo "  --no-crowdsec            Skip CrowdSec installation"
+    echo "  --crowdsec-appsec        Install CrowdSec with AppSec component"
+    echo
+    echo "Advanced options:"
+    echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
+    echo "                           (required for --manager and --scheduler-only)"
+    echo "  --backup-dir PATH        Directory to store automatic backup before upgrade"
+    echo "  --no-auto-backup         Skip automatic backup (you MUST have done it manually)"
     echo
     echo "Examples:"
     echo "  $0                       # Interactive installation"
@@ -624,6 +714,12 @@ usage() {
     echo "  $0 --version 1.6.0       # Install specific version"
     echo "  $0 --yes                 # Non-interactive with defaults"
     echo "  $0 --force               # Force install on unsupported OS"
+    echo "  $0 --manager --instances \"192.168.1.10 192.168.1.11\""
+    echo "                           # Manager setup with worker instances"
+    echo "  $0 --worker --no-wizard  # Worker-only installation"
+    echo "  $0 --crowdsec-appsec     # Full installation with CrowdSec AppSec"
+    echo "  $0 --quiet --yes         # Silent non-interactive installation"
+    echo "  $0 --dry-run             # Preview installation without executing"
     echo
 }
 
@@ -631,7 +727,12 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--version)
-            BUNKERWEB_VERSION="1.6.3-rc3"
+            # Fix: actually use provided argument for version
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing version after $1"
+                exit 1
+            fi
+            BUNKERWEB_VERSION="$2"
             shift 2
             ;;
         -w|--enable-wizard)
@@ -655,6 +756,63 @@ while [[ $# -gt 0 ]]; do
             usage
             exit 0
             ;;
+        --full)
+            INSTALL_TYPE="full"
+            shift
+            ;;
+        --manager)
+            INSTALL_TYPE="manager"
+            shift
+            ;;
+        --worker)
+            INSTALL_TYPE="worker"
+            shift
+            ;;
+        --scheduler-only)
+            INSTALL_TYPE="scheduler"
+            shift
+            ;;
+        --ui-only)
+            INSTALL_TYPE="ui"
+            shift
+            ;;
+        --crowdsec)
+            CROWDSEC_INSTALL="yes"
+            shift
+            ;;
+        --no-crowdsec)
+            CROWDSEC_INSTALL="no"
+            shift
+            ;;
+        --crowdsec-appsec)
+            CROWDSEC_INSTALL="yes"
+            CROWDSEC_APPSEC_INSTALL="yes"
+            shift
+            ;;
+        --instances)
+            BUNKERWEB_INSTANCES_INPUT="$2"
+            shift 2
+            ;;
+        --backup-dir)
+            BACKUP_DIRECTORY="$2"; shift 2 ;;
+        --no-auto-backup)
+            AUTO_BACKUP="no"; shift ;;
+        -q|--quiet)
+            exec >/dev/null 2>&1
+            shift
+            ;;
+        --dry-run)
+            echo "Dry run mode - would install BunkerWeb $BUNKERWEB_VERSION"
+            detect_os
+            check_supported_os
+            echo "Installation type: ${INSTALL_TYPE:-full}"
+            echo "Setup wizard: ${ENABLE_WIZARD:-auto}"
+            echo "CrowdSec: ${CROWDSEC_INSTALL:-no}"
+            if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+                echo "BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
+            fi
+            exit 0
+            ;;
         *)
             print_error "Unknown option: $1"
             usage
@@ -662,6 +820,174 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Validate instances option usage
+if [ -n "$BUNKERWEB_INSTANCES_INPUT" ] && [[ "$INSTALL_TYPE" != "manager" && "$INSTALL_TYPE" != "scheduler" ]]; then
+    print_error "The --instances option can only be used with --manager or --scheduler-only installation types"
+    exit 1
+fi
+
+# Validate required instances for manager/scheduler in non-interactive mode
+if [ "$INTERACTIVE_MODE" = "no" ] && [[ "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "scheduler" ]] && [ -z "$BUNKERWEB_INSTANCES_INPUT" ]; then
+    print_error "The --instances option is required when using --manager or --scheduler-only in non-interactive mode"
+    print_error "Example: --manager --instances \"192.168.1.10 192.168.1.11\""
+    exit 1
+fi
+
+# Validate CrowdSec options usage
+if [[ "$CROWDSEC_INSTALL" = "yes" || "$CROWDSEC_APPSEC_INSTALL" = "yes" ]] && [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" ]]; then
+    print_error "CrowdSec options (--crowdsec, --crowdsec-appsec) can only be used with --full or --manager installation types"
+    exit 1
+fi
+
+# Detect existing installation and handle reinstall/upgrade
+check_existing_installation() {
+    if [ -f /usr/share/bunkerweb/VERSION ]; then
+        INSTALLED_VERSION=$(cat /usr/share/bunkerweb/VERSION 2>/dev/null || echo "unknown")
+        print_status "Detected existing BunkerWeb installation (version ${INSTALLED_VERSION})"
+        if [ "$INSTALLED_VERSION" = "$BUNKERWEB_VERSION" ]; then
+            if [ "$INTERACTIVE_MODE" = "yes" ]; then
+                echo
+                read -p "BunkerWeb ${INSTALLED_VERSION} already installed. Show status and exit? (Y/n): " -r
+                case $REPLY in
+                    [Nn]*) print_status "Nothing to do."; exit 0 ;;
+                    *) show_final_info; exit 0 ;;
+                esac
+            else
+                print_status "BunkerWeb ${INSTALLED_VERSION} already installed. Nothing to do."; exit 0
+            fi
+        else
+            print_warning "Requested version ${BUNKERWEB_VERSION} differs from installed version ${INSTALLED_VERSION}. Upgrade will be attempted."
+            if [ "$INTERACTIVE_MODE" = "yes" ]; then
+                read -p "Proceed with upgrade? (Y/n): " -r
+                case $REPLY in
+                    [Nn]*) print_status "Upgrade cancelled."; exit 0 ;;
+                esac
+            fi
+            UPGRADE_SCENARIO="yes"
+        fi
+    fi
+}
+
+perform_upgrade_backup() {
+    [ "$UPGRADE_SCENARIO" != "yes" ] && return 0
+    if [ "$AUTO_BACKUP" != "yes" ]; then
+        print_warning "Automatic backup disabled. Ensure you already performed a manual backup (see https://docs.bunkerweb.io/latest/upgrading)."
+        return 0
+    fi
+    if ! command -v bwcli >/dev/null 2>&1; then
+        print_warning "bwcli not found, cannot run automatic backup. Perform manual backup per documentation."
+        return 0
+    fi
+    if ! systemctl is-active --quiet bunkerweb-scheduler; then
+        print_warning "Scheduler service not active; starting temporarily for backup."
+        systemctl start bunkerweb-scheduler || print_warning "Failed to start scheduler; backup may fail."
+        TEMP_STARTED="yes"
+    fi
+    if [ -z "$BACKUP_DIRECTORY" ]; then
+        BACKUP_DIRECTORY="/var/tmp/bunkerweb-backup-$(date +%Y%m%d-%H%M%S)"
+    fi
+    mkdir -p "$BACKUP_DIRECTORY" || {
+        print_warning "Unable to create backup directory $BACKUP_DIRECTORY. Skipping automatic backup."; return 0; }
+    print_step "Creating pre-upgrade backup in $BACKUP_DIRECTORY"
+    if BACKUP_DIRECTORY="$BACKUP_DIRECTORY" bwcli plugin backup save; then
+        print_status "Backup completed: $BACKUP_DIRECTORY"
+    else
+        print_warning "Automatic backup failed. Verify manually before continuing."
+    fi
+    if [ "$TEMP_STARTED" = "yes" ]; then
+        systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
+    fi
+}
+
+upgrade_only() {
+    # Interactive confirmation about backup (optional, enabled by default)
+    if [ "$INTERACTIVE_MODE" = "yes" ]; then
+        if [ "$AUTO_BACKUP" = "yes" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}💾 Pre-upgrade Backup${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "A pre-upgrade backup is recommended to preserve configuration and database."
+            echo "You can change the destination directory or accept the default."
+            DEFAULT_BACKUP_DIR="/var/tmp/bunkerweb-backup-$(date +%Y%m%d-%H%M%S)"
+            echo
+            echo -e "${YELLOW}Create automatic backup before upgrade? (Y/n):${NC} "
+            read -p "" -r
+            case $REPLY in
+                [Nn]*) AUTO_BACKUP="no" ;;
+                *)
+                    echo -e "${YELLOW}Backup directory [${DEFAULT_BACKUP_DIR}]:${NC} "
+                    read -p "" -r BACKUP_DIRECTORY_INPUT
+                    if [ -n "$BACKUP_DIRECTORY_INPUT" ]; then
+                        BACKUP_DIRECTORY="$BACKUP_DIRECTORY_INPUT"
+                    else
+                        BACKUP_DIRECTORY="${BACKUP_DIRECTORY:-$DEFAULT_BACKUP_DIR}"
+                    fi
+                    ;;
+            esac
+        else
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}⚠️  Backup Confirmation${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "Automatic backup is disabled. Make sure you already performed a manual backup as described in the documentation."
+            echo
+            echo -e "${YELLOW}Confirm manual backup was performed? (y/N):${NC} "
+            read -p "" -r
+            case $REPLY in
+                [Yy]*) ;; * ) print_error "Upgrade aborted until backup is confirmed."; exit 1 ;;
+            esac
+        fi
+    fi
+
+    print_status "Upgrade mode: $INSTALLED_VERSION -> $BUNKERWEB_VERSION"
+    perform_upgrade_backup
+    # Remove holds/version locks
+    case "$DISTRO_ID" in
+        debian|ubuntu)
+            if command -v apt-mark >/dev/null 2>&1; then
+                print_status "Removing holds (bunkerweb, nginx)"
+                apt-mark unhold bunkerweb nginx >/dev/null 2>&1 || true
+            fi
+            ;;
+        fedora|rhel|rocky|almalinux)
+            if command -v dnf >/dev/null 2>&1; then
+                print_status "Removing versionlock (bunkerweb, nginx)"
+                dnf versionlock delete bunkerweb nginx >/dev/null 2>&1 || true
+            fi
+            ;;
+    esac
+    # Stop services (best effort)
+    print_step "Stopping services prior to upgrade"
+    for svc in bunkerweb-ui bunkerweb-scheduler bunkerweb; do
+        if systemctl list-units --type=service --all | grep -q "^${svc}.service"; then
+            if systemctl is-active --quiet "$svc"; then
+                run_cmd systemctl stop "$svc"
+            fi
+        fi
+    done
+    # Install new version only (do NOT reinstall nginx)
+    print_step "Upgrading BunkerWeb package"
+    case "$DISTRO_ID" in
+        debian|ubuntu)
+            run_cmd apt update
+            run_cmd apt install -y "bunkerweb=$BUNKERWEB_VERSION"
+            run_cmd apt-mark hold bunkerweb nginx
+            ;;
+        fedora|rhel|rocky|almalinux)
+            if [ "$DISTRO_ID" = "fedora" ]; then
+                run_cmd dnf makecache || true
+            else
+                dnf check-update || true
+            fi
+            run_cmd dnf install -y --allowerasing "bunkerweb-$BUNKERWEB_VERSION"
+            run_cmd dnf versionlock add bunkerweb nginx
+            ;;
+    esac
+    show_final_info
+    exit 0
+}
 
 # Main installation function
 main() {
@@ -674,12 +1000,56 @@ main() {
     check_root
     detect_os
     check_supported_os
+    # New: check if already installed (after OS detection)
+    check_existing_installation
+
+    # If upgrade scenario, skip prompts & ancillary installs
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        upgrade_only
+    fi
 
     # Show RHEL database warning early
     show_rhel_database_warning
 
     # Ask user preferences in interactive mode
     ask_user_preferences
+
+    if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+        # Use a temporary file to pass the setting to the postinstall script
+        echo "BUNKERWEB_INSTANCES=$BUNKERWEB_INSTANCES_INPUT" > /var/tmp/bunkerweb_instances.env
+    fi
+
+    # Set environment variables based on installation type
+    case "$INSTALL_TYPE" in
+        "manager")
+            print_status "Installation Type: Manager"
+            export MANAGER_MODE=yes
+            ;;
+        "worker")
+            print_status "Installation Type: Worker"
+            export WORKER_MODE=yes
+            ;;
+        "scheduler")
+            print_status "Installation Type: Scheduler only"
+            export SERVICE_BUNKERWEB=no
+            export SERVICE_SCHEDULER=yes
+            export SERVICE_UI=no
+            ;;
+        "ui")
+            print_status "Installation Type: Web UI only"
+            export SERVICE_BUNKERWEB=no
+            export SERVICE_SCHEDULER=no
+            export SERVICE_UI=yes
+            ;;
+        "full"|"")
+            print_status "Installation Type: Full Stack"
+            ;;
+    esac
+
+    # Pass UI_WIZARD to postinstall script
+    if [ "$ENABLE_WIZARD" = "no" ]; then
+        export UI_WIZARD=no
+    fi
 
     print_status "Installing BunkerWeb $BUNKERWEB_VERSION"
     print_status "Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
@@ -694,6 +1064,35 @@ main() {
                 exit 0
                 ;;
         esac
+    fi
+
+    # If upgrading, remove holds/versionlocks so upgrade can proceed
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        case "$DISTRO_ID" in
+            debian|ubuntu)
+                if command -v apt-mark >/dev/null 2>&1; then
+                    print_status "Removing holds on bunkerweb & nginx (upgrade scenario)"
+                    apt-mark unhold bunkerweb nginx >/dev/null 2>&1 || true
+                fi
+                ;;
+            fedora|rhel|rocky|almalinux)
+                if command -v dnf >/dev/null 2>&1; then
+                    print_status "Removing versionlock on bunkerweb & nginx (upgrade scenario)"
+                    dnf versionlock delete bunkerweb nginx >/dev/null 2>&1 || true
+                fi
+                ;;
+        esac
+        # Stop services before upgrading (per upgrading.md procedure)
+        print_step "Stopping BunkerWeb services before upgrade"
+        for svc in bunkerweb bunkerweb-ui bunkerweb-scheduler; do
+            if systemctl list-units --type=service --all | grep -q "^${svc}.service"; then
+                if systemctl is-active --quiet "$svc"; then
+                    run_cmd systemctl stop "$svc"
+                else
+                    print_status "Service $svc not active, skipping stop"
+                fi
+            fi
+        done
     fi
 
     # Install NGINX based on distribution
@@ -714,7 +1113,7 @@ main() {
         install_crowdsec
     fi
 
-    # Install NGINX based on distribution
+    # Install BunkerWeb based on distribution
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
             install_bunkerweb_debian
@@ -726,6 +1125,12 @@ main() {
             install_bunkerweb_rpm
             ;;
     esac
+
+    if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+        run_cmd systemctl restart crowdsec
+        sleep 2
+        systemctl status crowdsec --no-pager -l || print_warning "CrowdSec may not be running"
+    fi
 
     # Show final information
     show_final_info

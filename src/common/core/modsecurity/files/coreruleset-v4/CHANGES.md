@@ -5,6 +5,44 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
+## Version 4.18.0 - 2025-MM-DD
+
+TBD
+
+## Version 4.17.1 - 2025-08-05
+
+## What's Changed
+### ⭐ Important changes
+* chore: removed detection for LaTeX injection by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4221
+### 🧰 Other Changes
+* fix(942340): remove dot star by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4220
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.17.0...v4.17.1
+## Version 4.17.0 - 2025-07-31
+
+## What's Changed
+### ⭐ Important changes
+* feat: remove PCI DSS tags (#4194) by @pha6d in https://github.com/coreruleset/coreruleset/pull/4203
+### 🆕 New features and detections 🎉
+* feat: added detection for ASP.NET errors by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4092
+* feat: added detection for RCE via Referer header by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/3993
+* feat: added detection for LaTeX injection by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4206
+* feat: added detection for ruby errors and code leakage by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4089
+### 🧰 Other Changes
+* fix(951xxx): remove dot star by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4171
+* fix: use word bondary on 952110 to avoid matching non-java errors by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4177
+* feat: Update java-classes.data by @KIC-8462852 in https://github.com/coreruleset/coreruleset/pull/4173
+* fix(931130): update file uri with single slash by @fzipi in https://github.com/coreruleset/coreruleset/pull/4193
+* fix(932281): avoid matching on json payloads by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4187
+* fix: 932280/932281 bypass by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4207
+
+## New Contributors
+* @KIC-8462852 made their first contribution in https://github.com/coreruleset/coreruleset/pull/4173
+* @pha6d made their first contribution in https://github.com/coreruleset/coreruleset/pull/4203
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.16.0...v4.17.0
+
 ## Version 4.16.0 - 2025-06-29
 
 ## What's Changed

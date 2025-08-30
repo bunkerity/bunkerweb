@@ -45,15 +45,15 @@ def reload_plugins():
 
         # If the target exists, compare its checksum.
         if target.exists():
-            with suppress(StopIteration, IndexError):
+            with suppress(StopIteration, IndexError, FileNotFoundError):
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
                         tar.add(target, arcname=target.name, recursive=True)
-                    plugin_content.seek(0)
+                    plugin_content.seek(0, 0)
                     if bytes_hash(plugin_content, algorithm="sha256") == plugin["checksum"]:
                         ignored_plugins.add(target.name)
                         continue
-            DB.logger.debug(f"Checksum of {target} has changed, removing it ...")
+                    DB.logger.debug(f"Checksum of {target} has changed, removing it ...")
 
             if target.is_symlink() or target.is_file():
                 with suppress(OSError):
@@ -110,6 +110,3 @@ def safe_reload_plugins(force: bool = False):
     if force or DATA.get("FORCE_RELOAD_PLUGIN", False) or not DATA.get("IS_RELOADING_PLUGINS", False):
         DATA["IS_RELOADING_PLUGINS"] = True
         reload_plugins()
-        for worker_pid in DATA.get("WORKERS", {}):
-            DATA["WORKERS"][worker_pid]["refresh_context"] = True
-        DATA.update({"FORCE_RELOAD_PLUGIN": False, "IS_RELOADING_PLUGINS": False})

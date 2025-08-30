@@ -1,0 +1,91 @@
+services:
+  bunkerweb-all-in-one:
+    build:
+      context: ../..
+      dockerfile: ./src/all-in-one/Dockerfile
+      args:
+        SKIP_MINIFY: "yes"
+    ports:
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
+      - 7000:7000/tcp
+    volumes:
+      - bw-storage:/data
+      - ../../src/ui/app:/usr/share/bunkerweb/ui/app:ro
+      - ../../src/ui/utils:/usr/share/bunkerweb/ui/utils:ro
+      - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
+    environment:
+      SERVER_NAME: "www.example.com app1.example.com"
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
+      MULTISITE: "yes"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      USE_WHITELIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      CUSTOM_LOG_LEVEL: "debug"
+      SERVE_FILES: "no"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
+      GENERATE_SELF_SIGNED_SSL: "yes"
+      app1.example.com_USE_REVERSE_PROXY: "yes"
+      app1.example.com_REVERSE_PROXY_URL: "/"
+      app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
+
+      # UI
+      www.example.com_USE_TEMPLATE: "ui"
+      www.example.com_USE_REVERSE_PROXY: "yes"
+      www.example.com_REVERSE_PROXY_URL: "/admin"
+      www.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:7000"
+      ADMIN_USERNAME: "admin"
+      ADMIN_PASSWORD: "P@ssw0rd"
+      CHECK_PRIVATE_IP: "no"
+      FLASK_SECRET: "secret"
+      DEBUG: "1"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        aliases:
+          - bunkerweb-all-in-one
+      bw-services:
+        aliases:
+          - bunkerweb-all-in-one
+
+  bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        aliases:
+          - bw-db
+
+  app1:
+    image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
+    networks:
+      bw-services:
+        aliases:
+          - app1
+
+volumes:
+  bw-data:
+  bw-storage:
+  bw-logs:
+
+networks:
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db

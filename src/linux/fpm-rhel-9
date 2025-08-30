@@ -3,8 +3,8 @@
 --license agpl3
 --version %VERSION%
 --architecture %ARCH%
---depends bash --depends python39 --depends 'nginx = 1:1.28.0' --depends libcurl-devel --depends libxml2 --depends yajl --depends file-libs --depends net-tools --depends gd --depends sudo --depends procps --depends lsof --depends geoip --depends libpq --depends libcap --depends openssl --depends sqlite --depends unzip --depends tar
---description "BunkerWeb %VERSION% for RHEL 8"
+--depends bash --depends python3.11 --depends 'nginx = 2:1.28.0' --depends libcurl-devel --depends libxml2 --depends yajl --depends file-libs --depends net-tools --depends gd --depends sudo --depends procps --depends lsof --depends libmaxminddb --depends libpq --depends libcap --depends openssl --depends sqlite --depends unzip --depends tar
+--description "BunkerWeb %VERSION% for RHEL 9"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
 --before-install /usr/share/bunkerweb/scripts/beforeInstall.sh
