@@ -447,7 +447,7 @@ You can update your username or password by filling the dedicated forms in the *
 Please note that when your username or password is updated, you will be logout from the web UI to log in again.
 
 <figure markdown>
-  ![Overview](assets/img/profile-username-password.png){ align=center, width="650" }
+  ![Overview](assets/img/profile-username-password.png){ align=center }
   <figcaption>Username / Password form</figcaption>
 </figure>
 
@@ -496,7 +496,7 @@ The following steps are needed to enable the TOTP feature from the web UI:
 You can enable or disable 2FA and also refresh recovery codes in the **Security** tab:
 
 <figure markdown>
-  ![Overview](assets/img/profile-totp.png){ align=center, width="800" }
+  ![Overview](assets/img/profile-totp.png){ align=center }
   <figcaption>TOTP enable / disable / refresh recovery codes forms</figcaption>
 </figure>
 
@@ -512,7 +512,7 @@ After a successful login/password combination, you will be prompted to enter you
 In the **Session** tab, you will be able to list and revoke current sessions:
 
 <figure markdown>
-  ![Overview](assets/img/sessions.png){ align=center, width="800" }
+  ![Overview](assets/img/sessions.png){ align=center }
   <figcaption>Manage sessions</figcaption>
 </figure>
 

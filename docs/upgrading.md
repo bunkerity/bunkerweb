@@ -161,7 +161,7 @@
         - Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.
         - Use appropriate tools to backup the entire database, including data, schemas, and configurations.
 
-        !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
+        ??? warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
             If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
             === "MySQL/MariaDB"
@@ -535,7 +535,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
         === "Linux"
 
-            !!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
+            ??? warning "Information for Red Hat Enterprise Linux (RHEL) 8.10 users"
                 If you are using **RHEL 8.10** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
                 === "MySQL/MariaDB"

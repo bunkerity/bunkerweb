@@ -567,7 +567,6 @@ You can now log in with the administrator account you created during the setup w
           <figcaption>Web interface create service easy</figcaption>
         </figure>
 
-        * To navigate between the different plugins, you can use the dropdown menu on the top left corner of the page.
         * Once you've selected the template, you can fill in the required fields and follow the instructions to create the service.
         * Once you're done configuring the service, you can click on the `💾 Save` button to save the configuration.
 
@@ -580,7 +579,7 @@ You can now log in with the administrator account you created during the setup w
           <figcaption>Web interface create service advanced</figcaption>
         </figure>
 
-        * To navigate between the different plugins, you can use the dropdown menu on the top left corner of the page.
+        * To navigate between the different plugins, you can use the navigation menu on the left side of the page.
         * Each setting has a small piece of information that will help you understand what it does.
         * Once you're done configuring the service, you can click on the `💾 Save` button to save the configuration.
 
@@ -658,7 +657,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Linux variables.env file"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Linux integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_2) and that the Linux integration is running on your machine.
 
     You can create a new service by editing the `variables.env` file located in the `/etc/bunkerweb/` directory.
 
@@ -684,7 +683,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Docker"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_1) and that the Docker integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_3) and that the Docker integration is running on your machine.
 
     You must have a network called `bw-services` so that you can connect your existing application and configure BunkerWeb:
 
@@ -728,7 +727,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Docker autoconf labels"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_2) and that the Docker autoconf integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_4) and that the Docker autoconf integration is running on your machine.
 
     You must have a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
 
@@ -754,7 +753,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Kubernetes annotations"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_4) and that the Kubernetes stack is running on your cluster.
+    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Kubernetes stack is running on your cluster.
 
     Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster:
 
@@ -820,11 +819,11 @@ You can now log in with the administrator account you created during the setup w
 === "Swarm labels"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    We assume that you followed the [Basic setup](#__tabbed_1_3) and that the Swarm stack is running on your cluster and connected to a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
+    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Swarm stack is running on your cluster and connected to a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
 
     ```yaml
     services:
@@ -852,7 +851,7 @@ You can now log in with the administrator account you created during the setup w
 
 Congratulations! You have just installed BunkerWeb and secured your first web service. Please note that BunkerWeb offers much more, both in terms of security and integrations with other systems and solutions. Here's a list of resources and actions that may help you continue to deepen your knowledge of the solution:
 
-- Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X](https://x.com/bunkerity)
+- Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X (Formerly Twitter)](https://x.com/bunkerity)
 - Check out the [official blog](https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=doc)
 - Explore [advanced use cases](advanced.md) in the documentation
 - [Get in touch with us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) to discuss your organization's needs

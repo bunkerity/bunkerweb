@@ -4,7 +4,7 @@ Many real-world use case examples are available in the [examples](https://github
 
 We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/misc/integrations) folder.
 
-This section only focuses on advanced usages and security tuning, see the [settings section](features.md) of the documentation to see all the available settings.
+This section only focuses on advanced usages and security tuning, see the [features section](features.md) of the documentation to see all the available settings.
 
 ## Use cases
 
@@ -37,7 +37,7 @@ The following settings can be used :
 - `REAL_IP_FROM` : list of trusted IP/network address allowed to send us the "real IP"
 - `REAL_IP_HEADER` : the HTTP header containing the real IP or special value `proxy_protocol` when using PROXY protocol
 
-You will find more settings about real IP in the [settings section](features.md#real-ip) of the documentation.
+You will find more settings about real IP in the [features section](features.md#real-ip) of the documentation.
 
 === "HTTP header"
 
@@ -170,7 +170,7 @@ You will find more settings about real IP in the [settings section](features.md#
     === "Swarm"
 
         !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
             **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
@@ -344,7 +344,7 @@ You will find more settings about real IP in the [settings section](features.md#
     === "Swarm"
 
         !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_3_2) instead.
+            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
             **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
@@ -398,6 +398,8 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
 
     Navigate to the **Global config** page and set the DNS resolvers to `127.0.0.53`
 
+    <figure markdown>![DNS resolvers setting using web UI](assets/img/advanced-dns-resolvers.png){ align=center }<figcaption>DNS resolvers setting using web UI</figcaption></figure>
+
 === "Linux"
 
     You will need to modify the `/etc/bunkerweb/variables.env` file:
@@ -408,7 +410,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
     ...
     ```
 
-    After making this change, reload BunkerWeb to apply the configuration:
+    After making this change, reload the Scheduler to apply the configuration:
 
     ```shell
     sudo systemctl reload bunkerweb-scheduler
@@ -464,6 +466,8 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
 
         Navigate to the **Global config** page, select the **NGINX** plugin and set the DNS resolvers to `127.0.0.1`.
 
+        <figure markdown>![DNS resolvers setting using web UI](assets/img/advanced-dns-resolvers2.png){ align=center }<figcaption>DNS resolvers setting using web UI</figcaption></figure>
+
     === "Linux"
 
         You will need to modify the `/etc/bunkerweb/variables.env` file:
@@ -474,7 +478,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         ...
         ```
 
-        After making this change, reload BunkerWeb:
+        After making this change, reload the Scheduler:
 
         ```shell
         sudo systemctl reload bunkerweb-scheduler
@@ -592,15 +596,15 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     <figure markdown>![Custom configurations using web UI](assets/img/advanced-config.png){ align=center }<figcaption>Custom configurations using web UI</figcaption></figure>
 
-    Don't forget to click on the save button.
+    Don't forget to click on the `💾 Save` button.
 
 === "Linux"
 
-    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
+    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
 
     Here is an example for server-http/hello-world.conf :
 
-    ```conf
+    ```nginx
     location /hello {
       default_type 'text/plain';
       content_by_lua_block {
@@ -678,12 +682,12 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     You can now write your configurations :
 
-    ```shell
+    ```nginx
     echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
 
@@ -734,7 +738,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
             default_type 'text/plain';
             content_by_lua_block {
               ngx.say('world')
-    	      }
+            }
           }
       ...
     ```
@@ -749,12 +753,12 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     You can now write your configurations :
 
-    ```shell
+    ```nginx
     echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
 
@@ -805,7 +809,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
             content_by_lua_block {
                 ngx.say('world')
             }
-    	    }
+          }
       ...
     ```
 
@@ -819,12 +823,12 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     You can now write your configurations :
 
-    ```shell
+    ```nginx
     echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
 
@@ -864,19 +868,19 @@ Some integrations provide more convenient ways to apply configurations, such as 
     metadata:
       name: cfg-bunkerweb-all-server-http
       annotations:
-    	  bunkerweb.io/CONFIG_TYPE: "server-http"
+        bunkerweb.io/CONFIG_TYPE: "server-http"
     data:
       myconf: |
-    	location /hello {
-    		default_type 'text/plain';
-    		content_by_lua_block {
-    			ngx.say('world')
-    		}
-    	}
+      location /hello {
+        default_type 'text/plain';
+        content_by_lua_block {
+          ngx.say('world')
+        }
+      }
     ```
 
     !!! tip "Custom Extra Config"
-        Since the `1.6.0-rc3` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
+        Since the `1.6.0` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
 
         ```yaml
         apiVersion: v1
@@ -894,7 +898,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
@@ -909,12 +913,12 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     Here is the example :
 
-    ```shell
+    ```nginx
     echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
     }" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -
     ```
 
@@ -927,9 +931,9 @@ Some integrations provide more convenient ways to apply configurations, such as 
 !!! warning "CRS plugins"
     When the CRS is loaded globally, **CRS plugins are not supported**. If you need to use them, you will need to load the CRS per service.
 
-If you use BunkerWeb in production with a large number of services, and you enable the ModSecurity feature globally with CRS rules, the time required to load BunkerWeb configurations may become too long, potentially resulting in a timeout.
+If you use BunkerWeb in production with a large number of services, and you enable the **ModSecurity feature globally** with CRS rules, the time required to load BunkerWeb configurations may become too long, potentially resulting in a timeout.
 
-The workaround is to load the CRS rules globally rather than per service. This behavior is not enabled by default for backward compatibility reasons and because it has a drawback: if you enable global CRS rule loading, it will no longer be possible to define modsec-crs rules (executed before the CRS rules) on a per-service basis. However, this limitation can be bypassed by writing global `modsec-crs` exclusion rules like this:
+The workaround is to load the CRS rules globally rather than per service. This behavior is not enabled by default for backward compatibility reasons and because it has a drawback: if you enable global CRS rule loading, **it will no longer be possible to define modsec-crs rules** (executed before the CRS rules) on a per-service basis. However, this limitation can be bypassed by writing global `modsec-crs` exclusion rules like this:
 
 ```
 SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
@@ -995,11 +999,11 @@ If you require more advanced settings, such as authentication, SSL/TLS support, 
 
 !!! example "Experimental feature"
 
-	This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+	  This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
 BunkerWeb offers the capability to function as a **generic UDP/TCP reverse proxy**, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX.
 
-It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [settings](features.md) sections of the documentation.
+It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [features](features.md) sections of the documentation.
 
 Configuring a basic reverse proxy is quite similar to the HTTP setup, as it involves using the same settings: `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:9000`. Even when BunkerWeb is positioned behind a Load Balancer, the settings remain the same (with **PROXY protocol** being the supported option due to evident reasons).
 
@@ -1010,11 +1014,11 @@ On top of that, the following specific settings are used :
 - `LISTEN_STREAM_PORT_SSL=4343` : the listening "ssl/tls" port that BunkerWeb will listen on
 - `USE_UDP=no` : listen for and forward UDP packets instead of TCP
 
-For complete list of settings regarding `stream` mode, please refer to the [settings](features.md) section of the documentation.
+For complete list of settings regarding `stream` mode, please refer to the [features](features.md) section of the documentation.
 
 !!! tip "multiple listening ports"
 
-    Since the `1.6.0-rc2` version, BunkerWeb supports multiple listening ports for the `stream` mode. You can specify them using the `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` settings.
+    Since the `1.6.0` version, BunkerWeb supports multiple listening ports for the `stream` mode. You can specify them using the `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` settings.
 
     Here is an example :
 
@@ -1173,81 +1177,6 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
           - "bunkerweb.LISTEN_STREAM_PORT=20000"
-
-    networks:
-      bw-services:
-        external: true
-        name: bw-services
-    ```
-
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_4_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
-
-    ```yaml
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc1
-        ports:
-          # Keep it if you want to use Let's Encrypt automation when using http challenge type
-          - published: 80
-            target: 8080
-            mode: host
-            protocol: tcp
-          # app1
-          - published: 10000
-            target: 10000
-            mode: host
-            protocol: tcp
-          # app2
-          - published: 20000
-            target: 20000
-            mode: host
-            protocol: tcp
-    ...
-    ```
-
-    Once the stack is running, you can connect your existing applications to the `bw-services` network and configure BunkerWeb with labels :
-
-    ```yaml
-    services:
-
-      myapp1:
-        image: istio/tcp-echo-server:1.3
-        command: [ "9000", "app1" ]
-        networks:
-          - bw-services
-        deploy:
-          placement:
-            constraints:
-              - "node.role==worker"
-          labels:
-            - "bunkerweb.SERVER_NAME=app1.example.com"
-            - "bunkerweb.SERVER_TYPE=stream"
-            - "bunkerweb.USE_REVERSE_PROXY=yes"
-            - "bunkerweb.REVERSE_PROXY_HOST=myapp1:9000"
-            - "bunkerweb.LISTEN_STREAM_PORT=10000"
-
-      myapp2:
-        image: istio/tcp-echo-server:1.3
-        command: [ "9000", "app2" ]
-        networks:
-          - bw-services
-        deploy:
-          placement:
-            constraints:
-              - "node.role==worker"
-          labels:
-            - "bunkerweb.SERVER_NAME=app2.example.com"
-            - "bunkerweb.SERVER_TYPE=stream"
-            - "bunkerweb.USE_REVERSE_PROXY=yes"
-            - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
-            - "bunkerweb.LISTEN_STREAM_PORT=20000"
 
     networks:
       bw-services:
@@ -1431,10 +1360,85 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     systemctl start bunkerweb-scheduler
     ```
 
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.5-rc1
+        ports:
+          # Keep it if you want to use Let's Encrypt automation when using http challenge type
+          - published: 80
+            target: 8080
+            mode: host
+            protocol: tcp
+          # app1
+          - published: 10000
+            target: 10000
+            mode: host
+            protocol: tcp
+          # app2
+          - published: 20000
+            target: 20000
+            mode: host
+            protocol: tcp
+    ...
+    ```
+
+    Once the stack is running, you can connect your existing applications to the `bw-services` network and configure BunkerWeb with labels :
+
+    ```yaml
+    services:
+
+      myapp1:
+        image: istio/tcp-echo-server:1.3
+        command: [ "9000", "app1" ]
+        networks:
+          - bw-services
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+            - "bunkerweb.SERVER_NAME=app1.example.com"
+            - "bunkerweb.SERVER_TYPE=stream"
+            - "bunkerweb.USE_REVERSE_PROXY=yes"
+            - "bunkerweb.REVERSE_PROXY_HOST=myapp1:9000"
+            - "bunkerweb.LISTEN_STREAM_PORT=10000"
+
+      myapp2:
+        image: istio/tcp-echo-server:1.3
+        command: [ "9000", "app2" ]
+        networks:
+          - bw-services
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+            - "bunkerweb.SERVER_NAME=app2.example.com"
+            - "bunkerweb.SERVER_TYPE=stream"
+            - "bunkerweb.USE_REVERSE_PROXY=yes"
+            - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
+            - "bunkerweb.LISTEN_STREAM_PORT=20000"
+
+    networks:
+      bw-services:
+        external: true
+        name: bw-services
+    ```
+
 ### PHP
 
 !!! example "Experimental feature"
-	At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
+	  At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
 
 BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/manual/en/install.fpm.php) instances. We will assume that you are already familiar with managing that kind of services.
 
@@ -1783,125 +1787,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         name: bw-services
     ```
 
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_6_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    !!! info "Multisite mode enabled"
-        The [Swarm integration](integrations.md#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
-
-    !!! info "Shared volume"
-        Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances which is not covered in this documentation.
-
-    When using the [Docker autoconf integration](integrations.md#docker-autoconf), to support PHP applications, you will need to :
-
-    - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
-    - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
-    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
-
-    Since the Swarm integration implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
-
-    ```
-    www
-    ├── app1.example.com
-    │   └── index.php
-    ├── app2.example.com
-    │   └── index.php
-    └── app3.example.com
-        └── index.php
-
-    3 directories, 3 files
-    ```
-
-    As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
-
-    Once the folders are created, copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
-
-    ```shell
-    chown -R 33:101 /shared/www && \
-    find /shared/www -type f -exec chmod 0640 {} \; && \
-    find /shared/www -type d -exec chmod 0750 {} \;
-    ```
-
-	  When you start the BunkerWeb stack, mount the `/shared/www` folder into `/var/www/html` for the **Scheduler** container :
-
-    ```yaml
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc1
-        volumes:
-          - /shared/www:/var/www/html
-    ...
-    ```
-
-    You can now create your PHP-FPM services, mount the correct subfolders and use labels to configure BunkerWeb :
-
-    ```yaml
-    services:
-      myapp1:
-          image: php:fpm
-          volumes:
-            - ./www/app1.example.com:/app
-          networks:
-            bw-services:
-                aliases:
-                  - myapp1
-          deploy:
-            placement:
-              constraints:
-                - "node.role==worker"
-            labels:
-              - "bunkerweb.SERVER_NAME=app1.example.com"
-              - "bunkerweb.REMOTE_PHP=myapp1"
-              - "bunkerweb.REMOTE_PHP_PATH=/app"
-
-      myapp2:
-          image: php:fpm
-          volumes:
-            - ./www/app2.example.com:/app
-          networks:
-            bw-services:
-                aliases:
-                  - myapp2
-          deploy:
-            placement:
-              constraints:
-                - "node.role==worker"
-            labels:
-              - "bunkerweb.SERVER_NAME=app2.example.com"
-              - "bunkerweb.REMOTE_PHP=myapp2"
-              - "bunkerweb.REMOTE_PHP_PATH=/app"
-
-      myapp3:
-          image: php:fpm
-          volumes:
-            - ./www/app3.example.com:/app
-          networks:
-            bw-services:
-                aliases:
-                  - myapp3
-          deploy:
-            placement:
-              constraints:
-                - "node.role==worker"
-            labels:
-              - "bunkerweb.SERVER_NAME=app3.example.com"
-              - "bunkerweb.REMOTE_PHP=myapp3"
-              - "bunkerweb.REMOTE_PHP_PATH=/app"
-
-    networks:
-      bw-services:
-        external: true
-        name: bw-services
-    ```
-
 === "Kubernetes"
 
-	!!! warning "PHP is not supported for Kubernetes"
-		Kubernetes integration allows configuration through [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) and the BunkerWeb controller only supports HTTP applications at the moment.
+    !!! warning "PHP is not supported for Kubernetes"
+        Kubernetes integration allows configuration through [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) and the BunkerWeb controller only supports HTTP applications at the moment.
 
 === "Linux"
 
@@ -1986,6 +1875,121 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl start bunkerweb-scheduler
     ```
 
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    !!! info "Multisite mode enabled"
+        The [Swarm integration](integrations.md#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
+
+    !!! info "Shared volume"
+        Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances which is not covered in this documentation.
+
+    When using the [Swarm](integrations.md#swarm), to support PHP applications, you will need to :
+
+    - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
+    - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
+    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
+
+    Since the Swarm integration implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+
+    ```
+    www
+    ├── app1.example.com
+    │   └── index.php
+    ├── app2.example.com
+    │   └── index.php
+    └── app3.example.com
+        └── index.php
+
+    3 directories, 3 files
+    ```
+
+    As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
+
+    Once the folders are created, copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
+
+    ```shell
+    chown -R 33:101 /shared/www && \
+    find /shared/www -type f -exec chmod 0640 {} \; && \
+    find /shared/www -type d -exec chmod 0750 {} \;
+    ```
+
+    When you start the BunkerWeb stack, mount the `/shared/www` folder into `/var/www/html` for the **Scheduler** container :
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.5-rc1
+        volumes:
+          - /shared/www:/var/www/html
+    ...
+    ```
+
+    You can now create your PHP-FPM services, mount the correct subfolders and use labels to configure BunkerWeb :
+
+    ```yaml
+    services:
+      myapp1:
+          image: php:fpm
+          volumes:
+            - ./www/app1.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp1
+          deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
+            labels:
+              - "bunkerweb.SERVER_NAME=app1.example.com"
+              - "bunkerweb.REMOTE_PHP=myapp1"
+              - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+      myapp2:
+          image: php:fpm
+          volumes:
+            - ./www/app2.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp2
+          deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
+            labels:
+              - "bunkerweb.SERVER_NAME=app2.example.com"
+              - "bunkerweb.REMOTE_PHP=myapp2"
+              - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+      myapp3:
+          image: php:fpm
+          volumes:
+            - ./www/app3.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp3
+          deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
+            labels:
+              - "bunkerweb.SERVER_NAME=app3.example.com"
+              - "bunkerweb.REMOTE_PHP=myapp3"
+              - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+    networks:
+      bw-services:
+        external: true
+        name: bw-services
+    ```
+
 ### IPv6
 
 !!! example "Experimental feature"
@@ -2066,10 +2070,10 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
 
 ## Security tuning
 
-BunkerWeb offers many security features that you can configure with [settings](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [features](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
-!!! tip "Other settings"
-    This section only focuses on security tuning, see the [settings section](features.md) of the documentation for other settings.
+!!! tip "Other features"
+    This section only focuses on security tuning, see the [features](features.md) section of the documentation for other settings.
 
 <figure markdown>
   ![Overview](assets/img/core-order.svg){ align=center }
@@ -2189,7 +2193,7 @@ The Backup S3 tool seamlessly automates data protection, similar to the communit
 
 By activating this feature, you're proactively safeguarding your **data's integrity**. Storing backups **remotely** shields crucial information from threats like **hardware failures**, **cyberattacks**, or **natural disasters**. This ensures both **security** and **availability**, enabling swift recovery during **unexpected events**, preserving **operational continuity**, and ensuring **peace of mind**.
 
-!!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
+??? warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
     If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
     === "MySQL/MariaDB"
