@@ -207,12 +207,12 @@ function storage.new(configuration)
   local ssl_verify              = configuration and configuration.ssl_verify
   local server_name             = configuration and configuration.server_name
 
+
   local auth
-  if password then
-    if username then
-      auth = username .. " " .. password
-    else
+  if not username then
+    if password then
       auth = password
+      password = nil
     end
   end
 
@@ -234,6 +234,8 @@ function storage.new(configuration)
         max_connection_attempts = max_connection_attempts,
         max_connection_timeout = max_connection_timeout,
         auth = auth,
+        username = username,
+        password = password,
         connect_opts = {
           ssl = ssl,
           ssl_verify = ssl_verify,
@@ -263,6 +265,8 @@ function storage.new(configuration)
       max_connection_attempts = max_connection_attempts,
       max_connection_timeout = max_connection_timeout,
       auth = auth,
+      username = username,
+      password = password,
     },
   }, metatable)
 end

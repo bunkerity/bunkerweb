@@ -1,6 +1,11 @@
 # Changelog
 
-## v1.6.5-rc1 - ????/??/??
+## v1.6.5-rc2 - ????/??/??
+
+- [DOCS] Add multi-language support to the documentation, including French
+- [DEPS] Update lua-resty-session version to v4.1.4
+
+## v1.6.5-rc1 - 2025/08/30
 
 - [FEATURE] Enhance update-check job to utilize cached GitHub release data and improve error handling
 - [BUGFIX] Update default algorithm for Let's Encrypt's `RFC2136` DNS provider from HMAC-SHA512 to HMAC-MD5
