@@ -2,6 +2,7 @@
 
 ## v1.6.5-rc2 - ????/??/??
 
+- [FEATURE] Add support for new reCAPTCHA version in `AntiBot` plugin
 - [DOCS] Add multi-language support to the documentation, including French
 - [DEPS] Update lua-resty-session version to v4.1.4
 - [DEPS] Update lua-resty-openssl version to v1.6.2
