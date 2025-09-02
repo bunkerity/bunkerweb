@@ -65,14 +65,34 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-# Minify JS files (can be skipped with SKIP_MINIFY=yes)
-ARG SKIP_MINIFY=no
-RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+# Minify JS files (can be skipped with SKIP_MINIFY_JS=yes)
+ARG SKIP_MINIFY_JS=no
+RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     apt-get install -y nodejs npm parallel && \
     npm install -g uglify-js && \
     find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
     else \
     echo "Skipping JS minification"; \
+    fi
+
+# Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+    apt-get install -y nodejs npm parallel && \
+    npm install -g html-minifier-terser && \
+    find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
+    parallel 'html-minifier-terser \
+    --collapse-whitespace \
+    --remove-comments \
+    --remove-optional-tags \
+    --remove-redundant-attributes \
+    --remove-script-type-attributes \
+    --remove-style-link-type-attributes \
+    --minify-css true \
+    --minify-js true \
+    --output {} {}'; \
+    else \
+    echo "Skipping HTML minification"; \
     fi
 
 FROM debian:bookworm-slim@sha256:b1a741487078b369e78119849663d7f1a5341ef2768798f7b7406c4240f86aef
