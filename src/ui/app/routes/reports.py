@@ -72,7 +72,9 @@ def reports_fetch():
     # Apply searchPanes filters
     def filter_by_search_panes(reports):
         for field, selected_values in search_panes.items():
-            reports = [report for report in reports if report.get(field, "N/A") in selected_values]
+            # Compare as strings to handle numeric fields (e.g., status codes)
+            selected_values_str = {str(v) for v in selected_values}
+            reports = [report for report in reports if str(report.get(field, "N/A")) in selected_values_str]
         return reports
 
     # Global search filtering
