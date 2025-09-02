@@ -82,9 +82,10 @@ RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   dnf install -y nodejs npm parallel && \
-  npm install -g html-minifier-terser && \
+  # Use a Node 10 compatible HTML minifier
+  npm install -g html-minifier && \
   find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
-  parallel 'html-minifier-terser \
+  parallel 'html-minifier \
   --collapse-whitespace \
   --remove-comments \
   --remove-optional-tags \
