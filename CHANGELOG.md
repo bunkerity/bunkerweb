@@ -4,6 +4,7 @@
 
 - [DOCS] Add multi-language support to the documentation, including French
 - [DEPS] Update lua-resty-session version to v4.1.4
+- [DEPS] Update lua-resty-openssl version to v1.6.2
 
 ## v1.6.5-rc1 - 2025/08/30
 

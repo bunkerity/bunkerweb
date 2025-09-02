@@ -397,7 +397,10 @@ function _M.load_jwk_ex(txt, ptyp, properties)
         if not v then
           return nil, "jwk:load_jwk: cannot decode parameter \"" .. kfrom .. "\" from base64 " .. tbl[kfrom]
         end
-        v = v:reverse() -- endian switch
+        -- reverse endian expect for OKP keys
+        if kty ~= "OKP" or (kfrom ~= "x" and kfrom ~= "d") then
+          v = v:reverse()
+        end
       end
 
       params_t[kto] = v

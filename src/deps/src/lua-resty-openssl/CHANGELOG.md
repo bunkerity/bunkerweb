@@ -2,6 +2,13 @@
 ## [Unreleased]
 
 
+<a name="1.6.2"></a>
+## [1.6.2] - 2025-09-02
+### bug fixes
+- **ci:** bump luarocks [e2f97c2](https://github.com/fffonion/lua-resty-openssl/commit/e2f97c223e465fee38c97d3c1fd5ddc2e17f8341)
+- **jwk:** fix endianess when loading JWK ECX keys [5a2aad1](https://github.com/fffonion/lua-resty-openssl/commit/5a2aad134262bd38b036e0e1494c4b7e0fb85df0)
+
+
 <a name="1.6.1"></a>
 ## [1.6.1] - 2025-04-16
 ### bug fixes
@@ -645,7 +652,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.1...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.2...HEAD
+[1.6.2]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.5.2...1.6.0
 [1.5.2]: https://github.com/fffonion/lua-resty-openssl/compare/1.5.1...1.5.2
