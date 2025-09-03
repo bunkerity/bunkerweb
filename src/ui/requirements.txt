@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==4.2.0 \
-    --hash=sha256:0df68c0e1acb3824a2100013f8cd51bda2e1a56aa23447449d14c942959f0c41 \
-    --hash=sha256:6292011bbfa5f966521b2fb9469982c24ff4c58e240985f14564ccf35372e79a
+acme==5.0.0 \
+    --hash=sha256:b701b23e66d3c58352896a72caa13523d9f72b183a0ba1cde93e6713a450a391 \
+    --hash=sha256:b7923d1105f3df7f0c94bab90fc3006e9a0de0597baf82dedfc8ed24889f56dc
     # via certbot
 bcrypt==4.3.0 \
     --hash=sha256:0042b2e342e9ae3d2ed22727c1262f76cc4f345683b5c1715f0250cf4277294f \
@@ -227,9 +227,9 @@ cachelib==0.13.0 \
     --hash=sha256:209d8996e3c57595bee274ff97116d1d73c4980b2fd9a34c7846cd07fd2e1a48 \
     --hash=sha256:8c8019e53b6302967d4e8329a504acf75e7bc46130291d30188a6e4e58162516
     # via flask-session
-certbot==4.2.0 \
-    --hash=sha256:8fcca0c1a06df9ce39e89b7d13c70506e1372823e8b5993633d21adb77581950 \
-    --hash=sha256:fb1e56ca8a072bec49ac0c7b5390a29cbf68c2c05f712259a9b3491de041c27b
+certbot==5.0.0 \
+    --hash=sha256:4e9e4680e812037b582cef7335570074390b455d24a3e09bcaa2fdc473dbcc0a \
+    --hash=sha256:6dd86a9a4f3890b02ff90f6b3d5063b80577082d1e067b6c55aa77399eb1f428
     # via -r requirements.in
 certifi==2025.8.3 \
     --hash=sha256:e564105f78ded564e3ae7c923924435e1daa7463faeab5bb932bc53ffae63407 \
