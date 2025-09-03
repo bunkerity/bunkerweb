@@ -54,7 +54,7 @@ def update_cache_file(db: Database, backup_dir: Path) -> str:
     return ""
 
 
-def backup_database(current_time: datetime, db: Database = None, backup_dir: Path = BACKUP_DIR) -> Database:
+def backup_database(current_time: datetime, db: Database = None, backup_dir: Path = BACKUP_DIR):
     """Backup the database."""
     db = db or Database(LOGGER)
 
@@ -178,7 +178,7 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
     backup_file.chmod(0o600)
 
     LOGGER.info(f"💾 Backup {backup_file.name} created successfully in {backup_dir}")
-    return db
+    return db, backup_file
 
 
 def restore_database(backup_file: Path, db: Database = None) -> Database:
