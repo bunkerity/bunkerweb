@@ -67,6 +67,8 @@
 7za@
 7zr@
 7zx@
+GET@
+aa-~
 ab@
 apt@
 ar@
@@ -108,7 +110,6 @@ ftp@
 gcc~
 gdb@
 gem@
-GET@
 ghc@
 git@
 go@
@@ -128,8 +129,8 @@ ln@
 lp@
 ls@
 lua@
-lz@
 lz4@
+lz@
 man@
 mtr@
 mv@
@@ -146,6 +147,7 @@ pg@
 php@
 pic@
 pip~
+pip@
 pkg@
 pr@
 pry@
@@ -159,6 +161,7 @@ rcp@
 red@
 rev@
 rm@
+rmt@
 rpm@
 scp@
 sed@
@@ -181,8 +184,8 @@ udp@
 ul@
 vi@
 vim@
-w@
 w3m@
+w@
 wc@
 who@
 xxd@

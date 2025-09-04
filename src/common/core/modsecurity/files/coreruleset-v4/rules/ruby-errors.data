@@ -1,20 +1,36 @@
 #### Core Ruby Errors
-NoMethodError
-NameError
-ArgumentError
-TypeError
-RuntimeError
-StandardError
-SyntaxError
-LoadError
-IndexError
-RangeError
-LocalJumpError
-SystemExit
-SecurityError
-NotImplementedError
-ScriptError
-ZeroDivisionError
+ArgumentError:
+ArgumentError (
+IndexError:
+IndexError (
+LoadError:
+LoadError (
+LocalJumpError:
+LocalJumpError (
+NameError:
+NameError (
+NoMethodError:
+NoMethodError (
+NotImplementedError:
+NotImplementedError (
+RangeError:
+RangeError (
+RuntimeError:
+RuntimeError (
+ScriptError:
+ScriptError (
+SecurityError:
+SecurityError (
+StandardError:
+StandardError (
+SyntaxError:
+SyntaxError (
+SystemExit:
+SystemExit (
+TypeError:
+TypeError (
+ZeroDivisionError:
+ZeroDivisionError (
 
 #### Ruby on Rails Errors
 ActionController::RoutingError
