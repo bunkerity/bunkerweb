@@ -81,6 +81,7 @@ class Configurator:
                 "SERVICE_SCHEDULER",
                 "SERVICE_UI",
                 "IGNORE_REGEX_CHECK",
+                "CROWDSEC_DISABLE_PARSERS",
                 "CROWDSEC_EXTRA_COLLECTIONS",
             }
         )

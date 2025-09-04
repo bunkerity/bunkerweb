@@ -144,6 +144,28 @@ docker run -d \
 
 ---
 
+#### Disable Specific Parsers
+
+If you want to keep the default setup but explicitly disable one or more parsers, provide a space-separated list via `CROWDSEC_DISABLED_PARSERS`:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e USE_CROWDSEC=yes \
+  -e CROWDSEC_DISABLED_PARSERS="crowdsecurity/geoip-enrich foo/bar-parser" \
+  -p 80:8080/tcp \
+  -p 443:8443/tcp \
+  -p 443:8443/udp \
+  bunkerity/bunkerweb-all-in-one:1.6.5-rc1
+```
+
+Notes:
+- The list is applied after required items are installed/updated; only the parsers you list are removed.
+- Use hub slugs as shown by `cscli parsers list` (e.g., `crowdsecurity/geoip-enrich`).
+
+---
+
 #### AppSec Toggle
 
 CrowdSec [AppSec](https://docs.crowdsec.net/docs/appsec/intro/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) features—powered by the `appsec-virtual-patching` and `appsec-generic-rules` collections—are **enabled by default**.
