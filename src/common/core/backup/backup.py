@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
+import re
 from json import dumps, loads
 from os import getenv
 from os.path import join, sep
 from pathlib import Path
 from subprocess import PIPE, run
+from shutil import which
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from typing import Literal
@@ -75,10 +77,10 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
 
             LOGGER.info("Creating a backup for the SQLite database ...")
 
-            # For SQLite, use a different approach to dump only specific tables
+            # Full SQLite database dump
             proc = run(
                 ["sqlite3", db_path.as_posix()],
-                input="\n".join([f".dump {table}" for table in model_tables]).encode(),
+                input=".dump\n".encode(),
                 stdout=PIPE,
                 stderr=PIPE,
                 env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")},
@@ -95,7 +97,15 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             if database in ("mariadb", "mysql"):
                 LOGGER.info("Creating a backup for the MariaDB/MySQL database ...")
 
-                cmd = ["mysqldump" if database == "mysql" else "mariadb-dump", "-h", db_host, "-u", db_user, db_database_name]
+                dump_bin = "mariadb-dump" if which("mariadb-dump") else "mysqldump"
+                cmd = [
+                    dump_bin,
+                    "-h",
+                    db_host,
+                    "-u",
+                    db_user,
+                    db_database_name,
+                ]
                 if db_port:
                     cmd.extend(["-P", db_port])
 
@@ -105,13 +115,17 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                         "--single-transaction",  # Consistent backup for InnoDB
                         "--routines",  # Include stored procedures and functions
                         "--triggers",  # Include triggers
+                        "--events",  # Include events
                         "--max_allowed_packet=2147483648",  # 2GB max packet size
                         "--quick",  # Retrieve rows one at a time
                         "--lock-tables=false",  # Don't lock tables
                         "--skip-add-locks",  # Don't add LOCK TABLES statements
                         "--default-character-set=utf8mb4",  # Use utf8mb4 charset
+                        "--add-drop-table",  # Ensure DROP TABLE before CREATE
                     ]
                 )
+
+                # Avoid --set-gtid-purged for broad compatibility (MariaDB variant doesn't support it)
 
                 # Apply additional arguments from query parameters
                 for key, value in db_query_args.items():
@@ -119,9 +133,6 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                         cmd.append("--ssl")
                     elif key == "charset":
                         cmd.extend(["--default-character-set", value])
-
-                # Add specific tables to backup
-                cmd.extend(model_tables)
 
                 proc = run(
                     cmd,
@@ -132,13 +143,24 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
             elif database == "postgresql":
                 LOGGER.info("Creating a backup for the PostgreSQL database ...")
 
-                cmd = ["pg_dump", "-h", db_host, "-U", db_user, db_database_name, "-w", "--no-password"]
+                cmd = [
+                    "pg_dump",
+                    "-h",
+                    db_host,
+                    "-U",
+                    db_user,
+                    db_database_name,
+                    "-w",
+                    "--no-password",
+                ]
                 if db_port:
                     cmd.extend(["-p", db_port])
 
                 # Add options to handle large data and improve compatibility
                 cmd.extend(
                     [
+                        "--clean",  # Include DROP statements for existing objects
+                        "--if-exists",  # Avoid errors if objects do not exist
                         "--no-owner",  # Skip ownership commands
                         "--no-privileges",  # Skip privilege commands
                         "--format=plain",  # Plain text format
@@ -153,12 +175,12 @@ def backup_database(current_time: datetime, db: Database = None, backup_dir: Pat
                         pg_env["PGSSLMODE"] = value
                     elif key == "sslrootcert":
                         pg_env["PGSSLROOTCERT"] = value
-
-                # Add specific tables to backup
-                for table in model_tables:
-                    cmd.extend(["-t", table])
-
-                proc = run(cmd, stdout=PIPE, stderr=PIPE, env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")} | pg_env)
+                proc = run(
+                    cmd,
+                    stdout=PIPE,
+                    stderr=PIPE,
+                    env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")} | pg_env,
+                )
             elif database == "oracle":
                 LOGGER.warning("Creating a database backup for Oracle is not supported")
                 return db
@@ -246,7 +268,19 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
         elif database == "postgresql":
             LOGGER.info("Restoring the PostgreSQL database ...")
 
-            cmd = ["psql", "-h", db_host, "-U", db_user, db_database_name]
+            cmd = [
+                "psql",
+                "-h",
+                db_host,
+                "-U",
+                db_user,
+                db_database_name,
+                "-v",
+                "ON_ERROR_STOP=1",  # Stop immediately on error
+                "--single-transaction",  # All-or-nothing restore
+                "--no-psqlrc",  # Do not read user startup files
+                "-X",  # Do not read ~/.psqlrc or ~/.pgpass implicitly
+            ]
             if db_port:
                 cmd.extend(["-p", db_port])
 
@@ -259,11 +293,34 @@ def restore_database(backup_file: Path, db: Database = None) -> Database:
                     pg_env["PGSSLROOTCERT"] = value
 
             with ZipFile(backup_file, "r") as zipf:
+                sql_name = backup_file.with_suffix(".sql").name
+                sql_data = zipf.read(sql_name)
+
+                # Sanitize dump for cross-version compatibility:
+                # - Remove SET directives unknown to older servers (e.g., transaction_timeout)
+                sql_text = sql_data.decode("utf-8", errors="ignore")
+                set_blacklist = re.compile(r"^\s*SET\s+(transaction_timeout|idle_session_timeout)\s*=.*;\s*$", re.IGNORECASE)
+                sanitized_lines = [line for line in sql_text.splitlines(True) if not set_blacklist.match(line)]
+                sanitized_sql = "".join(sanitized_lines).encode()
+
+                # Stabilize restore by setting safe defaults before feeding dump
+                # Avoid superuser-only settings to preserve compatibility
+                preamble = (
+                    "SET client_min_messages = WARNING;\n"
+                    "SET statement_timeout = 0;\n"
+                    "SET lock_timeout = '5s';\n"
+                    "SET idle_in_transaction_session_timeout = '5min';\n"
+                    "SET client_encoding = 'UTF8';\n"
+                    "SET standard_conforming_strings = on;\n"
+                    "SET search_path = public, pg_catalog;\n"
+                ).encode()
+                input_bytes = preamble + sanitized_sql
+
                 proc = run(
                     cmd,
                     stdout=PIPE,
                     stderr=PIPE,
-                    input=zipf.read(backup_file.with_suffix(".sql").name),
+                    input=input_bytes,
                     env={"PATH": getenv("PATH", ""), "PYTHONPATH": getenv("PYTHONPATH", "")} | pg_env,
                 )
         elif database == "oracle":

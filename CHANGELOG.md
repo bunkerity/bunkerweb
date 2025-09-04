@@ -2,6 +2,7 @@
 
 ## v1.6.5-rc2 - ????/??/??
 
+- [BUGFIX] Enhance database backup and restore functionality with improved compatibility and options
 - [FEATURE] Add support for new reCAPTCHA version in `AntiBot` plugin
 - [ALL-IN-ONE] Add support for disabling specific CrowdSec parsers
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.0
