@@ -4,9 +4,12 @@
 
 - [BUGFIX] Enhance database backup and restore functionality with improved compatibility and options
 - [FEATURE] Add support for new reCAPTCHA version in `Antibot` plugin
-- [ALL-IN-ONE] Add support for disabling specific CrowdSec parsers
 - [ALL-IN-ONE] Update CrowdSec version to 1.7.0
-- [DOCS] Add multi-language support to the documentation, including French
+- [ALL-IN-ONE] Add support for disabling specific CrowdSec parsers
+- [UI] Fix occasional rate limiting when using the web UI by increasing the base limit in its template
+- [UI] Fix status code filtering in reports page
+- [UI] Fix IPs charts in home page to accurately reflect data
+- [MISC] Automatically minify loading, errors and antibot HTML files in Images/Packages build process
 - [DEPS] Update lua-resty-session version to v4.1.4
 - [DEPS] Update lua-resty-openssl version to v1.6.3
 - [DEPS] Update coreruleset-v4 version to v4.18.0
