@@ -649,7 +649,7 @@
       "permanent_ban": "স্থায়ী নিষেধাজ্ঞা",
       "raw_configuration": "র কনফিগারেশন",
       "real_ip_from": "আসল আইপি থেকে",
-      "real_ip_from_urls": "আসল আইপি থেকে",
+      "real_ip_from_urls": "আসল আইপি থেকে (URL-গুলি)",
       "real_ip_header": "আসল আইপি হেডার",
       "real_ip_recursive": "আসল আইপি রিকার্সিভ",
       "reason": "কারণ",

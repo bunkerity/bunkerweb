@@ -649,7 +649,7 @@
       "permanent_ban": "Постоянный бан",
       "raw_configuration": "Необработанная конфигурация",
       "real_ip_from": "Реальный IP из",
-      "real_ip_from_urls": "Реальный IP из",
+      "real_ip_from_urls": "Реальный IP из (URL-адреса)",
       "real_ip_header": "Заголовок реального IP",
       "real_ip_recursive": "Рекурсивный реальный IP",
       "reason": "Причина",
