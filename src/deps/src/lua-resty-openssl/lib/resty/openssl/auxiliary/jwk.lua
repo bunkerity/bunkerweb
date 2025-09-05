@@ -1,6 +1,7 @@
 
 local ffi = require "ffi"
 local C = ffi.C
+local ffi_str = ffi.string
 
 
 local evp_macro = require "resty.openssl.include.evp"
@@ -13,6 +14,7 @@ local encode_base64url = require "resty.openssl.auxiliary.compat".encode_base64u
 local decode_base64url = require "resty.openssl.auxiliary.compat".decode_base64url
 local param_lib = require "resty.openssl.param"
 local json = require "resty.openssl.auxiliary.compat".json
+local ctypes = require "resty.openssl.auxiliary.ctypes"
 local format_error = require "resty.openssl.err".format_error
 
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
@@ -336,10 +338,8 @@ local jwk_params_required_mapping = {
     x = true,
     y = true,
   },
-  OKP = {
-    -- crv = true, handled earlier
-    x = true,
-  },
+  -- OKP required parameters are checked elsewhere
+  OKP = {},
 }
 
 function _M.load_jwk_ex(txt, ptyp, properties)
@@ -363,6 +363,15 @@ function _M.load_jwk_ex(txt, ptyp, properties)
       return nil, "jwk:load_jwk: missing \"crv\" parameter from OKP JWK"
     end
     tbl["crv"] = nil
+
+    if not tbl["x"] and not tbl["d"] then
+      return nil, "jwk:load_jwk: missing at least one of \"x\" or \"d\" parameter from OKP JWK"
+    end
+
+    if tbl["d"] and selection == evp_macro.EVP_PKEY_PUBLIC_KEY then
+      -- if only 'd' is provided and we want to import a public key, first create a private key
+      selection = evp_macro.EVP_PKEY_KEYPAIR
+    end
   end
 
   local ctx = ffi.new("EVP_PKEY*[1]")
@@ -423,6 +432,34 @@ function _M.load_jwk_ex(txt, ptyp, properties)
 
   if C.EVP_PKEY_fromdata(pctx, ctx, selection, params) ~= 1 then
     return nil, format_error("jwk:load_jwk: EVP_PKEY_fromdata()")
+  end
+
+  if kty == "OKP" and ptyp == "pu" and params_t["priv"] then
+    -- re-export the pubkey
+    local MAX_ECX_KEY_SIZE = 114 -- ed448 uses 114 bytes
+    local buf = ctypes.uchar_array(MAX_ECX_KEY_SIZE)
+    local length = ctypes.ptr_of_size_t(MAX_ECX_KEY_SIZE)
+
+    if C.EVP_PKEY_get_raw_public_key(ctx[0], buf, length) ~= 1 then
+      C.EVP_PKEY_free(ctx[0])
+      return nil, format_error("jwk:load_jwk: unable to derive public key from private key OKP JWK")
+    end
+
+    params_t["pub"] = ffi_str(buf, length[0])
+
+    C.EVP_PKEY_free(ctx[0])
+    ctx[0] = nil
+
+    local params, err = param_lib.construct(params_t, nil, schema)
+    if params == nil then
+      return nil, "jwk:load_jwk: failed to construct parameters for " .. kty .. " key: " .. err
+    end
+
+    if C.EVP_PKEY_fromdata(pctx, ctx, evp_macro.EVP_PKEY_PUBLIC_KEY, params) ~= 1 then
+      return nil, format_error("jwk:load_jwk: EVP_PKEY_fromdata()")
+    end
+
+    return ctx[0]
   end
 
   return ctx[0]

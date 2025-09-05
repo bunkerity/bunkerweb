@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="1.6.3"></a>
+## [1.6.3] - 2025-09-04
+### bug fixes
+- **jwk:** allow to load an ECX public key from private JWK [fb800c1](https://github.com/fffonion/lua-resty-openssl/commit/fb800c15951d42edb2c5cd462800f6c0ef5dbc06)
+
+
 <a name="1.6.2"></a>
 ## [1.6.2] - 2025-09-02
 ### bug fixes
@@ -652,7 +658,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.2...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.3...HEAD
+[1.6.3]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.2...1.6.3
 [1.6.2]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.0...1.6.1
 [1.6.0]: https://github.com/fffonion/lua-resty-openssl/compare/1.5.2...1.6.0

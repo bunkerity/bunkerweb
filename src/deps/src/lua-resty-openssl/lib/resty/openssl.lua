@@ -24,7 +24,7 @@ try_require_modules()
 
 
 local _M = {
-  _VERSION = '1.6.2',
+  _VERSION = '1.6.3',
 }
 
 function _M.load_modules()
