@@ -39,6 +39,8 @@ do_and_check_cmd chown -R nginx:nginx /var/cache/bunkerweb /var/lib/bunkerweb /e
 
 chmod 755 /var/log/bunkerweb
 chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/
+# Ensure temp dir enforces group inheritance and no access for others
+chmod 2770 /var/tmp/bunkerweb/
 chmod 550 -R /usr/share/bunkerweb/
 find . \( -path './scheduler' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
 find scheduler/ ui/ cli/ lua/ core/ db/ gen/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440

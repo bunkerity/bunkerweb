@@ -10,6 +10,7 @@
 - [DEPS] Update lua-resty-session version to v4.1.4
 - [DEPS] Update lua-resty-openssl version to v1.6.2
 - [DEPS] Update coreruleset-v4 version to v4.18.0
+- [SECURITY] Enforce restrictive umask across scripts and configurations for improved security
 
 ## v1.6.5-rc1 - 2025/08/30
 
