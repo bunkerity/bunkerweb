@@ -649,7 +649,7 @@
       "permanent_ban": "Kalıcı Yasaklama",
       "raw_configuration": "Ham Yapılandırma",
       "real_ip_from": "Gerçek IP'den",
-      "real_ip_from_urls": "Gerçek IP'den",
+      "real_ip_from_urls": "Gerçek IP'den (URL'ler)",
       "real_ip_header": "Gerçek IP başlığı",
       "real_ip_recursive": "Gerçek IP yinelemeli",
       "reason": "Sebep",

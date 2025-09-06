@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 # Source the utils helper script
 # shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
@@ -138,6 +141,9 @@ if db:
     with open("/var/tmp/bunkerweb/database_uri", "w") as file:
         file.write(db.database_uri)
 EOL
+    # Ensure the temporary script is readable by nginx under UMask=027
+    chown root:nginx /tmp/version_check.py
+    chmod 640 /tmp/version_check.py
 
     current_version=$(sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_check.py")
     rm -f /tmp/version_check.py
@@ -199,6 +205,9 @@ db = Database(LOGGER)
 with db.sql_engine.connect() as conn:
     conn.execute(sa.text("UPDATE bw_metadata SET version = '${installed_version}' WHERE id = 1"))
 EOL
+            # Ensure the temporary script is readable by nginx under UMask=027
+            chown root:nginx /tmp/version_update.py
+            chmod 640 /tmp/version_update.py
 
             sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_update.py"
             rm -f /tmp/version_update.py

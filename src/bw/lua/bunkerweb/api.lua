@@ -205,6 +205,8 @@ api.global.POST["^/confs$"] = function(self)
 	local cmds = {
 		"rm -rf " .. destination .. "/*",
 		"tar xzf " .. tmp .. " -C " .. destination,
+		-- Remove the temporary archive once extracted
+		"rm -f " .. tmp,
 	}
 	for _, cmd in ipairs(cmds) do
 		local status = execute(cmd)

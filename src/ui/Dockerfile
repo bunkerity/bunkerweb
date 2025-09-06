@@ -35,9 +35,9 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-# Minify JS files (can be skipped with SKIP_MINIFY=yes)
-ARG SKIP_MINIFY=no
-RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+# Minify JS files (can be skipped with SKIP_MINIFY_JS=yes)
+ARG SKIP_MINIFY_JS=no
+RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
   apk add --no-cache nodejs npm parallel && \
   npm install -g uglify-js && \
   find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
@@ -85,7 +85,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.5-rc1"
+LABEL version="1.6.5-rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

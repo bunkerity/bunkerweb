@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 

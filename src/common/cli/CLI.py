@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from contextlib import suppress
 from datetime import datetime
 from json import loads
 from operator import itemgetter
@@ -471,18 +472,21 @@ class CLI(ApiCaller):
 
         # Convert to absolute path
         abs_path = command_path.resolve()
-        module_dir = plugin_base_path.as_posix()
+        # Directory containing the command module (e.g., .../<plugin>/bwcli)
+        cmd_dir = abs_path.parent.as_posix()
+        # Plugin root directory (e.g., .../<plugin>)
+        plugin_dir = plugin_base_path.as_posix()
 
         # Validate path exists
         if not abs_path.exists():
             return False, self.__format_error(f"Plugin command file not found: {abs_path}")
 
-        # Add plugin directory to sys.path temporarily
-        if module_dir not in sys_path:
-            sys_path.insert(0, module_dir)
-            path_added = True
-        else:
-            path_added = False
+        # Add command directory (bwcli) and plugin root to sys.path temporarily
+        added_paths = []
+        for p in (cmd_dir, plugin_dir):
+            if p and p not in sys_path:
+                sys_path.insert(0, p)
+                added_paths.append(p)
 
         try:
             # Prepare environment similar to JobScheduler
@@ -549,9 +553,11 @@ class CLI(ApiCaller):
             environ.clear()
             environ.update(old_env)
 
-            # Remove plugin directory from sys.path if we added it
-            if path_added and module_dir in sys_path:
-                sys_path.remove(module_dir)
+            # Remove any paths we added to sys.path (in reverse order)
+            for p in added_paths:
+                if p in sys_path:
+                    with suppress(ValueError):
+                        sys_path.remove(p)
 
     def __exec_external_command(
         self, command_path: Path, plugin_id: str, command: str, debug: bool = False, extra_args: Optional[list] = None

@@ -23,6 +23,7 @@ done
 shopt -u globstar
 # docs
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*.md
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*/*.md
 # README
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" README.md
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/*/README.md

@@ -44,7 +44,7 @@ The first step is to install the plugin by placing its files inside the correspo
     cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
     ```
 
-    !!! warning "Using local folder for persistent data"
+    ??? warning "Using local folder for persistent data"
         The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
         But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
 
@@ -89,7 +89,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
         volumes:
           - ./bw-data:/data
     ...
@@ -125,7 +125,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
         volumes:
           - ./bw-data:/data
     ...
@@ -134,7 +134,7 @@ The first step is to install the plugin by placing its files inside the correspo
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_1_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
@@ -168,7 +168,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -215,7 +215,7 @@ The first step is to install the plugin by placing its files inside the correspo
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+              image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -255,7 +255,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc2/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 What a plugin structure looks like:
 ```
@@ -373,9 +373,9 @@ You can add custom NGINX configurations by adding a folder named **confs** with 
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
-```conf
+```nginx
 location /setting {
-	default_type 'text/plain';
+  default_type 'text/plain';
     content_by_lua_block {
         ngx.say('{{ DUMMY_SETTING }}')
     }
@@ -541,7 +541,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc2/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 
@@ -624,10 +624,38 @@ Here are the arguments that are passed and access on action.py functions:
 function(app=app, args=request.args.to_dict() or request.json or None)
 ```
 
-!!! info "Python libraries"
-    In addition, you can use Python libraries that are already available like :
-    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
+!!! info "Available Python Libraries"
 
+    BunkerWeb's Web UI includes a set of pre-installed Python libraries that you can use in your plugin's `actions.py` or other UI-related scripts. These are available out-of-the-box without needing additional installations.
+
+    Here's the complete list of included libraries:
+
+    - **bcrypt** - Password hashing library
+    - **biscuit-python** - Biscuit authentication tokens
+    - **certbot** - ACME client for Let's Encrypt
+    - **Flask** - Web framework
+    - **Flask-Login** - User session management
+    - **Flask-Session[cachelib]** - Server-side session storage
+    - **Flask-WTF** - Form handling and CSRF protection
+    - **gunicorn[gthread]** - WSGI HTTP server
+    - **pillow** - Image processing
+    - **psutil** - System and process utilities
+    - **python_dateutil** - Date and time utilities
+    - **qrcode** - QR code generation
+    - **regex** - Advanced regular expressions
+    - **urllib3** - HTTP client
+    - **user_agents** - User agent parsing
+
+    !!! tip "Using Libraries in Your Plugin"
+        To import and use these libraries in your `actions.py` file, simply use the standard Python `import` statement. For example:
+
+        ```python
+        from flask import request
+        import bcrypt
+        ```
+
+    ??? warning "External Libraries"
+        If you need libraries not listed above, install them inside the `ui` folder of your plugin and import them using the classical `import` directive. Ensure compatibility with the existing environment to avoid conflicts.
 
 **Some examples**
 

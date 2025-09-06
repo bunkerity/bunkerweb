@@ -649,7 +649,7 @@
       "permanent_ban": "مستقل پابندی",
       "raw_configuration": "خام کنفیگریشن",
       "real_ip_from": "اصل IP سے",
-      "real_ip_from_urls": "اصل IP سے",
+      "real_ip_from_urls": "اصل IP سے (URLs)",
       "real_ip_header": "اصل IP ہیڈر",
       "real_ip_recursive": "اصل IP بازگشتی",
       "reason": "وجہ",

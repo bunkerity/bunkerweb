@@ -57,14 +57,34 @@ COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-# Minify JS files (can be skipped with SKIP_MINIFY=yes)
-ARG SKIP_MINIFY=no
-RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+# Minify JS files (can be skipped with SKIP_MINIFY_JS=yes)
+ARG SKIP_MINIFY_JS=no
+RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     dnf install -y nodejs npm parallel && \
     npm install -g uglify-js && \
     find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
     else \
     echo "Skipping JS minification"; \
+    fi
+
+# Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+    dnf install -y nodejs npm parallel && \
+    npm install -g html-minifier-terser && \
+    find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
+    parallel 'html-minifier-terser \
+    --collapse-whitespace \
+    --remove-comments \
+    --remove-optional-tags \
+    --remove-redundant-attributes \
+    --remove-script-type-attributes \
+    --remove-style-link-type-attributes \
+    --minify-css true \
+    --minify-js true \
+    --output {} {}'; \
+    else \
+    echo "Skipping HTML minification"; \
     fi
 
 FROM fedora:41@sha256:9b6125f8fee07f1b5e8db594eb05b1289e9cf7b45cceb0de80e53a5e5a87b003

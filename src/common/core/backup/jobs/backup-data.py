@@ -15,12 +15,14 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
-from backup import backup_database, update_cache_file
+from backup import backup_database, update_cache_file, acquire_db_lock, DB_LOCK_FILE
 
 LOGGER = setup_logger("BACKUP")
 status = 0
 
 try:
+    # Prevent concurrent DB access with other backup plugins
+    acquire_db_lock()
     backup_dir = Path(getenv("BACKUP_DIRECTORY", "/var/lib/bunkerweb/backups"))
     backup_dir.mkdir(parents=True, exist_ok=True)
 
@@ -76,7 +78,7 @@ try:
                 LOGGER.info("First start of the scheduler, skipping backup ...")
                 sys_exit(0)
 
-        backup_database(current_time, db, backup_dir)
+        db, _ = backup_database(current_time, db, backup_dir)
         backed_up = True
 
         if not force_backup:
@@ -105,5 +107,9 @@ except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())
     LOGGER.error(f"Exception while running backup-data.py :\n{e}")
+
+finally:
+    # Always release DB lock
+    DB_LOCK_FILE.unlink(missing_ok=True)
 
 sys_exit(status)

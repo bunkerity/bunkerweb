@@ -22,8 +22,8 @@ COPY src/common/gen/requirements.txt deps/requirements-gen.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-	pip install --break-system-packages --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-	pip install --break-system-packages --no-cache-dir --require-hashes --target deps/python -r deps/requirements-gen.txt
+  pip install --break-system-packages --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+  pip install --break-system-packages --no-cache-dir --require-hashes --target deps/python -r deps/requirements-gen.txt
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
@@ -41,6 +41,26 @@ COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
+
+# Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+  apk add --no-cache nodejs npm parallel && \
+  npm install -g html-minifier-terser && \
+  find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
+  parallel 'html-minifier-terser \
+  --collapse-whitespace \
+  --remove-comments \
+  --remove-optional-tags \
+  --remove-redundant-attributes \
+  --remove-script-type-attributes \
+  --remove-style-link-type-attributes \
+  --minify-css true \
+  --minify-js true \
+  --output {} {}'; \
+  else \
+  echo "Skipping HTML minification"; \
+  fi
 
 FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e
 
@@ -60,25 +80,26 @@ WORKDIR /usr/share/bunkerweb
 
 # Move bwcli, create data folders and set permissions
 RUN cp helpers/bwcli /usr/bin/ && \
-	mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
-	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
-	mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-	mkdir -p /data/www && ln -s /data/www /var/www/html && \
-	for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-	for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
-	chown -R root:nginx /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
-	chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
-	find . \( -path './cli' -o -path './lua' -o -path './core' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+  mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
+  mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
+  mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
+  mkdir -p /data/www && ln -s /data/www /var/www/html && \
+  for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
+  for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
+  chown -R root:nginx /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+  chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
+  chmod 2770 /var/tmp/bunkerweb && \
+  find . \( -path './cli' -o -path './lua' -o -path './core' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
   find cli lua gen helpers deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
   find core -type f ! -name '*.lua' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
-	chmod 550 entrypoint.sh && \
-	rm -f /var/log/bunkerweb/* && \
-	ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
-	ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \
-	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
+  chmod 550 entrypoint.sh && \
+  rm -f /var/log/bunkerweb/* && \
+  ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
+  ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \
+  ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.5-rc1"
+LABEL version="1.6.5-rc2"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

@@ -102,14 +102,34 @@ COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-# Minify JS files (can be skipped with SKIP_MINIFY=yes)
-ARG SKIP_MINIFY=no
-RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
+# Minify JS files (can be skipped with SKIP_MINIFY_JS=yes)
+ARG SKIP_MINIFY_JS=no
+RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     apk add --no-cache nodejs npm parallel && \
     npm install -g uglify-js && \
     find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
     else \
     echo "Skipping JS minification"; \
+    fi
+
+# Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+    apk add --no-cache nodejs npm parallel && \
+    npm install -g html-minifier-terser && \
+    find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
+    parallel 'html-minifier-terser \
+    --collapse-whitespace \
+    --remove-comments \
+    --remove-optional-tags \
+    --remove-redundant-attributes \
+    --remove-script-type-attributes \
+    --remove-style-link-type-attributes \
+    --minify-css true \
+    --minify-js true \
+    --output {} {}'; \
+    else \
+    echo "Skipping HTML minification"; \
     fi
 
 FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e
@@ -138,14 +158,15 @@ WORKDIR /usr/share/bunkerweb
 # Move bwcli, create data folders and set permissions
 RUN cp helpers/bwcli /usr/bin/ && \
     echo "Docker" > INTEGRATION && \
-	mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
-	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
-	mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-	mkdir -p /data/www && ln -s /data/www /var/www/html && \
-	for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-	for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
-	chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
-	chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
+    mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
+    mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
+    mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
+    mkdir -p /data/www && ln -s /data/www /var/www/html && \
+    for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
+    for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
+    chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+    chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
+    chmod 2770 /var/tmp/bunkerweb && \
     find . \( -path './all-in-one' -o -path './scheduler' -o -path './ui' -o -path './autoconf' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
     find all-in-one scheduler ui autoconf cli lua core db gen helpers deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
     chmod 770 -R db/alembic && \
@@ -166,7 +187,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
     mv all-in-one/conf/appsec.yaml /etc/crowdsec/acquis.d/appsec.yaml && \
     rm -rf crowdsec* all-in-one/deps all-in-one/scripts && \
     chown -R root:nginx /data /var/lib/crowdsec /etc/crowdsec /usr/local/lib/crowdsec && \
-	chmod -R 770 /data /var/lib/bunkerweb /etc/crowdsec /usr/local/lib/crowdsec && \
+    chmod -R 770 /data /var/lib/bunkerweb /etc/crowdsec /usr/local/lib/crowdsec && \
     find /etc/crowdsec/ -type f -name "*.yaml" -print0 | xargs -0 chmod 660 && \
     mv /etc/crowdsec/online_api_credentials.yaml /var/lib/crowdsec/online_api_credentials.yaml && \
     mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml && \

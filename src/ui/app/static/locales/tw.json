@@ -649,7 +649,7 @@
       "permanent_ban": "永久封鎖",
       "raw_configuration": "原始設定",
       "real_ip_from": "真實 IP 來源",
-      "real_ip_from_urls": "真實 IP 來源",
+      "real_ip_from_urls": "真實 IP 來源（URLs）",
       "real_ip_header": "真實 IP 標頭",
       "real_ip_recursive": "遞迴搜尋真實 IP",
       "reason": "原因",

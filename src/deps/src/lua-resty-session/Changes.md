@@ -2,6 +2,11 @@
 
 All notable changes to `lua-resty-session` will be documented in this file.
 
+## [4.1.4] - 2025-08-11
+### Fixed
+- fix(redis-cluster): correctly pass username and password
+
+
 ## [4.1.3] - 2025-07-29
 ### Fixed
 - fix(utils): disable the SP800-132 compliance checks (on FIPS mode, but doesn't violate FIPS)

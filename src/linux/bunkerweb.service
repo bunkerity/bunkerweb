@@ -7,6 +7,7 @@ After=network.target
 Restart=always
 RestartSec=5
 User=root
+UMask=027
 PIDFile=/var/run/bunkerweb/scheduler.pid
 ExecStart=/usr/share/bunkerweb/scripts/start.sh start
 ExecStop=/usr/share/bunkerweb/scripts/start.sh stop

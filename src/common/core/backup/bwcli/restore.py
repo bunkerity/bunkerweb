@@ -51,7 +51,7 @@ try:
     current_time = datetime.now().astimezone()
     tmp_backup_dir = Path(sep, "tmp", "bunkerweb", "backups")
     tmp_backup_dir.mkdir(parents=True, exist_ok=True)
-    db = backup_database(current_time, backup_dir=tmp_backup_dir)
+    db, _ = backup_database(current_time, backup_dir=tmp_backup_dir)
 
     LOGGER.info(f"Restoring backup {backup_file} ...")
     restore_database(backup_file, db)

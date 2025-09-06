@@ -650,7 +650,7 @@
       "permanent_ban": "Permanent Ban",
       "raw_configuration": "Raw Configuration",
       "real_ip_from": "Real IP from",
-      "real_ip_from_urls": "Real IP from",
+      "real_ip_from_urls": "Real IP from (URLs)",
       "real_ip_header": "Real IP header",
       "real_ip_recursive": "Real IP recursive",
       "reason": "Reason",

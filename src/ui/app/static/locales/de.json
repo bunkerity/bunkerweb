@@ -649,7 +649,7 @@
       "permanent_ban": "Dauerhafte Sperre",
       "raw_configuration": "Rohkonfiguration",
       "real_ip_from": "Echte IP von",
-      "real_ip_from_urls": "Echte IP von",
+      "real_ip_from_urls": "Echte IP von (URLs)",
       "real_ip_header": "Echte IP-Header",
       "real_ip_recursive": "Echte IP rekursiv",
       "reason": "Grund",

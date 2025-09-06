@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 # Source the utils helper script
 # shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
@@ -54,6 +57,7 @@ function start() {
     if [ ! -f /var/tmp/bunkerweb ] ; then
         mkdir -p /var/tmp/bunkerweb
         chown nginx:nginx /var/tmp/bunkerweb
+        chmod 2770 /var/tmp/bunkerweb
     fi
 
     # Create LOG folder

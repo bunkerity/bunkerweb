@@ -649,7 +649,7 @@
       "permanent_ban": "Bloqueo Permanente",
       "raw_configuration": "Configuración sin Procesar",
       "real_ip_from": "IP real desde",
-      "real_ip_from_urls": "IP real desde",
+      "real_ip_from_urls": "IP real desde (URLs)",
       "real_ip_header": "Cabecera de IP real",
       "real_ip_recursive": "IP real recursiva",
       "reason": "Motivo",
