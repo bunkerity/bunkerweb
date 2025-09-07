@@ -5,13 +5,14 @@ patterns:
   # The Unix evasion patterns, were extended per decision in https://github.com/coreruleset/coreruleset/issues/2632.
   anti_evasion:
     # - [\x5c'\"\[)]: common evasion tokens and path expansion, e.g., `/bin/[c]''a""\t`
-    # - (?:\|\||&&)\s*: hiding of empty variables through logial operators, e.g., `nc&&$u -p 777`
+    # - (?:\|\||&&)\s*: hiding of empty variables through logical operators, e.g., `nc&&$u -p 777`
     # - \$[a-z0-9_@?!#{(*-]*: empty variable evasion, e.g., `n\$uc -p 777`
     # - [\x5c'\"\[)], \$[a-z0-9_@?!#{(*-]*: arithmetic expansion evasion, e.g., `c$((9))9`
     unix: |
       [\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?
     windows: |
       [\"\^]*
+  # Suffix marker `@`.
   anti_evasion_suffix:
     # - \s$: end of line / string
     # - <>: redirection, e.g., `cat<foo`
@@ -24,6 +25,7 @@ patterns:
     # "more<foo", "more>foo"
     windows: |
       [\s,;./<>].*
+  # Suffix marker `~`.
   # Same as above but does not allow any white space as the next token.
   # This is useful for words like `python3`, where `python@` would
   # create too many false positives because it would match `python `.
@@ -38,8 +40,12 @@ patterns:
     #
     # It will _not_ match:
     # python foo
+    #
+    # (?:[<>&|),]|$){1,10}: anti-evasion suffix without space, limited to 10 matches
+    # (?:[\w\d._-][\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?){1,10}: non-whitespace followed by anti-evasion pattern, limited to 10 matches
+    # (?:[\s<>&|),}]|$){1,10}): anti-evasion suffix, including `}` (to match command names within expansions, e.g. `${gcc7.4}gcc7.4`), limited to 10 matches
     unix: |
-      (?:(?:[<>&|),]|$){1,10}|(?:[\w\d._-][\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?){1,10}(?:[\s<>&|),]|$){1,10})
+      (?:(?:[<>&|),]|$){1,10}|(?:[\w\d._-][\x5c'\"\[)]*(?:(?:(?:\|\||&&)\s*)?\$[a-z0-9_@?!#{(*-]*)?\x5c?){1,10}(?:[\s<>&|),}]|$){1,10})
     # This will match:
     #
     # python,foo
@@ -47,5 +53,9 @@ patterns:
     #
     # It will _not_ match:
     # python foo
+    #
+    # [,;./<>]{1,10}: anti-evasion suffix without space, limited to 10 matches
+    # (?:[\w\d._-][\"\^]*){1,10}: non-whitespace followed by anti-evasion pattern, limited to 10 matches
+    # [\s,;./<>]{1,10}: anti-evasion suffix, limited to 10 matches
     windows: |
       (?:[,;./<>]{1,10}|(?:[\w\d._-][\"\^]*){1,10}[\s,;./<>]{1,10})

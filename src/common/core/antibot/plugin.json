@@ -146,6 +146,51 @@
       "regex": "^.*$",
       "type": "password"
     },
+    "ANTIBOT_RECAPTCHA_CLASSIC": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Use classic reCAPTCHA instead of the newer version.",
+      "id": "antibot-recaptcha-classic",
+      "label": "Use classic reCAPTCHA",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "ANTIBOT_RECAPTCHA_PROJECT_ID": {
+      "context": "multisite",
+      "default": "",
+      "help": "Project ID for reCAPTCHA challenge.",
+      "id": "antibot-recaptcha-project-id",
+      "label": "reCAPTCHA Project ID",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_RECAPTCHA_API_KEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "API key for reCAPTCHA challenge.",
+      "id": "antibot-recaptcha-api-key",
+      "label": "reCAPTCHA API key",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "ANTIBOT_RECAPTCHA_JA4": {
+      "context": "multisite",
+      "default": "",
+      "help": "JA4 fingerprint for the TLS client. We recommend using FoxIO-LLC/ja4 for computing the JA4 fingerprint.",
+      "id": "antibot-recaptcha-ja4",
+      "label": "reCAPTCHA JA4",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ANTIBOT_RECAPTCHA_JA3": {
+      "context": "multisite",
+      "default": "",
+      "help": "JA3 fingerprint for the TLS client. We recommend using salesforce/ja3 for computing the JA3 fingerprint.",
+      "id": "antibot-recaptcha-ja3",
+      "label": "reCAPTCHA JA3",
+      "regex": "^.*$",
+      "type": "text"
+    },
     "ANTIBOT_HCAPTCHA_SITEKEY": {
       "context": "multisite",
       "default": "",

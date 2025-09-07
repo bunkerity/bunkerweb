@@ -5,9 +5,25 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
-## Version 4.18.0 - 2025-MM-DD
+## Version 4.18.0-dev - 2025-MM-DD
 
-TBD
+## Version 4.18.0 - 2025-09-03
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat: add `application/reports+json` content-type header by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4230
+* feat: update unix commands list by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4215
+* feat: added ssh commands by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4249
+* feat: detect `rmt` and `rmt-tar` by @theseion in https://github.com/coreruleset/coreruleset/pull/4242
+### 🧰 Other Changes
+* feat: Add product name tags by @TimDiam0nd in https://github.com/coreruleset/coreruleset/pull/3960
+* fix: remove dot star by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4235
+* fix(942370): remove dot star by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4234
+* fix: avoid matching non-ruby errors and source code by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4224
+* fix: don't replace cmdline suffixes for 932220 and 932250 by @theseion in https://github.com/coreruleset/coreruleset/pull/4231
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.17.1...v4.18.0
 
 ## Version 4.17.1 - 2025-08-05
 

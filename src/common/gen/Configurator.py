@@ -81,6 +81,7 @@ class Configurator:
                 "SERVICE_SCHEDULER",
                 "SERVICE_UI",
                 "IGNORE_REGEX_CHECK",
+                "CROWDSEC_DISABLE_PARSERS",
                 "CROWDSEC_EXTRA_COLLECTIONS",
             }
         )
@@ -211,6 +212,7 @@ class Configurator:
             self.__core_plugins.append(data)
             self.__logger.debug(f"Loaded core plugin {file} with {len(data.get('settings', {}))} setting(s)")
         except BaseException as e:
+            self.__logger.debug(f"Exception details: {e}", exc_info=True)
             self.__logger.error(f"Exception while loading JSON from {file} : {e}")
 
     def __load_variables(self, path: Path) -> Dict[str, str]:

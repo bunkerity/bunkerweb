@@ -10,6 +10,8 @@ services:
     build:
       context: ../..
       dockerfile: ./src/bw/Dockerfile
+      args:
+        SKIP_MINIFY_HTML: "yes"
     ports:
       - 80:8080/tcp
       - 443:8443/tcp
@@ -101,7 +103,7 @@ services:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
       args:
-        SKIP_MINIFY: "yes"
+        SKIP_MINIFY_JS: "yes"
     ports:
       - 7000:7000
     volumes:

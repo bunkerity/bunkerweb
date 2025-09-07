@@ -649,7 +649,7 @@
       "permanent_ban": "حظر دائم",
       "raw_configuration": "التكوين الخام",
       "real_ip_from": "IP الحقيقي من",
-      "real_ip_from_urls": "IP الحقيقي من",
+      "real_ip_from_urls": "IP الحقيقي من (عناوين URL)",
       "real_ip_header": "رأس IP الحقيقي",
       "real_ip_recursive": "IP الحقيقي المتكرر",
       "reason": "السبب",

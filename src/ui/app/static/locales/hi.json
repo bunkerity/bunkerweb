@@ -649,7 +649,7 @@
       "permanent_ban": "स्थायी प्रतिबंध",
       "raw_configuration": "रॉ कॉन्फ़िगरेशन",
       "real_ip_from": "वास्तविक आईपी से",
-      "real_ip_from_urls": "वास्तविक आईपी से",
+      "real_ip_from_urls": "वास्तविक आईपी से (URLs)",
       "real_ip_header": "वास्तविक आईपी हेडर",
       "real_ip_recursive": "वास्तविक आईपी पुनरावर्ती",
       "reason": "कारण",

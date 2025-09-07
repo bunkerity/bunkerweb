@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
@@ -214,6 +217,7 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Processing required collections and parsers..."
 	install_or_upgrade_collection "crowdsecurity/nginx"
+	install_or_upgrade_collection "crowdsecurity/linux"
 
 	if [[ "${CROWDSEC_APPSEC_URL}" == http://127.0.0.1* || "${CROWDSEC_APPSEC_URL}" == http://localhost* ]]; then
 		install_or_upgrade_collection "crowdsecurity/appsec-virtual-patching"
@@ -224,7 +228,22 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	fi
 
 	install_or_upgrade_parser "crowdsecurity/geoip-enrich"
+	install_or_upgrade_parser "crowdsecurity/docker-logs"
+	install_or_upgrade_parser "crowdsecurity/cri-logs"
 	log "ENTRYPOINT" "✅" "[CROWDSEC] Required parsers and collections processed."
+
+	# Optionally disable specific parsers provided by user
+	if [ -n "${CROWDSEC_DISABLE_PARSERS}" ]; then
+		log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Disabling parsers: ${CROWDSEC_DISABLE_PARSERS}"
+		IFS=' ' read -ra PARSERS <<< "${CROWDSEC_DISABLE_PARSERS}"
+		for parser in "${PARSERS[@]}"; do
+			if cscli parsers remove "$parser" --force; then
+				log "ENTRYPOINT" "✅" "[CROWDSEC] Disabled parser: $parser"
+			else
+				log "ENTRYPOINT" "❌" "[CROWDSEC] Failed to disable parser: $parser"
+			fi
+		done
+	fi
 
 	if [ -n "${CROWDSEC_EXTRA_COLLECTIONS}" ]; then
 		log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Processing extra collections: ${CROWDSEC_EXTRA_COLLECTIONS}"

@@ -545,13 +545,21 @@ $(function () {
   function renderIpsChart() {
     const requestsIpsData = JSON.parse($("#requests-ips-data").text());
 
-    const topIpsData = Object.entries(requestsIpsData)
+    // Build Top 10 by blocked count, preserving counts for accurate percentages
+    const topIpsEntries = Object.entries(requestsIpsData)
       .sort((a, b) => b[1]["blocked"] - a[1]["blocked"])
-      .slice(0, 10)
-      .reduce((obj, [key, value]) => {
-        obj[key] = value["blocked"];
-        return obj;
-      }, {});
+      .slice(0, 10);
+
+    const topIpsData = topIpsEntries.reduce((obj, [key, value]) => {
+      obj[key] = value["blocked"]; // only blocked requests are charted
+      return obj;
+    }, {});
+
+    // Total blocked requests represented in the donut (Top 10 only)
+    const topBlockedTotal = topIpsEntries.reduce(
+      (sum, [, value]) => sum + (parseInt(value["blocked"], 10) || 0),
+      0,
+    );
 
     const ipsOptions = {
       chart: {
@@ -577,9 +585,6 @@ $(function () {
       },
       dataLabels: {
         enabled: false,
-        formatter: function (val, opt) {
-          return ((parseInt(val) / totalRequests) * 100).toFixed(2) + "%";
-        },
       },
       grid: {
         padding: {
@@ -609,9 +614,9 @@ $(function () {
                 color: headingColor,
                 offsetY: -17,
                 formatter: function (val) {
-                  return (
-                    ((parseInt(val) / totalRequests) * 100).toFixed(2) + "%"
-                  );
+                  const v = parseFloat(val) || 0;
+                  if (!topBlockedTotal) return "0%";
+                  return ((v / topBlockedTotal) * 100).toFixed(1) + "%";
                 },
               },
               name: {
@@ -634,6 +639,15 @@ $(function () {
       },
       tooltip: {
         theme: theme,
+        y: {
+          formatter: function (val) {
+            const v = parseInt(val, 10) || 0;
+            const pct = topBlockedTotal
+              ? ((v / topBlockedTotal) * 100).toFixed(1)
+              : "0.0";
+            return `${v} blocked (${pct}% of Top 10)`;
+          },
+        },
       },
     };
 

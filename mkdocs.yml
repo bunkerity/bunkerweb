@@ -3,27 +3,24 @@ site_url: https://docs.bunkerweb.io/
 repo_url: https://github.com/bunkerity/bunkerweb
 site_description: Documentation of BunkerWeb, the open source and next generation WAF.
 copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
-#remote_branch: ?
-#remote_name: ?
 
-nav:
-  - Introduction: 'index.md'
-  - Concepts: 'concepts.md'
-  - Integrations: 'integrations.md'
-  - Quickstart guide: 'quickstart-guide.md'
-  - Features: 'features.md'
-  - Advanced usages: 'advanced.md'
-  # - Security tuning: 'security-tuning.md'
-  - Web UI: 'web-ui.md'
-  - Upgrading: 'upgrading.md'
-  - Troubleshooting: 'troubleshooting.md'
-  - Plugins: 'plugins.md'
-  - Professional services: 'professional-services.md'
-  - About: 'about.md'
+nav: # language-agnostic structure (same file names in each locale folder)
+  - Introduction: "index.md"
+  - Concepts: "concepts.md"
+  - Integrations: "integrations.md"
+  - Quickstart guide: "quickstart-guide.md"
+  - Features: "features.md"
+  - Advanced usages: "advanced.md"
+  - Web UI: "web-ui.md"
+  - Upgrading: "upgrading.md"
+  - Troubleshooting: "troubleshooting.md"
+  - Plugins: "plugins.md"
+  - Professional services: "professional-services.md"
+  - About: "about.md"
 
 theme:
   name: material
-  locale: en
+  language: en
   logo: assets/logo.png
   favicon: assets/favicon.png
   font: false
@@ -59,7 +56,6 @@ extra:
   version:
     provider: mike
     version: latest
-
   generator: false
   social:
     - icon: fontawesome/brands/discord
@@ -80,3 +76,62 @@ plugins:
   - mike:
       canonical_version: latest
   - print-site
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: en
+          name: English
+          build: true
+          default: true
+          site_name: BunkerWeb documentation
+        - locale: fr
+          name: Français
+          build: true
+          site_name: Documentation BunkerWeb
+          nav_translations:
+            Introduction: Introduction
+            Concepts: Concepts
+            Integrations: Intégrations
+            "Quickstart guide": "Guide de démarrage rapide"
+            Features: Fonctionnalités
+            "Advanced usages": "Utilisations avancées"
+            "Web UI": "Interface Web"
+            Upgrading: "Mise à niveau"
+            Troubleshooting: Dépannage
+            Plugins: Plugins
+            "Professional services": "Services professionnels"
+            About: "À propos"
+        - locale: de
+          name: Deutsch
+          build: true
+          site_name: BunkerWeb Dokumentation
+          nav_translations:
+            Introduction: Einführung
+            Concepts: Konzepte
+            Integrations: Integrationen
+            "Quickstart guide": Schnellstart
+            Features: Funktionen
+            "Advanced usages": "Erweiterte Nutzung"
+            "Web UI": "Weboberfläche"
+            Upgrading: Aktualisierung
+            Troubleshooting: Fehlerbehebung
+            Plugins: Plugins
+            "Professional services": "Professionelle Dienste"
+            About: Über
+        - locale: es
+          name: Español
+          build: true
+          site_name: Documentación de BunkerWeb
+          nav_translations:
+            Introduction: Introducción
+            Concepts: Conceptos
+            Integrations: Integraciones
+            "Quickstart guide": "Guía de inicio rápido"
+            Features: Funcionalidades
+            "Advanced usages": "Usos avanzados"
+            "Web UI": "Interfaz web"
+            Upgrading: Actualización
+            Troubleshooting: "Solución de problemas"
+            Plugins: Plugins
+            "Professional services": "Servicios profesionales"
+            About: "Acerca de"

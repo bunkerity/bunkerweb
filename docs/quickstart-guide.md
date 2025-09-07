@@ -18,7 +18,7 @@ This quickstart guide will help you to quickly install BunkerWeb and secure a we
 
 Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb: it will act as a classical [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) with extra security features.
 
-See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/examples) of the repository to get real-world examples.
+See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc2/examples) of the repository to get real-world examples.
 
 ## Basic setup
 
@@ -33,7 +33,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.5-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.5-rc2
     ```
 
     By default, the container exposes:
@@ -51,8 +51,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
 
     ```bash
     # Download the script and its checksum
-    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc1/install-bunkerweb.sh
-    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc1/install-bunkerweb.sh.sha256
+    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc2/install-bunkerweb.sh
+    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc2/install-bunkerweb.sh.sha256
 
     # Verify the checksum
     sha256sum -c install-bunkerweb.sh.sha256
@@ -80,7 +80,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.5-rc1
+        image: bunkerity/bunkerweb:1.6.5-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -93,7 +93,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -110,7 +110,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.5-rc1
+        image: bunkerity/bunkerweb-ui:1.6.5-rc2
         environment:
           <<: *bw-env
         restart: "unless-stopped"
@@ -177,7 +177,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc1
+        image: bunkerity/bunkerweb:1.6.5-rc2
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -193,7 +193,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -211,7 +211,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.5-rc2
         depends_on:
           - bw-docker
         environment:
@@ -234,7 +234,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.5-rc1
+        image: bunkerity/bunkerweb-ui:1.6.5-rc2
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -329,7 +329,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc1
+        image: bunkerity/bunkerweb:1.6.5-rc2
         ports:
           - published: 80
             target: 8080
@@ -359,7 +359,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -377,7 +377,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
+        image: bunkerity/bunkerweb-autoconf:1.6.5-rc2
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -406,7 +406,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.5-rc1
+        image: bunkerity/bunkerweb-ui:1.6.5-rc2
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -567,7 +567,6 @@ You can now log in with the administrator account you created during the setup w
           <figcaption>Web interface create service easy</figcaption>
         </figure>
 
-        * To navigate between the different plugins, you can use the dropdown menu on the top left corner of the page.
         * Once you've selected the template, you can fill in the required fields and follow the instructions to create the service.
         * Once you're done configuring the service, you can click on the `💾 Save` button to save the configuration.
 
@@ -580,7 +579,7 @@ You can now log in with the administrator account you created during the setup w
           <figcaption>Web interface create service advanced</figcaption>
         </figure>
 
-        * To navigate between the different plugins, you can use the dropdown menu on the top left corner of the page.
+        * To navigate between the different plugins, you can use the navigation menu on the left side of the page.
         * Each setting has a small piece of information that will help you understand what it does.
         * Once you're done configuring the service, you can click on the `💾 Save` button to save the configuration.
 
@@ -629,7 +628,7 @@ You can now log in with the administrator account you created during the setup w
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---
-      bunkerity/bunkerweb-all-in-one:1.6.5-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.5-rc2
     ```
 
     Your application container (`myapp`) and the `bunkerweb-aio` container must be on the same Docker network for BunkerWeb to reach it using the hostname `myapp`.
@@ -651,14 +650,14 @@ You can now log in with the administrator account you created during the setup w
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (all other relevant environment variables as shown in the main example above) ...
-      bunkerity/bunkerweb-all-in-one:1.6.5-rc1
+      bunkerity/bunkerweb-all-in-one:1.6.5-rc2
     ```
 
     Make sure to replace `myapp` with the actual name or IP of your application container and `http://myapp:8080` with its correct address and port.
 
 === "Linux variables.env file"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Linux integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_2) and that the Linux integration is running on your machine.
 
     You can create a new service by editing the `variables.env` file located in the `/etc/bunkerweb/` directory.
 
@@ -684,7 +683,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Docker"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_1) and that the Docker integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_3) and that the Docker integration is running on your machine.
 
     You must have a network called `bw-services` so that you can connect your existing application and configure BunkerWeb:
 
@@ -728,7 +727,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Docker autoconf labels"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_2) and that the Docker autoconf integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_4) and that the Docker autoconf integration is running on your machine.
 
     You must have a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
 
@@ -754,7 +753,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Kubernetes annotations"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_4) and that the Kubernetes stack is running on your cluster.
+    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Kubernetes stack is running on your cluster.
 
     Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster:
 
@@ -820,11 +819,11 @@ You can now log in with the administrator account you created during the setup w
 === "Swarm labels"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    We assume that you followed the [Basic setup](#__tabbed_1_3) and that the Swarm stack is running on your cluster and connected to a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
+    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Swarm stack is running on your cluster and connected to a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
 
     ```yaml
     services:
@@ -852,7 +851,7 @@ You can now log in with the administrator account you created during the setup w
 
 Congratulations! You have just installed BunkerWeb and secured your first web service. Please note that BunkerWeb offers much more, both in terms of security and integrations with other systems and solutions. Here's a list of resources and actions that may help you continue to deepen your knowledge of the solution:
 
-- Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X](https://x.com/bunkerity)
+- Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X (Formerly Twitter)](https://x.com/bunkerity)
 - Check out the [official blog](https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=doc)
 - Explore [advanced use cases](advanced.md) in the documentation
 - [Get in touch with us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) to discuss your organization's needs
