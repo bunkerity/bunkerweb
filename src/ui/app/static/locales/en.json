@@ -1279,10 +1279,10 @@
       "download_file": "Download {{filename}}",
       "edit_config": "Edit Custom Config {{name}}",
       "edit_service": "Edit Service {{service}}",
-      "export_service": "Export Service {{name}} Configuration",
+      "export_service": "Export Service {{service}} Configuration",
       "view_config": "View Custom Config {{name}}",
       "view_file": "View {{filename}}",
-      "view_service": "View Service {{name}}"
+      "view_service": "View Service {{service}}"
     },
     "modal": {
       "title": {

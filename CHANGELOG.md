@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.5-rc3 - ????/??/??
+
+- [DOCS] Add multi-language support to the documentation, including French
+- [UI] Fix incorrect key used when viewing service details
+
 ## v1.6.5-rc2 - ????/??/??
 
 - [BUGFIX] Enhance database backup and restore functionality with improved compatibility and options

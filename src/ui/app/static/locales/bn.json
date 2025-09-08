@@ -1282,7 +1282,7 @@
       "export_service": "পরিষেবা {{name}} কনফিগারেশন রপ্তানি করুন",
       "view_config": "কাস্টম কনফিগারেশন {{name}} দেখুন",
       "view_file": "{{filename}} দেখুন",
-      "view_service": "পরিষেবা {{name}} দেখুন"
+      "view_service": "পরিষেবা {{service}} দেখুন"
     },
     "modal": {
       "title": {

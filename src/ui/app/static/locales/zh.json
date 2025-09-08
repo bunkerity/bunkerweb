@@ -1284,7 +1284,7 @@
       "export_service": "导出服务 {{name}} 配置",
       "view_config": "查看自定义配置 {{name}}",
       "view_file": "查看 {{filename}}",
-      "view_service": "查看服务 {{name}}"
+      "view_service": "查看服务 {{service}}"
     },
     "modal": {
       "title": {

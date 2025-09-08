@@ -1282,7 +1282,7 @@
       "export_service": "Экспортировать конфигурацию сервиса {{name}}",
       "view_config": "Просмотреть кастомную конфигурацию {{name}}",
       "view_file": "Просмотреть {{filename}}",
-      "view_service": "Просмотреть сервис {{name}}"
+      "view_service": "Просмотреть сервис {{service}}"
     },
     "modal": {
       "title": {

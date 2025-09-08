@@ -1281,7 +1281,7 @@
       "export_service": "Exporter la Configuration du Service {{name}}",
       "view_config": "Voir la Config Perso {{name}}",
       "view_file": "Voir {{filename}}",
-      "view_service": "Voir le Service {{name}}"
+      "view_service": "Voir le Service {{service}}"
     },
     "modal": {
       "title": {

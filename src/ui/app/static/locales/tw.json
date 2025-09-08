@@ -1283,7 +1283,7 @@
       "export_service": "匯出服務 {{name}} 設定",
       "view_config": "檢視自訂設定 {{name}}",
       "view_file": "檢視 {{filename}}",
-      "view_service": "檢視服務 {{name}}"
+      "view_service": "檢視服務 {{service}}"
     },
     "modal": {
       "title": {

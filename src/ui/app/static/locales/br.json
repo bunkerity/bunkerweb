@@ -1282,7 +1282,7 @@
       "export_service": "Exportar Configuração do Serviço {{name}}",
       "view_config": "Ver Configuração Personalizada {{name}}",
       "view_file": "Ver {{filename}}",
-      "view_service": "Ver Serviço {{name}}"
+      "view_service": "Ver Serviço {{service}}"
     },
     "modal": {
       "title": {

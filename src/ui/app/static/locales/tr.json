@@ -1282,7 +1282,7 @@
       "export_service": "{{name}} Servis Yapılandırmasını Dışa Aktar",
       "view_config": "{{name}} Özel Yapılandırmasını Görüntüle",
       "view_file": "{{filename}} Görüntüle",
-      "view_service": "{{name}} Servisini Görüntüle"
+      "view_service": "{{service}} Servisini Görüntüle"
     },
     "modal": {
       "title": {

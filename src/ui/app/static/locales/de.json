@@ -1283,7 +1283,7 @@
       "export_service": "Dienstkonfiguration {{name}} exportieren",
       "view_config": "Benutzerdefinierte Konfiguration {{name}} anzeigen",
       "view_file": "{{filename}} anzeigen",
-      "view_service": "Dienst {{name}} anzeigen"
+      "view_service": "Dienst {{service}} anzeigen"
     },
     "modal": {
       "title": {

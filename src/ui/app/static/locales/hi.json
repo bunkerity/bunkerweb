@@ -1281,7 +1281,7 @@
       "export_service": "सेवा {{name}} कॉन्फ़िगरेशन निर्यात करें",
       "view_config": "कस्टम कॉन्फ़िगरेशन {{name}} देखें",
       "view_file": "देखें {{filename}}",
-      "view_service": "सेवा {{name}} देखें"
+      "view_service": "सेवा {{service}} देखें"
     },
     "modal": {
       "title": {

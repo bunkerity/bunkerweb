@@ -1283,7 +1283,7 @@
       "export_service": "تصدير تكوين الخدمة {{name}}",
       "view_config": "عرض التكوين المخصص {{name}}",
       "view_file": "عرض {{filename}}",
-      "view_service": "عرض الخدمة {{name}}"
+      "view_service": "عرض الخدمة {{service}}"
     },
     "modal": {
       "title": {

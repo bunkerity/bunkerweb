@@ -1282,7 +1282,7 @@
       "export_service": "سروس {{name}} کنفیگریشن برآمد کریں",
       "view_config": "کسٹم کنفیگریشن {{name}} دیکھیں",
       "view_file": "{{filename}} دیکھیں",
-      "view_service": "سروس {{name}} دیکھیں"
+      "view_service": "سروس {{service}} دیکھیں"
     },
     "modal": {
       "title": {
