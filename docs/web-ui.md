@@ -111,6 +111,8 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
     x-bw-env: &bw-env
       # We anchor the environment variables to avoid duplication
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      # Optional API token when securing API access
+      API_TOKEN: ""
 
     services:
       bunkerweb:
@@ -645,6 +647,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - "443:8443/udp" # For QUIC / HTTP3 support
         environment:
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+          API_TOKEN: "" # Mirror API_TOKEN if you use it
         networks:
           - bw-universe
           - bw-services
@@ -657,6 +660,7 @@ The web UI can be deployed and configured without going through the setup wizard
           SERVER_NAME: "www.example.com"
           MULTISITE: "yes"
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # We mirror the API_WHITELIST_IP from the bunkerweb service
+          API_TOKEN: "" # Mirror API_TOKEN if you use it
           SERVE_FILES: "no"
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"

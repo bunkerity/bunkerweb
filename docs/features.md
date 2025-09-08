@@ -64,13 +64,24 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "API Settings"
 
-    | Setting            | Default       | Context | Multiple | Description                                                          |
-    | ------------------ | ------------- | ------- | -------- | -------------------------------------------------------------------- |
-    | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.             |
-    | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                        |
-    | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                    |
-    | `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.         |
-    | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API. |
+    | Setting            | Default       | Context | Multiple | Description                                                                                             |
+    | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------- |
+    | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.                                                |
+    | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                                                           |
+    | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                                                       |
+    | `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.                                            |
+    | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API.                                    |
+    | `API_TOKEN`        |               | global  | No       | **API Access Token (optional):** If set, all API requests must include `Authorization: Bearer <token>`. |
+
+    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth.
+
+    Example test with curl (replace token and host):
+
+    ```bash
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         http://<bunkerweb-host>:5000/ping
+    ```
 
 === "Network & Port Settings"
 
@@ -3045,15 +3056,26 @@ For example, `/metrics/requests` returns information about blocked requests.
     2. Your client IP is included in the `API_WHITELIST_IP` setting (default is `127.0.0.0/8`)
     3. You are accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
     4. You are using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
+    5. If `API_TOKEN` is configured, include `Authorization: Bearer <token>` in the request headers.
 
-    A typical API request would look like:
+    Typical requests:
+
+    Without token (when `API_TOKEN` is not set):
+    ```bash
+    curl -H "Host: bwapi" \
+         http://your-bunkerweb-instance:5000/metrics/requests
     ```
-    curl -H "Host: bwapi" http://your-bunkerweb-instance:5000/metrics/requests
+
+    With token (when `API_TOKEN` is set):
+    ```bash
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         http://your-bunkerweb-instance:5000/metrics/requests
     ```
 
     If you have customized the `API_SERVER_NAME` to something other than the default `bwapi`, use that value in the Host header instead.
 
-    For secure production environments, make sure to restrict API access to trusted IPs only.
+    For secure production environments, restrict API access to trusted IPs and enable `API_TOKEN`.
 
 ### Configuration Settings
 

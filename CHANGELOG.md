@@ -2,6 +2,7 @@
 
 ## v1.6.5-rc3 - ????/??/??
 
+- [FEATURE] Introduce optional API token authentication to bolster security for BunkerWeb API calls, allowing users to enable token-based access control for enhanced protection against unauthorized requests
 - [DOCS] Add multi-language support to the documentation, including French
 - [UI] Fix incorrect key used when viewing service details
 - [UI] Fix 403 when changing IP address on web UI

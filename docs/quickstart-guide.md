@@ -75,6 +75,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc2
     x-bw-env: &bw-env
       # We use an anchor to avoid repeating the same settings for both services
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+      # Optional: set an API token and mirror it in both containers
+      API_TOKEN: ""
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
 
     services:

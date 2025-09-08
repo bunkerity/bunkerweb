@@ -1073,6 +1073,8 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
     x-bw-api-env: &bw-api-env
       # We use an anchor to avoid repeating the same settings for all services
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      # Optional API token for authenticated API calls
+      API_TOKEN: ""
 
     services:
       bunkerweb:

@@ -301,7 +301,7 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.5-rc2
 
     Since version `1.6.0`, the Scheduler container is where you define the settings for BunkerWeb. The Scheduler then pushes the configuration to the BunkerWeb container.
 
-    ⚠ **Important**: All API-related settings (like `API_HTTP_PORT`, `API_LISTEN_IP`, `API_SERVER_NAME`, and `API_WHITELIST_IP`) **must also be defined in the BunkerWeb container**. (The settings must be mirrored in both containers; otherwise, the BunkerWeb container will not accept API requests from the Scheduler).
+    ⚠ **Important**: All API-related settings (like `API_HTTP_PORT`, `API_LISTEN_IP`, `API_SERVER_NAME`, `API_WHITELIST_IP`, and `API_TOKEN` if you use it) **must also be defined in the BunkerWeb container**. The settings must be mirrored in both containers; otherwise, the BunkerWeb container will not accept API requests from the Scheduler.
 
     ```yaml
     x-bw-api-env: &bw-api-env
@@ -310,6 +310,8 @@ docker pull bunkerity/bunkerweb-scheduler:1.6.5-rc2
       API_LISTEN_IP: "0.0.0.0" # Default value
       API_SERVER_NAME: "bwapi" # Default value
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24" # Set this according to your network settings
+      # Optional token; if set, Scheduler sends Authorization: Bearer <token>
+      API_TOKEN: ""
 
     services:
       bunkerweb:
@@ -412,7 +414,7 @@ For defense-in-depth purposes, we strongly recommend creating at least three dif
 - `bw-universe`: for BunkerWeb and the scheduler
 - `bw-db`: for the database (if you are using one)
 
-To secure communication between the scheduler and the BunkerWeb API, **it is important to authorize API calls**. You can use the `API_WHITELIST_IP` setting to specify allowed IP addresses and subnets.
+To secure communication between the scheduler and the BunkerWeb API, **authorize API calls**. Use the `API_WHITELIST_IP` setting to specify allowed IP addresses and subnets. For stronger protection, set `API_TOKEN` in both containers; the scheduler will automatically include `Authorization: Bearer <token>`.
 
 **It is strongly recommended to use a static subnet for the `bw-universe` network** to enhance security. By implementing these measures, you can ensure that only authorized sources can access the BunkerWeb API, reducing the risk of unauthorized access or malicious activities:
 
@@ -420,6 +422,9 @@ To secure communication between the scheduler and the BunkerWeb API, **it is imp
 x-bw-api-env: &bw-api-env
   # We use an anchor to avoid repeating the same settings for both containers
   API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+  API_TOKEN: "" # Optional API token
+  # Optional API token for authenticated API access
+  API_TOKEN: ""
 
 services:
   bunkerweb:

@@ -493,7 +493,7 @@ Since the `1.6`, the Scheduler also have a new [built-in healthcheck system](con
 
 Another important change is that the **settings** that were previously declared on the BunkerWeb container **are now declared on the scheduler**. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.
 
-While the settings are now declared on the Scheduler container, **you'll still need to declare api related mandatory settings on the BunkerWeb container** like the `API_WHITELIST_IP` setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.
+While the settings are now declared on the Scheduler container, **you'll still need to declare API-related mandatory settings on the BunkerWeb container** like the `API_WHITELIST_IP` setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance. If you use `API_TOKEN`, you must also set it on the BunkerWeb container (and mirror it on the Scheduler) to allow authenticated API calls.
 
 !!! warning "BunkerWeb's container settings"
 
