@@ -4,6 +4,7 @@
 
 - [DOCS] Add multi-language support to the documentation, including French
 - [UI] Fix incorrect key used when viewing service details
+- [DEPS] Update lua-resty-openssl version to v1.6.4
 
 ## v1.6.5-rc2 - ????/??/??
 
