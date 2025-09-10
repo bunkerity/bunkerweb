@@ -113,6 +113,22 @@ HOOKS = {
         "key": "CONTEXT_PROCESSOR_HOOKS",
         "log_prefix": "Context-processor",
     },
+    # New: per-request JavaScript providers from plugins
+    # A hook function named `scripts` in a plugin's ui/hooks.py can return:
+    # { "src": ["/path.js", {"src": "/mod.js", "type": "module"}], "inline": "console.log('hi')" }
+    # These are aggregated and exposed as `extra_scripts` and `custom_js` in templates.
+    "scripts": {
+        "key": "SCRIPTS_HOOKS",
+        "log_prefix": "Scripts",
+    },
+    # New: per-request CSS providers from plugins
+    # A hook function named `styles` in a plugin's ui/hooks.py can return:
+    # { "href": ["/path.css", {"href": "/print.css", "media": "print"}], "inline": ".x{display:none}" }
+    # These are aggregated and exposed as `extra_styles` and `custom_css` in templates.
+    "styles": {
+        "key": "STYLES_HOOKS",
+        "log_prefix": "Styles",
+    },
 }
 
 
@@ -509,6 +525,68 @@ def inject_variables():
         except Exception:
             LOGGER.exception("Error in context_processor hook")
 
+    # Aggregate JavaScript from plugin `scripts` hooks
+    extra_scripts = list(app_env.get("extra_scripts", []))
+    custom_js = []
+
+    for hook in app.config.get("SCRIPTS_HOOKS", []):
+        try:
+            payload = hook()
+            if not payload:
+                continue
+            # Collect external script URLs or mappings
+            srcs = payload.get("src") if isinstance(payload, dict) else None
+            if isinstance(srcs, (list, tuple)):
+                for s in srcs:
+                    extra_scripts.append(s)
+            elif isinstance(srcs, str):
+                extra_scripts.append(srcs)
+
+            # Collect inline JS (string or list)
+            inline = payload.get("inline") if isinstance(payload, dict) else None
+            if isinstance(inline, str):
+                custom_js.append(inline)
+            elif isinstance(inline, (list, tuple)):
+                for chunk in inline:
+                    if chunk:
+                        custom_js.append(chunk)
+        except Exception:
+            LOGGER.exception("Error in scripts hook")
+
+    # Aggregate CSS from plugin `styles` hooks
+    extra_styles = list(app_env.get("extra_styles", []))
+    custom_css = []
+
+    for hook in app.config.get("STYLES_HOOKS", []):
+        try:
+            payload = hook()
+            if not payload:
+                continue
+            # Collect external stylesheet URLs or mappings
+            hrefs = payload.get("href") if isinstance(payload, dict) else None
+            if isinstance(hrefs, (list, tuple)):
+                for h in hrefs:
+                    extra_styles.append(h)
+            elif isinstance(hrefs, str):
+                extra_styles.append(hrefs)
+
+            # Collect inline CSS (string or list)
+            inline = payload.get("inline") if isinstance(payload, dict) else None
+            if isinstance(inline, str):
+                custom_css.append(inline)
+            elif isinstance(inline, (list, tuple)):
+                for chunk in inline:
+                    if chunk:
+                        custom_css.append(chunk)
+        except Exception:
+            LOGGER.exception("Error in styles hook")
+
+    # Always provide keys for templates
+    app_env["extra_scripts"] = extra_scripts
+    app_env["custom_js"] = custom_js
+    app_env["extra_styles"] = extra_styles
+    app_env["custom_css"] = custom_css
+
     app.config["ENV"] = app_env
 
     return app_env
@@ -763,6 +841,7 @@ def before_request():
             columns_preferences_defaults=COLUMNS_PREFERENCES_DEFAULTS,
             extra_pages=app.config["EXTRA_PAGES"],
             extra_scripts=DATA.get("EXTRA_SCRIPTS", []),
+            extra_styles=DATA.get("EXTRA_STYLES", []),
             config=DB.get_config(global_only=True, methods=True),
         )
 
