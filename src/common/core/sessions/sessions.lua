@@ -2,14 +2,20 @@ local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
 local session = require "resty.session"
 local utils = require "bunkerweb.utils"
+local redis = require "resty.redis"
+local cjson = require "cjson"
 
 local sessions = class("sessions", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
+local WARN = ngx.WARN
+local worker = ngx.worker
 local get_variable = utils.get_variable
 local session_init = session.init
 local tonumber = tonumber
+local encode = cjson.encode
+local decode = cjson.decode
 
 function sessions:initialize(ctx)
 	-- Call parent initialize
@@ -44,6 +50,21 @@ function sessions:set()
 			table.insert(self.ctx.bw.sessions_checks, { check, value })
 		end
 	end
+	local ctx_config = {}
+	local config, config_err = self.datastore:get("storage_sessions_CONFIG")
+	if config then
+		ctx_config = decode(config)
+	else
+		self.logger:log(ERR, "failed to get sessions config from datastore: " .. (config_err or "unknown error"))
+	end
+	local storage, storage_err = self.datastore:get("storage_sessions_STORAGE")
+	if storage then
+		ctx_config.storage = storage
+	else
+		self.logger:log(ERR, "failed to get sessions storage from datastore: " .. (storage_err or "unknown error"))
+	end
+	self.ctx.bw.sessions_config = ctx_config
+	self.logger:log(WARN, encode(self.ctx.bw.sessions_config))
 	return self:ret(true, "success")
 end
 
@@ -147,8 +168,77 @@ function sessions:init()
 			config.redis.port = tonumber(redis_vars["REDIS_PORT"])
 		end
 	end
+	local ok_set, err_set = self.datastore:set("storage_sessions_STORAGE", config.storage)
+	if not ok_set then
+		self.logger:log(ERR, "error from datastore:set : " .. err_set)
+	end
+	ok_set, err_set = self.datastore:set("storage_sessions_CONFIG", encode(config))
+	if not ok_set then
+		self.logger:log(ERR, "error from datastore:set : " .. err_set)
+	end
 	session_init(config)
 	return self:ret(true, "sessions init successful")
+end
+
+function sessions:timer()
+	-- No loading and only for http
+	if self.is_loading or self.kind ~= "http" then
+		return self:ret(true, "timer not needed")
+	end
+
+	-- Only execute on worker 0
+	if worker.id() ~= 0 then
+		return self:ret(true, "skipped")
+	end
+
+	-- Check if Redis is enabled
+	local storage = "cookie"
+	local use_redis, err = get_variable("USE_REDIS", false)
+	if use_redis ~= "yes" then
+		local ok_set, err_set = self.datastore:set("storage_sessions_STORAGE", storage)
+		if not ok_set then
+			self.logger:log(ERR, "failed to set storage_sessions_STORAGE: " .. err_set)
+			return self:ret(false, "redis disabled -> cookie")
+		end
+		return self:ret(true, "timer done (storage = " .. storage .. ")")
+	end
+
+	-- Our ret values
+	local ret, ret_err = true, "success"
+
+	-- Check redis connection
+	local ok, err = self.clusterstore:connect(true)
+	if not ok then
+		ret_err = "redis connect error : " .. err
+	else
+		-- Send ping
+		local ok, err = self.clusterstore:call("ping")
+		self.clusterstore:close()
+		if err then
+			ret_err = "error while sending ping command to redis server : " .. err
+		end
+		if not ok then
+			ret_err = "redis ping command failed"
+		else
+			storage = "redis"
+		end
+	end
+
+	ret_err = "timer done (storage = " .. storage .. ")"
+
+	if storage ~= "redis" then
+		self.logger:log(WARN, "redis not available, falling back to cookie storage")
+	end
+
+	-- Save storage type
+	local ok_set, err_set = self.datastore:set("storage_sessions_STORAGE", storage)
+	if not ok_set then
+		ret = false
+		ret_err = "failed to set storage_sessions_STORAGE: " .. err_set
+		self.logger:log(ERR, "failed to set storage_sessions_STORAGE: " .. err_set)
+	end
+
+	return self:ret(ret, ret_err)
 end
 
 return sessions

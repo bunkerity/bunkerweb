@@ -653,8 +653,9 @@ utils.get_session = function(ctx)
 		return ctx.bw.sessions_session
 	end
 	-- Open/create and do an optional refresh
+	logger:log(WARN, "config = " .. encode(ctx.bw.sessions_config))
 	local err, exists, refreshed
-	session, err, exists, refreshed = session_start()
+	session, err, exists, refreshed = session_start(ctx.bw.sessions_config)
 	if not session then
 		return nil, err
 	end
