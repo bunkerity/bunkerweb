@@ -79,7 +79,14 @@ def reports_fetch():
     start = int(request.form.get("start", 0))
     length = int(request.form.get("length", 10))
     search_value = request.form.get("search[value]", "").lower()
-    order_column_index = int(request.form.get("order[0][column]", 0)) - 1
+    # DataTables includes two leading non-data columns (details-control and select)
+    # Adjust the incoming order column index to match our data columns mapping
+    try:
+        order_column_index_dt = int(request.form.get("order[0][column]", 0))
+    except Exception:
+        order_column_index_dt = 0
+    # Subtract 2 to align with backend columns (starting at "date")
+    order_column_index = max(order_column_index_dt - 2, 0)
     order_direction = request.form.get("order[0][dir]", "desc")
     search_panes = defaultdict(list)
     for key, value in request.form.items():
@@ -117,10 +124,23 @@ def reports_fetch():
         return any(search_value in str(report.get(col, "")).lower() for col in columns)
 
     # Sort reports
+    def _to_float(value, default=0.0):
+        try:
+            if isinstance(value, (int, float)):
+                return float(value)
+            if value is None:
+                return float(default)
+            return float(str(value))
+        except Exception:
+            return float(default)
+
     def sort_reports(reports):
         if 0 <= order_column_index < len(columns):
             sort_key = columns[order_column_index]
-            reports.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
+            if sort_key == "date":
+                reports.sort(key=lambda x: _to_float(x.get("date", 0.0), 0.0), reverse=(order_direction == "desc"))
+            else:
+                reports.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
 
     # Apply filters and sort
     filtered_reports = filter(global_search_filter, all_reports) if search_value else all_reports

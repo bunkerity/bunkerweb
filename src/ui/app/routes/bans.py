@@ -130,7 +130,13 @@ def bans_fetch():
     start = int(request.form.get("start", 0))
     length = int(request.form.get("length", 10))
     search_value = request.form.get("search[value]", "").lower()
-    order_column_index = int(request.form.get("order[0][column]", 0)) - 1
+    # DataTables includes two leading non-data columns (details-control and select)
+    # Adjust incoming index to align with backend data columns
+    try:
+        order_column_index_dt = int(request.form.get("order[0][column]", 0))
+    except Exception:
+        order_column_index_dt = 0
+    order_column_index = max(order_column_index_dt - 2, 0)
     order_direction = request.form.get("order[0][dir]", "desc")
     search_panes = defaultdict(list)
     for key, value in request.form.items():
@@ -253,6 +259,16 @@ def bans_fetch():
         return any(search_value in str(ban.get(col, "")).lower() for col in columns)
 
     # Sort bans
+    def _to_float(value, default=0.0):
+        try:
+            if isinstance(value, (int, float)):
+                return float(value)
+            if value is None:
+                return float(default)
+            return float(str(value))
+        except Exception:
+            return float(default)
+
     def sort_bans(bans):
         if 0 <= order_column_index < len(columns):
             sort_key = columns[order_column_index]
@@ -264,6 +280,8 @@ def bans_fetch():
                     key=lambda x: ("0" if order_direction == "desc" else "z") if x.get("permanent", False) else x.get(sort_key, ""),
                     reverse=(order_direction == "desc"),
                 )
+            elif sort_key == "date":
+                bans.sort(key=lambda x: _to_float(x.get("date", 0.0), 0.0), reverse=(order_direction == "desc"))
             else:
                 bans.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
 

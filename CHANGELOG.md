@@ -9,6 +9,7 @@
 - [UI] Fix incorrect key used when viewing service details
 - [UI] Fix 403 when changing IP address
 - [UI] Add the possibility to quickly ban IP addresses from the reports page
+- [UI] Fix date sorting in bans and reports pages
 - [MISC] Update new `reloading` health status for BunkerWeb when NGINX is reloading and handle it in it's healthcheck file
 - [MISC] Automatically minify UI CSS files in Images/Packages build process
 - [DEPS] Update lua-resty-openssl version to v1.6.4
