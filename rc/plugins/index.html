@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
     
     
       
@@ -275,6 +275,44 @@
     
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/plugins/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../de/plugins/" hreflang="de" class="md-select__link">
+              Deutsch
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../es/plugins/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
     
     
       
@@ -1260,8 +1298,8 @@
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>./bw-data/plugins
 </code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">Using local folder for persistent data</p>
+<details class="warning">
+<summary>Using local folder for persistent data</summary>
 <p>The scheduler runs as an <strong>unprivileged user with UID 101 and GID 101</strong> inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
 But there is a downside : if you use a <strong>local folder for the persistent data</strong>, you will need to <strong>set the correct permissions</strong> so the unprivileged user can write data to it. Something like that should do the trick :</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1285,12 +1323,12 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>b
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
-</div>
+</details>
 <p>Then you can mount the volume when starting your Docker stack :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1312,7 +1350,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="nn">...</span>
@@ -1321,7 +1359,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="tabbed-block">
 <div class="admonition warning">
 <p class="admonition-title">Deprecated</p>
-<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_1_2">Docker autoconf integration</a> instead.</p>
+<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="../integrations/#kubernetes">Kubernetes integration</a> instead.</p>
 <p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
 </div>
 <p>When using the <a href="../integrations/#swarm">Swarm integration</a>, plugins must be placed in the volume mounted on <code>/data/plugins</code> in the scheduler container.</p>
@@ -1343,7 +1381,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
 <span class="nn">...</span>
@@ -1383,7 +1421,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
@@ -1420,7 +1458,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="structure">Structure</h3>
 <div class="admonition tip">
 <p class="admonition-title">Existing plugins</p>
-<p>If the documentation is not enough, you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/src/common/core">core plugins</a> (already included in BunkerWeb but they are plugins, technically speaking).</p>
+<p>If the documentation is not enough, you can have a look at the existing source code of <a href="https://github.com/bunkerity/bunkerweb-plugins">official plugins</a> and the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc2/src/common/core">core plugins</a> (already included in BunkerWeb but they are plugins, technically speaking).</p>
 </div>
 <p>What a plugin structure looks like:
 <div class="highlight"><pre><span></span><code>plugin /
@@ -1655,12 +1693,12 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <h3 id="configurations">Configurations</h3>
 <p>You can add custom NGINX configurations by adding a folder named <strong>confs</strong> with content similar to the <a href="../advanced/#custom-configurations">custom configurations</a>. Each subfolder inside the <strong>confs</strong> will contain <a href="https://jinja.palletsprojects.com">jinja2</a> templates that will be generated and loaded at the corresponding context (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>stream</code>, <code>server-stream</code>, <code>modsec</code>, <code>modsec-crs</code>, <code>crs-plugins-before</code> and <code>crs-plugins-after</code>).</p>
 <p>Here is an example for a configuration template file inside the <strong>confs/server-http</strong> folder named <strong>example.conf</strong> :</p>
-<div class="highlight"><pre><span></span><code>location /setting {
-    default_type &#39;text/plain&#39;;
-    content_by_lua_block {
-        ngx.say(&#39;{{ DUMMY_SETTING }}&#39;)
-    }
-}
+<div class="highlight"><pre><span></span><code><span class="k">location</span><span class="w"> </span><span class="s">/setting</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kn">default_type</span><span class="w"> </span><span class="s">&#39;text/plain&#39;</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">content_by_lua_block</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">ngx.say(&#39;{{</span><span class="w"> </span><span class="s">DUMMY_SETTING</span><span class="w"> </span><span class="err">}}</span><span class="s">&#39;)</span>
+<span class="w">    </span><span class="err">}</span>
+<span class="err">}</span>
 </code></pre></div>
 <p><code>{{ DUMMY_SETTING }}</code> will be replaced by the value of the <code>DUMMY_SETTING</code> chosen by the user of the plugin.</p>
 <h3 id="templates">Templates</h3>
@@ -1835,7 +1873,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">More examples</p>
-<p>If you want to see the full list of available functions, you can have a look at the files present in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/src/bw/lua/bunkerweb">lua directory</a> of the repository.</p>
+<p>If you want to see the full list of available functions, you can have a look at the files present in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc2/src/bw/lua/bunkerweb">lua directory</a> of the repository.</p>
 </div>
 <h3 id="jobs">Jobs</h3>
 <p>BunkerWeb uses an internal job scheduler for periodic tasks like renewing certificates with certbot, downloading blacklists, downloading MMDB files, ... You can add tasks of your choice by putting them inside a subfolder named <strong>jobs</strong> and listing them in the <strong>plugin.json</strong> metadata file. Don't forget to add the execution permissions for everyone to avoid any problems when a user is cloning and installing your plugin.</p>
@@ -1890,9 +1928,37 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <div class="highlight"><pre><span></span><code><span class="n">function</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition info">
-<p class="admonition-title">Python libraries</p>
-<p>In addition, you can use Python libraries that are already available like :
-<code>Flask</code>, <code>Flask-Login</code>, <code>Flask-WTF</code>, <code>beautifulsoup4</code>, <code>docker</code>, <code>Jinja2</code>, <code>python-magic</code> and <code>requests</code>. To see the full list, you can have a look at the Web UI <a href="https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt">requirements.txt</a>. If you need external libraries, you can install them inside the <strong>ui</strong> folder of your plugin and then use the classical <strong>import</strong> directive.</p>
+<p class="admonition-title">Available Python Libraries</p>
+<p>BunkerWeb's Web UI includes a set of pre-installed Python libraries that you can use in your plugin's <code>actions.py</code> or other UI-related scripts. These are available out-of-the-box without needing additional installations.</p>
+<p>Here's the complete list of included libraries:</p>
+<ul>
+<li><strong>bcrypt</strong> - Password hashing library</li>
+<li><strong>biscuit-python</strong> - Biscuit authentication tokens</li>
+<li><strong>certbot</strong> - ACME client for Let's Encrypt</li>
+<li><strong>Flask</strong> - Web framework</li>
+<li><strong>Flask-Login</strong> - User session management</li>
+<li><strong>Flask-Session[cachelib]</strong> - Server-side session storage</li>
+<li><strong>Flask-WTF</strong> - Form handling and CSRF protection</li>
+<li><strong>gunicorn[gthread]</strong> - WSGI HTTP server</li>
+<li><strong>pillow</strong> - Image processing</li>
+<li><strong>psutil</strong> - System and process utilities</li>
+<li><strong>python_dateutil</strong> - Date and time utilities</li>
+<li><strong>qrcode</strong> - QR code generation</li>
+<li><strong>regex</strong> - Advanced regular expressions</li>
+<li><strong>urllib3</strong> - HTTP client</li>
+<li><strong>user_agents</strong> - User agent parsing</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Using Libraries in Your Plugin</p>
+<p>To import and use these libraries in your <code>actions.py</code> file, simply use the standard Python <code>import</code> statement. For example:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">bcrypt</span>
+</code></pre></div>
+</div>
+<details class="warning">
+<summary>External Libraries</summary>
+<p>If you need libraries not listed above, install them inside the <code>ui</code> folder of your plugin and import them using the classical <code>import</code> directive. Ensure compatibility with the existing environment to avoid conflicts.</p>
+</details>
 </div>
 <p><strong>Some examples</strong></p>
 <ul>
@@ -2093,7 +2159,8 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
   
 </div>
       
-        <div class="md-social">
+        
+<div class="md-social">
   
     
     

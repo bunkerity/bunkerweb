@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
     
     
       
@@ -275,6 +275,44 @@
     
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/features/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../de/features/" hreflang="de" class="md-select__link">
+              Deutsch
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../es/features/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
     
     
       
@@ -2848,10 +2886,6 @@
 
 
 <h1 id="features">Features</h1>
-<div class="admonition info">
-<p class="admonition-title">Settings generator tool</p>
-<p>To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at <a href="https://config.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">config.bunkerweb.io</a>.</p>
-</div>
 <p>This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the <a href="../concepts/">concepts</a> section of the documentation. Please follow the instructions for your own <a href="../integrations/">integration</a> on how to apply the settings.</p>
 <h2 id="global-settings">Global settings</h2>
 <p>STREAM support <img alt="⚠" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/26a0.svg" title=":warning:" /></p>
@@ -3663,7 +3697,11 @@
 </div>
 <div class="tabbed-block">
 <p>When enabled, reCAPTCHA runs in the background (v3) to assign a score based on user behavior. A score lower than the configured threshold will prompt further verification or block the request. For visible challenges (v2), users must interact with the reCAPTCHA widget before continuing.</p>
-<p>To use reCAPTCHA with BunkerWeb, you need to obtain your site and secret keys from the <a href="https://www.google.com/recaptcha/admin">Google reCAPTCHA admin console</a>. Once you have the keys, you can configure BunkerWeb to use reCAPTCHA as an antibot mechanism.</p>
+<p>There are now two ways to integrate reCAPTCHA:
+- The classic version (site/secret keys, v2/v3 verify endpoint)
+- The new version using Google Cloud (Project ID + API key). The classic version remains available and can be toggled with <code>ANTIBOT_RECAPTCHA_CLASSIC</code>.</p>
+<p>For the classic version, obtain your site and secret keys from the <a href="https://www.google.com/recaptcha/admin">Google reCAPTCHA admin console</a>.
+For the new version, create a reCAPTCHA key in your Google Cloud project and use the Project ID and an API key (see the <a href="https://console.cloud.google.com/security/recaptcha">Google Cloud reCAPTCHA console</a>). A site key is still required.</p>
 <p><strong>Configuration Settings:</strong></p>
 <table>
 <thead>
@@ -3681,28 +3719,63 @@
 <td><code>no</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>Enable Antibot:</strong> Set to <code>recaptcha</code> to enable the reCAPTCHA challenge.</td>
+<td>Enable antibot; set to <code>recaptcha</code> to enable reCAPTCHA.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_RECAPTCHA_CLASSIC</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>no</td>
+<td>Use classic reCAPTCHA. Set to <code>no</code> to use the new Google Cloud-based version.</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_RECAPTCHA_SITEKEY</code></td>
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>reCAPTCHA Site Key:</strong> Your reCAPTCHA site key (get this from Google).</td>
+<td>reCAPTCHA site key. Required for both classic and new versions.</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_RECAPTCHA_SECRET</code></td>
 <td></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>reCAPTCHA Secret Key:</strong> Your reCAPTCHA secret key (get this from Google).</td>
+<td>reCAPTCHA secret key. Required for the classic version only.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_RECAPTCHA_PROJECT_ID</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Google Cloud Project ID. Required for the new version only.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_RECAPTCHA_API_KEY</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Google Cloud API key used to call the reCAPTCHA Enterprise API. Required for the new version only.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_RECAPTCHA_JA3</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Optional JA3 TLS fingerprint to include in Enterprise assessments.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_RECAPTCHA_JA4</code></td>
+<td></td>
+<td>multisite</td>
+<td>no</td>
+<td>Optional JA4 TLS fingerprint to include in Enterprise assessments.</td>
 </tr>
 <tr>
 <td><code>ANTIBOT_RECAPTCHA_SCORE</code></td>
 <td><code>0.7</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>reCAPTCHA Minimum Score:</strong> The minimum score required for reCAPTCHA to pass a user (only for reCAPTCHA v3).</td>
+<td>Minimum score required to pass (applies to both classic v3 and the new version).</td>
 </tr>
 </tbody>
 </table>
@@ -3839,7 +3912,7 @@
 </div>
 </div>
 <h3 id="example-configurations_1">Example Configurations</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:7"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><input id="__tabbed_4_6" name="__tabbed_4" type="radio" /><input id="__tabbed_4_7" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Cookie Challenge</label><label for="__tabbed_4_2">JavaScript Challenge</label><label for="__tabbed_4_3">Captcha Challenge</label><label for="__tabbed_4_4">reCAPTCHA Challenge</label><label for="__tabbed_4_5">hCaptcha Challenge</label><label for="__tabbed_4_6">Turnstile Challenge</label><label for="__tabbed_4_7">mCaptcha Challenge</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:8"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><input id="__tabbed_4_6" name="__tabbed_4" type="radio" /><input id="__tabbed_4_7" name="__tabbed_4" type="radio" /><input id="__tabbed_4_8" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Cookie Challenge</label><label for="__tabbed_4_2">JavaScript Challenge</label><label for="__tabbed_4_3">Captcha Challenge</label><label for="__tabbed_4_4">reCAPTCHA Classic</label><label for="__tabbed_4_5">reCAPTCHA (new)</label><label for="__tabbed_4_6">hCaptcha Challenge</label><label for="__tabbed_4_7">Turnstile Challenge</label><label for="__tabbed_4_8">mCaptcha Challenge</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Example configuration for enabling the Cookie challenge:</p>
@@ -3868,10 +3941,27 @@
 <p>Note: The example above uses numbers 2-9 and all letters, which are the most commonly used characters for CAPTCHA challenges. You can customize the alphabet to include special characters as needed.</p>
 </div>
 <div class="tabbed-block">
-<p>Example configuration for enabling the reCAPTCHA challenge:</p>
+<p>Example configuration for the classic reCAPTCHA (site/secret keys):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_ANTIBOT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;recaptcha&quot;</span>
+<span class="nt">ANTIBOT_RECAPTCHA_CLASSIC</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">ANTIBOT_RECAPTCHA_SITEKEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-site-key&quot;</span>
 <span class="nt">ANTIBOT_RECAPTCHA_SECRET</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-secret-key&quot;</span>
+<span class="nt">ANTIBOT_RECAPTCHA_SCORE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0.7&quot;</span>
+<span class="nt">ANTIBOT_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/challenge&quot;</span>
+<span class="nt">ANTIBOT_TIME_RESOLVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60&quot;</span>
+<span class="nt">ANTIBOT_TIME_VALID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;86400&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Example configuration for the new Google Cloud-based reCAPTCHA (Project ID + API key):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_ANTIBOT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;recaptcha&quot;</span>
+<span class="nt">ANTIBOT_RECAPTCHA_CLASSIC</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="nt">ANTIBOT_RECAPTCHA_SITEKEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-site-key&quot;</span>
+<span class="nt">ANTIBOT_RECAPTCHA_PROJECT_ID</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-gcp-project-id&quot;</span>
+<span class="nt">ANTIBOT_RECAPTCHA_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-gcp-api-key&quot;</span>
+<span class="c1"># Optional fingerprints to improve Enterprise assessments</span>
+<span class="c1"># ANTIBOT_RECAPTCHA_JA3: &quot;&lt;ja3-fingerprint&gt;&quot;</span>
+<span class="c1"># ANTIBOT_RECAPTCHA_JA4: &quot;&lt;ja4-fingerprint&gt;&quot;</span>
 <span class="nt">ANTIBOT_RECAPTCHA_SCORE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0.7&quot;</span>
 <span class="nt">ANTIBOT_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/challenge&quot;</span>
 <span class="nt">ANTIBOT_TIME_RESOLVE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60&quot;</span>
@@ -5437,7 +5527,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5454,7 +5544,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># The IP address of the syslog service</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -5488,7 +5578,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.6.11</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.0</span><span class="w"> </span><span class="c1"># Use the latest version but always pin the version for a better stability/security</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># To persist the CrowdSec data</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># The logs of BunkerWeb for CrowdSec to parse</span>
@@ -8474,7 +8564,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <p>Select a CRS version to best match your security needs:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.17.1">v4.17.1</a> (<strong>default</strong>).</li>
+<li><strong><code>4</code></strong>: Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0">v4.18.0</a> (<strong>default</strong>).</li>
 <li><strong><code>nightly</code></strong>: <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Nightly build</a> offering the latest rule updates.</li>
 </ul>
 <div class="admonition example">
@@ -11370,7 +11460,8 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
   
 </div>
       
-        <div class="md-social">
+        
+<div class="md-social">
   
     
     

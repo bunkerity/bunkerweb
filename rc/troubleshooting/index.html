@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
     
     
       
@@ -275,6 +275,44 @@
     
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/troubleshooting/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../de/troubleshooting/" hreflang="de" class="md-select__link">
+              Deutsch
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../es/troubleshooting/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
     
     
       
@@ -979,6 +1017,39 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Web UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Access database
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upload plugin
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1092,11 +1163,11 @@
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>ps
 </code></pre></div></p>
 </div>
-<p>You can use the <code>docker logs</code> command (replace <code>mybunker</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>mybunker
+<p>You can use the <code>docker logs</code> command (replace <code>bunkerweb</code> with the name of your container) :
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>bunkerweb
 </code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>logs<span class="w"> </span>mybunker
+<p>Here is the docker-compose equivalent (replace <code>bunkerweb</code> with the name of the services declared in the docker-compose.yml file) :
+<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>logs<span class="w"> </span>bunkerweb
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1106,13 +1177,13 @@
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>ps
 </code></pre></div></p>
 </div>
-<p>You can use the <code>docker logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> with the name of your containers) :
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>mybunker
-docker<span class="w"> </span>logs<span class="w"> </span>myautoconf
+<p>You can use the <code>docker logs</code> command (replace <code>bunkerweb</code> and <code>bw-autoconf</code> with the name of your containers) :
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>bunkerweb
+docker<span class="w"> </span>logs<span class="w"> </span>bw-autoconf
 </code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>mybunker</code> and <code>myautoconf</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>logs<span class="w"> </span>mybunker
-docker-compose<span class="w"> </span>logs<span class="w"> </span>myautoconf
+<p>Here is the docker-compose equivalent (replace <code>bunkerweb</code> and <code>bw-autoconf</code> with the name of the services declared in the docker-compose.yml file) :
+<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>logs<span class="w"> </span>bunkerweb
+docker-compose<span class="w"> </span>logs<span class="w"> </span>bw-autoconf
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1127,7 +1198,7 @@ docker-compose<span class="w"> </span>logs<span class="w"> </span>myautoconf
 <div class="tabbed-block">
 <div class="admonition warning">
 <p class="admonition-title">Deprecated</p>
-<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_1_2">Docker autoconf integration</a> instead.</p>
+<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="../integrations/#kubernetes">Kubernetes integration</a> instead.</p>
 <p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
 </div>
 <div class="admonition tip">
@@ -1136,9 +1207,9 @@ docker-compose<span class="w"> </span>logs<span class="w"> </span>myautoconf
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>service<span class="w"> </span>ls
 </code></pre></div></p>
 </div>
-<p>You can use the <code>docker service logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> with the name of your services) :
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>service<span class="w"> </span>logs<span class="w"> </span>mybunker
-docker<span class="w"> </span>service<span class="w"> </span>logs<span class="w"> </span>myautoconf
+<p>You can use the <code>docker service logs</code> command (replace <code>bunkerweb</code> and <code>bw-autoconf</code> with the name of your services) :
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>service<span class="w"> </span>logs<span class="w"> </span>bunkerweb
+docker<span class="w"> </span>service<span class="w"> </span>logs<span class="w"> </span>bw-autoconf
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1148,9 +1219,9 @@ docker<span class="w"> </span>service<span class="w"> </span>logs<span class="w"
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>pods
 </code></pre></div></p>
 </div>
-<p>You can use the <code>kubectl logs</code> command (replace <code>mybunker</code> and <code>myautoconf</code> with the name of your pods) :
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>mybunker
-kubectl<span class="w"> </span>logs<span class="w"> </span>myautoconf
+<p>You can use the <code>kubectl logs</code> command (replace <code>bunkerweb</code> and <code>bunkerweb-controler</code> with the name of your pods) :
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>bunkerweb
+kubectl<span class="w"> </span>logs<span class="w"> </span>bunkerweb-controler
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1165,25 +1236,17 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 </div>
 <h2 id="permissions">Permissions</h2>
-<p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info <a href="../advanced/#custom-configurations">here</a>). You will need to set at least <strong>RW</strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
+<p>Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info <a href="../advanced/#custom-configurations">here</a>). You will need to set at least <strong><em>RW</em></strong> rights on files and <strong><em>RWX</em></strong> on folders.</p>
 <h2 id="ip-unban">IP unban</h2>
 <p>You can manually unban an IP, which is useful when performing tests so that you can contact the internal API of BunkerWeb (replace <code>1.2.3.4</code> with the IP address to unban) :</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:6"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker</label><label for="__tabbed_2_2">Docker autoconf</label><label for="__tabbed_2_3">All-in-one</label><label for="__tabbed_2_4">Swarm</label><label for="__tabbed_2_5">Kubernetes</label><label for="__tabbed_2_6">Linux</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Docker / Docker Autoconf</label><label for="__tabbed_2_2">All-in-one</label><label for="__tabbed_2_3">Swarm</label><label for="__tabbed_2_4">Kubernetes</label><label for="__tabbed_2_5">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>You can use the <code>docker exec</code> command (replace <code>mybunker</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mybunker<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
+<p>You can use the <code>docker exec</code> command (replace <code>bw-scheduler</code> with the name of your container) :
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>bw-scheduler<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
 </code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>mybunker</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mybunker<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<p>You can use the <code>docker exec</code> command (replace <code>myautoconf</code> with the name of your container) :
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>myautoconf<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
-</code></pre></div></p>
-<p>Here is the docker-compose equivalent (replace <code>myautoconf</code> with the name of the services declared in the docker-compose.yml file) :
-<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>myautoconf<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
+<p>Here is the docker-compose equivalent (replace <code>bw-scheduler</code> with the name of the services declared in the docker-compose.yml file) :
+<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>bw-scheduler<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1198,16 +1261,16 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <div class="tabbed-block">
 <div class="admonition warning">
 <p class="admonition-title">Deprecated</p>
-<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_2_2">Docker autoconf integration</a> instead.</p>
+<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="../integrations/#kubernetes">Kubernetes integration</a> instead.</p>
 <p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
 </div>
-<p>You can use the <code>docker exec</code> command (replace <code>myautoconf</code> with the name of your service) :
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="k">$(</span>docker<span class="w"> </span>ps<span class="w"> </span>-q<span class="w"> </span>-f<span class="w"> </span><span class="nv">name</span><span class="o">=</span>myautoconf<span class="k">)</span><span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
+<p>You can use the <code>docker exec</code> command (replace <code>bw-scheduler</code> with the name of your service) :
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="k">$(</span>docker<span class="w"> </span>ps<span class="w"> </span>-q<span class="w"> </span>-f<span class="w"> </span><span class="nv">name</span><span class="o">=</span>bw-scheduler<span class="k">)</span><span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
-<p>You can use the <code>kubectl exec</code> command (replace <code>myautoconf</code> with the name of your pod) :
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>myautoconf<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
+<p>You can use the <code>kubectl exec</code> command (replace <code>bunkerweb-scheduler</code> with the name of your pod) :
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>bunkerweb-scheduler<span class="w"> </span>bwcli<span class="w"> </span>unban<span class="w"> </span><span class="m">1</span>.2.3.4
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
@@ -1219,7 +1282,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 </div>
 <h2 id="false-positives">False positives</h2>
 <h3 id="detect-only-mode">Detect only mode</h3>
-<p>For debugging/test purposes, you can set BunkerWeb in <a href="http://localhost:8000/advanced/#security-mode">detect only mode</a> so it won't block request and will act as a classical reverse proxy.</p>
+<p>For debugging/test purposes, you can set BunkerWeb in <a href="../features/#security-modes">detect only mode</a> so it won't block request and will act as a classical reverse proxy.</p>
 <h3 id="modsecurity">ModSecurity</h3>
 <p>The default BunkerWeb configuration of ModSecurity is to load the Core Rule Set in anomaly scoring mode with a paranoia level (PL) of 1 :</p>
 <ul>
@@ -1328,8 +1391,8 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <p>When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the <code>TZ</code> environment variable to the timezone of your choice on your containers (e.g. <code>TZ=Europe/Paris</code>). You will find the list of timezone identifiers <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">here</a>.</p>
 <h2 id="web-ui">Web UI</h2>
 <p>In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.</p>
-<p><strong>Access database</strong></p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label></div>
+<h3 id="access-database">Access database</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label><label for="__tabbed_3_3">PostgreSQL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Linux</label><label for="__tabbed_4_2">Docker</label><label for="__tabbed_4_3">All-in-one</label></div>
@@ -1427,24 +1490,151 @@ sqlite&gt;
 </div>
 </div>
 </div>
+<div class="tabbed-block">
+<div class="admonition note">
+<p class="admonition-title">PostgreSQL only</p>
+<p>The following steps are only valid for PostgreSQL databases. If you are using another database, please refer to the documentation of your database.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Credentials, host and database name</p>
+<p>You will need to use the same credentials (user/password), host and database name used in the <code>DATABASE_URI</code> setting.</p>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Linux</label><label for="__tabbed_6_2">Docker</label><label for="__tabbed_6_3">All-in-one</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Access your local database:</p>
+<div class="highlight"><pre><span></span><code>psql<span class="w"> </span>-U<span class="w"> </span>&lt;user&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database&gt;
+</code></pre></div>
+<p>If your database is on another host, include the hostname/IP and port:</p>
+<div class="highlight"><pre><span></span><code>psql<span class="w"> </span>-h<span class="w"> </span>&lt;host&gt;<span class="w"> </span>-p<span class="w"> </span><span class="m">5432</span><span class="w"> </span>-U<span class="w"> </span>&lt;user&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database&gt;
+</code></pre></div>
+<p>Then enter the database user’s password and you should be able to access your database.</p>
+</div>
+<div class="tabbed-block">
+<p>Access your database container:</p>
+<div class="admonition note">
+<p class="admonition-title">Docker arguments</p>
+<ul>
+<li>the <code>-u 0</code> option is to run the command as root (mandatory)</li>
+<li>the <code>-it</code> options are to run the command interactively (mandatory)</li>
+<li><code>&lt;bunkerweb_db_container&gt;</code> : the name or ID of your database container</li>
+<li><code>&lt;user&gt;</code> : the database user</li>
+<li><code>&lt;database&gt;</code> : the database name</li>
+</ul>
+</div>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-u<span class="w"> </span><span class="m">0</span><span class="w"> </span>-it<span class="w"> </span>&lt;bunkerweb_db_container&gt;<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>&lt;user&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;database&gt;
+</code></pre></div>
+<p>If the database is hosted elsewhere, add the <code>-h &lt;host&gt;</code> and <code>-p 5432</code> options accordingly.</p>
+</div>
+<div class="tabbed-block">
+<p>The All-in-One image does not include a PostgreSQL server. If you have configured the AIO to use an external PostgreSQL database (by setting the <code>DATABASE_URI</code> environment variable), you should connect to that database directly using standard PostgreSQL client tools.</p>
+<p>The connection method would be similar to the "Linux" tab (if connecting from the host where AIO runs or another machine) or by running a PostgreSQL client in a separate Docker container if preferred, targeting your external database's host and credentials.</p>
 </div>
 </div>
-<p><strong>Troubleshooting actions</strong></p>
+</div>
+</div>
+</div>
+</div>
+<h3 id="troubleshooting-actions">Troubleshooting actions</h3>
 <div class="admonition info">
 <p class="admonition-title">Tables schema</p>
-<p>The schema of the <code>bw_ui_users</code> table is the following :</p>
-<div class="highlight"><pre><span></span><code><span class="n">username</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
-<span class="n">email</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span>
-<span class="n">password</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
-<span class="k">method</span><span class="w"> </span><span class="n">ENUM</span><span class="p">(</span><span class="s1">&#39;ui&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;scheduler&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;autoconf&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;manual&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;wizard&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
-<span class="k">admin</span><span class="w"> </span><span class="nb">BOOLEAN</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span>
-<span class="n">theme</span><span class="w"> </span><span class="n">ENUM</span><span class="p">(</span><span class="s1">&#39;light&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;dark&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;light&#39;</span>
-<span class="n">totp_secret</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span>
-<span class="n">creation_date</span><span class="w"> </span><span class="n">DATETIME</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
-<span class="n">update_date</span><span class="w"> </span><span class="n">DATETIME</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
-</code></pre></div>
+<p>The schema of the <code>bw_ui_users</code> table is the following:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Null</th>
+<th>Key</th>
+<th>Default</th>
+<th>Extra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>username</td>
+<td>varchar(256)</td>
+<td>NO</td>
+<td>PRI</td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>email</td>
+<td>varchar(256)</td>
+<td>YES</td>
+<td>UNI</td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>password</td>
+<td>varchar(60)</td>
+<td>NO</td>
+<td></td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>method</td>
+<td>enum('ui','scheduler','autoconf','manual','wizard')</td>
+<td>NO</td>
+<td></td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>admin</td>
+<td>tinyint(1)</td>
+<td>NO</td>
+<td></td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>theme</td>
+<td>enum('light','dark')</td>
+<td>NO</td>
+<td></td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>language</td>
+<td>varchar(2)</td>
+<td>NO</td>
+<td></td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>totp_secret</td>
+<td>varchar(256)</td>
+<td>YES</td>
+<td></td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>creation_date</td>
+<td>datetime</td>
+<td>NO</td>
+<td></td>
+<td>NULL</td>
+<td></td>
+</tr>
+<tr>
+<td>update_date</td>
+<td>datetime</td>
+<td>NO</td>
+<td></td>
+<td>NULL</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:4"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Retrieve username</label><label for="__tabbed_6_2">Update admin user password</label><label for="__tabbed_6_3">Disable 2FA authentication for admin user</label><label for="__tabbed_6_4">Refresh 2FA recovery codes</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:5"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><input id="__tabbed_7_5" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Retrieve username</label><label for="__tabbed_7_2">Update admin user password</label><label for="__tabbed_7_3">Disable 2FA authentication for admin user</label><label for="__tabbed_7_4">Refresh 2FA recovery codes</label><label for="__tabbed_7_5">Export configuration and anonymized logs</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Execute the following command to extract data from the <code>bw_ui_users</code> table :</p>
@@ -1566,9 +1756,18 @@ sqlite&gt;
 <div class="tabbed-block">
 <p>The recovery codes can be refreshed in your <strong>profile page</strong> of the web UI under the <code>Security</code> tab.</p>
 </div>
+<div class="tabbed-block">
+<p>Use the <strong>Support page</strong> in the Web UI to quickly gather configuration and logs for troubleshooting.</p>
+<ul>
+<li>Open the Web UI and go to the Support page.</li>
+<li>Choose the scope: export the Global configuration or select a specific Service.</li>
+<li>Click to download the configuration archive for the chosen scope.</li>
+<li>Optionally download logs: the exported logs are automatically anonymized (all IP addresses and domains are masked).</li>
+</ul>
 </div>
 </div>
-<p><strong>Upload plugin</strong></p>
+</div>
+<h3 id="upload-plugin">Upload plugin</h3>
 <p>It may not be possible to upload a plugin from the UI in certain situations:</p>
 <ul>
 <li>Missing package to manage compressed files on your integration, in which case you will need to add the necessary packages</li>
@@ -1612,7 +1811,8 @@ sqlite&gt;
   
 </div>
       
-        <div class="md-social">
+        
+<div class="md-social">
   
     
     

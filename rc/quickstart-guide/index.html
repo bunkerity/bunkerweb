@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
     
     
       
@@ -275,6 +275,44 @@
     
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/quickstart-guide/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../de/quickstart-guide/" hreflang="de" class="md-select__link">
+              Deutsch
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../es/quickstart-guide/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
     
     
       
@@ -1044,7 +1082,7 @@
 </div>
 <p>This quickstart guide will help you to quickly install BunkerWeb and secure a web service using the web User Interface.</p>
 <p>Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb: it will act as a classical <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> with extra security features.</p>
-<p>See the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/examples">examples folder</a> of the repository to get real-world examples.</p>
+<p>See the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc2/examples">examples folder</a> of the repository to get real-world examples.</p>
 <h2 id="basic-setup">Basic setup</h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">All-in-one</label><label for="__tabbed_1_2">Linux</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Docker autoconf</label><label for="__tabbed_1_5">Kubernetes</label><label for="__tabbed_1_6">Swarm</label></div>
 <div class="tabbed-content">
@@ -1056,7 +1094,7 @@
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc1
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc2
 </code></pre></div>
 <p>By default, the container exposes:</p>
 <ul>
@@ -1070,8 +1108,8 @@
 <div class="tabbed-block">
 <p>Use the Easy Install script to set up BunkerWeb on supported Linux distributions. It automatically installs and configures NGINX, adds the BunkerWeb repository, and sets up the required services.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc1/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc1/install-bunkerweb.sh.sha256
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc2/install-bunkerweb.sh
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc2/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1096,7 +1134,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># This is the name that will be used to identify the instance in the Scheduler</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1109,7 +1147,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct instance name</span>
@@ -1126,7 +1164,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
@@ -1190,7 +1228,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1206,7 +1244,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
@@ -1224,7 +1262,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -1247,7 +1285,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
@@ -1330,7 +1368,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
@@ -1360,7 +1398,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
@@ -1378,7 +1416,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">DOCKER_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://bw-docker:2375&quot;</span>
@@ -1407,7 +1445,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">manager&quot;</span>
 
 <span class="w">  </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc1</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc2</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-ui-env</span>
 <span class="w">      </span><span class="nt">TOTP_ENCRYPTION_KEYS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mysecret&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger secret key (see the Prerequisites section)</span>
@@ -1555,7 +1593,6 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
   <figcaption>Web interface create service easy</figcaption>
 </figure></p>
 <ul>
-<li>To navigate between the different plugins, you can use the dropdown menu on the top left corner of the page.</li>
 <li>Once you've selected the template, you can fill in the required fields and follow the instructions to create the service.</li>
 <li>Once you're done configuring the service, you can click on the <code>💾 Save</code> button to save the configuration.</li>
 </ul>
@@ -1567,7 +1604,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
   <figcaption>Web interface create service advanced</figcaption>
 </figure></p>
 <ul>
-<li>To navigate between the different plugins, you can use the dropdown menu on the top left corner of the page.</li>
+<li>To navigate between the different plugins, you can use the navigation menu on the left side of the page.</li>
 <li>Each setting has a small piece of information that will help you understand what it does.</li>
 <li>Once you're done configuring the service, you can click on the <code>💾 Save</code> button to save the configuration.</li>
 </ul>
@@ -1612,7 +1649,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">  </span>-e<span class="w"> </span><span class="s2">&quot;www.example.com_REVERSE_PROXY_HOST=http://myapp:8080&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="s2">&quot;www.example.com_REVERSE_PROXY_URL=/&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="c1"># --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc1
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc2
 </code></pre></div>
 <p>Your application container (<code>myapp</code>) and the <code>bunkerweb-aio</code> container must be on the same Docker network for BunkerWeb to reach it using the hostname <code>myapp</code>.</p>
 <p><strong>Network Setup Example:</strong>
@@ -1631,12 +1668,12 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="c1">#   ... (all other relevant environment variables as shown in the main example above) ...</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc1
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc2
 </code></pre></div></p>
 <p>Make sure to replace <code>myapp</code> with the actual name or IP of your application container and <code>http://myapp:8080</code> with its correct address and port.</p>
 </div>
 <div class="tabbed-block">
-<p>We assume that you followed the <a href="#__tabbed_1_5">Basic setup</a> and that the Linux integration is running on your machine.</p>
+<p>We assume that you followed the <a href="#__tabbed_1_2">Basic setup</a> and that the Linux integration is running on your machine.</p>
 <p>You can create a new service by editing the <code>variables.env</code> file located in the <code>/etc/bunkerweb/</code> directory.</p>
 <div class="highlight"><pre><span></span><code>nano<span class="w"> </span>/etc/bunkerweb/variables.env
 </code></pre></div>
@@ -1652,7 +1689,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>We assume that you followed the <a href="#__tabbed_1_1">Basic setup</a> and that the Docker integration is running on your machine.</p>
+<p>We assume that you followed the <a href="#__tabbed_1_3">Basic setup</a> and that the Docker integration is running on your machine.</p>
 <p>You must have a network called <code>bw-services</code> so that you can connect your existing application and configure BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -1686,7 +1723,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>We assume that you followed the <a href="#__tabbed_1_2">Basic setup</a> and that the Docker autoconf integration is running on your machine.</p>
+<p>We assume that you followed the <a href="#__tabbed_1_4">Basic setup</a> and that the Docker autoconf integration is running on your machine.</p>
 <p>You must have a network called <code>bw-services</code> so that you can connect your existing application and configure BunkerWeb with labels:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -1707,7 +1744,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <p>Doing so will automatically create a new service with the provided labels as configuration.</p>
 </div>
 <div class="tabbed-block">
-<p>We assume that you followed the <a href="#__tabbed_1_4">Basic setup</a> and that the Kubernetes stack is running on your cluster.</p>
+<p>We assume that you followed the <a href="#__tabbed_1_5">Basic setup</a> and that the Kubernetes stack is running on your cluster.</p>
 <p>Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
@@ -1767,10 +1804,10 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <div class="tabbed-block">
 <div class="admonition warning">
 <p class="admonition-title">Deprecated</p>
-<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="#__tabbed_2_2">Docker autoconf integration</a> instead.</p>
+<p>The Swarm integration is deprecated and will be removed in a future release. Please consider using the <a href="../integrations/#kubernetes">Kubernetes integration</a> instead.</p>
 <p><strong>More information can be found in the <a href="../integrations/#swarm">Swarm integration documentation</a>.</strong></p>
 </div>
-<p>We assume that you followed the <a href="#__tabbed_1_3">Basic setup</a> and that the Swarm stack is running on your cluster and connected to a network called <code>bw-services</code> so that you can connect your existing application and configure BunkerWeb with labels:</p>
+<p>We assume that you followed the <a href="#__tabbed_1_5">Basic setup</a> and that the Swarm stack is running on your cluster and connected to a network called <code>bw-services</code> so that you can connect your existing application and configure BunkerWeb with labels:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginxdemos/nginx-hello</span>
@@ -1797,7 +1834,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <h2 id="going-further">Going further</h2>
 <p>Congratulations! You have just installed BunkerWeb and secured your first web service. Please note that BunkerWeb offers much more, both in terms of security and integrations with other systems and solutions. Here's a list of resources and actions that may help you continue to deepen your knowledge of the solution:</p>
 <ul>
-<li>Join the Bunker community: <a href="https://discord.com/invite/fTf46FmtyD">Discord</a>, <a href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>, <a href="https://github.com/bunkerity">GitHub</a>, <a href="https://x.com/bunkerity">X</a></li>
+<li>Join the Bunker community: <a href="https://discord.com/invite/fTf46FmtyD">Discord</a>, <a href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>, <a href="https://github.com/bunkerity">GitHub</a>, <a href="https://x.com/bunkerity">X (Formerly Twitter)</a></li>
 <li>Check out the <a href="https://www.bunkerweb.io/blog?utm_campaign=self&amp;utm_source=doc">official blog</a></li>
 <li>Explore <a href="../advanced/">advanced use cases</a> in the documentation</li>
 <li><a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">Get in touch with us</a> to discuss your organization's needs</li>
@@ -1840,7 +1877,8 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
   
 </div>
       
-        <div class="md-social">
+        
+<div class="md-social">
   
     
     

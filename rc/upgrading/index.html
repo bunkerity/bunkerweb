@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.17">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
     
     
       
@@ -275,6 +275,44 @@
     
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../fr/upgrading/" hreflang="fr" class="md-select__link">
+              Français
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../de/upgrading/" hreflang="de" class="md-select__link">
+              Deutsch
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../es/upgrading/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
     
     
       
@@ -1121,16 +1159,16 @@
 <p><strong>Update the Docker Compose file</strong>: Update the Docker Compose file to use the new version of the BunkerWeb image.
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -1274,20 +1312,20 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </tbody>
 </table>
 <p>Examples:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Upgrade to 1.6.5-rc1 interactively (will prompt for backup)</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.5-rc1
+<div class="highlight"><pre><span></span><code><span class="c1"># Upgrade to 1.6.5-rc2 interactively (will prompt for backup)</span>
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.5-rc2
 
 <span class="c1"># Non-interactive upgrade with automatic backup to custom directory</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.5-rc1<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.5-rc2<span class="w"> </span>--backup-dir<span class="w"> </span>/var/backups/bw-2025-01<span class="w"> </span>-y
 
 <span class="c1"># Silent unattended upgrade (logs suppressed) – relies on default auto-backup</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.5-rc1<span class="w"> </span>-y<span class="w"> </span>-q
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.5-rc2<span class="w"> </span>-y<span class="w"> </span>-q
 
 <span class="c1"># Perform a dry run (plan) without applying changes</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.5-rc1<span class="w"> </span>--dry-run
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.5-rc2<span class="w"> </span>--dry-run
 
 <span class="c1"># Upgrade skipping automatic backup (NOT recommended)</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.5-rc1<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.6.5-rc2<span class="w"> </span>--no-auto-backup<span class="w"> </span>-y
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Skipping backups</p>
@@ -1304,8 +1342,8 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<spa
 <li>Before proceeding with the database upgrade, ensure that you perform a complete backup of the current state of the database.</li>
 <li>Use appropriate tools to backup the entire database, including data, schemas, and configurations.</li>
 </ul>
-<div class="admonition warning">
-<p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.10 users</p>
+<details class="warning">
+<summary>Information for Red Hat Enterprise Linux (RHEL) 8.10 users</summary>
 <p>If you are using <strong>RHEL 8.10</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">MySQL/MariaDB</label><label for="__tabbed_2_2">PostgreSQL</label></div>
 <div class="tabbed-content">
@@ -1344,7 +1382,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>-v<spa
 </div>
 </div>
 </div>
-</div>
+</details>
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
 </code></pre></div>
 </li>
@@ -1372,7 +1410,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>Then, you can update the BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.5-rc1
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.5-rc2
 </code></pre></div>
 <p>To prevent the BunkerWeb package from upgrading when executing <code>apt upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -1387,7 +1425,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>Then, you can update the BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.5-rc1
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.5-rc2
 </code></pre></div>
 <p>To prevent the BunkerWeb package from upgrading when executing <code>dnf upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1662,8 +1700,8 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="admonition warning">
-<p class="admonition-title">Information for Red Hat Enterprise Linux (RHEL) 8.10 users</p>
+<details class="warning">
+<summary>Information for Red Hat Enterprise Linux (RHEL) 8.10 users</summary>
 <p>If you are using <strong>RHEL 8.10</strong> and plan on using an <strong>external database</strong>, you will need to install the <code>mysql-community-client</code> package to ensure the <code>mysqldump</code> command is available. You can install the package by executing the following commands:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">MySQL/MariaDB</label><label for="__tabbed_9_2">PostgreSQL</label></div>
 <div class="tabbed-content">
@@ -1702,7 +1740,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 </div>
 </div>
 </div>
-</div>
+</details>
 <div class="highlight"><pre><span></span><code><span class="nv">BACKUP_DIRECTORY</span><span class="o">=</span>/path/to/backup/directory<span class="w"> </span>bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>save
 </code></pre></div>
 </div>
@@ -1791,16 +1829,16 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p><strong>Update the Docker Compose file</strong>: Update the Docker Compose file to use the new version of the BunkerWeb image.
     <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">bw-ui</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc1</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-ui:1.6.5-rc2</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div></p>
 </li>
@@ -1832,7 +1870,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"
 </code></pre></div>
 <p>Then, you can update the BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.5-rc1
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.5-rc2
 </code></pre></div>
 <p>To prevent the BunkerWeb package from upgrading when executing <code>apt upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>bunkerweb<span class="w"> </span>nginx
@@ -1847,7 +1885,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </code></pre></div>
 <p>Then, you can update the BunkerWeb package :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.5-rc1
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.5-rc2
 </code></pre></div>
 <p>To prevent the BunkerWeb package from upgrading when executing <code>dnf upgrade</code>, you can use the following command :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2112,7 +2150,8 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
   
 </div>
       
-        <div class="md-social">
+        
+<div class="md-social">
   
     
     

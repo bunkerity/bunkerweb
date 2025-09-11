@@ -1,51 +1,435 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
-         <loc>https://docs.bunkerweb.io/latest/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/about/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/about/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/about/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/about/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/about/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/about/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/advanced/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/advanced/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/advanced/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/concepts/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/concepts/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/concepts/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/features/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/features/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/features/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/features/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/features/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/features/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/integrations/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/integrations/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/integrations/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/plugins/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/plugins/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/plugins/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/professional-services/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/professional-services/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/professional-services/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/quickstart-guide/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/quickstart-guide/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/quickstart-guide/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/troubleshooting/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/troubleshooting/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/troubleshooting/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/upgrading/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/upgrading/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/upgrading/"/>
     </url>
     <url>
-         <loc>https://docs.bunkerweb.io/latest/web-ui/</loc>
-         <lastmod>2025-08-30</lastmod>
+        <loc>https://docs.bunkerweb.io/latest/web-ui/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/web-ui/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/about/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/about/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/about/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestabout/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/about/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/advanced/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestadvanced/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/advanced/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/concepts/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestconcepts/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/concepts/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/features/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/features/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/features/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestfeatures/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/features/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/integrations/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestintegrations/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/integrations/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/plugins/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestplugins/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/plugins/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/professional-services/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestprofessional-services/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/professional-services/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/quickstart-guide/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestquickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/quickstart-guide/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/troubleshooting/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latesttroubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/upgrading/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestupgrading/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/upgrading/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/fr/web-ui/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latest/fr/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestweb-ui/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/web-ui/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/about/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/about/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestabout/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/about/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/about/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/advanced/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestadvanced/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/advanced/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/concepts/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestconcepts/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/concepts/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/features/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/features/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestfeatures/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/features/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/features/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/integrations/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestintegrations/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/integrations/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/plugins/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestplugins/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/plugins/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/professional-services/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestprofessional-services/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/professional-services/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/quickstart-guide/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestquickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/quickstart-guide/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/troubleshooting/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latesttroubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/upgrading/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestupgrading/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/upgrading/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/de/web-ui/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latest/de/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestweb-ui/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latestes/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/web-ui/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latest"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/about/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/about/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/about/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestabout/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/about/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/advanced/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestadvanced/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/advanced/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/concepts/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestconcepts/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/concepts/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/features/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/features/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/features/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestfeatures/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/features/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/integrations/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/integrations/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestintegrations/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/integrations/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/plugins/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/plugins/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestplugins/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/plugins/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/professional-services/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/professional-services/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestprofessional-services/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/professional-services/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/quickstart-guide/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/quickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestquickstart-guide/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/quickstart-guide/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/troubleshooting/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latesttroubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/upgrading/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/upgrading/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestupgrading/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/upgrading/"/>
+    </url>
+    <url>
+        <loc>https://docs.bunkerweb.io/latest/es/web-ui/</loc>
+        <lastmod>2025-09-11</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://docs.bunkerweb.io/latest/es/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://docs.bunkerweb.io/latestde/web-ui/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://docs.bunkerweb.io/latestweb-ui/"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://docs.bunkerweb.io/latestfr/web-ui/"/>
     </url>
 </urlset>
