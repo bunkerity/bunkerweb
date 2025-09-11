@@ -3,6 +3,7 @@
 ## v1.6.5-rc3 - ????/??/??
 
 - [FEATURE] Introduce optional API token authentication to bolster security for BunkerWeb API calls, allowing users to enable token-based access control for enhanced protection against unauthorized requests
+- [FEATURE] Add the possibility to ignore IPs in `DNSBL` plugin
 - [LINUX] Improve nginx stop and reload handling in BunkerWeb service to use the pid file instead of the `pgrep` command
 - [DOCS] Add multi-language support to the documentation, including French
 - [UI] Fix incorrect key used when viewing service details
