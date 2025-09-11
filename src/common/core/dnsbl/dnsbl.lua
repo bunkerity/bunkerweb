@@ -40,7 +40,8 @@ function dnsbl:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "dnsbl", ctx)
 	-- Decode ignore lists during request phases when needed
-	if get_phase() ~= "init" and self:is_needed() then
+	local phase = get_phase()
+	if phase ~= "init" and phase ~= "timer" and self:is_needed() then
 		-- Load pre-downloaded lists from datastore if available
 		local datastore_lists, err = self.datastore:get("plugin_dnsbl_lists_" .. self.ctx.bw.server_name, true)
 		if not datastore_lists then
