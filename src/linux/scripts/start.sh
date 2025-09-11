@@ -158,40 +158,60 @@ function start() {
 function stop() {
     log "SYSTEMCTL" "ℹ️" "Stopping BunkerWeb service ..."
 
-    pgrep nginx > /dev/null 2>&1
-    # shellcheck disable=SC2181
-    if [ $? -eq 0 ] ; then
-        log "SYSTEMCTL" "ℹ️ " "Stopping nginx..."
-        nginx -s stop
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            log "SYSTEMCTL" "❌" "Error while sending stop signal to nginx"
-            log "SYSTEMCTL" "ℹ️ " "Stopping nginx (force)..."
-            kill -TERM "$(cat /var/run/bunkerweb/nginx.pid)"
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "SYSTEMCTL" "❌" "Error while sending term signal to nginx"
-            fi
+    pid_file="/var/run/bunkerweb/nginx.pid"
+
+    if [ -f "$pid_file" ] ; then
+        pid="$(cat "$pid_file" 2>/dev/null)"
+        if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
+            log "SYSTEMCTL" "ℹ️ " "Stopping nginx (PID $pid)..."
+            # Try graceful quit first
+            kill -QUIT "$pid" >/dev/null 2>&1
+            # Fallback to TERM if needed later
+        else
+            # PID file exists but process not running
+            log "SYSTEMCTL" "⚠️ " "PID file exists but nginx not running; cleaning up"
+            rm -f "$pid_file"
         fi
+    else
+        log "SYSTEMCTL" "ℹ️ " "nginx is not running"
     fi
+
+    # Wait for nginx to stop based on our own PID
     count=0
-    while true ; do
-        pgrep nginx > /dev/null 2>&1
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            break
+    if [ -n "$pid" ] ; then
+        while kill -0 "$pid" >/dev/null 2>&1 ; do
+            log "SYSTEMCTL" "ℹ️ " "Waiting for nginx to stop..."
+            sleep 1
+            count=$((count + 1))
+            if [ $count -ge 20 ] ; then
+                break
+            fi
+        done
+
+        if kill -0 "$pid" >/dev/null 2>&1 ; then
+            # Graceful stop timed out, try TERM
+            log "SYSTEMCTL" "ℹ️ " "Stopping nginx (TERM)..."
+            kill -TERM "$pid" >/dev/null 2>&1 || true
+            # Wait a bit more
+            extra=0
+            while kill -0 "$pid" >/dev/null 2>&1 ; do
+                sleep 1
+                extra=$((extra + 1))
+                if [ $extra -ge 5 ] ; then
+                    break
+                fi
+            done
         fi
-        log "SYSTEMCTL" "ℹ️ " "Waiting for nginx to stop..."
-        sleep 1
-        count=$((count + 1))
-        if [ $count -ge 20 ] ; then
-            break
+
+        if kill -0 "$pid" >/dev/null 2>&1 ; then
+            log "SYSTEMCTL" "❌" "Timeout while waiting nginx to stop"
+            exit 1
         fi
-    done
-    if [ $count -ge 20 ] ; then
-        log "SYSTEMCTL" "❌" "Timeout while waiting nginx to stop"
-        exit 1
     fi
+
+    # Ensure PID file is removed
+    [ -f "$pid_file" ] && rm -f "$pid_file"
+
     log "SYSTEMCTL" "ℹ️ " "nginx is stopped"
 
     log "SYSTEMCTL" "ℹ️" "BunkerWeb service stopped"
@@ -201,20 +221,25 @@ function reload()
 {
     log "SYSTEMCTL" "ℹ️" "Reloading BunkerWeb service ..."
 
-    pgrep nginx > /dev/null 2>&1
-    # shellcheck disable=SC2181
-    if [ $? -eq 0 ] ; then
-        log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
-        nginx -s reload
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            log "SYSTEMCTL" "❌" "Error while sending reload signal to nginx"
-            log "SYSTEMCTL" "ℹ️" "Reloading nginx (force) ..."
-            kill -HUP "$(cat /var/run/bunkerweb/nginx.pid)"
+    pid_file="/var/run/bunkerweb/nginx.pid"
+    if [ -f "$pid_file" ] ; then
+        pid="$(cat "$pid_file" 2>/dev/null)"
+        if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
+            log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
+            nginx -s reload
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
-                log "SYSTEMCTL" "❌" "Error while sending hup signal to nginx"
+                log "SYSTEMCTL" "❌" "Error while sending reload signal to nginx"
+                log "SYSTEMCTL" "ℹ️" "Reloading nginx (force) ..."
+                kill -HUP "$pid" >/dev/null 2>&1
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    log "SYSTEMCTL" "❌" "Error while sending hup signal to nginx"
+                fi
             fi
+        else
+            log "SYSTEMCTL" "❌" "nginx is not running"
+            exit 1
         fi
     else
         log "SYSTEMCTL" "❌" "nginx is not running"
