@@ -10,12 +10,16 @@ local sessions = class("sessions", plugin)
 local ngx = ngx
 local ERR = ngx.ERR
 local WARN = ngx.WARN
+local NOTICE = ngx.NOTICE
 local worker = ngx.worker
 local get_variable = utils.get_variable
 local session_init = session.init
 local tonumber = tonumber
 local encode = cjson.encode
 local decode = cjson.decode
+
+-- Per worker session config
+local sessions_config = {}
 
 function sessions:initialize(ctx)
 	-- Call parent initialize
@@ -50,21 +54,7 @@ function sessions:set()
 			table.insert(self.ctx.bw.sessions_checks, { check, value })
 		end
 	end
-	local ctx_config = {}
-	local config, config_err = self.datastore:get("storage_sessions_CONFIG")
-	if config then
-		ctx_config = decode(config)
-	else
-		self.logger:log(ERR, "failed to get sessions config from datastore: " .. (config_err or "unknown error"))
-	end
-	local storage, storage_err = self.datastore:get("storage_sessions_STORAGE")
-	if storage then
-		ctx_config.storage = storage
-	else
-		self.logger:log(ERR, "failed to get sessions storage from datastore: " .. (storage_err or "unknown error"))
-	end
-	self.ctx.bw.sessions_config = ctx_config
-	self.logger:log(WARN, encode(self.ctx.bw.sessions_config))
+	session_init(sessions_config)
 	return self:ret(true, "success")
 end
 
@@ -176,6 +166,7 @@ function sessions:init()
 	if not ok_set then
 		self.logger:log(ERR, "error from datastore:set : " .. err_set)
 	end
+	sessions_config = config
 	session_init(config)
 	return self:ret(true, "sessions init successful")
 end
@@ -186,20 +177,25 @@ function sessions:timer()
 		return self:ret(true, "timer not needed")
 	end
 
-	-- Only execute on worker 0
-	if worker.id() ~= 0 then
-		return self:ret(true, "skipped")
-	end
-
 	-- Check if Redis is enabled
 	local storage = "cookie"
+	local change = false
 	local use_redis, err = get_variable("USE_REDIS", false)
+	local prev_storage, prev_err = self.datastore:get("storage_sessions_STORAGE")
+	if prev_storage == nil and prev_err then
+		self.logger:log(ERR, "failed to get previous session storage from datastore: " .. prev_err .. ", assuming cookie")
+		prev_storage = "cookie"
+	end
 	if use_redis ~= "yes" then
+		if prev_storage ~= "cookie" then
+			change = true
+		end
 		local ok_set, err_set = self.datastore:set("storage_sessions_STORAGE", storage)
 		if not ok_set then
 			self.logger:log(ERR, "failed to set storage_sessions_STORAGE: " .. err_set)
 			return self:ret(false, "redis disabled -> cookie")
 		end
+		self.datastore:set("storage_sessions_CHANGE", change)
 		return self:ret(true, "timer done (storage = " .. storage .. ")")
 	end
 
@@ -209,34 +205,47 @@ function sessions:timer()
 	-- Check redis connection
 	local ok, err = self.clusterstore:connect(true)
 	if not ok then
+		if prev_storage == "redis" then
+			change = true
+		end
 		ret_err = "redis connect error : " .. err
 	else
 		-- Send ping
 		local ok, err = self.clusterstore:call("ping")
 		self.clusterstore:close()
-		if err then
-			ret_err = "error while sending ping command to redis server : " .. err
-		end
-		if not ok then
-			ret_err = "redis ping command failed"
+		if err or not ok then
+			if prev_storage == "redis" then
+				change = true
+			end
+			ret_err = "error while sending ping command to redis server : " .. (err or "ping failed")
 		else
 			storage = "redis"
+			if prev_storage ~= "redis" then
+				change = true
+			end
 		end
 	end
 
 	ret_err = "timer done (storage = " .. storage .. ")"
+	sessions_config.storage = storage
 
 	if storage ~= "redis" then
-		self.logger:log(WARN, "redis not available, falling back to cookie storage")
+		self.logger:log(ERR, "redis not available, falling back to cookie storage")
+	else
+		-- Added NOTICE log when redis becomes available again
+		if prev_storage ~= "redis" then
+			self.logger:log(NOTICE, "redis is available again, switching session storage to redis")
+		end
 	end
 
-	-- Save storage type
+	-- Save storage type and change flag
 	local ok_set, err_set = self.datastore:set("storage_sessions_STORAGE", storage)
 	if not ok_set then
 		ret = false
 		ret_err = "failed to set storage_sessions_STORAGE: " .. err_set
 		self.logger:log(ERR, "failed to set storage_sessions_STORAGE: " .. err_set)
 	end
+	self.datastore:set("storage_sessions_CHANGE", change)
 
 	return self:ret(ret, ret_err)
 end
