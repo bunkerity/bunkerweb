@@ -355,11 +355,18 @@ def bans_fetch():
     # Special handling for country searchpane options
     search_panes_options["country"] = []
     for code, counts in pane_counts["country"].items():
-        country_code = str(code).lower()
+        str_code = str(code)
+        country_code = str_code.lower()
+        is_unknown = str_code in ("unknown", "local", "n/a")
+        flag_code = "zz" if is_unknown else country_code
+        # Show both the alpha-2 code and the translated country name so users can search by either
+        code_text = "N/A" if is_unknown else str_code.upper()
+        i18n_key = "not_applicable" if str_code in ("unknown", "local") else str_code.upper()
+        fallback_name = "N/A" if is_unknown else str_code
         search_panes_options["country"].append(
             {
-                "label": f'<img src="{base_flags_url}/{"zz" if code in ("unknown", "local", "n/a")  else country_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{"not_applicable" if code in ("unknown", "local") else str(code).upper()}">{"N/A" if code in ("unknown", "local") else code}</span>',
-                "value": code,
+                "label": f'<img src="{base_flags_url}/{flag_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span class="me-1"><code>{code_text}</code></span><span data-i18n="country.{i18n_key}">{fallback_name}</span>',
+                "value": str_code,
                 "total": counts["total"],
                 "count": counts["count"],
             }

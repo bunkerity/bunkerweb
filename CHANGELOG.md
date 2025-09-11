@@ -14,7 +14,7 @@
 - [MISC] Automatically minify UI CSS files in Images/Packages build process
 - [DEPS] Update lua-resty-openssl version to v1.6.4
 
-## v1.6.5-rc2 - ????/??/??
+## v1.6.5-rc2 - 2025/09/11
 
 - [BUGFIX] Enhance database backup and restore functionality with improved compatibility and options
 - [FEATURE] Add support for new reCAPTCHA version in `Antibot` plugin

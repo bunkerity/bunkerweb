@@ -232,12 +232,16 @@ def reports_fetch():
         if field == "country":
             search_panes_options["country"] = []
             for code, counts in values.items():
-                country_code = code.lower()
-                country_name = "N/A"
+                str_code = str(code)
+                country_code = str_code.lower()
+                is_unknown = str_code in ("unknown", "local", "n/a")
+                fallback_label = "N/A" if is_unknown else str_code
+                i18n_key = "not_applicable" if str_code in ("unknown", "local") else str_code.upper()
+                flag_code = "zz" if is_unknown else country_code
                 search_panes_options["country"].append(
                     {
-                        "label": f"""<img src="{base_flags_url}/{'zz' if code == 'local' else country_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{'not_applicable' if code == 'local' else code.upper()}">{'N/A' if code == 'local' else country_name}</span>""",
-                        "value": code,
+                        "label": f'<img src="{base_flags_url}/{flag_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{i18n_key}">{fallback_label}</span>',
+                        "value": str_code,
                         "total": counts["total"],
                         "count": counts["count"],
                     }
