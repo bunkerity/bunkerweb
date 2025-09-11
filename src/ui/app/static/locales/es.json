@@ -69,6 +69,7 @@
     "add_plugins": "Añadir Plugins",
     "auto_refresh": "Actualización Automática",
     "ban": "Bloquear",
+    "ban_selected": "Bloquear seleccionados",
     "cache": "Caché",
     "cancel": "Cancelar",
     "clear": "LIMPIAR",
@@ -1222,6 +1223,7 @@
       "run_job": "Ejecutar Tarea {{job}}",
       "stop_instance": "Detener Instancia {{hostname}}",
       "unban_ip": "Desbloquear {{ip}}",
+      "ban_ip": "Bloquear esta dirección IP",
       "force_check": "Programa una verificación; descarga solo si hay actualizaciones.",
       "force_update": "Omite verificaciones y fuerza la descarga de plugins PRO; mantiene el estado actual si falla."
     },
@@ -1384,6 +1386,7 @@
         "version": "Versión del Plugin"
       },
       "reports": {
+        "actions": "Acciones disponibles para este informe",
         "country": "País asociado a la dirección IP reportada",
         "data": "Datos adicionales relacionados con el informe",
         "date": "Fecha y hora de generación del informe",

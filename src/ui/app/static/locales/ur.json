@@ -69,6 +69,7 @@
     "add_plugins": "پلگ ان شامل کریں",
     "auto_refresh": "آٹو ریفریش",
     "ban": "پابندی لگائیں",
+    "ban_selected": "Ban selected",
     "cache": "کیشے",
     "cancel": "منسوخ کریں",
     "clear": "صاف کریں",
@@ -1221,6 +1222,7 @@
       "run_job": "ٹاسک {{job}} چلائیں",
       "stop_instance": "انسٹینس {{hostname}} روکیں",
       "unban_ip": "{{ip}} سے پابندی ہٹائیں",
+      "ban_ip": "Ban this IP address",
       "force_check": "چیک شیڈول کرتا ہے؛ صرف اپڈیٹس ہونے پر ڈاؤن لوڈ کرتا ہے۔",
       "force_update": "چیکس کو چھوڑ کر PRO پلگ انز کا فورس ڈاؤن لوڈ؛ ناکامی پر موجودہ حالت برقرار رہتی ہے۔"
     },
@@ -1383,6 +1385,7 @@
         "version": "پلگ ان کا ورژن"
       },
       "reports": {
+        "actions": "Actions available for this Report",
         "country": "رپورٹ کردہ IP ایڈریس سے وابستہ ملک",
         "data": "رپورٹ سے متعلق اضافی ڈیٹا",
         "date": "رپورٹ بنانے کی تاریخ اور وقت",

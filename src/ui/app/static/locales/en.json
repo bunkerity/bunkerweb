@@ -69,6 +69,7 @@
     "add_plugins": "Add Plugins",
     "auto_refresh": "Auto Refresh",
     "ban": "Ban",
+    "ban_selected": "Ban selected",
     "cache": "Cache",
     "cancel": "Cancel",
     "clear": "CLEAR",
@@ -1221,6 +1222,7 @@
       "run_job": "Run Job {{job}}",
       "stop_instance": "Stop Instance {{hostname}}",
       "unban_ip": "Unban {{ip}}",
+      "ban_ip": "Ban this IP address",
       "force_check": "Schedules a check; downloads only if updates exist.",
       "force_update": "Skips checks and forces PRO plugin download; keeps current state on failure."
     },
@@ -1383,6 +1385,7 @@
         "version": "Version of the Plugin"
       },
       "reports": {
+        "actions": "Actions available for this Report",
         "country": "Country associated with the reported IP address",
         "data": "Additional data related to the report",
         "date": "Date and time when the report was generated",

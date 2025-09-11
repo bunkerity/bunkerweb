@@ -8,7 +8,7 @@ from html import escape
 from flask import Blueprint, flash, jsonify, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import BW_INSTANCES_UTILS
+from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
 from app.utils import LOGGER
 
 from app.routes.utils import cors_required, get_redis_client
@@ -27,6 +27,26 @@ def reports_page():
 @cors_required
 def reports_fetch():
     redis_client = get_redis_client()
+
+    # Load configuration to resolve Bad Behavior ban time per service
+    try:
+        db_config = BW_CONFIG.get_config(methods=False, with_drafts=True) if BW_CONFIG else {}
+    except Exception:
+        db_config = {}
+
+    def get_default_ban_time(server_name: str) -> int:
+        try:
+            if not db_config:
+                return 86400
+            # Prefer service-specific value when available
+            if server_name and server_name not in ("_", ""):
+                service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
+                if service_key in db_config:
+                    return int(db_config.get(service_key, 86400))
+            # Fallback to global default from config, or plugin default (24h)
+            return int(db_config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
+        except Exception:
+            return 86400
 
     # Fetch reports
     def fetch_reports():
@@ -67,7 +87,22 @@ def reports_fetch():
             field = key.split("[")[1].split("]")[0]
             search_panes[field].append(value)
 
-    columns = ["date", "id", "ip", "country", "method", "url", "status", "user_agent", "reason", "server_name", "data", "security_mode"]
+    # Keep this in sync with the frontend DataTables columns
+    columns = [
+        "date",
+        "id",
+        "ip",
+        "country",
+        "method",
+        "url",
+        "status",
+        "user_agent",
+        "reason",
+        "server_name",
+        "data",
+        "security_mode",
+        "actions",  # actions column for row buttons
+    ]
 
     # Apply searchPanes filters
     def filter_by_search_panes(reports):
@@ -124,6 +159,10 @@ def reports_fetch():
                 "server_name": escape(str(report.get("server_name", "N/A"))),
                 "data": data_output,
                 "security_mode": escape(str(report.get("security_mode", "N/A"))),
+                # default ban duration in seconds for quick-ban action
+                "ban_default_exp": get_default_ban_time(str(report.get("server_name", "_"))),
+                # Placeholder for UI actions column
+                "actions": "",
             }
         except Exception as e:
             LOGGER.error(f"Error formatting report: {e}")
@@ -141,6 +180,8 @@ def reports_fetch():
                 "server_name": "N/A",
                 "data": "{}",
                 "security_mode": "N/A",
+                "ban_default_exp": 86400,
+                "actions": "",
             }
 
     formatted_reports = [format_report(report) for report in paginated_reports]
@@ -151,6 +192,9 @@ def reports_fetch():
 
     for report in all_reports:
         for field in columns[2:]:  # Skip date and id fields for panes
+            # Skip actions field from search panes aggregation
+            if field == "actions":
+                continue
             value = report.get(field, "N/A")
 
             # Ensure value is hashable (convert dicts or lists to strings if necessary)

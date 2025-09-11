@@ -69,6 +69,7 @@
     "add_plugins": "Eklenti Ekle",
     "auto_refresh": "Otomatik Yenile",
     "ban": "Yasakla",
+    "ban_selected": "Seçilenleri yasakla",
     "cache": "Önbellek",
     "cancel": "İptal",
     "clear": "TEMİZLE",
@@ -1221,6 +1222,7 @@
       "run_job": "İşi Çalıştır: {{job}}",
       "stop_instance": "Örneği Durdur: {{hostname}}",
       "unban_ip": "{{ip}} yasağını kaldır",
+      "ban_ip": "Bu IP adresini yasakla",
       "force_check": "Bir kontrol planlar; yalnızca güncellemeler varsa indirir.",
       "force_update": "Kontrolleri atlar ve PRO eklentileri indirmeyi zorlar; hata olursa mevcut durumu korur."
     },
@@ -1383,6 +1385,7 @@
         "version": "Eklentinin versiyonu"
       },
       "reports": {
+        "actions": "Bu Rapor için mevcut işlemler",
         "country": "Raporlanan IP adresinin ülkesi",
         "data": "Raporla ilgili ek veri",
         "date": "Raporun oluşturulduğu tarih ve saat",

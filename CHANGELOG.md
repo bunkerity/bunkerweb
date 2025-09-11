@@ -7,7 +7,8 @@
 - [LINUX] Improve nginx stop and reload handling in BunkerWeb service to use the pid file instead of the `pgrep` command
 - [DOCS] Add multi-language support to the documentation, including French
 - [UI] Fix incorrect key used when viewing service details
-- [UI] Fix 403 when changing IP address on web UI
+- [UI] Fix 403 when changing IP address
+- [UI] Add the possibility to quickly ban IP addresses from the reports page
 - [MISC] Update new `reloading` health status for BunkerWeb when NGINX is reloading and handle it in it's healthcheck file
 - [DEPS] Update lua-resty-openssl version to v1.6.4
 

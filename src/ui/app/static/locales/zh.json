@@ -69,6 +69,7 @@
     "add_plugins": "添加插件",
     "auto_refresh": "自动刷新",
     "ban": "封禁",
+    "ban_selected": "封禁所选",
     "cache": "缓存",
     "cancel": "取消",
     "clear": "清除",
@@ -1223,6 +1224,7 @@
       "run_job": "运行任务 {{job}}",
       "stop_instance": "停止实例 {{hostname}}",
       "unban_ip": "解禁 {{ip}}",
+      "ban_ip": "封禁此 IP 地址",
       "force_check": "安排检查；仅在有更新时下载。",
       "force_update": "跳过检查并强制下载 PRO 插件；失败时保留当前状态。"
     },
@@ -1385,6 +1387,7 @@
         "version": "插件的版本"
       },
       "reports": {
+        "actions": "此报告可用的操作",
         "country": "与报告的 IP 地址关联的国家/地区",
         "data": "与报告相关的附加数据",
         "date": "报告生成的日期和时间",
