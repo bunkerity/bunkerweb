@@ -138,7 +138,7 @@ api.global.GET["^/health$"] = function(self)
 	local f = open("/var/tmp/bunkerweb_reloading", "r")
 	if f then
 		f:close()
-		return self:response(HTTP_OK, "success", "ok")
+		return self:response(HTTP_OK, "success", "reloading")
 	end
 
 	local data, err = get_variable("IS_LOADING", false)

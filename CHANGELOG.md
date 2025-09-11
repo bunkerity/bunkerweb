@@ -8,6 +8,7 @@
 - [DOCS] Add multi-language support to the documentation, including French
 - [UI] Fix incorrect key used when viewing service details
 - [UI] Fix 403 when changing IP address on web UI
+- [MISC] Update new `reloading` health status for BunkerWeb when NGINX is reloading and handle it in it's healthcheck file
 - [DEPS] Update lua-resty-openssl version to v1.6.4
 
 ## v1.6.5-rc2 - ????/??/??
