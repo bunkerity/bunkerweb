@@ -342,6 +342,36 @@ local jwk_params_required_mapping = {
   OKP = {},
 }
 
+local ec_coord_size_map = {
+  -- JWK RFC7518
+  ["P-256"] = 32,
+  ["P-384"] = 48,
+  ["P-521"] = 66, -- rounded up to the next byte
+  -- JOSE RFC8812 and others
+  prime256v1 = 32,
+  secp384r1 = 48,
+  secp521r1 = 66, -- rounded up to the next byte
+  brainpoolP256r1 = 32,
+  brainpoolP320r1 = 40,
+  brainpoolP384r1 = 48,
+  brainpoolP512r1 = 64, -- note this is 512 not 521
+  secp256k1 = 32,
+}
+-- Pad coordinates to field size with leading zeros
+local function pad_ec_coordinate(coord, crv)
+  local size = ec_coord_size_map[crv]
+  if not size then
+    return nil, "unsupported curve " .. tostring(crv)
+  end
+  if #coord < size then
+    return string.rep("\x00", size - #coord) .. coord
+  elseif #coord > size then
+    return nil, "coordinate length " .. #coord .. " is longer than expected " .. size
+  else
+    return coord
+  end
+end
+
 function _M.load_jwk_ex(txt, ptyp, properties)
   local tbl, err = json.decode(txt)
   if err then
@@ -420,7 +450,17 @@ function _M.load_jwk_ex(txt, ptyp, properties)
 
   if kty == "EC" then
     if params_t["x"] and params_t["y"] then
-      params_t["pub"] = "\x04" .. params_t["x"]:reverse() .. params_t["y"]:reverse()
+      local x = params_t["x"]:reverse()
+      local y = params_t["y"]:reverse()
+      x, err = pad_ec_coordinate(x, tbl["crv"])
+      if err then
+        return nil, "jwk:load_jwk: pad_ec_coordinate: " .. err
+      end
+      y, err = pad_ec_coordinate(y, tbl["crv"])
+      if err then
+        return nil, "jwk:load_jwk: pad_ec_coordinate: " .. err
+      end
+      params_t["pub"] = "\x04" .. x .. y
       params_t["x"], params_t["y"] = nil, nil
     end
   end

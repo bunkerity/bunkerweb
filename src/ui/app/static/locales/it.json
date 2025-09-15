@@ -69,6 +69,7 @@
     "add_plugins": "Aggiungi Plugin",
     "auto_refresh": "Aggiornamento Automatico",
     "ban": "Vieta",
+    "ban_selected": "Vieta selezionati",
     "cache": "Cache",
     "cancel": "Annulla",
     "clear": "PULISCI",
@@ -1222,6 +1223,7 @@
       "run_job": "Esegui Processo {{job}}",
       "stop_instance": "Ferma Istanza {{hostname}}",
       "unban_ip": "Sblocca {{ip}}",
+      "ban_ip": "Vieta questo indirizzo IP",
       "force_check": "Pianifica un controllo; scarica solo se ci sono aggiornamenti.",
       "force_update": "Salta i controlli e forza il download dei plugin PRO; mantiene lo stato attuale in caso di errore."
     },
@@ -1283,7 +1285,7 @@
       "export_service": "Esporta Configurazione Servizio {{name}}",
       "view_config": "Visualizza Configurazione Personalizzata {{name}}",
       "view_file": "Visualizza {{filename}}",
-      "view_service": "Visualizza Servizio {{name}}"
+      "view_service": "Visualizza Servizio {{service}}"
     },
     "modal": {
       "title": {
@@ -1384,6 +1386,7 @@
         "version": "Versione Plugin"
       },
       "reports": {
+        "actions": "Azioni disponibili per questo report",
         "country": "Paese associato all'indirizzo IP riportato",
         "data": "Dati aggiuntivi relativi al report",
         "date": "Data e ora di generazione del report",

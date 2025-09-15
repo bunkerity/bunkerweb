@@ -107,9 +107,21 @@ ARG SKIP_MINIFY_JS=no
 RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     apk add --no-cache nodejs npm parallel && \
     npm install -g uglify-js && \
-    find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
+    find ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+    | parallel -0 --no-run-if-empty 'uglifyjs {} --compress --mangle --output {}'; \
     else \
     echo "Skipping JS minification"; \
+    fi
+
+# Minify CSS files (can be skipped with SKIP_MINIFY_CSS=yes)
+ARG SKIP_MINIFY_CSS=no
+RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+    apk add --no-cache nodejs npm parallel && \
+    npm install -g clean-css-cli && \
+    find ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+    | parallel -0 --no-run-if-empty 'cleancss -O2 -o {} {}'; \
+    else \
+    echo "Skipping CSS minification"; \
     fi
 
 # Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)

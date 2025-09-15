@@ -1309,9 +1309,23 @@ $(document).ready(function () {
     firstBan.find("[type='flatpickr-datetime']").prop("disabled", false);
   });
 
-  const ipRegex = new RegExp(
-    /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?!$)|$)){4}$|^((?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?:[A-Fa-f0-9]{1,4}:){1,7}:|:(?::[A-Fa-f0-9]{1,4}){1,7}|::)$/i,
-  );
+  // Use ipaddr.js for robust IP validation
+  // Use ipaddr.js if available, fallback to a basic check
+  const isIp = (v) => {
+    if (
+      typeof window !== "undefined" &&
+      window.ipaddr &&
+      window.ipaddr.isValid
+    ) {
+      try {
+        return window.ipaddr.isValid(v);
+      } catch (_) {
+        return false;
+      }
+    }
+    // Fallback (very permissive minimal check): contains ':' for v6 or 3 dots for v4
+    return /:/.test(v) || (v.match(/\./g) || []).length === 3;
+  };
 
   const validateBan = (banIpInput, ipServiceMap) => {
     const value = banIpInput.val().trim();
@@ -1322,7 +1336,7 @@ $(document).ready(function () {
     if (value === "") {
       errorMessageKey = "validation.ip_required";
       isValid = false;
-    } else if (!ipRegex.test(value)) {
+    } else if (!isIp(value)) {
       errorMessageKey = "validation.ip_invalid";
       isValid = false;
     } else {

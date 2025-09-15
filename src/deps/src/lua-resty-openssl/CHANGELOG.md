@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="1.6.4"></a>
+## [1.6.4] - 2025-09-08
+### bug fixes
+- **jwk:** fix EC key x and y padding [42cac34](https://github.com/fffonion/lua-resty-openssl/commit/42cac34d5749c8b629002f66e8bbc8ce7ff54303)
+
+
 <a name="1.6.3"></a>
 ## [1.6.3] - 2025-09-04
 ### bug fixes
@@ -658,7 +664,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.3...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.4...HEAD
+[1.6.4]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.3...1.6.4
 [1.6.3]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.2...1.6.3
 [1.6.2]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.1...1.6.2
 [1.6.1]: https://github.com/fffonion/lua-resty-openssl/compare/1.6.0...1.6.1

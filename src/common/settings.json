@@ -210,6 +210,15 @@
     "regex": "^[^ ]{1,255}$",
     "type": "text"
   },
+  "API_TOKEN": {
+    "context": "global",
+    "default": "",
+    "help": "Optional token to authenticate API calls. If set, the scheduler (and any client) must send it via the Authorization header. Note: must be set on both BunkerWeb and the scheduler environments.",
+    "id": "api-token",
+    "label": "API access token",
+    "regex": ".*",
+    "type": "text"
+  },
   "API_WHITELIST_IP": {
     "context": "global",
     "default": "127.0.0.0/8",

@@ -5,6 +5,8 @@ $(document).ready(function () {
       ? i18next.t
       : (key, fallback) => fallback || key; // Fallback
   const baseFlagsUrl = $("#base_flags_url").val().trim();
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const headers = [
     {
@@ -67,6 +69,11 @@ $(document).ready(function () {
       tooltip: "Security mode",
       i18n: "tooltip.table.reports.security_mode",
     },
+    {
+      title: "Actions",
+      tooltip: "Actions available for this report",
+      i18n: "tooltip.table.reports.actions",
+    },
   ];
 
   // Batch update tooltips
@@ -95,7 +102,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6, 7, 9, 10, 12],
+        columns: [4, 5, 6, 7, 8, 10, 11, 13],
       },
     },
     topStart: {},
@@ -169,7 +176,7 @@ $(document).ready(function () {
             "Copy visible",
           )}</span>`,
           exportOptions: {
-            columns: ":visible:not(:first-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -179,7 +186,7 @@ $(document).ready(function () {
           filename: "bw_report",
           exportOptions: {
             modifier: { search: "none" },
-            columns: ":not(:first-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -188,12 +195,85 @@ $(document).ready(function () {
           filename: "bw_report",
           exportOptions: {
             modifier: { search: "none" },
-            columns: ":not(:first-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
       ],
     },
+    {
+      extend: "collection",
+      text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
+        "button.actions",
+        "Actions",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary action-button disabled",
+      buttons: [{ extend: "ban_selected", className: "text-danger" }],
+    },
   ];
+
+  // Define batch ban button similar to bans page actions
+  $.fn.dataTable.ext.buttons.ban_selected = {
+    text: `<span class="tf-icons bx bx-block bx-18px me-2"></span><span data-i18n="button.ban_selected">${t(
+      "button.ban_selected",
+      "Ban selected",
+    )}</span>`,
+    action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      const selected = dt.rows({ selected: true }).data().toArray();
+      if (!selected.length) return;
+
+      // Build bans array using per-row defaults and scope
+      const bans = [];
+      const seen = new Set();
+      selected.forEach((row) => {
+        const ip = row.ip;
+        const reason = row.reason || "ui";
+        const serverName = row.server_name;
+        const ban_scope =
+          serverName && serverName !== "_" ? "service" : "global";
+        const service = ban_scope === "service" ? serverName : "";
+        const expVal = Number(row.ban_default_exp);
+        const exp = Number.isFinite(expVal) ? expVal : 86400;
+        const key = `${ip}|${ban_scope}|${service || "_"}|${exp}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        bans.push({ ip, reason, ban_scope, service, exp });
+      });
+
+      if (!bans.length) return;
+
+      // Submit form to /bans/ban in new tab
+      const form = $("<form>", {
+        method: "POST",
+        action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
+        class: "visually-hidden",
+        target: "_blank",
+      });
+      form.append(
+        $("<input>", {
+          type: "hidden",
+          name: "csrf_token",
+          value: $("#csrf_token").val(),
+        }),
+      );
+      form.append(
+        $("<input>", {
+          type: "hidden",
+          name: "bans",
+          value: JSON.stringify(bans),
+        }),
+      );
+      form.appendTo("body").submit();
+    },
+  };
 
   // Custom button for auto-refresh
   let autoRefresh = false;
@@ -235,10 +315,11 @@ $(document).ready(function () {
   const reports_config = {
     tableSelector: "#reports",
     tableName: "reports",
-    columnVisibilityCondition: (column) => column > 1 && column < 13,
+    columnVisibilityCondition: (column) => column > 1 && column < 15,
     dataTableOptions: {
       columnDefs: [
         { orderable: false, targets: -1 },
+        { orderable: false, render: DataTable.render.select(), targets: 1 },
         {
           searchPanes: {
             show: true,
@@ -246,7 +327,7 @@ $(document).ready(function () {
             combiner: "or",
           },
           type: "ip-address",
-          targets: 3,
+          targets: 4,
         },
         {
           render: function (data, type, row) {
@@ -258,7 +339,7 @@ $(document).ready(function () {
             }
             return data;
           },
-          targets: 1,
+          targets: 2,
         },
         {
           searchPanes: {
@@ -266,7 +347,7 @@ $(document).ready(function () {
             header: t("searchpane.country", "Country"),
             combiner: "or",
           },
-          targets: 4,
+          targets: 5,
           render: function (data) {
             const countryCode = data.toLowerCase();
             const tooltipContent = "N/A";
@@ -296,7 +377,7 @@ $(document).ready(function () {
             header: t("searchpane.ip_address", "IP Address"),
             combiner: "or",
           },
-          targets: 3,
+          targets: 4,
         },
         {
           searchPanes: {
@@ -304,7 +385,7 @@ $(document).ready(function () {
             header: t("searchpane.method", "Method"),
             combiner: "or",
           },
-          targets: 5,
+          targets: 6,
         },
         {
           searchPanes: {
@@ -312,7 +393,7 @@ $(document).ready(function () {
             header: t("searchpane.url", "URL"),
             combiner: "or",
           },
-          targets: 6,
+          targets: 7,
           render: function (data, type, row) {
             if (type !== "display") {
               return data;
@@ -345,7 +426,7 @@ $(document).ready(function () {
             header: t("searchpane.status_code", "Status Code"),
             combiner: "or",
           },
-          targets: 7,
+          targets: 8,
         },
         {
           searchPanes: {
@@ -353,7 +434,7 @@ $(document).ready(function () {
             header: t("searchpane.reason", "Reason"),
             combiner: "or",
           },
-          targets: 9,
+          targets: 10,
         },
         {
           searchPanes: {
@@ -361,7 +442,7 @@ $(document).ready(function () {
             header: t("searchpane.server_name", "Server name"),
             combiner: "or",
           },
-          targets: 10,
+          targets: 11,
           render: function (data) {
             return data === "_"
               ? `<span data-i18n="status.default_server">default server</span>`
@@ -374,7 +455,7 @@ $(document).ready(function () {
             header: t("searchpane.data", "Data"),
             combiner: "or",
           },
-          targets: 11,
+          targets: 12,
         },
         {
           searchPanes: {
@@ -382,12 +463,48 @@ $(document).ready(function () {
             header: t("searchpane.security_mode", "Security mode"),
             combiner: "or",
           },
-          targets: 12,
+          targets: 13,
+        },
+        // Actions column renderer (last column)
+        {
+          targets: -1,
+          orderable: false,
+          render: function (data, type, row) {
+            if (type === "display") {
+              const readOnlyClass = isReadOnly ? " disabled" : "";
+              const banTooltip = isReadOnly
+                ? t(
+                    "tooltip.readonly_mode",
+                    "This action is not allowed in read-only mode.",
+                  )
+                : t("tooltip.button.ban_ip", "Ban this IP address");
+              return `
+                <div class="d-flex justify-content-center">
+                  <button type="button"
+                          class="btn btn-outline-danger btn-sm me-1 ban-single${readOnlyClass}"
+                          data-ip="${row.ip}"
+                          data-server_name="${row.server_name}"
+                          data-reason="${row.reason}"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          data-bs-original-title="${banTooltip}">
+                    <i class="bx bx-block bx-xs"></i>
+                  </button>
+                </div>
+              `;
+            }
+            return "";
+          },
         },
       ],
-      order: [[1, "desc"]],
+      order: [[2, "desc"]],
       autoFill: false,
       responsive: true,
+      select: {
+        style: "multi+shift",
+        selector: "td:nth-child(2)",
+        headerCheckbox: true,
+      },
       layout: layout,
       processing: true,
       serverSide: true,
@@ -422,6 +539,7 @@ $(document).ready(function () {
           orderable: false,
           className: "dtr-control",
         },
+        { data: null, defaultContent: "", orderable: false },
         {
           data: "date",
           title: "<span data-i18n='table.header.date'>Date</span>",
@@ -541,6 +659,11 @@ $(document).ready(function () {
           data: "security_mode",
           title:
             "<span data-i18n='table.header.security_mode'>Security mode</span>",
+        },
+        {
+          data: "actions",
+          title: "<span data-i18n='table.header.actions'>Actions</span>",
+          orderable: false,
         },
       ],
       headerCallback: function (thead) {
@@ -1114,8 +1237,9 @@ $(document).ready(function () {
       dt.on("draw.dt", function () {
         updateCountryTooltips();
         updateHeaderTooltips(dt.table().header(), headers);
-        // Clean up any existing tooltips to prevent memory leaks
+        // Re-init tooltips for dynamic elements
         $(".tooltip").remove();
+        $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
         // Hide waiting message and show table
         $("#reports-waiting").addClass("visually-hidden");
         $("#reports").removeClass("d-none");
@@ -1177,4 +1301,71 @@ $(document).ready(function () {
     applyTranslations();
     $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   }
+
+  // Quick ban action from reports table
+  let actionLock = false;
+  $(document).on("click", ".ban-single", function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    if (actionLock) return;
+    actionLock = true;
+
+    // Fetch row data from DataTable
+    const $btn = $(this);
+    const $row = $btn.closest("tr");
+    const table = $("#reports").DataTable();
+    const rowData = table.row($row).data();
+    if (!rowData) {
+      actionLock = false;
+      return;
+    }
+
+    const ip = rowData.ip;
+    const reason = rowData.reason || "ui";
+    const serverName = rowData.server_name;
+    const ban_scope = serverName && serverName !== "_" ? "service" : "global";
+    const service = ban_scope === "service" ? serverName : "";
+    let parsedExp = Number(rowData.ban_default_exp);
+    const defaultBanExpSeconds = Number.isFinite(parsedExp) ? parsedExp : 86400; // allow 0 (permanent)
+
+    // Create and submit the form to /bans/ban
+    const form = $("<form>", {
+      method: "POST",
+      action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
+      class: "visually-hidden",
+      target: "_blank",
+    });
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "csrf_token",
+        value: $("#csrf_token").val(),
+      }),
+    );
+    const banPayload = [
+      {
+        ip: ip,
+        reason: reason,
+        ban_scope: ban_scope,
+        service: service,
+        exp: defaultBanExpSeconds,
+      },
+    ];
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "bans",
+        value: JSON.stringify(banPayload),
+      }),
+    );
+    form.appendTo("body").submit();
+    actionLock = false;
+  });
 });

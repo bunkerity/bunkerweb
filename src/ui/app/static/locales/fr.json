@@ -69,6 +69,7 @@
     "add_plugins": "Ajouter les Plugins",
     "auto_refresh": "Actualisation Auto",
     "ban": "Bannir",
+    "ban_selected": "Bannir la sélection",
     "cache": "Cache",
     "cancel": "Annuler",
     "clear": "EFFACER",
@@ -1220,6 +1221,7 @@
       "run_job": "Exécuter la Tâche {{job}}",
       "stop_instance": "Arrêter l'Instance {{hostname}}",
       "unban_ip": "Débannir {{ip}}",
+      "ban_ip": "Bannir cette adresse IP",
       "force_check": "Planifie une vérification ; télécharge seulement s'il y a des mises à jour.",
       "force_update": "Ignore les vérifications et force le téléchargement des plugins PRO ; conserve l'état actuel en cas d'échec."
     },
@@ -1281,7 +1283,7 @@
       "export_service": "Exporter la Configuration du Service {{name}}",
       "view_config": "Voir la Config Perso {{name}}",
       "view_file": "Voir {{filename}}",
-      "view_service": "Voir le Service {{name}}"
+      "view_service": "Voir le Service {{service}}"
     },
     "modal": {
       "title": {
@@ -1382,6 +1384,7 @@
         "version": "Version du Plugin"
       },
       "reports": {
+        "actions": "Actions disponibles pour ce rapport",
         "country": "Pays associé à l'adresse IP signalée",
         "data": "Données supplémentaires liées au rapport",
         "date": "Date et heure de génération du rapport",
