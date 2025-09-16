@@ -1,6 +1,6 @@
 {
   "name": "redmine",
-  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "kinds": ["docker", "autoconf", "kubernetes"],
   "timeout": 120,
   "delay": 180,
   "tests": [
