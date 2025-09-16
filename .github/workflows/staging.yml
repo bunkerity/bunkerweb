@@ -14,7 +14,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         include:
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
@@ -24,6 +24,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
+          - image: api
+            dockerfile: src/api/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
@@ -164,10 +166,12 @@ jobs:
         run: docker pull ghcr.io/bunkerity/bunkerweb-tests:testing && docker tag ghcr.io/bunkerity/bunkerweb-tests:testing bunkerity/bunkerweb:testing && docker push bunkerity/bunkerweb:testing && docker tag bunkerity/bunkerweb:testing ghcr.io/bunkerity/bunkerweb:testing && docker push ghcr.io/bunkerity/bunkerweb:testing
       - name: Push scheduler image
         run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing bunkerity/bunkerweb-scheduler:testing && docker push bunkerity/bunkerweb-scheduler:testing && docker tag bunkerity/bunkerweb-scheduler:testing ghcr.io/bunkerity/bunkerweb-scheduler:testing && docker push ghcr.io/bunkerity/bunkerweb-scheduler:testing
-      - name: Push UI image
-        run: docker pull ghcr.io/bunkerity/ui-tests:testing && docker tag ghcr.io/bunkerity/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
       - name: Push autoconf image
         run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing && docker tag bunkerity/bunkerweb-autoconf:testing ghcr.io/bunkerity/bunkerweb-autoconf:testing && docker push ghcr.io/bunkerity/bunkerweb-autoconf:testing
+      - name: Push UI image
+        run: docker pull ghcr.io/bunkerity/ui-tests:testing && docker tag ghcr.io/bunkerity/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
+      - name: Push API image
+        run: docker pull ghcr.io/bunkerity/api-tests:testing && docker tag ghcr.io/bunkerity/api-tests:testing bunkerity/bunkerweb-api:testing && docker push bunkerity/bunkerweb-api:testing && docker tag bunkerity/bunkerweb-api:testing ghcr.io/bunkerity/bunkerweb-api:testing && docker push ghcr.io/bunkerity/bunkerweb-api:testing
       - name: Push all-in-one image
         run: docker pull ghcr.io/bunkerity/all-in-one-tests:testing && docker tag ghcr.io/bunkerity/all-in-one-tests:testing bunkerity/bunkerweb-all-in-one:testing && docker push bunkerity/bunkerweb-all-in-one:testing && docker tag bunkerity/bunkerweb-all-in-one:testing ghcr.io/bunkerity/bunkerweb-all-in-one:testing && docker push ghcr.io/bunkerity/bunkerweb-all-in-one:testing
 

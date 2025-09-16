@@ -21,7 +21,7 @@ jobs:
   build-containers:
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         arch: [linux/amd64, linux/386]
         exclude:
           - image: all-in-one
@@ -38,6 +38,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
+          - image: api
+            dockerfile: src/api/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
           - arch: linux/amd64
@@ -73,7 +75,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        image: [bunkerweb, scheduler, autoconf, ui, all-in-one]
+        image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         arch: [linux/arm64, linux/arm/v7]
         exclude:
           - image: all-in-one
@@ -91,6 +93,8 @@ jobs:
             dockerfile: src/autoconf/Dockerfile
           - image: ui
             dockerfile: src/ui/Dockerfile
+          - image: api
+            dockerfile: src/api/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
     uses: ./.github/workflows/container-build.yml
@@ -192,6 +196,7 @@ jobs:
             bunkerweb-scheduler,
             bunkerweb-autoconf,
             bunkerweb-ui,
+            bunkerweb-api,
             bunkerweb-all-in-one,
           ]
         include:
@@ -208,6 +213,9 @@ jobs:
           - image: bunkerweb-ui
             cache_from: ui
             dockerfile: src/ui/Dockerfile
+          - image: bunkerweb-api
+            cache_from: api
+            dockerfile: src/api/Dockerfile
           - image: bunkerweb-all-in-one
             cache_from: all-in-one
             dockerfile: src/all-in-one/Dockerfile
