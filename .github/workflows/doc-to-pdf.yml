@@ -32,7 +32,7 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
       - name: Run mkdocs serve in background
-        run: mkdocs serve & sleep 10
+        run: mkdocs serve & sleep 60
       - name: Run pdf script
         run: node docs/misc/pdf.js http://localhost:8000/print_page/ BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf 'BunkerWeb documentation v${{ inputs.VERSION }}'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
