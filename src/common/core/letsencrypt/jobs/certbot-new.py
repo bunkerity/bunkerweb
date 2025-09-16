@@ -177,11 +177,11 @@ def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) 
     return False
 
 
-def extract_provider(service: str, authenticator: str = "") -> Optional[Provider]:
+def extract_provider(service: str, authenticator: str = "", db=None) -> Optional[Provider]:
     credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
     credential_items = {}
 
-    # Collect all credential items
+    # First, try to get credentials from environment variables
     for env_key, env_value in environ.items():
         if not env_value or not env_key.startswith(credential_key):
             continue
@@ -192,6 +192,34 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
 
         key, value = env_value.split(" ", 1)
         credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+
+    # If no credentials found in environment, try database configuration
+    if not credential_items and db:
+        try:
+            # Get database configuration for this service
+            db_config = db.get_config(service=service if IS_MULTISITE else None)
+            
+            if IS_MULTISITE:
+                # For multisite, check service-specific credential
+                db_credential_value = db_config.get(f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM", {}).get("value", "")
+            else:
+                # For single site, check global credential
+                db_credential_value = db_config.get("LETS_ENCRYPT_DNS_CREDENTIAL_ITEM", {}).get("value", "")
+            
+            if db_credential_value:
+                LOGGER.debug(f"[Service: {service}] Found DNS credentials in database configuration")
+                
+                if " " not in db_credential_value:
+                    credential_items["json_data"] = db_credential_value
+                else:
+                    key, value = db_credential_value.split(" ", 1)
+                    credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
+            else:
+                LOGGER.debug(f"[Service: {service}] No DNS credentials found in database for key: {credential_key}")
+                
+        except Exception as e:
+            LOGGER.debug(f"[Service: {service}] Error accessing database configuration: {e}")
+            LOGGER.debug(format_exc())
 
     # Handle JSON data
     if "json_data" in credential_items:
@@ -223,22 +251,55 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
         LOGGER.warning(f"[Service: {service}] DNS challenge selected but no DNS credentials are configured, skipping generation.")
         return None
 
+    # Log credential items for debugging (excluding sensitive values)
+    LOGGER.debug(f"[Service: {service}] Processing credential items for authenticator '{authenticator}': {list(credential_items.keys())}")
+
     try:
-        return PROVIDERS[authenticator](**credential_items)
+        provider = PROVIDERS[authenticator](**credential_items)
+        LOGGER.debug(f"[Service: {service}] Successfully validated credentials for DNS provider '{authenticator}'")
+        return provider
     except ValidationError as ve:
         LOGGER.debug(format_exc())
-        LOGGER.error(f"[Service: {service}] Error while validating credentials, skipping generation: {ve}")
+        LOGGER.error(f"[Service: {service}] Error while validating credentials for DNS provider '{authenticator}', skipping generation: {ve}")
+        return None
+    except Exception as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"[Service: {service}] Unexpected error while creating DNS provider '{authenticator}': {e}")
         return None
 
 
-def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+def build_service_config(service: str, db=None) -> Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
     def env(key: str, default: Optional[str] = None) -> str:
+        # First try environment variables
         if IS_MULTISITE:
-            return getenv(f"{service}_{key}", default)
-        return getenv(key, default)
+            env_value = getenv(f"{service}_{key}", None)
+        else:
+            env_value = getenv(key, None)
+        
+        if env_value is not None:
+            return env_value
+        
+        # If not found in environment, try database configuration
+        if db:
+            try:
+                db_config = db.get_config(service=service if IS_MULTISITE else None)
+                
+                if IS_MULTISITE:
+                    db_key = f"{service}_{key}"
+                else:
+                    db_key = key
+                    
+                db_value = db_config.get(db_key, {}).get("value", "")
+                if db_value:
+                    LOGGER.debug(f"[Service: {service}] Using database value for {db_key}")
+                    return db_value
+            except Exception as e:
+                LOGGER.debug(f"[Service: {service}] Error accessing database for key {key}: {e}")
+        
+        return default or ""
 
     authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
-    server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
+    server_names_val = env("SERVER_NAME", "www.example.com").strip()
     email_val = env("EMAIL_LETS_ENCRYPT", "") or f"contact@{service}"
     retries_val = env("LETS_ENCRYPT_RETRIES", "0")
     challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
@@ -310,7 +371,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
                 )
             activated = False
         else:
-            provider = extract_provider(service, authenticator)
+            provider = extract_provider(service, authenticator, db)
             if not provider:
                 activated = False
     else:
@@ -394,6 +455,11 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
 def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str] = None) -> int:
     # * Building the certbot command
+    # Ensure all necessary directories exist
+    DATA_PATH.mkdir(parents=True, exist_ok=True)
+    Path(WORK_DIR).mkdir(parents=True, exist_ok=True)
+    Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
+    
     command = [
         CERTBOT_BIN,
         "certonly",
@@ -433,8 +499,15 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
         credentials = config["provider"].get_formatted_credentials()
         credentials_file = f"credentials_{bytes_hash(credentials, algorithm='sha256')[:12]}.{config['provider'].get_file_type()}"
         credentials_path = CACHE_PATH.joinpath(credentials_file)
+        
+        # Ensure cache directory exists
+        CACHE_PATH.mkdir(parents=True, exist_ok=True)
+        
         if not credentials_path.is_file() or config["force_renew"]:
-            JOB.cache_file(credentials_file, credentials)
+            cached, err = JOB.cache_file(credentials_file, credentials)
+            if not cached:
+                LOGGER.error(f"[Service: {service}] Failed to cache credentials file: {err}")
+                return 2
         credentials_path.chmod(0o600)  # Set permissions to read/write for owner only
 
         # * Adding the credentials to the command
@@ -497,12 +570,22 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
+    # Initialize database for configuration retrieval
+    db = None
+    try:
+        from Database import Database  # type: ignore
+        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
+        LOGGER.debug("Database connection established for configuration retrieval")
+    except Exception as e:
+        LOGGER.debug(f"Could not establish database connection: {e}")
+        LOGGER.debug("Will rely on environment variables only")
+
     services = {}
     for service in server_names.split(" "):
         if not service.strip():
             continue
 
-        server_name, config = build_service_config(service)
+        server_name, config = build_service_config(service, db)
         if config["wildcard"] and server_name in services:
             continue
         services[server_name] = config
@@ -619,23 +702,23 @@ try:
                 continue
 
         if set(config["server_names"].split(",")) != set(existing_cert["server_names"].split(",")):
-            LOGGER.warning(f"[Service: {service}] Server names do not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["challenge"] != existing_cert["challenge"]:
-            LOGGER.warning(f"[Service: {service}] Challenge type does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["authenticator"] != existing_cert["authenticator"]:
-            LOGGER.warning(f"[Service: {service}] DNS provider does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["staging"] != existing_cert["staging"]:
-            LOGGER.warning(f"[Service: {service}] Staging environment does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Staging environment does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["profile"] != existing_cert["profile"]:
-            LOGGER.warning(f"[Service: {service}] Profile does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Profile does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
 
-        if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
-            LOGGER.warning(f"[Service: {service}] DNS credentials have changed, forcing renewal.")
+        if config["challenge"] == "dns" and config.get("provider") and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
+            LOGGER.warning(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
             config["force_renew"] = True
 
     # ? generate new certificates and renew existing ones if needed

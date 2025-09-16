@@ -54,6 +54,11 @@ try:
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
     if getenv("DATABASE_URI", ""):
         cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
+    
+    # Ensure necessary directories exist before renewal
+    DATA_PATH.mkdir(parents=True, exist_ok=True)
+    Path(WORK_DIR).mkdir(parents=True, exist_ok=True)
+    Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
 
     process = Popen(
         [
