@@ -43,8 +43,7 @@ RUN apk add --no-cache bash tzdata && \
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.5.1-r0" "libssl3>=3.5.1-r0" # CVE-2025-4575
-RUN apk add --no-cache "sqlite-libs>=3.49.2-r1" # CVE-2025-6965
+# There are no CVEs for the following packages
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -67,7 +66,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.5-rc2"
+LABEL version="1.6.5-rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="autoconf"
 

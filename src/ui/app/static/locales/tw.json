@@ -69,6 +69,7 @@
     "add_plugins": "新增外掛程式",
     "auto_refresh": "自動重新整理",
     "ban": "封鎖",
+    "ban_selected": "封鎖所選",
     "cache": "快取",
     "cancel": "取消",
     "clear": "清除",
@@ -1222,6 +1223,7 @@
       "run_job": "執行任務 {{job}}",
       "stop_instance": "停止執行個體 {{hostname}}",
       "unban_ip": "解除封鎖 {{ip}}",
+      "ban_ip": "封鎖此 IP 位址",
       "force_check": "排程檢查；僅在有更新時下載。",
       "force_update": "略過檢查並強制下載 PRO 外掛；失敗時保留目前狀態。"
     },
@@ -1283,7 +1285,7 @@
       "export_service": "匯出服務 {{name}} 設定",
       "view_config": "檢視自訂設定 {{name}}",
       "view_file": "檢視 {{filename}}",
-      "view_service": "檢視服務 {{name}}"
+      "view_service": "檢視服務 {{service}}"
     },
     "modal": {
       "title": {
@@ -1384,6 +1386,7 @@
         "version": "外掛程式的版本"
       },
       "reports": {
+        "actions": "此報告可用的操作",
         "country": "與報告的 IP 位址關聯的國家/地區",
         "data": "與報告相關的附加資料",
         "date": "報告產生的日期和時間",

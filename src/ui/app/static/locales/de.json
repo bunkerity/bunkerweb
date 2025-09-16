@@ -69,6 +69,7 @@
     "add_plugins": "Plugins hinzufügen",
     "auto_refresh": "Auto-Aktualisierung",
     "ban": "Sperren",
+    "ban_selected": "Ausgewählte sperren",
     "cache": "Cache",
     "cancel": "Abbrechen",
     "clear": "LÖSCHEN",
@@ -1222,6 +1223,7 @@
       "run_job": "Auftrag {{job}} ausführen",
       "stop_instance": "Instanz {{hostname}} stoppen",
       "unban_ip": "{{ip}} entsperren",
+      "ban_ip": "Diese IP-Adresse sperren",
       "force_check": "Prüfung planen; lädt nur bei verfügbaren Updates herunter.",
       "force_update": "Überspringt Prüfungen und erzwingt den Download von PRO-Plugins; behält aktuellen Zustand bei Fehler bei."
     },
@@ -1283,7 +1285,7 @@
       "export_service": "Dienstkonfiguration {{name}} exportieren",
       "view_config": "Benutzerdefinierte Konfiguration {{name}} anzeigen",
       "view_file": "{{filename}} anzeigen",
-      "view_service": "Dienst {{name}} anzeigen"
+      "view_service": "Dienst {{service}} anzeigen"
     },
     "modal": {
       "title": {
@@ -1384,6 +1386,7 @@
         "version": "Version des Plugins"
       },
       "reports": {
+        "actions": "Verfügbare Aktionen für diesen Bericht",
         "country": "Land, das mit der gemeldeten IP-Adresse verbunden ist",
         "data": "Zusätzliche Daten im Zusammenhang mit dem Bericht",
         "date": "Datum und Uhrzeit der Berichtserstellung",

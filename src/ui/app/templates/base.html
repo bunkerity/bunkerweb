@@ -80,6 +80,17 @@
               href="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.css') }}"
               nonce="{{ style_nonce }}" />
         {% block head %}{% endblock %}
+        {# External styles from DATA['EXTRA_STYLES'] and plugin styles hooks #}
+        {% for extra_style in extra_styles %}
+            {% if extra_style is string %}
+                <link rel="stylesheet" href="{{ extra_style }}" nonce="{{ style_nonce }}" />
+            {% elif extra_style is mapping %}
+                <link rel="stylesheet"
+                      href="{{ extra_style.href }}"
+                      nonce="{{ style_nonce }}"
+                      {% if extra_style.media %}media="{{ extra_style.media }}"{% endif %} />
+            {% endif %}
+        {% endfor %}
     </head>
     <body>
         {% if not starting %}<input type="hidden" id="home-path" value="{{ url_for('home') }}" />{% endif %}
@@ -108,39 +119,29 @@
         {% block page %}{% endblock %}
         <!-- Helpers  -->
         <script src="{{ url_for('static', filename='js/helpers.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <!-- Config  -->
         <script src="{{ url_for('static', filename='js/config.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/jquery/jquery.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/popper/popper.min.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/bootstrap/bootstrap.bundle.min.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/perfect-scrollbar/perfect-scrollbar.min.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/purify/purify.min.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <!-- Main JS -->
         <script src="{{ url_for('static', filename='js/menu.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/main.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/common.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='js/utils.js') }}"
-                nonce="{{ script_nonce }}"
-                defer></script>
+                nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/i18next/i18next.min.js') }}"
                 nonce="{{ script_nonce }}"></script>
         <script src="{{ url_for('static', filename='libs/i18next/i18nextHttpBackend.min.js') }}"
@@ -151,9 +152,28 @@
                 nonce="{{ script_nonce }}"></script>
         <!-- Page Specific JS -->
         {% block scripts %}{% endblock %}
+        {# External scripts from DATA['EXTRA_SCRIPTS'] and plugin scripts hooks #}
         {% for extra_script in extra_scripts %}
-            <script src="{{ extra_script }}" nonce="{{ script_nonce }}" defer></script>
+            {% if extra_script is mapping %}
+                {% set _src = extra_script.get('src') %}
+                {% set _type = extra_script.get('type') %}
+                {% if _src %}
+                    <script src="{{ _src }}"
+                            nonce="{{ script_nonce }}"
+                            {% if _type == 'module' %} type="module"{% endif %}></script>
+                {% endif %}
+            {% else %}
+                <script src="{{ extra_script }}" nonce="{{ script_nonce }}"></script>
+            {% endif %}
         {% endfor %}
+        {# Inline custom JS from plugin scripts hooks: 'custom_js' can be string or list #}
+        {% if custom_js is string %}
+            <script nonce="{{ script_nonce }}">{{ custom_js | safe }}</script>
+        {% elif custom_js is sequence %}
+            {% for js_chunk in custom_js %}
+                {% if js_chunk %}<script nonce="{{ script_nonce }}">{{ js_chunk | safe }}</script>{% endif %}
+            {% endfor %}
+        {% endif %}
         <!-- Buttons plugin -->
         <script src="{{ url_for('static', filename='js/buttons.js') }}"
                 nonce="{{ script_nonce }}"

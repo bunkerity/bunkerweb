@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.5-rc2
+                    image: bunkerity/bunkerweb:1.6.5-rc3
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
+                    image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.5-rc2
+                    image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.5-rc2
+                    image: bunkerity/bunkerweb-ui:1.6.5-rc3
                     ...
             ```
 
@@ -135,20 +135,20 @@
         Examples:
 
         ```bash
-        # Upgrade to 1.6.5-rc2 interactively (will prompt for backup)
-        sudo ./install-bunkerweb.sh --version 1.6.5-rc2
+        # Upgrade to 1.6.5-rc3 interactively (will prompt for backup)
+        sudo ./install-bunkerweb.sh --version 1.6.5-rc3
 
         # Non-interactive upgrade with automatic backup to custom directory
-        sudo ./install-bunkerweb.sh -v 1.6.5-rc2 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.5-rc3 --backup-dir /var/backups/bw-2025-01 -y
 
         # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-        sudo ./install-bunkerweb.sh -v 1.6.5-rc2 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.5-rc3 -y -q
 
         # Perform a dry run (plan) without applying changes
-        sudo ./install-bunkerweb.sh -v 1.6.5-rc2 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.5-rc3 --dry-run
 
         # Upgrade skipping automatic backup (NOT recommended)
-        sudo ./install-bunkerweb.sh -v 1.6.5-rc2 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.5-rc3 --no-auto-backup -y
         ```
 
         !!! warning "Skipping backups"
@@ -228,7 +228,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5-rc2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5-rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -254,7 +254,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5-rc2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.5-rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -493,7 +493,7 @@ Since the `1.6`, the Scheduler also have a new [built-in healthcheck system](con
 
 Another important change is that the **settings** that were previously declared on the BunkerWeb container **are now declared on the scheduler**. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.
 
-While the settings are now declared on the Scheduler container, **you'll still need to declare api related mandatory settings on the BunkerWeb container** like the `API_WHITELIST_IP` setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.
+While the settings are now declared on the Scheduler container, **you'll still need to declare API-related mandatory settings on the BunkerWeb container** like the `API_WHITELIST_IP` setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance. If you use `API_TOKEN`, you must also set it on the BunkerWeb container (and mirror it on the Scheduler) to allow authenticated API calls.
 
 !!! warning "BunkerWeb's container settings"
 
@@ -651,16 +651,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.5-rc2
+                        image: bunkerity/bunkerweb:1.6.5-rc3
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.5-rc2
+                        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.5-rc2
+                        image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.5-rc2
+                        image: bunkerity/bunkerweb-ui:1.6.5-rc3
                         ...
                 ```
 
@@ -695,7 +695,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5-rc2
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5-rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -721,7 +721,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5-rc2
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.5-rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :

@@ -107,9 +107,21 @@ ARG SKIP_MINIFY_JS=no
 RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     apk add --no-cache nodejs npm parallel && \
     npm install -g uglify-js && \
-    find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
+    find ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+    | parallel -0 --no-run-if-empty 'uglifyjs {} --compress --mangle --output {}'; \
     else \
     echo "Skipping JS minification"; \
+    fi
+
+# Minify CSS files (can be skipped with SKIP_MINIFY_CSS=yes)
+ARG SKIP_MINIFY_CSS=no
+RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+    apk add --no-cache nodejs npm parallel && \
+    npm install -g clean-css-cli && \
+    find ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+    | parallel -0 --no-run-if-empty 'cleancss -O2 -o {} {}'; \
+    else \
+    echo "Skipping CSS minification"; \
     fi
 
 # Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
@@ -141,7 +153,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
-RUN apk add --no-cache "pyc>=3.12.11-r0" "python3>=3.12.11-r0" "python3-pyc>=3.12.11-r0" "python3-pycache-pyc0>=3.12.11-r0" # CVE-2024-12718 CVE-2025-4138 CVE-2025-4517 CVE-2025-4330
+RUN apk add --no-cache "sqlite>=3.48.0-r4" "sqlite-libs>=3.48.0-r4" # CVE-2025-29088
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 

@@ -6,6 +6,7 @@ services:
       args:
         SKIP_MINIFY_JS: "yes"
         SKIP_MINIFY_HTML: "yes"
+        SKIP_MINIFY_CSS: "yes"
     ports:
       - 80:8080/tcp
       - 443:8443/tcp

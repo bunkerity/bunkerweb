@@ -126,6 +126,19 @@ DataTable.ext.type.order['ip-address-pre'] = function (a) {
                 x += item;
             }
         }
+        // Handle IPv6 addresses that end with an embedded IPv4 dotted-quad
+        // Convert final 32-bits to hex if detected to keep ordering consistent
+        var v6parts = a.split(':');
+        var last = v6parts[v6parts.length - 1];
+        if (/^\d+\.\d+\.\d+\.\d+$/.test(last)) {
+            var quads = last.split('.');
+            var hi = (parseInt(quads[0], 10) << 8) + parseInt(quads[1], 10);
+            var lo = (parseInt(quads[2], 10) << 8) + parseInt(quads[3], 10);
+            var hexHi = ('0000' + hi.toString(16)).slice(-4);
+            var hexLo = ('0000' + lo.toString(16)).slice(-4);
+            // Replace last 4 bytes in the built string accordingly
+            x = x.slice(0, -8) + hexHi + hexLo;
+        }
     }
     return x;
 };

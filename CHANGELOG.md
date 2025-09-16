@@ -1,6 +1,24 @@
 # Changelog
 
-## v1.6.5-rc2 - ????/??/??
+## v1.6.5-rc3 - ????/??/??
+
+- [BUGFIX] Fix lua session handling when using redis
+- [BUGFIX] Fix ctx error at startup with `DNSBL` plugin
+- [FEATURE] Introduce optional API token authentication to bolster security for BunkerWeb API calls, allowing users to enable token-based access control for enhanced protection against unauthorized requests
+- [FEATURE] Add the possibility to ignore IPs in `DNSBL` plugin
+- [LINUX] Improve nginx stop and reload handling in BunkerWeb service to use the pid file instead of the `pgrep` command
+- [DOCS] Add multi-language support to the documentation, including French
+- [UI] Fix incorrect key used when viewing service details
+- [UI] Fix 403 when changing IP address
+- [UI] Add the possibility to quickly ban IP addresses from the reports page
+- [UI] Fix date sorting in bans and reports pages
+- [UI] Add ipaddr.js library for robust IP address validation
+- [MISC] Update new `reloading` health status for BunkerWeb when NGINX is reloading and handle it in it's healthcheck file
+- [MISC] Automatically minify UI CSS files in Images/Packages build process
+- [MISC] Add LRU eviction fallback to avoid no memory errors
+- [DEPS] Update lua-resty-openssl version to v1.6.4
+
+## v1.6.5-rc2 - 2025/09/11
 
 - [BUGFIX] Enhance database backup and restore functionality with improved compatibility and options
 - [FEATURE] Add support for new reCAPTCHA version in `Antibot` plugin

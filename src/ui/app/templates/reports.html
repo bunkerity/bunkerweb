@@ -13,10 +13,10 @@
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         {% set base_flags_url = url_for('static', filename='img/flags') %}
         <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
-        <textarea type="hidden"
-                  id="columns_preferences_defaults"
-                  class="visually-hidden">{{ columns_preferences_defaults['reports']|tojson }}</textarea>
-        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences_defaults" class="visually-hidden">
+{{ columns_preferences_defaults['reports']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">
+{{ columns_preferences|tojson }}</textarea>
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"
@@ -28,7 +28,8 @@
                class="table responsive nowrap position-relative w-100 d-none">
         </table>
         <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-            TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+            TZ:
+            <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
         </span>
     </div>
     <!-- / Content -->
@@ -75,7 +76,8 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="dataModalLabel">
-                        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report Details
+                        <span class="tf-icons bx bx-shield-alt-2 me-2"></span>Security Report
+                        Details
                     </h5>
                     <button type="button"
                             class="btn-close"

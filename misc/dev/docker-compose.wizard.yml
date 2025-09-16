@@ -78,6 +78,7 @@ services:
       dockerfile: ./src/ui/Dockerfile
       args:
         SKIP_MINIFY_JS: "yes"
+        SKIP_MINIFY_CSS: "yes"
     ports:
       - 7000:7000
     volumes:

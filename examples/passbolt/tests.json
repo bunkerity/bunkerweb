@@ -1,6 +1,6 @@
 {
   "name": "passbolt",
-  "kinds": ["docker", "autoconf", "swarm"],
+  "kinds": ["docker", "autoconf"],
   "timeout": 120,
   "tests": [
     {
