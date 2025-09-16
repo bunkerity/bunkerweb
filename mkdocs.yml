@@ -12,6 +12,7 @@ nav: # language-agnostic structure (same file names in each locale folder)
   - Features: "features.md"
   - Advanced usages: "advanced.md"
   - Web UI: "web-ui.md"
+  - API: "api.md"
   - Upgrading: "upgrading.md"
   - Troubleshooting: "troubleshooting.md"
   - Plugins: "plugins.md"
@@ -81,12 +82,10 @@ plugins:
       languages:
         - locale: en
           name: English
-          build: true
           default: true
           site_name: BunkerWeb documentation
         - locale: fr
           name: Français
-          build: true
           site_name: Documentation BunkerWeb
           nav_translations:
             Introduction: Introduction
@@ -96,6 +95,7 @@ plugins:
             Features: Fonctionnalités
             "Advanced usages": "Utilisations avancées"
             "Web UI": "Interface Web"
+            API: "API"
             Upgrading: "Mise à niveau"
             Troubleshooting: Dépannage
             Plugins: Plugins
@@ -103,7 +103,6 @@ plugins:
             About: "À propos"
         - locale: de
           name: Deutsch
-          build: true
           site_name: BunkerWeb Dokumentation
           nav_translations:
             Introduction: Einführung
@@ -113,6 +112,7 @@ plugins:
             Features: Funktionen
             "Advanced usages": "Erweiterte Nutzung"
             "Web UI": "Weboberfläche"
+            API: "API"
             Upgrading: Aktualisierung
             Troubleshooting: Fehlerbehebung
             Plugins: Plugins
@@ -120,7 +120,6 @@ plugins:
             About: Über
         - locale: es
           name: Español
-          build: true
           site_name: Documentación de BunkerWeb
           nav_translations:
             Introduction: Introducción
@@ -130,6 +129,7 @@ plugins:
             Features: Funcionalidades
             "Advanced usages": "Usos avanzados"
             "Web UI": "Interfaz web"
+            API: "API"
             Upgrading: Actualización
             Troubleshooting: "Solución de problemas"
             Plugins: Plugins

@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.5-rc1
+                    image: bunkerity/bunkerweb:1.6.5-rc3
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+                    image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
+                    image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.5-rc1
+                    image: bunkerity/bunkerweb-ui:1.6.5-rc3
                     ...
             ```
 
@@ -135,20 +135,20 @@
         Exemples:
 
         ```bash
-        # Upgrade to 1.6.5-rc1 interactively (will prompt for backup)
-        sudo ./install-bunkerweb.sh --version 1.6.5-rc1
+        # Upgrade to 1.6.5-rc3 interactively (will prompt for backup)
+        sudo ./install-bunkerweb.sh --version 1.6.5-rc3
 
         # Non-interactive upgrade with automatic backup to custom directory
-        sudo ./install-bunkerweb.sh -v 1.6.5-rc1 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.5-rc3 --backup-dir /var/backups/bw-2025-01 -y
 
         # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-        sudo ./install-bunkerweb.sh -v 1.6.5-rc1 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.5-rc3 -y -q
 
         # Perform a dry run (plan) without applying changes
-        sudo ./install-bunkerweb.sh -v 1.6.5-rc1 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.5-rc3 --dry-run
 
         # Upgrade skipping automatic backup (NOT recommended)
-        sudo ./install-bunkerweb.sh -v 1.6.5-rc1 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.5-rc3 --no-auto-backup -y
         ```
 
         !!! warning "Sauter les sauvegardes"
@@ -228,7 +228,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5-rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5-rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -254,7 +254,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5-rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.5-rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :
@@ -493,7 +493,7 @@ Depuis le `1.6`, le planificateur dispose également d'un nouveau [système de v
 
 Un autre changement important est que les **paramètres** qui étaient précédemment déclarés sur le conteneur BunkerWeb **sont désormais déclarés sur le planificateur**. Cela signifie que vous devrez déplacer vos paramètres du conteneur BunkerWeb vers le conteneur Scheduler.
 
-Bien que les paramètres soient maintenant déclarés sur le conteneur du planificateur, **vous devrez toujours déclarer les paramètres obligatoires liés à l'API sur le conteneur BunkerWeb**,  comme le `API_WHITELIST_IP` paramètre utilisé pour mettre en liste blanche l'adresse IP du planificateur, afin qu'il puisse envoyer la configuration à l'instance.
+Bien que les paramètres soient maintenant déclarés sur le conteneur du planificateur, **vous devrez toujours déclarer les paramètres obligatoires liés à l'API sur le conteneur BunkerWeb**, comme le paramètre `API_WHITELIST_IP` utilisé pour mettre en liste blanche l'adresse IP du planificateur, afin qu'il puisse envoyer la configuration à l'instance. Si vous utilisez `API_TOKEN`, vous devez également le définir sur le conteneur BunkerWeb (et le refléter sur le Scheduler) pour autoriser les appels API authentifiés.
 
 !!! warning "Paramètres du conteneur de BunkerWeb"
 
@@ -651,16 +651,16 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.5-rc1
+                        image: bunkerity/bunkerweb:1.6.5-rc3
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+                        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.5-rc1
+                        image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.5-rc1
+                        image: bunkerity/bunkerweb-ui:1.6.5-rc3
                         ...
                 ```
 
@@ -695,7 +695,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5-rc1
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5-rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `apt upgrade`, vous pouvez utiliser la commande suivante :
@@ -721,7 +721,7 @@ Nous avons ajouté une fonctionnalité d**'espace de noms** aux intégrations au
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5-rc1
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.5-rc3
                     ```
 
                     Pour empêcher le paquet BunkerWeb d'être mis à niveau lors de l'exécution de `dnf upgrade`, vous pouvez utiliser la commande suivante :

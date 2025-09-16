@@ -3,6 +3,7 @@
 ## v1.6.5-rc4 - ????/??/??
 
 - [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
+- [DOCS] Add multi-language support to the documentation, including French
 
 ## v1.6.5-rc3 - ????/??/??
 
@@ -11,7 +12,6 @@
 - [FEATURE] Introduce optional API token authentication to bolster security for BunkerWeb API calls, allowing users to enable token-based access control for enhanced protection against unauthorized requests
 - [FEATURE] Add the possibility to ignore IPs in `DNSBL` plugin
 - [LINUX] Improve nginx stop and reload handling in BunkerWeb service to use the pid file instead of the `pgrep` command
-- [DOCS] Add multi-language support to the documentation, including French
 - [UI] Fix incorrect key used when viewing service details
 - [UI] Fix 403 when changing IP address
 - [UI] Add the possibility to quickly ban IP addresses from the reports page
