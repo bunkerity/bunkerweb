@@ -3025,8 +3025,21 @@
 <td>No</td>
 <td><strong>API Whitelist IP:</strong> List of IP/network allowed to contact the API.</td>
 </tr>
+<tr>
+<td><code>API_TOKEN</code></td>
+<td></td>
+<td>global</td>
+<td>No</td>
+<td><strong>API Access Token (optional):</strong> If set, all API requests must include <code>Authorization: Bearer &lt;token&gt;</code>.</td>
+</tr>
 </tbody>
 </table>
+<p>Note: for bootstrap reasons, if you enable <code>API_TOKEN</code> you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the <code>Authorization</code> header when <code>API_TOKEN</code> is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth.</p>
+<p>Example test with curl (replace token and host):</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>http://&lt;bunkerweb-host&gt;:5000/ping
+</code></pre></div>
 </div>
 <div class="tabbed-block">
 <table>
@@ -7825,12 +7838,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>Your client IP is included in the <code>API_WHITELIST_IP</code> setting (default is <code>127.0.0.0/8</code>)</li>
 <li>You are accessing the API on the configured port (default is <code>5000</code> via the <code>API_HTTP_PORT</code> setting)</li>
 <li>You are using the correct <code>API_SERVER_NAME</code> value in the Host header (default is <code>bwapi</code>)</li>
+<li>If <code>API_TOKEN</code> is configured, include <code>Authorization: Bearer &lt;token&gt;</code> in the request headers.</li>
 </ol>
-<p>A typical API request would look like:
-<div class="highlight"><pre><span></span><code>curl -H &quot;Host: bwapi&quot; http://your-bunkerweb-instance:5000/metrics/requests
+<p>Typical requests:</p>
+<p>Without token (when <code>API_TOKEN</code> is not set):
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>http://your-bunkerweb-instance:5000/metrics/requests
+</code></pre></div></p>
+<p>With token (when <code>API_TOKEN</code> is set):
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>http://your-bunkerweb-instance:5000/metrics/requests
 </code></pre></div></p>
 <p>If you have customized the <code>API_SERVER_NAME</code> to something other than the default <code>bwapi</code>, use that value in the Host header instead.</p>
-<p>For secure production environments, make sure to restrict API access to trusted IPs only.</p>
+<p>For secure production environments, restrict API access to trusted IPs and enable <code>API_TOKEN</code>.</p>
 </div>
 <h3 id="configuration-settings_20">Configuration Settings</h3>
 <table>

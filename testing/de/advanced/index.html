@@ -1174,6 +1174,30 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#easy-resolve-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Easy Resolve (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Easy Resolve (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2215,6 +2239,8 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-api-env</span>
 <span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for all services</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">  </span><span class="c1"># Optional API token for authenticated API calls</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
@@ -3765,6 +3791,60 @@ USE_IPV6=yes
   </p>
 <figcaption>User Manager - Activities page</figcaption>
 </figure>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p>The Easy Resolve Plugin lets you quickly remediate false positives and recurring issues directly from the Reports page. It turns guided "Resolve" actions into safe, scoped configuration updates—without manual editing.</p>
+<h4 id="features_2">Features</h4>
+<ul>
+<li>One‑click actions from Reports and report details.</li>
+<li>Context‑aware suggestions for ModSecurity, blacklist, and DNSBL.</li>
+<li>Generates safe ModSecurity exclusions or updates ignore lists.</li>
+<li>Applies changes at service or global scope with permission checks.</li>
+<li>Optional auto‑open of the related configuration page after apply.</li>
+</ul>
+<figure>
+<p><img align="center" alt="Overview" src="../../assets/img/easy-resolve.png" />
+  </p>
+<figcaption>Reports page - with Easy Resolve</figcaption>
+</figure>
+<div class="grid grid-2">
+<figure>
+<p><img alt="ModSecurity resolve" src="../../assets/img/easy-resolve-modsecurity.png" width="100%" />
+  </p>
+<figcaption>ModSecurity resolve</figcaption>
+</figure>
+<figure>
+<p><img alt="DNSBL resolve" src="../../assets/img/easy-resolve-dnsbl.png" width="100%" />
+  </p>
+<figcaption>DNSBL resolve</figcaption>
+</figure>
+</div>
+<div class="grid grid-5">
+<figure>
+<p><img alt="Blacklist resolve - IP" src="../../assets/img/easy-resolve-blacklist-ip.png" width="100%" />
+  </p>
+<figcaption>Blacklist - IP</figcaption>
+</figure>
+<figure>
+<p><img alt="Blacklist resolve - User‑Agent" src="../../assets/img/easy-resolve-blacklist-ua.png" width="100%" />
+  </p>
+<figcaption>Blacklist - User‑Agent</figcaption>
+</figure>
+<figure>
+<p><img alt="Blacklist resolve - rDNS" src="../../assets/img/easy-resolve-blacklist-rdns.png" width="100%" />
+  </p>
+<figcaption>Blacklist - rDNS</figcaption>
+</figure>
+<figure>
+<p><img alt="Blacklist resolve - ASN" src="../../assets/img/easy-resolve-blacklist-asn.png" width="100%" />
+  </p>
+<figcaption>Blacklist - ASN</figcaption>
+</figure>
+<figure>
+<p><img alt="Blacklist resolve - URI" src="../../assets/img/easy-resolve-blacklist-uri.png" width="100%" />
+  </p>
+<figcaption>Blacklist - URI</figcaption>
+</figure>
+</div>
 
 
 

@@ -1587,13 +1587,15 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb settings</p>
 <p>Since version <code>1.6.0</code>, the Scheduler container is where you define the settings for BunkerWeb. The Scheduler then pushes the configuration to the BunkerWeb container.</p>
-<p>⚠ <strong>Important</strong>: All API-related settings (like <code>API_HTTP_PORT</code>, <code>API_LISTEN_IP</code>, <code>API_SERVER_NAME</code>, and <code>API_WHITELIST_IP</code>) <strong>must also be defined in the BunkerWeb container</strong>. (The settings must be mirrored in both containers; otherwise, the BunkerWeb container will not accept API requests from the Scheduler).</p>
+<p>⚠ <strong>Important</strong>: All API-related settings (like <code>API_HTTP_PORT</code>, <code>API_LISTEN_IP</code>, <code>API_SERVER_NAME</code>, <code>API_WHITELIST_IP</code>, and <code>API_TOKEN</code> if you use it) <strong>must also be defined in the BunkerWeb container</strong>. The settings must be mirrored in both containers; otherwise, the BunkerWeb container will not accept API requests from the Scheduler.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-api-env</span>
 <span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for both containers</span>
 <span class="w">  </span><span class="nt">API_HTTP_PORT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5000&quot;</span><span class="w"> </span><span class="c1"># Default value</span>
 <span class="w">  </span><span class="nt">API_LISTEN_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0.0.0.0&quot;</span><span class="w"> </span><span class="c1"># Default value</span>
 <span class="w">  </span><span class="nt">API_SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bwapi&quot;</span><span class="w"> </span><span class="c1"># Default value</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># Set this according to your network settings</span>
+<span class="w">  </span><span class="c1"># Optional token; if set, Scheduler sends Authorization: Bearer &lt;token&gt;</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
@@ -1676,11 +1678,14 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li><code>bw-universe</code>: for BunkerWeb and the scheduler</li>
 <li><code>bw-db</code>: for the database (if you are using one)</li>
 </ul>
-<p>To secure communication between the scheduler and the BunkerWeb API, <strong>it is important to authorize API calls</strong>. You can use the <code>API_WHITELIST_IP</code> setting to specify allowed IP addresses and subnets.</p>
+<p>To secure communication between the scheduler and the BunkerWeb API, <strong>authorize API calls</strong>. Use the <code>API_WHITELIST_IP</code> setting to specify allowed IP addresses and subnets. For stronger protection, set <code>API_TOKEN</code> in both containers; the scheduler will automatically include <code>Authorization: Bearer &lt;token&gt;</code>.</p>
 <p><strong>It is strongly recommended to use a static subnet for the <code>bw-universe</code> network</strong> to enhance security. By implementing these measures, you can ensure that only authorized sources can access the BunkerWeb API, reducing the risk of unauthorized access or malicious activities:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-api-env</span>
 <span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for both containers</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># Optional API token</span>
+<span class="w">  </span><span class="c1"># Optional API token for authenticated API access</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
@@ -3065,6 +3070,8 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
 <span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for both services</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct IP range so the scheduler can send the configuration to the instance</span>
+<span class="w">  </span><span class="c1"># Optional: set an API token and mirror it in both containers</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 <span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># Remember to set a stronger password for the database</span>
 
 <span class="nt">services</span><span class="p">:</span>
@@ -3914,8 +3921,21 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <td>No</td>
 <td><strong>API Whitelist IP:</strong> List of IP/network allowed to contact the API.</td>
 </tr>
+<tr>
+<td><code>API_TOKEN</code></td>
+<td></td>
+<td>global</td>
+<td>No</td>
+<td><strong>API Access Token (optional):</strong> If set, all API requests must include <code>Authorization: Bearer &lt;token&gt;</code>.</td>
+</tr>
 </tbody>
 </table>
+<p>Note: for bootstrap reasons, if you enable <code>API_TOKEN</code> you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the <code>Authorization</code> header when <code>API_TOKEN</code> is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth.</p>
+<p>Example test with curl (replace token and host):</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>http://&lt;bunkerweb-host&gt;:5000/ping
+</code></pre></div>
 </div>
 <div class="tabbed-block">
 <table>
@@ -8714,12 +8734,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>Your client IP is included in the <code>API_WHITELIST_IP</code> setting (default is <code>127.0.0.0/8</code>)</li>
 <li>You are accessing the API on the configured port (default is <code>5000</code> via the <code>API_HTTP_PORT</code> setting)</li>
 <li>You are using the correct <code>API_SERVER_NAME</code> value in the Host header (default is <code>bwapi</code>)</li>
+<li>If <code>API_TOKEN</code> is configured, include <code>Authorization: Bearer &lt;token&gt;</code> in the request headers.</li>
 </ol>
-<p>A typical API request would look like:
-<div class="highlight"><pre><span></span><code>curl -H &quot;Host: bwapi&quot; http://your-bunkerweb-instance:5000/metrics/requests
+<p>Typical requests:</p>
+<p>Without token (when <code>API_TOKEN</code> is not set):
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>http://your-bunkerweb-instance:5000/metrics/requests
+</code></pre></div></p>
+<p>With token (when <code>API_TOKEN</code> is set):
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>http://your-bunkerweb-instance:5000/metrics/requests
 </code></pre></div></p>
 <p>If you have customized the <code>API_SERVER_NAME</code> to something other than the default <code>bwapi</code>, use that value in the Host header instead.</p>
-<p>For secure production environments, make sure to restrict API access to trusted IPs only.</p>
+<p>For secure production environments, restrict API access to trusted IPs and enable <code>API_TOKEN</code>.</p>
 </div>
 <h3 id="es-features-configuration-settings_20">Configuration Settings</h3>
 <table>
@@ -13192,6 +13220,8 @@ LISTEN_STREAM_PORT_SSL_1=4344
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-api-env</span>
 <span class="w">  </span><span class="c1"># We use an anchor to avoid repeating the same settings for all services</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">  </span><span class="c1"># Optional API token for authenticated API calls</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
@@ -14741,7 +14771,61 @@ USE_IPV6=yes
 <p><img align="center" alt="Activities page" src="../assets/img/user-manager-activities.png" />
   </p>
 <figcaption>User Manager - Activities page</figcaption>
-</figure></section><section class="print-page" id="es-web-ui" heading-number="7"><h1 id="es-web-ui-web-ui">Web UI</h1>
+</figure>
+<h2 id="es-advanced-easy-resolve-pro">Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p>The Easy Resolve Plugin lets you quickly remediate false positives and recurring issues directly from the Reports page. It turns guided "Resolve" actions into safe, scoped configuration updates—without manual editing.</p>
+<h4 id="es-advanced-features_2">Features</h4>
+<ul>
+<li>One‑click actions from Reports and report details.</li>
+<li>Context‑aware suggestions for ModSecurity, blacklist, and DNSBL.</li>
+<li>Generates safe ModSecurity exclusions or updates ignore lists.</li>
+<li>Applies changes at service or global scope with permission checks.</li>
+<li>Optional auto‑open of the related configuration page after apply.</li>
+</ul>
+<figure>
+<p><img align="center" alt="Overview" src="../assets/img/easy-resolve.png" />
+  </p>
+<figcaption>Reports page - with Easy Resolve</figcaption>
+</figure>
+<div class="grid grid-2">
+<figure>
+<p><img alt="ModSecurity resolve" src="../assets/img/easy-resolve-modsecurity.png" width="100%" />
+  </p>
+<figcaption>ModSecurity resolve</figcaption>
+</figure>
+<figure>
+<p><img alt="DNSBL resolve" src="../assets/img/easy-resolve-dnsbl.png" width="100%" />
+  </p>
+<figcaption>DNSBL resolve</figcaption>
+</figure>
+</div>
+<div class="grid grid-5">
+<figure>
+<p><img alt="Blacklist resolve - IP" src="../assets/img/easy-resolve-blacklist-ip.png" width="100%" />
+  </p>
+<figcaption>Blacklist - IP</figcaption>
+</figure>
+<figure>
+<p><img alt="Blacklist resolve - User‑Agent" src="../assets/img/easy-resolve-blacklist-ua.png" width="100%" />
+  </p>
+<figcaption>Blacklist - User‑Agent</figcaption>
+</figure>
+<figure>
+<p><img alt="Blacklist resolve - rDNS" src="../assets/img/easy-resolve-blacklist-rdns.png" width="100%" />
+  </p>
+<figcaption>Blacklist - rDNS</figcaption>
+</figure>
+<figure>
+<p><img alt="Blacklist resolve - ASN" src="../assets/img/easy-resolve-blacklist-asn.png" width="100%" />
+  </p>
+<figcaption>Blacklist - ASN</figcaption>
+</figure>
+<figure>
+<p><img alt="Blacklist resolve - URI" src="../assets/img/easy-resolve-blacklist-uri.png" width="100%" />
+  </p>
+<figcaption>Blacklist - URI</figcaption>
+</figure>
+</div></section><section class="print-page" id="es-web-ui" heading-number="7"><h1 id="es-web-ui-web-ui">Web UI</h1>
 <h2 id="es-web-ui-overview">Overview</h2>
 <p align="center">
     <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/tGS3pzquEjY" title="BunkerWeb web UI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -14830,6 +14914,8 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
 <span class="w">  </span><span class="c1"># We anchor the environment variables to avoid duplication</span>
 <span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/24</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">  </span><span class="c1"># Optional API token when securing API access</span>
+<span class="w">  </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
@@ -15308,6 +15394,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w"> </span><span class="c1"># For QUIC / HTTP3 support</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># Make sure to set the correct IP range so the scheduler can send the configuration to the instance</span>
+<span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># Mirror API_TOKEN if you use it</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
@@ -15320,6 +15407,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www.example.com&quot;</span>
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># We mirror the API_WHITELIST_IP from the bunkerweb service</span>
+<span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># Mirror API_TOKEN if you use it</span>
 <span class="w">      </span><span class="nt">SERVE_FILES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
 <span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">USE_CLIENT_CACHE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -16249,7 +16337,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">770</sp
 <p>Since the <code>1.6</code>, the Scheduler also have a new <a href="#es-concepts">built-in healthcheck system</a>, that will check the health of the instances. If an instance becomes unhealthy, the scheduler will stop sending the configuration to it. If the instance becomes healthy again, the scheduler will start sending the configuration to it again.</p>
 <h4 id="es-upgrading-bunkerweb-container">BunkerWeb container</h4>
 <p>Another important change is that the <strong>settings</strong> that were previously declared on the BunkerWeb container <strong>are now declared on the scheduler</strong>. This means that you'll have to move your settings from the BunkerWeb container to the Scheduler container.</p>
-<p>While the settings are now declared on the Scheduler container, <strong>you'll still need to declare api related mandatory settings on the BunkerWeb container</strong> like the <code>API_WHITELIST_IP</code> setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance.</p>
+<p>While the settings are now declared on the Scheduler container, <strong>you'll still need to declare API-related mandatory settings on the BunkerWeb container</strong> like the <code>API_WHITELIST_IP</code> setting which is used to whitelist the Scheduler's IP address, so that it can send the configuration to the instance. If you use <code>API_TOKEN</code>, you must also set it on the BunkerWeb container (and mirror it on the Scheduler) to allow authenticated API calls.</p>
 <div class="admonition warning">
 <p class="admonition-title">BunkerWeb's container settings</p>
 <p>Every API related setting that you declare on the BunkerWeb container <strong>have to be mirrored on the Scheduler container</strong> so that it keeps working, as the configuration will be overwritten by the Scheduler's generated configuration.</p>
