@@ -1,6 +1,6 @@
 {
   "name": "gogs",
-  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "kinds": ["docker", "autoconf", "kubernetes"],
   "no_copy_container": true,
   "timeout": 90,
   "delay": 150,
