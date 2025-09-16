@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.5-rc4 - ????/??/??
+
+- [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
+
 ## v1.6.5-rc3 - ????/??/??
 
 - [BUGFIX] Fix lua session handling when using redis

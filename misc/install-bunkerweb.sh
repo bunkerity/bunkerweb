@@ -213,6 +213,27 @@ ask_user_preferences() {
             CROWDSEC_INSTALL="no"
         fi
 
+        # Ask about API service enablement
+        if [ -z "$SERVICE_API" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🧩 BunkerWeb API Service${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "The BunkerWeb API provides a programmatic interface (FastAPI) to manage instances,"
+            echo "perform actions (reload/stop), and integrate with external systems."
+            echo "It is optional and disabled by default on Linux installations."
+            echo
+            while true; do
+                echo -e "${YELLOW}Enable the API service? (y/N):${NC} "
+                read -p "" -r
+                case $REPLY in
+                    [Yy]*) SERVICE_API=yes; break ;;
+                    ""|[Nn]*) SERVICE_API=no; break ;;
+                    *) echo "Please answer yes (y) or no (n)." ;;
+                esac
+            done
+        fi
+
         # Ask about AppSec installation if CrowdSec is chosen
         if [ "$CROWDSEC_INSTALL" = "yes" ]; then
             echo
@@ -619,6 +640,10 @@ show_final_info() {
     echo "Services status:"
     systemctl status bunkerweb --no-pager -l || true
     systemctl status bunkerweb-scheduler --no-pager -l || true
+    # Show API service status if present on this system
+    if systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+        systemctl status bunkerweb-api --no-pager -l || true
+    fi
 
     if [ "$ENABLE_WIZARD" = "yes" ]; then
         systemctl status bunkerweb-ui --no-pager -l || true
@@ -633,6 +658,9 @@ show_final_info() {
     fi
 
     echo "  - Scheduler config: /etc/bunkerweb/scheduler.env"
+    if [ "${SERVICE_API:-no}" = "yes" ] || systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+        echo "  - API config: /etc/bunkerweb/api.env"
+    fi
     echo "  - Logs: /var/log/bunkerweb/"
     echo
 
@@ -685,6 +713,8 @@ usage() {
     echo "  -w, --enable-wizard      Enable the setup wizard (default in interactive mode)"
     echo "  -n, --no-wizard          Disable the setup wizard"
     echo "  -y, --yes                Non-interactive mode, use defaults"
+    echo "      --api, --enable-api  Enable the API service (disabled by default on Linux)"
+    echo "      --no-api             Explicitly disable the API service"
     echo "  -f, --force              Force installation on unsupported OS versions"
     echo "  -q, --quiet              Silent installation (suppress output)"
     echo "  -h, --help               Show this help message"
@@ -792,6 +822,14 @@ while [[ $# -gt 0 ]]; do
         --instances)
             BUNKERWEB_INSTANCES_INPUT="$2"
             shift 2
+            ;;
+        --api|--enable-api)
+            SERVICE_API=yes
+            shift
+            ;;
+        --no-api)
+            SERVICE_API=no
+            shift
             ;;
         --backup-dir)
             BACKUP_DIRECTORY="$2"; shift 2 ;;
@@ -1017,6 +1055,11 @@ main() {
     if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
         # Use a temporary file to pass the setting to the postinstall script
         echo "BUNKERWEB_INSTANCES=$BUNKERWEB_INSTANCES_INPUT" > /var/tmp/bunkerweb_instances.env
+    fi
+
+    # Persist API enablement for postinstall if chosen
+    if [ "${SERVICE_API:-no}" = "yes" ]; then
+        touch /var/tmp/bunkerweb_enable_api
     fi
 
     # Set environment variables based on installation type

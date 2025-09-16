@@ -22,7 +22,7 @@ from app.utils import COLUMNS_PREFERENCES_DEFAULTS
 
 class UIDatabase(Database):
     def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, pool: Optional[bool] = None, log: bool = True, **kwargs) -> None:
-        super().__init__(logger, sqlalchemy_string, ui=True, pool=pool, log=log, **kwargs)
+        super().__init__(logger, sqlalchemy_string, external=True, pool=pool, log=log, **kwargs)
 
     def get_ui_user(self, *, username: Optional[str] = None, as_dict: bool = False) -> Optional[Union[UiUsers, dict]]:
         """Get ui user. If username is None, return the first admin user."""

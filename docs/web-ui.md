@@ -531,8 +531,8 @@ The web UI can be deployed and configured without going through the setup wizard
     - `ADMIN_PASSWORD`: password to access the web UI.
     - `FLASK_SECRET`: a secret key used to encrypt the session cookie (if not set, a random key will be generated).
     - `TOTP_ENCRYPTION_KEYS` (or `TOTP_SECRETS`): a list of TOTP encryption keys separated by spaces or a dictionary (e.g.: `{"1": "mysecretkey"}` or `mysecretkey` or `mysecretkey mysecretkey1`). **We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys** (if not set, a random number of secret keys will be generated). Check out the [passlib documentation](https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets) for more information.
-    - `LISTEN_ADDR`: the address where the web UI will listen (default is `0.0.0.0` in **Docker images** and `127.0.0.1` on **Linux installations**).
-    - `LISTEN_PORT`: the port where the web UI will listen (default is `7000`).
+    - `UI_LISTEN_ADDR` (preferred): the address where the web UI will listen (default is `0.0.0.0` in **Docker images** and `127.0.0.1` on **Linux installations**). Falls back to `LISTEN_ADDR` if not set.
+    - `UI_LISTEN_PORT` (preferred): the port where the web UI will listen (default is `7000`). Falls back to `LISTEN_PORT` if not set.
     - `MAX_WORKERS`: the number of workers used by the web UI (default is the number of CPUs).
     - `MAX_THREADS`: the number of threads used by the web UI (default is `MAX_WORKERS` * 2).
     - `FORWARDED_ALLOW_IPS`: a list of IP addresses or networks that are allowed to be used in the `X-Forwarded-For` header (default is `*` in **Docker images** and `127.0.0.1` on **Linux installations**).

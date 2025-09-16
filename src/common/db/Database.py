@@ -91,7 +91,7 @@ class Database:
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
-        self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
+        self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, external: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
     ) -> None:
         """Initialize the database"""
         self.logger = logger
@@ -134,7 +134,7 @@ class Database:
             # Handle SQLite database
             if db_type.startswith("sqlite"):
                 path = Path(db_path)
-                if ui:
+                if external:
                     while not path.is_file():
                         if log:
                             self.logger.warning(f"Waiting for the database file to be created: {path}")
@@ -2036,6 +2036,7 @@ class Database:
                 for key in config.copy().keys():
                     if (original_config is None or key not in ("SERVER_NAME", "MULTISITE", "USE_TEMPLATE")) and not key.startswith(f"{service}_"):
                         del config[key]
+                        continue
                     if original_config is None:
                         config[key.replace(f"{service}_", "")] = config.pop(key)
 
@@ -3612,8 +3613,8 @@ class Database:
                     "async": job.run_async,
                     "history": [
                         {
-                            "start_date": job_run.start_date.isoformat(),
-                            "end_date": job_run.end_date.isoformat(),
+                            "start_date": job_run.start_date.astimezone().isoformat(),
+                            "end_date": job_run.end_date.astimezone().isoformat(),
                             "success": job_run.success,
                         }
                         for job_run in session.query(Jobs_runs)
@@ -3884,6 +3885,48 @@ class Database:
             db_instance.status = status
             if status != "down":
                 db_instance.last_seen = datetime.now().astimezone()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return f"An error occurred while updating the instance {hostname}.\n{e}"
+
+        return ""
+
+    def update_instance_fields(
+        self,
+        hostname: str,
+        *,
+        name: Optional[str] = None,
+        port: Optional[int] = None,
+        server_name: Optional[str] = None,
+        method: Optional[str] = None,
+        changed: Optional[bool] = True,
+    ) -> str:
+        """Update instance metadata fields (name, port, server_name, method)."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
+            if db_instance is None:
+                return f"Instance {hostname} does not exist, will not be updated."
+
+            if name is not None:
+                db_instance.name = name
+            if port is not None:
+                db_instance.port = port
+            if server_name is not None:
+                db_instance.server_name = server_name
+            if method is not None:
+                db_instance.method = method
+
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.instances_changed = True
+                        metadata.last_instances_change = datetime.now().astimezone()
 
             try:
                 session.commit()

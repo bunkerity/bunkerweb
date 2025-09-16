@@ -1,0 +1,21 @@
+[Unit]
+Description=BunkerWeb API service
+Documentation=https://docs.bunkerweb.io
+After=bunkerweb.service
+
+[Service]
+Restart=always
+RestartSec=5
+User=root
+UMask=027
+PIDFile=/var/run/bunkerweb/api.pid
+ExecStart=/usr/share/bunkerweb/scripts/bunkerweb-api.sh start
+ExecStop=/usr/share/bunkerweb/scripts/bunkerweb-api.sh stop
+ExecReload=/usr/share/bunkerweb/scripts/bunkerweb-api.sh reload
+Type=simple
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
+Alias=bunkerweb-api.service

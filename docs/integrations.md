@@ -45,14 +45,72 @@ By default, the container exposes:
 - 8443/tcp for HTTPS
 - 8443/udp for QUIC
 - 7000/tcp for the web UI access without BunkerWeb in front (not recommended for production)
+- 8888/tcp for the API when `SERVICE_API=yes` (internal use; prefer exposing it through BunkerWeb as a reverse proxy rather than publishing directly)
 
 The All-In-One image comes with several built-in services, which can be controlled using environment variables:
 
 - `SERVICE_UI=yes` (default) - Enables the web UI service
 - `SERVICE_SCHEDULER=yes` (default) - Enables the Scheduler service
+- `SERVICE_API=no` (default) - Enables the API service (FastAPI control plane)
 - `AUTOCONF_MODE=no` (default) - Enables the autoconf service
 - `USE_REDIS=yes` (default) - Enables the built-in [Redis](#redis-integration) instance
 - `USE_CROWDSEC=no` (default) - [CrowdSec](#crowdsec-integration) integration is disabled by default
+
+### API Integration
+
+The All-In-One image embeds the BunkerWeb API. It is disabled by default and can be enabled by setting `SERVICE_API=yes`.
+
+!!! warning "Security"
+    The API is a privileged control plane. Do not expose it directly to the Internet. Keep it on an internal network, restrict source IPs with `API_WHITELIST_IPS`, require authentication (`API_TOKEN` or API users + Biscuit), and preferably access it through BunkerWeb as a reverse proxy on an unguessable path.
+
+Quick enable (standalone) — publishes the API port; for testing only:
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e SERVICE_API=yes \
+  -e API_WHITELIST_IPS="127.0.0.0/8" \
+  -e API_TOKEN="changeme" \
+  -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
+  -p 8888:8888/tcp \
+  bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+```
+
+Recommended (behind BunkerWeb) — do not publish `8888`; reverse‑proxy it instead:
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5-rc3
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp"
+    environment:
+      SERVER_NAME: "www.example.com"
+      MULTISITE: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/api-<unguessable>"
+      REVERSE_PROXY_HOST: "http://bunkerweb-aio:8888"
+
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+    environment:
+      SERVICE_API: "yes"
+      API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
+      # Optionally set an admin override token
+      # API_TOKEN: "changeme"
+    networks:
+      - bw-universe
+
+networks:
+  bw-universe:
+    name: bw-universe
+```
+
+Details about authentication, permissions (ACL), rate limiting, TLS, and configuration options are available in the [API documentation](api.md).
 
 ### Accessing the Setup wizard
 
@@ -596,6 +654,7 @@ When run without any options, the script enters an interactive mode that guides 
 2.  **Setup Wizard**: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.
 3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection.
 4.  **CrowdSec AppSec**: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.
+5.  **API Service**: Choose whether to enable the optional BunkerWeb API service. It is disabled by default on Linux installations.
 
 !!! info "Manager and Scheduler installations"
     If you choose the **Manager** or **Scheduler Only** installation type, you will also be prompted to provide the IP addresses or hostnames of your BunkerWeb worker instances.
@@ -614,6 +673,8 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
 | `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
 | `-q, --quiet`           | Silent installation (suppress output).                                |
+| `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).      |
+| `--no-api`              | Explicitly disables the API service.                                   |
 | `-h, --help`            | Displays the help message with all available options.                 |
 | `--dry-run`             | Show what would be installed without doing it.                        |
 
@@ -667,6 +728,9 @@ sudo ./install-bunkerweb.sh --quiet --yes
 
 # Preview installation without executing
 sudo ./install-bunkerweb.sh --dry-run
+
+# Enable the API during easy install (non-interactive)
+sudo ./install-bunkerweb.sh --yes --api
 
 # Error: CrowdSec cannot be used with worker installations
 # sudo ./install-bunkerweb.sh --worker --crowdsec  # This will fail
