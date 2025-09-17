@@ -4,6 +4,7 @@
 
 - [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
 - [DOCS] Add multi-language support to the documentation, including French
+- [FEATURE] Add reason data for bad behavior bans/reports
 
 ## v1.6.5-rc3 - ????/??/??
 
