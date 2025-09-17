@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
 

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/api
 
 API_PID_FILE=/var/run/bunkerweb/api.pid
@@ -197,7 +200,12 @@ start() {
     mkdir -p /var/run/bunkerweb
     rm -f "$API_PID_FILE"
     sudo -E -u nginx -g nginx /bin/bash -c \
-        "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/api --logger-class utils.logger.APILogger --config /usr/share/bunkerweb/api/utils/gunicorn.conf.py" &
+        "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --logger-class utils.logger.APILogger --config utils/gunicorn.conf.py" &
+    pid=$!
+    echo "$pid" > "$API_PID_FILE"
+
+    # Wait on the process to keep unit active
+    wait "$pid"
 }
 
 stop() {
