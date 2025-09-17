@@ -192,6 +192,15 @@
     "regex": "^\\d+$",
     "type": "number"
   },
+  "API_HTTPS_PORT": {
+    "context": "global",
+    "default": "6000",
+    "help": "Listen port number (TLS) for the API.",
+    "id": "api-https-listen",
+    "label": "API HTTPS port number",
+    "regex": "^\\d+$",
+    "type": "number"
+  },
   "API_LISTEN_IP": {
     "context": "global",
     "default": "0.0.0.0",
@@ -200,6 +209,15 @@
     "label": "API listen IP",
     "regex": "^.*$",
     "type": "text"
+  },
+  "API_LISTEN_HTTPS": {
+    "context": "global",
+    "default": "no",
+    "help": "Enable HTTPS (TLS) for the API.",
+    "id": "api-listen-https",
+    "label": "API listen HTTPS",
+    "regex": "^(yes|no)$",
+    "type": "check"
   },
   "API_SERVER_NAME": {
     "context": "global",
