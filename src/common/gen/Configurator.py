@@ -17,7 +17,7 @@ from typing import Dict, List, Literal, Optional, Tuple, Union
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, add_dir_to_tar_safely  # type: ignore
 
 
 class Configurator:
@@ -196,7 +196,7 @@ class Configurator:
             if _type != "core":
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        tar.add(file.parent, arcname=file.parent.name, recursive=True)
+                        add_dir_to_tar_safely(tar, file.parent, arc_root=file.parent.name)
                     plugin_content.seek(0)
                     checksum = bytes_hash(plugin_content, algorithm="sha256")
                     value = plugin_content.getvalue()

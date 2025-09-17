@@ -7,7 +7,7 @@ from datetime import datetime
 from io import BytesIO
 from json import load as json_load
 from logging import Logger
-from os import _exit, environ, getenv, getpid, sep
+from os import _exit, environ, getenv, getpid, sep, access, R_OK
 from os.path import join
 from pathlib import Path
 from shutil import copy, rmtree, copytree
@@ -19,7 +19,7 @@ from tarfile import TarFile, open as tar_open
 from threading import Event, Lock, Thread
 from time import sleep
 from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union, cast
 
 BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
 
@@ -29,7 +29,7 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, add_dir_to_tar_safely, plugin_tar_exclude, plugin_tar_filter  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
@@ -298,7 +298,13 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
 
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        tar.add(file, arcname=file.name, recursive=True)
+                        if file.is_dir():
+                            add_dir_to_tar_safely(tar, file, arc_root=file.name)
+                        elif file.is_file():
+                            if not plugin_tar_exclude(file.as_posix()) and access(file.as_posix(), R_OK):
+                                tar.add(file.as_posix(), arcname=file.name, recursive=False, filter=plugin_tar_filter)
+                            else:
+                                LOGGER.debug(f"Excluding file from tar: {file}")
                     plugin_content.seek(0, 0)
                     if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
                         ignored_plugins.add(file.name)
@@ -734,6 +740,7 @@ if __name__ == "__main__":
         for db_instance in SCHEDULER.db.get_instances():
             SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
 
+        db_metadata = cast(Dict[str, Any], db_metadata)
         scheduler_first_start = db_metadata["scheduler_first_start"]
 
         LOGGER.info("Scheduler started ...")
@@ -792,7 +799,8 @@ if __name__ == "__main__":
             for file in plugin_path.glob("*/plugin.json"):
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        tar.add(file.parent, arcname=file.parent.name, recursive=True)
+                        # Safely pack the plugin directory while excluding caches/pyc and unreadable files
+                        add_dir_to_tar_safely(tar, file.parent, arc_root=file.parent.name)
                     plugin_content.seek(0, 0)
 
                     with file.open("r", encoding="utf-8") as f:
@@ -852,7 +860,7 @@ if __name__ == "__main__":
             thread.join()
 
         LOGGER.info("Running plugins download jobs ...")
-        SCHEDULER.run_once(("misc", "pro"))
+        SCHEDULER.run_once(["misc", "pro"])
 
         db_metadata = SCHEDULER.db.get_metadata()
         if db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]:
@@ -942,7 +950,7 @@ if __name__ == "__main__":
                 if not SCHEDULER.reload(
                     env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
                     changed_plugins=changed_plugins,
-                    ignore_plugins=("misc", "pro") if FIRST_START else (),
+                    ignore_plugins=["misc", "pro"] if FIRST_START else None,
                 ):
                     LOGGER.error("At least one job in run_once() failed")
                 else:

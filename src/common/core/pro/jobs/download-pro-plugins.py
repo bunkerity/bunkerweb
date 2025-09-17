@@ -23,9 +23,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError
 
+from common_utils import bytes_hash, get_os_info, get_integration, get_version, add_dir_to_tar_safely  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from common_utils import bytes_hash, get_os_info, get_integration, get_version  # type: ignore
 
 API_ENDPOINT = "https://api.bunkerweb.io"
 PREVIEW_ENDPOINT = "https://assets.bunkerity.com/bw-pro/preview"
@@ -350,7 +350,7 @@ try:
 
         with BytesIO() as plugin_content:
             with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                tar.add(plugin_path, arcname=plugin_path.name, recursive=True)
+                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
             plugin_content.seek(0, 0)
 
             with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
