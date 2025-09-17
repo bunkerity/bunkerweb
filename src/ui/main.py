@@ -743,6 +743,9 @@ def before_request():
         if current_user.is_authenticated:
             passed = True
 
+            # Ensure essential session fields are present for consistent UI behavior
+            if "creation_date" not in session:
+                session["creation_date"] = datetime.now().astimezone()
             if "ip" not in session:
                 session["ip"] = request.remote_addr
             if "user_agent" not in session:
