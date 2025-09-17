@@ -38,7 +38,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       BUNKERWEB_INSTANCES: "bunkerweb"
       SERVER_NAME: "www.example.com" # replace with your domain
@@ -61,7 +61,7 @@ services:
       - bw-services
 
 volumes:
-  bw-data:
+  bw-storage:
 
 
 networks:

@@ -19,7 +19,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       BUNKERWEB_INSTANCES: "bunkerweb"
       SERVER_NAME: "auth.example.com app1.example.com app2.example.com" # replace with your domains
@@ -97,7 +97,7 @@ services:
       - authelia-redis
 
 volumes:
-  bw-data:
+  bw-storage:
   redis-data:
 
 

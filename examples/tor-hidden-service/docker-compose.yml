@@ -26,7 +26,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       BUNKERWEB_INSTANCES: "bunkerweb"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
@@ -54,7 +54,7 @@ services:
       - bw-services
 
 volumes:
-  bw-data:
+  bw-storage:
 
 
 networks:

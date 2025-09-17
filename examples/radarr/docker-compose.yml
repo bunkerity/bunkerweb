@@ -44,7 +44,7 @@ services:
         SecAction "id:900220,phase:1,nolog,pass,t:none,setvar:'tx.allowed_request_content_type=|application/x-www-form-urlencoded| |multipart/form-data| |multipart/related| |text/xml| |application/xml| |application/soap+xml| |application/x-amf| |application/json| |application/cloudevents+json| |application/cloudevents-batch+json| |application/octet-stream| |application/csp-report| |application/xss-auditor-report| |text/plain| |application/x-git-upload-pack-request| |application/x-git-receive-pack-request|'"
     restart: "unless-stopped"
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     networks:
       - bw-universe
 
@@ -63,7 +63,7 @@ services:
       - bw-services
 
 volumes:
-  bw-data:
+  bw-storage:
 
 
 networks:
