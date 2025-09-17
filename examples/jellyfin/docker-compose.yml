@@ -1,0 +1,77 @@
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5-rc3
+    container_name: bunkerweb
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # for QUIC
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+    container_name: bw-scheduler
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-storage:/data
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com" # replace with your domain
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      AUTO_LETS_ENCRYPT: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      MAX_CLIENT_SIZE: "20m" # The default `client_max_body_size` is 10m, this might not be enough for some posters, etc.
+      LIMIT_REQ_RATE: "10r/s"
+      COOKIE_FLAGS: "* SameSite=Lax"
+      REVERSE_PROXY_SEND_TIMEOUT: "300s"
+      REVERSE_PROXY_READ_TIMEOUT: "300s"
+      PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), battery=(), bluetooth=(), camera=(), clipboard-read=(), display-capture=(), document-domain=(), encrypted-media=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), payment=(), publickey-credentials-get=(), serial=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+      CONTENT_SECURITY_POLICY: "default-src https: data: blob: ; img-src 'self' https://* ; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.youtube.com blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'self'; font-src 'self'"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_URL: "/"
+      REVERSE_PROXY_HOST: "http://jellyfin:8096"
+      REVERSE_PROXY_BUFFERING: "no"
+      REVERSE_PROXY_URL_1: "/socket"
+      REVERSE_PROXY_HOST_1: "http://jellyfin:8096"
+      REVERSE_PROXY_WS: "yes"
+      CUSTOM_CONF_MODSEC_CRS_jellyfin: |
+        SecRule REQUEST_FILENAME "/web/config.json" "id:1000000,ctl:ruleRemoveById=930130,ctl:ruleRemoveById=949110,nolog"
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+  jellyfin:
+    image: jellyfin/jellyfin:10.10.7
+    container_name: jellyfin
+    volumes:
+      - ./jellyfin-data/config:/config
+      - ./jellyfin-data/cache:/cache
+      - ./jellyfin-data/media:/media
+    restart: "unless-stopped"
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://www.example.com
+    networks:
+      - bw-services
+
+volumes:
+  bw-storage:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
