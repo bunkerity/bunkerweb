@@ -470,23 +470,32 @@ class CLI(ApiCaller):
         """Execute a Python module as a plugin command, similar to JobScheduler approach."""
         from importlib.util import module_from_spec, spec_from_file_location
 
-        # Convert to absolute path
-        abs_path = command_path.resolve()
-        # Directory containing the command module (e.g., .../<plugin>/bwcli)
-        cmd_dir = abs_path.parent.as_posix()
+        # Convert to absolute paths
+        abs_command_path = command_path.resolve()
+        abs_plugin_path = plugin_base_path.resolve()
+
+        # Get the command directory (parent of the command file, e.g., .../<plugin>/bwcli)
+        cmd_dir = abs_command_path.parent.as_posix()
         # Plugin root directory (e.g., .../<plugin>)
-        plugin_dir = plugin_base_path.as_posix()
+        plugin_dir = abs_plugin_path.as_posix()
 
-        # Validate path exists
-        if not abs_path.exists():
-            return False, self.__format_error(f"Plugin command file not found: {abs_path}")
+        # Validate paths exist
+        if not abs_command_path.exists():
+            return False, self.__format_error(f"Plugin command file not found: {abs_command_path}")
 
-        # Add command directory (bwcli) and plugin root to sys.path temporarily
+        if not abs_plugin_path.exists():
+            return False, self.__format_error(f"Plugin directory not found: {abs_plugin_path}")
+
+        self.__logger.debug(f"Adding to sys.path: plugin_dir={plugin_dir}, cmd_dir={cmd_dir}")
+
+        # Add plugin root and command directory to sys.path temporarily
+        # Plugin root should be added first so imports work correctly
         added_paths = []
-        for p in (cmd_dir, plugin_dir):
+        for p in (plugin_dir, cmd_dir):
             if p and p not in sys_path:
                 sys_path.insert(0, p)
                 added_paths.append(p)
+                self.__logger.debug(f"Added {p} to sys.path")
 
         try:
             # Prepare environment similar to JobScheduler
@@ -505,21 +514,25 @@ class CLI(ApiCaller):
             environ.clear()
             environ.update(plugin_env)
 
-            self.__logger.debug(f"Executing Python module {abs_path.as_posix()}")
+            self.__logger.debug(f"Executing Python module {abs_command_path.as_posix()}")
             self.__logger.info(f"Executing {plugin_id}:{command} (Python module)")
 
             # Backup and modify sys.argv to prevent argument parsing conflicts
             old_argv = sys_argv.copy()
             # Set sys.argv to just the script name and any extra args
-            sys_argv[:] = [abs_path.as_posix()] + (extra_args or [])
+            sys_argv[:] = [abs_command_path.as_posix()] + (extra_args or [])
+
+            self.__logger.debug(f"sys.argv for module: {sys_argv}")
 
             # Load and execute the module
-            spec = spec_from_file_location(f"{plugin_id}_{command}", abs_path.as_posix())
+            spec = spec_from_file_location(f"{plugin_id}_{command}", abs_command_path.as_posix())
             if spec is None:
-                return False, self.__format_error(f"Failed to create module spec for {abs_path}")
+                return False, self.__format_error(f"Failed to create module spec for {abs_command_path}")
 
             if spec.loader is None:
-                return False, self.__format_error(f"Failed to create module loader for {abs_path}")
+                return False, self.__format_error(f"Failed to create module loader for {abs_command_path}")
+
+            self.__logger.debug(f"Module spec: {spec}")
 
             module = module_from_spec(spec)
 
@@ -553,11 +566,12 @@ class CLI(ApiCaller):
             environ.clear()
             environ.update(old_env)
 
-            # Remove any paths we added to sys.path (in reverse order)
-            for p in added_paths:
+            # Remove any paths we added to sys.path (in reverse order of addition)
+            for p in reversed(added_paths):
                 if p in sys_path:
                     with suppress(ValueError):
                         sys_path.remove(p)
+                        self.__logger.debug(f"Removed {p} from sys.path")
 
     def __exec_external_command(
         self, command_path: Path, plugin_id: str, command: str, debug: bool = False, extra_args: Optional[list] = None
