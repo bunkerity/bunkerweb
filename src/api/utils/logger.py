@@ -1,5 +1,5 @@
 from contextlib import suppress
-from logging import Formatter, getLogger
+from logging import getLogger, Formatter
 from os.path import join, sep
 from sys import path as sys_path
 from threading import Lock
@@ -10,7 +10,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from gunicorn.glogging import Logger
 
-from logger import DATE_FORMAT, LOG_FORMAT, setup_logger  # type: ignore
+from logger import DATE_FORMAT, LOG_FORMAT  # type: ignore
 
 
 class APILogger(Logger):
@@ -23,22 +23,25 @@ class APILogger(Logger):
 
     def __init__(self, cfg):
         if not self.error_log:
-            # Use common utils setup to fetch level from CUSTOM_LOG_LEVEL/LOG_LEVEL
-            self.error_log = setup_logger("API")  # type: ignore
+            self.error_log = getLogger("API")
         self.error_log.propagate = False
         if not self.access_log:
-            self.access_log = setup_logger("API.access")  # type: ignore
+            self.access_log = getLogger("API.access")
         self.access_log.propagate = False
         self.error_handlers = []
         self.access_handlers = []
         self.logfile = None
         self.lock = Lock()
         self.cfg = cfg
+        self._uvicorn_synced = False  # ensure we don't re-sync multiple times
         self.setup(cfg)
 
     def setup(self, cfg):  # type: ignore[override]
         # Let Gunicorn configure its handlers first
         super().setup(cfg)
+
+        if self._uvicorn_synced:
+            return
 
         # Align uvicorn loggers with our format/handlers so all logs are consistent
         with suppress(Exception):
@@ -77,3 +80,5 @@ class APILogger(Logger):
             ):
                 with suppress(Exception):
                     getLogger(lname).setLevel(src.level)  # type: ignore
+
+            self._uvicorn_synced = True

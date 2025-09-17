@@ -31,7 +31,6 @@ LIB_DIR = Path(sep, "var", "lib", "bunkerweb")
 API_ACL_FILE = LIB_DIR.joinpath("api_acl.json")
 
 HEALTH_FILE = TMP_DIR.joinpath("api.healthy")
-ERROR_FILE = TMP_DIR.joinpath("api.error")
 
 PID_FILE = RUN_DIR.joinpath("api.pid")
 
@@ -117,8 +116,6 @@ def on_starting(server):
     TMP_UI_DIR.mkdir(parents=True, exist_ok=True)
     RUN_DIR.mkdir(parents=True, exist_ok=True)
     LIB_DIR.mkdir(parents=True, exist_ok=True)
-
-    ERROR_FILE.unlink(missing_ok=True)
 
     # Handle Docker secrets first
     docker_secrets = handle_docker_secrets()
@@ -234,10 +231,8 @@ def on_starting(server):
         LOGGER.info("Biscuit keys securely stored.")
         LOGGER.info("Biscuit key hashes securely stored for change detection.")
     except Exception as e:
-        message = f"An error occurred while handling Biscuit keys: {e}"
         LOGGER.debug(format_exc())
-        LOGGER.critical(message)
-        ERROR_FILE.write_text(message, encoding="utf-8")
+        LOGGER.critical(f"An error occurred while handling Biscuit keys: {e}")
         exit(1)
 
     DB = APIDatabase(LOGGER)
@@ -246,9 +241,7 @@ def on_starting(server):
     ready = False
     while not ready:
         if (datetime.now().astimezone() - current_time).total_seconds() > 60:
-            message = "Timed out while waiting for the database to be initialized."
-            LOGGER.error(message)
-            ERROR_FILE.write_text(message, encoding="utf-8")
+            LOGGER.error("Timed out while waiting for the database to be initialized.")
             exit(1)
 
         db_metadata = DB.get_metadata()
@@ -264,9 +257,7 @@ def on_starting(server):
     API_USER = "Error"
     while API_USER == "Error":
         if (datetime.now().astimezone() - current_time).total_seconds() > 60:
-            message = "Timed out while waiting for the api user."
-            LOGGER.error(message)
-            ERROR_FILE.write_text(message, encoding="utf-8")
+            LOGGER.error("Timed out while waiting for the api user.")
             exit(1)
 
         try:
@@ -317,21 +308,17 @@ def on_starting(server):
 
         if not DEBUG:
             if len(user_name) > 256:
-                message = "The api username is too long. It must be less than 256 characters."
-                LOGGER.error(message)
-                ERROR_FILE.write_text(message, encoding="utf-8")
+                LOGGER.error("The api username is too long. It must be less than 256 characters.")
                 exit(1)
             elif not USER_PASSWORD_RX.match(env_api_password):
-                message = "The api password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character."
-                LOGGER.error(message)
-                ERROR_FILE.write_text(message, encoding="utf-8")
+                LOGGER.error(
+                    "The api password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character."
+                )
                 exit(1)
 
         ret = DB.create_api_user(user_name, gen_password_hash(env_api_password), admin=True, method="manual")
         if ret and "already exists" not in ret:
-            message = f"Couldn't create the api user in the database: {ret}"
-            LOGGER.critical(message)
-            ERROR_FILE.write_text(message, encoding="utf-8")
+            LOGGER.critical(f"Couldn't create the api user in the database: {ret}")
             exit(1)
 
     # Build ACL cache file (redis-like JSON) for API users
@@ -501,9 +488,7 @@ def on_starting(server):
     api_token_present = bool(getenv("API_TOKEN", "").strip())
 
     if not (keys_loaded or admin_exists or api_token_present):
-        message = "No authentication configured: no Biscuit keys provided (ACL), no admin API user, and no API_TOKEN. Exiting."
-        LOGGER.critical(message)
-        ERROR_FILE.write_text(message, encoding="utf-8")
+        LOGGER.critical("No authentication configured: no Biscuit keys provided (ACL), no admin API user, and no API_TOKEN. Exiting.")
         exit(1)
 
     LOGGER.info("API is ready")

@@ -42,9 +42,9 @@ start() {
             echo "ADMIN_PASSWORD="
             echo "# FLASK_SECRET=changeme"
             echo "# TOTP_ENCRYPTION_KEYS=changeme"
-            echo "UI_LISTEN_ADDR=127.0.0.1"
-            echo "# UI_LISTEN_PORT=7000"
-            echo "UI_FORWARDED_ALLOW_IPS=127.0.0.1"
+            echo "LISTEN_ADDR=127.0.0.1"
+            echo "# LISTEN_PORT=7000"
+            echo "FORWARDED_ALLOW_IPS=127.0.0.1"
             echo "# ENABLE_HEALTHCHECK=no"
         } > /etc/bunkerweb/ui.env
         chown root:nginx /etc/bunkerweb/ui.env
@@ -57,6 +57,12 @@ start() {
         LISTEN_ADDR=$(get_env_var "LISTEN_ADDR" "127.0.0.1")
     fi
     export LISTEN_ADDR
+
+    LISTEN_PORT=$(get_env_var "UI_LISTEN_PORT" "")
+    if [ -z "$LISTEN_PORT" ]; then
+        LISTEN_PORT=$(get_env_var "LISTEN_PORT" "7000")
+    fi
+    export LISTEN_PORT
 
     FORWARDED_ALLOW_IPS=$(get_env_var "UI_FORWARDED_ALLOW_IPS" "")
     if [ -z "$FORWARDED_ALLOW_IPS" ]; then

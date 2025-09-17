@@ -44,18 +44,16 @@ start() {
             echo
             echo "# --- Network & Proxy ---"
             echo "# Listen address/port for the API"
-            echo "# API_LISTEN_ADDR=0.0.0.0   # synonym: LISTEN_ADDR"
-            echo "# API_LISTEN_PORT=8888      # synonym: LISTEN_PORT"
+            echo "LISTEN_ADDR=127.0.0.1"
+            echo "LISTEN_PORT=8888"
             echo "# Trusted proxy IPs for X-Forwarded-* headers (comma-separated)."
             echo "# Default is restricted to loopback for security."
-            echo "API_FORWARDED_ALLOW_IPS=127.0.0.1"
+            echo "FORWARDED_ALLOW_IPS=127.0.0.1"
             echo
             echo "# --- Logging & Runtime ---"
             echo "# LOG_LEVEL affects most components; CUSTOM_LOG_LEVEL overrides when provided."
             echo "# LOG_LEVEL=info"
             echo "# CUSTOM_LOG_LEVEL=info"
-            echo "# Capture Gunicorn/uvicorn output to files instead of stdout/stderr."
-            echo "CAPTURE_OUTPUT=yes"
             echo "# Number of workers/threads (auto if unset)."
             echo "# MAX_WORKERS=<auto>"
             echo "# MAX_THREADS=<auto>"
@@ -74,7 +72,7 @@ start() {
             echo "# --- IP allowlist ---"
             echo "# Enable and shape inbound IP allowlist for the API."
             echo "# API_WHITELIST_ENABLED=yes"
-            echo "API_WHITELIST_IPS=127.0.0.1"
+            echo "WHITELIST_IPS=127.0.0.1"
             echo
             echo "# --- FastAPI surface ---"
             echo "# Customize or disable documentation endpoints. Use 'disabled' to turn off."
@@ -150,6 +148,8 @@ start() {
 
     if [ ! -f /etc/bunkerweb/api.yml ]; then
         touch /etc/bunkerweb/api.yml
+        chown root:nginx /etc/bunkerweb/api.yml
+        chmod 660 /etc/bunkerweb/api.yml
     fi
 
     # Extract environment variables with fallback
@@ -197,15 +197,7 @@ start() {
         done < /etc/bunkerweb/api.env
     fi
 
-    mkdir -p /var/run/bunkerweb
-    rm -f "$API_PID_FILE"
-    sudo -E -u nginx -g nginx /bin/bash -c \
-        "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --logger-class utils.logger.APILogger --config utils/gunicorn.conf.py" &
-    pid=$!
-    echo "$pid" > "$API_PID_FILE"
-
-    # Wait on the process to keep unit active
-    wait "$pid"
+    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/api --logger-class utils.logger.APILogger --config /usr/share/bunkerweb/api/utils/gunicorn.conf.py"
 }
 
 stop() {
