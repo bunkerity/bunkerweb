@@ -7,8 +7,15 @@ from os import getenv
 from urllib.parse import urlsplit
 from requests import request
 from requests.exceptions import ConnectionError
+from urllib3 import disable_warnings  # new
+from urllib3.exceptions import InsecureRequestWarning  # new
 
 from logger import setup_logger  # type: ignore
+
+# Suppress urllib3 InsecureRequestWarning when verify=False (default: enabled)
+if getenv("API_SUPPRESS_INSECURE_WARNING", "1").lower() in ("1", "true", "yes", "on"):
+    with suppress(Exception):
+        disable_warnings(InsecureRequestWarning)
 
 
 class API:
