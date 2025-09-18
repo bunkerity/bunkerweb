@@ -120,6 +120,8 @@ DNS.1 = www.example.org
                 LOGGER.warning(f"Failed to delete temporary OpenSSL config file: {e}")
     else:
         LOGGER.info("Skipping generation of self-signed certificate for API server (already present)")
+except SystemExit as e:
+    status = e.code
 except BaseException as e:
     status = 2
     LOGGER.debug(format_exc())
