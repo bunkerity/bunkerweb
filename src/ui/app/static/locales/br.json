@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "Tem certeza de que deseja excluir a instância selecionada?",
       "delete_confirmation_alert": "Tem certeza de que deseja excluir a instância selecionada?",
       "delete_confirmation_alert_plural": "Tem certeza de que deseja excluir as instâncias selecionadas?",
-      "instance_creation_alert": "Você não precisa fornecer a porta ou o nome do servidor; os valores de `API_HTTP_PORT` e `API_SERVER_NAME` serão usados para a configuração da instância.",
+      "instance_creation_alert": "Você não precisa fornecer a porta ou o nome do servidor; os valores de `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` e `API_SERVER_NAME` serão usados para a configuração da instância.",
       "next_step_in_case_of_issue": "Se encontrar problemas, você pode aceitar manualmente o certificado não seguro:",
       "recovery_codes_save_alert": "Guarde estes códigos de recuperação em um local seguro (como um gerenciador de senhas ou cofre). Você pode usá-los para acessar sua conta se perder seu dispositivo de autenticação.",
       "recovery_codes_shown_once_alert": "Estes códigos de recuperação são mostrados apenas uma vez. Certifique-se de guardá-los em segurança.",

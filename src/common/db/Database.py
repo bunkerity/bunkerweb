@@ -3722,7 +3722,18 @@ class Database:
 
             return cache_files
 
-    def add_instance(self, hostname: str, port: int, server_name: str, method: str, changed: Optional[bool] = True, *, name: Optional[str] = None) -> str:
+    def add_instance(
+        self,
+        hostname: str,
+        port: int,
+        server_name: str,
+        method: str,
+        changed: Optional[bool] = True,
+        *,
+        name: Optional[str] = None,
+        listen_https: bool = False,
+        https_port: int = 6000,
+    ) -> str:
         """Add instance."""
         with self._db_session() as session:
             if self.readonly:
@@ -3739,6 +3750,8 @@ class Database:
                     hostname=hostname,
                     name=name or "manual instance",
                     port=port,
+                    listen_https=listen_https,
+                    https_port=https_port,
                     server_name=server_name,
                     method=method,
                     creation_date=current_time,
@@ -3834,6 +3847,8 @@ class Database:
                 if db_instance is not None:
                     db_instance.name = instance.get("name", "manual instance")
                     db_instance.port = instance["env"].get("API_HTTP_PORT", 5000)
+                    db_instance.listen_https = instance["env"].get("API_LISTEN_HTTPS", "no") == "yes"
+                    db_instance.https_port = instance["env"].get("API_HTTPS_PORT", 6000)
                     db_instance.server_name = instance["env"].get("API_SERVER_NAME", "bwapi")
                     db_instance.type = instance.get("type", "static")
                     db_instance.status = instance.get("status", "up" if instance.get("health", True) else "down")
@@ -3847,6 +3862,8 @@ class Database:
                         hostname=instance["hostname"],
                         name=instance.get("name", "manual instance"),
                         port=instance["env"].get("API_HTTP_PORT", 5000),
+                        listen_https=instance["env"].get("API_LISTEN_HTTPS", "no") == "yes",
+                        https_port=instance["env"].get("API_HTTPS_PORT", 6000),
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
                         type=instance.get("type", "static"),
                         status="up" if instance.get("health", True) else "down",
@@ -3899,6 +3916,8 @@ class Database:
         *,
         name: Optional[str] = None,
         port: Optional[int] = None,
+        listen_https: Optional[bool] = None,
+        https_port: Optional[int] = None,
         server_name: Optional[str] = None,
         method: Optional[str] = None,
         changed: Optional[bool] = True,
@@ -3916,6 +3935,10 @@ class Database:
                 db_instance.name = name
             if port is not None:
                 db_instance.port = port
+            if listen_https is not None:
+                db_instance.listen_https = listen_https
+            if https_port is not None:
+                db_instance.https_port = https_port
             if server_name is not None:
                 db_instance.server_name = server_name
             if method is not None:
@@ -3947,6 +3970,8 @@ class Database:
                     "hostname": instance.hostname,
                     "name": instance.name,
                     "port": instance.port,
+                    "listen_https": instance.listen_https,
+                    "https_port": instance.https_port,
                     "server_name": instance.server_name,
                     "type": instance.type,
                     "status": instance.status,
@@ -3973,6 +3998,8 @@ class Database:
                 "hostname": instance.hostname,
                 "name": instance.name,
                 "port": instance.port,
+                "listen_https": instance.listen_https,
+                "https_port": instance.https_port,
                 "server_name": instance.server_name,
                 "type": instance.type,
                 "status": instance.status,

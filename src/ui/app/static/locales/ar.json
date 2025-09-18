@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
       "delete_confirmation_alert": "هل أنت متأكد أنك تريد حذف المثيل المحدد؟",
       "delete_confirmation_alert_plural": "هل أنت متأكد أنك تريد حذف المثيلات المحددة؟",
-      "instance_creation_alert": "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و `API_SERVER_NAME` لتكوين المثيل.",
+      "instance_creation_alert": "لا تحتاج إلى توفير المنفذ أو اسم الخادم؛ سيتم استخدام قيم `API_HTTP_PORT` و`API_LISTEN_HTTPS` و`API_HTTPS_PORT` و`API_SERVER_NAME` لتكوين المثيل.",
       "next_step_in_case_of_issue": "إذا واجهت مشاكل، يمكنك قبول الشهادة غير الآمنة يدويًا:",
       "recovery_codes_save_alert": "يرجى حفظ رموز الاسترداد هذه في مكان آمن (مثل مدير كلمات المرور أو قبو). يمكنك استخدامها للوصول إلى حسابك إذا فقدت جهاز المصادقة الخاص بك.",
       "recovery_codes_shown_once_alert": "يتم عرض رموز الاسترداد هذه مرة واحدة فقط. يرجى التأكد من حفظها بأمان.",

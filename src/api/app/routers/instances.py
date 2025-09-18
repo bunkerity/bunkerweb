@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List, Tuple
 import re
+from urllib.parse import urlsplit
 
 from ..auth.guard import guard
 from ..deps import get_instances_api_caller, get_api_for_hostname
@@ -87,15 +88,21 @@ _DOMAIN_RE = re.compile(r"^(?!.*\\.\\.)[^\\s\/:]{1,256}$")
 
 
 def _normalize_hostname_and_port(hostname: str, port: Optional[int]) -> Tuple[str, Optional[int]]:
-    # Strip scheme and split port if provided in hostname
-    host = hostname.replace("http://", "").replace("https://", "").lower()
-    if ":" in host:
-        h, p = host.split(":", 1)
-        try:
-            return h, int(p)
-        except ValueError:
-            return h, port
-    return host, port
+    # Robustly parse scheme/host/port
+    try:
+        parsed = urlsplit(hostname)
+        host = (parsed.hostname or hostname).lower()
+        eff_port = parsed.port or port
+        return host, eff_port
+    except Exception:
+        host = hostname.replace("http://", "").replace("https://", "").lower()
+        if ":" in host:
+            h, p = host.split(":", 1)
+            try:
+                return h, int(p)
+            except ValueError:
+                return h, port
+        return host, port
 
 
 def _validate_port(port: Optional[int]) -> Optional[int]:
@@ -134,13 +141,21 @@ def create_instance(req: InstanceCreateRequest) -> JSONResponse:
     # Derive defaults from api_config when not provided
     name = req.name or "manual instance"
     method = req.method or "api"
+    parsed = urlsplit(req.hostname)
     hostname, port = _normalize_hostname_and_port(req.hostname, req.port)
 
     if not _DOMAIN_RE.match(hostname):
         return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid hostname: {hostname}"})
 
     server_name = req.server_name or api_config.internal_api_host_header
-    # Validate provided port or use default from api_config
+
+    # Determine scheme and ports
+    # Infer HTTPS if scheme is https and listen_https not explicitly provided
+    inferred_https = parsed.scheme.lower() == "https"
+    listen_https = bool(req.listen_https) if req.listen_https is not None else inferred_https
+    https_port: Optional[int] = req.https_port if req.https_port is not None else (parsed.port if inferred_https else None)
+
+    # Validate provided ports or use defaults
     if port is not None:
         try:
             port = _validate_port(port)
@@ -153,14 +168,45 @@ def create_instance(req: InstanceCreateRequest) -> JSONResponse:
             LOGGER.exception("Invalid API_HTTP_PORT in api_config; must be 1..65535")
             return JSONResponse(status_code=500, content={"status": "error", "message": "internal error"})
 
-    err = db.add_instance(hostname=hostname, port=port, server_name=server_name, method=method, name=name)
+    if https_port is not None:
+        try:
+            https_port = _validate_port(https_port)
+        except ValueError as ve:
+            return JSONResponse(status_code=422, content={"status": "error", "message": f"Invalid https_port: {ve}"})
+    else:
+        try:
+            cfg = db.get_config(global_only=True, methods=False, filtered_settings=("API_HTTPS_PORT",))
+            https_port = _validate_port(int(cfg.get("API_HTTPS_PORT", "6000")))
+        except Exception:
+            https_port = 6000
+
+    err = db.add_instance(
+        hostname=hostname,
+        port=port,
+        server_name=server_name,
+        method=method,
+        name=name,
+        listen_https=listen_https,
+        https_port=https_port,
+    )
     if err:
         code = 400 if "already exists" in err or "read-only" in err else 500
         return JSONResponse(status_code=code, content={"status": "error", "message": err})
 
     return JSONResponse(
         status_code=201,
-        content={"status": "success", "instance": {"hostname": hostname, "name": name, "port": port, "server_name": server_name, "method": method}},
+        content={
+            "status": "success",
+            "instance": {
+                "hostname": hostname,
+                "name": name,
+                "port": port,
+                "server_name": server_name,
+                "method": method,
+                "listen_https": listen_https,
+                "https_port": https_port,
+            },
+        },
     )
 
 
@@ -203,6 +249,8 @@ def update_instance(hostname: str, req: InstanceUpdateRequest) -> JSONResponse:
         port=int(req.port) if req.port is not None else None,
         server_name=req.server_name,
         method=req.method,
+        listen_https=bool(req.listen_https) if req.listen_https is not None else None,
+        https_port=int(req.https_port) if req.https_port is not None else None,
     )
     if err:
         code = 400 if ("does not exist" in err or "read-only" in err) else 500

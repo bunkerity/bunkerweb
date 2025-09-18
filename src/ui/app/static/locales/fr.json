@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "Êtes-vous sûr de vouloir supprimer l'instance sélectionnée ?",
       "delete_confirmation_alert": "Êtes-vous sûr de vouloir supprimer l'instance sélectionnée ?",
       "delete_confirmation_alert_plural": "Êtes-vous sûr de vouloir supprimer les instances sélectionnées ?",
-      "instance_creation_alert": "Vous n'avez pas besoin de fournir le port ou le nom du serveur ; les valeurs de `API_HTTP_PORT` et `API_SERVER_NAME` seront utilisées pour la configuration de l'instance.",
+      "instance_creation_alert": "Vous n'avez pas besoin de fournir le port ou le nom du serveur ; les valeurs de `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` et `API_SERVER_NAME` seront utilisées pour la configuration de l'instance.",
       "next_step_in_case_of_issue": "Si vous rencontrez des problèmes, vous pouvez accepter manuellement le certificat non sécurisé :",
       "recovery_codes_save_alert": "Veuillez sauvegarder ces codes de récupération dans un endroit sûr (comme un gestionnaire de mots de passe ou un bunker). Vous pourrez les utiliser pour accéder à votre compte si vous perdez votre appareil d'authentification.",
       "recovery_codes_shown_once_alert": "Ces codes de récupération ne sont affichés qu'une seule fois. Veuillez vous assurer de les sauvegarder en lieu sûr.",

@@ -121,6 +121,17 @@ if IGNORE_REGEX_CHECK:
     LOGGER.warning("Ignoring regex check for settings (we hope you know what you're doing) ...")
 
 
+def _instance_endpoint(db_instance: Dict[str, Any]) -> str:
+    """Return full scheme://host:port for an instance based on HTTPS settings."""
+    listen_https = bool(db_instance.get("listen_https", False))
+    host = db_instance.get("hostname", "127.0.0.1")
+    http_port = int(db_instance.get("port", 5000) or 5000)
+    https_port = int(db_instance.get("https_port", 6000) or 6000)
+    scheme = "https" if listen_https else "http"
+    port = https_port if listen_https else http_port
+    return f"{scheme}://{host}:{port}"
+
+
 def handle_stop(signum, frame):
     current_time = datetime.now().astimezone()
     while APPLYING_CHANGES.is_set() and (datetime.now().astimezone() - current_time).seconds < 30:
@@ -200,7 +211,7 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
             index = -1
             with SCHEDULER_LOCK:
                 for i, api in enumerate(SCHEDULER.apis):
-                    if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
+                    if api.endpoint == f"{_instance_endpoint(db_instance)}/":
                         index = i
                         break
 
@@ -214,11 +225,15 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
                 if status == "success":
                     success = True
                     if index == -1:
-                        logger.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
-                        SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                        logger.debug(
+                            f"Adding {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} to the list of reachable instances"
+                        )
+                        SCHEDULER.apis.append(API.from_instance(db_instance))
                 elif index != -1:
-                    fails.append(f"{db_instance['hostname']}:{db_instance['port']}")
-                    logger.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
+                    fails.append(f"{db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']}")
+                    logger.debug(
+                        f"Removing {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} from the list of reachable instances"
+                    )
                     del SCHEDULER.apis[index]
 
     if not success:
@@ -471,7 +486,7 @@ def healthcheck_job():
     env = None
 
     for db_instance in SCHEDULER.db.get_instances():
-        bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
+        bw_instance = API.from_instance(db_instance)
         try:
             try:
                 sent, err, status, resp = bw_instance.request("GET", "health")
@@ -738,7 +753,7 @@ if __name__ == "__main__":
 
         SCHEDULER.apis = []
         for db_instance in SCHEDULER.db.get_instances():
-            SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+            SCHEDULER.apis.append(API.from_instance(db_instance))
 
         db_metadata = cast(Dict[str, Any], db_metadata)
         scheduler_first_start = db_metadata["scheduler_first_start"]
@@ -1001,7 +1016,8 @@ if __name__ == "__main__":
                             if "\n" in message:
                                 message = message.split("\n", 1)[1]
 
-                            failover_message += f"{db_instance['hostname']}:{db_instance['port']} - {message}\n"
+                            port_display = db_instance["https_port"] if db_instance.get("listen_https") else db_instance["port"]
+                            failover_message += f"{db_instance['hostname']}:{port_display} - {message}\n"
 
                         ret = SCHEDULER.db.update_instance(
                             db_instance["hostname"],
@@ -1019,17 +1035,21 @@ if __name__ == "__main__":
                         if status == "success":
                             found = False
                             for api in SCHEDULER.apis:
-                                if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
+                                if api.endpoint == f"{_instance_endpoint(db_instance)}/":
                                     found = True
                                     break
                             if not found:
-                                LOGGER.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
-                                SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                                LOGGER.debug(
+                                    f"Adding {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} to the list of reachable instances"
+                                )
+                                SCHEDULER.apis.append(API.from_instance(db_instance))
                             continue
 
                         for i, api in enumerate(SCHEDULER.apis):
-                            if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
-                                LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
+                            if api.endpoint == f"{_instance_endpoint(db_instance)}/":
+                                LOGGER.debug(
+                                    f"Removing {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} from the list of reachable instances"
+                                )
                                 del SCHEDULER.apis[i]
                                 break
                 else:
@@ -1241,7 +1261,7 @@ if __name__ == "__main__":
                     CHANGES.append("instances")
                     SCHEDULER.apis = []
                     for db_instance in SCHEDULER.db.get_instances():
-                        SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                        SCHEDULER.apis.append(API.from_instance(db_instance))
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")

@@ -51,6 +51,8 @@ class InstanceCreateRequest(BaseModel):
     hostname: str
     name: Optional[str] = Field(None, description="Friendly name for the instance")
     port: Optional[int] = Field(None, description="API HTTP port; defaults from settings if omitted")
+    listen_https: Optional[bool] = Field(None, description="If true, instance API listens over HTTPS")
+    https_port: Optional[int] = Field(None, description="API HTTPS port; defaults from settings if omitted")
     server_name: Optional[str] = Field(None, description="API server_name/Host header; defaults if omitted")
     method: Optional[str] = Field("ui", description='Source method tag (defaults to "ui")')
 
@@ -62,6 +64,8 @@ class InstancesDeleteRequest(BaseModel):
 class InstanceUpdateRequest(BaseModel):
     name: Optional[str] = Field(None, description="Friendly name for the instance")
     port: Optional[int] = Field(None, description="API HTTP port")
+    listen_https: Optional[bool] = Field(None, description="If true, instance API listens over HTTPS")
+    https_port: Optional[int] = Field(None, description="API HTTPS port")
     server_name: Optional[str] = Field(None, description="API server_name/Host header")
     method: Optional[str] = Field(None, description="Source method tag")
 

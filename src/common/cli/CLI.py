@@ -143,9 +143,27 @@ class CLI(ApiCaller):
 
         if self.__db:
             for db_instance in self.__db.get_instances():
-                self.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                try:
+                    # Centralized builder handles scheme/port/host
+                    self.apis.append(API.from_instance(db_instance))
+                except Exception:
+                    # Fallback to HTTP if any field is missing/malformed
+                    self.apis.append(
+                        API(
+                            f"http://{db_instance.get('hostname', '127.0.0.1')}:{db_instance.get('port', 5000)}",
+                            db_instance.get("server_name", "bwapi"),
+                        )
+                    )
         else:
-            self.apis.append(API(f"http://127.0.0.1:{self.__get_variable('API_HTTP_PORT', '5000')}", self.__get_variable("API_SERVER_NAME", "bwapi")))
+            # Build single local API endpoint from environment variables
+            server_name = self.__get_variable("API_SERVER_NAME", "bwapi") or "bwapi"
+            endpoint = API.build_endpoint(
+                "127.0.0.1",
+                port=int(self.__get_variable("API_HTTP_PORT", "5000") or "5000"),
+                listen_https=(self.__get_variable("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
+                https_port=int(self.__get_variable("API_HTTPS_PORT", "6000") or "6000"),
+            )
+            self.apis.append(API(endpoint, server_name))
 
     def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
@@ -217,7 +235,8 @@ class CLI(ApiCaller):
                     config = self.__db.get_config(global_only=True, filtered_settings=("SERVER_NAME",))
                     services = config.get("SERVER_NAME", [])
                 else:
-                    services = self.__get_variable("SERVER_NAME", "").split(" ")
+                    srv = self.__get_variable("SERVER_NAME", "")
+                    services = srv.split() if isinstance(srv, str) else []
                 if isinstance(services, str):
                     services = services.split()
                 if not service or service == "bwcli" or service not in services:

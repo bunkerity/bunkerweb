@@ -2,11 +2,12 @@
 
 ## v1.6.5-rc4 - ????/??/??
 
+- [FEATURE] Add the possibility use HTTPS with BunkerWeb's internal API
 - [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
 - [DOCS] Add multi-language support to the documentation, including French
 - [FEATURE] Add reason data for bad behavior bans/reports
 
-## v1.6.5-rc3 - ????/??/??
+## v1.6.5-rc3 - 2025/09/16
 
 - [BUGFIX] Fix lua session handling when using redis
 - [BUGFIX] Fix ctx error at startup with `DNSBL` plugin

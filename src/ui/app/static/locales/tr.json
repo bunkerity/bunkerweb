@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert": "Seçili örneği silmek istediğinizden emin misiniz?",
       "delete_confirmation_alert_plural": "Seçili örnekleri silmek istediğinizden emin misiniz?",
-      "instance_creation_alert": "`API_HTTP_PORT` ve `API_SERVER_NAME` değerleri örnek yapılandırmasında kullanılacağı için port veya sunucu adı belirtmenize gerek yoktur.",
+      "instance_creation_alert": "Port veya sunucu adı belirtmenize gerek yoktur; örnek yapılandırması için `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` ve `API_SERVER_NAME` değerleri kullanılacaktır.",
       "next_step_in_case_of_issue": "Sorun yaşarsanız, güvensiz sertifikayı manuel olarak kabul edebilirsiniz:",
       "recovery_codes_save_alert": "Lütfen bu kurtarma kodlarını güvenli bir yerde (şifre yöneticisi veya kasa gibi) saklayın. Kimlik doğrulama cihazınızı kaybederseniz hesabınıza erişmek için kullanabilirsiniz.",
       "recovery_codes_shown_once_alert": "Bu kurtarma kodları yalnızca bir kez gösterilir. Lütfen güvenli bir şekilde sakladığınızdan emin olun.",

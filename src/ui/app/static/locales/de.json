@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "Sind Sie sicher, dass Sie die ausgewählte Instanz löschen möchten?",
       "delete_confirmation_alert": "Sind Sie sicher, dass Sie die ausgewählte Instanz löschen möchten?",
       "delete_confirmation_alert_plural": "Sind Sie sicher, dass Sie die ausgewählten Instanzen löschen möchten?",
-      "instance_creation_alert": "Sie müssen den Port oder den Servernamen nicht angeben; die Werte von `API_HTTP_PORT` und `API_SERVER_NAME` werden für die Instanzkonfiguration verwendet.",
+      "instance_creation_alert": "Sie müssen den Port oder den Servernamen nicht angeben; die Werte von `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` und `API_SERVER_NAME` werden für die Instanzkonfiguration verwendet.",
       "next_step_in_case_of_issue": "Bei Problemen können Sie das unsichere Zertifikat manuell akzeptieren:",
       "recovery_codes_save_alert": "Bitte speichern Sie diese Wiederherstellungscodes an einem sicheren Ort (wie einem Passwort-Manager oder Tresor). Sie können sie verwenden, um auf Ihr Konto zuzugreifen, wenn Sie Ihr Authentifizierungsgerät verlieren.",
       "recovery_codes_shown_once_alert": "Diese Wiederherstellungscodes werden nur einmal angezeigt. Bitte stellen Sie sicher, dass Sie sie sicher speichern.",

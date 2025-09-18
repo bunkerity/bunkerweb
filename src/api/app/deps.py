@@ -18,9 +18,7 @@ def get_instances_api_caller() -> ApiCaller:
     try:
         for inst in db.get_instances():
             try:
-                endpoint = f"http://{inst['hostname']}:{inst['port']}"
-                host = inst.get("server_name") or inst.get("name") or "bwapi"
-                apis.append(API(endpoint, host))
+                apis.append(API.from_instance(inst))
             except Exception:
                 continue
     except Exception:
@@ -34,6 +32,4 @@ def get_api_for_hostname(hostname: str) -> API:
     inst = get_db(log=False).get_instance(hostname)
     if not inst:
         raise HTTPException(status_code=404, detail=f"Instance {hostname} not found")
-    endpoint = f"http://{inst['hostname']}:{inst['port']}"
-    host = inst.get("server_name") or inst.get("name") or "bwapi"
-    return API(endpoint, host)
+    return API.from_instance(inst)
