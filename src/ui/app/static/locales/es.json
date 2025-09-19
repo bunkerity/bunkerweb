@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "¿Estás seguro de que quieres eliminar la instancia seleccionada?",
       "delete_confirmation_alert": "¿Estás seguro de que quieres eliminar la instancia seleccionada?",
       "delete_confirmation_alert_plural": "¿Estás seguro de que quieres eliminar las instancias seleccionadas?",
-      "instance_creation_alert": "No necesitas proporcionar el puerto o el nombre del servidor; los valores de `API_HTTP_PORT` y `API_SERVER_NAME` se usarán para la configuración de la instancia.",
+      "instance_creation_alert": "No necesitas proporcionar el puerto o el nombre del servidor; los valores de `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` y `API_SERVER_NAME` se usarán para la configuración de la instancia.",
       "next_step_in_case_of_issue": "Si encuentras problemas, puedes aceptar manualmente el certificado no seguro:",
       "recovery_codes_save_alert": "Guarda estos códigos de recuperación en un lugar seguro (como un gestor de contraseñas o una caja fuerte). Puedes usarlos para acceder a tu cuenta si pierdes tu dispositivo de autenticación.",
       "recovery_codes_shown_once_alert": "Estos códigos de recuperación se muestran solo una vez. Asegúrate de guardarlos de forma segura.",

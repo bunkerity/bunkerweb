@@ -50,9 +50,9 @@ BISCUIT_PRIVATE_KEY_HASH_FILE = BISCUIT_PRIVATE_KEY_FILE.with_suffix(".hash")  #
 
 MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
-LISTEN_ADDR = getenv("LISTEN_ADDR", "0.0.0.0")
-LISTEN_PORT = getenv("LISTEN_PORT", "7000")
-FORWARDED_ALLOW_IPS = getenv("FORWARDED_ALLOW_IPS", "*")
+LISTEN_ADDR = getenv("UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
+LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))
+FORWARDED_ALLOW_IPS = getenv("UI_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "*"))
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
 wsgi_app = "main:app"

@@ -33,6 +33,7 @@ RUN bash install.sh
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
 COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
+COPY src/api/requirements.txt /tmp/req/requirements-api.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 
@@ -65,6 +66,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
+COPY src/api api
 
 # Minify JS files (can be skipped with SKIP_MINIFY_JS=yes)
 ARG SKIP_MINIFY_JS=no

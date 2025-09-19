@@ -4,6 +4,8 @@ First off all, thanks for being here and showing your support to the project !
 
 We accept many types of contributions whether they are technical or not. Every community feedback, work or help is, and will always be, appreciated.
 
+Before getting started, review `AGENTS.md` for repository structure, tooling, and workflow expectations.
+
 ## Talk about the project
 
 The first thing you can do is to talk about the project. You can share it on social media (by the way, you can can also follow us on [LinkedIn](https://www.linkedin.com/company/bunkerity/), [Twitter](https://twitter.com/bunkerity) and [GitHub](https://github.com/bunkerity)), make a blog post about it or simply tell your friends/colleagues that's an awesome project..

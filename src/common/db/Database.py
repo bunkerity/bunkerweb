@@ -91,7 +91,7 @@ class Database:
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
-        self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, ui: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
+        self, logger: Logger, sqlalchemy_string: Optional[str] = None, *, external: bool = False, pool: Optional[bool] = None, log: bool = True, **kwargs
     ) -> None:
         """Initialize the database"""
         self.logger = logger
@@ -134,7 +134,7 @@ class Database:
             # Handle SQLite database
             if db_type.startswith("sqlite"):
                 path = Path(db_path)
-                if ui:
+                if external:
                     while not path.is_file():
                         if log:
                             self.logger.warning(f"Waiting for the database file to be created: {path}")
@@ -460,7 +460,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.5-rc3"
+                return "1.6.5-rc4"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -493,7 +493,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.5-rc3",
+            "version": "1.6.5-rc4",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -2036,6 +2036,7 @@ class Database:
                 for key in config.copy().keys():
                     if (original_config is None or key not in ("SERVER_NAME", "MULTISITE", "USE_TEMPLATE")) and not key.startswith(f"{service}_"):
                         del config[key]
+                        continue
                     if original_config is None:
                         config[key.replace(f"{service}_", "")] = config.pop(key)
 
@@ -3612,8 +3613,8 @@ class Database:
                     "async": job.run_async,
                     "history": [
                         {
-                            "start_date": job_run.start_date.isoformat(),
-                            "end_date": job_run.end_date.isoformat(),
+                            "start_date": job_run.start_date.astimezone().isoformat(),
+                            "end_date": job_run.end_date.astimezone().isoformat(),
                             "success": job_run.success,
                         }
                         for job_run in session.query(Jobs_runs)
@@ -3721,7 +3722,18 @@ class Database:
 
             return cache_files
 
-    def add_instance(self, hostname: str, port: int, server_name: str, method: str, changed: Optional[bool] = True, *, name: Optional[str] = None) -> str:
+    def add_instance(
+        self,
+        hostname: str,
+        port: int,
+        server_name: str,
+        method: str,
+        changed: Optional[bool] = True,
+        *,
+        name: Optional[str] = None,
+        listen_https: bool = False,
+        https_port: int = 6000,
+    ) -> str:
         """Add instance."""
         with self._db_session() as session:
             if self.readonly:
@@ -3738,6 +3750,8 @@ class Database:
                     hostname=hostname,
                     name=name or "manual instance",
                     port=port,
+                    listen_https=listen_https,
+                    https_port=https_port,
                     server_name=server_name,
                     method=method,
                     creation_date=current_time,
@@ -3833,6 +3847,8 @@ class Database:
                 if db_instance is not None:
                     db_instance.name = instance.get("name", "manual instance")
                     db_instance.port = instance["env"].get("API_HTTP_PORT", 5000)
+                    db_instance.listen_https = instance["env"].get("API_LISTEN_HTTPS", "no") == "yes"
+                    db_instance.https_port = instance["env"].get("API_HTTPS_PORT", 6000)
                     db_instance.server_name = instance["env"].get("API_SERVER_NAME", "bwapi")
                     db_instance.type = instance.get("type", "static")
                     db_instance.status = instance.get("status", "up" if instance.get("health", True) else "down")
@@ -3846,6 +3862,8 @@ class Database:
                         hostname=instance["hostname"],
                         name=instance.get("name", "manual instance"),
                         port=instance["env"].get("API_HTTP_PORT", 5000),
+                        listen_https=instance["env"].get("API_LISTEN_HTTPS", "no") == "yes",
+                        https_port=instance["env"].get("API_HTTPS_PORT", 6000),
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
                         type=instance.get("type", "static"),
                         status="up" if instance.get("health", True) else "down",
@@ -3892,6 +3910,54 @@ class Database:
 
         return ""
 
+    def update_instance_fields(
+        self,
+        hostname: str,
+        *,
+        name: Optional[str] = None,
+        port: Optional[int] = None,
+        listen_https: Optional[bool] = None,
+        https_port: Optional[int] = None,
+        server_name: Optional[str] = None,
+        method: Optional[str] = None,
+        changed: Optional[bool] = True,
+    ) -> str:
+        """Update instance metadata fields (name, port, server_name, method)."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            db_instance = session.query(Instances).filter_by(hostname=hostname).first()
+            if db_instance is None:
+                return f"Instance {hostname} does not exist, will not be updated."
+
+            if name is not None:
+                db_instance.name = name
+            if port is not None:
+                db_instance.port = port
+            if listen_https is not None:
+                db_instance.listen_https = listen_https
+            if https_port is not None:
+                db_instance.https_port = https_port
+            if server_name is not None:
+                db_instance.server_name = server_name
+            if method is not None:
+                db_instance.method = method
+
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.instances_changed = True
+                        metadata.last_instances_change = datetime.now().astimezone()
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return f"An error occurred while updating the instance {hostname}.\n{e}"
+
+        return ""
+
     def get_instances(self, *, method: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get instances."""
         with self._db_session() as session:
@@ -3904,6 +3970,8 @@ class Database:
                     "hostname": instance.hostname,
                     "name": instance.name,
                     "port": instance.port,
+                    "listen_https": instance.listen_https,
+                    "https_port": instance.https_port,
                     "server_name": instance.server_name,
                     "type": instance.type,
                     "status": instance.status,
@@ -3930,6 +3998,8 @@ class Database:
                 "hostname": instance.hostname,
                 "name": instance.name,
                 "port": instance.port,
+                "listen_https": instance.listen_https,
+                "https_port": instance.https_port,
                 "server_name": instance.server_name,
                 "type": instance.type,
                 "status": instance.status,

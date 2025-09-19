@@ -743,7 +743,7 @@
       "confirmation_instance_deletion": "Are you sure you want to delete the selected instance?",
       "delete_confirmation_alert": "Are you sure you want to delete the selected instance?",
       "delete_confirmation_alert_plural": "Are you sure you want to delete the selected instances?",
-      "instance_creation_alert": "You don't need to provide the port or the server name; the values of `API_HTTP_PORT` and `API_SERVER_NAME` will be used for the instance configuration.",
+      "instance_creation_alert": "You don't need to provide the port or the server name; the values of `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, and `API_SERVER_NAME` will be used for the instance configuration.",
       "next_step_in_case_of_issue": "If you encounter issues, you can manually accept the unsafe certificate:",
       "recovery_codes_save_alert": "Please save these recovery codes in a secure location (like a password manager or bunker). You can use them to access your account if you lose your authentication device.",
       "recovery_codes_shown_once_alert": "These recovery codes are shown only once. Please ensure you save them securely.",

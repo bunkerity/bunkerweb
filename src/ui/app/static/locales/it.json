@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "Sei sicuro di voler eliminare l'istanza selezionata?",
       "delete_confirmation_alert": "Sei sicuro di voler eliminare l'istanza selezionata?",
       "delete_confirmation_alert_plural": "Sei sicuro di voler eliminare le istanze selezionate?",
-      "instance_creation_alert": "Non è necessario fornire la porta o il nome del server; i valori di `API_HTTP_PORT` e `API_SERVER_NAME` verranno utilizzati per la configurazione dell'istanza.",
+      "instance_creation_alert": "Non è necessario fornire la porta o il nome del server; i valori di `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` e `API_SERVER_NAME` verranno utilizzati per la configurazione dell'istanza.",
       "next_step_in_case_of_issue": "In caso di problemi, puoi accettare manualmente il certificato non sicuro:",
       "recovery_codes_save_alert": "Salva questi codici di recupero in un luogo sicuro (come un gestore di password o una cassaforte). Puoi usarli per accedere al tuo account se perdi il tuo dispositivo di autenticazione.",
       "recovery_codes_shown_once_alert": "Questi codici di recupero vengono mostrati solo una volta. Assicurati di salvarli in modo sicuro.",

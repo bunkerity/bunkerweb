@@ -82,7 +82,7 @@ services:
       - MYSQL_USER=bunkerweb
       - MYSQL_PASSWORD=DBPassword   # Remember to set a stronger password for the database 
     volumes:
-      - bw-data:/var/lib/mysql
+      - bw-storage:/var/lib/mysql
     networks:
       - bw-docker
 
@@ -102,7 +102,7 @@ services:
       - DATABASE_URI=mariadb+pymysql://bunkerweb:DBPassword@bw-db:3306/db # Remember to set a stronger password for the database
 
 volumes:
-  bw-data:
+  bw-storage:
   certs:
 
 networks:

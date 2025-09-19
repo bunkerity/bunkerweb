@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "您确定要删除选定的实例吗？",
       "delete_confirmation_alert": "您确定要删除选定的实例吗？",
       "delete_confirmation_alert_plural": "您确定要删除选定的实例吗？",
-      "instance_creation_alert": "您不需要提供端口或服务器名称；`API_HTTP_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。",
+      "instance_creation_alert": "您不需要提供端口或服务器名称；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值将用于实例配置。",
       "next_step_in_case_of_issue": "如果遇到问题，您可以手动接受不安全的证书：",
       "recovery_codes_save_alert": "请将这些恢复代码保存在安全的位置（例如密码管理器或保险箱）。如果丢失身份验证设备，您可以使用它们访问您的帐户。",
       "recovery_codes_shown_once_alert": "这些恢复代码仅显示一次。请确保将其安全保存。",

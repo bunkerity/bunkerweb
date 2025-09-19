@@ -12,6 +12,7 @@ nav: # language-agnostic structure (same file names in each locale folder)
   - Features: "features.md"
   - Advanced usages: "advanced.md"
   - Web UI: "web-ui.md"
+  - API: "api.md"
   - Upgrading: "upgrading.md"
   - Troubleshooting: "troubleshooting.md"
   - Plugins: "plugins.md"
@@ -64,8 +65,12 @@ extra:
       link: https://github.com/bunkerity
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/company/bunkerity/
+    - icon: fontawesome/brands/reddit
+      link: https://www.reddit.com/r/BunkerWeb/
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/bunkerweb/
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/bunkerity
+      link: https://x.com/bunkerity
 
 plugins:
   - search
@@ -78,15 +83,16 @@ plugins:
   - print-site
   - i18n:
       docs_structure: folder
+      default_language: en
+      prefix_default_language: true
+      reconfigure_material: true
       languages:
         - locale: en
-          name: English
-          build: true
+          name: English - 🇬🇧
           default: true
           site_name: BunkerWeb documentation
         - locale: fr
-          name: Français
-          build: true
+          name: Français - 🇫🇷
           site_name: Documentation BunkerWeb
           nav_translations:
             Introduction: Introduction
@@ -96,14 +102,14 @@ plugins:
             Features: Fonctionnalités
             "Advanced usages": "Utilisations avancées"
             "Web UI": "Interface Web"
+            API: "API"
             Upgrading: "Mise à niveau"
             Troubleshooting: Dépannage
             Plugins: Plugins
             "Professional services": "Services professionnels"
             About: "À propos"
         - locale: de
-          name: Deutsch
-          build: true
+          name: Deutsch - 🇩🇪
           site_name: BunkerWeb Dokumentation
           nav_translations:
             Introduction: Einführung
@@ -113,14 +119,14 @@ plugins:
             Features: Funktionen
             "Advanced usages": "Erweiterte Nutzung"
             "Web UI": "Weboberfläche"
+            API: "API"
             Upgrading: Aktualisierung
             Troubleshooting: Fehlerbehebung
             Plugins: Plugins
             "Professional services": "Professionelle Dienste"
             About: Über
         - locale: es
-          name: Español
-          build: true
+          name: Español - 🇪🇸
           site_name: Documentación de BunkerWeb
           nav_translations:
             Introduction: Introducción
@@ -130,8 +136,26 @@ plugins:
             Features: Funcionalidades
             "Advanced usages": "Usos avanzados"
             "Web UI": "Interfaz web"
+            API: "API"
             Upgrading: Actualización
             Troubleshooting: "Solución de problemas"
             Plugins: Plugins
             "Professional services": "Servicios profesionales"
             About: "Acerca de"
+        # - locale: zh
+        #   name: 中文 - 🇨🇳
+        #   site_name: BunkerWeb 文档
+        #   nav_translations:
+        #     Introduction: 介绍
+        #     Concepts: 概念
+        #     Integrations: 集成
+        #     "Quickstart guide": "快速入门指南"
+        #     Features: 功能
+        #     "Advanced usages": "高级用法"
+        #     "Web UI": "Web 界面"
+        #     API: "API"
+        #     Upgrading: 升级
+        #     Troubleshooting: 故障排除
+        #     Plugins: 插件
+        #     "Professional services": "专业服务"
+        #     About: 关于

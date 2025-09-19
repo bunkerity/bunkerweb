@@ -10,7 +10,7 @@ from os import getenv, getpid, sep
 from os.path import abspath, join
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
-from sys import path as sys_path
+from sys import path as sys_path, modules as sys_modules
 from threading import Thread
 from time import time
 from traceback import format_exc
@@ -221,13 +221,13 @@ def refresh_app_context():
     for hook_info in HOOKS.values():
         app.config[hook_info["key"]] = []
 
-    # Find all python files in ui directories
-    core_ui_py_files = list(CORE_PLUGINS_PATH.glob("*/ui/hooks.py"))
-    external_ui_py_files = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/hooks.py"))
-    pro_ui_py_files = list(PRO_PLUGINS_PATH.glob("*/ui/hooks.py"))
-    core_bp_dirs = list(CORE_PLUGINS_PATH.glob("*/ui/blueprints"))
-    external_bp_dirs = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
-    pro_bp_dirs = list(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
+    # Find all python files in ui directories (sorted for deterministic load order)
+    core_ui_py_files = sorted(CORE_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    external_ui_py_files = sorted(EXTERNAL_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    pro_ui_py_files = sorted(PRO_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    core_bp_dirs = sorted(CORE_PLUGINS_PATH.glob("*/ui/blueprints"))
+    external_bp_dirs = sorted(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
+    pro_bp_dirs = sorted(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
 
     # Track active plugin paths and blueprints
     active_plugin_paths = set()
@@ -241,24 +241,36 @@ def refresh_app_context():
             continue
 
         active_plugin_paths.add(py_file.parent.parent.parent)
-        module_name = f"hooks_{py_file.parent.name}_{py_file.stem}"
+        # Namespace the module name with the plugin directory to avoid collisions
+        plugin_root = py_file.parents[2] if len(py_file.parents) >= 3 else py_file.parent
+        module_name = f"bw_ui_hooks_{plugin_root.name}_{py_file.stem}"
         active_hook_modules.add(module_name)
         hook_dir = str(py_file.parent)
 
         try:
-            # Check for a proxy file first
             proxy_file = py_file.parent / "hooks_proxy.py"
             target_file = proxy_file if proxy_file.exists() else py_file
 
-            # Add to sys.path if not already there
+            # Prepend plugin hook dir to sys.path for correct import resolution
+            added_to_path = False
             if hook_dir not in sys_path:
-                sys_path.append(hook_dir)
+                sys_path.insert(0, hook_dir)
+                added_to_path = True
                 app.hook_sys_paths[module_name] = hook_dir
 
-            # Load the module
+            # Ensure we don't keep stale modules with the same dynamic name around
+            if module_name in sys_modules:
+                del sys_modules[module_name]
+
+            # Also isolate a preloaded top-level "hooks" to avoid proxy importing the wrong one
+            prev_hooks_mod = sys_modules.pop("hooks", None)
+
             spec = spec_from_file_location(module_name, target_file)
             if not spec or not spec.loader:
                 LOGGER.warning(f"Could not load spec for file: {target_file}")
+                # Restore any prior 'hooks' module
+                if prev_hooks_mod is not None:
+                    sys_modules["hooks"] = prev_hooks_mod
                 continue
 
             hook_module = module_from_spec(spec)
@@ -266,7 +278,19 @@ def refresh_app_context():
                 spec.loader.exec_module(hook_module)
             except Exception as exec_err:
                 LOGGER.warning(f"Error executing module {target_file}: {exec_err}")
+                # Restore any prior 'hooks' module
+                if prev_hooks_mod is not None:
+                    sys_modules["hooks"] = prev_hooks_mod
+                else:
+                    # Ensure we don't keep a plugin-specific 'hooks' leaked
+                    sys_modules.pop("hooks", None)
                 continue
+
+            # Restore any prior 'hooks' module (avoid leaking current plugin 'hooks' globally)
+            if prev_hooks_mod is not None:
+                sys_modules["hooks"] = prev_hooks_mod
+            else:
+                sys_modules.pop("hooks", None)
 
             for hook_type, hook_info in HOOKS.items():
                 if hasattr(hook_module, hook_type) and callable(getattr(hook_module, hook_type)):
@@ -274,10 +298,16 @@ def refresh_app_context():
                     app.config.setdefault(hook_info["key"], []).append(hook_function)
                     LOGGER.debug(f"{hook_info['log_prefix']} hook '{hook_type}' from {py_file} loaded")
 
-            if hook_dir in sys_path:
+            # Remove the path we added
+            if added_to_path and hook_dir in sys_path:
                 sys_path.remove(hook_dir)
+                app.hook_sys_paths.pop(module_name, None)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+            # Best-effort cleanup of 'hooks'
+            with suppress(Exception):
+                if "hooks" in sys_modules:
+                    del sys_modules["hooks"]
 
     # --- CLEAN UP OBSOLETE HOOK PATHS ---
     for module_name, hook_dir in list(app.hook_sys_paths.items()):
@@ -286,33 +316,54 @@ def refresh_app_context():
             del app.hook_sys_paths[module_name]
             LOGGER.debug(f"Removed {hook_dir} from sys.path for obsolete hook {module_name}")
 
+    # Dedupe all hook lists by (module, qualname) to avoid duplicates across refreshes
+    for hook_info in HOOKS.values():
+        key = hook_info["key"]
+        dedup, seen = [], set()
+        for fn in app.config.get(key, []):
+            ident = (getattr(fn, "__module__", ""), getattr(fn, "__qualname__", getattr(fn, "__name__", "")))
+            if ident in seen:
+                continue
+            seen.add(ident)
+            dedup.append(fn)
+        app.config[key] = dedup
+
     # --- LOAD BLUEPRINTS ---
+    base_pro = str(PRO_PLUGINS_PATH.resolve())
+    base_ext = str(EXTERNAL_PLUGINS_PATH.resolve())
+    # base_core not needed explicitly for detection, default priority is 0
+
     for bp_dir in chain(pro_bp_dirs, external_bp_dirs, core_bp_dirs):
         if not bp_dir.is_dir():
             continue
 
-        # Track plugin path
         active_plugin_paths.add(bp_dir.parent.parent.parent)
         blueprint_dir = str(bp_dir)
-        is_pro = bp_dir in (p.parent for p in pro_bp_dirs)
-        is_external = bp_dir in (p.parent for p in external_bp_dirs)
 
-        # Add directory to sys_path
+        # Compute priority based on directory location: pro (2) > external (1) > core (0)
+        dir_str = str(bp_dir.resolve())
+        priority = 2 if dir_str.startswith(base_pro) else (1 if dir_str.startswith(base_ext) else 0)
+
+        # Prepend for correct import precedence during this load
+        added_to_path = False
         if blueprint_dir not in sys_path:
-            sys_path.append(blueprint_dir)
+            sys_path.insert(0, blueprint_dir)
+            added_to_path = True
 
-        # Load blueprints from Python files
         for bp_file in bp_dir.glob("*.py"):
             if bp_file.name.endswith("_proxy.py"):
                 continue
 
             try:
-                # Check for a proxy file first
                 proxy_file = bp_file.parent / f"{bp_file.stem}_proxy.py"
-                module_name = f"blueprint_{bp_dir.parent.name}_{bp_file.stem}"
-
-                # Use the proxy file if it exists, otherwise use the original file
+                # Namespace module name with plugin directory to avoid collisions
+                plugin_root = bp_dir.parents[1] if len(bp_dir.parents) >= 2 else bp_dir.parent
+                module_name = f"bw_ui_blueprint_{plugin_root.name}_{bp_file.stem}"
                 target_file = proxy_file if proxy_file.exists() else bp_file
+
+                # Clear stale dynamic module if present
+                if module_name in sys_modules:
+                    del sys_modules[module_name]
 
                 spec = spec_from_file_location(module_name, target_file)
                 if not spec or not spec.loader:
@@ -321,11 +372,9 @@ def refresh_app_context():
                 bp_module = module_from_spec(spec)
                 spec.loader.exec_module(bp_module)
 
-                # Look for a blueprint object with the same name as the file
                 bp_name = bp_file.stem
                 if hasattr(bp_module, bp_name):
                     bp = getattr(bp_module, bp_name)
-                    # Verify it's a Blueprint or has blueprint-like characteristics
                     if isinstance(bp, Blueprint) or (
                         hasattr(bp, "name")
                         and hasattr(bp, "route")
@@ -335,16 +384,13 @@ def refresh_app_context():
                     ):
                         plugin_blueprints.add(bp_name)
 
-                        # Set plugin priority and path
-                        bp.plugin_priority = 2 if is_pro else (1 if is_external else 0)
+                        bp.plugin_priority = priority
                         bp.import_path = blueprint_dir
                         app.plugin_sys_paths[bp_name] = blueprint_dir
 
-                        # Make template folder absolute
                         if bp.template_folder:
                             bp.template_folder = abspath(bp.template_folder)
 
-                        # Register in our blueprint registry by priority
                         if bp_name not in blueprint_registry or bp.plugin_priority > getattr(blueprint_registry[bp_name], "plugin_priority", 0):
                             blueprint_registry[bp_name] = bp
                             LOGGER.debug(f"Blueprint '{bp_name}' from {bp_file} registered with priority {bp.plugin_priority}")
@@ -354,6 +400,10 @@ def refresh_app_context():
                     LOGGER.debug(f"No blueprint named '{bp_name}' found in {bp_file}")
             except Exception as exc:
                 LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
+
+        # Remove the path we added
+        if added_to_path and blueprint_dir in sys_path:
+            sys_path.remove(blueprint_dir)
 
     # --- HANDLE BLUEPRINT CHANGES ---
     # Remove blueprints for deleted plugins
@@ -743,6 +793,9 @@ def before_request():
         if current_user.is_authenticated:
             passed = True
 
+            # Ensure essential session fields are present for consistent UI behavior
+            if "creation_date" not in session:
+                session["creation_date"] = datetime.now().astimezone()
             if "ip" not in session:
                 session["ip"] = request.remote_addr
             if "user_agent" not in session:

@@ -1,10 +1,11 @@
 from hashlib import new as new_hash
 from io import BytesIO
-from os import getenv, sep
+from os import getenv, sep, access, R_OK
 from pathlib import Path
 from platform import machine
 from typing import Dict, List, Optional, Union, Any
 import logging
+from contextlib import suppress
 
 
 def handle_docker_secrets() -> Dict[str, str]:
@@ -121,6 +122,95 @@ def bytes_hash(bio: Union[str, bytes, BytesIO], *, algorithm: str = "sha512") ->
     return _hash.hexdigest()
 
 
+# -----------------------
+# Safe tar helper utilities
+# -----------------------
+
+_EXCLUDED_DIR_NAMES = {
+    "__pycache__",
+    ".git",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    "node_modules",
+}
+
+_EXCLUDED_FILE_SUFFIXES = {".pyc", ".pyo"}
+_EXCLUDED_FILE_NAMES = {".DS_Store"}
+
+
+def plugin_tar_exclude(path: Union[str, Path]) -> bool:
+    """Return True if a path should be excluded from plugin tar archives.
+
+    Excludes cache/hidden directories, compiled files, platform junk, and unreadable files.
+    """
+    p = Path(path)
+    try:
+        if any(part in _EXCLUDED_DIR_NAMES for part in p.parts):
+            return True
+        if p.suffix in _EXCLUDED_FILE_SUFFIXES:
+            return True
+        if p.name in _EXCLUDED_FILE_NAMES:
+            return True
+        if p.is_file() and not access(p.as_posix(), R_OK):
+            return True
+    except Exception:
+        # Be conservative if checks fail
+        return True
+    return False
+
+
+def plugin_tar_filter(tarinfo):
+    """Tar filter for plugin archives to drop unwanted entries."""
+    try:
+        name = getattr(tarinfo, "name", "")
+        p = Path(name)
+        if any(part in _EXCLUDED_DIR_NAMES for part in p.parts):
+            return None
+        if p.suffix in _EXCLUDED_FILE_SUFFIXES:
+            return None
+        if p.name in _EXCLUDED_FILE_NAMES:
+            return None
+        return tarinfo
+    except Exception:
+        return None
+
+
+def add_dir_to_tar_safely(tar: Any, dir_path: Union[str, Path], arc_root: Optional[str] = None):
+    """Recursively add a directory to an open TarFile, safely.
+
+    - Skips excluded/unreadable files and directories via plugin_tar_exclude
+    - Applies plugin_tar_filter on files/dirs
+
+    Args:
+        tar: an open TarFile in write mode
+        dir_path: root directory to add
+        arc_root: name of the directory inside the archive (defaults to basename)
+    """
+    d = Path(dir_path)
+    if not d.exists():
+        return
+    if arc_root is None:
+        arc_root = d.name
+
+    # Ensure the root directory entry exists (non-recursive)
+    with suppress(Exception):
+        if not plugin_tar_exclude(d):
+            tar.add(d.as_posix(), arcname=arc_root, recursive=False, filter=plugin_tar_filter)
+
+    for p in d.rglob("*"):
+        if plugin_tar_exclude(p):
+            continue
+        arcname = f"{arc_root}/{p.relative_to(d).as_posix()}"
+        with suppress(Exception):
+            if p.is_dir():
+                tar.add(p.as_posix(), arcname=arcname, recursive=False, filter=plugin_tar_filter)
+            elif p.is_file() and access(p.as_posix(), R_OK):
+                tar.add(p.as_posix(), arcname=arcname, recursive=False, filter=plugin_tar_filter)
+            # unreadable files are ignored silently
+
+
 def get_redis_client(
     use_redis: bool = False,
     redis_host: Optional[str] = None,
@@ -198,7 +288,7 @@ def get_redis_client(
 
     # Process sentinel hosts if provided as string
     if isinstance(redis_sentinel_hosts, str):
-        redis_sentinel_hosts = [host.split(":") if ":" in host else (host, "26379") for host in redis_sentinel_hosts.split() if host]
+        redis_sentinel_hosts = [tuple(host.split(":", 1)) if ":" in host else (host, "26379") for host in redis_sentinel_hosts.split() if host]
 
     redis_client = None
 
@@ -237,6 +327,10 @@ def get_redis_client(
 
         # Direct connection to Redis
         else:
+            if not redis_host:
+                if logger:
+                    logger.error("redis_host is required when not using sentinel")
+                return None
             if logger:
                 logger.info(f"Connecting to Redis at {redis_host}:{redis_port}")
 

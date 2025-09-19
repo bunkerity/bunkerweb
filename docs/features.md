@@ -68,12 +68,15 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.                                                |
     | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                                                           |
+    | `API_HTTPS_PORT`   | `6000`        | global  | No       | **API HTTPS Port:** Listen port number (TLS) for the API.                                               |
+    | `API_LISTEN_HTTP`  | `yes`         | global  | No       | **API Listen HTTP:** Enable HTTP listener for the API.                                                  |
+    | `API_LISTEN_HTTPS` | `no`          | global  | No       | **API Listen HTTPS:** Enable HTTPS (TLS) listener for the API.                                          |
     | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                                                       |
     | `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.                                            |
     | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API.                                    |
     | `API_TOKEN`        |               | global  | No       | **API Access Token (optional):** If set, all API requests must include `Authorization: Bearer <token>`. |
 
-    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth.
+    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth. You can expose the API over HTTPS by setting `API_LISTEN_HTTPS=yes` (port: `API_HTTPS_PORT`, default `6000`).
 
     Example test with curl (replace token and host):
 
@@ -81,6 +84,11 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          http://<bunkerweb-host>:5000/ping
+
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         --insecure \
+         https://<bunkerweb-host>:6000/ping
     ```
 
 === "Network & Port Settings"
@@ -123,11 +131,11 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Logging Settings"
 
-    | Setting            | Default                                                                                                                        | Context | Multiple | Description                                                                                                                   |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
-    | `LOG_LEVEL`        | `notice`                                                                                                                       | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                        | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
+    | Setting            | Default                                                                                                                                    | Context | Multiple | Description                                                                                                                   |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
 
     !!! tip "Logging Best Practices"
         - For production environments, use the `notice`, `warn`, or `error` log levels to minimize log volume.
@@ -1616,7 +1624,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1633,7 +1641,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -1987,10 +1995,19 @@ Follow these steps to configure and use the DNSBL feature:
 
 ### Configuration Settings
 
-| Setting      | Default                                             | Context   | Multiple | Description                                                                     |
-| ------------ | --------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | no       | **Enable DNSBL:** Set to `yes` to enable DNSBL checks for incoming connections. |
-| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | **DNSBL Servers:** List of DNSBL server domains to check, separated by spaces.  |
+**General**
+
+| Setting      | Default                                             | Context   | Multiple | Description                                                                 |
+| ------------ | --------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
+| `USE_DNSBL`  | `no`                                                | multisite | no       | Enable DNSBL: set to `yes` to enable DNSBL checks for incoming connections. |
+| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | DNSBL servers: list of DNSBL server domains to check, separated by spaces.  |
+
+**Ignore Lists**
+
+| Setting                | Default | Context   | Multiple | Description                                                                                    |
+| ---------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`      | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                |
+| `DNSBL_IGNORE_IP_URLS` | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes. |
 
 !!! tip "Choosing DNSBL Servers"
     Choose reputable DNSBL providers to minimize false positives. The default list includes well-established services that are suitable for most websites:
@@ -2028,6 +2045,43 @@ Follow these steps to configure and use the DNSBL feature:
     This configuration uses only:
 
     - **zen.spamhaus.org**: Spamhaus' combined list is often considered sufficient as a standalone solution due to its wide coverage and reputation for accuracy. It combines the SBL, XBL, and PBL lists in a single query, making it efficient and comprehensive.
+
+=== "Excluding Trusted IPs"
+
+    You can exclude specific clients from DNSBL checks using static values and/or remote files:
+
+    - `DNSBL_IGNORE_IP`: Add space-separated IPs and CIDR ranges. Example: `192.0.2.10 203.0.113.0/24 2001:db8::/32`.
+    - `DNSBL_IGNORE_IP_URLS`: Provide URLs whose contents list one IP/CIDR per line. Comments starting with `#` or `;` are ignored. Duplicate entries are de-duplicated.
+
+    When an incoming client IP matches the ignore list, BunkerWeb skips DNSBL lookups and caches the result as “ok” for faster subsequent requests.
+
+=== "Using Remote URLs"
+
+    The `dnsbl-download` job downloads and caches ignore IPs hourly:
+
+    - Protocols: `https://`, `http://`, and local `file://` paths.
+    - Per-URL cache with checksum prevents redundant downloads (1-hour grace).
+    - Per-service merged file: `/var/cache/bunkerweb/dnsbl/<service>/IGNORE_IP.list`.
+    - Loaded at startup and merged with `DNSBL_IGNORE_IP`.
+
+    Example combining static and URL sources:
+
+    ```yaml
+    USE_DNSBL: "yes"
+    DNSBL_LIST: "zen.spamhaus.org"
+    DNSBL_IGNORE_IP: "10.0.0.0/8 192.168.0.0/16 2001:db8::/32"
+    DNSBL_IGNORE_IP_URLS: "https://example.com/allow-cidrs.txt file:///etc/bunkerweb/dnsbl/ignore.txt"
+    ```
+
+=== "Using Local Files"
+
+    Load ignore IPs from local files using `file://` URLs:
+
+    ```yaml
+    USE_DNSBL: "yes"
+    DNSBL_LIST: "zen.spamhaus.org"
+    DNSBL_IGNORE_IP_URLS: "file:///etc/bunkerweb/dnsbl/ignore.txt file:///opt/data/allow-cidrs.txt"
+    ```
 
 ## Database
 
@@ -2078,6 +2132,13 @@ Follow these steps to configure and use the Database feature:
 
 !!! warning "Database Maintenance"
     The plugin automatically runs a daily job that cleans up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.
+
+## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Provides a simpler way to fix false positives in reports.
 
 ## Errors
 

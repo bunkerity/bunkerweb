@@ -31,7 +31,7 @@ from magic import Magic
 from requests import get
 from requests.exceptions import ConnectionError
 
-from common_utils import bytes_hash  # type: ignore
+from common_utils import bytes_hash, add_dir_to_tar_safely  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
@@ -181,7 +181,10 @@ try:
                             tar_mode = "r:xz"
 
                         with tar_open(fileobj=content, mode=tar_mode) as tar:
-                            tar.extractall(path=temp_dir)
+                            try:
+                                tar.extractall(path=temp_dir, filter="fully_trusted")
+                            except TypeError:
+                                tar.extractall(path=temp_dir)
                         LOGGER.info(f"Successfully extracted TAR file to {temp_dir}")
                     except TarError as e:
                         LOGGER.debug(format_exc())
@@ -224,7 +227,7 @@ try:
 
         with BytesIO() as plugin_content:
             with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                tar.add(plugin_path, arcname=plugin_path.name, recursive=True)
+                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
             plugin_content.seek(0, 0)
 
             with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:

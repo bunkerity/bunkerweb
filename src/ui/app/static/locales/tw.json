@@ -742,7 +742,7 @@
       "confirmation_instance_deletion": "您確定要刪除選定的執行個體嗎？",
       "delete_confirmation_alert": "您確定要刪除選定的執行個體嗎？",
       "delete_confirmation_alert_plural": "您確定要刪除選定的執行個體嗎？",
-      "instance_creation_alert": "您不需要提供連接埠或伺服器名稱；`API_HTTP_PORT` 和 `API_SERVER_NAME` 的值將用於執行個體設定。",
+      "instance_creation_alert": "您不需要提供連接埠或伺服器名稱；`API_HTTP_PORT`、`API_LISTEN_HTTPS`、`API_HTTPS_PORT` 和 `API_SERVER_NAME` 的值將用於執行個體設定。",
       "next_step_in_case_of_issue": "如果遇到問題，您可以手動接受不安全的憑證：",
       "recovery_codes_save_alert": "請將這些恢復碼儲存在安全的位置（例如密碼管理器或保險箱）。如果遺失驗證裝置，您可以使用它們存取您的帳戶。",
       "recovery_codes_shown_once_alert": "這些恢復碼僅顯示一次。請確保將其安全儲存。",

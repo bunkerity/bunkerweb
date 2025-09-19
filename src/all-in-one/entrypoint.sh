@@ -172,6 +172,17 @@ else
 	log "ENTRYPOINT" "ℹ️" "UI service is disabled, autostart not enabled"
 fi
 
+# Enable autorestart for API service if enabled
+if [ "${SERVICE_API}" = "yes" ]; then
+    export API_LISTEN_ADDR="${API_LISTEN_ADDR:-${LISTEN_ADDR:-0.0.0.0}}"
+    export API_LISTEN_PORT="${API_LISTEN_PORT:-${LISTEN_PORT:-8888}}"
+    sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/api.ini
+    log "ENTRYPOINT" "✅" "Enabled autorestart for API service"
+else
+    sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/api.ini
+    log "ENTRYPOINT" "ℹ️" "API service is disabled, autostart not enabled"
+fi
+
 # Enable autorestart for scheduler service if enabled
 if [ "${SERVICE_SCHEDULER}" = "yes" ]; then
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/scheduler.ini
