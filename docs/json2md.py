@@ -49,6 +49,48 @@ I18N = {
         # Badge
         "pro_badge": " (PRO)",
     },
+    "de": {
+        "features_title": "# Funktionen",
+        "intro_text": "Dieser Abschnitt enthält die vollständige Liste der von BunkerWeb unterstützten Einstellungen. Wenn Sie mit BunkerWeb noch nicht vertraut sind, lesen Sie zuerst den Abschnitt [Konzepte](concepts.md) der Dokumentation. Befolgen Sie anschließend die Anweisungen für Ihre [Integration](integrations.md), um die Einstellungen anzuwenden.",
+        "global_settings": "## Globale Einstellungen",
+        "stream_support": "STREAM-Unterstützung",
+        "header_setting": "Einstellung",
+        "header_default": "Standardwert",
+        "header_context": "Kontext",
+        "header_multiple": "Mehrfach",
+        "header_description": "Beschreibung",
+        "yes": "ja",
+        "no": "nein",
+        "pro_badge": " (PRO)",
+    },
+    "es": {
+        "features_title": "# Características",
+        "intro_text": "Esta sección contiene la lista completa de ajustes admitidos por BunkerWeb. Si aún no está familiarizado con BunkerWeb, primero lea la sección de [conceptos](concepts.md) de la documentación. Siga las instrucciones de su [integración](integrations.md) para aplicar los ajustes.",
+        "global_settings": "## Configuración global",
+        "stream_support": "Compatibilidad con STREAM",
+        "header_setting": "Parámetro",
+        "header_default": "Valor predeterminado",
+        "header_context": "Contexto",
+        "header_multiple": "Múltiple",
+        "header_description": "Descripción",
+        "yes": "sí",
+        "no": "no",
+        "pro_badge": " (PRO)",
+    },
+    # "zh": {
+    #     "features_title": "# 功能",
+    #     "intro_text": "本节包含 BunkerWeb 支持的完整设置列表。若尚未熟悉 BunkerWeb，建议先阅读文档中的[概念](concepts.md)部分。请根据您的[集成](integrations.md)说明应用相应的设置。",
+    #     "global_settings": "## 全局设置",
+    #     "stream_support": "STREAM 支持",
+    #     "header_setting": "参数",
+    #     "header_default": "默认值",
+    #     "header_context": "上下文",
+    #     "header_multiple": "可重复",
+    #     "header_description": "描述",
+    #     "yes": "是",
+    #     "no": "否",
+    #     "pro_badge": " (PRO)",
+    # },
 }
 
 
@@ -59,6 +101,8 @@ def tr(key: str):
 
 def generate_docs_for_lang(lang: str):
     """Generate documentation for a specific language."""
+    global LANG
+    LANG = lang
 
     def tr_lang(key: str):
         base = I18N.get("en", {})

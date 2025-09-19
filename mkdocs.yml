@@ -65,8 +65,12 @@ extra:
       link: https://github.com/bunkerity
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/company/bunkerity/
+    - icon: fontawesome/brands/reddit
+      link: https://www.reddit.com/r/BunkerWeb/
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/bunkerweb/
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/bunkerity
+      link: https://x.com/bunkerity
 
 plugins:
   - search
@@ -79,13 +83,16 @@ plugins:
   - print-site
   - i18n:
       docs_structure: folder
+      default_language: en
+      prefix_default_language: true
+      reconfigure_material: true
       languages:
         - locale: en
-          name: English
+          name: English - 🇬🇧
           default: true
           site_name: BunkerWeb documentation
         - locale: fr
-          name: Français
+          name: Français - 🇫🇷
           site_name: Documentation BunkerWeb
           nav_translations:
             Introduction: Introduction
@@ -102,7 +109,7 @@ plugins:
             "Professional services": "Services professionnels"
             About: "À propos"
         - locale: de
-          name: Deutsch
+          name: Deutsch - 🇩🇪
           site_name: BunkerWeb Dokumentation
           nav_translations:
             Introduction: Einführung
@@ -119,7 +126,7 @@ plugins:
             "Professional services": "Professionelle Dienste"
             About: Über
         - locale: es
-          name: Español
+          name: Español - 🇪🇸
           site_name: Documentación de BunkerWeb
           nav_translations:
             Introduction: Introducción
@@ -135,3 +142,20 @@ plugins:
             Plugins: Plugins
             "Professional services": "Servicios profesionales"
             About: "Acerca de"
+        # - locale: zh
+        #   name: 中文 - 🇨🇳
+        #   site_name: BunkerWeb 文档
+        #   nav_translations:
+        #     Introduction: 介绍
+        #     Concepts: 概念
+        #     Integrations: 集成
+        #     "Quickstart guide": "快速入门指南"
+        #     Features: 功能
+        #     "Advanced usages": "高级用法"
+        #     "Web UI": "Web 界面"
+        #     API: "API"
+        #     Upgrading: 升级
+        #     Troubleshooting: 故障排除
+        #     Plugins: 插件
+        #     "Professional services": "专业服务"
+        #     About: 关于

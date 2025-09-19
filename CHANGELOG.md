@@ -5,7 +5,7 @@
 - [FEATURE] Add the possibility use HTTPS with BunkerWeb's internal API
 - [FEATURE] Add reason data for bad behavior bans/reports
 - [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
-- [DOCS] Add multi-language support to the documentation, including French
+- [DOCS] Add multi-language support to the documentation, including French, German and Spanish translations.
 - [DEPS] Updated luajit2 version to v2.1-20250826
 
 ## v1.6.5-rc3 - 2025/09/16
