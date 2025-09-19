@@ -43,8 +43,20 @@ status = 0
 def clean_pro_plugins(db) -> None:
     LOGGER.warning("Cleaning up Pro plugins...")
     # Clean Pro plugins
-    for plugin in PRO_PLUGINS_DIR.glob("*"):
-        rmtree(plugin, ignore_errors=True)
+    for plugin_dir in PRO_PLUGINS_DIR.glob("*"):
+        if plugin_dir.is_dir():
+            plugin_json = plugin_dir / "plugin.json"
+            if plugin_json.exists():
+                # Delete all files and subdirectories except plugin.json
+                for item in plugin_dir.iterdir():
+                    if item != plugin_json:
+                        if item.is_file():
+                            item.unlink()
+                        elif item.is_dir():
+                            rmtree(item, ignore_errors=True)
+            else:
+                # If no plugin.json, remove the entire directory
+                rmtree(plugin_dir, ignore_errors=True)
     # Update database
     db.update_external_plugins([], _type="pro", only_clear_metadata=True)
 
