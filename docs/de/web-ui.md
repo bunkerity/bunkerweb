@@ -116,7 +116,7 @@ Um die Protokolle über die Web-UI zugänglich zu halten, empfehlen wir die Verw
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -134,7 +134,7 @@ Um die Protokolle über die Web-UI zugänglich zu halten, empfehlen wir die Verw
             syslog-address: "udp://10.20.30.254:514" # Dies ist die Adresse des syslog-ng-Containers
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -162,7 +162,7 @@ Um die Protokolle über die Web-UI zugänglich zu halten, empfehlen wir die Verw
             syslog-address: "udp://10.20.30.254:514" # Dies ist die Adresse des syslog-ng-Containers
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.5-rc3
+        image: bunkerity/bunkerweb-ui:1.6.5-rc4
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Denken Sie daran, ein stärkeres Passwort für die Datenbank festzulegen
           ADMIN_USERNAME: "changeme"
@@ -242,7 +242,7 @@ Um die Protokolle über die Web-UI zugänglich zu halten, empfehlen wir die Verw
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -261,7 +261,7 @@ Um die Protokolle über die Web-UI zugänglich zu halten, empfehlen wir die Verw
             syslog-address: "udp://10.20.30.254:514" # Dies ist die Adresse des syslog-ng-Containers
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "" # Wir müssen die BunkerWeb-Instanz hier nicht angeben, da sie automatisch vom Autoconf-Dienst erkannt werden
@@ -281,7 +281,7 @@ Um die Protokolle über die Web-UI zugänglich zu halten, empfehlen wir die Verw
             syslog-address: "udp://10.20.30.254:514" # Dies ist die Adresse des syslog-ng-Containers
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.5-rc4
         depends_on:
           - bunkerweb
           - bw-docker
@@ -300,7 +300,7 @@ Um die Protokolle über die Web-UI zugänglich zu halten, empfehlen wir die Verw
             syslog-address: "udp://10.20.30.254:514" # Dies ist die Adresse des syslog-ng-Containers
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.5-rc3
+        image: bunkerity/bunkerweb-ui:1.6.5-rc4
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
@@ -629,7 +629,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
 
     !!! info "Datenbank-Backend"
 
-        Wenn Sie ein anderes Datenbank-Backend als MariaDB wünschen, lesen Sie bitte die docker-compose-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations) des Repositorys.
+        Wenn Sie ein anderes Datenbank-Backend als MariaDB wünschen, lesen Sie bitte die docker-compose-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/misc/integrations) des Repositorys.
 
     Hier ist die docker-compose-Vorlage, die Sie verwenden können (vergessen Sie nicht, die `changeme`-Daten zu bearbeiten):
 
@@ -640,7 +640,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -653,7 +653,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -676,7 +676,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.5-rc3
+        image: bunkerity/bunkerweb-ui:1.6.5-rc4
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -741,7 +741,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
 
     !!! info "Datenbank-Backend"
 
-        Wenn Sie ein anderes Datenbank-Backend als MariaDB wünschen, lesen Sie bitte die docker-compose-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations) des Repositorys.
+        Wenn Sie ein anderes Datenbank-Backend als MariaDB wünschen, lesen Sie bitte die docker-compose-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/misc/integrations) des Repositorys.
 
     Hier ist die docker-compose-Vorlage, die Sie verwenden können (vergessen Sie nicht, die `changeme`-Daten zu bearbeiten):
 
@@ -753,7 +753,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -768,7 +768,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -782,7 +782,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.5-rc4
         depends_on:
           - bw-docker
         environment:
@@ -818,7 +818,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.5-rc3
+        image: bunkerity/bunkerweb-ui:1.6.5-rc4
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -861,7 +861,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
 
     !!! info "Datenbank-Backend"
 
-        Wenn Sie ein anderes Datenbank-Backend als MariaDB wünschen, lesen Sie bitte die YAML-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations) des Repositorys.
+        Wenn Sie ein anderes Datenbank-Backend als MariaDB wünschen, lesen Sie bitte die YAML-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/misc/integrations) des Repositorys.
 
     Hier ist der entsprechende Teil Ihrer `values.yaml`-Datei, den Sie verwenden können:
 
@@ -907,7 +907,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
 
     !!! info "Datenbank-Backend"
 
-        Wenn Sie ein anderes Datenbank-Backend als MariaDB wünschen, lesen Sie bitte die Stack-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations) des Repositorys.
+        Wenn Sie ein anderes Datenbank-Backend als MariaDB wünschen, lesen Sie bitte die Stack-Dateien im Ordner [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/misc/integrations) des Repositorys.
 
     Hier ist die Stack-Vorlage, die Sie verwenden können (vergessen Sie nicht, die `changeme`-Daten zu bearbeiten):
 
@@ -919,7 +919,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - published: 80
             target: 8080
@@ -948,7 +948,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -964,7 +964,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.5-rc4
         environment:
           <<: *ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -1011,7 +1011,7 @@ Die Web-UI kann auch ohne den Einrichtungsassistenten bereitgestellt und konfigu
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.5-rc3
+        image: bunkerity/bunkerweb-ui:1.6.5-rc4
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1071,7 +1071,7 @@ Die BunkerWeb-Benutzeroberfläche unterstützt mehrere Sprachen. Die Übersetzun
 - Deutsch (de)
 - Italienisch (it)
 
-Weitere Informationen zur Herkunft und zum Überprüfungsstatus der Übersetzungen finden Sie in der [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.5-rc3/src/ui/app/static/locales/README.md).
+Weitere Informationen zur Herkunft und zum Überprüfungsstatus der Übersetzungen finden Sie in der [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.5-rc4/src/ui/app/static/locales/README.md).
 
 ### Beitragen von Übersetzungen
 
@@ -1087,4 +1087,4 @@ Wir freuen uns über Beiträge zur Verbesserung oder zum Hinzufügen neuer Lokal
 
 Für Aktualisierungen bearbeiten Sie die entsprechende Datei und aktualisieren Sie die Herkunftstabelle nach Bedarf.
 
-Weitere Richtlinien finden Sie in der [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.5-rc3/src/ui/app/static/locales/README.md).
+Weitere Richtlinien finden Sie in der [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.5-rc4/src/ui/app/static/locales/README.md).

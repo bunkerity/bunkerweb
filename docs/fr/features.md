@@ -1422,7 +1422,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1439,7 +1439,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance

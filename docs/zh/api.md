@@ -37,7 +37,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -50,7 +50,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb"  # 匹配实例服务名称
@@ -70,7 +70,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.5-rc3
+        image: bunkerity/bunkerweb-api:1.6.5-rc4
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # 使用强密码
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # API 允许列表
@@ -124,7 +124,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5-rc4
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -138,7 +138,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
         environment:
           <<: *api-env
           BUNKERWEB_INSTANCES: ""    # 由 Autoconf 发现
@@ -153,7 +153,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.5-rc4
         depends_on:
           - bunkerweb
           - bw-docker
@@ -167,7 +167,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.5-rc3
+        image: bunkerity/bunkerweb-api:1.6.5-rc4
         environment:
           <<: *api-env
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
@@ -242,7 +242,7 @@ docker run -d \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.5-rc4
 ```
 
 ## 身份验证

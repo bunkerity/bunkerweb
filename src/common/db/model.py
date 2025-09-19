@@ -348,7 +348,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.5-rc3", nullable=False)
+    version = Column(String(32), default="1.6.5-rc4", nullable=False)
 
 
 ## UI Models
