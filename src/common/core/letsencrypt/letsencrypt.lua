@@ -77,6 +77,7 @@ function letsencrypt:init()
 							multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 							and multisite_vars["LETS_ENCRYPT_DNS_PROVIDER"] ~= ""
 							and credential_items[server_name]
+							and credential_items[server_name]["LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"] ~= ""
 						)
 					)
 				then
@@ -102,12 +103,13 @@ function letsencrypt:init()
 					if not data then
 						-- Load certificate
 						local check
-						check, data = read_files({
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem",
-						})
+						local cert_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem"
+						local key_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem"
+						check, data = read_files({cert_path, key_path})
 						if not check then
-							self.logger:log(ERR, "error while reading files : " .. data)
+							self.logger:log(ERR, "error while reading certificate files for " .. server_name .. " : " .. data)
+							self.logger:log(ERR, "expected certificate files at: " .. cert_path .. " and " .. key_path)
+							self.logger:log(ERR, "please ensure Let's Encrypt certificate generation completed successfully")
 							ret_ok = false
 							ret_err = "error reading files"
 						else
@@ -159,12 +161,13 @@ function letsencrypt:init()
 					wildcard_servers[part] = false
 				end
 			end
-			local check, data = read_files({
-				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
-				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem",
-			})
+			local cert_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem"
+			local key_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem"
+			local check, data = read_files({cert_path, key_path})
 			if not check then
-				self.logger:log(ERR, "error while reading files : " .. data)
+				self.logger:log(ERR, "error while reading certificate files for " .. server_name .. " : " .. data)
+				self.logger:log(ERR, "expected certificate files at: " .. cert_path .. " and " .. key_path)
+				self.logger:log(ERR, "please ensure Let's Encrypt certificate generation completed successfully")
 				ret_ok = false
 				ret_err = "error reading files"
 			else
