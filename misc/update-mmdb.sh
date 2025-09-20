@@ -5,30 +5,40 @@
 cd ../src/bw/misc || cd src/bw/misc || exit 1
 
 # Download the latest GeoLite2 databases
+asn_url="https://download.db-ip.com/free/dbip-asn-lite-$(date +%Y-%m).mmdb.gz"
+country_url="https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz"
 
-curl -o asn.mmdb.gz "https://download.db-ip.com/free/dbip-asn-lite-$(date +%Y-%m).mmdb.gz"
-# shellcheck disable=SC2181
-if [ $? -ne 0 ]; then
-    echo "❌ Failed to download the ASN database."
-    exit 1
-fi
-
-content_head="$(head -n 2 asn.mmdb.gz)"
-if [[ "$content_head" =~ "404 Not Found" ]]; then
+# ASN database: check availability and download
+status="$(curl -sIL -o /dev/null -w "%{http_code}" "$asn_url")"
+if [ "$status" = "200" ]; then
+    curl -fsSL --retry 3 -o asn.mmdb.gz "$asn_url"
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to download the ASN database."
+        exit 1
+    fi
+elif [ "$status" = "404" ]; then
     echo "❌ The ASN database is not available for the current month for the moment."
     exit 1
-fi
-
-curl -o country.mmdb.gz "https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz"
-# shellcheck disable=SC2181
-if [ $? -ne 0 ]; then
-    echo "❌ Failed to download the country database."
+else
+    echo "❌ Failed to fetch the ASN database (HTTP $status)."
     exit 1
 fi
 
-content_head="$(head -n 2 country.mmdb.gz)"
-if [[ "$content_head" =~ "404 Not Found" ]]; then
+# Country database: check availability and download
+status="$(curl -sIL -o /dev/null -w "%{http_code}" "$country_url")"
+if [ "$status" = "200" ]; then
+    curl -fsSL --retry 3 -o country.mmdb.gz "$country_url"
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to download the country database."
+        exit 1
+    fi
+elif [ "$status" = "404" ]; then
     echo "❌ The country database is not available for the current month for the moment."
+    exit 1
+else
+    echo "❌ Failed to fetch the country database (HTTP $status)."
     exit 1
 fi
 
