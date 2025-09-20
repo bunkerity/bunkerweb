@@ -247,10 +247,10 @@ Siga estos pasos para habilitar y configurar la función Antibot:
 4.  **Importante:** Asegúrese de que el `ANTIBOT_URI` sea una URL única en su sitio que no esté en uso.
 
 !!! important "Acerca de la configuración `ANTIBOT_URI`"
-    Asegúrese de que el `ANTIBOT_URI` sea una URL única en su sitio que no esté en uso.
+Asegúrese de que el `ANTIBOT_URI` sea una URL única en su sitio que no esté en uso.
 
 !!! warning "Configuración de sesión en entornos de clúster"
-    La función antibot utiliza cookies para rastrear si un usuario ha completado el desafío. Si está ejecutando BunkerWeb en un entorno de clúster (múltiples instancias de BunkerWeb), **debe** configurar la gestión de sesiones correctamente. Esto implica establecer las configuraciones `SESSIONS_SECRET` y `SESSIONS_NAME` con los **mismos valores** en todas las instancias de BunkerWeb. Si no lo hace, es posible que a los usuarios se les pida repetidamente que completen el desafío antibot. Puede encontrar más información sobre la configuración de sesiones [aquí](#sessions).
+La función antibot utiliza cookies para rastrear si un usuario ha completado el desafío. Si está ejecutando BunkerWeb en un entorno de clúster (múltiples instancias de BunkerWeb), **debe** configurar la gestión de sesiones correctamente. Esto implica establecer las configuraciones `SESSIONS_SECRET` y `SESSIONS_NAME` con los **mismos valores** en todas las instancias de BunkerWeb. Si no lo hace, es posible que a los usuarios se les pida repetidamente que completen el desafío antibot. Puede encontrar más información sobre la configuración de sesiones [aquí](#sessions).
 
 ### Configuraciones comunes
 
@@ -277,16 +277,16 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
 **Ejemplos:**
 
-*   `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
-    Esto excluirá del desafío antibot todas las URI que comiencen con `/api/`, `/webhook/` o `/assets/`.
-*   `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
-    Esto excluirá del desafío antibot la red interna `192.168.1.0/24` y la IP específica `10.0.0.1`.
-*   `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
-    Esto excluirá del desafío antibot las solicitudes de hosts con DNS inverso que terminen en `googlebot.com` o `bingbot.com`.
-*   `ANTIBOT_IGNORE_ASN: "15169 8075"`
-    Esto excluirá del desafío antibot las solicitudes de los ASN 15169 (Google) y 8075 (Microsoft).
-*   `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
-    Esto excluirá del desafío antibot las solicitudes con User-Agents que coincidan con el patrón regex especificado.
+- `ANTIBOT_IGNORE_URI: "^/api/ ^/webhook/ ^/assets/"`
+  Esto excluirá del desafío antibot todas las URI que comiencen con `/api/`, `/webhook/` o `/assets/`.
+- `ANTIBOT_IGNORE_IP: "192.168.1.0/24 10.0.0.1"`
+  Esto excluirá del desafío antibot la red interna `192.168.1.0/24` y la IP específica `10.0.0.1`.
+- `ANTIBOT_IGNORE_RDNS: ".googlebot.com .bingbot.com"`
+  Esto excluirá del desafío antibot las solicitudes de hosts con DNS inverso que terminen en `googlebot.com` o `bingbot.com`.
+- `ANTIBOT_IGNORE_ASN: "15169 8075"`
+  Esto excluirá del desafío antibot las solicitudes de los ASN 15169 (Google) y 8075 (Microsoft).
+- `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
+  Esto excluirá del desafío antibot las solicitudes con User-Agents que coincidan con el patrón regex especificado.
 
 ### Mecanismos de desafío compatibles
 
@@ -359,10 +359,10 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-| Configuración              | Valor por defecto                                      | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                 |
-| -------------------------- | ------------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_ANTIBOT`              | `no`                                                   | multisite | no       | **Habilitar Antibot:** Establezca en `captcha` para habilitar el desafío de Captcha.                                                                                                                                                        |
-| `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no       | **Alfabeto del Captcha:** Una cadena de caracteres para usar en la generación del CAPTCHA. Caracteres admitidos: todas las letras (a-z, A-Z), números 2-9 (excluye 0 y 1) y caracteres especiales: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
+| Configuración              | Valor por defecto                                      | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                               |
+| -------------------------- | ------------------------------------------------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_ANTIBOT`              | `no`                                                   | multisite | no       | **Habilitar Antibot:** Establezca en `captcha` para habilitar el desafío de Captcha.                                                                                                                                                      |
+| `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no       | **Alfabeto del Captcha:** Una cadena de caracteres para usar en la generación del CAPTCHA. Caracteres admitidos: todas las letras (a-z, A-Z), números 2-9 (excluye 0 y 1) y caracteres especiales: ``+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„`` |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
@@ -590,10 +590,10 @@ Siga estos pasos para habilitar y configurar la autenticación básica:
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                         |
 
 !!! warning "Consideraciones de seguridad"
-    La autenticación básica HTTP transmite las credenciales codificadas (no cifradas) en Base64. Aunque esto es aceptable cuando se utiliza sobre HTTPS, no debe considerarse seguro sobre HTTP plano. Habilite siempre SSL/TLS cuando utilice la autenticación básica.
+La autenticación básica HTTP transmite las credenciales codificadas (no cifradas) en Base64. Aunque esto es aceptable cuando se utiliza sobre HTTPS, no debe considerarse seguro sobre HTTP plano. Habilite siempre SSL/TLS cuando utilice la autenticación básica.
 
 !!! tip "Uso de múltiples credenciales"
-    Puede configurar múltiples pares de nombre de usuario/contraseña para el acceso. Cada ajuste `AUTH_BASIC_USER` debe tener un ajuste `AUTH_BASIC_PASSWORD` correspondiente.
+Puede configurar múltiples pares de nombre de usuario/contraseña para el acceso. Cada ajuste `AUTH_BASIC_USER` debe tener un ajuste `AUTH_BASIC_PASSWORD` correspondiente.
 
 ### Configuraciones de ejemplo
 
@@ -698,10 +698,10 @@ bwcli plugin backup restore /ruta/a/copia/de/seguridad/backup-sqlite-2023-08-15_
 ```
 
 !!! tip "La seguridad es lo primero"
-    Antes de cualquier operación de restauración, el complemento de copia de seguridad crea automáticamente una copia de seguridad del estado actual de su base de datos en una ubicación temporal. Esto proporciona una protección adicional en caso de que necesite revertir la operación de restauración.
+Antes de cualquier operación de restauración, el complemento de copia de seguridad crea automáticamente una copia de seguridad del estado actual de su base de datos en una ubicación temporal. Esto proporciona una protección adicional en caso de que necesite revertir la operación de restauración.
 
 !!! warning "Compatibilidad de la base de datos"
-    El complemento de copia de seguridad es compatible con las bases de datos SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos de Oracle no son compatibles actualmente para las operaciones de copia de seguridad y restauración.
+El complemento de copia de seguridad es compatible con las bases de datos SQLite, MySQL/MariaDB y PostgreSQL. Las bases de datos de Oracle no son compatibles actualmente para las operaciones de copia de seguridad y restauración.
 
 ### Configuraciones de ejemplo
 
@@ -793,7 +793,7 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 5.  **Elija el ámbito del bloqueo:** Decida si los bloqueos deben aplicarse solo al servicio actual o globalmente a todos los servicios utilizando la configuración `BAD_BEHAVIOR_BAN_SCOPE`.
 
 !!! tip "Modo Stream"
-    En **modo stream**, solo el código de estado `444` se considera "malo" y activará este comportamiento.
+En **modo stream**, solo el código de estado `444` se considera "malo" y activará este comportamiento.
 
 ### Ajustes de configuración
 
@@ -807,10 +807,10 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`).                                                                                                  |
 
 !!! warning "Falsos positivos"
-    Tenga cuidado al establecer el umbral y el tiempo de conteo. Establecer estos valores demasiado bajos puede bloquear inadvertidamente a usuarios legítimos que encuentren errores mientras navegan por su sitio.
+Tenga cuidado al establecer el umbral y el tiempo de conteo. Establecer estos valores demasiado bajos puede bloquear inadvertidamente a usuarios legítimos que encuentren errores mientras navegan por su sitio.
 
 !!! tip "Ajuste de su configuración"
-    Comience con configuraciones conservadoras (umbral más alto, tiempo de bloqueo más corto) y ajústelas según sus necesidades específicas y patrones de tráfico. Supervise sus registros para asegurarse de que los usuarios legítimos no sean bloqueados por error.
+Comience con configuraciones conservadoras (umbral más alto, tiempo de bloqueo más corto) y ajústelas según sus necesidades específicas y patrones de tráfico. Supervise sus registros para asegurarse de que los usuarios legítimos no sean bloqueados por error.
 
 ### Configuraciones de ejemplo
 
@@ -891,7 +891,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 5.  **Supervise la eficacia:** Consulte la [interfaz de usuario web](web-ui.md) para ver las estadísticas de las solicitudes bloqueadas.
 
 !!! info "modo stream"
-    Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS y ASN.
+Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS y ASN.
 
 ### Ajustes de configuración
 
@@ -903,7 +903,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Listas Negras de la Comunidad:** Seleccione listas negras preconfiguradas mantenidas por la comunidad para incluirlas en el bloqueo. |
 
 === "Listas Negras de la Comunidad"
-    **Qué hace esto:** Le permite añadir rápidamente listas negras bien mantenidas y de origen comunitario sin tener que configurar manualmente las URL.
+**Qué hace esto:** Le permite añadir rápidamente listas negras bien mantenidas y de origen comunitario sin tener que configurar manualmente las URL.
 
     El ajuste `BLACKLIST_COMMUNITY_LISTS` le permite seleccionar de fuentes de listas negras curadas. Las opciones disponibles incluyen:
 
@@ -923,7 +923,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
         Las listas negras de la comunidad proporcionan una forma conveniente de empezar con fuentes de listas negras probadas. Puede usarlas junto con configuraciones de URL manuales para una máxima flexibilidad.
 
 === "Dirección IP"
-    **Qué hace esto:** Bloquea a los visitantes según su dirección IP o red.
+**Qué hace esto:** Bloquea a los visitantes según su dirección IP o red.
 
 | Ajuste                     | Valor por defecto                     | Contexto  | Múltiple | Descripción                                                                                                              |
 | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -935,7 +935,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     El ajuste por defecto de `BLACKLIST_IP_URLS` incluye una URL que proporciona una **lista de nodos de salida de Tor conocidos**. Esta es una fuente común de tráfico malicioso y es un buen punto de partida para muchos sitios.
 
 === "DNS Inverso"
-    **Qué hace esto:** Bloquea a los visitantes según su nombre de dominio inverso. Esto es útil para bloquear escáneres y rastreadores conocidos basados en los dominios de su organización.
+**Qué hace esto:** Bloquea a los visitantes según su nombre de dominio inverso. Esto es útil para bloquear escáneres y rastreadores conocidos basados en los dominios de su organización.
 
 | Ajuste                       | Valor por defecto       | Contexto  | Múltiple | Descripción                                                                                                                  |
 | ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -948,7 +948,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     El ajuste por defecto de `BLACKLIST_RDNS` incluye dominios de escáneres comunes como **Shodan** y **Censys**. Estos son a menudo utilizados por investigadores de seguridad y escáneres para identificar sitios vulnerables.
 
 === "ASN"
-    **Qué hace esto:** Bloquea a los visitantes de proveedores de red específicos. Los ASN son como los códigos postales de Internet: identifican a qué proveedor u organización pertenece una IP.
+**Qué hace esto:** Bloquea a los visitantes de proveedores de red específicos. Los ASN son como los códigos postales de Internet: identifican a qué proveedor u organización pertenece una IP.
 
 | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                             |
 | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
@@ -958,7 +958,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 | `BLACKLIST_IGNORE_ASN_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de ASN:** Lista de URL que contienen ASN a omitir.                         |
 
 === "Agente de Usuario"
-    **Qué hace esto:** Bloquea a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo contra los bots que se identifican honestamente (como "ScannerBot" o "WebHarvestTool").
+**Qué hace esto:** Bloquea a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo contra los bots que se identifican honestamente (como "ScannerBot" o "WebHarvestTool").
 
 | Ajuste                             | Valor por defecto                                                                                                              | Contexto  | Múltiple | Descripción                                                                                                                              |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -970,7 +970,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     El ajuste por defecto de `BLACKLIST_USER_AGENT_URLS` incluye una URL que proporciona una **lista de agentes de usuario maliciosos conocidos**. Estos son a menudo utilizados por bots y escáneres maliciosos para identificar sitios vulnerables.
 
 === "URI"
-    **Qué hace esto:** Bloquea las solicitudes a URL específicas en su sitio. Esto es útil para bloquear intentos de acceso a páginas de administración, formularios de inicio de sesión u otras áreas sensibles que podrían ser objetivo de ataques.
+**Qué hace esto:** Bloquea las solicitudes a URL específicas en su sitio. Esto es útil para bloquear intentos de acceso a páginas de administración, formularios de inicio de sesión u otras áreas sensibles que podrían ser objetivo de ataques.
 
 | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                         |
 | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -980,10 +980,10 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
 !!! info "Soporte de Formato de URL"
-    Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
+Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-    Las listas negras de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada contra las últimas amenazas.
+Las listas negras de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada contra las últimas amenazas.
 
 ### Configuraciones de Ejemplo
 
@@ -1075,10 +1075,10 @@ Siga estos pasos para configurar y utilizar la función de compresión Brotli:
 | `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | **Nivel de compresión:** Nivel de compresión de 0 (sin compresión) a 11 (compresión máxima). Los valores más altos consumen más CPU. |
 
 !!! tip "Optimización del nivel de compresión"
-    El nivel de compresión por defecto (6) ofrece un buen equilibrio entre la tasa de compresión y el uso de la CPU. Para contenido estático o cuando los recursos de la CPU del servidor son abundantes, considere aumentarlo a 9-11 para una compresión máxima. Para contenido dinámico o cuando los recursos de la CPU son limitados, es posible que desee utilizar 4-5 para una compresión más rápida con una reducción de tamaño razonable.
+El nivel de compresión por defecto (6) ofrece un buen equilibrio entre la tasa de compresión y el uso de la CPU. Para contenido estático o cuando los recursos de la CPU del servidor son abundantes, considere aumentarlo a 9-11 para una compresión máxima. Para contenido dinámico o cuando los recursos de la CPU son limitados, es posible que desee utilizar 4-5 para una compresión más rápida con una reducción de tamaño razonable.
 
 !!! info "Soporte de navegadores"
-    Brotli es compatible con todos los navegadores modernos, incluidos Chrome, Firefox, Edge, Safari y Opera. Los navegadores más antiguos recibirán automáticamente el contenido sin comprimir, lo que garantiza la compatibilidad.
+Brotli es compatible con todos los navegadores modernos, incluidos Chrome, Firefox, Edge, Safari y Opera. Los navegadores más antiguos recibirán automáticamente el contenido sin comprimir, lo que garantiza la compatibilidad.
 
 ### Configuraciones de ejemplo
 
@@ -1155,10 +1155,10 @@ Siga estos pasos para configurar y usar la función BunkerNet:
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **Servidor BunkerNet:** La dirección del servidor de la API de BunkerNet para compartir inteligencia sobre amenazas.    |
 
 !!! tip "Protección de Red"
-    Cuando BunkerNet detecta que una dirección IP ha estado involucrada en actividades maliciosas en múltiples instancias de BunkerWeb, añade esa IP a una lista negra colectiva. Esto proporciona una capa de defensa proactiva, protegiendo su sitio de amenazas antes de que puedan atacarlo directamente.
+Cuando BunkerNet detecta que una dirección IP ha estado involucrada en actividades maliciosas en múltiples instancias de BunkerWeb, añade esa IP a una lista negra colectiva. Esto proporciona una capa de defensa proactiva, protegiendo su sitio de amenazas antes de que puedan atacarlo directamente.
 
 !!! info "Informes Anónimos"
-    Al informar sobre amenazas a BunkerNet, su instancia solo comparte los datos necesarios para identificar la amenaza: la dirección IP, el motivo del bloqueo y datos contextuales mínimos. No se comparte información personal sobre sus usuarios ni detalles sensibles sobre su sitio.
+Al informar sobre amenazas a BunkerNet, su instancia solo comparte los datos necesarios para identificar la amenaza: la dirección IP, el motivo del bloqueo y datos contextuales mínimos. No se comparte información personal sobre sus usuarios ni detalles sensibles sobre su sitio.
 
 ### Configuraciones de Ejemplo
 
@@ -1291,21 +1291,21 @@ Siga estos pasos para configurar y usar la función CORS:
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | no       | **Denegar Orígenes No Autorizados:** Cuando es `yes`, las solicitudes de orígenes no autorizados se deniegan con un código de error.                       |
 
 !!! tip "Optimizando las Solicitudes de Preflight"
-    El ajuste `CORS_MAX_AGE` determina cuánto tiempo los navegadores almacenarán en caché los resultados de una solicitud de preflight. Establecer esto en un valor más alto (como el predeterminado de 86400 segundos/24 horas) reduce el número de solicitudes de preflight, mejorando el rendimiento para los recursos a los que se accede con frecuencia.
+El ajuste `CORS_MAX_AGE` determina cuánto tiempo los navegadores almacenarán en caché los resultados de una solicitud de preflight. Establecer esto en un valor más alto (como el predeterminado de 86400 segundos/24 horas) reduce el número de solicitudes de preflight, mejorando el rendimiento para los recursos a los que se accede con frecuencia.
 
 !!! warning "Consideraciones de Seguridad"
-    Tenga cuidado al establecer `CORS_ALLOW_ORIGIN` en `*` (todos los orígenes) o `CORS_ALLOW_CREDENTIALS` en `yes` porque estas configuraciones pueden introducir riesgos de seguridad si no se gestionan adecuadamente. Generalmente es más seguro enumerar explícitamente los orígenes de confianza y limitar los métodos y encabezados permitidos.
+Tenga cuidado al establecer `CORS_ALLOW_ORIGIN` en `*` (todos los orígenes) o `CORS_ALLOW_CREDENTIALS` en `yes` porque estas configuraciones pueden introducir riesgos de seguridad si no se gestionan adecuadamente. Generalmente es más seguro enumerar explícitamente los orígenes de confianza y limitar los métodos y encabezados permitidos.
 
 ### Configuraciones de Ejemplo
 
 Aquí hay ejemplos de posibles valores para el ajuste `CORS_ALLOW_ORIGIN`, junto con su comportamiento:
 
--   **`*`**: Permite solicitudes de todos los orígenes.
--   **`self`**: Permite automáticamente solicitudes del mismo origen que el `server_name` configurado.
--   **`^https://www\.example\.com$`**: Permite solicitudes solo de `https://www.example.com`.
--   **`^https://.+\.example\.com$`**: Permite solicitudes de cualquier subdominio que termine en `.example.com`.
--   **`^https://(www\.example1\.com|www\.example2\.com)$`**: Permite solicitudes de `https://www.example1.com` o `https://www.example2.com`.
--   **`^https?://www\.example\.com$`**: Permite solicitudes tanto de `https://www.example.com` como de `http://www.example.com`.
+- **`*`**: Permite solicitudes de todos los orígenes.
+- **`self`**: Permite automáticamente solicitudes del mismo origen que el `server_name` configurado.
+- **`^https://www\.example\.com$`**: Permite solicitudes solo de `https://www.example.com`.
+- **`^https://.+\.example\.com$`**: Permite solicitudes de cualquier subdominio que termine en `.example.com`.
+- **`^https://(www\.example1\.com|www\.example2\.com)$`**: Permite solicitudes de `https://www.example1.com` o `https://www.example2.com`.
+- **`^https?://www\.example\.com$`**: Permite solicitudes tanto de `https://www.example.com` como de `http://www.example.com`.
 
 === "Configuración Básica"
 
@@ -1411,10 +1411,10 @@ Siga estos pasos para configurar y usar la función de Caché del Cliente:
 | `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | no       | **Habilitar ETags:** Establezca en `yes` para enviar el encabezado HTTP ETag para los recursos estáticos.                                      |
 
 !!! tip "Optimizando los Ajustes de Caché"
-    Para contenido que se actualiza con frecuencia, considere usar valores de `max-age` más cortos. Para contenido que cambia raramente (como bibliotecas de JavaScript versionadas o logotipos), use tiempos de caché más largos. El valor por defecto de 15552000 segundos (180 días) es apropiado para la mayoría de los activos estáticos.
+Para contenido que se actualiza con frecuencia, considere usar valores de `max-age` más cortos. Para contenido que cambia raramente (como bibliotecas de JavaScript versionadas o logotipos), use tiempos de caché más largos. El valor por defecto de 15552000 segundos (180 días) es apropiado para la mayoría de los activos estáticos.
 
 !!! info "Comportamiento del Navegador"
-    Diferentes navegadores implementan el almacenamiento en caché de manera ligeramente diferente, pero todos los navegadores modernos respetan las directivas estándar de `Cache-Control`. Los ETags proporcionan un mecanismo de validación adicional que ayuda a los navegadores a determinar si el contenido en caché sigue siendo válido.
+Diferentes navegadores implementan el almacenamiento en caché de manera ligeramente diferente, pero todos los navegadores modernos respetan las directivas estándar de `Cache-Control`. Los ETags proporcionan un mecanismo de validación adicional que ayuda a los navegadores a determinar si el contenido en caché sigue siendo válido.
 
 ### Configuraciones de Ejemplo
 
@@ -1482,16 +1482,16 @@ Siga estos pasos para configurar y utilizar la función de País:
 | `BLACKLIST_COUNTRY` |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país (formato ISO 3166-1 alfa-2) separados por espacios. Estos países están bloqueados.  |
 
 !!! tip "Lista Blanca vs. Lista Negra"
-    Elija el enfoque que mejor se adapte a sus necesidades:
+Elija el enfoque que mejor se adapte a sus necesidades:
 
     -   Use la lista blanca cuando quiera restringir el acceso a un pequeño número de países.
     -   Use la lista negra cuando quiera bloquear el acceso desde regiones problemáticas específicas mientras permite a todos los demás.
 
 !!! warning "Regla de Precedencia"
-    Si se configuran tanto la lista blanca como la lista negra, la lista blanca tiene prioridad. Esto significa que el sistema primero comprueba si un país está en la lista blanca; si no, se deniega el acceso independientemente de la configuración de la lista negra.
+Si se configuran tanto la lista blanca como la lista negra, la lista blanca tiene prioridad. Esto significa que el sistema primero comprueba si un país está en la lista blanca; si no, se deniega el acceso independientemente de la configuración de la lista negra.
 
 !!! info "Detección de País"
-    BunkerWeb utiliza la [base de datos mmdb lite de db-ip](https://db-ip.com/db/download/ip-to-country-lite) para determinar el país de origen basándose en las direcciones IP.
+BunkerWeb utiliza la [base de datos mmdb lite de db-ip](https://db-ip.com/db/download/ip-to-country-lite) para determinar el país de origen basándose en las direcciones IP.
 
 ### Configuraciones de Ejemplo
 
@@ -1557,7 +1557,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
 ### Configuración
 
 === "Docker"
-    **Archivo de adquisición**
+**Archivo de adquisición**
 
     Necesitará ejecutar una instancia de CrowdSec y configurarla para analizar los registros de BunkerWeb. Dado que BunkerWeb se basa en NGINX, puede usar el valor `nginx` para el parámetro `type` en su archivo de adquisición (suponiendo que los registros de BunkerWeb se almacenan tal cual sin datos adicionales):
 
@@ -1620,7 +1620,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1637,7 +1637,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -1825,9 +1825,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`              | global   | no       | **Enviar Siempre:** Establezca en `yes` para enviar siempre las solicitudes a AppSec, incluso si hay una decisión a nivel de IP. |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`              | global   | no       | **Verificar SSL:** Establezca en `yes` para verificar el certificado SSL del Componente AppSec.                                  |
 
-!!! info "Sobre los Modos de Operación"
-    - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia.
-    - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
+!!! info "Sobre los Modos de Operación" - **Modo `live`** consulta la API de CrowdSec para cada solicitud entrante, proporcionando protección en tiempo real a costa de una mayor latencia. - **Modo `stream`** descarga periódicamente todas las decisiones de la API de CrowdSec y las almacena en caché localmente, reduciendo la latencia con un ligero retraso en la aplicación de nuevas decisiones.
 
 ### Configuraciones de Ejemplo
 
@@ -1876,7 +1874,7 @@ El complemento de certificado SSL personalizado le permite usar sus propios cert
 5.  Usted tiene control total sobre la gestión de certificados, lo que le permite usar certificados de cualquier emisor que prefiera.
 
 !!! info "Monitoreo Automático de Certificados"
-    Cuando habilita SSL/TLS personalizado estableciendo `USE_CUSTOM_SSL` en `yes`, BunkerWeb monitorea automáticamente el certificado personalizado especificado en `CUSTOM_SSL_CERT`. Comprueba los cambios diariamente y recarga NGINX si se detecta alguna modificación, asegurando que el certificado más reciente esté siempre en uso.
+Cuando habilita SSL/TLS personalizado estableciendo `USE_CUSTOM_SSL` en `yes`, BunkerWeb monitorea automáticamente el certificado personalizado especificado en `CUSTOM_SSL_CERT`. Comprueba los cambios diariamente y recarga NGINX si se detecta alguna modificación, asegurando que el certificado más reciente esté siempre en uso.
 
 ### Cómo usar
 
@@ -1889,7 +1887,7 @@ Siga estos pasos para configurar y usar la función de certificado SSL personali
 5.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, BunkerWeb usa automáticamente sus certificados personalizados para todas las conexiones HTTPS.
 
 !!! tip "Configuración en Modo Stream"
-    Para el modo stream, debe configurar el ajuste `LISTEN_STREAM_PORT_SSL` para especificar el puerto de escucha SSL/TLS. Este paso es esencial para el correcto funcionamiento en modo stream.
+Para el modo stream, debe configurar el ajuste `LISTEN_STREAM_PORT_SSL` para especificar el puerto de escucha SSL/TLS. Este paso es esencial para el correcto funcionamiento en modo stream.
 
 ### Ajustes de Configuración
 
@@ -1903,14 +1901,13 @@ Siga estos pasos para configurar y usar la función de certificado SSL personali
 | `CUSTOM_SSL_KEY_DATA`      |                   | multisite | no       | **Datos de la Clave Privada:** Su clave privada codificada en formato base64 o como texto plano PEM.                             |
 
 !!! warning "Consideraciones de Seguridad"
-    Cuando use certificados personalizados, asegúrese de que su clave privada esté debidamente protegida y tenga los permisos adecuados. Los archivos deben ser legibles por el programador de BunkerWeb.
+Cuando use certificados personalizados, asegúrese de que su clave privada esté debidamente protegida y tenga los permisos adecuados. Los archivos deben ser legibles por el programador de BunkerWeb.
 
 !!! tip "Formato del Certificado"
-    BunkerWeb espera los certificados en formato PEM. Si su certificado está en un formato diferente, es posible que necesite convertirlo primero.
+BunkerWeb espera los certificados en formato PEM. Si su certificado está en un formato diferente, es posible que necesite convertirlo primero.
 
 !!! info "Cadenas de Certificados"
-    Si su certificado incluye una cadena (intermediarios), debe proporcionar la cadena de certificados completa en el orden correcto, con su certificado primero, seguido de los certificados intermedios.
-
+Si su certificado incluye una cadena (intermediarios), debe proporcionar la cadena de certificados completa en el orden correcto, con su certificado primero, seguido de los certificados intermedios.
 
 ### Configuraciones de Ejemplo
 
@@ -2006,17 +2003,17 @@ Siga estos pasos para configurar y usar la función DNSBL:
 | `DNSBL_IGNORE_IP_URLS` | ``                | multisite | yes      | URL separadas por espacios que proporcionan IPs/CIDRs para omitir. Admite los esquemas `http(s)://` y `file://`. |
 
 !!! tip "Elección de Servidores DNSBL"
-    Elija proveedores de DNSBL de buena reputación para minimizar los falsos positivos. La lista predeterminada incluye servicios bien establecidos que son adecuados para la mayoría de los sitios web:
+Elija proveedores de DNSBL de buena reputación para minimizar los falsos positivos. La lista predeterminada incluye servicios bien establecidos que son adecuados para la mayoría de los sitios web:
 
     -   **bl.blocklist.de:** Lista las IP que han sido detectadas atacando otros servidores.
     -   **sbl.spamhaus.org:** Se centra en fuentes de spam y otras actividades maliciosas.
     -   **xbl.spamhaus.org:** Apunta a sistemas infectados, como máquinas comprometidas o proxies abiertos.
 
 !!! info "Cómo Funciona DNSBL"
-    Los servidores DNSBL funcionan respondiendo a consultas DNS con formato especial. Cuando BunkerWeb verifica una dirección IP, invierte la IP y añade el nombre de dominio del DNSBL. Si la consulta DNS resultante devuelve una respuesta de "éxito", la IP se considera en la lista negra.
+Los servidores DNSBL funcionan respondiendo a consultas DNS con formato especial. Cuando BunkerWeb verifica una dirección IP, invierte la IP y añade el nombre de dominio del DNSBL. Si la consulta DNS resultante devuelve una respuesta de "éxito", la IP se considera en la lista negra.
 
 !!! warning "Consideraciones de Rendimiento"
-    Aunque BunkerWeb optimiza las búsquedas de DNSBL para el rendimiento, agregar un gran número de servidores DNSBL podría afectar potencialmente los tiempos de respuesta. Comience con unos pocos servidores DNSBL de buena reputación y supervise el rendimiento antes de agregar más.
+Aunque BunkerWeb optimiza las búsquedas de DNSBL para el rendimiento, agregar un gran número de servidores DNSBL podría afectar potencialmente los tiempos de respuesta. Comience con unos pocos servidores DNSBL de buena reputación y supervise el rendimiento antes de agregar más.
 
 ### Configuraciones de Ejemplo
 
@@ -2112,14 +2109,10 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 | `DATABASE_LOG_LEVEL`     | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                         |
 | `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global   | no       | **Máximo de Ejecuciones de Trabajos:** El número máximo de registros de ejecución de trabajos que se conservarán en la base de datos antes de la limpieza automática. |
 
-!!! tip "Selección de Base de Datos"
-    - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos.
-    - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia.
-    - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción.
-    - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
+!!! tip "Selección de Base de Datos" - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos. - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia. - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción. - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
 
 !!! info "Formato de URI de SQLAlchemy"
-    El URI de la base de datos sigue el formato de SQLAlchemy:
+El URI de la base de datos sigue el formato de SQLAlchemy:
 
     -   SQLite: `sqlite:////ruta/a/database.sqlite3`
     -   PostgreSQL: `postgresql://usuario:contraseña@hostname:puerto/basededatos`
@@ -2127,7 +2120,7 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
     -   Oracle: `oracle://usuario:contraseña@hostname:puerto/basededatos`
 
 !!! warning "Mantenimiento de la Base de Datos"
-    El complemento ejecuta automáticamente un trabajo diario que limpia las ejecuciones de trabajos sobrantes basándose en el ajuste `DATABASE_MAX_JOBS_RUNS`. Esto evita el crecimiento ilimitado de la base de datos mientras se mantiene un historial útil de las ejecuciones de trabajos.
+El complemento ejecuta automáticamente un trabajo diario que limpia las ejecuciones de trabajos sobrantes basándose en el ajuste `DATABASE_MAX_JOBS_RUNS`. Esto evita el crecimiento ilimitado de la base de datos mientras se mantiene un historial útil de las ejecuciones de trabajos.
 
 ## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -2147,8 +2140,8 @@ El complemento de Errores proporciona un manejo de errores personalizable para s
 1.  Cuando un cliente encuentra un error HTTP (por ejemplo, 400, 404 o 500), BunkerWeb intercepta la respuesta de error.
 2.  En lugar de mostrar la página de error predeterminada, BunkerWeb muestra una página de error personalizada y diseñada profesionalmente.
 3.  Las páginas de error son totalmente personalizables a través de su configuración, permitiéndole especificar páginas personalizadas para códigos de error específicos. **Los archivos de las páginas de error personalizadas deben colocarse en el directorio definido por el ajuste `ROOT_FOLDER` (consulte la documentación del complemento Varios).**
-    *   Por defecto, `ROOT_FOLDER` es `/var/www/html/{server_name}` (donde `{server_name}` se reemplaza por el nombre real del servidor).
-    *   En el modo multisitio, cada sitio puede tener su propio `ROOT_FOLDER`, por lo que las páginas de error personalizadas deben colocarse en el directorio correspondiente para cada sitio.
+    - Por defecto, `ROOT_FOLDER` es `/var/www/html/{server_name}` (donde `{server_name}` se reemplaza por el nombre real del servidor).
+    - En el modo multisitio, cada sitio puede tener su propio `ROOT_FOLDER`, por lo que las páginas de error personalizadas deben colocarse en el directorio correspondiente para cada sitio.
 4.  Las páginas de error predeterminadas proporcionan explicaciones claras, ayudando a los usuarios a entender qué salió mal y qué pueden hacer a continuación.
 
 ### Cómo usar
@@ -2168,7 +2161,7 @@ Siga estos pasos para configurar y usar la función de Errores:
 | `INTERCEPTED_ERROR_CODES` | `400 401 403 404 405 413 429 500 501 502 503 504` | multisite | no       | **Errores Interceptados:** Lista de códigos de error HTTP que BunkerWeb debe manejar con su página de error predeterminada cuando no se especifica una página personalizada. |
 
 !!! tip "Diseño de la Página de Error"
-    Las páginas de error predeterminadas de BunkerWeb están diseñadas para ser informativas, amigables y de apariencia profesional. Incluyen:
+Las páginas de error predeterminadas de BunkerWeb están diseñadas para ser informativas, amigables y de apariencia profesional. Incluyen:
 
     -   Descripciones claras del error
     -   Información sobre qué pudo haber causado el error
@@ -2176,7 +2169,7 @@ Siga estos pasos para configurar y usar la función de Errores:
     -   Indicadores visuales que ayudan a los usuarios a comprender si el problema está del lado del cliente o del servidor
 
 !!! info "Tipos de Error"
-    Los códigos de error se clasifican por tipo:
+Los códigos de error se clasifican por tipo:
 
     -   **Errores 4xx (del lado del cliente):** Indican problemas con la solicitud del cliente, como intentar acceder a páginas inexistentes o carecer de la autenticación adecuada.
     -   **Errores 5xx (del lado del servidor):** Indican problemas con la capacidad del servidor para cumplir una solicitud válida, como errores internos del servidor o indisponibilidad temporal.
@@ -2218,7 +2211,7 @@ A diferencia de los enfoques tradicionales de [lista negra](#blacklist)/[lista b
 
 **Cómo funciona:**
 
-1.  Usted define los criterios para que los visitantes sean incluidos en la lista gris (*direcciones IP, redes, DNS inverso, ASN, User-Agent o patrones de URI*).
+1.  Usted define los criterios para que los visitantes sean incluidos en la lista gris (_direcciones IP, redes, DNS inverso, ASN, User-Agent o patrones de URI_).
 2.  Cuando un visitante coincide con cualquiera de estos criterios, se le concede acceso a su sitio mientras las demás características de seguridad permanecen activas.
 3.  Si un visitante no coincide con ningún criterio de la lista gris, se le deniega el acceso.
 4.  Los datos de la lista gris se pueden actualizar automáticamente desde fuentes externas de forma programada.
@@ -2233,13 +2226,13 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
 4.  **Supervise el acceso:** Revise la [interfaz de usuario web](web-ui.md) para ver qué visitantes están siendo permitidos o denegados.
 
 !!! tip "Comportamiento del Control de Acceso"
-    Cuando la función de lista gris está habilitada con el ajuste `USE_GREYLIST` establecido en `yes`:
+Cuando la función de lista gris está habilitada con el ajuste `USE_GREYLIST` establecido en `yes`:
 
     1.  **Visitantes en la lista gris:** Se les permite el acceso pero siguen estando sujetos a todos los controles de seguridad.
     2.  **Visitantes no incluidos en la lista gris:** Se les deniega completamente el acceso.
 
 !!! info "modo stream"
-    Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
+Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
 
 ### Ajustes de Configuración
 
@@ -2250,7 +2243,7 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
 | `USE_GREYLIST` | `no`              | multisite | no       | **Habilitar Lista Gris:** Establezca en `yes` para habilitar la lista gris. |
 
 === "Dirección IP"
-    **Qué hace esto:** Incluye en la lista gris a los visitantes según su dirección IP o red. Estos visitantes obtienen acceso pero siguen estando sujetos a los controles de seguridad.
+**Qué hace esto:** Incluye en la lista gris a los visitantes según su dirección IP o red. Estos visitantes obtienen acceso pero siguen estando sujetos a los controles de seguridad.
 
     | Ajuste             | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                             |
     | ------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2258,7 +2251,7 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_IP_URLS` |                   | multisite | no       | **URLs de Lista Gris de IP:** Lista de URLs que contienen direcciones IP o redes para incluir en la lista gris, separadas por espacios. |
 
 === "DNS Inverso"
-    **Qué hace esto:** Incluye en la lista gris a los visitantes según su nombre de dominio (en inverso). Útil para permitir el acceso condicional a visitantes de organizaciones o redes específicas.
+**Qué hace esto:** Incluye en la lista gris a los visitantes según su nombre de dominio (en inverso). Útil para permitir el acceso condicional a visitantes de organizaciones o redes específicas.
 
     | Ajuste                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                               |
     | ---------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2267,7 +2260,7 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_RDNS_URLS`   |                   | multisite | no       | **URLs de Lista Gris de rDNS:** Lista de URLs que contienen sufijos de DNS inverso para incluir en la lista gris, separadas por espacios. |
 
 === "ASN"
-    **Qué hace esto:** Incluye en la lista gris a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
+**Qué hace esto:** Incluye en la lista gris a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
 
     | Ajuste              | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                            |
     | ------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -2275,7 +2268,7 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_ASN_URLS` |                   | multisite | no       | **URLs de Lista Gris de ASN:** Lista de URLs que contienen ASNs para incluir en la lista gris, separadas por espacios. |
 
 === "User Agent"
-    **Qué hace esto:** Incluye en la lista gris a los visitantes según el navegador o la herramienta que dicen estar usando. Esto permite el acceso controlado para herramientas específicas mientras se mantienen los controles de seguridad.
+**Qué hace esto:** Incluye en la lista gris a los visitantes según el navegador o la herramienta que dicen estar usando. Esto permite el acceso controlado para herramientas específicas mientras se mantienen los controles de seguridad.
 
     | Ajuste                     | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                   |
     | -------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2283,7 +2276,7 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_USER_AGENT_URLS` |                   | multisite | no       | **URLs de Lista Gris de User-Agent:** Lista de URLs que contienen patrones de User-Agent para incluir en la lista gris.                       |
 
 === "URI"
-    **Qué hace esto:** Incluye en la lista gris las solicitudes a URLs específicas de su sitio. Esto permite el acceso condicional a ciertos puntos finales mientras se mantienen los controles de seguridad.
+**Qué hace esto:** Incluye en la lista gris las solicitudes a URLs específicas de su sitio. Esto permite el acceso condicional a ciertos puntos finales mientras se mantienen los controles de seguridad.
 
     | Ajuste              | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                       |
     | ------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -2291,11 +2284,10 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     | `GREYLIST_URI_URLS` |                   | multisite | no       | **URLs de Lista Gris de URI:** Lista de URLs que contienen patrones de URI para incluir en la lista gris, separadas por espacios. |
 
 !!! info "Soporte de Formato de URL"
-    Todos los ajustes `*_URLS` admiten URLs HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
+Todos los ajustes `*_URLS` admiten URLs HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-    Las listas grises de las URLs se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada con las últimas fuentes de confianza.
-
+Las listas grises de las URLs se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada con las últimas fuentes de confianza.
 
 ### Configuraciones de Ejemplo
 
@@ -2386,13 +2378,13 @@ Siga estos pasos para configurar y utilizar la función de compresión GZIP:
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | multisite | no       | **Solicitudes Proxy:** Especifica qué solicitudes proxy deben comprimirse según las cabeceras de respuesta.                            |
 
 !!! tip "Optimizando el Nivel de Compresión"
-    El nivel de compresión por defecto (5) ofrece un buen equilibrio entre la tasa de compresión y el uso de la CPU. Para contenido estático o cuando los recursos de la CPU del servidor son abundantes, considere aumentarlo a 7-9 para una compresión máxima. Para contenido dinámico o cuando los recursos de la CPU son limitados, es posible que desee utilizar 1-3 para una compresión más rápida con una reducción de tamaño razonable.
+El nivel de compresión por defecto (5) ofrece un buen equilibrio entre la tasa de compresión y el uso de la CPU. Para contenido estático o cuando los recursos de la CPU del servidor son abundantes, considere aumentarlo a 7-9 para una compresión máxima. Para contenido dinámico o cuando los recursos de la CPU son limitados, es posible que desee utilizar 1-3 para una compresión más rápida con una reducción de tamaño razonable.
 
 !!! info "Soporte de Navegadores"
-    GZIP es compatible con todos los navegadores modernos y ha sido el método de compresión estándar para las respuestas HTTP durante muchos años, lo que garantiza una excelente compatibilidad en todos los dispositivos y navegadores.
+GZIP es compatible con todos los navegadores modernos y ha sido el método de compresión estándar para las respuestas HTTP durante muchos años, lo que garantiza una excelente compatibilidad en todos los dispositivos y navegadores.
 
 !!! warning "Compresión vs. Uso de CPU"
-    Aunque la compresión GZIP reduce el ancho de banda y mejora los tiempos de carga, los niveles de compresión más altos consumen más recursos de la CPU. Para sitios de alto tráfico, encuentre el equilibrio adecuado entre la eficiencia de la compresión y el rendimiento del servidor.
+Aunque la compresión GZIP reduce el ancho de banda y mejora los tiempos de carga, los niveles de compresión más altos consumen más recursos de la CPU. Para sitios de alto tráfico, encuentre el equilibrio adecuado entre la eficiencia de la compresión y el rendimiento del servidor.
 
 ### Configuraciones de Ejemplo
 
@@ -2473,17 +2465,9 @@ Siga estos pasos para configurar y usar la función de Inyección de HTML:
 | `INJECT_HEAD` |                   | multisite | no       | **Código HTML de la Cabecera:** El código HTML para inyectar antes de la etiqueta `</head>`. |
 | `INJECT_BODY` |                   | multisite | no       | **Código HTML del Cuerpo:** El código HTML para inyectar antes de la etiqueta `</body>`.     |
 
-!!! tip "Mejores Prácticas"
-    - Por razones de rendimiento, coloque los archivos de JavaScript al final del cuerpo para evitar el bloqueo del renderizado.
-    - Coloque CSS y JavaScript crítico en la sección de la cabecera para evitar un "destello" de contenido sin estilo (FOUC).
-    - Tenga cuidado con el contenido inyectado que podría potencialmente romper la funcionalidad de su sitio.
+!!! tip "Mejores Prácticas" - Por razones de rendimiento, coloque los archivos de JavaScript al final del cuerpo para evitar el bloqueo del renderizado. - Coloque CSS y JavaScript crítico en la sección de la cabecera para evitar un "destello" de contenido sin estilo (FOUC). - Tenga cuidado con el contenido inyectado que podría potencialmente romper la funcionalidad de su sitio.
 
-!!! info "Casos de Uso Comunes"
-    - Agregar scripts de análisis (como Google Analytics, Matomo)
-    - Integrar widgets de chat o herramientas de soporte al cliente
-    - Incluir píxeles de seguimiento para campañas de marketing
-    - Agregar estilos CSS personalizados o funcionalidad de JavaScript
-    - Incluir bibliotecas de terceros sin modificar el código de su aplicación
+!!! info "Casos de Uso Comunes" - Agregar scripts de análisis (como Google Analytics, Matomo) - Integrar widgets de chat o herramientas de soporte al cliente - Incluir píxeles de seguimiento para campañas de marketing - Agregar estilos CSS personalizados o funcionalidad de JavaScript - Incluir bibliotecas de terceros sin modificar el código de su aplicación
 
 ### Configuraciones de Ejemplo
 
@@ -2686,7 +2670,7 @@ El complemento de Let's Encrypt simplifica la gestión de certificados SSL/TLS a
 6.  Todo el proceso está totalmente automatizado, requiriendo una intervención mínima después de la configuración inicial.
 
 !!! info "Requisitos previos"
-    Para utilizar esta función, asegúrese de que los **registros A** de DNS adecuados estén configurados para cada dominio, apuntando a la(s) IP(s) pública(s) donde BunkerWeb es accesible. Sin una configuración de DNS correcta, el proceso de verificación del dominio fallará.
+Para utilizar esta función, asegúrese de que los **registros A** de DNS adecuados estén configurados para cada dominio, apuntando a la(s) IP(s) pública(s) donde BunkerWeb es accesible. Sin una configuración de DNS correcta, el proceso de verificación del dominio fallará.
 
 ### Cómo usar
 
@@ -2700,14 +2684,10 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 6.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, los certificados se emiten, instalan y renuevan automáticamente según sea necesario.
 
 !!! tip "Perfiles de Certificado"
-    Let's Encrypt proporciona diferentes perfiles de certificado para diferentes casos de uso:
-    - **classic**: Certificados de propósito general con una validez de 90 días (predeterminado)
-    - **tlsserver**: Optimizado para la autenticación de servidores TLS con una validez de 90 días y una carga útil más pequeña
-    - **shortlived**: Seguridad mejorada con una validez de 7 días para entornos automatizados
-    - **custom**: Si su servidor ACME admite un perfil diferente, configúrelo usando `LETS_ENCRYPT_CUSTOM_PROFILE`.
+Let's Encrypt proporciona diferentes perfiles de certificado para diferentes casos de uso: - **classic**: Certificados de propósito general con una validez de 90 días (predeterminado) - **tlsserver**: Optimizado para la autenticación de servidores TLS con una validez de 90 días y una carga útil más pequeña - **shortlived**: Seguridad mejorada con una validez de 7 días para entornos automatizados - **custom**: Si su servidor ACME admite un perfil diferente, configúrelo usando `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Disponibilidad del Perfil"
-    Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disponibles en todos los entornos o con todos los clientes ACME en este momento. El perfil `classic` tiene la compatibilidad más amplia y se recomienda para la mayoría de los usuarios. Si un perfil seleccionado no está disponible, el sistema volverá automáticamente al perfil `classic`.
+Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disponibles en todos los entornos o con todos los clientes ACME en este momento. El perfil `classic` tiene la compatibilidad más amplia y se recomienda para la mayoría de los usuarios. Si un perfil seleccionado no está disponible, el sistema volverá automáticamente al perfil `classic`.
 
 ### Ajustes de Configuración
 
@@ -2727,14 +2707,10 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 | `LETS_ENCRYPT_CUSTOM_PROFILE`      |                          | multisite | no       | **Perfil de certificado personalizado:** Ingrese un perfil de certificado personalizado si su servidor ACME admite perfiles no estándar. Esto anula `LETS_ENCRYPT_PROFILE` si está configurado.                                                                  |
 | `LETS_ENCRYPT_MAX_RETRIES`         | `3`                      | multisite | no       | **Máximo de reintentos:** Número de veces que se reintentará la generación de certificados en caso de fallo. Establezca en `0` para deshabilitar los reintentos. Útil para manejar problemas de red temporales o límites de velocidad de la API.                 |
 
-!!! info "Información y comportamiento"
-    - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él.
-    - Si no se proporciona ningún ajuste `LETS_ENCRYPT_DNS_PROPAGATION`, se utiliza el tiempo de propagación predeterminado del proveedor.
-    - La automatización completa de Let's Encrypt utilizando el desafío `http` funciona en modo de flujo (stream) siempre que abra el puerto `80/tcp` desde el exterior. Utilice el ajuste `LISTEN_STREAM_PORT_SSL` para elegir su puerto de escucha SSL/TLS.
-    - Si `LETS_ENCRYPT_PASSTHROUGH` se establece en `yes`, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt.
+!!! info "Información y comportamiento" - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él. - Si no se proporciona ningún ajuste `LETS_ENCRYPT_DNS_PROPAGATION`, se utiliza el tiempo de propagación predeterminado del proveedor. - La automatización completa de Let's Encrypt utilizando el desafío `http` funciona en modo de flujo (stream) siempre que abra el puerto `80/tcp` desde el exterior. Utilice el ajuste `LISTEN_STREAM_PORT_SSL` para elegir su puerto de escucha SSL/TLS. - Si `LETS_ENCRYPT_PASSTHROUGH` se establece en `yes`, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt.
 
 !!! tip "Desafíos HTTP vs. DNS"
-    **Los desafíos HTTP** son más fáciles de configurar y funcionan bien para la mayoría de los sitios web:
+**Los desafíos HTTP** son más fáciles de configurar y funcionan bien para la mayoría de los sitios web:
 
     - Requiere que su sitio web sea accesible públicamente en el puerto 80
     - Configurado automáticamente por BunkerWeb
@@ -2748,11 +2724,10 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
     - Útil cuando el puerto 80 está bloqueado o no está disponible
 
 !!! warning "Certificados comodín"
-    Los certificados comodín solo están disponibles con desafíos DNS. Si desea utilizarlos, debe establecer el ajuste `USE_LETS_ENCRYPT_WILDCARD` en `yes` y configurar correctamente las credenciales de su proveedor de DNS.
+Los certificados comodín solo están disponibles con desafíos DNS. Si desea utilizarlos, debe establecer el ajuste `USE_LETS_ENCRYPT_WILDCARD` en `yes` y configurar correctamente las credenciales de su proveedor de DNS.
 
 !!! warning "Límites de velocidad"
-    Let's Encrypt impone límites de velocidad en la emisión de certificados. Al probar las configuraciones, utilice el entorno de prueba estableciendo `USE_LETS_ENCRYPT_STAGING` en `yes` para evitar alcanzar los límites de velocidad de producción. Los certificados de prueba no son de confianza para los navegadores, pero son útiles para validar su configuración.
-
+Let's Encrypt impone límites de velocidad en la emisión de certificados. Al probar las configuraciones, utilice el entorno de prueba estableciendo `USE_LETS_ENCRYPT_STAGING` en `yes` para evitar alcanzar los límites de velocidad de producción. Los certificados de prueba no son de confianza para los navegadores, pero son útiles para validar su configuración.
 
 ### Proveedores de DNS compatibles
 
@@ -2868,8 +2843,8 @@ Compatibilidad con STREAM :warning:
 
 El complemento de Límite en BunkerWeb proporciona capacidades robustas para aplicar políticas de limitación en su sitio web, asegurando un uso justo y protegiendo sus recursos del abuso, ataques de denegación de servicio y consumo excesivo de recursos. Estas políticas incluyen:
 
--   **Número de conexiones por dirección IP** (soporte para STREAM :white_check_mark:)
--   **Número de solicitudes por dirección IP y URL dentro de un período de tiempo específico** (soporte para STREAM :x:)
+- **Número de conexiones por dirección IP** (soporte para STREAM :white_check_mark:)
+- **Número de solicitudes por dirección IP y URL dentro de un período de tiempo específico** (soporte para STREAM :x:)
 
 ### Cómo funciona
 
@@ -2914,14 +2889,12 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     | `LIMIT_CONN_MAX_HTTP3`  | `100`             | multisite | no       | **Flujos HTTP/3:** Número máximo de flujos HTTP/3 concurrentes por dirección IP.                                   |
     | `LIMIT_CONN_MAX_STREAM` | `10`              | multisite | no       | **Conexiones de Flujo:** Número máximo de conexiones de flujo concurrentes por dirección IP.                       |
 
-!!! info "Limitación de Conexiones vs. Solicitudes"
-    -   **La limitación de conexiones** restringe el número de conexiones simultáneas que una sola dirección IP puede mantener.
-    -   **La limitación de tasa de solicitudes** restringe el número de solicitudes que una dirección IP puede hacer dentro de un período de tiempo definido.
+!!! info "Limitación de Conexiones vs. Solicitudes" - **La limitación de conexiones** restringe el número de conexiones simultáneas que una sola dirección IP puede mantener. - **La limitación de tasa de solicitudes** restringe el número de solicitudes que una dirección IP puede hacer dentro de un período de tiempo definido.
 
     El uso de ambos métodos proporciona una protección completa contra varios tipos de abuso.
 
 !!! warning "Estableciendo Límites Apropiados"
-    Establecer límites demasiado restrictivos puede afectar a los usuarios legítimos, especialmente para HTTP/2 y HTTP/3, donde los navegadores a menudo usan múltiples flujos. Los valores predeterminados están equilibrados para la mayoría de los casos de uso, pero considere ajustarlos según las necesidades de su aplicación y el comportamiento del usuario.
+Establecer límites demasiado restrictivos puede afectar a los usuarios legítimos, especialmente para HTTP/2 y HTTP/3, donde los navegadores a menudo usan múltiples flujos. Los valores predeterminados están equilibrados para la mayoría de los casos de uso, pero considere ajustarlos según las necesidades de su aplicación y el comportamiento del usuario.
 
 ### Configuraciones de Ejemplo
 
@@ -3062,12 +3035,12 @@ El complemento de Métricas proporciona capacidades completas de monitoreo y rec
 
 El complemento de métricas funciona mediante:
 
--   El uso de diccionarios compartidos en NGINX, donde `metrics_datastore` se utiliza para HTTP y `metrics_datastore_stream` para el tráfico TCP/UDP
--   El aprovechamiento de una caché LRU para un almacenamiento eficiente en memoria
--   La sincronización periódica de datos entre los trabajadores (workers) mediante temporizadores
--   El almacenamiento de información detallada sobre las solicitudes bloqueadas, incluida la dirección IP del cliente, el país, la marca de tiempo, los detalles de la solicitud y el motivo del bloqueo
--   El soporte para métricas específicas de complementos a través de una interfaz común de recolección de métricas
--   La provisión de puntos finales de API para consultar las métricas recopiladas
+- El uso de diccionarios compartidos en NGINX, donde `metrics_datastore` se utiliza para HTTP y `metrics_datastore_stream` para el tráfico TCP/UDP
+- El aprovechamiento de una caché LRU para un almacenamiento eficiente en memoria
+- La sincronización periódica de datos entre los trabajadores (workers) mediante temporizadores
+- El almacenamiento de información detallada sobre las solicitudes bloqueadas, incluida la dirección IP del cliente, el país, la marca de tiempo, los detalles de la solicitud y el motivo del bloqueo
+- El soporte para métricas específicas de complementos a través de una interfaz común de recolección de métricas
+- La provisión de puntos finales de API para consultar las métricas recopiladas
 
 ### Cómo usar
 
@@ -3084,14 +3057,14 @@ Siga estos pasos para configurar y usar la función de Métricas:
 El complemento de métricas recopila la siguiente información:
 
 1.  **Solicitudes Bloqueadas**: Para cada solicitud bloqueada, se almacenan los siguientes datos:
-    -   ID de la solicitud y marca de tiempo
-    -   Dirección IP del cliente y país (cuando esté disponible)
-    -   Método HTTP y URL
-    -   Código de estado HTTP
-    -   Agente de usuario
-    -   Motivo del bloqueo y modo de seguridad
-    -   Nombre del servidor
-    -   Datos adicionales relacionados con el motivo del bloqueo
+    - ID de la solicitud y marca de tiempo
+    - Dirección IP del cliente y país (cuando esté disponible)
+    - Método HTTP y URL
+    - Código de estado HTTP
+    - Agente de usuario
+    - Motivo del bloqueo y modo de seguridad
+    - Nombre del servidor
+    - Datos adicionales relacionados con el motivo del bloqueo
 
 2.  **Contadores de Complementos**: Varios contadores específicos de complementos que rastrean actividades y eventos.
 
@@ -3099,15 +3072,15 @@ El complemento de métricas recopila la siguiente información:
 
 Se puede acceder a los datos de las métricas a través de los puntos finales de la API interna de BunkerWeb:
 
--   **Punto final**: `/metrics/{filtro}`
--   **Método**: GET
--   **Descripción**: Recupera los datos de las métricas según el filtro especificado
--   **Formato de respuesta**: Objeto JSON que contiene las métricas solicitadas
+- **Punto final**: `/metrics/{filtro}`
+- **Método**: GET
+- **Descripción**: Recupera los datos de las métricas según el filtro especificado
+- **Formato de respuesta**: Objeto JSON que contiene las métricas solicitadas
 
 Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes bloqueadas.
 
 !!! info "Configuración del Acceso a la API"
-    Para acceder a las métricas a través de la API, debe asegurarse de que:
+Para acceder a las métricas a través de la API, debe asegurarse de que:
 
     1.  La función de API esté habilitada con `USE_API: "yes"` (habilitada por defecto)
     2.  Su IP de cliente esté incluida en el ajuste `API_WHITELIST_IP` (el valor predeterminado es `127.0.0.0/8`)
@@ -3145,16 +3118,16 @@ Por ejemplo, `/metrics/requests` devuelve información sobre las solicitudes blo
 | `METRICS_SAVE_TO_REDIS`              | `yes`             | global    | no       | **Guardar Métricas en Redis:** Establezca en `yes` para guardar las métricas (contadores y tablas) en Redis para la agregación en todo el clúster. |
 
 !!! tip "Dimensionamiento de la Asignación de Memoria"
-    El ajuste `METRICS_MEMORY_SIZE` debe ajustarse en función de su volumen de tráfico y el número de instancias. Para sitios de alto tráfico, considere aumentar este valor para garantizar que todas las métricas se capturen sin pérdida de datos.
+El ajuste `METRICS_MEMORY_SIZE` debe ajustarse en función de su volumen de tráfico y el número de instancias. Para sitios de alto tráfico, considere aumentar este valor para garantizar que todas las métricas se capturen sin pérdida de datos.
 
 !!! info "Integración con Redis"
-    Cuando BunkerWeb está configurado para usar [Redis](#redis), el complemento de métricas sincronizará automáticamente los datos de las solicitudes bloqueadas con el servidor Redis. Esto proporciona una vista centralizada de los eventos de seguridad en múltiples instancias de BunkerWeb.
+Cuando BunkerWeb está configurado para usar [Redis](#redis), el complemento de métricas sincronizará automáticamente los datos de las solicitudes bloqueadas con el servidor Redis. Esto proporciona una vista centralizada de los eventos de seguridad en múltiples instancias de BunkerWeb.
 
 !!! warning "Consideraciones de Rendimiento"
-    Establecer valores muy altos para `METRICS_MAX_BLOCKED_REQUESTS` o `METRICS_MAX_BLOCKED_REQUESTS_REDIS` puede aumentar el uso de la memoria. Supervise los recursos de su sistema y ajuste estos valores según sus necesidades reales y los recursos disponibles.
+Establecer valores muy altos para `METRICS_MAX_BLOCKED_REQUESTS` o `METRICS_MAX_BLOCKED_REQUESTS_REDIS` puede aumentar el uso de la memoria. Supervise los recursos de su sistema y ajuste estos valores según sus necesidades reales y los recursos disponibles.
 
 !!! note "Almacenamiento Específico del Trabajador"
-    Cada trabajador de NGINX mantiene sus propias métricas en la memoria. Al acceder a las métricas a través de la API, los datos de todos los trabajadores se agregan automáticamente para proporcionar una vista completa.
+Cada trabajador de NGINX mantiene sus propias métricas en la memoria. Al acceder a las métricas a través de la API, los datos de todos los trabajadores se agregan automáticamente para proporcionar una vista completa.
 
 ### Configuraciones de Ejemplo
 
@@ -3215,11 +3188,11 @@ Compatibilidad con STREAM :warning:
 
 El complemento Varios proporciona **ajustes básicos esenciales** que ayudan a mantener la seguridad y la funcionalidad de su sitio web. Este componente principal ofrece controles integrales para:
 
--   **Comportamiento del servidor** - Configure cómo responde su servidor a diversas solicitudes
--   **Ajustes HTTP** - Gestione métodos, tamaños de solicitud y opciones de protocolo
--   **Gestión de archivos** - Controle la entrega de archivos estáticos y optimice la entrega
--   **Soporte de protocolos** - Habilite protocolos HTTP modernos para un mejor rendimiento
--   **Configuraciones del sistema** - Amplíe la funcionalidad y mejore la seguridad
+- **Comportamiento del servidor** - Configure cómo responde su servidor a diversas solicitudes
+- **Ajustes HTTP** - Gestione métodos, tamaños de solicitud y opciones de protocolo
+- **Gestión de archivos** - Controle la entrega de archivos estáticos y optimice la entrega
+- **Soporte de protocolos** - Habilite protocolos HTTP modernos para un mejor rendimiento
+- **Configuraciones del sistema** - Amplíe la funcionalidad y mejore la seguridad
 
 Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las solicitudes, optimizar el almacenamiento en caché de archivos o controlar cómo responde su servidor a diversas solicitudes, este complemento le brinda las herramientas para **afinar el comportamiento de su servicio web** mientras optimiza tanto el rendimiento como la seguridad.
 
@@ -3556,7 +3529,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 | `USE_MODSECURITY_GLOBAL_CRS`          | `no`              | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                            |
 
 !!! warning "ModSecurity y el OWASP Core Rule Set"
-    **Recomendamos encarecidamente mantener habilitados tanto ModSecurity como el OWASP Core Rule Set (CRS)** para proporcionar una protección robusta contra las vulnerabilidades web comunes. Aunque pueden ocurrir falsos positivos ocasionales, se pueden resolver con un poco de esfuerzo ajustando las reglas o utilizando exclusiones predefinidas.
+**Recomendamos encarecidamente mantener habilitados tanto ModSecurity como el OWASP Core Rule Set (CRS)** para proporcionar una protección robusta contra las vulnerabilidades web comunes. Aunque pueden ocurrir falsos positivos ocasionales, se pueden resolver con un poco de esfuerzo ajustando las reglas o utilizando exclusiones predefinidas.
 
     El equipo de CRS mantiene activamente una lista de exclusiones para aplicaciones populares como WordPress, Nextcloud, Drupal y Cpanel, lo que facilita la integración sin afectar la funcionalidad. Los beneficios de seguridad superan con creces el mínimo esfuerzo de configuración necesario para solucionar los falsos positivos.
 
@@ -3564,15 +3537,15 @@ Siga estos pasos para configurar y usar ModSecurity:
 
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
--   **`3`**: Estable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
--   **`4`**: Estable [v4.18.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0) (**predeterminada**).
--   **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
+- **`3`**: Estable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
+- **`4`**: Estable [v4.18.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0) (**predeterminada**).
+- **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
 
 !!! example "Compilación Nocturna"
-    La **compilación nocturna** contiene las reglas más actualizadas, ofreciendo las últimas protecciones contra amenazas emergentes. Sin embargo, dado que se actualiza diariamente y puede incluir cambios experimentales o no probados, se recomienda utilizar primero la compilación nocturna en un **entorno de preproducción** antes de implementarla en producción.
+La **compilación nocturna** contiene las reglas más actualizadas, ofreciendo las últimas protecciones contra amenazas emergentes. Sin embargo, dado que se actualiza diariamente y puede incluir cambios experimentales o no probados, se recomienda utilizar primero la compilación nocturna en un **entorno de preproducción** antes de implementarla en producción.
 
 !!! tip "Niveles de Paranoia"
-    El OWASP Core Rule Set utiliza "niveles de paranoia" (PL) para controlar la rigurosidad de las reglas:
+El OWASP Core Rule Set utiliza "niveles de paranoia" (PL) para controlar la rigurosidad de las reglas:
 
     -   **PL1 (predeterminado):** Protección básica con mínimos falsos positivos
     -   **PL2:** Seguridad más estricta con una coincidencia de patrones más rigurosa
@@ -3585,10 +3558,10 @@ Seleccione una versión de CRS que se ajuste mejor a sus necesidades de segurida
 
 El ajuste de ModSecurity y el OWASP Core Rule Set (CRS) se puede lograr a través de configuraciones personalizadas. Estas configuraciones le permiten personalizar el comportamiento en etapas específicas del procesamiento de las reglas de seguridad:
 
--   **`modsec-crs`**: Se aplica **antes** de que se cargue el OWASP Core Rule Set.
--   **`modsec`**: Se aplica **después** de que se haya cargado el OWASP Core Rule Set. También se utiliza si el CRS no se carga en absoluto.
--   **`crs-plugins-before`**: Se aplica **antes** de que se carguen los complementos de CRS.
--   **`crs-plugins-after`**: Se aplica **después** de que se hayan cargado los complementos de CRS.
+- **`modsec-crs`**: Se aplica **antes** de que se cargue el OWASP Core Rule Set.
+- **`modsec`**: Se aplica **después** de que se haya cargado el OWASP Core Rule Set. También se utiliza si el CRS no se carga en absoluto.
+- **`crs-plugins-before`**: Se aplica **antes** de que se carguen los complementos de CRS.
+- **`crs-plugins-after`**: Se aplica **después** de que se hayan cargado los complementos de CRS.
 
 Esta estructura proporciona flexibilidad, permitiéndole ajustar la configuración de ModSecurity y CRS para adaptarse a las necesidades específicas de su aplicación mientras mantiene un flujo de configuración claro.
 
@@ -3608,8 +3581,8 @@ SecAction \
 
 En este ejemplo:
 
--   La acción se ejecuta en la **Fase 1** (temprano en el ciclo de vida de la solicitud).
--   Habilita las exclusiones de CRS específicas de WordPress estableciendo la variable `tx.crs_exclusions_wordpress`.
+- La acción se ejecuta en la **Fase 1** (temprano en el ciclo de vida de la solicitud).
+- Habilita las exclusiones de CRS específicas de WordPress estableciendo la variable `tx.crs_exclusions_wordpress`.
 
 #### Actualizar las Reglas de CRS con `modsec`
 
@@ -3623,12 +3596,12 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 
 En este ejemplo:
 
--   **Regla 1**: Elimina las reglas etiquetadas como `attack-xss` y `attack-rce` para las solicitudes a `/wp-admin/admin-ajax.php`.
--   **Regla 2**: Elimina las reglas etiquetadas como `attack-xss` para las solicitudes a `/wp-admin/options.php`.
--   **Regla 3**: Elimina una regla específica (ID `930120`) para las solicitudes que coinciden con `/wp-json/yoast`.
+- **Regla 1**: Elimina las reglas etiquetadas como `attack-xss` y `attack-rce` para las solicitudes a `/wp-admin/admin-ajax.php`.
+- **Regla 2**: Elimina las reglas etiquetadas como `attack-xss` para las solicitudes a `/wp-admin/options.php`.
+- **Regla 3**: Elimina una regla específica (ID `930120`) para las solicitudes que coinciden con `/wp-json/yoast`.
 
 !!! info "Orden de ejecución"
-    El orden de ejecución de ModSecurity en BunkerWeb es el siguiente, asegurando una progresión clara y lógica de la aplicación de reglas:
+El orden de ejecución de ModSecurity en BunkerWeb es el siguiente, asegurando una progresión clara y lógica de la aplicación de reglas:
 
     1.  **Configuración de OWASP CRS**: Configuración base para el OWASP Core Rule Set.
     2.  **Configuración de Complementos Personalizados (`crs-plugins-before`)**: Ajustes específicos de los complementos, aplicados antes de cualquier regla de CRS.
@@ -3652,7 +3625,7 @@ En este ejemplo:
 El OWASP Core Rule Set también admite una gama de **complementos** diseñados para ampliar su funcionalidad y mejorar la compatibilidad con aplicaciones o entornos específicos. Estos complementos pueden ayudar a ajustar el CRS para su uso con plataformas populares como WordPress, Nextcloud y Drupal, o incluso con configuraciones personalizadas. Para obtener más información y una lista de los complementos disponibles, consulte el [registro de complementos de OWASP CRS](https://github.com/coreruleset/plugin-registry).
 
 !!! tip "Descarga de complementos"
-    El ajuste `MODSECURITY_CRS_PLUGINS` le permite descargar e instalar complementos para ampliar la funcionalidad del OWASP Core Rule Set (CRS). Este ajuste acepta una lista de nombres de complementos con etiquetas o URL opcionales, lo que facilita la integración de funciones de seguridad adicionales adaptadas a sus necesidades específicas.
+El ajuste `MODSECURITY_CRS_PLUGINS` le permite descargar e instalar complementos para ampliar la funcionalidad del OWASP Core Rule Set (CRS). Este ajuste acepta una lista de nombres de complementos con etiquetas o URL opcionales, lo que facilita la integración de funciones de seguridad adicionales adaptadas a sus necesidades específicas.
 
     Aquí hay una lista no exhaustiva de valores aceptados para el ajuste `MODSECURITY_CRS_PLUGINS`:
 
@@ -3661,7 +3634,7 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
     *   `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` - Descargar el complemento directamente desde la URL.
 
 !!! warning "Falsos Positivos"
-    Una configuración de seguridad más alta puede bloquear el tráfico legítimo. Comience con la configuración predeterminada y supervise los registros antes de aumentar los niveles de seguridad. Esté preparado para agregar reglas de exclusión para las necesidades específicas de su aplicación.
+Una configuración de seguridad más alta puede bloquear el tráfico legítimo. Comience con la configuración predeterminada y supervise los registros antes de aumentar los niveles de seguridad. Esté preparado para agregar reglas de exclusión para las necesidades específicas de su aplicación.
 
 ### Configuraciones de Ejemplo
 
@@ -3738,7 +3711,7 @@ El OWASP Core Rule Set también admite una gama de **complementos** diseñados p
     ```
 
 !!! note "Valores de tamaño legibles por humanos"
-    Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
 ## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -3787,16 +3760,16 @@ Siga estos pasos para configurar y usar la función PHP:
 | `LOCAL_PHP_PATH`  |                   | multisite | no       | **Ruta Local:** Carpeta raíz que contiene los archivos en la instancia local de PHP-FPM.                              |
 
 !!! tip "PHP-FPM Local vs. Remoto"
-    Elija la configuración que mejor se adapte a su infraestructura:
+Elija la configuración que mejor se adapte a su infraestructura:
 
     -   **PHP-FPM local** ofrece un mejor rendimiento debido a la comunicación basada en sockets y es ideal cuando PHP se ejecuta en la misma máquina que BunkerWeb.
     -   **PHP-FPM remoto** proporciona más flexibilidad y escalabilidad al permitir que el procesamiento de PHP se realice en servidores separados.
 
 !!! warning "Configuración de la Ruta"
-    La `REMOTE_PHP_PATH` o `LOCAL_PHP_PATH` debe coincidir con la ruta real del sistema de archivos donde se almacenan sus archivos PHP; de lo contrario, se producirá un error de "Archivo no encontrado".
+La `REMOTE_PHP_PATH` o `LOCAL_PHP_PATH` debe coincidir con la ruta real del sistema de archivos donde se almacenan sus archivos PHP; de lo contrario, se producirá un error de "Archivo no encontrado".
 
 !!! info "Reescritura de URL"
-    El complemento PHP configura automáticamente la reescritura de URL para admitir aplicaciones PHP modernas. Las solicitudes de archivos inexistentes se dirigirán a `index.php` con el URI de la solicitud original disponible como parámetro de consulta.
+El complemento PHP configura automáticamente la reescritura de URL para admitir aplicaciones PHP modernas. Las solicitudes de archivos inexistentes se dirigirán a `index.php` con el URI de la solicitud original disponible como parámetro de consulta.
 
 ### Configuraciones de Ejemplo
 
@@ -3876,13 +3849,13 @@ Siga estos pasos para configurar y usar las características Pro:
 | `PRO_LICENSE_KEY` |                   | global   | no       | **Clave de Licencia Pro:** Su clave de licencia de BunkerWeb Pro para la autenticación. |
 
 !!! tip "Gestión de Licencias"
-    Su licencia Pro está vinculada a su entorno de implementación específico. Si necesita transferir su licencia o tiene preguntas sobre su suscripción, póngase en contacto con el soporte a través del [Panel de BunkerWeb](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
+Su licencia Pro está vinculada a su entorno de implementación específico. Si necesita transferir su licencia o tiene preguntas sobre su suscripción, póngase en contacto con el soporte a través del [Panel de BunkerWeb](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
 
 !!! info "Características Pro"
-    Las características Pro específicas disponibles pueden evolucionar con el tiempo a medida que se agregan nuevas capacidades. El complemento Pro se encarga automáticamente de la instalación y configuración de todas las características disponibles.
+Las características Pro específicas disponibles pueden evolucionar con el tiempo a medida que se agregan nuevas capacidades. El complemento Pro se encarga automáticamente de la instalación y configuración de todas las características disponibles.
 
 !!! warning "Requisitos de Red"
-    El complemento Pro requiere acceso a Internet de salida para conectarse a la API de BunkerWeb para la verificación de la licencia y para descargar los complementos premium. Asegúrese de que su firewall permita conexiones a `api.bunkerweb.io` en el puerto 443 (HTTPS).
+El complemento Pro requiere acceso a Internet de salida para conectarse a la API de BunkerWeb para la verificación de la licencia y para descargar los complementos premium. Asegúrese de que su firewall permita conexiones a `api.bunkerweb.io` en el puerto 443 (HTTPS).
 
 ### Preguntas Frecuentes
 
@@ -3898,8 +3871,8 @@ R: No, las características Pro están diseñadas para integrarse sin problemas 
 
 R: ¡Absolutamente! BunkerWeb ofrece dos planes Pro para satisfacer sus necesidades:
 
--   **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
--   **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
+- **BunkerWeb PRO Standard:** Acceso completo a las características Pro sin soporte técnico.
+- **BunkerWeb PRO Enterprise:** Acceso completo a las características Pro con soporte técnico dedicado.
 
 Puede explorar las características Pro con una prueba gratuita de 1 mes utilizando el código de promoción `freetrial`. Visite el [Panel de BunkerWeb](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) para activar su prueba y obtener más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
 
@@ -3945,7 +3918,7 @@ Siga estos pasos para configurar y usar la función de IP Real:
 6.  **Protocolo PROXY:** Para la comunicación directa con el proxy, habilítelo con `USE_PROXY_PROTOCOL` si su upstream lo admite.
 
 !!! danger "Advertencia sobre el Protocolo PROXY"
-    Habilitar `USE_PROXY_PROTOCOL` sin configurar correctamente su proxy upstream para enviar los encabezados del protocolo PROXY **romperá su aplicación**. Solo habilite este ajuste si está seguro de que su proxy upstream está configurado correctamente para enviar la información del protocolo PROXY. Si su proxy no está enviando los encabezados del protocolo PROXY, todas las conexiones a BunkerWeb fallarán con errores de protocolo.
+Habilitar `USE_PROXY_PROTOCOL` sin configurar correctamente su proxy upstream para enviar los encabezados del protocolo PROXY **romperá su aplicación**. Solo habilite este ajuste si está seguro de que su proxy upstream está configurado correctamente para enviar la información del protocolo PROXY. Si su proxy no está enviando los encabezados del protocolo PROXY, todas las conexiones a BunkerWeb fallarán con errores de protocolo.
 
 ### Ajustes de Configuración
 
@@ -3959,13 +3932,13 @@ Siga estos pasos para configurar y usar la función de IP Real:
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | no       | **Protocolo PROXY:** Establezca en `yes` para habilitar el soporte del protocolo PROXY para la comunicación directa de proxy a BunkerWeb.                   |
 
 !!! tip "Redes de Proveedores de la Nube"
-    Si está utilizando un proveedor de la nube como AWS, GCP o Azure, considere agregar los rangos de IP de sus balanceadores de carga a su ajuste `REAL_IP_FROM` para garantizar la correcta identificación de la IP del cliente.
+Si está utilizando un proveedor de la nube como AWS, GCP o Azure, considere agregar los rangos de IP de sus balanceadores de carga a su ajuste `REAL_IP_FROM` para garantizar la correcta identificación de la IP del cliente.
 
 !!! danger "Consideraciones de Seguridad"
-    Solo incluya las IP de los proxies de confianza en su configuración. Agregar fuentes no confiables podría permitir ataques de suplantación de IP, donde los actores maliciosos podrían falsificar la IP del cliente manipulando los encabezados.
+Solo incluya las IP de los proxies de confianza en su configuración. Agregar fuentes no confiables podría permitir ataques de suplantación de IP, donde los actores maliciosos podrían falsificar la IP del cliente manipulando los encabezados.
 
 !!! info "Múltiples Direcciones IP"
-    Cuando `REAL_IP_RECURSIVE` está habilitado y un encabezado contiene múltiples IP (p. ej., `X-Forwarded-For: cliente, proxy1, proxy2`), BunkerWeb identificará como la IP del cliente la IP más a la izquierda que no esté en su lista de proxies de confianza.
+Cuando `REAL_IP_RECURSIVE` está habilitado y un encabezado contiene múltiples IP (p. ej., `X-Forwarded-For: cliente, proxy1, proxy2`), BunkerWeb identificará como la IP del cliente la IP más a la izquierda que no esté en su lista de proxies de confianza.
 
 ### Configuraciones de Ejemplo
 
@@ -4071,12 +4044,10 @@ Siga estos pasos para configurar y utilizar la función de Redirección:
 | `REDIRECT_TO_REQUEST_URI` | `no`              | multisite | yes      | **Preservar ruta:** Cuando se establece en `yes`, agrega el URI de la solicitud original a la URL de destino.                        |
 | `REDIRECT_TO_STATUS_CODE` | `301`             | multisite | yes      | **Código de estado HTTP:** El código de estado HTTP a utilizar para la redirección. Opciones: `301` (permanente) o `302` (temporal). |
 
-!!! tip "Elegir el Código de Estado Correcto"
-    -   Use `301` (Movido Permanentemente) cuando la redirección es permanente, como para migraciones de dominio o para establecer URL canónicas. Esto ayuda a los motores de búsqueda a actualizar sus índices.
-    -   Use `302` (Encontrado/Redirección Temporal) cuando la redirección es temporal o si desea reutilizar la URL original en el futuro.
+!!! tip "Elegir el Código de Estado Correcto" - Use `301` (Movido Permanentemente) cuando la redirección es permanente, como para migraciones de dominio o para establecer URL canónicas. Esto ayuda a los motores de búsqueda a actualizar sus índices. - Use `302` (Encontrado/Redirección Temporal) cuando la redirección es temporal o si desea reutilizar la URL original en el futuro.
 
 !!! info "Preservación de la Ruta"
-    Cuando `REDIRECT_TO_REQUEST_URI` se establece en `yes`, BunkerWeb preserva la ruta de la solicitud original. Por ejemplo, si un usuario visita `https://dominio-antiguo.com/blog/post-1` y ha configurado una redirección a `https://dominio-nuevo.com`, será redirigido a `https://dominio-nuevo.com/blog/post-1`.
+Cuando `REDIRECT_TO_REQUEST_URI` se establece en `yes`, BunkerWeb preserva la ruta de la solicitud original. Por ejemplo, si un usuario visita `https://dominio-antiguo.com/blog/post-1` y ha configurado una redirección a `https://dominio-nuevo.com`, será redirigido a `https://dominio-nuevo.com/blog/post-1`.
 
 ### Configuraciones de Ejemplo
 
@@ -4189,10 +4160,10 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_KEEPALIVE_POOL`    | `3`               | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
 
 !!! tip "Alta Disponibilidad con Redis Sentinel"
-    Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
+Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
 
 !!! warning "Consideraciones de Seguridad"
-    Cuando utilice Redis en producción:
+Cuando utilice Redis en producción:
 
     -   Establezca siempre contraseñas seguras tanto para la autenticación de Redis como de Sentinel
     -   Considere habilitar el cifrado SSL/TLS para las conexiones de Redis
@@ -4200,7 +4171,7 @@ Siga estos pasos para configurar y usar el complemento de Redis:
     -   Restrinja el acceso al puerto de Redis mediante cortafuegos o segmentación de red
 
 !!! info "Requisitos del Clúster"
-    Al implementar BunkerWeb en un clúster:
+Al implementar BunkerWeb en un clúster:
 
     -   Todas las instancias de BunkerWeb deben conectarse al mismo servidor Redis o Valkey o al clúster de Sentinel
     -   Configure el mismo número de base de datos en todas las instancias
@@ -4263,27 +4234,30 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas para garantizar un rendimiento, seguridad y fiabilidad óptimos:
 
 #### Gestión de la Memoria
--   **Supervise el uso de la memoria:** Configure Redis con los ajustes `maxmemory` apropiados para evitar errores de falta de memoria
--   **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` o `allkeys-lru`) apropiada para su caso de uso
--   **Evite claves grandes:** Asegúrese de que las claves individuales de Redis se mantengan en un tamaño razonable para evitar la degradación del rendimiento
+
+- **Supervise el uso de la memoria:** Configure Redis con los ajustes `maxmemory` apropiados para evitar errores de falta de memoria
+- **Establezca una política de desalojo:** Utilice `maxmemory-policy` (p. ej., `volatile-lru` o `allkeys-lru`) apropiada para su caso de uso
+- **Evite claves grandes:** Asegúrese de que las claves individuales de Redis se mantengan en un tamaño razonable para evitar la degradación del rendimiento
 
 #### Persistencia de Datos
--   **Habilite las instantáneas RDB:** Configure instantáneas periódicas para la persistencia de datos sin un impacto significativo en el rendimiento
--   **Considere AOF:** Para datos críticos, habilite la persistencia AOF (Append-Only File) con una política de `fsync` apropiada
--   **Estrategia de copia de seguridad:** Implemente copias de seguridad regulares de Redis como parte de su plan de recuperación de desastres
+
+- **Habilite las instantáneas RDB:** Configure instantáneas periódicas para la persistencia de datos sin un impacto significativo en el rendimiento
+- **Considere AOF:** Para datos críticos, habilite la persistencia AOF (Append-Only File) con una política de `fsync` apropiada
+- **Estrategia de copia de seguridad:** Implemente copias de seguridad regulares de Redis como parte de su plan de recuperación de desastres
 
 #### Optimización del Rendimiento
--   **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
--   **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
--   **Evite operaciones costosas:** Tenga cuidado con comandos como `KEYS` en entornos de producción
--   **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos
+
+- **Agrupación de conexiones:** BunkerWeb ya implementa esto, pero asegúrese de que otras aplicaciones sigan esta práctica
+- **Canalización:** Cuando sea posible, utilice la canalización para operaciones masivas para reducir la sobrecarga de la red
+- **Evite operaciones costosas:** Tenga cuidado con comandos como `KEYS` en entornos de producción
+- **Compare su carga de trabajo:** Utilice `redis-benchmark` para probar sus patrones de carga de trabajo específicos
 
 ### Recursos Adicionales
 
--   [Documentación de Redis](https://redis.io/documentation)
--   [Guía de Seguridad de Redis](https://redis.io/topics/security)
--   [Alta Disponibilidad de Redis](https://redis.io/topics/sentinel)
--   [Persistencia de Redis](https://redis.io/topics/persistence)
+- [Documentación de Redis](https://redis.io/documentation)
+- [Guía de Seguridad de Redis](https://redis.io/topics/security)
+- [Alta Disponibilidad de Redis](https://redis.io/topics/sentinel)
+- [Persistencia de Redis](https://redis.io/topics/persistence)
 
 ## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4533,7 +4507,7 @@ Siga estos pasos para configurar y usar la función de Proxy Inverso:
         - Supervise las tasas de aciertos de la caché y ajuste la configuración en consecuencia
 
 !!! danger "Usuarios de Docker Compose - Variables de NGINX"
-    Al usar Docker Compose con variables de NGINX en sus configuraciones, debe escapar el signo de dólar (`$`) usando signos de dólar dobles (`$$`). Esto se aplica a todos los ajustes que contienen variables de NGINX como `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
+Al usar Docker Compose con variables de NGINX en sus configuraciones, debe escapar el signo de dólar (`$`) usando signos de dólar dobles (`$$`). Esto se aplica a todos los ajustes que contienen variables de NGINX como `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
 
     Sin este escape, Docker Compose intentará sustituir estas variables por variables de entorno, que normalmente no existen, lo que dará como resultado valores vacíos en su configuración de NGINX.
 
@@ -4674,10 +4648,10 @@ Siga estos pasos para configurar y usar la función de Escaneo Inverso:
 | `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | no       | **Tiempo de Espera del Escaneo:** Tiempo máximo en milisegundos permitido para escanear un puerto.           |
 
 !!! warning "Consideraciones de Rendimiento"
-    Escanear múltiples puertos puede agregar latencia a las conexiones de los clientes. Use un valor de tiempo de espera apropiado y limite el número de puertos escaneados para mantener un buen rendimiento.
+Escanear múltiples puertos puede agregar latencia a las conexiones de los clientes. Use un valor de tiempo de espera apropiado y limite el número de puertos escaneados para mantener un buen rendimiento.
 
 !!! info "Puertos de Proxy Comunes"
-    La configuración predeterminada incluye puertos comunes utilizados por los servidores proxy (80, 443, 8080, 3128) y SSH (22). Es posible que desee personalizar esta lista según su modelo de amenaza.
+La configuración predeterminada incluye puertos comunes utilizados por los servidores proxy (80, 443, 8080, 3128) y SSH (22). Es posible que desee personalizar esta lista según su modelo de amenaza.
 
 ### Configuraciones de Ejemplo
 
@@ -4748,10 +4722,10 @@ Para habilitar esto, debe registrarse en [darkvisitors.com](https://darkvisitors
 
 1.  **Habilite la función:** Establezca el ajuste `USE_ROBOTSTXT` en `yes`.
 2.  **Configure las reglas:** Elija uno o más métodos para definir sus reglas de `robots.txt`:
-    *   **API de DarkVisitors:** Proporcione `ROBOTSTXT_DARKVISITORS_TOKEN` y, opcionalmente, `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` y `ROBOTSTXT_DARKVISITORS_DISALLOW`.
-    *   **Listas de la Comunidad:** Especifique `ROBOTSTXT_COMMUNITY_LISTS` (IDs separados por espacios).
-    *   **URL personalizadas:** Proporcione `ROBOTSTXT_URLS` (URLs separadas por espacios).
-    *   **Reglas manuales:** Use `ROBOTSTXT_RULE` para reglas individuales (se pueden especificar múltiples reglas con `ROBOTSTXT_RULE_N`).
+    - **API de DarkVisitors:** Proporcione `ROBOTSTXT_DARKVISITORS_TOKEN` y, opcionalmente, `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` y `ROBOTSTXT_DARKVISITORS_DISALLOW`.
+    - **Listas de la Comunidad:** Especifique `ROBOTSTXT_COMMUNITY_LISTS` (IDs separados por espacios).
+    - **URL personalizadas:** Proporcione `ROBOTSTXT_URLS` (URLs separadas por espacios).
+    - **Reglas manuales:** Use `ROBOTSTXT_RULE` para reglas individuales (se pueden especificar múltiples reglas con `ROBOTSTXT_RULE_N`).
 3.  **Filtre las reglas (opcional):** Use `ROBOTSTXT_IGNORE_RULE_N` para excluir reglas específicas por patrón de expresión regular.
 4.  **Agregue mapas de sitio (opcional):** Use `ROBOTSTXT_SITEMAP_N` para las URL de los mapas de sitio.
 5.  **Obtenga el archivo robots.txt generado:** Una vez que BunkerWeb esté funcionando con los ajustes anteriores, puede acceder al archivo `robots.txt` generado dinámicamente haciendo una solicitud HTTP GET a `http(s)://su-dominio.com/robots.txt`.
@@ -4834,11 +4808,7 @@ El complemento SSL proporciona capacidades robustas de cifrado SSL/TLS para sus 
 3.  Los parámetros de sesión SSL optimizados mejoran el rendimiento de la conexión sin sacrificar la seguridad.
 4.  La presentación de certificados se configura de acuerdo con las mejores prácticas para garantizar la compatibilidad y la seguridad.
 
-!!! success "Beneficios de Seguridad"
-    - **Protección de Datos:** Cifra los datos en tránsito, previniendo la interceptación y los ataques de intermediario (man-in-the-middle).
-    - **Autenticación:** Verifica la identidad de su servidor a los clientes.
-    - **Integridad:** Asegura que los datos no han sido manipulados durante la transmisión.
-    - **Estándares Modernos:** Configurado para cumplir con las mejores prácticas y los estándares de seguridad de la industria.
+!!! success "Beneficios de Seguridad" - **Protección de Datos:** Cifra los datos en tránsito, previniendo la interceptación y los ataques de intermediario (man-in-the-middle). - **Autenticación:** Verifica la identidad de su servidor a los clientes. - **Integridad:** Asegura que los datos no han sido manipulados durante la transmisión. - **Estándares Modernos:** Configurado para cumplir con las mejores prácticas y los estándares de seguridad de la industria.
 
 ### Cómo usar
 
@@ -4858,12 +4828,11 @@ Siga estos pasos para configurar y usar la función SSL:
 | `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | no       | **Nivel de Cifrados SSL:** Nivel de seguridad preestablecido para los conjuntos de cifrado (`modern`, `intermediate` o `old`).                      |
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | no       | **Cifrados SSL Personalizados:** Lista de conjuntos de cifrado separados por dos puntos para usar en las conexiones SSL/TLS (sobrescribe el nivel). |
 
-
 !!! tip "Pruebas de SSL Labs"
-    Después de configurar sus ajustes de SSL, utilice la [Prueba de Servidor de SSL Labs de Qualys](https://www.ssllabs.com/ssltest/) para verificar su configuración y buscar posibles problemas de seguridad. Una configuración de SSL adecuada de BunkerWeb debería obtener una calificación A+.
+Después de configurar sus ajustes de SSL, utilice la [Prueba de Servidor de SSL Labs de Qualys](https://www.ssllabs.com/ssltest/) para verificar su configuración y buscar posibles problemas de seguridad. Una configuración de SSL adecuada de BunkerWeb debería obtener una calificación A+.
 
 !!! warning "Selección de Protocolo"
-    El soporte para protocolos más antiguos como SSLv3, TLSv1.0 y TLSv1.1 está deshabilitado intencionadamente por defecto debido a vulnerabilidades conocidas. Solo habilite estos protocolos si es absolutamente necesario para admitir clientes heredados y comprende las implicaciones de seguridad de hacerlo.
+El soporte para protocolos más antiguos como SSLv3, TLSv1.0 y TLSv1.1 está deshabilitado intencionadamente por defecto debido a vulnerabilidades conocidas. Solo habilite estos protocolos si es absolutamente necesario para admitir clientes heredados y comprende las implicaciones de seguridad de hacerlo.
 
 ### Configuraciones de Ejemplo
 
@@ -4953,13 +4922,13 @@ Siga estos pasos para configurar y usar la función Security.txt:
 | `SECURITYTXT_CSAF`             |                             | multisite | sí       | **CSAF:** Enlace al `provider-metadata.json` de su proveedor de Common Security Advisory Framework.                                |
 
 !!! warning "Se requiere fecha de vencimiento"
-    Según la RFC 9116, el campo `Expires` es obligatorio. Si no proporciona un valor para `SECURITYTXT_EXPIRES`, BunkerWeb establece automáticamente la fecha de vencimiento en un año a partir de la fecha actual.
+Según la RFC 9116, el campo `Expires` es obligatorio. Si no proporciona un valor para `SECURITYTXT_EXPIRES`, BunkerWeb establece automáticamente la fecha de vencimiento en un año a partir de la fecha actual.
 
 !!! info "La información de contacto es esencial"
-    El campo `Contact` es la parte más importante del archivo security.txt. Debe proporcionar al menos una forma para que los investigadores de seguridad se pongan en contacto con usted. Puede ser una dirección de correo electrónico, un formulario web, un número de teléfono o cualquier otro método que funcione para su organización.
+El campo `Contact` es la parte más importante del archivo security.txt. Debe proporcionar al menos una forma para que los investigadores de seguridad se pongan en contacto con usted. Puede ser una dirección de correo electrónico, un formulario web, un número de teléfono o cualquier otro método que funcione para su organización.
 
 !!! warning "Las URL deben usar HTTPS"
-    Según la RFC 9116, todas las URL del archivo security.txt (excepto los enlaces `mailto:` y `tel:`) DEBEN usar HTTPS. BunkerWeb convertirá automáticamente las URL que no sean HTTPS a HTTPS para garantizar el cumplimiento de la norma.
+Según la RFC 9116, todas las URL del archivo security.txt (excepto los enlaces `mailto:` y `tel:`) DEBEN usar HTTPS. BunkerWeb convertirá automáticamente las URL que no sean HTTPS a HTTPS para garantizar el cumplimiento de la norma.
 
 ### Configuraciones de Ejemplo
 
@@ -5018,7 +4987,7 @@ El complemento de Certificado Autofirmado genera y gestiona automáticamente cer
 4.  El certificado se renueva automáticamente antes de su vencimiento, lo que garantiza la disponibilidad continua de HTTPS.
 
 !!! warning "Advertencias de Seguridad del Navegador"
-    Los navegadores mostrarán advertencias de seguridad cuando los usuarios visiten sitios que utilizan certificados autofirmados, ya que estos certificados no están validados por una autoridad de certificación de confianza. Para entornos de producción, considere usar [Let's Encrypt](#lets-encrypt) en su lugar.
+Los navegadores mostrarán advertencias de seguridad cuando los usuarios visiten sitios que utilizan certificados autofirmados, ya que estos certificados no están validados por una autoridad de certificación de confianza. Para entornos de producción, considere usar [Let's Encrypt](#lets-encrypt) en su lugar.
 
 ### Cómo usar
 
@@ -5031,7 +5000,7 @@ Siga estos pasos para configurar y usar la función de Certificado Autofirmado:
 5.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, los certificados se generan y aplican automáticamente a sus dominios.
 
 !!! tip "Configuración en Modo Stream"
-    Para el modo stream, configure el ajuste `LISTEN_STREAM_PORT_SSL` para especificar el puerto de escucha SSL/TLS. Este paso es esencial para el correcto funcionamiento en modo stream.
+Para el modo stream, configure el ajuste `LISTEN_STREAM_PORT_SSL` para especificar el puerto de escucha SSL/TLS. Este paso es esencial para el correcto funcionamiento en modo stream.
 
 ### Ajustes de Configuración
 
@@ -5043,10 +5012,10 @@ Siga estos pasos para configurar y usar la función de Certificado Autofirmado:
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | no       | **Sujeto del certificado:** Campo de sujeto para el certificado que identifica el dominio.                                                       |
 
 !!! tip "Entornos de Desarrollo"
-    Los certificados autofirmados son ideales para entornos de desarrollo y prueba donde se necesita HTTPS pero no se requieren certificados de confianza para los navegadores públicos.
+Los certificados autofirmados son ideales para entornos de desarrollo y prueba donde se necesita HTTPS pero no se requieren certificados de confianza para los navegadores públicos.
 
 !!! info "Información del Certificado"
-    Los certificados autofirmados generados utilizan el algoritmo especificado (por defecto, criptografía de curva elíptica con la curva prime256v1) e incluyen el sujeto configurado, lo que garantiza la funcionalidad adecuada para sus dominios.
+Los certificados autofirmados generados utilizan el algoritmo especificado (por defecto, criptografía de curva elíptica con la curva prime256v1) e incluyen el sujeto configurado, lo que garantiza la funcionalidad adecuada para sus dominios.
 
 ### Configuraciones de Ejemplo
 
@@ -5122,7 +5091,7 @@ Siga estos pasos para configurar y usar la función de Sesiones:
 | `SESSIONS_CHECK_USER_AGENT` | `yes`             | global   | no       | **Comprobar User-Agent:** Cuando se establece en `yes`, destruye la sesión si el User-Agent del cliente cambia.                                     |
 
 !!! warning "Consideraciones de Seguridad"
-    El ajuste `SESSIONS_SECRET` es fundamental para la seguridad. En entornos de producción:
+El ajuste `SESSIONS_SECRET` es fundamental para la seguridad. En entornos de producción:
 
     1. Use un valor fuerte y aleatorio (al menos 32 caracteres)
     2. Mantenga este valor confidencial
@@ -5130,7 +5099,7 @@ Siga estos pasos para configurar y usar la función de Sesiones:
     4. Considere usar variables de entorno o gestión de secretos para evitar almacenar esto en texto plano
 
 !!! tip "Entornos en Clúster"
-    Si está ejecutando múltiples instancias de BunkerWeb detrás de un balanceador de carga:
+Si está ejecutando múltiples instancias de BunkerWeb detrás de un balanceador de carga:
 
     1. Establezca `USE_REDIS` en `yes` y configure su conexión Redis
     2. Asegúrese de que todas las instancias usen exactamente el mismo `SESSIONS_SECRET` y `SESSIONS_NAME`
@@ -5223,7 +5192,7 @@ El complemento de Lista Blanca proporciona un enfoque integral para permitir exp
 
 **Cómo funciona:**
 
-1.  Usted define los criterios para los visitantes que deben estar en la "lista blanca" (*direcciones IP, redes, DNS inverso, ASN, User-Agent o patrones de URI*).
+1.  Usted define los criterios para los visitantes que deben estar en la "lista blanca" (_direcciones IP, redes, DNS inverso, ASN, User-Agent o patrones de URI_).
 2.  Cuando un visitante intenta acceder a su sitio, BunkerWeb comprueba si coincide con alguno de estos criterios de la lista blanca.
 3.  Si un visitante coincide con alguna regla de la lista blanca (y no coincide con ninguna regla de omisión), se le concede acceso a su sitio y **omite todos los demás controles de seguridad**.
 4.  Si un visitante no coincide con ningún criterio de la lista blanca, procede a través de todos los controles de seguridad normales como de costumbre.
@@ -5240,7 +5209,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
 5.  **Supervise el acceso:** Consulte la [interfaz de usuario web](web-ui.md) para ver qué visitantes están siendo permitidos o denegados.
 
 !!! info "modo stream"
-    Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
+Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
 
 ### Ajustes de Configuración
 
@@ -5251,7 +5220,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
 | `USE_WHITELIST` | `no`              | multisite | no       | **Habilitar Lista Blanca:** Establezca en `yes` para habilitar la función de lista blanca. |
 
 === "Dirección IP"
-    **Qué hace esto:** Pone en la lista blanca a los visitantes según su dirección IP o red. Estos visitantes omitirán todos los controles de seguridad.
+**Qué hace esto:** Pone en la lista blanca a los visitantes según su dirección IP o red. Estos visitantes omitirán todos los controles de seguridad.
 
     | Ajuste                     | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                               |
     | -------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -5261,7 +5230,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_IP_URLS` |                   | multisite | no       | **URL de Lista de Omisión de IP:** Lista de URL que contienen direcciones IP o redes para ignorar.                                        |
 
 === "DNS Inverso"
-    **Qué hace esto:** Pone en la lista blanca a los visitantes según su nombre de dominio (en inverso). Esto es útil para permitir el acceso a visitantes de organizaciones o redes específicas por su dominio.
+**Qué hace esto:** Pone en la lista blanca a los visitantes según su nombre de dominio (en inverso). Esto es útil para permitir el acceso a visitantes de organizaciones o redes específicas por su dominio.
 
     | Ajuste                       | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                 |
     | ---------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -5272,7 +5241,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_RDNS_URLS` |                   | multisite | no       | **URL de Lista de Omisión de rDNS:** Lista de URL que contienen sufijos de DNS inverso para ignorar.                                        |
 
 === "ASN"
-    **Qué hace esto:** Pone en la lista blanca a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
+**Qué hace esto:** Pone en la lista blanca a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
 
     | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                             |
     | --------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -5282,7 +5251,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_ASN_URLS` |                   | multisite | no       | **URL de Lista de Omisión de ASN:** Lista de URL que contienen ASN para ignorar.                                        |
 
 === "User Agent"
-    **Qué hace esto:** Pone en la lista blanca a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo para permitir el acceso a herramientas o servicios conocidos específicos.
+**Qué hace esto:** Pone en la lista blanca a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo para permitir el acceso a herramientas o servicios conocidos específicos.
 
     | Ajuste                             | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                               |
     | ---------------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -5292,7 +5261,7 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_USER_AGENT_URLS` |                   | multisite | no       | **URL de Lista de Omisión de User-Agent:** Lista de URL que contienen patrones de User-Agent para ignorar.                                |
 
 === "URI"
-    **Qué hace esto:** Pone en la lista blanca las solicitudes a URL específicas de su sitio. Esto es útil para permitir el acceso a puntos finales específicos independientemente de otros factores.
+**Qué hace esto:** Pone en la lista blanca las solicitudes a URL específicas de su sitio. Esto es útil para permitir el acceso a puntos finales específicos independientemente de otros factores.
 
     | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                         |
     | --------------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -5302,14 +5271,13 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     | `WHITELIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de Lista de Omisión de URI:** Lista de URL que contienen patrones de URI para ignorar.                                        |
 
 !!! info "Soporte de Formato de URL"
-    Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
+Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-    Las listas blancas de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada con las últimas fuentes de confianza.
+Las listas blancas de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada con las últimas fuentes de confianza.
 
 !!! warning "Omisión de Seguridad"
-    Los visitantes en la lista blanca **omitirán por completo todos los demás controles de seguridad** en BunkerWeb, incluidas las reglas del WAF, la limitación de velocidad, la detección de bots maliciosos y cualquier otro mecanismo de seguridad. Use la lista blanca solo para fuentes de confianza en las que esté absolutamente seguro.
-
+Los visitantes en la lista blanca **omitirán por completo todos los demás controles de seguridad** en BunkerWeb, incluidas las reglas del WAF, la limitación de velocidad, la detección de bots maliciosos y cualquier otro mecanismo de seguridad. Use la lista blanca solo para fuentes de confianza en las que esté absolutamente seguro.
 
 ### Configuraciones de Ejemplo
 
