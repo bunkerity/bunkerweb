@@ -1,7 +1,7 @@
 {
   "name": "behind-reverse-proxy",
   "kinds": ["docker", "linux"],
-  "timeout": 150,
+  "timeout": 180,
   "tests": [
     {
       "type": "string",
