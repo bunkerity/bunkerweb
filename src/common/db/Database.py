@@ -3732,7 +3732,7 @@ class Database:
         *,
         name: Optional[str] = None,
         listen_https: bool = False,
-        https_port: int = 6000,
+        https_port: int = 5443,
     ) -> str:
         """Add instance."""
         with self._db_session() as session:
@@ -3848,7 +3848,7 @@ class Database:
                     db_instance.name = instance.get("name", "manual instance")
                     db_instance.port = instance["env"].get("API_HTTP_PORT", 5000)
                     db_instance.listen_https = instance["env"].get("API_LISTEN_HTTPS", "no") == "yes"
-                    db_instance.https_port = instance["env"].get("API_HTTPS_PORT", 6000)
+                    db_instance.https_port = instance["env"].get("API_HTTPS_PORT", 5443)
                     db_instance.server_name = instance["env"].get("API_SERVER_NAME", "bwapi")
                     db_instance.type = instance.get("type", "static")
                     db_instance.status = instance.get("status", "up" if instance.get("health", True) else "down")
@@ -3863,7 +3863,7 @@ class Database:
                         name=instance.get("name", "manual instance"),
                         port=instance["env"].get("API_HTTP_PORT", 5000),
                         listen_https=instance["env"].get("API_LISTEN_HTTPS", "no") == "yes",
-                        https_port=instance["env"].get("API_HTTPS_PORT", 6000),
+                        https_port=instance["env"].get("API_HTTPS_PORT", 5443),
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
                         type=instance.get("type", "static"),
                         status="up" if instance.get("health", True) else "down",

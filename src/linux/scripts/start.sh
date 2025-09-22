@@ -77,7 +77,7 @@ function start() {
         [API_LISTEN_HTTP]="yes"
         [API_LISTEN_HTTPS]="no"
         [API_HTTP_PORT]="5000"
-        [API_HTTPS_PORT]="6000"
+        [API_HTTPS_PORT]="5443"
         [API_LISTEN_IP]="127.0.0.1"
         [API_SERVER_NAME]="bwapi"
         [API_WHITELIST_IP]="127.0.0.0/8"

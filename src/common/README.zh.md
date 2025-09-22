@@ -61,7 +61,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | ------------------ | ------------- | ------ | ---- | ---------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`         | global | 否   | **激活 API：** 激活 API 以控制 BunkerWeb。                                                     |
     | `API_HTTP_PORT`    | `5000`        | global | 否   | **API 端口：** API 的监听端口号。                                                              |
-    | `API_HTTPS_PORT`   | `6000`        | global | 否   | **API HTTPS 端口：** API 的监听端口号 (TLS)。                                                  |
+    | `API_HTTPS_PORT`   | `5443`        | global | 否   | **API HTTPS 端口：** API 的监听端口号 (TLS)。                                                  |
     | `API_LISTEN_HTTP`  | `yes`         | global | 否   | **API 监听 HTTP：** 启用 API 的 HTTP 监听器。                                                  |
     | `API_LISTEN_HTTPS` | `no`          | global | 否   | **API 监听 HTTPS：** 启用 API 的 HTTPS (TLS) 监听器。                                          |
     | `API_LISTEN_IP`    | `0.0.0.0`     | global | 否   | **API 监听 IP：** API 的监听 IP 地址。                                                         |
@@ -69,7 +69,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `API_WHITELIST_IP` | `127.0.0.0/8` | global | 否   | **API 白名单 IP：** 允许联系 API 的 IP/网络列表。                                              |
     | `API_TOKEN`        |               | global | 否   | **API 访问令牌（可选）：** 如果设置，所有 API 请求都必须包含 `Authorization: Bearer <token>`。 |
 
-    注意：出于引导原因，如果您启用 `API_TOKEN`，您必须在 BunkerWeb 实例和调度程序的**两个**环境中都设置它。当 `API_TOKEN` 存在于其环境中时，调度程序会自动包含 `Authorization` 标头。如果未设置，则不发送标头，BunkerWeb 将不强制执行令牌身份验证。您可以通过设置 `API_LISTEN_HTTPS=yes`（端口：`API_HTTPS_PORT`，默认 `6000`）通过 HTTPS 公开 API。
+    注意：出于引导原因，如果您启用 `API_TOKEN`，您必须在 BunkerWeb 实例和调度程序的**两个**环境中都设置它。当 `API_TOKEN` 存在于其环境中时，调度程序会自动包含 `Authorization` 标头。如果未设置，则不发送标头，BunkerWeb 将不强制执行令牌身份验证。您可以通过设置 `API_LISTEN_HTTPS=yes`（端口：`API_HTTPS_PORT`，默认 `5443`）通过 HTTPS 公开 API。
 
     使用 curl 的测试示例（替换令牌和主机）：
 
@@ -81,7 +81,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          --insecure \
-         https://<bunkerweb-host>:6000/ping
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "网络和端口设置"

@@ -50,7 +50,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.add_column("bw_instances", sa.Column("listen_https", sa.Boolean(), nullable=False, server_default=sa.text("false")))
-    op.add_column("bw_instances", sa.Column("https_port", sa.Integer(), nullable=False, server_default=sa.text("6000")))
+    op.add_column("bw_instances", sa.Column("https_port", sa.Integer(), nullable=False, server_default=sa.text("5443")))
     op.alter_column("bw_metadata", "pro_expire", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)
     op.alter_column("bw_metadata", "last_pro_check", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)
     op.alter_column("bw_metadata", "last_custom_configs_change", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)

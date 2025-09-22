@@ -59,7 +59,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | ------------------ | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`             | global   | Non      | **Activer l’API :** Active l’API pour piloter BunkerWeb.                                                        |
     | `API_HTTP_PORT`    | `5000`            | global   | Non      | **Port de l’API :** Numéro de port d’écoute de l’API.                                                           |
-    | `API_HTTPS_PORT`   | `6000`            | global   | Non      | **Port HTTPS de l’API :** Numéro de port d’écoute (TLS) de l’API.                                               |
+    | `API_HTTPS_PORT`   | `5443`            | global   | Non      | **Port HTTPS de l’API :** Numéro de port d’écoute (TLS) de l’API.                                               |
     | `API_LISTEN_HTTP`  | `yes`             | global   | Non      | **Écoute HTTP de l’API :** Active l’écoute HTTP pour l’API.                                                     |
     | `API_LISTEN_HTTPS` | `no`              | global   | Non      | **Écoute HTTPS de l’API :** Active l’écoute HTTPS (TLS) pour l’API.                                             |
     | `API_LISTEN_IP`    | `0.0.0.0`         | global   | Non      | **IP d’écoute de l’API :** Adresse IP d’écoute de l’API.                                                        |
@@ -67,7 +67,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `API_WHITELIST_IP` | `127.0.0.0/8`     | global   | Non      | **Liste blanche API :** Liste IP/réseaux autorisés à contacter l’API.                                           |
     | `API_TOKEN`        |                   | global   | Non      | **Jeton d’accès API (optionnel) :** Si défini, chaque requête API doit inclure `Authorization: Bearer <token>`. |
 
-    Remarque : pour des raisons d’amorçage, si vous activez `API_TOKEN`, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête `Authorization` quand `API_TOKEN` est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant `API_LISTEN_HTTPS=yes` (port : `API_HTTPS_PORT`, `6000` par défaut).
+    Remarque : pour des raisons d’amorçage, si vous activez `API_TOKEN`, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête `Authorization` quand `API_TOKEN` est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant `API_LISTEN_HTTPS=yes` (port : `API_HTTPS_PORT`, `5443` par défaut).
 
     Exemple de test avec curl (remplacez le jeton et l’hôte) :
 
@@ -79,7 +79,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          --insecure \
-         https://<bunkerweb-host>:6000/ping
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "Paramètres réseau et ports"

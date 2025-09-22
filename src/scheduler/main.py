@@ -126,7 +126,7 @@ def _instance_endpoint(db_instance: Dict[str, Any]) -> str:
     listen_https = bool(db_instance.get("listen_https", False))
     host = db_instance.get("hostname", "127.0.0.1")
     http_port = int(db_instance.get("port", 5000) or 5000)
-    https_port = int(db_instance.get("https_port", 6000) or 6000)
+    https_port = int(db_instance.get("https_port", 5443) or 5443)
     scheme = "https" if listen_https else "http"
     port = https_port if listen_https else http_port
     return f"{scheme}://{host}:{port}"

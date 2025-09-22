@@ -59,7 +59,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | ------------------ | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`             | global   | No       | **Activar API:** Activa la API para controlar BunkerWeb.                                                                                |
     | `API_HTTP_PORT`    | `5000`            | global   | No       | **Puerto de la API:** Número de puerto de escucha para la API.                                                                          |
-    | `API_HTTPS_PORT`   | `6000`            | global   | No       | **Puerto HTTPS de la API:** Número de puerto de escucha (TLS) para la API.                                                              |
+    | `API_HTTPS_PORT`   | `5443`            | global   | No       | **Puerto HTTPS de la API:** Número de puerto de escucha (TLS) para la API.                                                              |
     | `API_LISTEN_HTTP`  | `yes`             | global   | No       | **Escucha HTTP de la API:** Habilita el listener HTTP para la API.                                                                      |
     | `API_LISTEN_HTTPS` | `no`              | global   | No       | **Escucha HTTPS de la API:** Habilita el listener HTTPS (TLS) para la API.                                                              |
     | `API_LISTEN_IP`    | `0.0.0.0`         | global   | No       | **IP de Escucha de la API:** Dirección IP de escucha para la API.                                                                       |
@@ -67,7 +67,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `API_WHITELIST_IP` | `127.0.0.0/8`     | global   | No       | **IP de la Lista Blanca de la API:** Lista de IP/redes permitidas para contactar con la API.                                            |
     | `API_TOKEN`        |                   | global   | No       | **Token de Acceso a la API (opcional):** Si se establece, todas las solicitudes a la API deben incluir `Authorization: Bearer <token>`. |
 
-    Nota: por razones de arranque, si habilitas `API_TOKEN` debes establecerlo en el entorno de AMBAS, la instancia de BunkerWeb y el Programador. El Programador incluye automáticamente el encabezado `Authorization` cuando `API_TOKEN` está presente en su entorno. Si no se establece, no se envía ningún encabezado y BunkerWeb no aplicará la autenticación por token. Puedes exponer la API a través de HTTPS estableciendo `API_LISTEN_HTTPS=yes` (puerto: `API_HTTPS_PORT`, predeterminado `6000`).
+    Nota: por razones de arranque, si habilitas `API_TOKEN` debes establecerlo en el entorno de AMBAS, la instancia de BunkerWeb y el Programador. El Programador incluye automáticamente el encabezado `Authorization` cuando `API_TOKEN` está presente en su entorno. Si no se establece, no se envía ningún encabezado y BunkerWeb no aplicará la autenticación por token. Puedes exponer la API a través de HTTPS estableciendo `API_LISTEN_HTTPS=yes` (puerto: `API_HTTPS_PORT`, predeterminado `5443`).
 
     Prueba de ejemplo con curl (reemplaza el token y el host):
 
@@ -79,7 +79,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          --insecure \
-         https://<bunkerweb-host>:6000/ping
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "Ajustes de Red y Puertos"

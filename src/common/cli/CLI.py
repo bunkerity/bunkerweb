@@ -161,7 +161,7 @@ class CLI(ApiCaller):
                 "127.0.0.1",
                 port=int(self.__get_variable("API_HTTP_PORT", "5000") or "5000"),
                 listen_https=(self.__get_variable("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
-                https_port=int(self.__get_variable("API_HTTPS_PORT", "6000") or "6000"),
+                https_port=int(self.__get_variable("API_HTTPS_PORT", "5443") or "5443"),
             )
             self.apis.append(API(endpoint, server_name))
 

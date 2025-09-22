@@ -220,7 +220,7 @@ if __name__ == "__main__":
             scheme = parsed.scheme
             listen_https = scheme == "https"
             http_port_default = settings.get("API_HTTP_PORT", getenv("API_HTTP_PORT", "5000"))
-            https_port_default = settings.get("API_HTTPS_PORT", getenv("API_HTTPS_PORT", "6000"))
+            https_port_default = settings.get("API_HTTPS_PORT", getenv("API_HTTPS_PORT", "5443"))
             if listen_https:
                 http_port_val = http_port_default
                 https_port_val = int(parsed.port or https_port_default)
