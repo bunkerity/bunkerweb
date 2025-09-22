@@ -144,31 +144,34 @@ function letsencrypt:init()
 			if not challenge then
 				return self:ret(false, "can't get LETS_ENCRYPT_CHALLENGE variable : " .. err)
 			end
-			server_name = server_name:match("%S+")
-			if challenge == "dns" and use_wildcard == "yes" then
-				for part in server_name:gmatch("%S+") do
+			local server_names = server_name
+			local cert_identifier = server_names:match("%S+")
+			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
+			if use_wildcard_mode then
+				for part in server_names:gmatch("%S+") do
 					wildcard_servers[part] = true
 				end
 				local parts = {}
-				for part in server_name:gmatch("[^.]+") do
+				for part in cert_identifier:gmatch("[^.]+") do
 					table.insert(parts, part)
 				end
-				server_name = table.concat(parts, ".", 2)
+				cert_identifier = table.concat(parts, ".", 2)
 			else
-				for part in server_name:gmatch("%S+") do
+				for part in server_names:gmatch("%S+") do
 					wildcard_servers[part] = false
 				end
 			end
 			local check, data = read_files({
-				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
-				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem",
+				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
+				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
 			})
 			if not check then
 				self.logger:log(ERR, "error while reading files : " .. data)
 				ret_ok = false
 				ret_err = "error reading files"
 			else
-				check, err = self:load_data(data, server_name)
+				local load_key = use_wildcard_mode and cert_identifier or server_names
+				check, err = self:load_data(data, load_key)
 				if not check then
 					self.logger:log(ERR, "error while loading data : " .. err)
 					ret_ok = false
