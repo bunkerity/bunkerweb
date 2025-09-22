@@ -60,25 +60,11 @@ else
 	echo "Docker" > /usr/share/bunkerweb/INTEGRATION
 fi
 
-# Start the main Gunicorn process with the standard logger configuration.
-# Normalize TLS cipher envs for consistency (support unprefixed and legacy names)
-if [[ -n "${SSL_CIPHERS_CUSTOM}" && -z "${API_SSL_CIPHERS_CUSTOM}" ]]; then
-    export API_SSL_CIPHERS_CUSTOM="${SSL_CIPHERS_CUSTOM}"
-fi
-if [[ -n "${API_SSL_CIPHERS}" && -z "${API_SSL_CIPHERS_CUSTOM}" ]]; then
-    export API_SSL_CIPHERS_CUSTOM="${API_SSL_CIPHERS}"
-fi
-if [[ -n "${SSL_CIPHERS}" && -z "${API_SSL_CIPHERS_CUSTOM}" ]]; then
-    export API_SSL_CIPHERS_CUSTOM="${SSL_CIPHERS}"
-fi
-if [[ -z "${API_SSL_CIPHERS_LEVEL}" && -n "${SSL_CIPHERS_LEVEL}" ]]; then
-    export API_SSL_CIPHERS_LEVEL="${SSL_CIPHERS_LEVEL}"
-fi
-
 if [ ! -f /etc/bunkerweb/api.yml ]; then
 	touch /etc/bunkerweb/api.yml
 fi
 
+# Start the main Gunicorn process with the standard logger configuration.
 python3 -m gunicorn --logger-class utils.logger.APILogger --config utils/gunicorn.conf.py &
 pid="$!"
 

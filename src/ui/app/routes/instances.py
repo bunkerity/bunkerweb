@@ -71,7 +71,7 @@ def instances_new():
     # Derive defaults
     default_http_port = str(db_config.get("API_HTTP_PORT", "5000"))
     default_listen_https = str(db_config.get("API_LISTEN_HTTPS", "no")).lower() == "yes"
-    default_https_port = str(db_config.get("API_HTTPS_PORT", "6000"))
+    default_https_port = str(db_config.get("API_HTTPS_PORT", "5443"))
 
     # Apply explicit scheme rules when user provided it; otherwise use defaults
     listen_https = scheme_https if explicit_scheme else default_listen_https

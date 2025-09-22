@@ -236,7 +236,7 @@ class Instances(Base):
     name = Column(String(256), nullable=False, default="manual instance")
     port = Column(Integer, nullable=False)
     listen_https = Column(Boolean, nullable=False, default=False)
-    https_port = Column(Integer, nullable=False, default=6000)
+    https_port = Column(Integer, nullable=False, default=5443)
     server_name = Column(String(256), nullable=False)
     type = Column(INSTANCE_TYPE_ENUM, nullable=False, default="static")
     status = Column(INSTANCE_STATUS_ENUM, nullable=False, default="loading")

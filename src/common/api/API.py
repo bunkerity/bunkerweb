@@ -108,9 +108,9 @@ class API:
     @staticmethod
     def __default_https_port() -> int:
         try:
-            return int(getenv("API_HTTPS_PORT", "6000"))
+            return int(getenv("API_HTTPS_PORT", "5443"))
         except Exception:
-            return 6000
+            return 5443
 
     @classmethod
     def build_endpoint(

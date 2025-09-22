@@ -194,7 +194,7 @@
   },
   "API_HTTPS_PORT": {
     "context": "global",
-    "default": "6000",
+    "default": "5443",
     "help": "Listen port number (TLS) for BunkerWeb internal API.",
     "id": "api-https-listen",
     "label": "API HTTPS port number",

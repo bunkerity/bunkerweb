@@ -39,6 +39,7 @@ extra_css:
 extra_javascript:
   - assets/extra.js
   - https://chatbot.bunkerweb.io/static/js/chatbot.js
+  - assets/preserve-version-on-language-switch.js
 
 markdown_extensions:
   - attr_list
@@ -83,9 +84,6 @@ plugins:
   - print-site
   - i18n:
       docs_structure: folder
-      default_language: en
-      prefix_default_language: true
-      reconfigure_material: true
       languages:
         - locale: en
           name: English - 🇬🇧
@@ -142,20 +140,20 @@ plugins:
             Plugins: Plugins
             "Professional services": "Servicios profesionales"
             About: "Acerca de"
-        # - locale: zh
-        #   name: 中文 - 🇨🇳
-        #   site_name: BunkerWeb 文档
-        #   nav_translations:
-        #     Introduction: 介绍
-        #     Concepts: 概念
-        #     Integrations: 集成
-        #     "Quickstart guide": "快速入门指南"
-        #     Features: 功能
-        #     "Advanced usages": "高级用法"
-        #     "Web UI": "Web 界面"
-        #     API: "API"
-        #     Upgrading: 升级
-        #     Troubleshooting: 故障排除
-        #     Plugins: 插件
-        #     "Professional services": "专业服务"
-        #     About: 关于
+        - locale: zh
+          name: 中文 - 🇨🇳
+          site_name: BunkerWeb 文档
+          nav_translations:
+            Introduction: 介绍
+            Concepts: 概念
+            Integrations: 集成
+            "Quickstart guide": "快速入门指南"
+            Features: 功能
+            "Advanced usages": "高级用法"
+            "Web UI": "Web 界面"
+            API: "API"
+            Upgrading: 升级
+            Troubleshooting: 故障排除
+            Plugins: 插件
+            "Professional services": "专业服务"
+            About: 关于

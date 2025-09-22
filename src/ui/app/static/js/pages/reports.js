@@ -869,7 +869,7 @@ $(document).ready(function () {
 
       // Generate formatted content with error handling
       try {
-        const formattedContent = formatSecurityReportData(reportData);
+        const formattedContent = formatSecurityReportData(reportData, reason);
         $("#dataContent").html(formattedContent);
       } catch (formatError) {
         console.error("Error formatting report data:", formatError);
@@ -1040,14 +1040,40 @@ $(document).ready(function () {
   };
 
   // Function to format security report data
-  function formatSecurityReportData(data) {
+  function formatSecurityReportData(data, reason = "") {
     if (!data || typeof data !== "object") {
       return '<div class="alert alert-warning" data-i18n="status.no_data">No data available</div>';
     }
 
-    let html = "";
+    const normalizedReason = String(reason || "")
+      .trim()
+      .toLowerCase();
+    const badBehaviorEntries = normalizeBadBehaviorEntries(data);
+    const isBadBehaviorReason =
+      normalizedReason === "bad behavior" ||
+      normalizedReason === "bad_behavior" ||
+      normalizedReason.includes("bad behavior");
+    const shouldFormatBadBehavior =
+      isBadBehaviorReason ||
+      (!normalizedReason && badBehaviorEntries.length > 0);
 
-    // Check if this looks like a ModSecurity-style report
+    if (shouldFormatBadBehavior) {
+      if (!badBehaviorEntries.length) {
+        return `
+          <div class="alert alert-info" data-i18n="status.no_data">
+            ${escapeHtml(
+              t(
+                "reports.bad_behavior_no_details",
+                "No bad behavior details were captured for this report.",
+              ),
+            )}
+          </div>
+          ${createRawDataFallback(data)}
+        `;
+      }
+      return formatBadBehaviorData(badBehaviorEntries);
+    }
+
     const hasSecurityFields =
       data.ids ||
       data.msgs ||
@@ -1056,12 +1082,293 @@ $(document).ready(function () {
       data.anomaly_score;
 
     if (hasSecurityFields) {
-      html += formatModSecurityData(data);
-    } else {
-      html += formatGenericData(data);
+      return formatModSecurityData(data);
     }
 
+    return formatGenericData(data);
+  }
+
+  function normalizeBadBehaviorEntries(data) {
+    if (!data) {
+      return [];
+    }
+
+    if (Array.isArray(data)) {
+      return data.filter((entry) => isBadBehaviorEntry(entry));
+    }
+
+    if (typeof data === "object") {
+      if (Array.isArray(data.events)) {
+        return data.events.filter((entry) => isBadBehaviorEntry(entry));
+      }
+
+      const numericKeys = Object.keys(data).filter((key) => /^\d+$/.test(key));
+
+      if (numericKeys.length) {
+        return numericKeys
+          .sort((a, b) => Number(a) - Number(b))
+          .map((key) => data[key])
+          .filter((entry) => isBadBehaviorEntry(entry));
+      }
+
+      if (isBadBehaviorEntry(data)) {
+        return [data];
+      }
+    }
+
+    return [];
+  }
+
+  function isBadBehaviorEntry(entry) {
+    if (!entry || typeof entry !== "object") {
+      return false;
+    }
+
+    const indicativeKeys = [
+      "ip",
+      "method",
+      "url",
+      "status",
+      "server_name",
+      "date",
+      "id",
+    ];
+
+    return indicativeKeys.some((key) =>
+      Object.prototype.hasOwnProperty.call(entry, key),
+    );
+  }
+
+  function formatBadBehaviorData(entries) {
+    if (!entries || entries.length === 0) {
+      return '<div class="alert alert-info" data-i18n="status.no_data">No bad behavior activity recorded</div>';
+    }
+
+    const title = escapeHtml(
+      t(
+        "reports.bad_behavior_activity_detected",
+        "Bad behavior activity detected",
+      ),
+    );
+    const subtitle = escapeHtml(
+      t(
+        "reports.bad_behavior_activity_explanation",
+        "These requests exceeded the bad behavior threshold and were grouped together.",
+      ),
+    );
+    const totalLabel = escapeHtml(
+      t("reports.bad_behavior_total_requests", "Suspicious requests"),
+    );
+    const requestLabel = escapeHtml(
+      t("reports.bad_behavior_request_label", "Request"),
+    );
+    const ipLabel = escapeHtml(t("reports.bad_behavior_ip", "IP address"));
+    const serverLabel = escapeHtml(t("reports.bad_behavior_server", "Server"));
+    const urlLabel = escapeHtml(t("reports.bad_behavior_url", "URL"));
+    const capturedAtLabel = escapeHtml(
+      t("reports.bad_behavior_captured_at", "Captured at"),
+    );
+    const requestIdLabel = escapeHtml(
+      t("reports.bad_behavior_request_id", "Request ID"),
+    );
+    const defaultServerLabel = escapeHtml(
+      t("status.default_server", "default server"),
+    );
+
+    const statusCounts = entries.reduce((acc, entry) => {
+      const code =
+        entry &&
+        entry.status !== undefined &&
+        entry.status !== null &&
+        entry.status !== ""
+          ? String(entry.status)
+          : "N/A";
+      acc[code] = (acc[code] || 0) + 1;
+      return acc;
+    }, {});
+
+    const statusBadges = Object.entries(statusCounts)
+      .map(([code, count]) => {
+        const badgeClass = getStatusBadgeClass(code);
+        return `<span class="badge rounded-pill ${badgeClass}">${escapeHtml(
+          `${code} × ${count}`,
+        )}</span>`;
+      })
+      .join("");
+
+    let html = '<div class="bad-behavior-report">';
+
+    html += `
+      <div class="bad-behavior-summary card shadow-sm border-0 mb-4">
+        <div class="card-body d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="bad-behavior-summary__icon">
+              <span class="tf-icons bx bx-traffic-cone"></span>
+            </span>
+            <div>
+              <h6 class="bad-behavior-summary__title mb-1">${title}</h6>
+              <p class="bad-behavior-summary__subtitle mb-0">${subtitle}</p>
+            </div>
+          </div>
+          <span class="bad-behavior-summary__total badge bg-label-warning text-warning">
+            <span class="bad-behavior-summary__total-count">${escapeHtml(
+              String(entries.length),
+            )}</span>
+            <span class="bad-behavior-summary__total-label">${totalLabel}</span>
+          </span>
+        </div>
+      </div>
+    `;
+
+    if (statusBadges) {
+      html += `<div class="bad-behavior-statuses d-flex flex-wrap gap-2 mb-4">${statusBadges}</div>`;
+    }
+
+    entries.forEach((entry, index) => {
+      const methodClass = getMethodBadgeClass(entry.method);
+      const statusClass = getStatusBadgeClass(entry.status);
+      const methodText = escapeHtml(
+        (entry && entry.method ? String(entry.method) : "-").toUpperCase(),
+      );
+      const statusText = escapeHtml(
+        entry &&
+          entry.status !== undefined &&
+          entry.status !== null &&
+          entry.status !== ""
+          ? String(entry.status)
+          : "N/A",
+      );
+      const capturedAt = escapeHtml(formatBadBehaviorTimestamp(entry.date));
+      const ipValue = escapeHtml(entry && entry.ip ? entry.ip : "N/A");
+      const serverValue = escapeHtml(
+        entry && entry.server_name ? entry.server_name : "N/A",
+      );
+      const urlValue = escapeHtml(entry && entry.url ? entry.url : "N/A");
+      const requestNumber = escapeHtml(String(index + 1));
+      const serverContent =
+        entry && entry.server_name === "_"
+          ? `<span class="badge bg-label-secondary text-secondary bad-behavior-event__value fw-semibold">${defaultServerLabel}</span>`
+          : `<span class="bad-behavior-event__value text-break">${serverValue}</span>`;
+      const requestIdBlock =
+        entry && entry.id
+          ? `<div class="col-12">
+              <div class="bad-behavior-event__field">
+                <div class="bad-behavior-event__label">${requestIdLabel}</div>
+                <code class="bad-behavior-event__value text-break">${escapeHtml(
+                  entry.id,
+                )}</code>
+              </div>
+            </div>`
+          : "";
+
+      html += `
+        <article class="bad-behavior-event card shadow-sm border-0 mb-4">
+          <div class="card-body">
+            <div class="bad-behavior-event__header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge rounded-pill ${methodClass} text-uppercase">${methodText}</span>
+                <span class="badge rounded-pill ${statusClass}">${statusText}</span>
+              </div>
+              <span class="badge rounded-pill bad-behavior-event__sequence bg-label-secondary text-secondary">
+                ${requestLabel} ${requestNumber}
+              </span>
+            </div>
+            <div class="bad-behavior-event__meta small d-flex flex-wrap mb-3">
+              <span class="d-flex align-items-center">
+                <i class="bx bx-time-five me-2"></i>${capturedAtLabel}: ${capturedAt}
+              </span>
+            </div>
+            <div class="row gy-3 gx-4">
+              <div class="col-md-6">
+                <div class="bad-behavior-event__field">
+                  <div class="bad-behavior-event__label">${ipLabel}</div>
+                  <code class="bad-behavior-event__value text-break">${ipValue}</code>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="bad-behavior-event__field">
+                  <div class="bad-behavior-event__label">${serverLabel}</div>
+                  ${serverContent}
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="bad-behavior-event__field">
+                  <div class="bad-behavior-event__label">${urlLabel}</div>
+                  <code class="bad-behavior-event__value text-break">${urlValue}</code>
+                </div>
+              </div>
+              ${requestIdBlock}
+            </div>
+          </div>
+        </article>
+      `;
+    });
+
+    html += "</div>";
     return html;
+  }
+
+  function getMethodBadgeClass(method) {
+    const normalized = (method || "").toString().toUpperCase();
+    switch (normalized) {
+      case "GET":
+        return "bg-label-primary text-primary";
+      case "POST":
+        return "bg-label-success text-success";
+      case "PUT":
+      case "OPTIONS":
+        return "bg-label-info text-info";
+      case "DELETE":
+        return "bg-label-danger text-danger";
+      case "PATCH":
+        return "bg-label-warning text-warning";
+      default:
+        return "bg-label-secondary text-secondary";
+    }
+  }
+
+  function getStatusBadgeClass(status) {
+    const code = parseInt(status, 10);
+    if (!Number.isNaN(code)) {
+      if (code >= 500) {
+        return "bg-label-danger text-danger";
+      }
+      if (code >= 400) {
+        return "bg-label-warning text-warning";
+      }
+      if (code >= 300) {
+        return "bg-label-info text-info";
+      }
+      if (code >= 200) {
+        return "bg-label-success text-success";
+      }
+    }
+    return "bg-label-secondary text-secondary";
+  }
+
+  function formatBadBehaviorTimestamp(value) {
+    if (value === null || value === undefined || value === "") {
+      return t("status.not_applicable", "N/A");
+    }
+
+    let numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) {
+      const parsedDate = new Date(value);
+      if (!Number.isNaN(parsedDate.getTime())) {
+        return parsedDate.toLocaleString();
+      }
+      return String(value);
+    }
+
+    if (numericValue < 1e12) {
+      numericValue *= 1000;
+    }
+
+    const dateObj = new Date(numericValue);
+    if (!Number.isNaN(dateObj.getTime())) {
+      return dateObj.toLocaleString();
+    }
+    return String(value);
   }
 
   // Function to format ModSecurity-style data

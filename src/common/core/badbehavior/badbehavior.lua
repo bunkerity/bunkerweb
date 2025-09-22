@@ -236,8 +236,15 @@ function badbehavior:timer()
 			if data.security_mode == "block" then
 				local ban_time = tonumber(data.ban_time) or 0
 				local reason_data = self:get_metric("tables", "increments_" .. data.ip) or {}
-				local ok, err =
-					add_ban(data.ip, "bad behavior", ban_time, data.server_name, data.country, data.ban_scope, reason_data)
+				local ok, err = add_ban(
+					data.ip,
+					"bad behavior",
+					ban_time,
+					data.server_name,
+					data.country,
+					data.ban_scope,
+					reason_data
+				)
 				if not ok then
 					ret = false
 					ret_err = "can't save ban : " .. err

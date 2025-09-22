@@ -176,9 +176,9 @@ def create_instance(req: InstanceCreateRequest) -> JSONResponse:
     else:
         try:
             cfg = db.get_config(global_only=True, methods=False, filtered_settings=("API_HTTPS_PORT",))
-            https_port = _validate_port(int(cfg.get("API_HTTPS_PORT", "6000")))
+            https_port = _validate_port(int(cfg.get("API_HTTPS_PORT", "5443")))
         except Exception:
-            https_port = 6000
+            https_port = 5443
 
     err = db.add_instance(
         hostname=hostname,
