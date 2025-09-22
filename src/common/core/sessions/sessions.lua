@@ -1,22 +1,18 @@
+local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
 local session = require "resty.session"
 local utils = require "bunkerweb.utils"
-local redis = require "resty.redis"
-local cjson = require "cjson"
 
 local sessions = class("sessions", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
-local WARN = ngx.WARN
 local NOTICE = ngx.NOTICE
-local worker = ngx.worker
 local get_variable = utils.get_variable
 local session_init = session.init
 local tonumber = tonumber
 local encode = cjson.encode
-local decode = cjson.decode
 
 -- Per worker session config
 local sessions_config = {}
@@ -180,10 +176,13 @@ function sessions:timer()
 	-- Check if Redis is enabled
 	local storage = "cookie"
 	local change = false
-	local use_redis, err = get_variable("USE_REDIS", false)
+	local use_redis, _ = get_variable("USE_REDIS", false)
 	local prev_storage, prev_err = self.datastore:get("storage_sessions_STORAGE")
 	if prev_storage == nil and prev_err then
-		self.logger:log(ERR, "failed to get previous session storage from datastore: " .. prev_err .. ", assuming cookie")
+		self.logger:log(
+			ERR,
+			"failed to get previous session storage from datastore: " .. prev_err .. ", assuming cookie"
+		)
 		prev_storage = "cookie"
 	end
 	if use_redis ~= "yes" then
@@ -200,7 +199,8 @@ function sessions:timer()
 	end
 
 	-- Our ret values
-	local ret, ret_err = true, "success"
+	local ret = true
+	local ret_err
 
 	-- Check redis connection
 	local ok, err = self.clusterstore:connect(true)
@@ -211,7 +211,7 @@ function sessions:timer()
 		ret_err = "redis connect error : " .. err
 	else
 		-- Send ping
-		local ok, err = self.clusterstore:call("ping")
+		ok, err = self.clusterstore:call("ping")
 		self.clusterstore:close()
 		if err or not ok then
 			if prev_storage == "redis" then
@@ -226,7 +226,9 @@ function sessions:timer()
 		end
 	end
 
-	ret_err = "timer done (storage = " .. storage .. ")"
+	if ret_err == nil then
+		ret_err = "timer done (storage = " .. storage .. ")"
+	end
 	sessions_config.storage = storage
 
 	if storage ~= "redis" then
