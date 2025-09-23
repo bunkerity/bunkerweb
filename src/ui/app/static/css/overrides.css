@@ -1435,12 +1435,14 @@ span.cursor-pointer ~ .reset-setting {
   margin-bottom: 0;
 }
 
-.multivalue-input-group .form-control {
+.multivalue-input-group .input-group .form-control {
   flex: 1;
   border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
+  height: calc(3.5rem + 2px);
+  padding: 1rem 0.75rem;
 }
 
-.multivalue-input-group .btn {
+.multivalue-input-group .input-group .btn {
   border-left: 0;
   min-width: 38px;
   display: flex;
@@ -1450,6 +1452,7 @@ span.cursor-pointer ~ .reset-setting {
   font-size: 0.875rem;
   line-height: 1.5;
   border-radius: 0;
+  height: calc(3.5rem + 2px);
 }
 
 .multivalue-input-group .btn:last-child {
@@ -1495,6 +1498,43 @@ span.cursor-pointer ~ .reset-setting {
 
 .multivalue-input-group:focus-within .btn {
   border-color: var(--bs-primary);
+}
+
+/* Ensure floating labels work properly with input groups in multivalue containers */
+.multivalue-input-group.form-floating:focus-within > label,
+.multivalue-input-group.form-floating.has-value > label {
+  opacity: 0.65;
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+/* Ensure multivalue inputs behave like regular form-floating inputs */
+.multivalue-input-group.form-floating .multivalue-input:focus,
+.multivalue-input-group.form-floating.has-value .multivalue-input {
+  padding-top: 1.625rem !important;
+  padding-bottom: 0.625rem !important;
+}
+
+/* Fix label positioning for input groups inside form-floating */
+.multivalue-input-group.form-floating > label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  padding: 1rem 0.75rem;
+  pointer-events: none;
+  border: 1px solid transparent;
+  transform-origin: 0 0;
+  transition:
+    opacity 0.1s ease-in-out,
+    transform 0.1s ease-in-out;
+  z-index: 2;
+}
+
+/* Ensure inputs have proper padding for floating labels */
+.multivalue-input-group.form-floating:focus-within .multivalue-input,
+.multivalue-input-group.form-floating.has-value .multivalue-input {
+  padding-top: 1.625rem !important;
+  padding-bottom: 0.625rem !important;
 }
 
 /* Animation for adding/removing multivalue items */
