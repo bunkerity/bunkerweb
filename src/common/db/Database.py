@@ -3049,6 +3049,8 @@ class Database:
                             setting_id, suffix = setting.rsplit("_", 1) if self.SUFFIX_RX.search(setting) else (setting, None)
                             if suffix is not None:
                                 suffix = int(suffix)
+                            else:
+                                suffix = 0
 
                             if setting_id in self.RESTRICTED_TEMPLATE_SETTINGS:
                                 self.logger.error(
@@ -3344,6 +3346,8 @@ class Database:
                         setting_id, suffix = setting.rsplit("_", 1) if self.SUFFIX_RX.search(setting) else (setting, None)
                         if suffix is not None:
                             suffix = int(suffix)
+                        else:
+                            suffix = 0
 
                         if setting_id in self.RESTRICTED_TEMPLATE_SETTINGS:
                             self.logger.error(

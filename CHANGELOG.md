@@ -3,6 +3,7 @@
 ## v1.6.5-rc4 - ????/??/??
 
 - [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
+- [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes
 - [FEATURE] Add the possibility use HTTPS with BunkerWeb's internal API
 - [FEATURE] Add reason data for bad behavior bans/reports
 - [FEATURE] Add session retention configuration via the `DATABASE_MAX_SESSION_AGE_DAYS` setting in the `Database` plugin and automatic cleanup job to purge old UI user sessions from the database
