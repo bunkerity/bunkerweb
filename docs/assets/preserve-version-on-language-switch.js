@@ -20,7 +20,7 @@
 
   // Add: Morphaius Polyglot credit configuration (update logoSrc as needed)
   var MORPHAIUS_CREDIT = {
-    enabled: false,
+    enabled: true,
     logoSrc: '/assets/logo-morphaius.webp',
     logoAlt: 'Morphaius',
     text: 'Translations by Morphaius Polyglot',
