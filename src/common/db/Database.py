@@ -1328,6 +1328,7 @@ class Database:
         to_delete = []
         changed_plugins = set()
         changed_services = False
+        service_template_change = False
 
         db_config = {}
         if method == "autoconf":
@@ -1429,6 +1430,8 @@ class Database:
                         # Handle special SERVER_NAME case
                         if key in ("SERVER_NAME", f"{db_service_config.service_id}_SERVER_NAME"):
                             changed_services = True
+                        elif key in ("USE_TEMPLATE", f"{db_service_config.service_id}_USE_TEMPLATE"):
+                            service_template_change = True
                 except Exception as e:
                     self.logger.warning(f"Error processing service config {db_service_config.setting_id}: {e}")
                     continue
@@ -1461,6 +1464,8 @@ class Database:
                             {Metadata.custom_configs_changed: True, Metadata.last_custom_configs_change: datetime.now().astimezone()}
                         )
                         changed_services = True
+                        if any(config.get(f"{sid}_USE_TEMPLATE", "") for sid in missing_ids):
+                            service_template_change = True
 
                 self.logger.debug("Checking if the drafts have changed")
                 drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
@@ -1539,6 +1544,7 @@ class Database:
                         local_to_delete = []
                         local_changed_plugins = set()
                         local_changed_services = False
+                        local_service_template_change = False
 
                         service_template = service_config.get("USE_TEMPLATE", template)
 
@@ -1571,6 +1577,7 @@ class Database:
                             template_setting_default = None
                             if service_template:
                                 template_setting_default = templates.get(service_template, {}).get((key, suffix))
+                                local_service_template_change = True
 
                             # Determine if we need to add, update, or delete
                             if not service_setting:
@@ -1612,13 +1619,14 @@ class Database:
                                 if key == "SERVER_NAME":
                                     local_changed_services = True
 
-                        return local_to_put, local_to_update, local_to_delete, local_changed_plugins, local_changed_services
+                        return local_to_put, local_to_update, local_to_delete, local_changed_plugins, local_changed_services, local_service_template_change
 
                     def process_global_settings(global_config: Dict[str, str]):
                         local_to_put = []
                         local_to_update = []
                         local_to_delete = []
                         local_changed_plugins = set()
+                        local_service_template_change = False
 
                         for original_key, value in global_config.items():
                             suffix = 0
@@ -1637,6 +1645,7 @@ class Database:
                             template_setting_default = None
                             if template:
                                 template_setting_default = templates.get(template, {}).get((key, suffix))
+                                local_service_template_change = True
 
                             if not global_value:
                                 if check_value(key, value, setting, template_setting_default, suffix, True):
@@ -1664,7 +1673,7 @@ class Database:
                                     }
                                 )
 
-                        return local_to_put, local_to_update, local_to_delete, local_changed_plugins, False
+                        return local_to_put, local_to_update, local_to_delete, local_changed_plugins, False, local_service_template_change
 
                     # Use ThreadPoolExecutor to process services in parallel
                     with ThreadPoolExecutor() as executor:
@@ -1678,13 +1687,17 @@ class Database:
                         # Collect results from threads
                         for future in as_completed(futures):
                             try:
-                                ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services = future.result()
+                                ret_to_put, ret_to_update, ret_to_delete, ret_changed_plugins, ret_changed_services, ret_service_template_change = (
+                                    future.result()
+                                )
                                 to_put.extend(ret_to_put)
                                 to_update.extend(ret_to_update)
                                 to_delete.extend(ret_to_delete)
                                 changed_plugins.update(ret_changed_plugins)
                                 if not changed_services:
                                     changed_services = ret_changed_services
+                                if not service_template_change:
+                                    service_template_change = ret_service_template_change
                             except Exception as e:
                                 self.logger.error(f"Thread raised an exception: {e}")
 
@@ -1739,6 +1752,7 @@ class Database:
                                 .filter_by(template_id=template, setting_id=key, suffix=suffix)
                                 .first()
                             )
+                            service_template_change = True
 
                         if not global_value:
                             if value == (template_setting.default if template_setting is not None else setting.default):
@@ -1773,6 +1787,9 @@ class Database:
                     if metadata is not None:
                         if not metadata.first_config_saved:
                             metadata.first_config_saved = True
+                        if service_template_change:
+                            metadata.custom_configs_changed = True
+                            metadata.last_custom_configs_change = datetime.now().astimezone()
 
                     if changed_plugins:
                         session.query(Plugins).filter(Plugins.id.in_(changed_plugins)).update({Plugins.config_changed: True}, synchronize_session=False)
