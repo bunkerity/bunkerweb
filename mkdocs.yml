@@ -74,16 +74,10 @@ extra:
       link: https://x.com/bunkerity
 
 plugins:
-  - search
-  - social:
-      cards_layout_options:
-        background_color: "#0b5577"
-        color: "white"
-  - mike:
-      canonical_version: latest
-  - print-site
+  # i18n must run early so other plugins (search, social, print-site, mike) see localized pages
   - i18n:
       docs_structure: folder
+      reconfigure_material: true
       languages:
         - locale: en
           name: English - 🇬🇧
@@ -157,3 +151,11 @@ plugins:
             Plugins: 插件
             "Professional services": "专业服务"
             About: 关于
+  - search
+  - social:
+      cards_layout_options:
+        background_color: "#0b5577"
+        color: "white"
+  - mike:
+      canonical_version: latest
+  - print-site
