@@ -2,7 +2,7 @@
 {% set setting_separator = setting_data.get("separator", " ") %}
 {% set setting_values = setting_value.split(setting_separator) if setting_value else [""] %}
 {% set setting_values = setting_values if setting_values != [""] else [""] %}
-<div class="multivalue-container form-floating mt-1"
+<div class="multivalue-container mt-1 overflow-hidden position-relative"
      data-separator="{{ setting_separator }}">
     <!-- Hidden input to store the final multivalue string -->
     <input type="hidden"
@@ -17,23 +17,29 @@
            {% if setting_data.get('regex') %}pattern="{{ setting_data['regex'] }}"{% endif %}>
     <div class="multivalue-inputs">
         {% for value in setting_values %}
-            <div class="input-group mb-2 multivalue-input-group">
-                <input type="text"
-                       class="form-control multivalue-input"
-                       value="{{ value }}"
-                       placeholder="Enter value..."
-                       data-i18n="form.placeholder.multivalue_enter_value"
-                       {% if disabled %}disabled{% endif %}>
-                {% if not disabled %}
-                    <button type="button" class="btn btn-outline-success add-multivalue-item">
-                        <i class="bx bx-plus"></i>
-                    </button>
-                    {% if loop.index > 1 or setting_values|length > 1 %}
-                        <button type="button" class="btn btn-outline-danger remove-multivalue-item">
-                            <i class="bx bx-x"></i>
+            <div class="form-floating{% if not loop.last %} mb-2{% endif %} multivalue-input-group">
+                <div class="input-group">
+                    <input type="text"
+                           class="form-control multivalue-input"
+                           value="{{ value }}"
+                           id="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}_{{ loop.index }}"
+                           {% if disabled %}disabled{% endif %}>
+                    {% if not disabled %}
+                        <button type="button" class="btn btn-outline-success add-multivalue-item">
+                            <i class="bx bx-plus"></i>
                         </button>
+                        {% if loop.index > 1 %}
+                            <button type="button" class="btn btn-outline-danger remove-multivalue-item">
+                                <i class="bx bx-x"></i>
+                            </button>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
+                </div>
+                <label for="{{ setting_id_prefix }}{{ setting_data['id'] }}{{ setting_id_suffix if setting_id_suffix is defined else '' }}_{{ loop.index }}"
+                       class="text-truncate">
+                    {{ setting }}
+                    {% if loop.index > 1 %}#{{ loop.index - 1 }}{% endif %}
+                </label>
             </div>
         {% endfor %}
     </div>

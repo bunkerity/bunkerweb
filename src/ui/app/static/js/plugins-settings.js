@@ -1492,9 +1492,7 @@ $(document).ready(() => {
                   <div class="input-group mb-2 multivalue-input-group">
                     <input type="text"
                            class="form-control multivalue-input"
-                           value="${value.trim()}"
-                           placeholder="Enter value..."
-                           data-i18n="form.placeholder.multivalue_enter_value">
+                           value="${value.trim()}">
                     <button type="button"
                             class="btn btn-outline-success add-multivalue-item">
                       <i class="bx bx-plus"></i>
@@ -2002,9 +2000,7 @@ $(document).ready(() => {
           <div class="input-group mb-2 multivalue-input-group">
             <input type="text"
                    class="form-control multivalue-input"
-                   value="${value.trim()}"
-                   placeholder="Enter value..."
-                   data-i18n="form.placeholder.multivalue_enter_value">
+                   value="${value.trim()}">
 
             <button type="button"
                     class="btn btn-outline-success add-multivalue-item">
@@ -2039,6 +2035,44 @@ $(document).ready(() => {
   isInit = false;
 
   // Multivalue functionality
+  const updateMultivalueLabels = ($container) => {
+    const $hiddenInput = $container.find(".multivalue-hidden-input");
+    const settingName = $hiddenInput.attr("name");
+    const baseId = $hiddenInput.attr("id");
+
+    $container.find(".multivalue-input-group").each(function (index) {
+      const $group = $(this);
+      const $input = $group.find(".multivalue-input");
+      const $label = $group.find("label");
+      const newIndex = index + 1;
+      const newId = `${baseId}_${newIndex}`;
+
+      $input.attr("id", newId);
+
+      // First item has no index, subsequent items have #1, #2, etc.
+      if (index === 0) {
+        $label.attr("for", newId).text(settingName);
+      } else {
+        $label.attr("for", newId).text(`${settingName} #${index}`);
+      }
+    });
+  };
+
+  const updateMultivalueFloatingLabel = ($container) => {
+    // Update floating label state for each input based on its value
+    $container.find(".multivalue-input-group").each(function () {
+      const $inputGroup = $(this);
+      const $input = $inputGroup.find(".multivalue-input");
+      const hasValue = $input.val().trim() !== "";
+
+      if (hasValue) {
+        $inputGroup.addClass("has-value");
+      } else {
+        $inputGroup.removeClass("has-value");
+      }
+    });
+  };
+
   const toggleMultivalueVisibility = ($container, isToggleAction = false) => {
     const $inputGroups = $container.find(".multivalue-input-group");
     const visibleLimit = 5;
@@ -2121,21 +2155,33 @@ $(document).ready(() => {
 
     if (isDisabled) return;
 
+    // Get the base ID and setting name from the hidden input
+    const $hiddenInput = $container.find(".multivalue-hidden-input");
+    const baseId = $hiddenInput.attr("id");
+    const settingName = $hiddenInput.attr("name");
+
+    // Calculate the index for the new input
+    const currentCount = $container.find(".multivalue-input-group").length;
+    const newIndex = currentCount + 1;
+    const inputId = `${baseId}_${newIndex}`;
+
     const inputGroupHtml = `
-      <div class="input-group mb-2 multivalue-input-group">
-        <input type="text"
-               class="form-control multivalue-input"
-               value="${value}"
-               placeholder="Enter value..."
-               data-i18n="form.placeholder.multivalue_enter_value">
-        <button type="button"
-                class="btn btn-outline-success add-multivalue-item">
-          <i class="bx bx-plus"></i>
-        </button>
-        <button type="button"
-                class="btn btn-outline-danger remove-multivalue-item">
-          <i class="bx bx-x"></i>
-        </button>
+      <div class="form-floating multivalue-input-group">
+        <div class="input-group">
+          <input type="text"
+                 class="form-control multivalue-input"
+                 value="${value}"
+                 id="${inputId}">
+          <button type="button"
+                  class="btn btn-outline-success add-multivalue-item">
+            <i class="bx bx-plus"></i>
+          </button>
+          <button type="button"
+                  class="btn btn-outline-danger remove-multivalue-item">
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+        <label for="${inputId}" class="text-truncate">Temporary</label>
       </div>
     `;
 
@@ -2146,8 +2192,19 @@ $(document).ready(() => {
       $inputsContainer.append(inputGroupHtml);
     }
 
+    // Update margin bottom for all input groups
+    const $allGroups = $container.find(".multivalue-input-group");
+    $allGroups.removeClass("mb-2");
+    $allGroups.not(":last").addClass("mb-2");
+
+    // Update all labels with correct indices
+    updateMultivalueLabels($container);
+
     const $newInput = $container.find(".multivalue-input").last();
     $newInput.focus();
+
+    // Update floating label behavior when new input is added
+    updateMultivalueFloatingLabel($container);
 
     updateMultivalueHiddenInput($container);
     toggleMultivalueVisibility($container, false);
@@ -2165,6 +2222,7 @@ $(document).ready(() => {
     if ($container.find(".multivalue-input-group").length <= 1) {
       $inputGroup.find(".multivalue-input").val("");
       updateMultivalueHiddenInput($container);
+      updateMultivalueFloatingLabel($container);
       return;
     }
 
@@ -2173,7 +2231,17 @@ $(document).ready(() => {
       .hasClass("expanded");
 
     $inputGroup.remove();
+
+    // Update margin bottom for remaining input groups
+    const $allGroups = $container.find(".multivalue-input-group");
+    $allGroups.removeClass("mb-2");
+    $allGroups.not(":last").addClass("mb-2");
+
+    // Update all labels with correct indices
+    updateMultivalueLabels($container);
+
     updateMultivalueHiddenInput($container);
+    updateMultivalueFloatingLabel($container);
     toggleMultivalueVisibility($container, false);
 
     if (wasExpanded) {
@@ -2188,6 +2256,7 @@ $(document).ready(() => {
   $(".multivalue-container").each(function () {
     const $container = $(this);
     updateMultivalueHiddenInput($container);
+    updateMultivalueFloatingLabel($container);
     toggleMultivalueVisibility($container, false);
   });
 
@@ -2215,6 +2284,13 @@ $(document).ready(() => {
   $(document).on("input", ".multivalue-input", function () {
     const $container = $(this).closest(".multivalue-container");
     updateMultivalueHiddenInput($container);
+    updateMultivalueFloatingLabel($container);
+  });
+
+  // Handle focus/blur for floating label behavior
+  $(document).on("focus blur", ".multivalue-input", function () {
+    const $container = $(this).closest(".multivalue-container");
+    updateMultivalueFloatingLabel($container);
   }); // Handle Enter key in multivalue inputs to add new item
   $(document).on("keydown", ".multivalue-input", function (e) {
     if (e.key === "Enter") {
