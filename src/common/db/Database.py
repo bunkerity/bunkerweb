@@ -4,7 +4,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager, suppress
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from json import JSONDecodeError, loads
 from logging import Logger
@@ -2497,6 +2497,23 @@ class Database:
                 except BaseException as e:
                     return str(e)
         return f"Removed {result} excess jobs runs"
+
+    def cleanup_expired_ui_sessions(self, max_age_days: int) -> str:
+        """Remove UI sessions older than the provided age threshold."""
+        with self._db_session() as session:
+            if self.readonly:
+                return "The database is read-only, the changes will not be saved"
+
+            cutoff = datetime.now().astimezone() - timedelta(days=max_age_days)
+
+            deleted = session.query(UserSessions).filter(UserSessions.last_activity < cutoff).delete(synchronize_session=False)
+
+            try:
+                session.commit()
+            except BaseException as e:
+                return str(e)
+
+        return f"Removed {deleted} expired UI user sessions"
 
     def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None) -> str:
         job_name = job_name or argv[0].replace(".py", "")

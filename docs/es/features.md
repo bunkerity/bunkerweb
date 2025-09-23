@@ -68,7 +68,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | ------------------ | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`             | global   | No       | **Activar API:** Activa la API para controlar BunkerWeb.                                                                                |
     | `API_HTTP_PORT`    | `5000`            | global   | No       | **Puerto de la API:** Número de puerto de escucha para la API.                                                                          |
-    | `API_HTTPS_PORT`   | `6000`            | global   | No       | **Puerto HTTPS de la API:** Número de puerto de escucha (TLS) para la API.                                                              |
+    | `API_HTTPS_PORT`   | `5443`            | global   | No       | **Puerto HTTPS de la API:** Número de puerto de escucha (TLS) para la API.                                                              |
     | `API_LISTEN_HTTP`  | `yes`             | global   | No       | **Escucha HTTP de la API:** Habilita el listener HTTP para la API.                                                                      |
     | `API_LISTEN_HTTPS` | `no`              | global   | No       | **Escucha HTTPS de la API:** Habilita el listener HTTPS (TLS) para la API.                                                              |
     | `API_LISTEN_IP`    | `0.0.0.0`         | global   | No       | **IP de Escucha de la API:** Dirección IP de escucha para la API.                                                                       |
@@ -76,7 +76,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     | `API_WHITELIST_IP` | `127.0.0.0/8`     | global   | No       | **IP de la Lista Blanca de la API:** Lista de IP/redes permitidas para contactar con la API.                                            |
     | `API_TOKEN`        |                   | global   | No       | **Token de Acceso a la API (opcional):** Si se establece, todas las solicitudes a la API deben incluir `Authorization: Bearer <token>`. |
 
-    Nota: por razones de arranque, si habilitas `API_TOKEN` debes establecerlo en el entorno de AMBAS, la instancia de BunkerWeb y el Programador. El Programador incluye automáticamente el encabezado `Authorization` cuando `API_TOKEN` está presente en su entorno. Si no se establece, no se envía ningún encabezado y BunkerWeb no aplicará la autenticación por token. Puedes exponer la API a través de HTTPS estableciendo `API_LISTEN_HTTPS=yes` (puerto: `API_HTTPS_PORT`, predeterminado `6000`).
+    Nota: por razones de arranque, si habilitas `API_TOKEN` debes establecerlo en el entorno de AMBAS, la instancia de BunkerWeb y el Programador. El Programador incluye automáticamente el encabezado `Authorization` cuando `API_TOKEN` está presente en su entorno. Si no se establece, no se envía ningún encabezado y BunkerWeb no aplicará la autenticación por token. Puedes exponer la API a través de HTTPS estableciendo `API_LISTEN_HTTPS=yes` (puerto: `API_HTTPS_PORT`, predeterminado `5443`).
 
     Prueba de ejemplo con curl (reemplaza el token y el host):
 
@@ -88,7 +88,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          --insecure \
-         https://<bunkerweb-host>:6000/ping
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "Ajustes de Red y Puertos"
@@ -2102,12 +2102,13 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 
 ### Ajustes de Configuración
 
-| Ajuste                   | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                           |
-| ------------------------ | ----------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                               |
-| `DATABASE_URI_READONLY`  |                                           | global   | no       | **URI de la Base de Datos de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la base de datos principal está caída.        |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                         |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global   | no       | **Máximo de Ejecuciones de Trabajos:** El número máximo de registros de ejecución de trabajos que se conservarán en la base de datos antes de la limpieza automática. |
+| Ajuste                          | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                           |
+| ------------------------------- | ----------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                               |
+| `DATABASE_URI_READONLY`         |                                           | global   | no       | **URI de la Base de Datos de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la base de datos principal está caída.        |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                         |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global   | no       | **Máximo de Ejecuciones de Trabajos:** El número máximo de registros de ejecución de trabajos que se conservarán en la base de datos antes de la limpieza automática. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                     |
 
 !!! tip "Selección de Base de Datos" - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos. - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia. - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción. - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
 
@@ -2120,7 +2121,12 @@ El URI de la base de datos sigue el formato de SQLAlchemy:
     -   Oracle: `oracle://usuario:contraseña@hostname:puerto/basededatos`
 
 !!! warning "Mantenimiento de la Base de Datos"
-El complemento ejecuta automáticamente un trabajo diario que limpia las ejecuciones de trabajos sobrantes basándose en el ajuste `DATABASE_MAX_JOBS_RUNS`. Esto evita el crecimiento ilimitado de la base de datos mientras se mantiene un historial útil de las ejecuciones de trabajos.
+El complemento ejecuta automáticamente trabajos de mantenimiento diarios:
+
+- **Limpiar Ejecuciones de Trabajos en Exceso:** Purga el historial que supera el límite `DATABASE_MAX_JOBS_RUNS`.
+- **Limpiar Sesiones de UI Caducadas:** Elimina las sesiones de usuarios de la UI que superan `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+Estas tareas evitan el crecimiento ilimitado de la base de datos mientras conservan un historial operativo útil.
 
 ## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

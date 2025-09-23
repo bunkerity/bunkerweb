@@ -5,6 +5,7 @@
 - [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
 - [FEATURE] Add the possibility use HTTPS with BunkerWeb's internal API
 - [FEATURE] Add reason data for bad behavior bans/reports
+- [FEATURE] Add session retention configuration via the `DATABASE_MAX_SESSION_AGE_DAYS` setting in the `Database` plugin and automatic cleanup job to purge old UI user sessions from the database
 - [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
 - [UI] Tweak the bad behavior details to look nice in the report page
 - [UI] Prevent renaming of template-based custom configs in update and edit functions for consistency
