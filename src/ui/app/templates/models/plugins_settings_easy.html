@@ -286,8 +286,8 @@
                                                         {% if step_config_value is none %}
                                                             {% set step_config_value = template_data["configs"].get(step_config, "") %}
                                                         {% else %}
-                                                            {% set step_config_value = step_config_value["data"].decode("utf-8") %}
                                                             {% set step_config_method = step_config_value["method"] %}
+                                                            {% set step_config_value = step_config_value["data"].decode("utf-8") %}
                                                         {% endif %}
                                                         <div class="mb-3 pb-6 position-relative h-vh-40"
                                                              {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
