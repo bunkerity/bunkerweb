@@ -14,6 +14,7 @@
 - [MISC] Update default value for Permissions-Policy header to include additional features and remove the deprecated ones
 - [DOCS] Add multi-language support to the documentation, including French, German, Spanish and Chinese (Mandarin) translations.
 - [DEPS] Updated luajit2 version to v2.1-20250826
+- [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the `Let's Encrypt` plugin.
 
 ## v1.6.5-rc3 - 2025/09/16
 
