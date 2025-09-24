@@ -10,6 +10,7 @@
 - [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
 - [UI] Tweak the bad behavior details to look nice in the report page
 - [UI] Prevent renaming of template-based custom configs in update and edit functions for consistency
+- [UI] Fix template config not being editable in service easy mode
 - [MISC] Update default value for Permissions-Policy header to include additional features and remove the deprecated ones
 - [DOCS] Add multi-language support to the documentation, including French, German, Spanish and Chinese (Mandarin) translations.
 - [DEPS] Updated luajit2 version to v2.1-20250826
