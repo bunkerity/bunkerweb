@@ -1,3 +1,4 @@
+{% from 'macros/docs_link.html' import docs_url %}
 {% extends "dashboard.html" %}
 {% block head %}
     <!-- Datatables -->
@@ -23,10 +24,19 @@
                 <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin["description"] }}</p>
             </div>
             <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
-                <a href="{% if plugin['type'] == 'core' %}https://docs.bunkerweb.io/{{ bw_version }}/features/?utm_campaign=self&utm_source=ui#{% if plugin['id'] == 'general' %}global-settings{% else %}{{ plugin['id'] }}{% endif %}{% else %}https://docs.bunkerweb.io/{{ bw_version }}/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
-                   class="btn btn-sm btn-primary rounded-pill ms-2"
+                {% if plugin['type'] == 'core' %}
+                    {% set plugin_endpoint = "/features" %}
+                    {% set plugin_fragment = '#' + ('global-settings' if plugin['id'] == 'general' else plugin['id']) %}
+                {% else %}
+                    {% set plugin_endpoint = "/plugins" %}
+                    {% set plugin_fragment = "" %}
+                {% endif %}
+                <a href="{{ docs_url(plugin_endpoint, plugin_fragment) }}"
+                   class="btn btn-sm btn-primary rounded-pill ms-2 docs-link"
                    target="_blank"
-                   rel="noopener">
+                   rel="noopener"
+                   data-endpoint="{{ plugin_endpoint }}"
+                   data-fragment="{{ plugin_fragment }}">
                     <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;More info</span>
                 </a>
             </div>

@@ -2480,3 +2480,73 @@ code.bad-behavior-event__value {
 .dark-style .pro-alert .alert-link:hover {
   color: var(--bs-bw-green) !important;
 }
+
+.template-summary-column {
+  position: sticky;
+  top: 10.3rem;
+  z-index: 1020;
+  margin-bottom: 1rem !important;
+}
+
+@media (max-width: 1200px) {
+  .template-summary-column {
+    position: static;
+    top: auto;
+    z-index: auto;
+    margin-bottom: 0 !important;
+  }
+}
+
+.step-settings-list,
+.step-configs-list {
+  min-height: 2.5rem;
+  border: 1px dashed transparent;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.step-settings-list.step-list-dragover,
+.step-configs-list.step-list-dragover {
+  border-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.step-item {
+  transition: background-color 0.2s ease;
+}
+
+.step-item-handle {
+  cursor: grab;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.step-item-handle i {
+  font-size: 1.25rem;
+}
+
+.step-item-handle:active {
+  cursor: grabbing;
+}
+
+.step-item.dragging {
+  opacity: 0.65;
+}
+
+@media (max-width: 576px) {
+  .step-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .step-item .step-item-handle {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .step-item .step-item-move-group {
+    justify-content: center;
+  }
+}

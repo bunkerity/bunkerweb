@@ -1,3 +1,4 @@
+{% from 'macros/docs_link.html' import docs_url %}
 {% set plugins_settings = get_plugins_settings() %}
 <div class="card p-1 mb-4 sticky-card">
     <div class="d-flex flex-wrap justify-content-around align-items-center">
@@ -203,8 +204,10 @@
                                                                 <div class="d-flex align-items-center">
                                                                     {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
                                                                         <a role="badge"
-                                                                           href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
-                                                                           class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                           href='{{ docs_url("/concepts", "#multisite-mode") }}'
+                                                                           class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
+                                                                           data-endpoint="/concepts"
+                                                                           data-fragment="#multisite-mode"
                                                                            data-bs-toggle="tooltip"
                                                                            data-bs-placement="top"
                                                                            data-bs-original-title="Multisite setting"

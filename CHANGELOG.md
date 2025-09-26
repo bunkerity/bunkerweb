@@ -11,6 +11,7 @@
 - [UI] Tweak the bad behavior details to look nice in the report page
 - [UI] Prevent renaming of template-based custom configs in update and edit functions for consistency
 - [UI] Fix template config not being editable in service easy mode
+- [UI] Introduce a `Templates` management page to create, edit, clone and delete service templates.
 - [MISC] Update default value for Permissions-Policy header to include additional features and remove the deprecated ones
 - [DOCS] Add multi-language support to the documentation, including French, German, Spanish and Chinese (Mandarin) translations.
 - [DEPS] Updated luajit2 version to v2.1-20250826

@@ -28,6 +28,7 @@ function initializeDataTable(config) {
     "plugins",
     "reports",
     "services",
+    "templates",
   ];
   const entityName = allowedNames.includes(tableName) ? tableName : "items";
 
