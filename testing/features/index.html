@@ -3062,7 +3062,7 @@
 </tr>
 <tr>
 <td><code>API_HTTPS_PORT</code></td>
-<td><code>6000</code></td>
+<td><code>5443</code></td>
 <td>global</td>
 <td>No</td>
 <td><strong>API HTTPS Port:</strong> Listen port number (TLS) for the API.</td>
@@ -3111,7 +3111,7 @@
 </tr>
 </tbody>
 </table>
-<p>Note: for bootstrap reasons, if you enable <code>API_TOKEN</code> you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the <code>Authorization</code> header when <code>API_TOKEN</code> is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth. You can expose the API over HTTPS by setting <code>API_LISTEN_HTTPS=yes</code> (port: <code>API_HTTPS_PORT</code>, default <code>6000</code>).</p>
+<p>Note: for bootstrap reasons, if you enable <code>API_TOKEN</code> you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the <code>Authorization</code> header when <code>API_TOKEN</code> is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth. You can expose the API over HTTPS by setting <code>API_LISTEN_HTTPS=yes</code> (port: <code>API_HTTPS_PORT</code>, default <code>5443</code>).</p>
 <p>Example test with curl (replace token and host):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
@@ -3120,7 +3120,7 @@
 curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>--insecure<span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>https://&lt;bunkerweb-host&gt;:6000/ping
+<span class="w">     </span>https://&lt;bunkerweb-host&gt;:5443/ping
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -6295,6 +6295,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>no</td>
 <td><strong>Maximum Job Runs:</strong> The maximum number of job execution records to retain in the database before automatic cleanup.</td>
 </tr>
+<tr>
+<td><code>DATABASE_MAX_SESSION_AGE_DAYS</code></td>
+<td><code>14</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Session Retention:</strong> The maximum age (in days) for UI user sessions before they are purged automatically.</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition tip">
@@ -6318,7 +6325,12 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Database Maintenance</p>
-<p>The plugin automatically runs a daily job that cleans up excess job runs based on the <code>DATABASE_MAX_JOBS_RUNS</code> setting. This prevents unbounded database growth while maintaining a useful history of job executions.</p>
+<p>The plugin automatically runs daily maintenance jobs:</p>
+<ul>
+<li><strong>Cleanup Excess Job Runs:</strong> Purges job execution history beyond the <code>DATABASE_MAX_JOBS_RUNS</code> limit.</li>
+<li><strong>Cleanup Expired UI Sessions:</strong> Removes UI user sessions older than <code>DATABASE_MAX_SESSION_AGE_DAYS</code>.</li>
+</ul>
+<p>Together, these jobs prevent unbounded database growth while preserving useful operational history.</p>
 </div>
 <h2 id="easy-resolve-pro">Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM support <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
@@ -11720,6 +11732,8 @@ For blocking unwanted clients instead, refer to the <a href="#blacklist">Blackli
         <script src="https://chatbot.bunkerweb.io/static/js/chatbot.js"></script>
       
         <script src="../assets/preserve-version-on-language-switch.js"></script>
+      
+        <script src="../assets/toc-dropdown.js"></script>
       
     
   </body>

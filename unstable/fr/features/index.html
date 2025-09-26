@@ -2952,7 +2952,7 @@
 </tr>
 <tr>
 <td><code>API_HTTPS_PORT</code></td>
-<td><code>6000</code></td>
+<td><code>5443</code></td>
 <td>global</td>
 <td>Non</td>
 <td><strong>Port HTTPS de l’API :</strong> Numéro de port d’écoute (TLS) de l’API.</td>
@@ -3001,7 +3001,7 @@
 </tr>
 </tbody>
 </table>
-<p>Remarque : pour des raisons d’amorçage, si vous activez <code>API_TOKEN</code>, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête <code>Authorization</code> quand <code>API_TOKEN</code> est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant <code>API_LISTEN_HTTPS=yes</code> (port : <code>API_HTTPS_PORT</code>, <code>6000</code> par défaut).</p>
+<p>Remarque : pour des raisons d’amorçage, si vous activez <code>API_TOKEN</code>, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête <code>Authorization</code> quand <code>API_TOKEN</code> est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant <code>API_LISTEN_HTTPS=yes</code> (port : <code>API_HTTPS_PORT</code>, <code>5443</code> par défaut).</p>
 <p>Exemple de test avec curl (remplacez le jeton et l’hôte) :</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
@@ -3010,7 +3010,7 @@
 curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>--insecure<span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>https://&lt;bunkerweb-host&gt;:6000/ping
+<span class="w">     </span>https://&lt;bunkerweb-host&gt;:5443/ping
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -3358,7 +3358,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 </div>
 </div>
-<h2 id="anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
 <table>
@@ -4209,7 +4209,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <span class="nt">BACKUP_ROTATION</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;24&quot;</span>
 <span class="nt">BACKUP_DIRECTORY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/mnt/backup-drive/bunkerweb-backups&quot;</span>
 </code></pre></div>
-<h2 id="backup-s3-pro">Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
@@ -5901,6 +5901,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>non</td>
 <td>Nombre max d’entrées de runs de jobs conservées avant purge automatique.</td>
 </tr>
+<tr>
+<td><code>DATABASE_MAX_SESSION_AGE_DAYS</code></td>
+<td><code>14</code></td>
+<td>global</td>
+<td>non</td>
+<td>Durée max de conservation des sessions UI (en jours) avant purge automatique.</td>
+</tr>
 </tbody>
 </table>
 <p>!!! tip "Choix du moteur" - SQLite (défaut) : simple et fichier unique, idéal mono‑nœud/tests. - PostgreSQL : recommandé en production multi‑instances (robustesse, concurrence). - MySQL/MariaDB : alternative solide aux capacités proches de PostgreSQL. - Oracle : adapté aux environnements d’entreprise standardisés sur Oracle.</p>
@@ -5908,8 +5915,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <div class="admonition warning">
 <p class="admonition-title">Maintenance</p>
 </div>
-<p>Une tâche quotidienne purge automatiquement les runs de jobs excédentaires selon <code>DATABASE_MAX_JOBS_RUNS</code> pour éviter une croissance illimitée tout en conservant un historique utile.</p>
-<h2 id="easy-resolve-pro">Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>Des tâches quotidiennes assurent la maintenance automatique :</p>
+<ul>
+<li><strong>Purge des runs de jobs excédentaires</strong> : supprime l’historique au-delà de <code>DATABASE_MAX_JOBS_RUNS</code>.</li>
+<li><strong>Purge des sessions UI expirées</strong> : enlève les sessions plus anciennes que <code>DATABASE_MAX_SESSION_AGE_DAYS</code>.</li>
+</ul>
+<p>Ces jobs évitent la croissance illimitée tout en conservant un historique d’exploitation pertinent.</p>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides a simpler way to fix false positives in reports.</p>
 <h2 id="errors">Errors</h2>
@@ -7263,7 +7275,7 @@ Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour ch
 </div>
 </div>
 </div>
-<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
 <table>
@@ -7518,7 +7530,7 @@ Par exemple, `5r/m` signifie que 5 requêtes par minute sont autorisées pour ch
 </div>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_METRICS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
 </code></pre></div>
-<h2 id="migration-pro">Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
 <h2 id="miscellaneous">Miscellaneous</h2>
@@ -8302,7 +8314,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Valeurs de taille lisibles</p>
 </div>
 <p>Pour les paramètres de taille comme <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code>, les suffixes <code>k</code>, <code>m</code>, et <code>g</code> (insensibles à la casse) sont pris en charge et représentent les kibioctets, mébioctets et gibioctets (multiples de 1024). Exemples : <code>256k</code> = 262144, <code>1m</code> = 1048576, <code>2g</code> = 2147483648.</p>
-<h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
@@ -8525,7 +8537,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>BunkerWeb PRO Enterprise : accès complet, avec support dédié.</li>
 </ul>
 <p>Un essai gratuit d’1 mois est disponible avec le code <code>freetrial</code>. Rendez‑vous sur le <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb Panel</a> pour l’activer.</p>
-<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
@@ -8994,7 +9006,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <span class="nt">REDIS_KEEPALIVE_IDLE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;60&quot;</span>
 <span class="nt">REDIS_KEEPALIVE_POOL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5&quot;</span>
 </code></pre></div>
-<h2 id="reporting-pro">Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
@@ -10500,7 +10512,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<h2 id="user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>
@@ -10931,6 +10943,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
         <script src="https://chatbot.bunkerweb.io/static/js/chatbot.js"></script>
       
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
+      
+        <script src="../../assets/toc-dropdown.js"></script>
       
     
   </body>

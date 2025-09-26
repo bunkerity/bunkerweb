@@ -171,7 +171,7 @@ def generate_docs_for_lang(lang: str):
         pro_crown = ""
         if "is_pro" in data:
             pro_crown = (
-                " <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'>"
+                f" <img src='{'../' if lang != 'en' else ''}../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'>"
                 + tr_lang("pro_badge")
                 + "\n"
             )
@@ -232,10 +232,6 @@ def stream_support(support) -> str:
     else:
         md += ":warning:"
     return md
-
-
-def pro_title(title: str) -> str:
-    return f"## {title} <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'>\n"
 
 
 def get_readme_content(plugin_dir, lang: str = "en"):

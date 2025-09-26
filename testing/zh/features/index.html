@@ -3080,7 +3080,7 @@
 </tr>
 <tr>
 <td><code>API_HTTPS_PORT</code></td>
-<td><code>6000</code></td>
+<td><code>5443</code></td>
 <td>global</td>
 <td>否</td>
 <td><strong>API HTTPS 端口：</strong> API 的监听端口号 (TLS)。</td>
@@ -3129,7 +3129,7 @@
 </tr>
 </tbody>
 </table>
-<p>注意：出于引导原因，如果您启用 <code>API_TOKEN</code>，您必须在 BunkerWeb 实例和调度程序的<strong>两个</strong>环境中都设置它。当 <code>API_TOKEN</code> 存在于其环境中时，调度程序会自动包含 <code>Authorization</code> 标头。如果未设置，则不发送标头，BunkerWeb 将不强制执行令牌身份验证。您可以通过设置 <code>API_LISTEN_HTTPS=yes</code>（端口：<code>API_HTTPS_PORT</code>，默认 <code>6000</code>）通过 HTTPS 公开 API。</p>
+<p>注意：出于引导原因，如果您启用 <code>API_TOKEN</code>，您必须在 BunkerWeb 实例和调度程序的<strong>两个</strong>环境中都设置它。当 <code>API_TOKEN</code> 存在于其环境中时，调度程序会自动包含 <code>Authorization</code> 标头。如果未设置，则不发送标头，BunkerWeb 将不强制执行令牌身份验证。您可以通过设置 <code>API_LISTEN_HTTPS=yes</code>（端口：<code>API_HTTPS_PORT</code>，默认 <code>5443</code>）通过 HTTPS 公开 API。</p>
 <p>使用 curl 的测试示例（替换令牌和主机）：</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
@@ -3138,7 +3138,7 @@
 curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>--insecure<span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>https://&lt;bunkerweb-host&gt;:6000/ping
+<span class="w">     </span>https://&lt;bunkerweb-host&gt;:5443/ping
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -3486,7 +3486,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 </div>
 </div>
-<h2 id="anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
 <table>
@@ -3564,12 +3564,12 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </ol>
 <div class="admonition important">
 <p class="admonition-title">关于 <code>ANTIBOT_URI</code> 设置</p>
-<p>确保 <code>ANTIBOT_URI</code> 是您网站上一个未被使用的唯一 URL。</p>
 </div>
+<p>确保 <code>ANTIBOT_URI</code> 是您网站上一个未被使用的唯一 URL。</p>
 <div class="admonition warning">
 <p class="admonition-title">集群环境中的会话配置</p>
-<p>antibot 功能使用 cookie 来跟踪用户是否已完成挑战。如果您在集群环境中运行 BunkerWeb（多个 BunkerWeb 实例），您<strong>必须</strong>正确配置会话管理。这涉及在所有 BunkerWeb 实例中将 <code>SESSIONS_SECRET</code> 和 <code>SESSIONS_NAME</code> 设置设置为<strong>相同的值</strong>。如果您不这样做，用户可能会被反复提示完成 antibot 挑战。您可以在<a href="#sessions">此处</a>找到有关会话配置的更多信息。</p>
 </div>
+<p>antibot 功能使用 cookie 来跟踪用户是否已完成挑战。如果您在集群环境中运行 BunkerWeb（多个 BunkerWeb 实例），您<strong>必须</strong>正确配置会话管理。这涉及在所有 BunkerWeb 实例中将 <code>SESSIONS_SECRET</code> 和 <code>SESSIONS_NAME</code> 设置设置为<strong>相同的值</strong>。如果您不这样做，用户可能会被反复提示完成 antibot 挑战。您可以在<a href="#sessions">此处</a>找到有关会话配置的更多信息。</p>
 <h3 id="_9">通用设置</h3>
 <p>以下设置在所有挑战机制中共享：</p>
 <table>
@@ -4184,12 +4184,12 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </table>
 <div class="admonition warning">
 <p class="admonition-title">安全注意事项</p>
-<p>HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。</p>
 </div>
+<p>HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。</p>
 <div class="admonition tip">
 <p class="admonition-title">使用多个凭据</p>
-<p>您可以为访问配置多个用户名/密码对。每个 <code>AUTH_BASIC_USER</code> 设置都应有一个对应的 <code>AUTH_BASIC_PASSWORD</code> 设置。</p>
 </div>
+<p>您可以为访问配置多个用户名/密码对。每个 <code>AUTH_BASIC_USER</code> 设置都应有一个对应的 <code>AUTH_BASIC_PASSWORD</code> 设置。</p>
 <h3 id="_15">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">全站保护</label><label for="__tabbed_5_2">保护特定区域</label><label for="__tabbed_5_3">多个用户</label></div>
 <div class="tabbed-content">
@@ -4313,12 +4313,12 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">安全第一</p>
-<p>在任何恢复操作之前，备份插件会自动在临时位置创建您当前数据库状态的备份。如果您需要还原恢复操作，这提供了一个额外的保障。</p>
 </div>
+<p>在任何恢复操作之前，备份插件会自动在临时位置创建您当前数据库状态的备份。如果您需要还原恢复操作，这提供了一个额外的保障。</p>
 <div class="admonition warning">
 <p class="admonition-title">数据库兼容性</p>
-<p>备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。</p>
 </div>
+<p>备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。</p>
 <h3 id="_19">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">每日备份，保留 7 天</label><label for="__tabbed_6_2">每周备份，延长保留期</label><label for="__tabbed_6_3">每月备份到自定义位置</label></div>
 <div class="tabbed-content">
@@ -4348,7 +4348,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 </div>
-<h2 id="backup-s3-pro">Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
@@ -4467,8 +4467,8 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">流模式</p>
-<p>在<strong>流模式</strong>下，只有 <code>444</code> 状态码被视为“不良”并会触发此行为。</p>
 </div>
+<p>在<strong>流模式</strong>下，只有 <code>444</code> 状态码被视为“不良”并会触发此行为。</p>
 <h3 id="_21">配置设置</h3>
 <table>
 <thead>
@@ -4527,12 +4527,12 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </table>
 <div class="admonition warning">
 <p class="admonition-title">误报</p>
-<p>在设置阈值和计数时间时要小心。将这些值设置得太低可能会无意中封禁在浏览您网站时遇到错误的合法用户。</p>
 </div>
+<p>在设置阈值和计数时间时要小心。将这些值设置得太低可能会无意中封禁在浏览您网站时遇到错误的合法用户。</p>
 <div class="admonition tip">
 <p class="admonition-title">调整您的配置</p>
-<p>从保守的设置开始（更高的阈值，更短的封禁时间），并根据您的具体需求和流量模式进行调整。监控您的日志以确保合法用户不会被错误地封禁。</p>
 </div>
+<p>从保守的设置开始（更高的阈值，更短的封禁时间），并根据您的具体需求和流量模式进行调整。监控您的日志以确保合法用户不会被错误地封禁。</p>
 <h3 id="_22">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:4"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">默认配置</label><label for="__tabbed_7_2">严格配置</label><label for="__tabbed_7_3">宽松配置</label><label for="__tabbed_7_4">永久封禁配置</label></div>
 <div class="tabbed-content">
@@ -4600,8 +4600,8 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </ol>
 <div class="admonition info">
 <p class="admonition-title">流模式</p>
-<p>当使用流模式时，只会执行 IP、rDNS 和 ASN 检查。</p>
 </div>
+<p>当使用流模式时，只会执行 IP、rDNS 和 ASN 检查。</p>
 <h3 id="_24">配置设置</h3>
 <p><strong>通用</strong></p>
 <table>
@@ -4631,292 +4631,111 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:6"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><input id="__tabbed_8_5" name="__tabbed_8" type="radio" /><input id="__tabbed_8_6" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">社区黑名单</label><label for="__tabbed_8_2">IP 地址</label><label for="__tabbed_8_3">反向 DNS</label><label for="__tabbed_8_4">ASN</label><label for="__tabbed_8_5">用户代理</label><label for="__tabbed_8_6">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:1"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">社区黑名单</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block">
+<div class="tabbed-block"></div>
+</div>
+</div>
 <p><strong>这是做什么的：</strong> 使您能够快速添加维护良好的、来自社区的黑名单，而无需手动配置 URL。</p>
-<p><code>BLACKLIST_COMMUNITY_LISTS</code> 设置允许您从精选的黑名单源中进行选择。可用选项包括：</p>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>描述</th>
-<th>来源</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ip:laurent-minne-data-shield-aggressive</code></td>
-<td>Data-Shield IPv4 黑名单。DST = 欧洲</td>
-<td></td>
-</tr>
-<tr>
-<td><code>https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt</code></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>ip:danmeuk-tor-exit</code></td>
-<td>Tor 出口节点 IP (dan.me.uk)</td>
-<td><code>https://www.dan.me.uk/torlist/?exit</code></td>
-</tr>
-<tr>
-<td><code>ua:mitchellkrogza-bad-user-agents</code></td>
-<td>Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail</td>
-<td><code>https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list</code></td>
-</tr>
-</tbody>
-</table>
-<p><strong>配置：</strong> 指定多个列表，以空格分隔。例如：
-<div class="highlight"><pre><span></span><code><span class="nt">BLACKLIST_COMMUNITY_LISTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ip:danmeuk-tor-exit</span><span class="nv"> </span><span class="s">ua:mitchellkrogza-bad-user-agents&quot;</span>
-</code></pre></div></p>
-<div class="admonition tip">
-<p class="admonition-title">社区与手动配置</p>
-<p>社区黑名单提供了一种方便的方式来开始使用经过验证的黑名单源。您可以将它们与手动 URL 配置一起使用，以实现最大的灵活性。</p>
+<pre><code>`BLACKLIST_COMMUNITY_LISTS` 设置允许您从精选的黑名单源中进行选择。可用选项包括：
+
+| ID                                                                                                                           | 描述                                                                                                                                                                        | 来源                                                                                                                           |
+| ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `ip:laurent-minne-data-shield-aggressive`                                                                                    | Data-Shield IPv4 黑名单。DST = 欧洲                                                                                                                                         |
+| `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt` |
+| `ip:danmeuk-tor-exit`                                                                                                        | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
+| `ua:mitchellkrogza-bad-user-agents`                                                                                          | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
+
+**配置：** 指定多个列表，以空格分隔。例如：
+```yaml
+BLACKLIST_COMMUNITY_LISTS: "ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents"
+```
+
+!!! tip "社区与手动配置"
+    社区黑名单提供了一种方便的方式来开始使用经过验证的黑名单源。您可以将它们与手动 URL 配置一起使用，以实现最大的灵活性。
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">IP 地址</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
 </div>
-<div class="tabbed-block">
 <p><strong>这是做什么的：</strong> 根据访问者的 IP 地址或网络阻止访问。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>BLACKLIST_IP</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 黑名单：</strong> 要阻止的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_IP</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 忽略列表：</strong> 应绕过 IP 黑名单检查的 IP 地址或网络列表。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IP_URLS</code></td>
-<td><code>https://www.dan.me.uk/torlist/?exit</code></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 黑名单 URL：</strong> 包含要阻止的 IP 地址或网络的 URL 列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_IP_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 忽略列表 URL：</strong> 包含要忽略的 IP 地址或网络的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
-<p>默认的 <code>BLACKLIST_IP_URLS</code> 设置包含一个提供<strong>已知 Tor 出口节点列表</strong>的 URL。这是恶意流量的常见来源，对于许多网站来说是一个很好的起点。</p>
+<pre><code>| 设置                       | 默认值                                | 上下文    | 多个 | 描述                                                                    |
+| -------------------------- | ------------------------------------- | --------- | ---- | ----------------------------------------------------------------------- |
+| `BLACKLIST_IP`             |                                       | multisite | 否   | **IP 黑名单：** 要阻止的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。 |
+| `BLACKLIST_IGNORE_IP`      |                                       | multisite | 否   | **IP 忽略列表：** 应绕过 IP 黑名单检查的 IP 地址或网络列表。            |
+| `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | 否   | **IP 黑名单 URL：** 包含要阻止的 IP 地址或网络的 URL 列表，以空格分隔。 |
+| `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | 否   | **IP 忽略列表 URL：** 包含要忽略的 IP 地址或网络的 URL 列表。           |
+
+默认的 `BLACKLIST_IP_URLS` 设置包含一个提供**已知 Tor 出口节点列表**的 URL。这是恶意流量的常见来源，对于许多网站来说是一个很好的起点。
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">反向 DNS</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>这是做什么的：</strong> 根据访问者的反向域名阻止访问。这对于根据其组织域名阻止已知的扫描器和爬虫非常有用。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>BLACKLIST_RDNS</code></td>
-<td><code>.shodan.io .censys.io</code></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 黑名单：</strong> 要阻止的反向 DNS 后缀列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_RDNS_GLOBAL</code></td>
-<td><code>yes</code></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>仅限 rDNS 全局：</strong> 当设置为 <code>yes</code> 时，仅对全局 IP 地址执行 rDNS 检查。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_RDNS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 忽略列表：</strong> 应绕过 rDNS 黑名单检查的反向 DNS 后缀列表。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_RDNS_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 黑名单 URL：</strong> 包含要阻止的反向 DNS 后缀的 URL 列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_RDNS_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 忽略列表 URL：</strong> 包含要忽略的反向 DNS 后缀的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
-<p>默认的 <code>BLACKLIST_RDNS</code> 设置包括常见的扫描器域名，如 <strong>Shodan</strong> 和 <strong>Censys</strong>。这些通常被安全研究人员和扫描器用来识别易受攻击的网站。</p>
+<pre><code>| 设置                         | 默认值                  | 上下文    | 多个 | 描述                                                                     |
+| ---------------------------- | ----------------------- | --------- | ---- | ------------------------------------------------------------------------ |
+| `BLACKLIST_RDNS`             | `.shodan.io .censys.io` | multisite | 否   | **rDNS 黑名单：** 要阻止的反向 DNS 后缀列表，以空格分隔。                |
+| `BLACKLIST_RDNS_GLOBAL`      | `yes`                   | multisite | 否   | **仅限 rDNS 全局：** 当设置为 `yes` 时，仅对全局 IP 地址执行 rDNS 检查。 |
+| `BLACKLIST_IGNORE_RDNS`      |                         | multisite | 否   | **rDNS 忽略列表：** 应绕过 rDNS 黑名单检查的反向 DNS 后缀列表。          |
+| `BLACKLIST_RDNS_URLS`        |                         | multisite | 否   | **rDNS 黑名单 URL：** 包含要阻止的反向 DNS 后缀的 URL 列表，以空格分隔。 |
+| `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | 否   | **rDNS 忽略列表 URL：** 包含要忽略的反向 DNS 后缀的 URL 列表。           |
+
+默认的 `BLACKLIST_RDNS` 设置包括常见的扫描器域名，如 **Shodan** 和 **Censys**。这些通常被安全研究人员和扫描器用来识别易受攻击的网站。
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:1"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">ASN</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>这是做什么的：</strong> 阻止来自特定网络提供商的访问者。ASN 就像互联网的邮政编码——它们标识一个 IP 属于哪个提供商或组织。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>BLACKLIST_ASN</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 黑名单：</strong> 要阻止的自治系统号列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_ASN</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 忽略列表：</strong> 应绕过 ASN 黑名单检查的 ASN 列表。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_ASN_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 黑名单 URL：</strong> 包含要阻止的 ASN 的 URL 列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_ASN_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 忽略列表 URL：</strong> 包含要忽略的 ASN 的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                            |
+| --------------------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
+| `BLACKLIST_ASN`             |        | multisite | 否   | **ASN 黑名单：** 要阻止的自治系统号列表，以空格分隔。           |
+| `BLACKLIST_IGNORE_ASN`      |        | multisite | 否   | **ASN 忽略列表：** 应绕过 ASN 黑名单检查的 ASN 列表。           |
+| `BLACKLIST_ASN_URLS`        |        | multisite | 否   | **ASN 黑名单 URL：** 包含要阻止的 ASN 的 URL 列表，以空格分隔。 |
+| `BLACKLIST_IGNORE_ASN_URLS` |        | multisite | 否   | **ASN 忽略列表 URL：** 包含要忽略的 ASN 的 URL 列表。           |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">用户代理</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>这是做什么的：</strong> 根据访问者声称使用的浏览器或工具来阻止访问。这对于诚实地表明自己身份的机器人（例如“ScannerBot”或“WebHarvestTool”）是有效的。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>BLACKLIST_USER_AGENT</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理黑名单：</strong> 要阻止的用户代理模式（PCRE 正则表达式）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_USER_AGENT</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理忽略列表：</strong> 应绕过用户代理黑名单检查的用户代理模式列表。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_USER_AGENT_URLS</code></td>
-<td><code>https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list</code></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理黑名单 URL：</strong> 包含要阻止的用户代理模式的 URL 列表。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_USER_AGENT_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理忽略列表 URL：</strong> 包含要忽略的用户代理模式的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
-<p>默认的 <code>BLACKLIST_USER_AGENT_URLS</code> 设置包含一个提供<strong>已知恶意用户代理列表</strong>的 URL。这些通常被恶意机器人和扫描器用来识别易受攻击的网站。</p>
+<pre><code>| 设置                               | 默认值                                                                                                                         | 上下文    | 多个 | 描述                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | ---- | ------------------------------------------------------------------------------ |
+| `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | 否   | **用户代理黑名单：** 要阻止的用户代理模式（PCRE 正则表达式）列表，以空格分隔。 |
+| `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | 否   | **用户代理忽略列表：** 应绕过用户代理黑名单检查的用户代理模式列表。            |
+| `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | 否   | **用户代理黑名单 URL：** 包含要阻止的用户代理模式的 URL 列表。                 |
+| `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | 否   | **用户代理忽略列表 URL：** 包含要忽略的用户代理模式的 URL 列表。               |
+
+默认的 `BLACKLIST_USER_AGENT_URLS` 设置包含一个提供**已知恶意用户代理列表**的 URL。这些通常被恶意机器人和扫描器用来识别易受攻击的网站。
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">URI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>这是做什么的：</strong> 阻止对您网站上特定 URL 的请求。这对于阻止尝试访问管理页面、登录表单或其他可能成为攻击目标的敏感区域非常有用。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>BLACKLIST_URI</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 黑名单：</strong> 要阻止的 URI 模式（PCRE 正则表达式）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_URI</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 忽略列表：</strong> 应绕过 URI 黑名单检查的 URI 模式列表。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_URI_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 黑名单 URL：</strong> 包含要阻止的 URI 模式的 URL 列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>BLACKLIST_IGNORE_URI_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 忽略列表 URL：</strong> 包含要忽略的 URI 模式的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
+<pre><code>| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                    |
+| --------------------------- | ------ | --------- | ---- | ----------------------------------------------------------------------- |
+| `BLACKLIST_URI`             |        | multisite | 否   | **URI 黑名单：** 要阻止的 URI 模式（PCRE 正则表达式）列表，以空格分隔。 |
+| `BLACKLIST_IGNORE_URI`      |        | multisite | 否   | **URI 忽略列表：** 应绕过 URI 黑名单检查的 URI 模式列表。               |
+| `BLACKLIST_URI_URLS`        |        | multisite | 否   | **URI 黑名单 URL：** 包含要阻止的 URI 模式的 URL 列表，以空格分隔。     |
+| `BLACKLIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。               |
+</code></pre>
 <div class="admonition info">
 <p class="admonition-title">URL 格式支持</p>
-<p>所有 <code>*_URLS</code> 设置都支持 HTTP/HTTPS URL 以及使用 <code>file:///</code> 前缀的本地文件路径。使用 <code>http://user:pass@url</code> 格式支持基本身份验证。</p>
 </div>
+<p>所有 <code>*_URLS</code> 设置都支持 HTTP/HTTPS URL 以及使用 <code>file:///</code> 前缀的本地文件路径。使用 <code>http://user:pass@url</code> 格式支持基本身份验证。</p>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>来自 URL 的黑名单会每小时自动下载和更新，以确保您的保护措施始终能应对最新的威胁。</p>
 </div>
+<p>来自 URL 的黑名单会每小时自动下载和更新，以确保您的保护措施始终能应对最新的威胁。</p>
 <h3 id="_25">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">基本的 IP 和用户代理保护</label><label for="__tabbed_9_2">带有自定义规则的高级保护</label><label for="__tabbed_9_3">使用本地文件</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">基本的 IP 和用户代理保护</label><label for="__tabbed_14_2">带有自定义规则的高级保护</label><label for="__tabbed_14_3">使用本地文件</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个简单的配置，使用社区黑名单阻止已知的 Tor 出口节点和常见的恶意用户代理：</p>
@@ -5025,14 +4844,14 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </table>
 <div class="admonition tip">
 <p class="admonition-title">优化压缩级别</p>
-<p>默认的压缩级别 (6) 在压缩率和 CPU 使用率之间提供了良好的平衡。对于静态内容或服务器 CPU 资源充足的情况，可以考虑增加到 9-11 以获得最大压缩。对于动态内容或 CPU 资源有限的情况，您可能希望使用 4-5 以实现更快的压缩和合理的尺寸减小。</p>
 </div>
+<p>默认的压缩级别 (6) 在压缩率和 CPU 使用率之间提供了良好的平衡。对于静态内容或服务器 CPU 资源充足的情况，可以考虑增加到 9-11 以获得最大压缩。对于动态内容或 CPU 资源有限的情况，您可能希望使用 4-5 以实现更快的压缩和合理的尺寸减小。</p>
 <div class="admonition info">
 <p class="admonition-title">浏览器支持</p>
-<p>所有现代浏览器，包括 Chrome、Firefox、Edge、Safari 和 Opera，都支持 Brotli。旧版浏览器会自动接收未压缩的内容，以确保兼容性。</p>
 </div>
+<p>所有现代浏览器，包括 Chrome、Firefox、Edge、Safari 和 Opera，都支持 Brotli。旧版浏览器会自动接收未压缩的内容，以确保兼容性。</p>
 <h3 id="_28">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">基本配置</label><label for="__tabbed_10_2">最大压缩</label><label for="__tabbed_10_3">平衡性能</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">基本配置</label><label for="__tabbed_15_2">最大压缩</label><label for="__tabbed_15_3">平衡性能</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个使用默认设置启用 Brotli 的标准配置：</p>
@@ -5120,14 +4939,14 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </table>
 <div class="admonition tip">
 <p class="admonition-title">网络保护</p>
-<p>当 BunkerNet 检测到某个 IP 地址在多个 BunkerWeb 实例中参与了恶意活动时，它会将该 IP 添加到集体黑名单中。这提供了一个主动的防御层，在威胁直接攻击您之前就保护您的网站。</p>
 </div>
+<p>当 BunkerNet 检测到某个 IP 地址在多个 BunkerWeb 实例中参与了恶意活动时，它会将该 IP 添加到集体黑名单中。这提供了一个主动的防御层，在威胁直接攻击您之前就保护您的网站。</p>
 <div class="admonition info">
 <p class="admonition-title">匿名报告</p>
-<p>在向 BunkerNet 报告威胁信息时，您的实例只分享识别威胁所需的数据：IP 地址、阻止原因和最少的上下文数据。不会分享有关您的用户的个人信息或有关您网站的敏感详细信息。</p>
 </div>
+<p>在向 BunkerNet 报告威胁信息时，您的实例只分享识别威胁所需的数据：IP 地址、阻止原因和最少的上下文数据。不会分享有关您的用户的个人信息或有关您网站的敏感详细信息。</p>
 <h3 id="_31">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">默认配置（推荐）</label><label for="__tabbed_11_2">禁用配置</label><label for="__tabbed_11_3">自定义服务器配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">默认配置（推荐）</label><label for="__tabbed_16_2">禁用配置</label><label for="__tabbed_16_3">自定义服务器配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>默认配置使用官方 BunkerWeb API 服务器启用 BunkerNet：</p>
@@ -5302,12 +5121,12 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </table>
 <div class="admonition tip">
 <p class="admonition-title">优化预检请求</p>
-<p><code>CORS_MAX_AGE</code> 设置决定了浏览器缓存预检请求结果的时间。将其设置为一个较高的值（例如默认的 86400 秒/24 小时）可以减少预检请求的数量，从而提高频繁访问资源的性能。</p>
 </div>
+<p><code>CORS_MAX_AGE</code> 设置决定了浏览器缓存预检请求结果的时间。将其设置为一个较高的值（例如默认的 86400 秒/24 小时）可以减少预检请求的数量，从而提高频繁访问资源的性能。</p>
 <div class="admonition warning">
 <p class="admonition-title">安全注意事项</p>
-<p>在将 <code>CORS_ALLOW_ORIGIN</code> 设置为 <code>*</code>（所有来源）或将 <code>CORS_ALLOW_CREDENTIALS</code> 设置为 <code>yes</code> 时要小心，因为如果管理不当，这些配置可能会引入安全风险。通常更安全的做法是明确列出受信任的来源，并限制允许的方法和标头。</p>
 </div>
+<p>在将 <code>CORS_ALLOW_ORIGIN</code> 设置为 <code>*</code>（所有来源）或将 <code>CORS_ALLOW_CREDENTIALS</code> 设置为 <code>yes</code> 时要小心，因为如果管理不当，这些配置可能会引入安全风险。通常更安全的做法是明确列出受信任的来源，并限制允许的方法和标头。</p>
 <h3 id="_34">示例配置</h3>
 <p>以下是 <code>CORS_ALLOW_ORIGIN</code> 设置的可能值及其行为的示例：</p>
 <ul>
@@ -5318,7 +5137,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong><code>^https://(www\.example1\.com|www\.example2\.com)$</code></strong>：允许来自 <code>https://www.example1.com</code> 或 <code>https://www.example2.com</code> 的请求。</li>
 <li><strong><code>^https?://www\.example\.com$</code></strong>：允许来自 <code>https://www.example.com</code> 和 <code>http://www.example.com</code> 的请求。</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:5"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><input id="__tabbed_12_4" name="__tabbed_12" type="radio" /><input id="__tabbed_12_5" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">基本配置</label><label for="__tabbed_12_2">公共 API 配置</label><label for="__tabbed_12_3">多个受信任的域</label><label for="__tabbed_12_4">子域通配符</label><label for="__tabbed_12_5">多个域模式</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:5"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><input id="__tabbed_17_5" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">基本配置</label><label for="__tabbed_17_2">公共 API 配置</label><label for="__tabbed_17_3">多个受信任的域</label><label for="__tabbed_17_4">子域通配符</label><label for="__tabbed_17_5">多个域模式</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个简单的配置，允许来自同一域的跨源请求：</p>
@@ -5441,14 +5260,14 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </table>
 <div class="admonition tip">
 <p class="admonition-title">优化缓存设置</p>
-<p>对于频繁更新的内容，请考虑使用较短的 max-age 值。对于很少更改的内容（如带版本的 JavaScript 库或徽标），请使用较长的缓存时间。默认值 15552000 秒（180 天）适用于大多数静态资产。</p>
 </div>
+<p>对于频繁更新的内容，请考虑使用较短的 max-age 值。对于很少更改的内容（如带版本的 JavaScript 库或徽标），请使用较长的缓存时间。默认值 15552000 秒（180 天）适用于大多数静态资产。</p>
 <div class="admonition info">
 <p class="admonition-title">浏览器行为</p>
-<p>不同的浏览器对缓存的实现略有不同，但所有现代浏览器都遵循标准的 Cache-Control 指令。ETags 提供了一个额外的验证机制，可以帮助浏览器确定缓存的内容是否仍然有效。</p>
 </div>
+<p>不同的浏览器对缓存的实现略有不同，但所有现代浏览器都遵循标准的 Cache-Control 指令。ETags 提供了一个额外的验证机制，可以帮助浏览器确定缓存的内容是否仍然有效。</p>
 <h3 id="_37">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">基本配置</label><label for="__tabbed_13_2">积极缓存</label><label for="__tabbed_13_3">混合内容策略</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:3"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">基本配置</label><label for="__tabbed_18_2">积极缓存</label><label for="__tabbed_18_3">混合内容策略</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个简单的配置，为常见的静态资产启用缓存：</p>
@@ -5525,22 +5344,21 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </table>
 <div class="admonition tip">
 <p class="admonition-title">白名单与黑名单</p>
-<p>选择最适合您需求的方法：</p>
-<ul>
-<li>当您想将访问限制在少数几个国家/地区时，请使用白名单。</li>
-<li>当您想阻止来自特定问题地区的访问，同时允许其他所有地区时，请使用黑名单。</li>
-</ul>
 </div>
+<p>选择最适合您需求的方法：</p>
+<pre><code>- 当您想将访问限制在少数几个国家/地区时，请使用白名单。
+- 当您想阻止来自特定问题地区的访问，同时允许其他所有地区时，请使用黑名单。
+</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">优先规则</p>
-<p>如果同时配置了白名单和黑名单，则白名单优先。这意味着系统首先检查一个国家/地区是否在白名单中；如果不在，无论黑名单配置如何，访问都将被拒绝。</p>
 </div>
+<p>如果同时配置了白名单和黑名单，则白名单优先。这意味着系统首先检查一个国家/地区是否在白名单中；如果不在，无论黑名单配置如何，访问都将被拒绝。</p>
 <div class="admonition info">
 <p class="admonition-title">国家/地区检测</p>
-<p>BunkerWeb 使用 <a href="https://db-ip.com/db/download/ip-to-country-lite">lite db-ip mmdb 数据库</a>根据 IP 地址确定来源国家/地区。</p>
 </div>
+<p>BunkerWeb 使用 <a href="https://db-ip.com/db/download/ip-to-country-lite">lite db-ip mmdb 数据库</a>根据 IP 地址确定来源国家/地区。</p>
 <h3 id="_40">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:4"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><input id="__tabbed_14_4" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">仅白名单</label><label for="__tabbed_14_2">仅黑名单</label><label for="__tabbed_14_3">仅限欧盟访问</label><label for="__tabbed_14_4">高风险国家/地区被阻止</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">仅白名单</label><label for="__tabbed_19_2">仅黑名单</label><label for="__tabbed_19_3">仅限欧盟访问</label><label for="__tabbed_19_4">高风险国家/地区被阻止</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>仅允许来自美国、加拿大和英国的访问：</p>
@@ -5589,157 +5407,175 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </ol>
 </div>
 <h3 id="_41">设置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">All-in-one</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:1"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Docker</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block">
+<div class="tabbed-block"></div>
+</div>
+</div>
 <p><strong>采集文件</strong></p>
-<p>您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。由于 BunkerWeb 基于 NGINX，您可以在采集文件中为 <code>type</code> 参数使用 <code>nginx</code> 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：</p>
-<div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb.log</span>
-<span class="nt">labels</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
-</code></pre></div>
-<p><strong>应用程序安全组件（<em>可选</em>）</strong></p>
-<p>CrowdSec 还提供了一个<a href="https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">应用程序安全组件</a>，可用于保护您的应用程序免受攻击。如果您想使用它，必须为 AppSec 组件创建另一个采集文件：</p>
-<div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
-<span class="nt">labels</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
-<span class="nt">listen_addr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0:7422</span>
-<span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">appsec</span>
-</code></pre></div>
-<p><strong>Syslog</strong></p>
-<p>对于基于容器的集成，我们建议将 BunkerWeb 容器的日志重定向到 syslog 服务，以便 CrowdSec 可以轻松访问它们。这是一个 syslog-ng 的示例配置，它会将来自 BunkerWeb 的原始日志存储到本地的 <code>/var/log/bunkerweb.log</code> 文件中：</p>
-<div class="highlight"><pre><span></span><code>@version: 4.8
+<pre><code>您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。由于 BunkerWeb 基于 NGINX，您可以在采集文件中为 `type` 参数使用 `nginx` 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：
+
+```yaml
+filenames:
+  - /var/log/bunkerweb.log
+labels:
+  type: nginx
+```
+
+**应用程序安全组件（*可选*）**
+
+CrowdSec 还提供了一个[应用程序安全组件](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs)，可用于保护您的应用程序免受攻击。如果您想使用它，必须为 AppSec 组件创建另一个采集文件：
+
+```yaml
+appsec_config: crowdsecurity/appsec-default
+labels:
+  type: appsec
+listen_addr: 0.0.0.0:7422
+source: appsec
+```
+
+**Syslog**
+
+对于基于容器的集成，我们建议将 BunkerWeb 容器的日志重定向到 syslog 服务，以便 CrowdSec 可以轻松访问它们。这是一个 syslog-ng 的示例配置，它会将来自 BunkerWeb 的原始日志存储到本地的 `/var/log/bunkerweb.log` 文件中：
+
+```syslog
+@version: 4.8
 
 source s_net {
     udp(
-        ip(&quot;0.0.0.0&quot;)
+        ip("0.0.0.0")
     );
 };
 
 template t_imp {
-    template(&quot;$MSG\n&quot;);
+    template("$MSG\n");
     template_escape(no);
 };
 
 destination d_file {
-    file(&quot;/var/log/bunkerweb.log&quot; template(t_imp));
+    file("/var/log/bunkerweb.log" template(t_imp));
 };
 
 log {
     source(s_net);
     destination(d_file);
 };
-</code></pre></div>
-<p><strong>Docker Compose</strong></p>
-<p>这是您可以使用的 docker-compose 样板（不要忘记更新 bouncer 密钥）：</p>
-<div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
-<span class="w">  </span><span class="c1"># 我们使用一个锚点来避免在两个服务中重复相同的设置</span>
-<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># 确保设置正确的 IP 范围，以便调度器可以将配置发送到实例</span>
+```
 
-<span class="nt">services</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="c1"># 这是将用于在调度器中识别实例的名称</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
-<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w"> </span><span class="c1"># 用于 QUIC / HTTP3 支持</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span><span class="w"> </span><span class="c1"># 我们使用锚点来避免为所有服务重复相同的设置</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
-<span class="w">    </span><span class="nt">logging</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">syslog</span><span class="w"> </span><span class="c1"># 将日志发送到 syslog</span>
-<span class="w">      </span><span class="nt">options</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># syslog 服务的 IP 地址</span>
+**Docker Compose**
 
-<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
-<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># 确保设置正确的实例名称</span>
-<span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># 记得为数据库设置一个更强的密码</span>
-<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
-<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">USE_CROWDSEC</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:8080&quot;</span><span class="w"> </span><span class="c1"># 这是同一网络中 CrowdSec 容器 API 的地址</span>
-<span class="w">      </span><span class="nt">CROWDSEC_APPSEC_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:7422&quot;</span><span class="w"> </span><span class="c1"># 如果您不想使用 AppSec 组件，请注释掉此行</span>
-<span class="w">      </span><span class="nt">CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># 记得为 bouncer 设置一个更强的密钥</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># 用于持久化缓存和备份等其他数据</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+这是您可以使用的 docker-compose 样板（不要忘记更新 bouncer 密钥）：
 
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
-<span class="w">    </span><span class="c1"># 我们设置了最大允许的数据包大小以避免大查询的问题</span>
-<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
-<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># 记得为数据库设置一个更强的密码</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+```yaml
+x-bw-env: &amp;bw-env
+  # 我们使用一个锚点来避免在两个服务中重复相同的设置
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # 确保设置正确的 IP 范围，以便调度器可以将配置发送到实例
 
-<span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.0</span><span class="w"> </span><span class="c1"># 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># 持久化 CrowdSec 数据</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># BunkerWeb 的日志，供 CrowdSec 解析</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./acquis.yaml:/etc/crowdsec/acquis.yaml</span><span class="w"> </span><span class="c1"># BunkerWeb 日志的采集文件</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml</span><span class="w"> </span><span class="c1"># 如果您不想使用 AppSec 组件，请注释掉此行</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">BOUNCER_KEY_bunkerweb</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># 记得为 bouncer 设置一个更强的密钥</span>
-<span class="w">      </span><span class="nt">COLLECTIONS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;crowdsecurity/nginx</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-virtual-patching</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-generic-rules&quot;</span>
-<span class="w">      </span><span class="c1">#   COLLECTIONS: &quot;crowdsecurity/nginx&quot; # 如果您不想使用 AppSec 组件，请改用此行</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+services:
+  bunkerweb:
+    # 这是将用于在调度器中识别实例的名称
+    image: bunkerity/bunkerweb:testing
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # 用于 QUIC / HTTP3 支持
+    environment:
+      &lt;&lt;: *bw-env # 我们使用锚点来避免为所有服务重复相同的设置
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+    logging:
+      driver: syslog # 将日志发送到 syslog
+      options:
+        syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
-<span class="w">  </span><span class="nt">syslog</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balabit/syslog-ng:4.9.0</span>
-<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BIND_SERVICE</span><span class="w">  </span><span class="c1"># 绑定到低端口</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_BROADCAST</span><span class="w">  </span><span class="c1"># 发送广播</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_RAW</span><span class="w">  </span><span class="c1"># 使用原始套接字</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_READ_SEARCH</span><span class="w">  </span><span class="c1"># 绕过权限读取文件</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DAC_OVERRIDE</span><span class="w">  </span><span class="c1"># 覆盖文件权限</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CHOWN</span><span class="w">  </span><span class="c1"># 更改所有权</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SYSLOG</span><span class="w">  </span><span class="c1"># 写入系统日志</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log/bunkerweb</span><span class="w"> </span><span class="c1"># 用于存储日志的卷</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf</span><span class="w"> </span><span class="c1"># syslog-ng 配置文件</span>
-<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">bw-universe</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">ipv4_address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.254</span>
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:testing
+    environment:
+      &lt;&lt;: *bw-env
+      BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
+      DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 记得为数据库设置一个更强的密码
+      SERVER_NAME: ""
+      MULTISITE: "yes"
+      USE_CROWDSEC: "yes"
+      CROWDSEC_API: "http://crowdsec:8080" # 这是同一网络中 CrowdSec 容器 API 的地址
+      CROWDSEC_APPSEC_URL: "http://crowdsec:7422" # 如果您不想使用 AppSec 组件，请注释掉此行
+      CROWDSEC_API_KEY: "s3cr3tb0unc3rk3y" # 记得为 bouncer 设置一个更强的密钥
+    volumes:
+      - bw-storage:/data # 用于持久化缓存和备份等其他数据
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
 
-<span class="nt">volumes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-logs</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">cs-data</span><span class="p">:</span>
+  bw-db:
+    image: mariadb:11
+    # 我们设置了最大允许的数据包大小以避免大查询的问题
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # 记得为数据库设置一个更强的密码
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
 
-<span class="nt">networks</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
-<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"> </span><span class="c1"># 确保设置正确的 IP 范围，以便调度器可以将配置发送到实例</span>
-<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
-<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
-</code></pre></div>
-</div>
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.7.0 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
+    volumes:
+      - cs-data:/var/lib/crowdsec/data # 持久化 CrowdSec 数据
+      - bw-logs:/var/log:ro # BunkerWeb 的日志，供 CrowdSec 解析
+      - ./acquis.yaml:/etc/crowdsec/acquis.yaml # BunkerWeb 日志的采集文件
+      - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # 如果您不想使用 AppSec 组件，请注释掉此行
+    environment:
+      BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # 记得为 bouncer 设置一个更强的密钥
+      COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+      #   COLLECTIONS: "crowdsecurity/nginx" # 如果您不想使用 AppSec 组件，请改用此行
+    networks:
+      - bw-universe
+
+  syslog:
+    image: balabit/syslog-ng:4.9.0
+    cap_add:
+      - NET_BIND_SERVICE  # 绑定到低端口
+      - NET_BROADCAST  # 发送广播
+      - NET_RAW  # 使用原始套接字
+      - DAC_READ_SEARCH  # 绕过权限读取文件
+      - DAC_OVERRIDE  # 覆盖文件权限
+      - CHOWN  # 更改所有权
+      - SYSLOG  # 写入系统日志
+    volumes:
+      - bw-logs:/var/log/bunkerweb # 用于存储日志的卷
+      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf # syslog-ng 配置文件
+    networks:
+        bw-universe:
+          ipv4_address: 10.20.30.254
+
+volumes:
+  bw-data:
+  bw-storage:
+  bw-logs:
+  cs-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24 # 确保设置正确的 IP 范围，以便调度器可以将配置发送到实例
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db
+```
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">All-in-one</label></div>
+<div class="tabbed-content">
 <div class="tabbed-block">
 <p>您需要安装 CrowdSec 并将其配置为解析 BunkerWeb 日志。请按照<a href="https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs#scenarios">官方文档</a>进行操作。</p>
 <p>要使 CrowdSec 能够解析 BunkerWeb 日志，请将以下行添加到位于 <code>/etc/crowdsec/acquis.yaml</code> 的采集文件中：</p>
@@ -5933,15 +5769,9 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<div class="admonition info">
-<p class="admonition-title">关于操作模式</p>
-<ul>
-<li><strong>实时模式</strong>会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。</li>
-<li><strong>流模式</strong>会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。</li>
-</ul>
-</div>
+<p>!!! info "关于操作模式" - <strong>实时模式</strong>会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。- <strong>流模式</strong>会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。</p>
 <h3 id="_44">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">基本配置</label><label for="__tabbed_16_2">带有 AppSec 的高级配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">基本配置</label><label for="__tabbed_22_2">带有 AppSec 的高级配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>这是一个当 CrowdSec 在同一台主机上运行时的一个简单配置：</p>
@@ -5982,8 +5812,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ol>
 <div class="admonition info">
 <p class="admonition-title">自动证书监控</p>
-<p>当您通过将 <code>USE_CUSTOM_SSL</code> 设置为 <code>yes</code> 来启用自定义 SSL/TLS 时，BunkerWeb 会自动监控 <code>CUSTOM_SSL_CERT</code> 中指定的自定义证书。它会每天检查更改，并在检测到任何修改时重新加载 NGINX，确保始终使用最新的证书。</p>
 </div>
+<p>当您通过将 <code>USE_CUSTOM_SSL</code> 设置为 <code>yes</code> 来启用自定义 SSL/TLS 时，BunkerWeb 会自动监控 <code>CUSTOM_SSL_CERT</code> 中指定的自定义证书。它会每天检查更改，并在检测到任何修改时重新加载 NGINX，确保始终使用最新的证书。</p>
 <h3 id="_45">如何使用</h3>
 <p>请按照以下步骤配置和使用自定义 SSL 证书功能：</p>
 <ol>
@@ -5995,8 +5825,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">流模式配置</p>
-<p>对于流模式，您必须配置 <code>LISTEN_STREAM_PORT_SSL</code> 设置以指定 SSL/TLS 监听端口。此步骤对于在流模式下正常运行至关重要。</p>
 </div>
+<p>对于流模式，您必须配置 <code>LISTEN_STREAM_PORT_SSL</code> 设置以指定 SSL/TLS 监听端口。此步骤对于在流模式下正常运行至关重要。</p>
 <h3 id="_46">配置设置</h3>
 <table>
 <thead>
@@ -6055,18 +5885,18 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <div class="admonition warning">
 <p class="admonition-title">安全注意事项</p>
-<p>使用自定义证书时，请确保您的私钥得到妥善保护并具有适当的权限。文件必须可由 BunkerWeb 调度器读取。</p>
 </div>
+<p>使用自定义证书时，请确保您的私钥得到妥善保护并具有适当的权限。文件必须可由 BunkerWeb 调度器读取。</p>
 <div class="admonition tip">
 <p class="admonition-title">证书格式</p>
-<p>BunkerWeb 需要 PEM 格式的证书。如果您的证书是其他格式，您可能需要先进行转换。</p>
 </div>
+<p>BunkerWeb 需要 PEM 格式的证书。如果您的证书是其他格式，您可能需要先进行转换。</p>
 <div class="admonition info">
 <p class="admonition-title">证书链</p>
-<p>如果您的证书包含一个链（中间证书），您应该按正确的顺序提供完整的证书链，首先是您的证书，然后是任何中间证书。</p>
 </div>
+<p>如果您的证书包含一个链（中间证书），您应该按正确的顺序提供完整的证书链，首先是您的证书，然后是任何中间证书。</p>
 <h3 id="_47">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:4"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">使用文件路径</label><label for="__tabbed_17_2">使用 Base64 数据</label><label for="__tabbed_17_3">使用纯文本 PEM 数据</label><label for="__tabbed_17_4">回退配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">使用文件路径</label><label for="__tabbed_23_2">使用 Base64 数据</label><label for="__tabbed_23_3">使用纯文本 PEM 数据</label><label for="__tabbed_23_4">回退配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个使用磁盘上的证书和密钥文件的配置：</p>
@@ -6188,23 +6018,22 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <div class="admonition tip">
 <p class="admonition-title">选择 DNSBL 服务器</p>
-<p>选择信誉良好的 DNSBL 提供商以最大限度地减少误报。默认列表包括适合大多数网站的成熟服务：</p>
-<ul>
-<li><strong>bl.blocklist.de：</strong> 列出被检测到攻击其他服务器的 IP。</li>
-<li><strong>sbl.spamhaus.org：</strong> 专注于垃圾邮件源和其他恶意活动。</li>
-<li><strong>xbl.spamhaus.org：</strong> 针对受感染的系统，例如被入侵的机器或开放代理。</li>
-</ul>
 </div>
+<p>选择信誉良好的 DNSBL 提供商以最大限度地减少误报。默认列表包括适合大多数网站的成熟服务：</p>
+<pre><code>-   **bl.blocklist.de：** 列出被检测到攻击其他服务器的 IP。
+-   **sbl.spamhaus.org：** 专注于垃圾邮件源和其他恶意活动。
+-   **xbl.spamhaus.org：** 针对受感染的系统，例如被入侵的机器或开放代理。
+</code></pre>
 <div class="admonition info">
 <p class="admonition-title">DNSBL 的工作原理</p>
-<p>DNSBL 服务器通过响应特殊格式的 DNS 查询来工作。当 BunkerWeb 检查一个 IP 地址时，它会反转该 IP 并附加 DNSBL 域名。如果生成的 DNS 查询返回“成功”响应，则该 IP 被视为已列入黑名单。</p>
 </div>
+<p>DNSBL 服务器通过响应特殊格式的 DNS 查询来工作。当 BunkerWeb 检查一个 IP 地址时，它会反转该 IP 并附加 DNSBL 域名。如果生成的 DNS 查询返回“成功”响应，则该 IP 被视为已列入黑名单。</p>
 <div class="admonition warning">
 <p class="admonition-title">性能考虑</p>
-<p>虽然 BunkerWeb 优化了 DNSBL 查找的性能，但添加大量 DNSBL 服务器可能会影响响应时间。从几个信誉良好的 DNSBL 服务器开始，并在添加更多服务器之前监控性能。</p>
 </div>
+<p>虽然 BunkerWeb 优化了 DNSBL 查找的性能，但添加大量 DNSBL 服务器可能会影响响应时间。从几个信誉良好的 DNSBL 服务器开始，并在添加更多服务器之前监控性能。</p>
 <h3 id="_50">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:5"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><input id="__tabbed_18_4" name="__tabbed_18" type="radio" /><input id="__tabbed_18_5" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">基本配置</label><label for="__tabbed_18_2">最小配置</label><label for="__tabbed_18_3">排除受信任的 IP</label><label for="__tabbed_18_4">使用远程 URL</label><label for="__tabbed_18_5">使用本地文件</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:5"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><input id="__tabbed_24_4" name="__tabbed_24" type="radio" /><input id="__tabbed_24_5" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">基本配置</label><label for="__tabbed_24_2">最小配置</label><label for="__tabbed_24_3">排除受信任的 IP</label><label for="__tabbed_24_4">使用远程 URL</label><label for="__tabbed_24_5">使用本地文件</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个使用默认 DNSBL 服务器的简单配置：</p>
@@ -6313,32 +6142,35 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td>否</td>
 <td><strong>最大作业运行次数：</strong> 在自动清理之前，数据库中保留的作业执行记录的最大数量。</td>
 </tr>
+<tr>
+<td><code>DATABASE_MAX_SESSION_AGE_DAYS</code></td>
+<td><code>14</code></td>
+<td>global</td>
+<td>否</td>
+<td><strong>会话保留：</strong> UI 用户会话在自动清理前允许存在的最大天数。</td>
+</tr>
 </tbody>
 </table>
-<div class="admonition tip">
-<p class="admonition-title">数据库选择</p>
-<ul>
-<li><strong>SQLite</strong>（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。</li>
-<li><strong>PostgreSQL</strong>：由于其健壮性和并发支持，推荐用于具有多个 BunkerWeb 实例的生产环境。</li>
-<li><strong>MySQL/MariaDB</strong>：是 PostgreSQL 的一个很好的替代品，具有类似的生产级功能。</li>
-<li><strong>Oracle</strong>：适用于 Oracle 已经是标准数据库平台的企业环境。</li>
-</ul>
-</div>
+<p>!!! tip "数据库选择" - <strong>SQLite</strong>（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。- <strong>PostgreSQL</strong>：由于其健壮性和并发支持，推荐用于具有多个 BunkerWeb 实例的生产环境。- <strong>MySQL/MariaDB</strong>：是 PostgreSQL 的一个很好的替代品，具有类似的生产级功能。- <strong>Oracle</strong>：适用于 Oracle 已经是标准数据库平台的企业环境。</p>
 <div class="admonition info">
 <p class="admonition-title">SQLAlchemy URI 格式</p>
-<p>数据库 URI 遵循 SQLAlchemy 格式：</p>
-<ul>
-<li>SQLite: <code>sqlite:////path/to/database.sqlite3</code></li>
-<li>PostgreSQL: <code>postgresql://username:password@hostname:port/database</code></li>
-<li>MySQL/MariaDB: <code>mysql://username:password@hostname:port/database</code> 或 <code>mariadb://username:password@hostname:port/database</code></li>
-<li>Oracle: <code>oracle://username:password@hostname:port/database</code></li>
-</ul>
 </div>
+<p>数据库 URI 遵循 SQLAlchemy 格式：</p>
+<pre><code>-   SQLite: `sqlite:////path/to/database.sqlite3`
+-   PostgreSQL: `postgresql://username:password@hostname:port/database`
+-   MySQL/MariaDB: `mysql://username:password@hostname:port/database` 或 `mariadb://username:password@hostname:port/database`
+-   Oracle: `oracle://username:password@hostname:port/database`
+</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">数据库维护</p>
-<p>该插件会自动运行一个每日作业，根据 <code>DATABASE_MAX_JOBS_RUNS</code> 设置清理多余的作业运行记录。这可以防止数据库无限增长，同时保留有用的作业执行历史记录。</p>
 </div>
-<h2 id="easy-resolve-pro">Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>该插件会自动运行每日维护作业：</p>
+<ul>
+<li><strong>清理多余的作业运行记录：</strong> 根据 <code>DATABASE_MAX_JOBS_RUNS</code> 限制清除超出的历史。</li>
+<li><strong>清理过期的 UI 会话：</strong> 删除超过 <code>DATABASE_MAX_SESSION_AGE_DAYS</code> 的 UI 用户会话。</li>
+</ul>
+<p>这些作业可以防止数据库无限增长，同时保留有价值的运行历史。</p>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides a simpler way to fix false positives in reports.</p>
 <h2 id="errors">Errors</h2>
@@ -6393,24 +6225,22 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <div class="admonition tip">
 <p class="admonition-title">错误页面设计</p>
-<p>默认的 BunkerWeb 错误页面旨在提供信息、用户友好且外观专业。它们包括：</p>
-<ul>
-<li>清晰的错误描述</li>
-<li>关于可能导致错误原因的信息</li>
-<li>建议用户解决问题的操作</li>
-<li>帮助用户了解问题是出在客户端还是服务器端的视觉指示器</li>
-</ul>
 </div>
+<p>默认的 BunkerWeb 错误页面旨在提供信息、用户友好且外观专业。它们包括：</p>
+<pre><code>-   清晰的错误描述
+-   关于可能导致错误原因的信息
+-   建议用户解决问题的操作
+-   帮助用户了解问题是出在客户端还是服务器端的视觉指示器
+</code></pre>
 <div class="admonition info">
 <p class="admonition-title">错误类型</p>
-<p>错误代码按类型分类：</p>
-<ul>
-<li><strong>4xx 错误（客户端）：</strong> 这些表示客户端请求存在问题，例如试图访问不存在的页面或缺少适当的身份验证。</li>
-<li><strong>5xx 错误（服务器端）：</strong> 这些表示服务器无法满足有效请求，例如内部服务器错误或暂时不可用。</li>
-</ul>
 </div>
+<p>错误代码按类型分类：</p>
+<pre><code>-   **4xx 错误（客户端）：** 这些表示客户端请求存在问题，例如试图访问不存在的页面或缺少适当的身份验证。
+-   **5xx 错误（服务器端）：** 这些表示服务器无法满足有效请求，例如内部服务器错误或暂时不可用。
+</code></pre>
 <h3 id="_55">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">默认错误处理</label><label for="__tabbed_19_2">自定义错误页面</label><label for="__tabbed_19_3">选择性错误处理</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:3"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><input id="__tabbed_25_3" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">默认错误处理</label><label for="__tabbed_25_2">自定义错误页面</label><label for="__tabbed_25_3">选择性错误处理</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>让 BunkerWeb 使用其默认的错误页面处理常见的错误代码：</p>
@@ -6451,16 +6281,15 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">访问控制行为</p>
-<p>当使用 <code>USE_GREYLIST</code> 设置为 <code>yes</code> 启用灰名单功能时：</p>
-<ol>
-<li><strong>灰名单中的访问者：</strong> 允许访问，但仍会受到所有安全检查。</li>
-<li><strong>非灰名单中的访问者：</strong> 完全拒绝访问。</li>
-</ol>
 </div>
+<p>当使用 <code>USE_GREYLIST</code> 设置为 <code>yes</code> 启用灰名单功能时：</p>
+<pre><code>1.  **灰名单中的访问者：** 允许访问，但仍会受到所有安全检查。
+2.  **非灰名单中的访问者：** 完全拒绝访问。
+</code></pre>
 <div class="admonition info">
 <p class="admonition-title">流模式</p>
-<p>当使用流模式时，只会执行 IP、rDNS 和 ASN 检查。</p>
 </div>
+<p>当使用流模式时，只会执行 IP、rDNS 和 ASN 检查。</p>
 <h3 id="_57">配置设置</h3>
 <p><strong>通用</strong></p>
 <table>
@@ -6483,177 +6312,72 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:5"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><input id="__tabbed_20_5" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">IP 地址</label><label for="__tabbed_20_2">反向 DNS</label><label for="__tabbed_20_3">ASN</label><label for="__tabbed_20_4">用户代理</label><label for="__tabbed_20_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:1"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">IP 地址</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block">
+<div class="tabbed-block"></div>
+</div>
+</div>
 <p><strong>这是做什么的：</strong> 根据访问者的 IP 地址或网络将访问者列入灰名单。这些访问者可以获得访问权限，但仍会受到安全检查。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GREYLIST_IP</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 灰名单：</strong> 要列入灰名单的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>GREYLIST_IP_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 灰名单 URL：</strong> 包含要列入灰名单的 IP 地址或网络的 URL 列表，以空格分隔。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置               | 默认值 | 上下文    | 多个 | 描述                                                                          |
+| ------------------ | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
+| `GREYLIST_IP`      |        | multisite | 否   | **IP 灰名单：** 要列入灰名单的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。 |
+| `GREYLIST_IP_URLS` |        | multisite | 否   | **IP 灰名单 URL：** 包含要列入灰名单的 IP 地址或网络的 URL 列表，以空格分隔。 |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:1"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">反向 DNS</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>这是做什么的：</strong> 根据访问者的域名（反向）将访问者列入灰名单。对于允许来自特定组织或网络的访问者有条件地访问非常有用。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GREYLIST_RDNS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 灰名单：</strong> 要列入灰名单的反向 DNS 后缀列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>GREYLIST_RDNS_GLOBAL</code></td>
-<td><code>yes</code></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>仅限 rDNS 全局：</strong> 当设置为 <code>yes</code> 时，仅对全局 IP 地址执行 rDNS 灰名单检查。</td>
-</tr>
-<tr>
-<td><code>GREYLIST_RDNS_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 灰名单 URL：</strong> 包含要列入灰名单的反向 DNS 后缀的 URL 列表，以空格分隔。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置                   | 默认值 | 上下文    | 多个 | 描述                                                                           |
+| ---------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------ |
+| `GREYLIST_RDNS`        |        | multisite | 否   | **rDNS 灰名单：** 要列入灰名单的反向 DNS 后缀列表，以空格分隔。                |
+| `GREYLIST_RDNS_GLOBAL` | `yes`  | multisite | 否   | **仅限 rDNS 全局：** 当设置为 `yes` 时，仅对全局 IP 地址执行 rDNS 灰名单检查。 |
+| `GREYLIST_RDNS_URLS`   |        | multisite | 否   | **rDNS 灰名单 URL：** 包含要列入灰名单的反向 DNS 后缀的 URL 列表，以空格分隔。 |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:1"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">ASN</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>这是做什么的：</strong> 使用自治系统号将来自特定网络提供商的访问者列入灰名单。ASN 标识一个 IP 属于哪个提供商或组织。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GREYLIST_ASN</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 灰名单：</strong> 要列入灰名单的自治系统号列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>GREYLIST_ASN_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 灰名单 URL：</strong> 包含要列入灰名单的 ASN 的 URL 列表，以空格分隔。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置                | 默认值 | 上下文    | 多个 | 描述                                                                  |
+| ------------------- | ------ | --------- | ---- | --------------------------------------------------------------------- |
+| `GREYLIST_ASN`      |        | multisite | 否   | **ASN 灰名单：** 要列入灰名单的自治系统号列表，以空格分隔。           |
+| `GREYLIST_ASN_URLS` |        | multisite | 否   | **ASN 灰名单 URL：** 包含要列入灰名单的 ASN 的 URL 列表，以空格分隔。 |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">用户代理</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>这是做什么的：</strong> 根据访问者声称使用的浏览器或工具将访问者列入灰名单。这允许对特定工具进行受控访问，同时保持安全检查。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GREYLIST_USER_AGENT</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理灰名单：</strong> 要列入灰名单的用户代理模式（PCRE 正则表达式）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>GREYLIST_USER_AGENT_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理灰名单 URL：</strong> 包含要列入灰名单的用户代理模式的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置                       | 默认值 | 上下文    | 多个 | 描述                                                                                 |
+| -------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------ |
+| `GREYLIST_USER_AGENT`      |        | multisite | 否   | **用户代理灰名单：** 要列入灰名单的用户代理模式（PCRE 正则表达式）列表，以空格分隔。 |
+| `GREYLIST_USER_AGENT_URLS` |        | multisite | 否   | **用户代理灰名单 URL：** 包含要列入灰名单的用户代理模式的 URL 列表。                 |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:1"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">URI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>这是做什么的：</strong> 将对您网站上特定 URL 的请求列入灰名单。这允许有条件地访问某些端点，同时保持安全检查。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多个</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GREYLIST_URI</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 灰名单：</strong> 要列入灰名单的 URI 模式（PCRE 正则表达式）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>GREYLIST_URI_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 灰名单 URL：</strong> 包含要列入灰名单的 URI 模式的 URL 列表，以空格分隔。</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
+<pre><code>| 设置                | 默认值 | 上下文    | 多个 | 描述                                                                          |
+| ------------------- | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
+| `GREYLIST_URI`      |        | multisite | 否   | **URI 灰名单：** 要列入灰名单的 URI 模式（PCRE 正则表达式）列表，以空格分隔。 |
+| `GREYLIST_URI_URLS` |        | multisite | 否   | **URI 灰名单 URL：** 包含要列入灰名单的 URI 模式的 URL 列表，以空格分隔。     |
+</code></pre>
 <div class="admonition info">
 <p class="admonition-title">URL 格式支持</p>
-<p>所有 <code>*_URLS</code> 设置都支持 HTTP/HTTPS URL 以及使用 <code>file:///</code> 前缀的本地文件路径。使用 <code>http://user:pass@url</code> 格式支持基本身份验证。</p>
 </div>
+<p>所有 <code>*_URLS</code> 设置都支持 HTTP/HTTPS URL 以及使用 <code>file:///</code> 前缀的本地文件路径。使用 <code>http://user:pass@url</code> 格式支持基本身份验证。</p>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>来自 URL 的灰名单会每小时自动下载和更新，以确保您的保护始终与最新的受信任来源保持同步。</p>
 </div>
+<p>来自 URL 的灰名单会每小时自动下载和更新，以确保您的保护始终与最新的受信任来源保持同步。</p>
 <h3 id="_58">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">基本配置</label><label for="__tabbed_21_2">高级配置</label><label for="__tabbed_21_3">使用本地文件</label><label for="__tabbed_21_4">选择性 API 访问</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:4"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">基本配置</label><label for="__tabbed_31_2">高级配置</label><label for="__tabbed_31_3">使用本地文件</label><label for="__tabbed_31_4">选择性 API 访问</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个简单的配置，将灰名单应用于公司的内部网络和爬虫：</p>
@@ -6768,18 +6492,18 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <div class="admonition tip">
 <p class="admonition-title">优化压缩级别</p>
-<p>默认的压缩级别 (5) 在压缩率和 CPU 使用率之间提供了良好的平衡。对于静态内容或服务器 CPU 资源充足的情况，可以考虑增加到 7-9 以获得最大压缩。对于动态内容或 CPU 资源有限的情况，您可能希望使用 1-3 以实现更快的压缩和合理的尺寸减小。</p>
 </div>
+<p>默认的压缩级别 (5) 在压缩率和 CPU 使用率之间提供了良好的平衡。对于静态内容或服务器 CPU 资源充足的情况，可以考虑增加到 7-9 以获得最大压缩。对于动态内容或 CPU 资源有限的情况，您可能希望使用 1-3 以实现更快的压缩和合理的尺寸减小。</p>
 <div class="admonition info">
 <p class="admonition-title">浏览器支持</p>
-<p>所有现代浏览器都支持 GZIP，并且多年来一直是 HTTP 响应的标准压缩方法，确保了在设备和浏览器之间具有出色的兼容性。</p>
 </div>
+<p>所有现代浏览器都支持 GZIP，并且多年来一直是 HTTP 响应的标准压缩方法，确保了在设备和浏览器之间具有出色的兼容性。</p>
 <div class="admonition warning">
 <p class="admonition-title">压缩与 CPU 使用率</p>
-<p>虽然 GZIP 压缩减少了带宽并缩短了加载时间，但更高的压缩级别会消耗更多的 CPU 资源。对于高流量的网站，请在压缩效率和服务器性能之间找到适当的平衡。</p>
 </div>
+<p>虽然 GZIP 压缩减少了带宽并缩短了加载时间，但更高的压缩级别会消耗更多的 CPU 资源。对于高流量的网站，请在压缩效率和服务器性能之间找到适当的平衡。</p>
 <h3 id="_62">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:4"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">基本配置</label><label for="__tabbed_22_2">最大压缩</label><label for="__tabbed_22_3">平衡性能</label><label for="__tabbed_22_4">代理内容焦点</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:4"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><input id="__tabbed_32_4" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">基本配置</label><label for="__tabbed_32_2">最大压缩</label><label for="__tabbed_32_3">平衡性能</label><label for="__tabbed_32_4">代理内容焦点</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个使用默认设置启用 GZIP 的标准配置：</p>
@@ -6865,26 +6589,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<div class="admonition tip">
-<p class="admonition-title">最佳实践</p>
-<ul>
-<li>出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。</li>
-<li>将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。</li>
-<li>请谨慎处理可能破坏您网站功能的注入内容。</li>
-</ul>
-</div>
-<div class="admonition info">
-<p class="admonition-title">常见用例</p>
-<ul>
-<li>添加分析脚本（如 Google Analytics, Matomo）</li>
-<li>集成聊天小部件或客户支持工具</li>
-<li>为营销活动添加跟踪像素</li>
-<li>添加自定义 CSS 样式或 JavaScript 功能</li>
-<li>无需修改应用程序代码即可引入第三方库</li>
-</ul>
-</div>
+<p>!!! tip "最佳实践" - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。- 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。- 请谨慎处理可能破坏您网站功能的注入内容。</p>
+<p>!!! info "常见用例" - 添加分析脚本（如 Google Analytics, Matomo）- 集成聊天小部件或客户支持工具 - 为营销活动添加跟踪像素 - 添加自定义 CSS 样式或 JavaScript 功能 - 无需修改应用程序代码即可引入第三方库</p>
 <h3 id="_65">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">谷歌分析</label><label for="__tabbed_23_2">自定义样式</label><label for="__tabbed_23_3">多个集成</label><label for="__tabbed_23_4">Cookie 同意横幅</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:4"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><input id="__tabbed_33_4" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">谷歌分析</label><label for="__tabbed_33_2">自定义样式</label><label for="__tabbed_33_3">多个集成</label><label for="__tabbed_33_4">Cookie 同意横幅</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>将谷歌分析跟踪添加到您的网站：</p>
@@ -6935,7 +6643,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>利用条件性头应用：</strong> 如果您希望在不中断的情况下测试策略，请通过 <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code> 启用 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">CSP 仅报告</a>模式。</li>
 </ol>
 <h3 id="_67">配置指南</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">安全头</label><label for="__tabbed_24_2">Cookie 设置</label><label for="__tabbed_24_3">自定义头</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:3"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">安全头</label><label for="__tabbed_34_2">Cookie 设置</label><label for="__tabbed_34_3">自定义头</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>概述</strong></p>
@@ -7136,7 +6844,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h3 id="_68">示例配置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:4"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><input id="__tabbed_25_3" name="__tabbed_25" type="radio" /><input id="__tabbed_25_4" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">基本安全头</label><label for="__tabbed_25_2">增强的 Cookie 安全性</label><label for="__tabbed_25_3">API 的自定义头</label><label for="__tabbed_25_4">内容安全策略 - 报告模式</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:4"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">基本安全头</label><label for="__tabbed_35_2">增强的 Cookie 安全性</label><label for="__tabbed_35_3">API 的自定义头</label><label for="__tabbed_35_4">内容安全策略 - 报告模式</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个带有基本安全头的标准配置：</p>
@@ -7186,8 +6894,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ol>
 <div class="admonition info">
 <p class="admonition-title">先决条件</p>
-<p>要使用此功能，请确保为每个域名配置了正确的 DNS <strong>A 记录</strong>，指向 BunkerWeb 可访问的公共 IP 地址。没有正确的 DNS 配置，域名验证过程将失败。</p>
 </div>
+<p>要使用此功能，请确保为每个域名配置了正确的 DNS <strong>A 记录</strong>，指向 BunkerWeb 可访问的公共 IP 地址。没有正确的 DNS 配置，域名验证过程将失败。</p>
 <h3 id="_69">如何使用</h3>
 <p>请按照以下步骤配置和使用 Let's Encrypt 功能：</p>
 <ol>
@@ -7200,16 +6908,12 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">证书配置文件</p>
-<p>Let's Encrypt 为不同的用例提供了不同的证书配置文件：
-- <strong>classic</strong>：通用证书，有效期为 90 天（默认）
-- <strong>tlsserver</strong>：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小
-- <strong>shortlived</strong>：增强安全性，有效期为 7 天，适用于自动化环境
-- <strong>custom</strong>：如果您的 ACME 服务器支持不同的配置文件，请使用 <code>LETS_ENCRYPT_CUSTOM_PROFILE</code> 进行设置。</p>
 </div>
+<p>Let's Encrypt 为不同的用例提供了不同的证书配置文件：- <strong>classic</strong>：通用证书，有效期为 90 天（默认）- <strong>tlsserver</strong>：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小 - <strong>shortlived</strong>：增强安全性，有效期为 7 天，适用于自动化环境 - <strong>custom</strong>：如果您的 ACME 服务器支持不同的配置文件，请使用 <code>LETS_ENCRYPT_CUSTOM_PROFILE</code> 进行设置。</p>
 <div class="admonition info">
 <p class="admonition-title">配置文件可用性</p>
-<p>请注意，<code>tlsserver</code> 和 <code>shortlived</code> 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。<code>classic</code> 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 <code>classic</code> 配置文件。</p>
 </div>
+<p>请注意，<code>tlsserver</code> 和 <code>shortlived</code> 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。<code>classic</code> 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 <code>classic</code> 配置文件。</p>
 <h3 id="_70">配置设置</h3>
 <table>
 <thead>
@@ -7315,39 +7019,30 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<div class="admonition info">
-<p class="admonition-title">信息和行为</p>
-<ul>
-<li><code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。</li>
-<li>如果未提供 <code>LETS_ENCRYPT_DNS_PROPAGATION</code> 设置，则使用提供商的默认传播时间。</li>
-<li>只要您从外部打开 <code>80/tcp</code> 端口，使用 <code>http</code> 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 <code>LISTEN_STREAM_PORT_SSL</code> 设置来选择您的侦听 SSL/TLS 端口。</li>
-<li>如果 <code>LETS_ENCRYPT_PASSTHROUGH</code> 设置为 <code>yes</code>，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。</li>
-</ul>
-</div>
+<p>!!! info "信息和行为" - <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。- 如果未提供 <code>LETS_ENCRYPT_DNS_PROPAGATION</code> 设置，则使用提供商的默认传播时间。- 只要您从外部打开 <code>80/tcp</code> 端口，使用 <code>http</code> 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 <code>LISTEN_STREAM_PORT_SSL</code> 设置来选择您的侦听 SSL/TLS 端口。- 如果 <code>LETS_ENCRYPT_PASSTHROUGH</code> 设置为 <code>yes</code>，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。</p>
 <div class="admonition tip">
 <p class="admonition-title">HTTP 与 DNS 验证</p>
-<p><strong>HTTP 验证</strong> 更容易设置，并且适用于大多数网站：</p>
-<ul>
-<li>要求您的网站在端口 80 上可公开访问</li>
-<li>由 BunkerWeb 自动配置</li>
-<li>不能用于通配符证书</li>
-</ul>
-<p><strong>DNS 验证</strong> 提供更大的灵活性，并且是通配符证书所必需的：</p>
-<ul>
-<li>即使您的网站无法公开访问也能正常工作</li>
-<li>需要 DNS 提供商的 API 凭据</li>
-<li>通配符证书（例如 *.example.com）所必需</li>
-<li>在端口 80 被阻止或不可用时很有用</li>
-</ul>
 </div>
+<p><strong>HTTP 验证</strong> 更容易设置，并且适用于大多数网站：</p>
+<pre><code>- 要求您的网站在端口 80 上可公开访问
+- 由 BunkerWeb 自动配置
+- 不能用于通配符证书
+
+**DNS 验证** 提供更大的灵活性，并且是通配符证书所必需的：
+
+- 即使您的网站无法公开访问也能正常工作
+- 需要 DNS 提供商的 API 凭据
+- 通配符证书（例如 *.example.com）所必需
+- 在端口 80 被阻止或不可用时很有用
+</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">通配符证书</p>
-<p>通配符证书仅适用于 DNS 验证。如果要使用它们，必须将 <code>USE_LETS_ENCRYPT_WILDCARD</code> 设置为 <code>yes</code> 并正确配置您的 DNS 提供商凭据。</p>
 </div>
+<p>通配符证书仅适用于 DNS 验证。如果要使用它们，必须将 <code>USE_LETS_ENCRYPT_WILDCARD</code> 设置为 <code>yes</code> 并正确配置您的 DNS 提供商凭据。</p>
 <div class="admonition warning">
 <p class="admonition-title">速率限制</p>
-<p>Let's Encrypt 对证书颁发施加速率限制。在测试配置时，通过将 <code>USE_LETS_ENCRYPT_STAGING</code> 设置为 <code>yes</code> 来使用测试环境，以避免达到生产环境的速率限制。测试证书不受浏览器信任，但对于验证您的设置很有用。</p>
 </div>
+<p>Let's Encrypt 对证书颁发施加速率限制。在测试配置时，通过将 <code>USE_LETS_ENCRYPT_STAGING</code> 设置为 <code>yes</code> 来使用测试环境，以避免达到生产环境的速率限制。测试证书不受浏览器信任，但对于验证您的设置很有用。</p>
 <h3 id="dns">支持的 DNS 提供商</h3>
 <p>Let's Encrypt 插件支持广泛的 DNS 提供商进行 DNS 验证。每个提供商都需要使用 <code>LETS_ENCRYPT_DNS_CREDENTIAL_ITEM</code> 设置提供特定的凭据。</p>
 <table>
@@ -7511,7 +7206,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tbody>
 </table>
 <h3 id="_71">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:6"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><input id="__tabbed_26_5" name="__tabbed_26" type="radio" /><input id="__tabbed_26_6" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">基本 HTTP 验证</label><label for="__tabbed_26_2">使用通配符的 Cloudflare DNS</label><label for="__tabbed_26_3">AWS Route53 配置</label><label for="__tabbed_26_4">使用测试环境和重试进行测试</label><label for="__tabbed_26_5">具有自定义传播时间的 DigitalOcean</label><label for="__tabbed_26_6">Google Cloud DNS</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:6"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><input id="__tabbed_36_6" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">基本 HTTP 验证</label><label for="__tabbed_36_2">使用通配符的 Cloudflare DNS</label><label for="__tabbed_36_3">AWS Route53 配置</label><label for="__tabbed_36_4">使用测试环境和重试进行测试</label><label for="__tabbed_36_5">具有自定义传播时间的 DigitalOcean</label><label for="__tabbed_36_6">Google Cloud DNS</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>使用 HTTP 验证为单个域进行简单配置：</p>
@@ -7596,7 +7291,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>监控有效性：</strong> 使用<a href="../web-ui/">Web UI</a>查看有关受限请求和连接的统计信息。</li>
 </ol>
 <h3 id="_74">配置设置</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">请求速率限制</label><label for="__tabbed_27_2">连接限制</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="37:2"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">请求速率限制</label><label for="__tabbed_37_2">连接限制</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -7697,20 +7392,15 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<div class="admonition info">
-<p class="admonition-title">连接限制与请求限制</p>
-<ul>
-<li><strong>连接限制</strong> 限制单个 IP 地址可以维持的并发连接数。</li>
-<li><strong>请求速率限制</strong> 限制一个 IP 地址在定义的时间段内可以发出的请求数。</li>
-</ul>
-<p>同时使用这两种方法可以全面防护各种类型的滥用。</p>
-</div>
+<p>!!! info "连接限制与请求限制" - <strong>连接限制</strong> 限制单个 IP 地址可以维持的并发连接数。- <strong>请求速率限制</strong> 限制一个 IP 地址在定义的时间段内可以发出的请求数。</p>
+<pre><code>同时使用这两种方法可以全面防护各种类型的滥用。
+</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">设置适当的限制</p>
-<p>设置过于严格的限制可能会影响合法用户，特别是对于 HTTP/2 和 HTTP/3，浏览器通常会使用多个流。默认值在大多数用例中是平衡的，但请考虑根据您的应用程序需求和用户行为进行调整。</p>
 </div>
+<p>设置过于严格的限制可能会影响合法用户，特别是对于 HTTP/2 和 HTTP/3，浏览器通常会使用多个流。默认值在大多数用例中是平衡的，但请考虑根据您的应用程序需求和用户行为进行调整。</p>
 <h3 id="_75">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:4"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><input id="__tabbed_28_4" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">基本保护</label><label for="__tabbed_28_2">保护特定端点</label><label for="__tabbed_28_3">高流量网站配置</label><label for="__tabbed_28_4">API 服务器配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:4"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">基本保护</label><label for="__tabbed_38_2">保护特定端点</label><label for="__tabbed_38_3">高流量网站配置</label><label for="__tabbed_38_4">API 服务器配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个使用默认设置来保护您整个网站的简单配置：</p>
@@ -7792,7 +7482,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
 <table>
@@ -7996,27 +7686,33 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>例如，<code>/metrics/requests</code> 返回有关被阻止请求的信息。</p>
 <div class="admonition info">
 <p class="admonition-title">API 访问配置</p>
-<p>要通过 API 访问指标，您必须确保：</p>
-<ol>
-<li>API 功能已通过 <code>USE_API: "yes"</code> 启用（默认启用）</li>
-<li>您的客户端 IP 包含在 <code>API_WHITELIST_IP</code> 设置中（默认为 <code>127.0.0.0/8</code>）</li>
-<li>您正在通过配置的端口访问 API（默认为 <code>5000</code>，通过 <code>API_HTTP_PORT</code> 设置）</li>
-<li>您在 Host 标头中使用了正确的 <code>API_SERVER_NAME</code> 值（默认为 <code>bwapi</code>）</li>
-<li>如果配置了 <code>API_TOKEN</code>，请在请求标头中包含 <code>Authorization: Bearer &lt;token&gt;</code>。</li>
-</ol>
-<p>典型请求：</p>
-<p>不带令牌（当未设置 <code>API_TOKEN</code> 时）：
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>http://your-bunkerweb-instance:5000/metrics/requests
-</code></pre></div></p>
-<p>带令牌（当设置了 <code>API_TOKEN</code> 时）：
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>http://your-bunkerweb-instance:5000/metrics/requests
-</code></pre></div></p>
-<p>如果您已将 <code>API_SERVER_NAME</code> 自定义为默认 <code>bwapi</code> 以外的值，请在 Host 标头中使用该值。</p>
-<p>对于安全的生产环境，请将 API 访问限制为受信任的 IP，并启用 <code>API_TOKEN</code>。</p>
 </div>
+<p>要通过 API 访问指标，您必须确保：</p>
+<pre><code>1.  API 功能已通过 `USE_API: "yes"` 启用（默认启用）
+2.  您的客户端 IP 包含在 `API_WHITELIST_IP` 设置中（默认为 `127.0.0.0/8`）
+3.  您正在通过配置的端口访问 API（默认为 `5000`，通过 `API_HTTP_PORT` 设置）
+4.  您在 Host 标头中使用了正确的 `API_SERVER_NAME` 值（默认为 `bwapi`）
+5.  如果配置了 `API_TOKEN`，请在请求标头中包含 `Authorization: Bearer &lt;token&gt;`。
+
+典型请求：
+
+不带令牌（当未设置 `API_TOKEN` 时）：
+```bash
+curl -H "Host: bwapi" \
+     http://your-bunkerweb-instance:5000/metrics/requests
+```
+
+带令牌（当设置了 `API_TOKEN` 时）：
+```bash
+curl -H "Host: bwapi" \
+     -H "Authorization: Bearer $API_TOKEN" \
+     http://your-bunkerweb-instance:5000/metrics/requests
+```
+
+如果您已将 `API_SERVER_NAME` 自定义为默认 `bwapi` 以外的值，请在 Host 标头中使用该值。
+
+对于安全的生产环境，请将 API 访问限制为受信任的 IP，并启用 `API_TOKEN`。
+</code></pre>
 <h3 id="_79">配置设置</h3>
 <table>
 <thead>
@@ -8068,22 +7764,22 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <div class="admonition tip">
 <p class="admonition-title">调整内存分配大小</p>
-<p>应根据您的流量和实例数量调整 <code>METRICS_MEMORY_SIZE</code> 设置。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。</p>
 </div>
+<p>应根据您的流量和实例数量调整 <code>METRICS_MEMORY_SIZE</code> 设置。对于高流量网站，请考虑增加此值以确保所有指标都能被捕获而不会丢失数据。</p>
 <div class="admonition info">
 <p class="admonition-title">Redis 集成</p>
-<p>当 BunkerWeb 配置为使用<a href="#redis">Redis</a>时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。</p>
 </div>
+<p>当 BunkerWeb 配置为使用<a href="#redis">Redis</a>时，指标插件将自动将被阻止的请求数据同步到 Redis 服务器。这提供了跨多个 BunkerWeb 实例的安全事件的集中视图。</p>
 <div class="admonition warning">
 <p class="admonition-title">性能注意事项</p>
-<p>为 <code>METRICS_MAX_BLOCKED_REQUESTS</code> 或 <code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code> 设置非常高的值会增加内存使用量。请监控您的系统资源，并根据您的实际需求和可用资源调整这些值。</p>
 </div>
+<p>为 <code>METRICS_MAX_BLOCKED_REQUESTS</code> 或 <code>METRICS_MAX_BLOCKED_REQUESTS_REDIS</code> 设置非常高的值会增加内存使用量。请监控您的系统资源，并根据您的实际需求和可用资源调整这些值。</p>
 <div class="admonition note">
 <p class="admonition-title">工作进程特定存储</p>
-<p>每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。</p>
 </div>
+<p>每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。</p>
 <h3 id="_80">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:4"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><input id="__tabbed_29_4" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">基本配置</label><label for="__tabbed_29_2">低资源环境</label><label for="__tabbed_29_3">高流量环境</label><label for="__tabbed_29_4">禁用指标</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:4"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">基本配置</label><label for="__tabbed_39_2">低资源环境</label><label for="__tabbed_39_3">高流量环境</label><label for="__tabbed_39_4">禁用指标</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>适用于大多数部署的默认配置：</p>
@@ -8119,7 +7815,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h2 id="migration-pro">Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
 <h2 id="miscellaneous">Miscellaneous</h2>
@@ -8181,7 +7877,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tbody>
 </table>
 <h3 id="_82">配置指南</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:8"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><input id="__tabbed_30_5" name="__tabbed_30" type="radio" /><input id="__tabbed_30_6" name="__tabbed_30" type="radio" /><input id="__tabbed_30_7" name="__tabbed_30" type="radio" /><input id="__tabbed_30_8" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">默认服务器安全</label><label for="__tabbed_30_2">拒绝 HTTP 状态</label><label for="__tabbed_30_3">HTTP 方法</label><label for="__tabbed_30_4">请求大小限制</label><label for="__tabbed_30_5">协议支持</label><label for="__tabbed_30_6">静态文件服务</label><label for="__tabbed_30_7">系统设置</label><label for="__tabbed_30_8">文件缓存</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="40:8"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><input id="__tabbed_40_7" name="__tabbed_40" type="radio" /><input id="__tabbed_40_8" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">默认服务器安全</label><label for="__tabbed_40_2">拒绝 HTTP 状态</label><label for="__tabbed_40_3">HTTP 方法</label><label for="__tabbed_40_4">请求大小限制</label><label for="__tabbed_40_5">协议支持</label><label for="__tabbed_40_6">静态文件服务</label><label for="__tabbed_40_7">系统设置</label><label for="__tabbed_40_8">文件缓存</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>默认服务器控制</strong></p>
@@ -8580,7 +8276,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h3 id="_83">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:7"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><input id="__tabbed_31_5" name="__tabbed_31" type="radio" /><input id="__tabbed_31_6" name="__tabbed_31" type="radio" /><input id="__tabbed_31_7" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">默认服务器安全</label><label for="__tabbed_31_2">拒绝 HTTP 状态</label><label for="__tabbed_31_3">HTTP 方法</label><label for="__tabbed_31_4">请求大小限制</label><label for="__tabbed_31_5">协议支持</label><label for="__tabbed_31_6">静态文件服务</label><label for="__tabbed_31_7">文件缓存</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="41:7"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><input id="__tabbed_41_5" name="__tabbed_41" type="radio" /><input id="__tabbed_41_6" name="__tabbed_41" type="radio" /><input id="__tabbed_41_7" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">默认服务器安全</label><label for="__tabbed_41_2">拒绝 HTTP 状态</label><label for="__tabbed_41_3">HTTP 方法</label><label for="__tabbed_41_4">请求大小限制</label><label for="__tabbed_41_5">协议支持</label><label for="__tabbed_41_6">静态文件服务</label><label for="__tabbed_41_7">文件缓存</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>禁用默认服务器并强制执行严格 SNI 的示例配置：</p>
@@ -8742,9 +8438,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <div class="admonition warning">
 <p class="admonition-title">ModSecurity 和 OWASP 核心规则集</p>
-<p><strong>我们强烈建议同时启用 ModSecurity 和 OWASP 核心规则集 (CRS)</strong>，以提供针对常见 Web 漏洞的强大保护。虽然偶尔可能会出现误报，但可以通过微调规则或使用预定义的排除项来解决。</p>
-<p>CRS 团队积极维护着针对 WordPress、Nextcloud、Drupal 和 Cpanel 等流行应用程序的排除项列表，从而更容易在不影响功能的情况下进行集成。其安全优势远远超过了解决误报所需的最低配置工作量。</p>
 </div>
+<p><strong>我们强烈建议同时启用 ModSecurity 和 OWASP 核心规则集 (CRS)</strong>，以提供针对常见 Web 漏洞的强大保护。虽然偶尔可能会出现误报，但可以通过微调规则或使用预定义的排除项来解决。</p>
+<pre><code>CRS 团队积极维护着针对 WordPress、Nextcloud、Drupal 和 Cpanel 等流行应用程序的排除项列表，从而更容易在不影响功能的情况下进行集成。其安全优势远远超过了解决误报所需的最低配置工作量。
+</code></pre>
 <h3 id="crs">可用的 CRS 版本</h3>
 <p>选择一个 CRS 版本以最符合您的安全需求：</p>
 <ul>
@@ -8754,19 +8451,19 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ul>
 <div class="admonition example">
 <p class="admonition-title">每日构建版</p>
-<p><strong>每日构建版</strong>包含最新的规则，提供针对新兴威胁的最新保护。然而，由于它每天更新，并且可能包含实验性或未经测试的更改，建议在将其部署到生产环境之前，首先在<strong>预演环境</strong>中使用每日构建版。</p>
 </div>
+<p><strong>每日构建版</strong>包含最新的规则，提供针对新兴威胁的最新保护。然而，由于它每天更新，并且可能包含实验性或未经测试的更改，建议在将其部署到生产环境之前，首先在<strong>预演环境</strong>中使用每日构建版。</p>
 <div class="admonition tip">
 <p class="admonition-title">偏执级别</p>
-<p>OWASP 核心规则集使用“偏执级别”(PL) 来控制规则的严格性：</p>
-<ul>
-<li><strong>PL1 (默认):</strong> 基本保护，误报最少</li>
-<li><strong>PL2:</strong> 更严格的安全性，具有更严格的模式匹配</li>
-<li><strong>PL3:</strong> 增强的安全性，具有更严格的验证</li>
-<li><strong>PL4:</strong> 最高安全性，规则非常严格（可能导致许多误报）</li>
-</ul>
-<p>您可以通过在 <code>/etc/bunkerweb/configs/modsec-crs/</code> 中添加自定义配置文件来设置偏执级别。</p>
 </div>
+<p>OWASP 核心规则集使用“偏执级别”(PL) 来控制规则的严格性：</p>
+<pre><code>-   **PL1 (默认):** 基本保护，误报最少
+-   **PL2:** 更严格的安全性，具有更严格的模式匹配
+-   **PL3:** 增强的安全性，具有更严格的验证
+-   **PL4:** 最高安全性，规则非常严格（可能导致许多误报）
+
+您可以通过在 `/etc/bunkerweb/configs/modsec-crs/` 中添加自定义配置文件来设置偏执级别。
+</code></pre>
 <h3 id="_86">自定义配置</h3>
 <p>可以通过自定义配置来调整 ModSecurity 和 OWASP 核心规则集 (CRS)。这些配置允许您在安全规则处理的特定阶段自定义行为：</p>
 <ul>
@@ -8805,44 +8502,43 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ul>
 <div class="admonition info">
 <p class="admonition-title">执行顺序</p>
-<p>BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰和逻辑性：</p>
-<ol>
-<li><strong>OWASP CRS 配置</strong>：OWASP 核心规则集的基础配置。</li>
-<li><strong>自定义插件配置 (<code>crs-plugins-before</code>)</strong>：特定于插件的设置，在任何 CRS 规则之前应用。</li>
-<li><strong>自定义插件规则（在 CRS 规则之前）(<code>crs-plugins-before</code>)</strong>：在 CRS 规则之前执行的插件自定义规则。</li>
-<li><strong>下载的插件配置</strong>：外部下载插件的配置。</li>
-<li><strong>下载的插件规则（在 CRS 规则之前）</strong>：在 CRS 规则之前执行的下载插件规则。</li>
-<li><strong>自定义 CRS 规则 (<code>modsec-crs</code>)</strong>：在加载 CRS 规则之前应用的用户定义规则。</li>
-<li><strong>OWASP CRS 规则</strong>：由 OWASP 提供的核心安全规则集。</li>
-<li><strong>自定义插件规则（在 CRS 规则之后）(<code>crs-plugins-after</code>)</strong>：在 CRS 规则之后执行的自定义插件规则。</li>
-<li><strong>下载的插件规则（在 CRS 规则之后）</strong>：在 CRS 规则之后执行的下载插件规则。</li>
-<li><strong>自定义规则 (<code>modsec</code>)</strong>：在所有 CRS 和插件规则之后应用的用户定义规则。</li>
-</ol>
-<p><strong>关键说明</strong>：</p>
-<ul>
-<li><strong>CRS 前的自定义</strong>（<code>crs-plugins-before</code>、<code>modsec-crs</code>）允许您在加载核心 CRS 规则之前定义例外或准备性规则。</li>
-<li><strong>CRS 后的自定义</strong>（<code>crs-plugins-after</code>、<code>modsec</code>）是在应用 CRS 和插件规则之后覆盖或扩展规则的理想选择。</li>
-<li>这种结构提供了最大的灵活性，能够在保持强大安全基线的同时，精确控制规则的执行和自定义。</li>
-</ul>
 </div>
+<p>BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰和逻辑性：</p>
+<pre><code>1.  **OWASP CRS 配置**：OWASP 核心规则集的基础配置。
+2.  **自定义插件配置 (`crs-plugins-before`)**：特定于插件的设置，在任何 CRS 规则之前应用。
+3.  **自定义插件规则（在 CRS 规则之前）(`crs-plugins-before`)**：在 CRS 规则之前执行的插件自定义规则。
+4.  **下载的插件配置**：外部下载插件的配置。
+5.  **下载的插件规则（在 CRS 规则之前）**：在 CRS 规则之前执行的下载插件规则。
+6.  **自定义 CRS 规则 (`modsec-crs`)**：在加载 CRS 规则之前应用的用户定义规则。
+7.  **OWASP CRS 规则**：由 OWASP 提供的核心安全规则集。
+8.  **自定义插件规则（在 CRS 规则之后）(`crs-plugins-after`)**：在 CRS 规则之后执行的自定义插件规则。
+9.  **下载的插件规则（在 CRS 规则之后）**：在 CRS 规则之后执行的下载插件规则。
+10. **自定义规则 (`modsec`)**：在所有 CRS 和插件规则之后应用的用户定义规则。
+
+**关键说明**：
+
+-   **CRS 前的自定义**（`crs-plugins-before`、`modsec-crs`）允许您在加载核心 CRS 规则之前定义例外或准备性规则。
+-   **CRS 后的自定义**（`crs-plugins-after`、`modsec`）是在应用 CRS 和插件规则之后覆盖或扩展规则的理想选择。
+-   这种结构提供了最大的灵活性，能够在保持强大安全基线的同时，精确控制规则的执行和自定义。
+</code></pre>
 <h3 id="owasp-crs">OWASP CRS 插件</h3>
 <p>OWASP 核心规则集还支持一系列<strong>插件</strong>，旨在扩展其功能并提高与特定应用程序或环境的兼容性。这些插件可以帮助微调 CRS，以用于 WordPress、Nextcloud 和 Drupal 等流行平台，甚至是自定义设置。有关更多信息和可用插件列表，请参阅 <a href="https://github.com/coreruleset/plugin-registry">OWASP CRS 插件注册表</a>。</p>
 <div class="admonition tip">
 <p class="admonition-title">插件下载</p>
-<p><code>MODSECURITY_CRS_PLUGINS</code> 设置允许您下载和安装插件，以扩展 OWASP 核心规则集 (CRS) 的功能。此设置接受带有可选标签或 URL 的插件名称列表，从而可以轻松集成根据您的特定需求量身定制的其他安全功能。</p>
-<p>以下是 <code>MODSECURITY_CRS_PLUGINS</code> 设置接受的值的非详尽列表：</p>
-<ul>
-<li><code>fake-bot</code> - 下载插件的最新版本。</li>
-<li><code>wordpress-rule-exclusions/v1.0.0</code> - 下载插件的 1.0.0 版本。</li>
-<li><code>https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip</code> - 直接从 URL 下载插件。</li>
-</ul>
 </div>
+<p><code>MODSECURITY_CRS_PLUGINS</code> 设置允许您下载和安装插件，以扩展 OWASP 核心规则集 (CRS) 的功能。此设置接受带有可选标签或 URL 的插件名称列表，从而可以轻松集成根据您的特定需求量身定制的其他安全功能。</p>
+<pre><code>以下是 `MODSECURITY_CRS_PLUGINS` 设置接受的值的非详尽列表：
+
+*   `fake-bot` - 下载插件的最新版本。
+*   `wordpress-rule-exclusions/v1.0.0` - 下载插件的 1.0.0 版本。
+*   `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` - 直接从 URL 下载插件。
+</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">误报</p>
-<p>较高的安全设置可能会阻止合法流量。请从默认设置开始，并在提高安全级别之前监控日志。请准备好为您的特定应用程序需求添加排除规则。</p>
 </div>
+<p>较高的安全设置可能会阻止合法流量。请从默认设置开始，并在提高安全级别之前监控日志。请准备好为您的特定应用程序需求添加排除规则。</p>
 <h3 id="_87">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="32:6"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><input id="__tabbed_32_4" name="__tabbed_32" type="radio" /><input id="__tabbed_32_5" name="__tabbed_32" type="radio" /><input id="__tabbed_32_6" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">基本配置</label><label for="__tabbed_32_2">仅检测模式</label><label for="__tabbed_32_3">带插件的高级配置</label><label for="__tabbed_32_4">旧版配置</label><label for="__tabbed_32_5">全局 ModSecurity</label><label for="__tabbed_32_6">带自定义插件的每日构建版</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="42:6"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><input id="__tabbed_42_4" name="__tabbed_42" type="radio" /><input id="__tabbed_42_5" name="__tabbed_42" type="radio" /><input id="__tabbed_42_6" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">基本配置</label><label for="__tabbed_42_2">仅检测模式</label><label for="__tabbed_42_3">带插件的高级配置</label><label for="__tabbed_42_4">旧版配置</label><label for="__tabbed_42_5">全局 ModSecurity</label><label for="__tabbed_42_6">带自定义插件的每日构建版</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>启用 ModSecurity 和 CRS v4 的标准配置：</p>
@@ -8902,9 +8598,9 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <div class="admonition note">
 <p class="admonition-title">人类可读的大小值</p>
-<p>对于像 <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code> 这样的 大小设置，支持 <code>k</code>、<code>m</code> 和 <code>g</code>（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：<code>256k</code> = 262144，<code>1m</code> = 1048576，<code>2g</code> = 2147483648。</p>
 </div>
-<h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>对于像 <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code> 这样的 大小设置，支持 <code>k</code>、<code>m</code> 和 <code>g</code>（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：<code>256k</code> = 262144，<code>1m</code> = 1048576，<code>2g</code> = 2147483648。</p>
+<h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
@@ -9011,22 +8707,21 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition tip">
 <p class="admonition-title">本地与远程 PHP-FPM</p>
-<p>选择最适合您基础架构的设置：</p>
-<ul>
-<li><strong>本地 PHP-FPM</strong> 由于基于套接字的通信而提供更好的性能，并且在 PHP 与 BunkerWeb 在同一台机器上运行时是理想选择。</li>
-<li><strong>远程 PHP-FPM</strong> 通过允许在单独的服务器上进行 PHP 处理，提供了更大的灵活性和可伸缩性。</li>
-</ul>
 </div>
+<p>选择最适合您基础架构的设置：</p>
+<pre><code>-   **本地 PHP-FPM** 由于基于套接字的通信而提供更好的性能，并且在 PHP 与 BunkerWeb 在同一台机器上运行时是理想选择。
+-   **远程 PHP-FPM** 通过允许在单独的服务器上进行 PHP 处理，提供了更大的灵活性和可伸缩性。
+</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">路径配置</p>
-<p><code>REMOTE_PHP_PATH</code> 或 <code>LOCAL_PHP_PATH</code> 必须与存储 PHP 文件的实际文件系统路径匹配；否则，将发生“文件未找到”错误。</p>
 </div>
+<p><code>REMOTE_PHP_PATH</code> 或 <code>LOCAL_PHP_PATH</code> 必须与存储 PHP 文件的实际文件系统路径匹配；否则，将发生“文件未找到”错误。</p>
 <div class="admonition info">
 <p class="admonition-title">URL 重写</p>
-<p>PHP 插件会自动配置 URL 重写以支持现代 PHP 应用程序。对不存在的文件的请求将被定向到 <code>index.php</code>，原始请求 URI 将作为查询参数提供。</p>
 </div>
+<p>PHP 插件会自动配置 URL 重写以支持现代 PHP 应用程序。对不存在的文件的请求将被定向到 <code>index.php</code>，原始请求 URI 将作为查询参数提供。</p>
 <h3 id="_90">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="33:4"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><input id="__tabbed_33_4" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">本地 PHP-FPM 配置</label><label for="__tabbed_33_2">远程 PHP-FPM 配置</label><label for="__tabbed_33_3">自定义端口配置</label><label for="__tabbed_33_4">WordPress 配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="43:4"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><input id="__tabbed_43_4" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">本地 PHP-FPM 配置</label><label for="__tabbed_43_2">远程 PHP-FPM 配置</label><label for="__tabbed_43_3">自定义端口配置</label><label for="__tabbed_43_4">WordPress 配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>使用本地 PHP-FPM 实例的配置：</p>
@@ -9108,16 +8803,16 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition tip">
 <p class="admonition-title">许可证管理</p>
-<p>您的 Pro 许可证与您的特定部署环境相关联。如果您需要转移许可证或对您的订阅有疑问，请通过 <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a> 联系支持。</p>
 </div>
+<p>您的 Pro 许可证与您的特定部署环境相关联。如果您需要转移许可证或对您的订阅有疑问，请通过 <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a> 联系支持。</p>
 <div class="admonition info">
 <p class="admonition-title">Pro 功能</p>
-<p>随着新功能的增加，可用的具体 Pro 功能可能会随时间演变。Pro 插件会自动处理所有可用功能的安装和配置。</p>
 </div>
+<p>随着新功能的增加，可用的具体 Pro 功能可能会随时间演变。Pro 插件会自动处理所有可用功能的安装和配置。</p>
 <div class="admonition warning">
 <p class="admonition-title">网络要求</p>
-<p>Pro 插件需要出站互联网访问权限，以连接到 BunkerWeb API 进行许可证验证和下载高级插件。请确保您的防火墙允许连接到 <code>api.bunkerweb.io</code> 的 443 端口 (HTTPS)。</p>
 </div>
+<p>Pro 插件需要出站互联网访问权限，以连接到 BunkerWeb API 进行许可证验证和下载高级插件。请确保您的防火墙允许连接到 <code>api.bunkerweb.io</code> 的 443 端口 (HTTPS)。</p>
 <h3 id="_93">常见问题解答</h3>
 <p><strong>问：如果我的 Pro 许可证到期会怎样？</strong></p>
 <p>答：如果您的 Pro 许可证到期，对高级功能和插件的访问将被禁用。但是，您的 BunkerWeb 安装将继续使用所有社区版功能正常运行。要重新获得对 Pro 功能的访问权限，只需续订您的许可证即可。</p>
@@ -9130,7 +8825,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>BunkerWeb PRO Enterprise：</strong> 完全访问 Pro 功能，并提供专属技术支持。</li>
 </ul>
 <p>您可以使用促销码 <code>freetrial</code> 免费试用 Pro 功能 1 个月。请访问 <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a> 激活您的试用，并了解更多关于基于 BunkerWeb PRO 保护的服务数量的灵活定价选项。</p>
-<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
@@ -9205,8 +8900,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ol>
 <div class="admonition danger">
 <p class="admonition-title">PROXY 协议警告</p>
-<p>在未正确配置您的上游代理以发送 PROXY 协议标头的情况下启用 <code>USE_PROXY_PROTOCOL</code> 将<strong>破坏您的应用程序</strong>。仅当您确定您的上游代理已正确配置为发送 PROXY 协议信息时，才启用此设置。如果您的代理未发送 PROXY 协议标头，所有到 BunkerWeb 的连接都将因协议错误而失败。</p>
 </div>
+<p>在未正确配置您的上游代理以发送 PROXY 协议标头的情况下启用 <code>USE_PROXY_PROTOCOL</code> 将<strong>破坏您的应用程序</strong>。仅当您确定您的上游代理已正确配置为发送 PROXY 协议信息时，才启用此设置。如果您的代理未发送 PROXY 协议标头，所有到 BunkerWeb 的连接都将因协议错误而失败。</p>
 <h3 id="_95">配置设置</h3>
 <table>
 <thead>
@@ -9265,18 +8960,18 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition tip">
 <p class="admonition-title">云提供商网络</p>
-<p>如果您正在使用像 AWS、GCP 或 Azure 这样的云提供商，请考虑将其负载均衡器的 IP 范围添加到您的 <code>REAL_IP_FROM</code> 设置中，以确保正确的客户端 IP 识别。</p>
 </div>
+<p>如果您正在使用像 AWS、GCP 或 Azure 这样的云提供商，请考虑将其负载均衡器的 IP 范围添加到您的 <code>REAL_IP_FROM</code> 设置中，以确保正确的客户端 IP 识别。</p>
 <div class="admonition danger">
 <p class="admonition-title">安全注意事项</p>
-<p>仅在您的配置中包含受信任的代理 IP。添加不受信任的源可能会允许 IP 欺骗攻击，恶意行为者可以通过操纵标头来伪造客户端 IP。</p>
 </div>
+<p>仅在您的配置中包含受信任的代理 IP。添加不受信任的源可能会允许 IP 欺骗攻击，恶意行为者可以通过操纵标头来伪造客户端 IP。</p>
 <div class="admonition info">
 <p class="admonition-title">多个 IP 地址</p>
-<p>当 <code>REAL_IP_RECURSIVE</code> 启用并且标头包含多个 IP（例如，<code>X-Forwarded-For: client, proxy1, proxy2</code>）时，BunkerWeb 会将不在您受信任代理列表中的最左侧 IP 识别为客户端 IP。</p>
 </div>
+<p>当 <code>REAL_IP_RECURSIVE</code> 启用并且标头包含多个 IP（例如，<code>X-Forwarded-For: client, proxy1, proxy2</code>）时，BunkerWeb 会将不在您受信任代理列表中的最左侧 IP 识别为客户端 IP。</p>
 <h3 id="_96">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:6"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><input id="__tabbed_34_4" name="__tabbed_34" type="radio" /><input id="__tabbed_34_5" name="__tabbed_34" type="radio" /><input id="__tabbed_34_6" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">基本配置</label><label for="__tabbed_34_2">云负载均衡器</label><label for="__tabbed_34_3">PROXY 协议</label><label for="__tabbed_34_4">带有 URL 的多个代理源</label><label for="__tabbed_34_5">CDN 配置</label><label for="__tabbed_34_6">位于 Cloudflare 后面</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="44:6"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><input id="__tabbed_44_4" name="__tabbed_44" type="radio" /><input id="__tabbed_44_5" name="__tabbed_44" type="radio" /><input id="__tabbed_44_6" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">基本配置</label><label for="__tabbed_44_2">云负载均衡器</label><label for="__tabbed_44_3">PROXY 协议</label><label for="__tabbed_44_4">带有 URL 的多个代理源</label><label for="__tabbed_44_5">CDN 配置</label><label for="__tabbed_44_6">位于 Cloudflare 后面</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个用于位于反向代理后面的站点的简单配置：</p>
@@ -9393,19 +9088,13 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<div class="admonition tip">
-<p class="admonition-title">选择正确的状态码</p>
-<ul>
-<li>当重定向是永久性的时，例如域名迁移或建立规范 URL，请使用 <code>301</code>（永久移动）。这有助于搜索引擎更新其索引。</li>
-<li>当重定向是临时性的，或者如果您将来可能想重新使用原始 URL，请使用 <code>302</code>（找到/临时重定向）。</li>
-</ul>
-</div>
+<p>!!! tip "选择正确的状态码" - 当重定向是永久性的时，例如域名迁移或建立规范 URL，请使用 <code>301</code>（永久移动）。这有助于搜索引擎更新其索引。- 当重定向是临时性的，或者如果您将来可能想重新使用原始 URL，请使用 <code>302</code>（找到/临时重定向）。</p>
 <div class="admonition info">
 <p class="admonition-title">路径保留</p>
-<p>当 <code>REDIRECT_TO_REQUEST_URI</code> 设置为 <code>yes</code> 时，BunkerWeb 会保留原始请求路径。例如，如果用户访问 <code>https://old-domain.com/blog/post-1</code>，并且您已设置为重定向到 <code>https://new-domain.com</code>，他们将被重定向到 <code>https://new-domain.com/blog/post-1</code>。</p>
 </div>
+<p>当 <code>REDIRECT_TO_REQUEST_URI</code> 设置为 <code>yes</code> 时，BunkerWeb 会保留原始请求路径。例如，如果用户访问 <code>https://old-domain.com/blog/post-1</code>，并且您已设置为重定向到 <code>https://new-domain.com</code>，他们将被重定向到 <code>https://new-domain.com/blog/post-1</code>。</p>
 <h3 id="_99">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:5"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><input id="__tabbed_35_5" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">多路径重定向</label><label for="__tabbed_35_2">简单域名重定向</label><label for="__tabbed_35_3">保留路径的重定向</label><label for="__tabbed_35_4">临时重定向</label><label for="__tabbed_35_5">子域名整合</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="45:5"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><input id="__tabbed_45_5" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">多路径重定向</label><label for="__tabbed_45_2">简单域名重定向</label><label for="__tabbed_45_3">保留路径的重定向</label><label for="__tabbed_45_4">临时重定向</label><label for="__tabbed_45_5">子域名整合</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个将多个路径重定向到不同目标的配置：</p>
@@ -9599,29 +9288,27 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition tip">
 <p class="admonition-title">使用 Redis Sentinel 实现高可用性</p>
-<p>对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。</p>
 </div>
+<p>对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。</p>
 <div class="admonition warning">
 <p class="admonition-title">安全注意事项</p>
-<p>在生产环境中使用 Redis 时：</p>
-<ul>
-<li>始终为 Redis 和 Sentinel 身份验证设置强密码</li>
-<li>考虑为 Redis 连接启用 SSL/TLS 加密</li>
-<li>确保您的 Redis 服务器未暴露于公共互联网</li>
-<li>使用防火墙或网络分段限制对 Redis 端口的访问</li>
-</ul>
 </div>
+<p>在生产环境中使用 Redis 时：</p>
+<pre><code>-   始终为 Redis 和 Sentinel 身份验证设置强密码
+-   考虑为 Redis 连接启用 SSL/TLS 加密
+-   确保您的 Redis 服务器未暴露于公共互联网
+-   使用防火墙或网络分段限制对 Redis 端口的访问
+</code></pre>
 <div class="admonition info">
 <p class="admonition-title">集群要求</p>
-<p>在集群中部署 BunkerWeb 时：</p>
-<ul>
-<li>所有 BunkerWeb 实例都应连接到相同的 Redis 或 Valkey 服务器或 Sentinel 集群</li>
-<li>在所有实例中配置相同的数据库编号</li>
-<li>确保所有 BunkerWeb 实例与 Redis/Valkey 服务器之间的网络连接</li>
-</ul>
 </div>
+<p>在集群中部署 BunkerWeb 时：</p>
+<pre><code>-   所有 BunkerWeb 实例都应连接到相同的 Redis 或 Valkey 服务器或 Sentinel 集群
+-   在所有实例中配置相同的数据库编号
+-   确保所有 BunkerWeb 实例与 Redis/Valkey 服务器之间的网络连接
+</code></pre>
 <h3 id="_102">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:4"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">基本配置</label><label for="__tabbed_36_2">安全配置</label><label for="__tabbed_36_3">Redis Sentinel 配置</label><label for="__tabbed_36_4">高级调优</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="46:4"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">基本配置</label><label for="__tabbed_46_2">安全配置</label><label for="__tabbed_46_3">Redis Sentinel 配置</label><label for="__tabbed_46_4">高级调优</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个用于连接到本地计算机上的 Redis 或 Valkey 服务器的简单配置：</p>
@@ -9691,7 +9378,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><a href="https://redis.io/topics/sentinel">Redis 高可用性</a></li>
 <li><a href="https://redis.io/topics/persistence">Redis 持久性</a></li>
 </ul>
-<h2 id="reporting-pro">Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
@@ -9812,7 +9499,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>设置缓存（可选）：</strong> 启用和配置代理缓存，以提高频繁访问内容的性能。</li>
 </ol>
 <h3 id="_108">配置指南</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="37:8"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><input id="__tabbed_37_3" name="__tabbed_37" type="radio" /><input id="__tabbed_37_4" name="__tabbed_37" type="radio" /><input id="__tabbed_37_5" name="__tabbed_37" type="radio" /><input id="__tabbed_37_6" name="__tabbed_37" type="radio" /><input id="__tabbed_37_7" name="__tabbed_37" type="radio" /><input id="__tabbed_37_8" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">基本配置</label><label for="__tabbed_37_2">连接设置</label><label for="__tabbed_37_3">SSL/TLS 配置</label><label for="__tabbed_37_4">协议支持</label><label for="__tabbed_37_5">标头管理</label><label for="__tabbed_37_6">认证</label><label for="__tabbed_37_7">高级配置</label><label for="__tabbed_37_8">缓存配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="47:8"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><input id="__tabbed_47_6" name="__tabbed_47" type="radio" /><input id="__tabbed_47_7" name="__tabbed_47" type="radio" /><input id="__tabbed_47_8" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">基本配置</label><label for="__tabbed_47_2">连接设置</label><label for="__tabbed_47_3">SSL/TLS 配置</label><label for="__tabbed_47_4">协议支持</label><label for="__tabbed_47_5">标头管理</label><label for="__tabbed_47_6">认证</label><label for="__tabbed_47_7">高级配置</label><label for="__tabbed_47_8">缓存配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>核心设置</strong></p>
@@ -10330,11 +10017,12 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <div class="admonition danger">
 <p class="admonition-title">Docker Compose 用户 - NGINX 变量</p>
-<p>当在 Docker Compose 中使用 NGINX 变量进行配置时，您必须通过使用双美元符号 (<code>$$</code>) 来转义美元符号 (<code>$</code>)。这适用于所有包含 NGINX 变量的设置，如 <code>$remote_addr</code>、<code>$proxy_add_x_forwarded_for</code> 等。</p>
-<p>如果不进行此转义，Docker Compose 将尝试用环境变量替换这些变量，而这些环境变量通常不存在，导致您的 NGINX 配置中出现空值。</p>
 </div>
+<p>当在 Docker Compose 中使用 NGINX 变量进行配置时，您必须通过使用双美元符号 (<code>$$</code>) 来转义美元符号 (<code>$</code>)。这适用于所有包含 NGINX 变量的设置，如 <code>$remote_addr</code>、<code>$proxy_add_x_forwarded_for</code> 等。</p>
+<pre><code>如果不进行此转义，Docker Compose 将尝试用环境变量替换这些变量，而这些环境变量通常不存在，导致您的 NGINX 配置中出现空值。
+</code></pre>
 <h3 id="_109">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:6"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><input id="__tabbed_38_5" name="__tabbed_38" type="radio" /><input id="__tabbed_38_6" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">基本 HTTP 代理</label><label for="__tabbed_38_2">WebSocket 应用</label><label for="__tabbed_38_3">多个位置</label><label for="__tabbed_38_4">缓存配置</label><label for="__tabbed_38_5">高级标头管理</label><label for="__tabbed_38_6">认证集成</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="48:6"><input checked="checked" id="__tabbed_48_1" name="__tabbed_48" type="radio" /><input id="__tabbed_48_2" name="__tabbed_48" type="radio" /><input id="__tabbed_48_3" name="__tabbed_48" type="radio" /><input id="__tabbed_48_4" name="__tabbed_48" type="radio" /><input id="__tabbed_48_5" name="__tabbed_48" type="radio" /><input id="__tabbed_48_6" name="__tabbed_48" type="radio" /><div class="tabbed-labels"><label for="__tabbed_48_1">基本 HTTP 代理</label><label for="__tabbed_48_2">WebSocket 应用</label><label for="__tabbed_48_3">多个位置</label><label for="__tabbed_48_4">缓存配置</label><label for="__tabbed_48_5">高级标头管理</label><label for="__tabbed_48_6">认证集成</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个用于将 HTTP 请求代理到后端应用服务器的简单配置：</p>
@@ -10481,14 +10169,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition warning">
 <p class="admonition-title">性能注意事项</p>
-<p>扫描多个端口会增加客户端连接的延迟。请使用适当的超时值并限制扫描的端口数量以保持良好的性能。</p>
 </div>
+<p>扫描多个端口会增加客户端连接的延迟。请使用适当的超时值并限制扫描的端口数量以保持良好的性能。</p>
 <div class="admonition info">
 <p class="admonition-title">常见代理端口</p>
-<p>默认配置包括代理服务器（80、443、8080、3128）和 SSH（22）使用的常见端口。您可能需要根据您的威胁模型自定义此列表。</p>
 </div>
+<p>默认配置包括代理服务器（80、443、8080、3128）和 SSH（22）使用的常见端口。您可能需要根据您的威胁模型自定义此列表。</p>
 <h3 id="_112">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="39:4"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">基本配置</label><label for="__tabbed_39_2">全面扫描</label><label for="__tabbed_39_3">性能优化配置</label><label for="__tabbed_39_4">高安全性配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="49:4"><input checked="checked" id="__tabbed_49_1" name="__tabbed_49" type="radio" /><input id="__tabbed_49_2" name="__tabbed_49" type="radio" /><input id="__tabbed_49_3" name="__tabbed_49" type="radio" /><input id="__tabbed_49_4" name="__tabbed_49" type="radio" /><div class="tabbed-labels"><label for="__tabbed_49_1">基本配置</label><label for="__tabbed_49_2">全面扫描</label><label for="__tabbed_49_3">性能优化配置</label><label for="__tabbed_49_4">高安全性配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个用于启用客户端端口扫描的简单配置：</p>
@@ -10686,15 +10374,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>优化的 SSL 会话参数可在不牺牲安全性的情况下提高连接性能。</li>
 <li>证书的呈现根据最佳实践进行配置，以确保兼容性和安全性。</li>
 </ol>
-<div class="admonition success">
-<p class="admonition-title">安全优势</p>
-<ul>
-<li><strong>数据保护：</strong> 加密传输中的数据，防止窃听和中间人攻击</li>
-<li><strong>身份验证：</strong> 向客户端验证您服务器的身份</li>
-<li><strong>完整性：</strong> 确保数据在传输过程中未被篡改</li>
-<li><strong>现代标准：</strong> 配置符合行业最佳实践和安全标准</li>
-</ul>
-</div>
+<p>!!! success "安全优势" - <strong>数据保护：</strong> 加密传输中的数据，防止窃听和中间人攻击 - <strong>身份验证：</strong> 向客户端验证您服务器的身份 - <strong>完整性：</strong> 确保数据在传输过程中未被篡改 - <strong>现代标准：</strong> 配置符合行业最佳实践和安全标准</p>
 <h3 id="_116">如何使用</h3>
 <p>请按照以下步骤配置和使用 SSL 功能：</p>
 <ol>
@@ -10753,14 +10433,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition tip">
 <p class="admonition-title">SSL Labs 测试</p>
-<p>配置 SSL 设置后，请使用 <a href="https://www.ssllabs.com/ssltest/">Qualys SSL Labs 服务器测试</a> 来验证您的配置并检查潜在的安全问题。一个正确的 BunkerWeb SSL 配置应该能获得 A+ 评级。</p>
 </div>
+<p>配置 SSL 设置后，请使用 <a href="https://www.ssllabs.com/ssltest/">Qualys SSL Labs 服务器测试</a> 来验证您的配置并检查潜在的安全问题。一个正确的 BunkerWeb SSL 配置应该能获得 A+ 评级。</p>
 <div class="admonition warning">
 <p class="admonition-title">协议选择</p>
-<p>由于已知的漏洞，默认情况下有意禁用了对 SSLv3、TLSv1.0 和 TLSv1.1 等旧协议的支持。只有在您绝对需要支持旧版客户端并了解这样做的安全隐患时，才启用这些协议。</p>
 </div>
+<p>由于已知的漏洞，默认情况下有意禁用了对 SSLv3、TLSv1.0 和 TLSv1.1 等旧协议的支持。只有在您绝对需要支持旧版客户端并了解这样做的安全隐患时，才启用这些协议。</p>
 <h3 id="_118">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="40:4"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">现代安全（默认）</label><label for="__tabbed_40_2">最高安全</label><label for="__tabbed_40_3">旧版兼容性</label><label for="__tabbed_40_4">自定义密码</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="50:4"><input checked="checked" id="__tabbed_50_1" name="__tabbed_50" type="radio" /><input id="__tabbed_50_2" name="__tabbed_50" type="radio" /><input id="__tabbed_50_3" name="__tabbed_50" type="radio" /><input id="__tabbed_50_4" name="__tabbed_50" type="radio" /><div class="tabbed-labels"><label for="__tabbed_50_1">现代安全（默认）</label><label for="__tabbed_50_2">最高安全</label><label for="__tabbed_50_3">旧版兼容性</label><label for="__tabbed_50_4">自定义密码</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>默认配置提供了强大的安全性，同时保持了与现代浏览器的兼容性：</p>
@@ -10910,18 +10590,18 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition warning">
 <p class="admonition-title">需要到期日期</p>
-<p>根据 RFC 9116，<code>Expires</code> 字段是必需的。如果您没有为 <code>SECURITYTXT_EXPIRES</code> 提供值，BunkerWeb 会自动将到期日期设置为从当前日期算起的一年。</p>
 </div>
+<p>根据 RFC 9116，<code>Expires</code> 字段是必需的。如果您没有为 <code>SECURITYTXT_EXPIRES</code> 提供值，BunkerWeb 会自动将到期日期设置为从当前日期算起的一年。</p>
 <div class="admonition info">
 <p class="admonition-title">联系信息至关重要</p>
-<p><code>Contact</code> 字段是 security.txt 文件中最重要的部分。您应该至少提供一种方式让安全研究人员与您联系。这可以是电子邮件地址、Web 表单、电话号码或任何其他适合您组织的方式。</p>
 </div>
+<p><code>Contact</code> 字段是 security.txt 文件中最重要的部分。您应该至少提供一种方式让安全研究人员与您联系。这可以是电子邮件地址、Web 表单、电话号码或任何其他适合您组织的方式。</p>
 <div class="admonition warning">
 <p class="admonition-title">URL 必须使用 HTTPS</p>
-<p>根据 RFC 9116，security.txt 文件中的所有 URL（<code>mailto:</code> 和 <code>tel:</code> 链接除外）都必须使用 HTTPS。非 HTTPS URL 将被 BunkerWeb 自动转换为 HTTPS，以确保符合标准。</p>
 </div>
+<p>根据 RFC 9116，security.txt 文件中的所有 URL（<code>mailto:</code> 和 <code>tel:</code> 链接除外）都必须使用 HTTPS。非 HTTPS URL 将被 BunkerWeb 自动转换为 HTTPS，以确保符合标准。</p>
 <h3 id="_121">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="41:3"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">基本配置</label><label for="__tabbed_41_2">综合配置</label><label for="__tabbed_41_3">多联系人配置</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="51:3"><input checked="checked" id="__tabbed_51_1" name="__tabbed_51" type="radio" /><input id="__tabbed_51_2" name="__tabbed_51" type="radio" /><input id="__tabbed_51_3" name="__tabbed_51" type="radio" /><div class="tabbed-labels"><label for="__tabbed_51_1">基本配置</label><label for="__tabbed_51_2">综合配置</label><label for="__tabbed_51_3">多联系人配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个仅包含联系信息的最小配置：</p>
@@ -10969,8 +10649,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ol>
 <div class="admonition warning">
 <p class="admonition-title">浏览器安全警告</p>
-<p>当用户访问使用自签名证书的网站时，浏览器会显示安全警告，因为这些证书未经受信任的证书颁发机构验证。对于生产环境，请考虑改用 <a href="#lets-encrypt">Let's Encrypt</a>。</p>
 </div>
+<p>当用户访问使用自签名证书的网站时，浏览器会显示安全警告，因为这些证书未经受信任的证书颁发机构验证。对于生产环境，请考虑改用 <a href="#lets-encrypt">Let's Encrypt</a>。</p>
 <h3 id="_122">如何使用</h3>
 <p>请按照以下步骤配置和使用自签名证书功能：</p>
 <ol>
@@ -10982,8 +10662,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ol>
 <div class="admonition tip">
 <p class="admonition-title">流模式配置</p>
-<p>对于流模式，请配置 <code>LISTEN_STREAM_PORT_SSL</code> 设置以指定 SSL/TLS 监听端口。此步骤对于在流模式下正常运行至关重要。</p>
 </div>
+<p>对于流模式，请配置 <code>LISTEN_STREAM_PORT_SSL</code> 设置以指定 SSL/TLS 监听端口。此步骤对于在流模式下正常运行至关重要。</p>
 <h3 id="_123">配置设置</h3>
 <table>
 <thead>
@@ -11028,14 +10708,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition tip">
 <p class="admonition-title">开发环境</p>
-<p>自签名证书非常适合开发和测试环境，在这些环境中您需要 HTTPS，但不需要受公共浏览器信任的证书。</p>
 </div>
+<p>自签名证书非常适合开发和测试环境，在这些环境中您需要 HTTPS，但不需要受公共浏览器信任的证书。</p>
 <div class="admonition info">
 <p class="admonition-title">证书信息</p>
-<p>生成的自签名证书使用指定的算法（默认为使用 prime256v1 曲线的椭圆曲线加密），并包含配置的主题，确保您的域名功能正常。</p>
 </div>
+<p>生成的自签名证书使用指定的算法（默认为使用 prime256v1 曲线的椭圆曲线加密），并包含配置的主题，确保您的域名功能正常。</p>
 <h3 id="_124">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="42:3"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">基本配置</label><label for="__tabbed_42_2">短期证书</label><label for="__tabbed_42_3">使用 RSA 证书进行测试</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="52:3"><input checked="checked" id="__tabbed_52_1" name="__tabbed_52" type="radio" /><input id="__tabbed_52_2" name="__tabbed_52" type="radio" /><input id="__tabbed_52_3" name="__tabbed_52" type="radio" /><div class="tabbed-labels"><label for="__tabbed_52_1">基本配置</label><label for="__tabbed_52_2">短期证书</label><label for="__tabbed_52_3">使用 RSA 证书进行测试</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个使用默认设置的自签名证书的简单配置：</p>
@@ -11150,25 +10830,23 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </table>
 <div class="admonition warning">
 <p class="admonition-title">安全注意事项</p>
-<p><code>SESSIONS_SECRET</code> 设置对安全至关重要。在生产环境中：</p>
-<ol>
-<li>使用一个强大的、随机的值（至少 32 个字符）</li>
-<li>对此值保密</li>
-<li>在集群中的所有 BunkerWeb 实例中使用相同的值</li>
-<li>考虑使用环境变量或密钥管理，以避免以纯文本形式存储此值</li>
-</ol>
 </div>
+<p><code>SESSIONS_SECRET</code> 设置对安全至关重要。在生产环境中：</p>
+<pre><code>1. 使用一个强大的、随机的值（至少 32 个字符）
+2. 对此值保密
+3. 在集群中的所有 BunkerWeb 实例中使用相同的值
+4. 考虑使用环境变量或密钥管理，以避免以纯文本形式存储此值
+</code></pre>
 <div class="admonition tip">
 <p class="admonition-title">集群环境</p>
-<p>如果您在负载均衡器后面运行多个 BunkerWeb 实例：</p>
-<ol>
-<li>将 <code>USE_REDIS</code> 设置为 <code>yes</code> 并配置您的 Redis 连接</li>
-<li>确保所有实例使用完全相同的 <code>SESSIONS_SECRET</code> 和 <code>SESSIONS_NAME</code></li>
-<li>这确保了无论哪个 BunkerWeb 实例处理用户的请求，他们都能保持其会话</li>
-</ol>
 </div>
+<p>如果您在负载均衡器后面运行多个 BunkerWeb 实例：</p>
+<pre><code>1. 将 `USE_REDIS` 设置为 `yes` 并配置您的 Redis 连接
+2. 确保所有实例使用完全相同的 `SESSIONS_SECRET` 和 `SESSIONS_NAME`
+3. 这确保了无论哪个 BunkerWeb 实例处理用户的请求，他们都能保持其会话
+</code></pre>
 <h3 id="_127">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="43:4"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><input id="__tabbed_43_4" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">基本配置</label><label for="__tabbed_43_2">增强安全性</label><label for="__tabbed_43_3">带 Redis 的集群环境</label><label for="__tabbed_43_4">长效会话</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="53:4"><input checked="checked" id="__tabbed_53_1" name="__tabbed_53" type="radio" /><input id="__tabbed_53_2" name="__tabbed_53" type="radio" /><input id="__tabbed_53_3" name="__tabbed_53" type="radio" /><input id="__tabbed_53_4" name="__tabbed_53" type="radio" /><div class="tabbed-labels"><label for="__tabbed_53_1">基本配置</label><label for="__tabbed_53_2">增强安全性</label><label for="__tabbed_53_3">带 Redis 的集群环境</label><label for="__tabbed_53_4">长效会话</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>单个 BunkerWeb 实例的简单配置：</p>
@@ -11242,7 +10920,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<h2 id="user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>
@@ -11289,8 +10967,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ol>
 <div class="admonition info">
 <p class="admonition-title">流模式</p>
-<p>当使用流模式时，仅执行 IP、反向 DNS 和 ASN 检查。</p>
 </div>
+<p>当使用流模式时，仅执行 IP、反向 DNS 和 ASN 检查。</p>
 <h3 id="_129">配置设置</h3>
 <p><strong>通用</strong></p>
 <table>
@@ -11313,251 +10991,86 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="44:5"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><input id="__tabbed_44_4" name="__tabbed_44" type="radio" /><input id="__tabbed_44_5" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">IP 地址</label><label for="__tabbed_44_2">反向 DNS</label><label for="__tabbed_44_3">ASN</label><label for="__tabbed_44_4">用户代理</label><label for="__tabbed_44_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="54:1"><input checked="checked" id="__tabbed_54_1" name="__tabbed_54" type="radio" /><div class="tabbed-labels"><label for="__tabbed_54_1">IP 地址</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block">
+<div class="tabbed-block"></div>
+</div>
+</div>
 <p><strong>功能说明：</strong> 根据访问者的 IP 地址或网络将其列入白名单。这些访问者将绕过所有安全检查。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多选</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>WHITELIST_IP</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 白名单：</strong> 允许的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_IP</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 忽略列表：</strong> 应绕过 IP 白名单检查的 IP 地址或网络列表。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IP_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 白名单 URL：</strong> 包含要列入白名单的 IP 地址或网络的 URL 列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_IP_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>IP 忽略列表 URL：</strong> 包含要忽略的 IP 地址或网络的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置                       | 默认值 | 上下文    | 多选 | 描述                                                                          |
+| -------------------------- | ------ | --------- | ---- | ----------------------------------------------------------------------------- |
+| `WHITELIST_IP`             |        | multisite | 否   | **IP 白名单：** 允许的 IP 地址或网络（CIDR 表示法）列表，以空格分隔。         |
+| `WHITELIST_IGNORE_IP`      |        | multisite | 否   | **IP 忽略列表：** 应绕过 IP 白名单检查的 IP 地址或网络列表。                  |
+| `WHITELIST_IP_URLS`        |        | multisite | 否   | **IP 白名单 URL：** 包含要列入白名单的 IP 地址或网络的 URL 列表，以空格分隔。 |
+| `WHITELIST_IGNORE_IP_URLS` |        | multisite | 否   | **IP 忽略列表 URL：** 包含要忽略的 IP 地址或网络的 URL 列表。                 |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="55:1"><input checked="checked" id="__tabbed_55_1" name="__tabbed_55" type="radio" /><div class="tabbed-labels"><label for="__tabbed_55_1">反向 DNS</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>功能说明：</strong> 根据访问者的域名（反向）将其列入白名单。这对于允许来自特定组织或网络的访问者按其域名访问非常有用。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多选</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>WHITELIST_RDNS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 白名单：</strong> 允许的反向 DNS 后缀列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_RDNS_GLOBAL</code></td>
-<td><code>yes</code></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>仅限全局 rDNS：</strong> 当设置为 <code>yes</code> 时，仅对全局 IP 地址执行 rDNS 白名单检查。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_RDNS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 忽略列表：</strong> 应绕过 rDNS 白名单检查的反向 DNS 后缀列表。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_RDNS_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 白名单 URL：</strong> 包含要列入白名单的反向 DNS 后缀的 URL 列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_RDNS_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>rDNS 忽略列表 URL：</strong> 包含要忽略的反向 DNS 后缀的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置                         | 默认值 | 上下文    | 多选 | 描述                                                                           |
+| ---------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------ |
+| `WHITELIST_RDNS`             |        | multisite | 否   | **rDNS 白名单：** 允许的反向 DNS 后缀列表，以空格分隔。                        |
+| `WHITELIST_RDNS_GLOBAL`      | `yes`  | multisite | 否   | **仅限全局 rDNS：** 当设置为 `yes` 时，仅对全局 IP 地址执行 rDNS 白名单检查。  |
+| `WHITELIST_IGNORE_RDNS`      |        | multisite | 否   | **rDNS 忽略列表：** 应绕过 rDNS 白名单检查的反向 DNS 后缀列表。                |
+| `WHITELIST_RDNS_URLS`        |        | multisite | 否   | **rDNS 白名单 URL：** 包含要列入白名单的反向 DNS 后缀的 URL 列表，以空格分隔。 |
+| `WHITELIST_IGNORE_RDNS_URLS` |        | multisite | 否   | **rDNS 忽略列表 URL：** 包含要忽略的反向 DNS 后缀的 URL 列表。                 |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="56:1"><input checked="checked" id="__tabbed_56_1" name="__tabbed_56" type="radio" /><div class="tabbed-labels"><label for="__tabbed_56_1">ASN</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>功能说明：</strong> 使用自治系统编号（ASN）将来自特定网络提供商的访问者列入白名单。ASN 标识 IP 属于哪个提供商或组织。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多选</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>WHITELIST_ASN</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 白名单：</strong> 允许的自治系统编号列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_ASN</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 忽略列表：</strong> 应绕过 ASN 白名单检查的 ASN 列表。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_ASN_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 白名单 URL：</strong> 包含要列入白名单的 ASN 的 URL 列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_ASN_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>ASN 忽略列表 URL：</strong> 包含要忽略的 ASN 的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置                        | 默认值 | 上下文    | 多选 | 描述                                                                  |
+| --------------------------- | ------ | --------- | ---- | --------------------------------------------------------------------- |
+| `WHITELIST_ASN`             |        | multisite | 否   | **ASN 白名单：** 允许的自治系统编号列表，以空格分隔。                 |
+| `WHITELIST_IGNORE_ASN`      |        | multisite | 否   | **ASN 忽略列表：** 应绕过 ASN 白名单检查的 ASN 列表。                 |
+| `WHITELIST_ASN_URLS`        |        | multisite | 否   | **ASN 白名单 URL：** 包含要列入白名单的 ASN 的 URL 列表，以空格分隔。 |
+| `WHITELIST_IGNORE_ASN_URLS` |        | multisite | 否   | **ASN 忽略列表 URL：** 包含要忽略的 ASN 的 URL 列表。                 |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="57:1"><input checked="checked" id="__tabbed_57_1" name="__tabbed_57" type="radio" /><div class="tabbed-labels"><label for="__tabbed_57_1">用户代理</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>功能说明：</strong> 根据访问者声称使用的浏览器或工具将其列入白名单。这对于允许访问特定的已知工具或服务非常有效。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多选</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>WHITELIST_USER_AGENT</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理白名单：</strong> 允许的用户代理模式（PCRE 正则表达式）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_USER_AGENT</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理忽略列表：</strong> 应绕过用户代理白名单检查的用户代理模式列表。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_USER_AGENT_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理白名单 URL：</strong> 包含要列入白名单的用户代理模式的 URL 列表。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_USER_AGENT_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>用户代理忽略列表 URL：</strong> 包含要忽略的用户代理模式的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
+<pre><code>| 设置                               | 默认值 | 上下文    | 多选 | 描述                                                                         |
+| ---------------------------------- | ------ | --------- | ---- | ---------------------------------------------------------------------------- |
+| `WHITELIST_USER_AGENT`             |        | multisite | 否   | **用户代理白名单：** 允许的用户代理模式（PCRE 正则表达式）列表，以空格分隔。 |
+| `WHITELIST_IGNORE_USER_AGENT`      |        | multisite | 否   | **用户代理忽略列表：** 应绕过用户代理白名单检查的用户代理模式列表。          |
+| `WHITELIST_USER_AGENT_URLS`        |        | multisite | 否   | **用户代理白名单 URL：** 包含要列入白名单的用户代理模式的 URL 列表。         |
+| `WHITELIST_IGNORE_USER_AGENT_URLS` |        | multisite | 否   | **用户代理忽略列表 URL：** 包含要忽略的用户代理模式的 URL 列表。             |
+</code></pre>
+<div class="tabbed-set tabbed-alternate" data-tabs="58:1"><input checked="checked" id="__tabbed_58_1" name="__tabbed_58" type="radio" /><div class="tabbed-labels"><label for="__tabbed_58_1">URI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
 </div>
-<div class="tabbed-block">
+</div>
 <p><strong>功能说明：</strong> 将对您网站上特定 URL 的请求列入白名单。这对于允许访问特定端点而不考虑其他因素很有帮助。</p>
-<table>
-<thead>
-<tr>
-<th>设置</th>
-<th>默认值</th>
-<th>上下文</th>
-<th>多选</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>WHITELIST_URI</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 白名单：</strong> 允许的 URI 模式（PCRE 正则表达式）列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_URI</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 忽略列表：</strong> 应绕过 URI 白名单检查的 URI 模式列表。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_URI_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 白名单 URL：</strong> 包含要列入白名单的 URI 模式的 URL 列表，以空格分隔。</td>
-</tr>
-<tr>
-<td><code>WHITELIST_IGNORE_URI_URLS</code></td>
-<td></td>
-<td>multisite</td>
-<td>否</td>
-<td><strong>URI 忽略列表 URL：</strong> 包含要忽略的 URI 模式的 URL 列表。</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
+<pre><code>| 设置                        | 默认值 | 上下文    | 多选 | 描述                                                                      |
+| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------- |
+| `WHITELIST_URI`             |        | multisite | 否   | **URI 白名单：** 允许的 URI 模式（PCRE 正则表达式）列表，以空格分隔。     |
+| `WHITELIST_IGNORE_URI`      |        | multisite | 否   | **URI 忽略列表：** 应绕过 URI 白名单检查的 URI 模式列表。                 |
+| `WHITELIST_URI_URLS`        |        | multisite | 否   | **URI 白名单 URL：** 包含要列入白名单的 URI 模式的 URL 列表，以空格分隔。 |
+| `WHITELIST_IGNORE_URI_URLS` |        | multisite | 否   | **URI 忽略列表 URL：** 包含要忽略的 URI 模式的 URL 列表。                 |
+</code></pre>
 <div class="admonition info">
 <p class="admonition-title">URL 格式支持</p>
-<p>所有 <code>*_URLS</code> 设置都支持 HTTP/HTTPS URL 以及使用 <code>file:///</code> 前缀的本地文件路径。支持使用 <code>http://user:pass@url</code> 格式进行基本身份验证。</p>
 </div>
+<p>所有 <code>*_URLS</code> 设置都支持 HTTP/HTTPS URL 以及使用 <code>file:///</code> 前缀的本地文件路径。支持使用 <code>http://user:pass@url</code> 格式进行基本身份验证。</p>
 <div class="admonition tip">
 <p class="admonition-title">定期更新</p>
-<p>从 URL 获取的白名单会每小时自动下载和更新，以确保您的保护与最新的受信任来源保持同步。</p>
 </div>
+<p>从 URL 获取的白名单会每小时自动下载和更新，以确保您的保护与最新的受信任来源保持同步。</p>
 <div class="admonition warning">
 <p class="admonition-title">安全绕过</p>
-<p>被列入白名单的访问者将完全<strong>绕过 BunkerWeb 中的所有其他安全检查</strong>，包括 WAF 规则、速率限制、恶意机器人检测以及任何其他安全机制。仅对您绝对信任的来源使用白名单。</p>
 </div>
+<p>被列入白名单的访问者将完全<strong>绕过 BunkerWeb 中的所有其他安全检查</strong>，包括 WAF 规则、速率限制、恶意机器人检测以及任何其他安全机制。仅对您绝对信任的来源使用白名单。</p>
 <h3 id="_130">配置示例</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="45:5"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><input id="__tabbed_45_5" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">基本组织访问</label><label for="__tabbed_45_2">高级配置</label><label for="__tabbed_45_3">使用本地文件</label><label for="__tabbed_45_4">API 访问模式</label><label for="__tabbed_45_5">知名爬虫</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="59:5"><input checked="checked" id="__tabbed_59_1" name="__tabbed_59" type="radio" /><input id="__tabbed_59_2" name="__tabbed_59" type="radio" /><input id="__tabbed_59_3" name="__tabbed_59" type="radio" /><input id="__tabbed_59_4" name="__tabbed_59" type="radio" /><input id="__tabbed_59_5" name="__tabbed_59" type="radio" /><div class="tabbed-labels"><label for="__tabbed_59_1">基本组织访问</label><label for="__tabbed_59_2">高级配置</label><label for="__tabbed_59_3">使用本地文件</label><label for="__tabbed_59_4">API 访问模式</label><label for="__tabbed_59_5">知名爬虫</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>一个简单的配置，将公司办公室的 IP 列入白名单：</p>
@@ -11750,6 +11263,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
         <script src="https://chatbot.bunkerweb.io/static/js/chatbot.js"></script>
       
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
+      
+        <script src="../../assets/toc-dropdown.js"></script>
       
     
   </body>

@@ -3074,7 +3074,7 @@
 </tr>
 <tr>
 <td><code>API_HTTPS_PORT</code></td>
-<td><code>6000</code></td>
+<td><code>5443</code></td>
 <td>global</td>
 <td>No</td>
 <td><strong>Puerto HTTPS de la API:</strong> Número de puerto de escucha (TLS) para la API.</td>
@@ -3123,7 +3123,7 @@
 </tr>
 </tbody>
 </table>
-<p>Nota: por razones de arranque, si habilitas <code>API_TOKEN</code> debes establecerlo en el entorno de AMBAS, la instancia de BunkerWeb y el Programador. El Programador incluye automáticamente el encabezado <code>Authorization</code> cuando <code>API_TOKEN</code> está presente en su entorno. Si no se establece, no se envía ningún encabezado y BunkerWeb no aplicará la autenticación por token. Puedes exponer la API a través de HTTPS estableciendo <code>API_LISTEN_HTTPS=yes</code> (puerto: <code>API_HTTPS_PORT</code>, predeterminado <code>6000</code>).</p>
+<p>Nota: por razones de arranque, si habilitas <code>API_TOKEN</code> debes establecerlo en el entorno de AMBAS, la instancia de BunkerWeb y el Programador. El Programador incluye automáticamente el encabezado <code>Authorization</code> cuando <code>API_TOKEN</code> está presente en su entorno. Si no se establece, no se envía ningún encabezado y BunkerWeb no aplicará la autenticación por token. Puedes exponer la API a través de HTTPS estableciendo <code>API_LISTEN_HTTPS=yes</code> (puerto: <code>API_HTTPS_PORT</code>, predeterminado <code>5443</code>).</p>
 <p>Prueba de ejemplo con curl (reemplaza el token y el host):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
@@ -3132,7 +3132,7 @@
 curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">     </span>--insecure<span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>https://&lt;bunkerweb-host&gt;:6000/ping
+<span class="w">     </span>https://&lt;bunkerweb-host&gt;:5443/ping
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -3480,7 +3480,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 </div>
 </div>
-<h2 id="anti-ddos-pro">Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="anti-ddos-pro">Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.</p>
 <table>
@@ -4363,7 +4363,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </div>
 </div>
 </div>
-<h2 id="backup-s3-pro">Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="backup-s3-pro">Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Automatically backup your data to an S3 bucket</p>
 <table>
@@ -6363,6 +6363,13 @@ DNSBL_IGNORE_IP_URLS: "https://example.com/allow-cidrs.txt file:///etc/bunkerweb
 <td>no</td>
 <td><strong>Máximo de Ejecuciones de Trabajos:</strong> El número máximo de registros de ejecución de trabajos que se conservarán en la base de datos antes de la limpieza automática.</td>
 </tr>
+<tr>
+<td><code>DATABASE_MAX_SESSION_AGE_DAYS</code></td>
+<td><code>14</code></td>
+<td>global</td>
+<td>no</td>
+<td><strong>Retención de Sesiones:</strong> La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.</td>
+</tr>
 </tbody>
 </table>
 <p>!!! tip "Selección de Base de Datos" - <strong>SQLite</strong> (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos. - <strong>PostgreSQL</strong>: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia. - <strong>MySQL/MariaDB</strong>: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción. - <strong>Oracle</strong>: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.</p>
@@ -6378,8 +6385,13 @@ DNSBL_IGNORE_IP_URLS: "https://example.com/allow-cidrs.txt file:///etc/bunkerweb
 <div class="admonition warning">
 <p class="admonition-title">Mantenimiento de la Base de Datos</p>
 </div>
-<p>El complemento ejecuta automáticamente un trabajo diario que limpia las ejecuciones de trabajos sobrantes basándose en el ajuste <code>DATABASE_MAX_JOBS_RUNS</code>. Esto evita el crecimiento ilimitado de la base de datos mientras se mantiene un historial útil de las ejecuciones de trabajos.</p>
-<h2 id="easy-resolve-pro">Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p>El complemento ejecuta automáticamente trabajos de mantenimiento diarios:</p>
+<ul>
+<li><strong>Limpiar Ejecuciones de Trabajos en Exceso:</strong> Purga el historial que supera el límite <code>DATABASE_MAX_JOBS_RUNS</code>.</li>
+<li><strong>Limpiar Sesiones de UI Caducadas:</strong> Elimina las sesiones de usuarios de la UI que superan <code>DATABASE_MAX_SESSION_AGE_DAYS</code>.</li>
+</ul>
+<p>Estas tareas evitan el crecimiento ilimitado de la base de datos mientras conservan un historial operativo útil.</p>
+<h2 id="easy-resolve-pro">Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides a simpler way to fix false positives in reports.</p>
 <h2 id="errors">Errors</h2>
@@ -7687,7 +7699,7 @@ DNSBL_IGNORE_IP_URLS: "https://example.com/allow-cidrs.txt file:///etc/bunkerweb
 </div>
 </div>
 </div>
-<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
 <table>
@@ -8020,7 +8032,7 @@ Para entornos de producción seguros, restrinja el acceso a la API a IPs de conf
 </div>
 </div>
 </div>
-<h2 id="migration-pro">Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="migration-pro">Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Migration of BunkerWeb configuration between instances made easy via the web UI</p>
 <h2 id="miscellaneous">Miscellaneous</h2>
@@ -8824,7 +8836,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">Valores de tamaño legibles por humanos</p>
 </div>
 <p>Para los ajustes de tamaño como <code>MODSECURITY_REQ_BODY_NO_FILES_LIMIT</code>, se admiten los sufijos <code>k</code>, <code>m</code> y <code>g</code> (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: <code>256k</code> = 262144, <code>1m</code> = 1048576, <code>2g</code> = 2147483648.</p>
-<h2 id="monitoring-pro">Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="monitoring-pro">Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.</p>
 <table>
@@ -9049,7 +9061,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>BunkerWeb PRO Enterprise:</strong> Acceso completo a las características Pro con soporte técnico dedicado.</li>
 </ul>
 <p>Puede explorar las características Pro con una prueba gratuita de 1 mes utilizando el código de promoción <code>freetrial</code>. Visite el <a href="https://panel.bunkerweb.io/?utm_campaign=self&amp;utm_source=doc">Panel de BunkerWeb</a> para activar su prueba y obtener más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.</p>
-<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="prometheus-exporter-pro">Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Prometheus exporter for BunkerWeb internal metrics.</p>
 <table>
@@ -9602,7 +9614,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><a href="https://redis.io/topics/sentinel">Alta Disponibilidad de Redis</a></li>
 <li><a href="https://redis.io/topics/persistence">Persistencia de Redis</a></li>
 </ul>
-<h2 id="reporting-pro">Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="reporting-pro">Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.</p>
 <table>
@@ -11155,7 +11167,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<h2 id="user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
 <p>Compatibilidad con STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>
@@ -11496,6 +11508,8 @@ Para bloquear clientes no deseados, consulte el <a href="#blacklist">complemento
         <script src="https://chatbot.bunkerweb.io/static/js/chatbot.js"></script>
       
         <script src="../../assets/preserve-version-on-language-switch.js"></script>
+      
+        <script src="../../assets/toc-dropdown.js"></script>
       
     
   </body>
