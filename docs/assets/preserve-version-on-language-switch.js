@@ -183,6 +183,8 @@
           var newSegs = [currentVersion, targetLang].concat(contentSegs);
 
           // Preserve link's original hash and query, but use current page trailing slash style
+          var hadHash = url.hash && url.hash !== '#';
+          if (!hadHash && window.location.hash) url.hash = window.location.hash;
           url.pathname = '/' + newSegs.join('/') + (trailingSlashFromCurrent ? '/' : '');
           a.setAttribute('href', url.toString());
         } catch (e) {

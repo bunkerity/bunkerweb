@@ -208,7 +208,7 @@ Cambiar al modo `detect` puede ayudarte a identificar y resolver posibles falsos
     USE_UDP: "no"
     ```
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -738,7 +738,7 @@ El complemento de copia de seguridad es compatible con las bases de datos SQLite
     BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
     ```
 
-## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :white_check_mark:
@@ -2128,7 +2128,7 @@ El complemento ejecuta automáticamente trabajos de mantenimiento diarios:
 
 Estas tareas evitan el crecimiento ilimitado de la base de datos mientras conservan un historial operativo útil.
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -2994,7 +2994,7 @@ Establecer límites demasiado restrictivos puede afectar a los usuarios legítim
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -3181,7 +3181,7 @@ Cada trabajador de NGINX mantiene sus propias métricas en la memoria. Al accede
     USE_METRICS: "no"
     ```
 
-## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :white_check_mark:
@@ -3719,7 +3719,7 @@ Una configuración de seguridad más alta puede bloquear el tráfico legítimo. 
 !!! note "Valores de tamaño legibles por humanos"
 Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
-## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -3882,7 +3882,7 @@ R: ¡Absolutamente! BunkerWeb ofrece dos planes Pro para satisfacer sus necesida
 
 Puede explorar las características Pro con una prueba gratuita de 1 mes utilizando el código de promoción `freetrial`. Visite el [Panel de BunkerWeb](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) para activar su prueba y obtener más información sobre las opciones de precios flexibles basadas en el número de servicios protegidos por BunkerWeb PRO.
 
-## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -4265,7 +4265,7 @@ Cuando utilice Redis o Valkey con BunkerWeb, considere estas mejores prácticas 
 - [Alta Disponibilidad de Redis](https://redis.io/topics/sentinel)
 - [Persistencia de Redis](https://redis.io/topics/persistence)
 
-## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:
@@ -5176,7 +5176,7 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`  | `no`                 | multisite | no       | Use UI                                       |
 | `UI_HOST` |                      | global    | no       | Address of the web UI used for initial setup |
 
-## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Compatibilidad con STREAM :x:

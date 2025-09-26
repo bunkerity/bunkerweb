@@ -208,7 +208,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     USE_UDP: "no"
     ```
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -690,7 +690,7 @@ BACKUP_ROTATION: "24"
 BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
 ```
 
-## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :white_check_mark:
@@ -1913,7 +1913,7 @@ Des tâches quotidiennes assurent la maintenance automatique :
 
 Ces jobs évitent la croissance illimitée tout en conservant un historique d’exploitation pertinent.
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -2664,7 +2664,7 @@ Des limites trop strictes peuvent impacter des clients légitimes, notamment pou
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -2763,7 +2763,7 @@ METRICS_SAVE_TO_REDIS: "yes"
 USE_METRICS: "no"
 ```
 
-## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :white_check_mark:
@@ -3299,7 +3299,7 @@ Des paramètres de sécurité plus élevés peuvent bloquer le trafic légitime.
 !!! note "Valeurs de taille lisibles"
 Pour les paramètres de taille comme `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, les suffixes `k`, `m`, et `g` (insensibles à la casse) sont pris en charge et représentent les kibioctets, mébioctets et gibioctets (multiples de 1024). Exemples : `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
-## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -3446,7 +3446,7 @@ R : Oui. Deux offres existent :
 
 Un essai gratuit d’1 mois est disponible avec le code `freetrial`. Rendez‑vous sur le [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) pour l’activer.
 
-## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -3698,7 +3698,7 @@ REDIS_KEEPALIVE_IDLE: "60"
 REDIS_KEEPALIVE_POOL: "5"
 ```
 
-## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -4525,7 +4525,7 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`  | `no`              | multisite | non      | Use UI                                       |
 | `UI_HOST` |                   | global    | non      | Address of the web UI used for initial setup |
 
-## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
