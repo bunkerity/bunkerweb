@@ -214,7 +214,7 @@ spec:
     spec:
       containers:
         - name: bunkerweb-db
-          image: postgres:17-alpine
+          image: postgres:18-alpine
           imagePullPolicy: Always
           env:
             - name: POSTGRES_DB
@@ -223,8 +223,6 @@ spec:
               value: "bunkerweb"
             - name: POSTGRES_PASSWORD
               value: "changeme"
-            - name: PGDATA
-              value: "/var/lib/postgresql/data/pgdata"
           volumeMounts:
             - mountPath: "/var/lib/postgresql/data"
               name: vol-db
