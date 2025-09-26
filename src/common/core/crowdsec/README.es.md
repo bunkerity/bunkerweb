@@ -37,8 +37,6 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
 
     **Componente de Seguridad de Aplicaciones (*opcional*)**
 
-    CrowdSec también proporciona un [Componente de Seguridad de Aplicaciones](https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs) que se puede utilizar para proteger su aplicación de ataques. Si desea utilizarlo, debe crear otro archivo de adquisición para el Componente AppSec:
-
     ```yaml
     appsec_config: crowdsecurity/appsec-default
     labels:
@@ -48,8 +46,6 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
     ```
 
     **Syslog**
-
-    Para las integraciones basadas en contenedores, recomendamos redirigir los registros del contenedor de BunkerWeb a un servicio de syslog para que CrowdSec pueda acceder a ellos fácilmente. Aquí hay un ejemplo de configuración para syslog-ng que almacenará los registros sin procesar provenientes de BunkerWeb en un archivo local `/var/log/bunkerweb.log`:
 
     ```syslog
     @version: 4.8
@@ -76,8 +72,6 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
     ```
 
     **Docker Compose**
-
-    Aquí está la plantilla de docker-compose que puede utilizar (no olvide actualizar la clave del bouncer):
 
     ```yaml
     x-bw-env: &bw-env
@@ -319,6 +313,12 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
     CROWDSEC_UPDATE_FREQUENCY: "30"
     CROWDSEC_EXCLUDE_LOCATION: "/health,/metrics"
 
+    # Configuración de AppSec
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
+    CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
+    CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
     # Configuración de AppSec
     CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"

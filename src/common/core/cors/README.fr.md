@@ -42,60 +42,60 @@ Soyez prudent avec `CORS_ALLOW_ORIGIN: *` et/ou `CORS_ALLOW_CREDENTIALS: yes`. P
 
 === "Configuration basique"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "self"
-CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, Authorization"
-CORS_ALLOW_CREDENTIALS: "no"
-CORS_DENY_REQUEST: "yes"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "self"
+    CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, Authorization"
+    CORS_ALLOW_CREDENTIALS: "no"
+    CORS_DENY_REQUEST: "yes"
+    ```
 
 === "API publique"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "*"
-CORS_ALLOW_METHODS: "GET, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, X-API-Key"
-CORS_ALLOW_CREDENTIALS: "no"
-CORS_MAX_AGE: "3600"
-CORS_DENY_REQUEST: "no"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "*"
+    CORS_ALLOW_METHODS: "GET, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, X-API-Key"
+    CORS_ALLOW_CREDENTIALS: "no"
+    CORS_MAX_AGE: "3600"
+    CORS_DENY_REQUEST: "no"
+    ```
 
 === "Plusieurs domaines de confiance"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "^https://(app|api|dashboard)\\.example\\.com$"
-CORS_ALLOW_METHODS: "GET, POST, PUT, DELETE, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, Authorization, X-Requested-With"
-CORS_ALLOW_CREDENTIALS: "yes"
-CORS_EXPOSE_HEADERS: "Content-Length, Content-Range, X-RateLimit-Remaining"
-CORS_MAX_AGE: "86400"
-CORS_DENY_REQUEST: "yes"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "^https://(app|api|dashboard)\\.example\\.com$"
+    CORS_ALLOW_METHODS: "GET, POST, PUT, DELETE, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, Authorization, X-Requested-With"
+    CORS_ALLOW_CREDENTIALS: "yes"
+    CORS_EXPOSE_HEADERS: "Content-Length, Content-Range, X-RateLimit-Remaining"
+    CORS_MAX_AGE: "86400"
+    CORS_DENY_REQUEST: "yes"
+    ```
 
 === "Wildcard sous‑domaine"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "^https://.*\\.example\\.com$"
-CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, Authorization"
-CORS_ALLOW_CREDENTIALS: "no"
-CORS_MAX_AGE: "86400"
-CORS_DENY_REQUEST: "yes"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "^https://.*\\.example\\.com$"
+    CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, Authorization"
+    CORS_ALLOW_CREDENTIALS: "no"
+    CORS_MAX_AGE: "86400"
+    CORS_DENY_REQUEST: "yes"
+    ```
 
 === "Multiples motifs de domaine"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "^https://(.*\\.example\\.com|.*\\.trusted-partner\\.org|api\\.third-party\\.net)$"
-CORS_ALLOW_METHODS: "GET, POST, PUT, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, Authorization, X-Custom-Header"
-CORS_ALLOW_CREDENTIALS: "no"
-CORS_MAX_AGE: "86400"
-CORS_DENY_REQUEST: "yes"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "^https://(.*\\.example\\.com|.*\\.trusted-partner\\.org|api\\.third-party\\.net)$"
+    CORS_ALLOW_METHODS: "GET, POST, PUT, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, Authorization, X-Custom-Header"
+    CORS_ALLOW_CREDENTIALS: "no"
+    CORS_MAX_AGE: "86400"
+    CORS_DENY_REQUEST: "yes"
+    ```

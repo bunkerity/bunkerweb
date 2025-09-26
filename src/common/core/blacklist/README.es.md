@@ -35,12 +35,12 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
 
     El ajuste `BLACKLIST_COMMUNITY_LISTS` le permite seleccionar de fuentes de listas negras curadas. Las opciones disponibles incluyen:
 
-| ID                                                                                                                           | Descripción                                                                                                                                                                                                                    | Fuente                                                                                                                         |
-| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| `ip:laurent-minne-data-shield-aggressive`                                                                                    | Lista de bloqueo de IPv4 de Data-Shield. DST = Europa                                                                                                                                                                          |
-| `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt` |
-| `ip:danmeuk-tor-exit`                                                                                                        | IP de nodos de salida de Tor (dan.me.uk)                                                                                                                                                                                       | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
-| `ua:mitchellkrogza-bad-user-agents`                                                                                          | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, con anti-DDOS, Wordpress Theme Detector Blocking y Fail2Ban Jail para infractores reincidentes | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
+    | ID                                                                                                                           | Descripción                                                                                                                                                                                                                    | Fuente                                                                                                                         |
+    | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+    | `ip:laurent-minne-data-shield-aggressive`                                                                                    | Lista de bloqueo de IPv4 de Data-Shield. DST = Europa                                                                                                                                                                          |
+    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt` |
+    | `ip:danmeuk-tor-exit`                                                                                                        | IP de nodos de salida de Tor (dan.me.uk)                                                                                                                                                                                       | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
+    | `ua:mitchellkrogza-bad-user-agents`                                                                                          | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, con anti-DDOS, Wordpress Theme Detector Blocking y Fail2Ban Jail para infractores reincidentes | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
 
     **Configuración:** Especifique múltiples listas separadas por espacios. Por ejemplo:
     ```yaml
@@ -53,59 +53,59 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
 === "Dirección IP"
 **Qué hace esto:** Bloquea a los visitantes según su dirección IP o red.
 
-| Ajuste                     | Valor por defecto                     | Contexto  | Múltiple | Descripción                                                                                                              |
-| -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `BLACKLIST_IP`             |                                       | multisite | no       | **Lista Negra de IP:** Lista de direcciones IP o redes (notación CIDR) a bloquear, separadas por espacios.               |
-| `BLACKLIST_IGNORE_IP`      |                                       | multisite | no       | **Lista de Omisión de IP:** Lista de direcciones IP o redes que deben omitir las comprobaciones de la lista negra de IP. |
-| `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | no       | **URL de la Lista Negra de IP:** Lista de URL que contienen direcciones IP o redes a bloquear, separadas por espacios.   |
-| `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | no       | **URL de la Lista de Omisión de IP:** Lista de URL que contienen direcciones IP o redes a omitir.                        |
+    | Ajuste                     | Valor por defecto                     | Contexto  | Múltiple | Descripción                                                                                                              |
+    | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+    | `BLACKLIST_IP`             |                                       | multisite | no       | **Lista Negra de IP:** Lista de direcciones IP o redes (notación CIDR) a bloquear, separadas por espacios.               |
+    | `BLACKLIST_IGNORE_IP`      |                                       | multisite | no       | **Lista de Omisión de IP:** Lista de direcciones IP o redes que deben omitir las comprobaciones de la lista negra de IP. |
+    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | multisite | no       | **URL de la Lista Negra de IP:** Lista de URL que contienen direcciones IP o redes a bloquear, separadas por espacios.   |
+    | `BLACKLIST_IGNORE_IP_URLS` |                                       | multisite | no       | **URL de la Lista de Omisión de IP:** Lista de URL que contienen direcciones IP o redes a omitir.                        |
 
     El ajuste por defecto de `BLACKLIST_IP_URLS` incluye una URL que proporciona una **lista de nodos de salida de Tor conocidos**. Esta es una fuente común de tráfico malicioso y es un buen punto de partida para muchos sitios.
 
 === "DNS Inverso"
 **Qué hace esto:** Bloquea a los visitantes según su nombre de dominio inverso. Esto es útil para bloquear escáneres y rastreadores conocidos basados en los dominios de su organización.
 
-| Ajuste                       | Valor por defecto       | Contexto  | Múltiple | Descripción                                                                                                                  |
-| ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `BLACKLIST_RDNS`             | `.shodan.io .censys.io` | multisite | no       | **Lista Negra de rDNS:** Lista de sufijos de DNS inverso a bloquear, separados por espacios.                                 |
-| `BLACKLIST_RDNS_GLOBAL`      | `yes`                   | multisite | no       | **Solo Global para rDNS:** Solo realizar comprobaciones de rDNS en direcciones IP globales cuando se establece en `yes`.     |
-| `BLACKLIST_IGNORE_RDNS`      |                         | multisite | no       | **Lista de Omisión de rDNS:** Lista de sufijos de DNS inverso que deben omitir las comprobaciones de la lista negra de rDNS. |
-| `BLACKLIST_RDNS_URLS`        |                         | multisite | no       | **URL de la Lista Negra de rDNS:** Lista de URL que contienen sufijos de DNS inverso a bloquear, separadas por espacios.     |
-| `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | no       | **URL de la Lista de Omisión de rDNS:** Lista de URL que contienen sufijos de DNS inverso a omitir.                          |
+    | Ajuste                       | Valor por defecto       | Contexto  | Múltiple | Descripción                                                                                                                  |
+    | ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_RDNS`             | `.shodan.io .censys.io` | multisite | no       | **Lista Negra de rDNS:** Lista de sufijos de DNS inverso a bloquear, separados por espacios.                                 |
+    | `BLACKLIST_RDNS_GLOBAL`      | `yes`                   | multisite | no       | **Solo Global para rDNS:** Solo realizar comprobaciones de rDNS en direcciones IP globales cuando se establece en `yes`.     |
+    | `BLACKLIST_IGNORE_RDNS`      |                         | multisite | no       | **Lista de Omisión de rDNS:** Lista de sufijos de DNS inverso que deben omitir las comprobaciones de la lista negra de rDNS. |
+    | `BLACKLIST_RDNS_URLS`        |                         | multisite | no       | **URL de la Lista Negra de rDNS:** Lista de URL que contienen sufijos de DNS inverso a bloquear, separadas por espacios.     |
+    | `BLACKLIST_IGNORE_RDNS_URLS` |                         | multisite | no       | **URL de la Lista de Omisión de rDNS:** Lista de URL que contienen sufijos de DNS inverso a omitir.                          |
 
     El ajuste por defecto de `BLACKLIST_RDNS` incluye dominios de escáneres comunes como **Shodan** y **Censys**. Estos son a menudo utilizados por investigadores de seguridad y escáneres para identificar sitios vulnerables.
 
 === "ASN"
 **Qué hace esto:** Bloquea a los visitantes de proveedores de red específicos. Los ASN son como los códigos postales de Internet: identifican a qué proveedor u organización pertenece una IP.
 
-| Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                             |
-| --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
-| `BLACKLIST_ASN`             |                   | multisite | no       | **Lista Negra de ASN:** Lista de Números de Sistema Autónomo a bloquear, separados por espacios.        |
-| `BLACKLIST_IGNORE_ASN`      |                   | multisite | no       | **Lista de Omisión de ASN:** Lista de ASN que deben omitir las comprobaciones de la lista negra de ASN. |
-| `BLACKLIST_ASN_URLS`        |                   | multisite | no       | **URL de la Lista Negra de ASN:** Lista de URL que contienen ASN a bloquear, separadas por espacios.    |
-| `BLACKLIST_IGNORE_ASN_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de ASN:** Lista de URL que contienen ASN a omitir.                         |
+    | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                             |
+    | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_ASN`             |                   | multisite | no       | **Lista Negra de ASN:** Lista de Números de Sistema Autónomo a bloquear, separados por espacios.        |
+    | `BLACKLIST_IGNORE_ASN`      |                   | multisite | no       | **Lista de Omisión de ASN:** Lista de ASN que deben omitir las comprobaciones de la lista negra de ASN. |
+    | `BLACKLIST_ASN_URLS`        |                   | multisite | no       | **URL de la Lista Negra de ASN:** Lista de URL que contienen ASN a bloquear, separadas por espacios.    |
+    | `BLACKLIST_IGNORE_ASN_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de ASN:** Lista de URL que contienen ASN a omitir.                         |
 
 === "Agente de Usuario"
 **Qué hace esto:** Bloquea a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo contra los bots que se identifican honestamente (como "ScannerBot" o "WebHarvestTool").
 
-| Ajuste                             | Valor por defecto                                                                                                              | Contexto  | Múltiple | Descripción                                                                                                                              |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | no       | **Lista Negra de User-Agent:** Lista de patrones de User-Agent (expresión regular PCRE) a bloquear, separados por espacios.              |
-| `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | no       | **Lista de Omisión de User-Agent:** Lista de patrones de User-Agent que deben omitir las comprobaciones de la lista negra de User-Agent. |
-| `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | no       | **URL de la Lista Negra de User-Agent:** Lista de URL que contienen patrones de User-Agent a bloquear.                                   |
-| `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | no       | **URL de la Lista de Omisión de User-Agent:** Lista de URL que contienen patrones de User-Agent a omitir.                                |
+    | Ajuste                             | Valor por defecto                                                                                                              | Contexto  | Múltiple | Descripción                                                                                                                              |
+    | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_USER_AGENT`             |                                                                                                                                | multisite | no       | **Lista Negra de User-Agent:** Lista de patrones de User-Agent (expresión regular PCRE) a bloquear, separados por espacios.              |
+    | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | multisite | no       | **Lista de Omisión de User-Agent:** Lista de patrones de User-Agent que deben omitir las comprobaciones de la lista negra de User-Agent. |
+    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | multisite | no       | **URL de la Lista Negra de User-Agent:** Lista de URL que contienen patrones de User-Agent a bloquear.                                   |
+    | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | multisite | no       | **URL de la Lista de Omisión de User-Agent:** Lista de URL que contienen patrones de User-Agent a omitir.                                |
 
     El ajuste por defecto de `BLACKLIST_USER_AGENT_URLS` incluye una URL que proporciona una **lista de agentes de usuario maliciosos conocidos**. Estos son a menudo utilizados por bots y escáneres maliciosos para identificar sitios vulnerables.
 
 === "URI"
 **Qué hace esto:** Bloquea las solicitudes a URL específicas en su sitio. Esto es útil para bloquear intentos de acceso a páginas de administración, formularios de inicio de sesión u otras áreas sensibles que podrían ser objetivo de ataques.
 
-| Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                         |
-| --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `BLACKLIST_URI`             |                   | multisite | no       | **Lista Negra de URI:** Lista de patrones de URI (expresión regular PCRE) a bloquear, separados por espacios.       |
-| `BLACKLIST_IGNORE_URI`      |                   | multisite | no       | **Lista de Omisión de URI:** Lista de patrones de URI que deben omitir las comprobaciones de la lista negra de URI. |
-| `BLACKLIST_URI_URLS`        |                   | multisite | no       | **URL de la Lista Negra de URI:** Lista de URL que contienen patrones de URI a bloquear, separadas por espacios.    |
-| `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
+    | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                         |
+    | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_URI`             |                   | multisite | no       | **Lista Negra de URI:** Lista de patrones de URI (expresión regular PCRE) a bloquear, separados por espacios.       |
+    | `BLACKLIST_IGNORE_URI`      |                   | multisite | no       | **Lista de Omisión de URI:** Lista de patrones de URI que deben omitir las comprobaciones de la lista negra de URI. |
+    | `BLACKLIST_URI_URLS`        |                   | multisite | no       | **URL de la Lista Negra de URI:** Lista de URL que contienen patrones de URI a bloquear, separadas por espacios.    |
+    | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
 !!! info "Soporte de Formato de URL"
 Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.

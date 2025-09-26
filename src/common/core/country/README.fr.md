@@ -35,24 +35,24 @@ BunkerWeb utilise la base mmdb [db‑ip lite](https://db-ip.com/db/download/ip-t
 
 === "Liste blanche uniquement"
 
-```yaml
-WHITELIST_COUNTRY: "US CA GB"
-```
+    ```yaml
+    WHITELIST_COUNTRY: "US CA GB"
+    ```
 
 === "Liste noire uniquement"
 
-```yaml
-BLACKLIST_COUNTRY: "RU CN KP"
-```
+    ```yaml
+    BLACKLIST_COUNTRY: "RU CN KP"
+    ```
 
 === "UE uniquement"
 
-```yaml
-WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
-```
+    ```yaml
+    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    ```
 
 === "Blocage pays à risque"
 
-```yaml
-BLACKLIST_COUNTRY: "RU CN KP IR SY"
-```
+    ```yaml
+    BLACKLIST_COUNTRY: "RU CN KP IR SY"
+    ```

@@ -37,30 +37,30 @@ Le plugin configure automatiquement la réécriture pour diriger les requêtes v
 
 === "PHP‑FPM local"
 
-```yaml
-LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
-LOCAL_PHP_PATH: "/var/www/html"
-```
+    ```yaml
+    LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+    ```
 
 === "PHP‑FPM distant"
 
-```yaml
-REMOTE_PHP: "php-server.example.com"
-REMOTE_PHP_PORT: "9000"
-REMOTE_PHP_PATH: "/var/www/html"
-```
+    ```yaml
+    REMOTE_PHP: "php-server.example.com"
+    REMOTE_PHP_PORT: "9000"
+    REMOTE_PHP_PATH: "/var/www/html"
+    ```
 
 === "Port personnalisé"
 
-```yaml
-REMOTE_PHP: "php-server.example.com"
-REMOTE_PHP_PORT: "9001"
-REMOTE_PHP_PATH: "/var/www/html"
-```
+    ```yaml
+    REMOTE_PHP: "php-server.example.com"
+    REMOTE_PHP_PORT: "9001"
+    REMOTE_PHP_PATH: "/var/www/html"
+    ```
 
 === "WordPress"
 
-```yaml
-LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
-LOCAL_PHP_PATH: "/var/www/html/wordpress"
-```
+    ```yaml
+    LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html/wordpress"
+    ```

@@ -187,10 +187,8 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
         name: bw-db
     ```
 
-===
-"Linux"
-
-    Sie müssen CrowdSec installieren und so konfigurieren, dass es die BunkerWeb-Protokolle analysiert. Befolgen Sie die [offizielle Dokumentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
+=== "Linux"
+Sie müssen CrowdSec installieren und so konfigurieren, dass es die BunkerWeb-Protokolle analysiert. Befolgen Sie die [offizielle Dokumentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
 
     Damit CrowdSec die BunkerWeb-Protokolle analysieren kann, fügen Sie die folgenden Zeilen zu Ihrer Akquisitionsdatei unter `/etc/crowdsec/acquis.yaml` hinzu:
 
@@ -261,10 +259,8 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
     sudo systemctl reload bunkerweb
     ```
 
-===
-"All-in-one"
-
-    Das Docker-Image BunkerWeb All-In-One (AIO) wird mit vollständig integriertem CrowdSec geliefert. Sie müssen keine separate CrowdSec-Instanz einrichten oder die Akquisitionsdateien für die BunkerWeb-Protokolle manuell konfigurieren, wenn Sie den internen CrowdSec-Agenten verwenden.
+=== "All-in-one"
+Das Docker-Image BunkerWeb All-In-One (AIO) wird mit vollständig integriertem CrowdSec geliefert. Sie müssen keine separate CrowdSec-Instanz einrichten oder die Akquisitionsdateien für die BunkerWeb-Protokolle manuell konfigurieren, wenn Sie den internen CrowdSec-Agenten verwenden.
 
     Beachten Sie die [Integrationsdokumentation des All-In-One (AIO)-Images](integrations.md#crowdsec-integration).
 
@@ -309,8 +305,7 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
     CROWDSEC_MODE: "live"
     ```
 
-===
-"Erweiterte Konfiguration mit AppSec"
+=== "Erweiterte Konfiguration mit AppSec"
 
     Eine umfassendere Konfiguration, einschließlich der Anwendungssicherheitskomponente:
 
@@ -323,6 +318,11 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
     CROWDSEC_EXCLUDE_LOCATION: "/health,/metrics"
 
     # AppSec-Konfiguration
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
+    CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
+    CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
     CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"

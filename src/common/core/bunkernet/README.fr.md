@@ -41,20 +41,20 @@ Grâce au partenariat avec [CrowdSec](https://www.crowdsec.net/?utm_campaign=bun
 
 === "Configuration par défaut (recommandée)"
 
-```yaml
-USE_BUNKERNET: "yes"
-BUNKERNET_SERVER: "https://api.bunkerweb.io"
-```
+    ```yaml
+    USE_BUNKERNET: "yes"
+    BUNKERNET_SERVER: "https://api.bunkerweb.io"
+    ```
 
 === "Désactivation"
 
-```yaml
-USE_BUNKERNET: "no"
-```
+    ```yaml
+    USE_BUNKERNET: "no"
+    ```
 
 === "Serveur personnalisé"
 
-```yaml
-USE_BUNKERNET: "yes"
-BUNKERNET_SERVER: "https://bunkernet.example.com"
-```
+    ```yaml
+    USE_BUNKERNET: "yes"
+    BUNKERNET_SERVER: "https://bunkernet.example.com"
+    ```

@@ -45,8 +45,8 @@ Avec `REAL_IP_RECURSIVE`, si l’en‑tête contient plusieurs IPs, la première
 
 === "Basique (derrière reverse proxy)"
 
-```yaml
-USE_REAL_IP: "yes"
-REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
-REAL_IP_HEADER: "X-Forwarded-For"
-```
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
+    REAL_IP_HEADER: "X-Forwarded-For"
+    ```

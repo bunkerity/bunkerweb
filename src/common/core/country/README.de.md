@@ -35,24 +35,24 @@ BunkerWeb verwendet die mmdb-Datenbank [db-ip lite](https://db-ip.com/db/downloa
 
 === "Nur Whitelist"
 
-```yaml
-WHITELIST_COUNTRY: "US CA GB"
-```
+    ```yaml
+    WHITELIST_COUNTRY: "US CA GB"
+    ```
 
 === "Nur Blacklist"
 
-```yaml
-BLACKLIST_COUNTRY: "RU CN KP"
-```
+    ```yaml
+    BLACKLIST_COUNTRY: "RU CN KP"
+    ```
 
 === "Nur EU"
 
-```yaml
-WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
-```
+    ```yaml
+    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    ```
 
 === "Blockierung von Risikoländern"
 
-```yaml
-BLACKLIST_COUNTRY: "RU CN KP IR SY"
-```
+    ```yaml
+    BLACKLIST_COUNTRY: "RU CN KP IR SY"
+    ```

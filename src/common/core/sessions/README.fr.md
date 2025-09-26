@@ -36,44 +36,44 @@ Comment ça marche :
 
 === "Basique (instance unique)"
 
-```yaml
-SESSIONS_SECRET: "your-strong-random-secret-key-here"
-SESSIONS_NAME: "myappsession"
-SESSIONS_IDLING_TIMEOUT: "1800"
-SESSIONS_ROLLING_TIMEOUT: "3600"
-SESSIONS_ABSOLUTE_TIMEOUT: "86400"
-```
+    ```yaml
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "myappsession"
+    SESSIONS_IDLING_TIMEOUT: "1800"
+    SESSIONS_ROLLING_TIMEOUT: "3600"
+    SESSIONS_ABSOLUTE_TIMEOUT: "86400"
+    ```
 
 === "Sécurité renforcée"
 
-```yaml
-SESSIONS_SECRET: "your-very-strong-random-secret-key-here"
-SESSIONS_NAME: "securesession"
-SESSIONS_IDLING_TIMEOUT: "900"
-SESSIONS_ROLLING_TIMEOUT: "1800"
-SESSIONS_ABSOLUTE_TIMEOUT: "43200"
-SESSIONS_CHECK_IP: "yes"
-SESSIONS_CHECK_USER_AGENT: "yes"
-```
+    ```yaml
+    SESSIONS_SECRET: "your-very-strong-random-secret-key-here"
+    SESSIONS_NAME: "securesession"
+    SESSIONS_IDLING_TIMEOUT: "900"
+    SESSIONS_ROLLING_TIMEOUT: "1800"
+    SESSIONS_ABSOLUTE_TIMEOUT: "43200"
+    SESSIONS_CHECK_IP: "yes"
+    SESSIONS_CHECK_USER_AGENT: "yes"
+    ```
 
 === "Cluster + Redis"
 
-```yaml
-SESSIONS_SECRET: "your-strong-random-secret-key-here"
-SESSIONS_NAME: "clustersession"
-SESSIONS_IDLING_TIMEOUT: "1800"
-SESSIONS_ROLLING_TIMEOUT: "3600"
-SESSIONS_ABSOLUTE_TIMEOUT: "86400"
-USE_REDIS: "yes"
-# Configurez la connexion Redis
-```
+    ```yaml
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "clustersession"
+    SESSIONS_IDLING_TIMEOUT: "1800"
+    SESSIONS_ROLLING_TIMEOUT: "3600"
+    SESSIONS_ABSOLUTE_TIMEOUT: "86400"
+    USE_REDIS: "yes"
+    # Configurez la connexion Redis
+    ```
 
 === "Sessions longue durée"
 
-```yaml
-SESSIONS_SECRET: "your-strong-random-secret-key-here"
-SESSIONS_NAME: "persistentsession"
-SESSIONS_IDLING_TIMEOUT: "86400"
-SESSIONS_ROLLING_TIMEOUT: "172800"
-SESSIONS_ABSOLUTE_TIMEOUT: "604800"
-```
+    ```yaml
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "persistentsession"
+    SESSIONS_IDLING_TIMEOUT: "86400"
+    SESSIONS_ROLLING_TIMEOUT: "172800"
+    SESSIONS_ABSOLUTE_TIMEOUT: "604800"
+    ```
