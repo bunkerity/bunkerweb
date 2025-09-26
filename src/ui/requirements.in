@@ -1,4 +1,4 @@
-bcrypt==4.3.0
+bcrypt==5.0.0
 biscuit-python==0.3.2
 certbot==5.0.0
 Flask==3.1.2
