@@ -12,6 +12,7 @@
     <!-- Content -->
     <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
         <input type="hidden" id="services_number" value="{{ services|length }}" />
+        <input type="hidden" id="templates" value="{{ templates|join(' ') }}" />
         <textarea type="hidden"
                   id="columns_preferences_defaults"
                   class="visually-hidden">{{ columns_preferences_defaults['services']|tojson }}</textarea>
@@ -52,6 +53,12 @@
                         data-bs-original-title="The Service's creation method"
                         data-i18n="tooltip.table.services.method">
                         <span data-i18n="table.header.method">Method</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Service's template"
+                        data-i18n="tooltip.table.services.template">
+                        <span data-i18n="table.header.template">Template</span>
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
@@ -99,6 +106,14 @@
                             {% endif %}
                         </td>
                         <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
+                        <td>
+                            {% if service["template"] %}
+                                <span class="badge rounded-pill bg-label-primary">{{ service["template"] }}</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-label-secondary"
+                                      data-i18n="badge.no_template">No template</span>
+                            {% endif %}
+                        </td>
                         <td class="service-creation-date">{{ service['creation_date'].astimezone().isoformat() }}</td>
                         <td class="service-last-update-date">{{ service['last_update'].astimezone().isoformat() }}</td>
                         <td>

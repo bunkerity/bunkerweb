@@ -18,7 +18,7 @@ services = Blueprint("services", __name__)
 @services.route("/services", methods=["GET"])
 @login_required
 def services_page():
-    return render_template("services.html", services=DB.get_services(with_drafts=True))
+    return render_template("services.html", services=DB.get_services(with_drafts=True), templates=DB.get_templates())
 
 
 @services.route("/services/", methods=["GET"])
