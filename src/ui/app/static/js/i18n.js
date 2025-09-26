@@ -179,12 +179,35 @@ function loadPluginTranslations(lang) {
     });
 }
 
+// Function to update documentation links based on language
+function updateDocumentationLinks(lang) {
+  const alpha2 = getAlpha2(lang);
+  const supportedDocLangs = ["fr", "de", "es", "zh"];
+  const langPrefix = supportedDocLangs.includes(alpha2) ? `/${alpha2}` : "";
+
+  // Get BunkerWeb version from a global variable or data attribute
+  const bwVersion =
+    window.bw_version || $("body").data("bw-version") || "latest";
+
+  // Update all documentation links
+  $(".docs-link").each(function () {
+    const $link = $(this);
+    const endpoint = $link.data("endpoint") || "";
+    const fragment = $link.data("fragment") || "";
+    const newUrl = `https://docs.bunkerweb.io/${bwVersion}${langPrefix}${endpoint}/?utm_campaign=self&utm_source=ui${fragment}`;
+    $link.attr("href", newUrl);
+  });
+}
+
 // Language switch helper
 function changeLanguage(lang) {
   const alpha2 = getAlpha2(lang);
   // Save language preference to localStorage
   localStorage.setItem("language", alpha2);
   i18next.changeLanguage(alpha2);
+
+  // Update documentation links
+  updateDocumentationLinks(alpha2);
 
   // Get the root URL for the API endpoint
   const rootUrl = $("#home-path")
@@ -276,6 +299,7 @@ $(document).ready(function () {
         loadPluginTranslations(i18next.language).then(function () {
           applyTranslations();
           updateLanguageSelector(i18next.language);
+          updateDocumentationLinks(i18next.language);
           $("[name='language']").val(i18next.language);
           $("#newsletter-locale").val(i18next.language);
         });
@@ -285,6 +309,7 @@ $(document).ready(function () {
           loadPluginTranslations(i18next.language).then(function () {
             applyTranslations();
             updateLanguageSelector(lng);
+            updateDocumentationLinks(lng);
             $("#newsletter-locale").val(i18next.language);
           });
         });

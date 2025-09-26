@@ -74,7 +74,9 @@ class News {
     if (homeNewsContainer) {
       homeNewsContainer.empty();
     }
-    const lastItem = lastNews[0];
+
+    const orderedNews = [...lastNews].reverse();
+    const lastItem = orderedNews[orderedNews.length - 1];
 
     const newsRow = $("<div>", {
       "data-news-row": "",
@@ -89,7 +91,7 @@ class News {
       }).appendTo(homeNewsContainer);
     }
 
-    lastNews.reverse().forEach((news) => {
+    orderedNews.forEach((news) => {
       const isLast = news === lastItem;
 
       const filteredTitle = news.title.rendered
@@ -102,14 +104,24 @@ class News {
         .replace(/^<p>([\s\S]*?)<\/p>$/i, "$1");
       const decodedExcerpt = $("<textarea/>").html(filteredExcerpt).text();
 
+      const articleTags = this.extractTerms(news);
+      const formattedDate = this.formatDate(news.date);
+      const featuredMedia = news._embedded?.["wp:featuredmedia"]?.[0] ?? null;
+      const featuredImg = featuredMedia?.source_url ?? null;
+      const featuredAlt =
+        featuredMedia?.alt_text ||
+        featuredMedia?.title?.rendered ||
+        this.t("news.image_alt");
+
       // Render for sidebar/news page
       const cardElement = this.template(
         decodedTitle,
         news.link,
-        news._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
+        featuredImg,
+        featuredAlt,
         decodedExcerpt,
-        news.tags,
-        news.date,
+        articleTags,
+        formattedDate,
         isLast,
         false,
       );
@@ -120,10 +132,11 @@ class News {
         const homeCardElement = this.template(
           decodedTitle,
           news.link,
-          news._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
+          featuredImg,
+          featuredAlt,
           decodedExcerpt,
-          news.tags,
-          news.date,
+          articleTags,
+          formattedDate,
           isLast,
           true,
         );
@@ -132,7 +145,7 @@ class News {
     });
   }
 
-  template(title, link, img, excerpt, tags, date, last, isHome) {
+  template(title, link, img, imgAlt, excerpt, tags, date, last, isHome) {
     const colClass = !isHome && last ? "" : "mb-1";
     const colSize = isHome ? "col-md-12 col-xl-12" : "col-md-11 col-xl-11";
     const col = $("<div>", {
@@ -140,6 +153,7 @@ class News {
     });
 
     const card = $("<div>", { class: "card" });
+    const imageSrc = img ?? null;
 
     if (isHome) {
       // Home page layout with image on the left
@@ -147,23 +161,26 @@ class News {
         class: "row g-0 align-items-center",
       });
 
-      const imgCol = $("<div>", { class: "col-md-5" }).appendTo(row);
-      const imgLink = $("<a>", {
-        class: "w-100",
-        href: `${link}?utm_campaign=self&utm_source=ui`,
-        target: "_blank",
-        rel: "noopener",
-      }).append(
-        $("<img>", {
-          class: "card-img card-img-left",
-          src: img,
-          alt: this.t("news.image_alt"),
-          loading: "lazy",
-        }),
-      );
-      imgCol.append(imgLink);
+      if (imageSrc) {
+        const imgCol = $("<div>", { class: "col-md-5" }).appendTo(row);
+        const imgLink = $("<a>", {
+          class: "w-100",
+          href: `${link}?utm_campaign=self&utm_source=ui`,
+          target: "_blank",
+          rel: "noopener",
+        }).append(
+          $("<img>", {
+            class: "card-img card-img-left",
+            src: imageSrc,
+            alt: imgAlt,
+            loading: "lazy",
+          }),
+        );
+        imgCol.append(imgLink);
+      }
 
-      const contentCol = $("<div>", { class: "col-md-7" }).appendTo(row);
+      const contentColClass = imageSrc ? "col-md-7" : "col-12";
+      const contentCol = $("<div>", { class: contentColClass }).appendTo(row);
       const cardBody = $("<div>", { class: "card-body p-3" }).appendTo(
         contentCol,
       );
@@ -190,13 +207,14 @@ class News {
         .append(
           $("<small>", {
             class: "text-muted courier-prime",
-            text: `${this.t("news.posted_on")}: ${date}`,
+            text: `Posted on: ${date}`,
           }),
         )
         .appendTo(cardFooter);
 
       const tagsContainer = $("<p>", { class: "d-flex flex-wrap m-0" });
-      tags.forEach((tag) => {
+      const validTags = tags.filter((tag) => tag?.slug && tag?.name);
+      validTags.forEach((tag) => {
         $("<a>", {
           role: "button",
           href: `${this.BASE_URL}category/${tag.slug}?utm_campaign=self&utm_source=ui`,
@@ -214,24 +232,29 @@ class News {
           .appendTo(tagsContainer);
       });
 
-      tagsContainer.appendTo(cardFooter);
+      if (validTags.length) {
+        tagsContainer.appendTo(cardFooter);
+      }
 
       cardBody.append(cardTitle, cardText, cardFooter);
       card.append(row);
     } else {
       // Sidebar/news page layout with image on top
-      const imgLink = $("<a>", {
-        href: `${link}?utm_campaign=self&utm_source=ui`,
-        target: "_blank",
-        rel: "noopener",
-      }).append(
-        $("<img>", {
-          class: "card-img-top",
-          src: img,
-          alt: "News image",
-          loading: "lazy",
-        }),
-      );
+      if (imageSrc) {
+        const imgLink = $("<a>", {
+          href: `${link}?utm_campaign=self&utm_source=ui`,
+          target: "_blank",
+          rel: "noopener",
+        }).append(
+          $("<img>", {
+            class: "card-img-top",
+            src: imageSrc,
+            alt: imgAlt,
+            loading: "lazy",
+          }),
+        );
+        card.append(imgLink);
+      }
 
       const cardBody = $("<div>", { class: "card-body" });
       const cardTitle = $("<h5>", { class: "card-title" }).append(
@@ -248,7 +271,8 @@ class News {
       });
 
       const tagsContainer = $("<p>", { class: "d-flex flex-wrap" });
-      tags.forEach((tag) => {
+      const validTags = tags.filter((tag) => tag?.slug && tag?.name);
+      validTags.forEach((tag) => {
         $("<a>", {
           role: "button",
           href: `${this.BASE_URL}category/${tag.slug}?utm_campaign=self&utm_source=ui`,
@@ -269,12 +293,16 @@ class News {
       const dateText = $("<p>", { class: "card-text" }).append(
         $("<small>", {
           class: "text-muted courier-prime",
-          text: `${this.t("news.posted_on")}: ${date}`,
+          text: `Posted on: ${date}`,
         }),
       );
 
-      cardBody.append(cardTitle, cardText, tagsContainer, dateText);
-      card.append(imgLink, cardBody);
+      if (validTags.length) {
+        cardBody.append(cardTitle, cardText, tagsContainer, dateText);
+      } else {
+        cardBody.append(cardTitle, cardText, dateText);
+      }
+      card.append(cardBody);
     }
 
     if (isHome) {
@@ -284,6 +312,45 @@ class News {
     }
 
     return col;
+  }
+
+  extractTerms(news) {
+    const embeddedTerms = news._embedded?.["wp:term"] ?? [];
+    const termMap = new Map();
+
+    embeddedTerms
+      .flat()
+      .filter(
+        (term) =>
+          term &&
+          (term.taxonomy === "category" || term.taxonomy === "post_tag") &&
+          term.slug &&
+          term.name,
+      )
+      .forEach((term) => {
+        if (!termMap.has(term.slug)) {
+          termMap.set(term.slug, { slug: term.slug, name: term.name });
+        }
+      });
+
+    return Array.from(termMap.values());
+  }
+
+  formatDate(dateString) {
+    if (!dateString) {
+      return "";
+    }
+
+    const parsedDate = new Date(dateString);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return dateString;
+    }
+
+    return parsedDate.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   }
 }
 

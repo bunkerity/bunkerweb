@@ -98,7 +98,7 @@ BunkerWeb 提供了一个可选的[用户界面](web-ui.md)来管理您的实例
 
 无论是增强的安全性、丰富的用户体验还是技术监控，BunkerWeb PRO 版本都能让您充分利用 BunkerWeb，满足您的专业需求。
 
-在文档或用户界面中，PRO 功能会用一个皇冠图标 <img src="assets/img/pro-icon.svg" alt="crown pro icon" height="32px" width="32px"> 标注，以区别于集成在开源版本中的功能。
+在文档或用户界面中，PRO 功能会用一个皇冠图标 <img src="../../assets/img/pro-icon.svg" alt="crown pro icon" height="32px" width="32px"> 标注，以区别于集成在开源版本中的功能。
 
 您可以随时轻松地从开源版本升级到 PRO 版本。过程非常简单：
 

@@ -117,6 +117,8 @@
             {% include "flash.html" %}
         {% endif %}
         {% block page %}{% endblock %}
+        <!-- Global JavaScript variables -->
+        <script nonce="{{ script_nonce }}">window.bw_version = "{{ bw_version }}";</script>
         <!-- Helpers  -->
         <script src="{{ url_for('static', filename='js/helpers.js') }}"
                 nonce="{{ script_nonce }}"></script>

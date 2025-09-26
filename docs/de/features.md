@@ -68,7 +68,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
 | `USE_API`          | `yes`         | global  | Nein     | **API aktivieren:** Aktivieren Sie die API, um BunkerWeb zu steuern.                                                |
 | `API_HTTP_PORT`    | `5000`        | global  | Nein     | **API-Port:** Lauschportnummer für die API.                                                                         |
-| `API_HTTPS_PORT`   | `6000`        | global  | Nein     | **API-HTTPS-Port:** Lauschportnummer (TLS) für die API.                                                             |
+| `API_HTTPS_PORT`   | `5443`        | global  | Nein     | **API-HTTPS-Port:** Lauschportnummer (TLS) für die API.                                                             |
 | `API_LISTEN_HTTP`  | `yes`         | global  | Nein     | **API-HTTP-Lauschen:** HTTP-Listener für die API aktivieren.                                                        |
 | `API_LISTEN_HTTPS` | `no`          | global  | Nein     | **API-HTTPS-Lauschen:** HTTPS (TLS)-Listener für die API aktivieren.                                                |
 | `API_LISTEN_IP`    | `0.0.0.0`     | global  | Nein     | **API-Lausch-IP:** Lausch-IP-Adresse für die API.                                                                   |
@@ -76,7 +76,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | Nein     | **API-Whitelist-IP:** Liste der IP/Netzwerke, die die API kontaktieren dürfen.                                      |
 | `API_TOKEN`        |               | global  | Nein     | **API-Zugriffstoken (optional):** Wenn gesetzt, müssen alle API-Anfragen `Authorization: Bearer <token>` enthalten. |
 
-Hinweis: Aus Bootstrap-Gründen müssen Sie, wenn Sie `API_TOKEN` aktivieren, es in der Umgebung SOWOHL der BunkerWeb-Instanz als auch des Schedulers setzen. Der Scheduler fügt den `Authorization`-Header automatisch hinzu, wenn `API_TOKEN` in seiner Umgebung vorhanden ist. Wenn es nicht gesetzt ist, wird kein Header gesendet und BunkerWeb erzwingt keine Token-Authentifizierung. Sie können die API über HTTPS bereitstellen, indem Sie `API_LISTEN_HTTPS=yes` setzen (Port: `API_HTTPS_PORT`, Standard `6000`).
+Hinweis: Aus Bootstrap-Gründen müssen Sie, wenn Sie `API_TOKEN` aktivieren, es in der Umgebung SOWOHL der BunkerWeb-Instanz als auch des Schedulers setzen. Der Scheduler fügt den `Authorization`-Header automatisch hinzu, wenn `API_TOKEN` in seiner Umgebung vorhanden ist. Wenn es nicht gesetzt ist, wird kein Header gesendet und BunkerWeb erzwingt keine Token-Authentifizierung. Sie können die API über HTTPS bereitstellen, indem Sie `API_LISTEN_HTTPS=yes` setzen (Port: `API_HTTPS_PORT`, Standard `5443`).
 
 Beispieltest mit curl (Token und Host ersetzen):
 
@@ -88,7 +88,7 @@ curl -H "Host: bwapi" \
 curl -H "Host: bwapi" \
      -H "Authorization: Bearer $API_TOKEN" \
      --insecure \
-     https://<bunkerweb-host>:6000/ping
+     https://<bunkerweb-host>:5443/ping
 ```
 
 === "Netzwerk- & Port-Einstellungen"
@@ -209,7 +209,7 @@ curl -H "Host: bwapi" \
     USE_UDP: "no"
     ```
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -719,7 +719,7 @@ Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken.
     BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
     ```
 
-## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :white_check_mark:
@@ -2049,12 +2049,13 @@ Führen Sie die folgenden Schritte aus, um die Datenbankfunktion zu konfiguriere
 
 ### Konfigurationseinstellungen
 
-| Einstellung              | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                |
-| ------------------------ | ----------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                       |
-| `DATABASE_URI_READONLY`  |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                               |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.    |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden. |
+| Einstellung                     | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                |
+| ------------------------------- | ----------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                       |
+| `DATABASE_URI_READONLY`         |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                               |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.    |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                   |
 
 !!! tip "Auswahl der Datenbank" - **SQLite** (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur. - **PostgreSQL**: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit. - **MySQL/MariaDB**: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten. - **Oracle**: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.
 
@@ -2067,9 +2068,14 @@ Die Datenbank-URI folgt dem SQLAlchemy-Format:
     - Oracle: `oracle://benutzername:passwort@hostname:port/datenbank`
 
 !!! warning "Datenbankwartung"
-Das Plugin führt automatisch einen täglichen Job aus, der überschüssige Job-Ausführungen basierend auf der Einstellung `DATABASE_MAX_JOBS_RUNS` bereinigt. Dies verhindert unbegrenztes Datenbankwachstum und bewahrt gleichzeitig eine nützliche Historie der Job-Ausführungen.
+Das Plugin führt automatisch tägliche Wartungsjobs aus:
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+- **Bereinigung überschüssiger Job-Ausführungen:** Entfernt Historien, die über dem Wert von `DATABASE_MAX_JOBS_RUNS` liegen.
+- **Bereinigung abgelaufener UI-Sitzungen:** Löscht UI-Benutzersitzungen, die älter sind als `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+Diese Aufgaben verhindern ein unbegrenztes Datenbankwachstum und bewahren gleichzeitig eine nützliche Betriebshistorie.
+
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -2907,7 +2913,7 @@ Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesonde
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -3094,7 +3100,7 @@ Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff au
     USE_METRICS: "no"
     ```
 
-## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :white_check_mark:
@@ -3632,7 +3638,7 @@ Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen 
 !!! note "Menschenlesbare Größenwerte"
 Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
-## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -3795,7 +3801,7 @@ A: Auf jeden Fall! BunkerWeb bietet zwei Pro-Pläne, die Ihren Bedürfnissen ent
 
 Sie können die Pro-Funktionen mit einer kostenlosen 1-monatigen Testversion erkunden, indem Sie den Promo-Code `freetrial` verwenden. Besuchen Sie das [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), um Ihre Testversion zu aktivieren und mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste zu erfahren.
 
-## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -4070,7 +4076,7 @@ REDIS_KEEPALIVE_IDLE: "60"
 REDIS_KEEPALIVE_POOL: "5"
 ```
 
-## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -4954,7 +4960,7 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`    | `no`         | multisite | nein     | Use UI                                       |
 | `UI_HOST`   |              | global    | nein     | Address of the web UI used for initial setup |
 
-## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:

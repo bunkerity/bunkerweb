@@ -2097,7 +2097,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
 ## 监控和报告
 
-#### 监控 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### 监控 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2117,7 +2117,7 @@ STREAM 支持 :x:
 | `USE_MONITORING`               | `yes` | 全局   | 否   | 启用 BunkerWeb 的监控。      |
 | `MONITORING_METRICS_DICT_SIZE` | `10M` | 全局   | 否   | 用于存储监控指标的字典大小。 |
 
-#### Prometheus 导出器 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Prometheus 导出器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2143,7 +2143,7 @@ Prometheus 导出器插件在您的 BunkerWeb 实例上添加了一个 [Promethe
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | 全局   | 否   | Prometheus 导出器的 HTTP URL。                 |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | 全局   | 否   | 允许联系 Prometheus 导出器端点的 IP/网络列表。 |
 
-#### 报告 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### 报告 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2187,7 +2187,7 @@ STREAM 支持 :x:
 
 ### 备份和恢复
 
-#### S3 备份 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :white_check_mark:
 
@@ -2368,7 +2368,7 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-### 迁移 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### 迁移 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :white_check_mark:
 
@@ -2482,7 +2482,7 @@ STREAM 支持 :white_check_mark:
 
 此命令将您的 BunkerWeb 数据无缝迁移，以精确匹配迁移文件中概述的配置。
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2519,7 +2519,7 @@ STREAM 支持 :x:
 - **状态码审查：** 定期更新 `ANTIDDOS_STATUS_CODES` 以捕获新的或不断演变的可疑行为。
 - **监控：** 定期分析日志和指标以微调设置并提高整体保护。
 
-## 用户管理器 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## 用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 用户管理插件提供了一个强大的界面，用于管理系统内的用户帐户。
 
@@ -2548,7 +2548,7 @@ STREAM 支持 :x:
   <figcaption>用户管理器 - 活动页面</figcaption>
 </figure>
 
-## 轻松解决 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## 轻松解决 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 轻松解决插件让您可以直接从报告页面快速修复误报和重复出现的问题。它将引导式的“解决”操作转化为安全、范围受限的配置更新——无需手动编辑。
 

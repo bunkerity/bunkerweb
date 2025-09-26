@@ -1,0 +1,9 @@
+{# Macro to generate documentation URLs with proper language prefix #}
+{% macro docs_url(endpoint='', fragment='', utm_campaign='self', utm_source='ui') -%}
+    {%- if language and language in ['fr', 'de', 'es', 'zh'] -%}
+        {%- set lang_prefix = '/' + language -%}
+    {%- else -%}
+        {%- set lang_prefix = "" -%}
+    {%- endif -%}
+    https://docs.bunkerweb.io/{{ bw_version }}{{ lang_prefix }}{{ endpoint }}/?utm_campaign={{ utm_campaign }}&utm_source={{ utm_source }}{{ fragment }}
+{%- endmacro %}

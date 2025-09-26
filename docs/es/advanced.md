@@ -2097,7 +2097,7 @@ Consejo profesional: Al ver tus alertas, haz clic en la opción "columnas" y mar
 
 ## Monitoreo y reportes
 
-#### Monitoreo <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Monitoreo <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :x:
 
@@ -2117,7 +2117,7 @@ El plugin de monitoreo te permite recolectar y recuperar métricas sobre BunkerW
 | `USE_MONITORING`               | `yes`          | global   | no       | Habilitar el monitoreo de BunkerWeb.                         |
 | `MONITORING_METRICS_DICT_SIZE` | `10M`          | global   | no       | Tamaño del diccionario para almacenar métricas de monitoreo. |
 
-#### Exportador de Prometheus <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Exportador de Prometheus <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :x:
 
@@ -2143,7 +2143,7 @@ También proporcionamos un [panel de control de Grafana](https://grafana.com/gra
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global   | no       | URL HTTP del exportador de Prometheus.                                                   |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global   | no       | Lista de IP/redes permitidas para contactar el punto final del exportador de Prometheus. |
 
-#### Reportes <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Reportes <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :x:
 
@@ -2187,7 +2187,7 @@ El plugin de Reportes proporciona una solución integral para la generación de 
 
 ### Copia de seguridad y restauración
 
-#### Copia de seguridad S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Copia de seguridad S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :white_check_mark:
 
@@ -2368,7 +2368,7 @@ También puedes especificar un archivo de copia de seguridad personalizado para 
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-### Migración <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Migración <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :white_check_mark:
 
@@ -2482,7 +2482,7 @@ Para iniciar manualmente una migración, ejecuta el siguiente comando:
 
 Este comando migra sin problemas tus datos de BunkerWeb para que coincidan precisamente con la configuración descrita en el archivo de migración.
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :x:
 
@@ -2519,7 +2519,7 @@ Personaliza el comportamiento del plugin usando las siguientes configuraciones:
 - **Revisión de códigos de estado:** Actualiza regularmente `ANTIDDOS_STATUS_CODES` para capturar comportamientos sospechosos nuevos o en evolución.
 - **Monitoreo:** Analiza los registros y las métricas periódicamente para ajustar la configuración y mejorar la protección general.
 
-## Administrador de usuarios <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Administrador de usuarios <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 El Plugin de gestión de usuarios ofrece una interfaz robusta para administrar cuentas de usuario dentro de tu sistema.
 
@@ -2548,7 +2548,7 @@ Con este plugin, los administradores pueden crear, actualizar y deshabilitar cue
   <figcaption>Administrador de usuarios - Página de actividades</figcaption>
 </figure>
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 El plugin Easy Resolve te permite remediar rápidamente falsos positivos y problemas recurrentes directamente desde la página de Informes. Convierte las acciones guiadas de "Resolver" en actualizaciones de configuración seguras y acotadas, sin edición manual.
 

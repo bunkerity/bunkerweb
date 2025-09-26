@@ -68,7 +68,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.                                                |
     | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                                                           |
-    | `API_HTTPS_PORT`   | `6000`        | global  | No       | **API HTTPS Port:** Listen port number (TLS) for the API.                                               |
+    | `API_HTTPS_PORT`   | `5443`        | global  | No       | **API HTTPS Port:** Listen port number (TLS) for the API.                                               |
     | `API_LISTEN_HTTP`  | `yes`         | global  | No       | **API Listen HTTP:** Enable HTTP listener for the API.                                                  |
     | `API_LISTEN_HTTPS` | `no`          | global  | No       | **API Listen HTTPS:** Enable HTTPS (TLS) listener for the API.                                          |
     | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                                                       |
@@ -76,7 +76,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API.                                    |
     | `API_TOKEN`        |               | global  | No       | **API Access Token (optional):** If set, all API requests must include `Authorization: Bearer <token>`. |
 
-    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth. You can expose the API over HTTPS by setting `API_LISTEN_HTTPS=yes` (port: `API_HTTPS_PORT`, default `6000`).
+    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth. You can expose the API over HTTPS by setting `API_LISTEN_HTTPS=yes` (port: `API_HTTPS_PORT`, default `5443`).
 
     Example test with curl (replace token and host):
 
@@ -88,7 +88,7 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          --insecure \
-         https://<bunkerweb-host>:6000/ping
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "Network & Port Settings"
@@ -2109,12 +2109,13 @@ Follow these steps to configure and use the Database feature:
 
 ### Configuration Settings
 
-| Setting                  | Default                                   | Context | Multiple | Description                                                                                                           |
-| ------------------------ | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
-| `DATABASE_URI_READONLY`  |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
+| Setting                         | Default                                   | Context | Multiple | Description                                                                                                           |
+| ------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
+| `DATABASE_URI_READONLY`         |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.           |
 
 !!! tip "Database Selection"
     - **SQLite** (default): Ideal for single-node deployments or testing environments due to its simplicity and file-based nature.
@@ -2131,7 +2132,12 @@ Follow these steps to configure and use the Database feature:
     - Oracle: `oracle://username:password@hostname:port/database`
 
 !!! warning "Database Maintenance"
-    The plugin automatically runs a daily job that cleans up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.
+    The plugin automatically runs daily maintenance jobs:
+
+    - **Cleanup Excess Job Runs:** Purges job execution history beyond the `DATABASE_MAX_JOBS_RUNS` limit.
+    - **Cleanup Expired UI Sessions:** Removes UI user sessions older than `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+    Together, these jobs prevent unbounded database growth while preserving useful operational history.
 
 ## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 

@@ -20,12 +20,13 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 
 ### Ajustes de Configuración
 
-| Ajuste                   | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                           |
-| ------------------------ | ----------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                               |
-| `DATABASE_URI_READONLY`  |                                           | global   | no       | **URI de la Base de Datos de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la base de datos principal está caída.        |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                         |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global   | no       | **Máximo de Ejecuciones de Trabajos:** El número máximo de registros de ejecución de trabajos que se conservarán en la base de datos antes de la limpieza automática. |
+| Ajuste                          | Valor por defecto                         | Contexto | Múltiple | Descripción                                                                                                                                                           |
+| ------------------------------- | ----------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | no       | **URI de la Base de Datos:** La cadena de conexión de la base de datos principal en formato SQLAlchemy.                                                               |
+| `DATABASE_URI_READONLY`         |                                           | global   | no       | **URI de la Base de Datos de Solo Lectura:** Base de datos opcional para operaciones de solo lectura o como respaldo si la base de datos principal está caída.        |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global   | no       | **Nivel de Registro:** El nivel de verbosidad para los registros de la base de datos. Opciones: `debug`, `info`, `warn`, `warning` o `error`.                         |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global   | no       | **Máximo de Ejecuciones de Trabajos:** El número máximo de registros de ejecución de trabajos que se conservarán en la base de datos antes de la limpieza automática. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global   | no       | **Retención de Sesiones:** La edad máxima (en días) de las sesiones de usuarios de la UI antes de que se purguen automáticamente.                                     |
 
 !!! tip "Selección de Base de Datos" - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos. - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia. - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción. - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
 
@@ -38,4 +39,9 @@ El URI de la base de datos sigue el formato de SQLAlchemy:
     -   Oracle: `oracle://usuario:contraseña@hostname:puerto/basededatos`
 
 !!! warning "Mantenimiento de la Base de Datos"
-El complemento ejecuta automáticamente un trabajo diario que limpia las ejecuciones de trabajos sobrantes basándose en el ajuste `DATABASE_MAX_JOBS_RUNS`. Esto evita el crecimiento ilimitado de la base de datos mientras se mantiene un historial útil de las ejecuciones de trabajos.
+El complemento ejecuta automáticamente trabajos de mantenimiento diarios:
+
+- **Limpiar Ejecuciones de Trabajos en Exceso:** Purga el historial que supera el límite `DATABASE_MAX_JOBS_RUNS`.
+- **Limpiar Sesiones de UI Caducadas:** Elimina las sesiones de usuarios de la UI que superan `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+Estas tareas evitan el crecimiento ilimitado de la base de datos mientras conservan un historial operativo útil.

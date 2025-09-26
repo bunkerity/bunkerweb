@@ -1689,7 +1689,7 @@ $(document).ready(() => {
     // }
 
     const method = $(this).data("method");
-    if (method !== "ui") {
+    if (method !== "ui" && method !== "default") {
       editor.setReadOnly(true);
     }
 

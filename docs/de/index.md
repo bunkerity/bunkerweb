@@ -98,7 +98,7 @@ Bei der Verwendung von BunkerWeb haben Sie die Wahl zwischen der Open-Source- od
 
 Ob verbesserte Sicherheit, ein bereichertes Benutzererlebnis oder technische Überwachung, die BunkerWeb PRO-Version ermöglicht es Ihnen, BunkerWeb in vollem Umfang zu nutzen und Ihre beruflichen Anforderungen zu erfüllen.
 
-In der Dokumentation oder der Benutzeroberfläche sind PRO-Funktionen mit einer Krone <img src="assets/img/pro-icon.svg" alt="Kronen-Pro-Symbol" height="32px" width="32px"> gekennzeichnet, um sie von denen der Open-Source-Version zu unterscheiden.
+In der Dokumentation oder der Benutzeroberfläche sind PRO-Funktionen mit einer Krone <img src="../../assets/img/pro-icon.svg" alt="Kronen-Pro-Symbol" height="32px" width="32px"> gekennzeichnet, um sie von denen der Open-Source-Version zu unterscheiden.
 
 Sie können jederzeit einfach von der Open-Source-Version auf die PRO-Version upgraden. Der Vorgang ist unkompliziert:
 

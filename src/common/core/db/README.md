@@ -26,6 +26,7 @@ Follow these steps to configure and use the Database feature:
 | `DATABASE_URI_READONLY`  |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
 | `DATABASE_LOG_LEVEL`     | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
 | `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                              | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.           |
 
 !!! tip "Database Selection"
     - **SQLite** (default): Ideal for single-node deployments or testing environments due to its simplicity and file-based nature.
@@ -42,4 +43,9 @@ Follow these steps to configure and use the Database feature:
     - Oracle: `oracle://username:password@hostname:port/database`
 
 !!! warning "Database Maintenance"
-    The plugin automatically runs a daily job that cleans up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.
+    The plugin automatically runs daily maintenance jobs:
+
+    - **Cleanup Excess Job Runs:** Purges job execution history beyond the `DATABASE_MAX_JOBS_RUNS` limit.
+    - **Cleanup Expired UI Sessions:** Removes UI user sessions older than `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+    Together, these jobs prevent unbounded database growth while preserving useful operational history.

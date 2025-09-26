@@ -1,3 +1,4 @@
+{% from 'macros/docs_link.html' import docs_url %}
 <!-- Navbar -->
 <nav class="layout-navbar navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
      id="layout-navbar">
@@ -16,6 +17,9 @@
         {% elif current_endpoint == 'configs' %}
             {% set documentation_endpoint = "/concepts" %}
             {% set documentation_fragment = "#custom-configurations" %}
+        {% elif 'templates' in request.path %}
+            {% set documentation_endpoint = "/concepts" %}
+            {% set documentation_fragment = "#templates" %}
         {% elif 'plugins' in request.path %}
             {% set documentation_endpoint = "/plugins" %}
         {% elif current_endpoint == 'cache' %}
@@ -39,12 +43,15 @@
         {% endif %}
         <div class="d-none d-md-inline navbar-nav align-items-center">
             <div class="nav-item d-flex align-items-center">
-                <a role="button"
-                   class="btn btn-text-secondary p-1 p-md-2"
+                <a id="documentation-link"
+                   role="button"
+                   class="btn btn-text-secondary p-1 p-md-2 docs-link"
                    aria-pressed="true"
-                   href="https://docs.bunkerweb.io/{{ bw_version }}{{ documentation_endpoint }}/?utm_campaign=self&utm_source=ui{{ documentation_fragment }}"
+                   href="{{ docs_url(documentation_endpoint, documentation_fragment) }}"
                    target="_blank"
-                   rel="noopener">
+                   rel="noopener"
+                   data-endpoint="{{ documentation_endpoint }}"
+                   data-fragment="{{ documentation_fragment or '' }}">
                     <span class="tf-icons bx bx-file me-md-2"></span>
                     <span class="d-none d-lg-inline" data-i18n="navbar.link.documentation">Documentation</span>
                 </a>

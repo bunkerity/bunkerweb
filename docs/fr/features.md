@@ -68,7 +68,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | ------------------ | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`             | global   | Non      | **Activer l’API :** Active l’API pour piloter BunkerWeb.                                                        |
     | `API_HTTP_PORT`    | `5000`            | global   | Non      | **Port de l’API :** Numéro de port d’écoute de l’API.                                                           |
-    | `API_HTTPS_PORT`   | `6000`            | global   | Non      | **Port HTTPS de l’API :** Numéro de port d’écoute (TLS) de l’API.                                               |
+    | `API_HTTPS_PORT`   | `5443`            | global   | Non      | **Port HTTPS de l’API :** Numéro de port d’écoute (TLS) de l’API.                                               |
     | `API_LISTEN_HTTP`  | `yes`             | global   | Non      | **Écoute HTTP de l’API :** Active l’écoute HTTP pour l’API.                                                     |
     | `API_LISTEN_HTTPS` | `no`              | global   | Non      | **Écoute HTTPS de l’API :** Active l’écoute HTTPS (TLS) pour l’API.                                             |
     | `API_LISTEN_IP`    | `0.0.0.0`         | global   | Non      | **IP d’écoute de l’API :** Adresse IP d’écoute de l’API.                                                        |
@@ -76,7 +76,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `API_WHITELIST_IP` | `127.0.0.0/8`     | global   | Non      | **Liste blanche API :** Liste IP/réseaux autorisés à contacter l’API.                                           |
     | `API_TOKEN`        |                   | global   | Non      | **Jeton d’accès API (optionnel) :** Si défini, chaque requête API doit inclure `Authorization: Bearer <token>`. |
 
-    Remarque : pour des raisons d’amorçage, si vous activez `API_TOKEN`, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête `Authorization` quand `API_TOKEN` est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant `API_LISTEN_HTTPS=yes` (port : `API_HTTPS_PORT`, `6000` par défaut).
+    Remarque : pour des raisons d’amorçage, si vous activez `API_TOKEN`, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête `Authorization` quand `API_TOKEN` est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant `API_LISTEN_HTTPS=yes` (port : `API_HTTPS_PORT`, `5443` par défaut).
 
     Exemple de test avec curl (remplacez le jeton et l’hôte) :
 
@@ -88,7 +88,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          --insecure \
-         https://<bunkerweb-host>:6000/ping
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "Paramètres réseau et ports"
@@ -208,7 +208,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     USE_UDP: "no"
     ```
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -690,7 +690,7 @@ BACKUP_ROTATION: "24"
 BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
 ```
 
-## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :white_check_mark:
@@ -1893,21 +1893,27 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre                | Défaut                                    | Contexte | Multiple | Description                                                                    |
-| ------------------------ | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | non      | URI principale de connexion (format SQLAlchemy).                               |
-| `DATABASE_URI_READONLY`  |                                           | global   | non      | URI optionnelle en lecture seule (offload/HA).                                 |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global   | non      | Niveau de verbosité des logs DB : `debug`, `info`, `warn`, `warning`, `error`. |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global   | non      | Nombre max d’entrées de runs de jobs conservées avant purge automatique.       |
+| Paramètre                       | Défaut                                    | Contexte | Multiple | Description                                                                    |
+| ------------------------------- | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | non      | URI principale de connexion (format SQLAlchemy).                               |
+| `DATABASE_URI_READONLY`         |                                           | global   | non      | URI optionnelle en lecture seule (offload/HA).                                 |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global   | non      | Niveau de verbosité des logs DB : `debug`, `info`, `warn`, `warning`, `error`. |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global   | non      | Nombre max d’entrées de runs de jobs conservées avant purge automatique.       |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global   | non      | Durée max de conservation des sessions UI (en jours) avant purge automatique.  |
 
 !!! tip "Choix du moteur" - SQLite (défaut) : simple et fichier unique, idéal mono‑nœud/tests. - PostgreSQL : recommandé en production multi‑instances (robustesse, concurrence). - MySQL/MariaDB : alternative solide aux capacités proches de PostgreSQL. - Oracle : adapté aux environnements d’entreprise standardisés sur Oracle.
 
 !!! info "Format SQLAlchemy" - SQLite : `sqlite:////chemin/vers/database.sqlite3` - PostgreSQL : `postgresql://user:password@hôte:port/base` - MySQL/MariaDB : `mysql://user:password@hôte:port/base` ou `mariadb://user:password@hôte:port/base` - Oracle : `oracle://user:password@hôte:port/base`
 
 !!! warning "Maintenance"
-Une tâche quotidienne purge automatiquement les runs de jobs excédentaires selon `DATABASE_MAX_JOBS_RUNS` pour éviter une croissance illimitée tout en conservant un historique utile.
+Des tâches quotidiennes assurent la maintenance automatique :
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+- **Purge des runs de jobs excédentaires** : supprime l’historique au-delà de `DATABASE_MAX_JOBS_RUNS`.
+- **Purge des sessions UI expirées** : enlève les sessions plus anciennes que `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+Ces jobs évitent la croissance illimitée tout en conservant un historique d’exploitation pertinent.
+
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -2658,7 +2664,7 @@ Des limites trop strictes peuvent impacter des clients légitimes, notamment pou
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -2757,7 +2763,7 @@ METRICS_SAVE_TO_REDIS: "yes"
 USE_METRICS: "no"
 ```
 
-## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :white_check_mark:
@@ -3293,7 +3299,7 @@ Des paramètres de sécurité plus élevés peuvent bloquer le trafic légitime.
 !!! note "Valeurs de taille lisibles"
 Pour les paramètres de taille comme `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, les suffixes `k`, `m`, et `g` (insensibles à la casse) sont pris en charge et représentent les kibioctets, mébioctets et gibioctets (multiples de 1024). Exemples : `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
-## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -3440,7 +3446,7 @@ R : Oui. Deux offres existent :
 
 Un essai gratuit d’1 mois est disponible avec le code `freetrial`. Rendez‑vous sur le [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) pour l’activer.
 
-## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -3692,7 +3698,7 @@ REDIS_KEEPALIVE_IDLE: "60"
 REDIS_KEEPALIVE_POOL: "5"
 ```
 
-## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -4519,7 +4525,7 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`  | `no`              | multisite | non      | Use UI                                       |
 | `UI_HOST` |                   | global    | non      | Address of the web UI used for initial setup |
 
-## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
