@@ -2496,20 +2496,31 @@ class Database:
 
     def get_services(self, *, with_drafts: bool = False) -> List[Dict[str, Any]]:
         """Get the services from the database"""
+        services = []
         with self._db_session() as session:
-            return [
-                {
-                    "id": service.id,
-                    "method": service.method,
-                    "is_draft": service.is_draft,
-                    "creation_date": service.creation_date,
-                    "last_update": service.last_update,
-                }
-                for service in session.query(Services).with_entities(
-                    Services.id, Services.method, Services.is_draft, Services.creation_date, Services.last_update
+            db_services = (
+                session.query(Services).with_entities(Services.id, Services.method, Services.is_draft, Services.creation_date, Services.last_update).all()
+            )
+
+        for service in db_services:
+            if with_drafts or not service.is_draft:
+                service_settings = self.get_non_default_settings(
+                    with_drafts=with_drafts,
+                    filtered_settings=("USE_TEMPLATE",),
+                    service=service.id,
                 )
-                if with_drafts or not service.is_draft
-            ]
+                services.append(
+                    {
+                        "id": service.id,
+                        "method": service.method,
+                        "is_draft": service.is_draft,
+                        "creation_date": service.creation_date,
+                        "last_update": service.last_update,
+                        "template": service_settings.get("USE_TEMPLATE", ""),
+                    }
+                )
+
+        return services
 
     def add_job_run(self, job_name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None) -> str:
         """Add a job run."""
@@ -4578,7 +4589,6 @@ class Database:
                         return f"Plugin {normalized_plugin} does not exist"
                     template.plugin_id = normalized_plugin
 
-            old_template_name = template.name
             if name is not None:
                 normalized_name = name.strip()
                 if not normalized_name:
@@ -4586,22 +4596,6 @@ class Database:
                 conflict = session.query(Templates.id).filter(Templates.name == normalized_name, Templates.id != template_id).first()
                 if conflict:
                     return f"Template name {normalized_name} already exists"
-
-                # Handle template renaming - migrate USE_TEMPLATE references
-                if normalized_name != old_template_name:
-                    self.logger.info(f"Migrating template references from '{old_template_name}' to '{normalized_name}'")
-
-                    # Update global USE_TEMPLATE references
-                    global_templates = session.query(Global_values).filter_by(setting_id="USE_TEMPLATE", value=old_template_name).all()
-                    for global_template in global_templates:
-                        global_template.value = normalized_name
-                        self.logger.debug(f"Updated global USE_TEMPLATE from '{old_template_name}' to '{normalized_name}'")
-
-                    # Update service USE_TEMPLATE references
-                    service_templates = session.query(Services_settings).filter_by(setting_id="USE_TEMPLATE", value=old_template_name).all()
-                    for service_template in service_templates:
-                        service_template.value = normalized_name
-                        self.logger.debug(f"Updated service '{service_template.service_id}' USE_TEMPLATE from '{old_template_name}' to '{normalized_name}'")
 
                 template.name = normalized_name
 
