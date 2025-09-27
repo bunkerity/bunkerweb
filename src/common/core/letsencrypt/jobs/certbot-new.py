@@ -346,15 +346,19 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
 def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
     wildcards = set()
     for domain in domains:
+        domain = domain.strip()
+        if not domain:
+            continue
+
         parts = domain.split(".")
-        if len(parts) > 2:
-            base_domain = ".".join(parts[1:])
-            wildcards.add(f"*.{base_domain}")
+        if len(parts) >= 2:
+            base_domain = ".".join(parts[-2:])
             wildcards.add(base_domain)
+            wildcards.add(f"*.{base_domain}")
         else:
             wildcards.add(domain)
 
-    return sorted(wildcards, key=lambda x: x[0] != "*")
+    return sorted(list(wildcards), key=lambda x: x.startswith("*"))
 
 
 def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
@@ -498,14 +502,25 @@ try:
         sys_exit(0)
 
     services = {}
+    processed_base_domains = set()
     for service in server_names.split(" "):
         if not service.strip():
             continue
 
-        server_name, config = build_service_config(service)
-        if config["wildcard"] and server_name in services:
+        parts = service.split('.')
+        if len(parts) >= 2:
+            base_domain = ".".join(parts[-2:])
+        else:
+            base_domain = service
+
+        if base_domain in processed_base_domains:
             continue
-        services[server_name] = config
+
+        server_name, config = build_service_config(service)
+        if config["activated"]:
+            services[server_name] = config
+            if config["wildcard"]:
+                processed_base_domains.add(base_domain)
 
     if not any(service["activated"] for service in services.values()):
         LOGGER.info("No services uses Let's Encrypt, skipping generation of new certificates...")
