@@ -27,7 +27,7 @@ $(document).ready(() => {
   let usedTemplate = "low";
   if ($templateInput.length) {
     const normalizedUsedTemplate = normalizeTemplateId($templateInput.val());
-    if (normalizedUsedTemplate) usedTemplate = normalizedUsedTemplate;
+    usedTemplate = normalizedUsedTemplate !== "" ? normalizedUsedTemplate : "";
   }
 
   let currentTemplate = normalizeTemplateId($("#selected-template").val());
@@ -162,11 +162,6 @@ $(document).ready(() => {
     currentTemplate = normalized;
     // Ensure we have a DOM id mapping for this template
     getTemplateDomId(currentTemplate);
-
-    usedTemplate = currentTemplate;
-    if ($templateInput.length) {
-      $templateInput.val(currentTemplate);
-    }
 
     const $selectedTemplateField = $("#selected-template");
     if ($selectedTemplateField.length)
@@ -327,7 +322,11 @@ $(document).ready(() => {
       );
 
       // Only proceed if validation passes
-      if (!validateCurrentStepInputs(currentStepContainer)) {
+      if (
+        !validateCurrentStepInputs(currentStepContainer, {
+          skipRequiredNames: ["SERVER_NAME"],
+        })
+      ) {
         // If validation fails, prevent the tab change
         return false;
       }
@@ -419,7 +418,14 @@ $(document).ready(() => {
 
   // Enhanced validation function with support for validation without UI focus
   const validateCurrentStepInputs = (currentStepContainer, options = {}) => {
-    const { focusOnError = true, markStepInvalid = true } = options;
+    const {
+      focusOnError = true,
+      markStepInvalid = true,
+      skipRequiredNames = [],
+    } = options;
+    const skippedRequired = new Set(
+      skipRequiredNames.map((name) => name.toUpperCase()),
+    );
     let isStepValid = true;
     let firstInvalidInput = null;
 
@@ -444,6 +450,8 @@ $(document).ready(() => {
       const pattern = $input.attr("pattern");
       let $label = $(`label[for="${$input.attr("id")}"]`);
       let fieldName = $input.attr("name") || t("validation.default_field_name");
+      const inputName = ($input.attr("name") || "").toUpperCase();
+      const skipRequiredCheck = skippedRequired.has(inputName);
 
       // Handle multiselect hidden inputs
       if (
@@ -480,7 +488,7 @@ $(document).ready(() => {
       let isValid = true;
 
       // Check if the field is required and not empty
-      if (isRequired && value === "") {
+      if (isRequired && !skipRequiredCheck && value === "") {
         errorMessage = requiredMessage;
         isValid = false;
       }
@@ -780,7 +788,11 @@ $(document).ready(() => {
         currentStep,
       );
 
-      if (!validateCurrentStepInputs(currentStepContainer)) {
+      if (
+        !validateCurrentStepInputs(currentStepContainer, {
+          skipRequiredNames: ["SERVER_NAME"],
+        })
+      ) {
         e.preventDefault(); // Prevent tab change
         e.stopPropagation(); // Stop event bubbling
         return false;
@@ -807,7 +819,11 @@ $(document).ready(() => {
         currentStep,
       );
 
-      if (!validateCurrentStepInputs(currentStepContainer)) {
+      if (
+        !validateCurrentStepInputs(currentStepContainer, {
+          skipRequiredNames: ["SERVER_NAME"],
+        })
+      ) {
         e.preventDefault(); // Prevent tab change
         e.stopPropagation(); // Stop event bubbling
         return false;
