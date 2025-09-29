@@ -92,10 +92,24 @@ def upgrade() -> None:
         sa.text("UPDATE bw_templates SET method = :method, creation_date = :ts, last_update = :ts"),
         {"method": "manual", "ts": current_timestamp},
     )
+    op.alter_column(
+        "bw_templates",
+        "plugin_id",
+        existing_type=sa.String(length=64),
+        existing_nullable=False,
+        nullable=True,
+    )
     op.execute("UPDATE bw_metadata SET version = '1.6.5' WHERE id = 1")
 
 
 def downgrade() -> None:
+    op.alter_column(
+        "bw_templates",
+        "plugin_id",
+        existing_type=sa.String(length=64),
+        existing_nullable=True,
+        nullable=False,
+    )
     op.drop_column("bw_templates", "last_update")
     op.drop_column("bw_templates", "creation_date")
     op.drop_column("bw_templates", "method")

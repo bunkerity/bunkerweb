@@ -111,7 +111,7 @@
                                data-bs-original-title="{% if template_data.method != 'ui' or is_readonly %}View{% else %}Edit{% endif %} template {{ template }}"><i class="bx bx-{% if template_data.method != 'ui' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ template }}</a>
                         </td>
                         <td>{{ template_data.name }}</td>
-                        <td>{{ template_data.plugin_id }}</td>
+                        <td>{{ template_data.plugin_id or '-' }}</td>
                         <td>{{ template_data.steps|length }}</td>
                         <td>{{ template_data.settings|length }}</td>
                         <td>{{ template_data.configs|length }}</td>

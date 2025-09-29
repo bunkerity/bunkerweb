@@ -262,7 +262,7 @@ class Templates(Base):
 
     id = Column(String(256), primary_key=True)
     name = Column(String(256), unique=True, nullable=False)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True)
     method = Column(METHODS_ENUM, nullable=False, default="manual")
     creation_date = Column(DateTime(timezone=True), nullable=False)
     last_update = Column(DateTime(timezone=True), nullable=False)

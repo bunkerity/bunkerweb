@@ -93,7 +93,12 @@
 </div>
 <div class="card tab-content m-1 p-2 position-relative">
     {% for template, template_data in templates.items() if template != "ui" %}
-        {% set template_plugin = plugins[template_data['plugin_id']] %}
+        {% set template_plugin_id = template_data.get('plugin_id') %}
+        {% set plugin_dom_id = template_plugin_id if template_plugin_id else 'ui' %}
+        {% set template_plugin = plugins.get(template_plugin_id) %}
+        {% if template_plugin is none %}
+            {% set template_plugin = {'id': plugin_dom_id, 'type': 'ui', 'name': 'UI'} %}
+        {% endif %}
         <div id="navs-templates-{{ template_data['dom_id'] }}"
              class="tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
              role="tabpanel"
@@ -181,7 +186,7 @@
                                                 </div>
                                                 <div class="row pb-0">
                                                     {% for setting in step["settings"] %}
-                                                        {% set setting_id_prefix = template + "-setting-" + template_data['plugin_id'] +"-" %}
+                                                        {% set setting_id_prefix = template + "-setting-" + plugin_dom_id +"-" %}
                                                         {% set setting_config = config.get(setting, {}) %}
                                                         {% set setting_data = plugins_settings.get(setting, {}) %}
                                                         {% set setting_default = setting_data.get("default", "") %}
@@ -203,8 +208,8 @@
                                                         <div class="col-12 col-sm-6 col-lg-4 pb-3"
                                                              {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
                                                             <div class="d-flex justify-content-between align-items-center">
-                                                                <label id="label-{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
-                                                                       for="{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
+                                                                <label id="label-{{ template }}-setting-{{ plugin_dom_id }}-{{ setting_data['id'] }}"
+                                                                       for="{{ template }}-setting-{{ plugin_dom_id }}-{{ setting_data['id'] }}"
                                                                        class="form-label fw-semibold text-truncate">
                                                                     {{ setting_data["label"] }}
                                                                 </label>
@@ -290,7 +295,7 @@
                                                         </h5>
                                                     </div>
                                                     {% for step_config in step_configs %}
-                                                        {% set step_config_id = template + "-config-" + template_data['plugin_id'] + "-" + step_config.replace("/", "-").replace(".conf", "") %}
+                                                        {% set step_config_id = template + "-config-" + plugin_dom_id + "-" + step_config.replace("/", "-").replace(".conf", "") %}
                                                         {% set step_config_value = configs.get(current_endpoint + "_" + step_config.replace(".conf", "").replace("/", "_")) %}
                                                         {% set step_config_method = "ui" %}
                                                         {% if step_config_value is none %}

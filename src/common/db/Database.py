@@ -702,18 +702,22 @@ class Database:
                 old_cli_commands[(c.plugin_id, c.name)] = c
 
             # For templates:
-            old_templates = {(t.plugin_id, t.id): t for t in old_data.get("bw_templates", [])}
+            managed_template_ids = {t.id for t in old_data.get("bw_templates", []) if t.plugin_id}
+            old_templates = {(t.plugin_id, t.id): t for t in old_data.get("bw_templates", []) if t.plugin_id}
             old_template_steps = {}
             for st in old_data.get("bw_template_steps", []):
-                old_template_steps[(st.template_id, st.id)] = st
+                if st.template_id in managed_template_ids:
+                    old_template_steps[(st.template_id, st.id)] = st
 
             old_template_settings = {}
             for ts in old_data.get("bw_template_settings", []):
-                old_template_settings[(ts.template_id, ts.setting_id, ts.suffix, ts.step_id, ts.order)] = ts.default
+                if ts.template_id in managed_template_ids:
+                    old_template_settings[(ts.template_id, ts.setting_id, ts.suffix, ts.step_id, ts.order)] = ts.default
 
             old_template_configs = {}
             for tc in old_data.get("bw_template_custom_configs", []):
-                old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id, ts.order)] = tc
+                if tc.template_id in managed_template_ids:
+                    old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id, tc.order)] = tc
 
             # Build desired data from default_plugins
             # The following logic is similar to the original code but uses dicts/sets for comparisons.
@@ -4464,7 +4468,7 @@ class Database:
         self,
         template_id: str,
         *,
-        plugin_id: str,
+        plugin_id: Optional[str] = None,
         name: str,
         settings: Dict[str, Any],
         steps: List[Dict[str, Any]],
@@ -4485,9 +4489,10 @@ class Database:
             if not normalized_name:
                 return "Template name cannot be empty"
 
-            normalized_plugin = plugin_id.strip()
-            if not normalized_plugin:
-                return "plugin_id cannot be empty"
+            normalized_plugin = None
+            if isinstance(plugin_id, str):
+                normalized_value = plugin_id.strip()
+                normalized_plugin = normalized_value or None
 
             if session.query(Templates.id).filter_by(id=template_id).first():
                 return f"Template {template_id} already exists"
@@ -4495,8 +4500,9 @@ class Database:
             if session.query(Templates.id).filter(Templates.name == normalized_name).first():
                 return f"Template name {normalized_name} already exists"
 
-            if session.query(Plugins.id).filter_by(id=normalized_plugin).first() is None:
-                return f"Plugin {normalized_plugin} does not exist"
+            if normalized_plugin:
+                if session.query(Plugins.id).filter_by(id=normalized_plugin).first() is None:
+                    return f"Plugin {normalized_plugin} does not exist"
 
             error, step_entities, setting_entities, config_entities = self._prepare_template_entities(session, template_id, settings, steps, configs)
             if error:
@@ -4579,11 +4585,15 @@ class Database:
                 return "Template not found"
 
             if plugin_id is not None:
-                normalized_plugin = plugin_id.strip()
-                if not normalized_plugin:
-                    return "plugin_id cannot be empty"
+                normalized_plugin = None
+                if isinstance(plugin_id, str):
+                    normalized_value = plugin_id.strip()
+                    normalized_plugin = normalized_value or None
+                else:
+                    normalized_plugin = str(plugin_id) or None
+
                 if normalized_plugin != template.plugin_id:
-                    if session.query(Plugins.id).filter_by(id=normalized_plugin).first() is None:
+                    if normalized_plugin and session.query(Plugins.id).filter_by(id=normalized_plugin).first() is None:
                         return f"Plugin {normalized_plugin} does not exist"
                     template.plugin_id = normalized_plugin
 
