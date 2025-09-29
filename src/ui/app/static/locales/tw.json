@@ -1525,8 +1525,9 @@
         "last_update": "服務最後更新的日期和時間",
         "method": "服務的建立方法（例如，ui, file）",
         "name": "服務的名稱",
-        "select_all": "選取所有服務",
-        "type": "服務類型（線上/草稿）"
+        "select_all": "選擇所有服務",
+        "template": "服務使用的範本",
+        "type": "服務類型 (線上/草稿)"
       }
     },
     "ui_host": "將透過反向代理提供 BunkerWeb UI 的主機名稱或 IP 位址。",

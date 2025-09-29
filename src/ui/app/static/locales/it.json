@@ -1525,7 +1525,8 @@
         "method": "Metodo di creazione del Servizio (es. ui, file)",
         "name": "Nome Servizio",
         "select_all": "Seleziona tutti i Servizi",
-        "type": "Tipo Servizio (Online/Bozza)"
+        "template": "Il template utilizzato dal Servizio",
+        "type": "Tipo di Servizio (Online/Bozza)"
       }
     },
     "ui_host": "Il nome host o indirizzo IP che servirà la UI di BunkerWeb tramite il proxy inverso.",

@@ -11,15 +11,32 @@ $(document).ready(() => {
   if (isReadOnly && window.location.pathname.endsWith("/new"))
     window.location.href = window.location.href.split("/new")[0];
 
+  const normalizeTemplateId = (value) => {
+    if (value === undefined || value === null) return "";
+    const raw = value.toString().trim();
+    if (!raw) return "";
+    const plusNormalized = raw.replace(/\+/g, " ");
+    try {
+      return decodeURIComponent(plusNormalized);
+    } catch (err) {
+      return plusNormalized;
+    }
+  };
+
   const $templateInput = $("#used-template");
   let usedTemplate = "low";
   if ($templateInput.length) {
-    usedTemplate = $templateInput.val().trim();
+    const normalizedUsedTemplate = normalizeTemplateId($templateInput.val());
+    if (normalizedUsedTemplate) usedTemplate = normalizedUsedTemplate;
   }
 
-  let currentTemplate = $("#selected-template").val();
-  let currentMode = $("#selected-mode").val();
-  let currentType = $("#selected-type").val();
+  let currentTemplate = normalizeTemplateId($("#selected-template").val());
+  let currentMode = normalizeTemplateId($("#selected-mode").val());
+  let currentType = normalizeTemplateId($("#selected-type").val());
+
+  if (!currentTemplate) currentTemplate = usedTemplate;
+  if (!currentMode) currentMode = "easy";
+  if (!currentType) currentType = "all";
 
   const $serviceMethodInput = $("#service-method");
   const $pluginTypeSelect = $("#plugin-type-select");
@@ -29,6 +46,69 @@ $(document).ready(() => {
   const $templateSearch = $("#template-search");
   const $templateDropdownMenu = $("#templates-dropdown-menu");
   const $templateDropdownItems = $("#templates-dropdown-menu li.nav-item");
+
+  const templateDomIdMap = {};
+  const domIdToTemplateIdMap = {};
+  const assignedDomIds = new Set();
+
+  const sanitizeDomId = (value) => {
+    const normalizedValue = normalizeTemplateId(value);
+    const sanitized = normalizedValue
+      .replace(/[^0-9A-Za-z_-]+/g, "-")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "");
+    return sanitized || "template";
+  };
+
+  const registerDomId = (templateId, preferredDomId) => {
+    const key = normalizeTemplateId(templateId);
+    if (!key) return;
+
+    let baseDomId = sanitizeDomId(preferredDomId || key);
+    let domId = baseDomId;
+    let suffix = 2;
+    while (assignedDomIds.has(domId)) {
+      domId = `${baseDomId}-${suffix}`;
+      suffix += 1;
+    }
+    templateDomIdMap[key] = domId;
+    domIdToTemplateIdMap[domId] = key;
+    assignedDomIds.add(domId);
+  };
+
+  $("#templates-dropdown-menu button[data-template-id]").each(function () {
+    const $button = $(this);
+    const templateId = normalizeTemplateId($button.data("template-id"));
+    const domId = normalizeTemplateId($button.data("template-dom-id"));
+    registerDomId(templateId, domId);
+  });
+
+  const getTemplateDomId = (templateId) => {
+    const key = normalizeTemplateId(templateId);
+    if (!key) return "";
+    if (!templateDomIdMap[key]) {
+      registerDomId(key);
+    }
+    return templateDomIdMap[key];
+  };
+
+  const getTemplateContainer = (templateId) => {
+    const key = normalizeTemplateId(templateId);
+    if (!key) return $();
+    return $(`.tab-pane[data-template-id="${key}"]`);
+  };
+
+  const getStepId = (templateId, step) =>
+    `navs-steps-${getTemplateDomId(templateId)}-${step}`;
+
+  const getStepContainer = (templateId, step) =>
+    $(`#${getStepId(templateId, step)}`);
+
+  const getTemplateTabButton = (templateId) => {
+    const key = normalizeTemplateId(templateId);
+    if (!key) return $();
+    return $(`#templates-dropdown-menu button[data-template-id="${key}"]`);
+  };
 
   const updateUrlParams = (params, removeHash = false) => {
     const newUrl = new URL(window.location.href);
@@ -42,13 +122,60 @@ $(document).ready(() => {
       }
     });
 
-    newUrl.search = searchParams.toString();
+    const serializedSearch = searchParams.toString().replace(/\+/g, "%20");
+    newUrl.search = serializedSearch ? `?${serializedSearch}` : "";
     if (removeHash) {
       newUrl.hash = "";
     }
 
     history.pushState(params, document.title, newUrl.toString());
   };
+
+  const updateTemplateUrl = (templateId, { clearType = false } = {}) => {
+    const params = {};
+    if (clearType) params.type = null;
+
+    const normalizedTemplate = normalizeTemplateId(templateId);
+    if (
+      currentMode === "easy" &&
+      normalizedTemplate &&
+      normalizedTemplate !== "low"
+    ) {
+      params.template = normalizedTemplate;
+    } else {
+      params.template = null;
+    }
+
+    updateUrlParams(params);
+  };
+
+  const showTemplateTab = (templateId) => {
+    const $button = getTemplateTabButton(templateId);
+    if ($button.length) {
+      $button.tab("show");
+    }
+  };
+
+  const setCurrentTemplate = (templateId, { clearType = false } = {}) => {
+    const normalized = normalizeTemplateId(templateId);
+    if (!normalized) return;
+    currentTemplate = normalized;
+    // Ensure we have a DOM id mapping for this template
+    getTemplateDomId(currentTemplate);
+
+    usedTemplate = currentTemplate;
+    if ($templateInput.length) {
+      $templateInput.val(currentTemplate);
+    }
+
+    const $selectedTemplateField = $("#selected-template");
+    if ($selectedTemplateField.length)
+      $selectedTemplateField.val(currentTemplate);
+
+    updateTemplateUrl(currentTemplate, { clearType });
+  };
+
+  setCurrentTemplate(currentTemplate);
 
   const handleModeChange = (targetClass) => {
     currentMode = targetClass.substring(1).replace("navs-modes-", "");
@@ -83,8 +210,11 @@ $(document).ready(() => {
     }
   };
 
-  const resetTemplateConfig = () => {
-    const templateContainer = $(`#navs-templates-${currentTemplate}`);
+  const resetTemplateConfig = (templateId = currentTemplate) => {
+    const normalizedTemplate = normalizeTemplateId(templateId);
+    if (!normalizedTemplate) return;
+
+    const templateContainer = getTemplateContainer(normalizedTemplate);
     // Hide any override badges shown after fetching global config
     templateContainer
       .find(".global-override-badge")
@@ -125,14 +255,14 @@ $(document).ready(() => {
     setTimeout(() => {
       // Force select the first step
       const firstStep = $(
-        `.step-navigation-item[data-step="1"][data-template="${currentTemplate}"]`,
+        `.step-navigation-item[data-step="1"][data-template="${normalizedTemplate}"]`,
       );
       if (firstStep.length) {
         // Set currentStep to ensure proper navigation
         currentStep = 1;
 
         // Update UI state - properly managing show/active classes
-        $(`.step-navigation-item[data-template="${currentTemplate}"]`).each(
+        $(`.step-navigation-item[data-template="${normalizedTemplate}"]`).each(
           function () {
             const $item = $(this);
             const step = parseInt($item.data("step"));
@@ -146,8 +276,8 @@ $(document).ready(() => {
         // Show the first step content with proper fade transition
         const stepId = firstStep.data("step-id");
         // Find all active panes and remove show first
-        const $activePanes = $(
-          `#navs-templates-${currentTemplate} .template-steps-content .tab-pane.active`,
+        const $activePanes = templateContainer.find(
+          ".template-steps-content .tab-pane.active",
         );
         $activePanes.removeClass("show");
 
@@ -164,46 +294,37 @@ $(document).ready(() => {
         }, 150);
 
         // Update button states
-        if (
-          !$(`#navs-templates-${currentTemplate} .previous-step`).hasClass(
-            "visually-hidden",
-          )
-        ) {
-          $(`#navs-templates-${currentTemplate} .previous-step`).addClass(
-            "visually-hidden",
-          );
+        const $previousButton = templateContainer.find(".previous-step");
+        if (!$previousButton.hasClass("visually-hidden")) {
+          $previousButton.addClass("visually-hidden");
         }
 
-        if (
-          $(`.step-navigation-item[data-template="${currentTemplate}"]`)
-            .length > 1
-        ) {
-          $(`#navs-templates-${currentTemplate} .next-step`).removeClass(
-            "visually-hidden",
-          );
-        } else if (
-          !$(`#navs-templates-${currentTemplate} .next-step`).hasClass(
-            "visually-hidden",
-          )
-        ) {
-          $(`#navs-templates-${currentTemplate} .next-step`).addClass(
-            "visually-hidden",
-          );
+        const $stepItems = $(
+          `.step-navigation-item[data-template="${normalizedTemplate}"]`,
+        );
+        const $nextButton = templateContainer.find(".next-step");
+        if ($stepItems.length > 1) {
+          $nextButton.removeClass("visually-hidden");
+        } else if (!$nextButton.hasClass("visually-hidden")) {
+          $nextButton.addClass("visually-hidden");
         }
       }
     }, 100);
   };
 
   // Enhanced handleTabChange function with validation check
-  const handleTabChange = (targetClass) => {
+  const handleTabChange = (targetClass, options = {}) => {
+    const { templateId: explicitTemplateId } = options;
     // If we're changing templates in easy mode, validate current step first
     if (
       targetClass.includes("navs-templates-") &&
       currentMode === "easy" &&
       !isInit
     ) {
-      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(
+        currentTemplate,
+        currentStep,
+      );
 
       // Only proceed if validation passes
       if (!validateCurrentStepInputs(currentStepContainer)) {
@@ -220,7 +341,6 @@ $(document).ready(() => {
 
     if (targetClass.includes("navs-plugins-")) {
       currentPlugin = targetClass.substring(1).replace("navs-plugins-", "");
-      params.template = null; // Remove the template parameter
 
       // If "general" is selected and a hash exists, remove the hash but keep the parameters
       if (currentPlugin === "general" && window.location.hash) {
@@ -234,24 +354,25 @@ $(document).ready(() => {
         updateUrlParams(params);
       }
     } else if (targetClass.includes("navs-templates-")) {
-      if (!isInit) resetTemplateConfig();
-      setTimeout(() => {
-        currentTemplate = targetClass
-          .substring(1)
-          .replace("navs-templates-", "");
+      const previousTemplate = currentTemplate;
+      const targetDomId = targetClass
+        .substring(1)
+        .replace("navs-templates-", "");
 
-        params.type = null; // Remove the type parameter
+      let nextTemplateId =
+        explicitTemplateId || domIdToTemplateIdMap[targetDomId] || "";
 
-        // If "low"  is selected, remove the "template" parameter
-        if (currentTemplate === "low") {
-          params.template = null; // Set template to null to remove it from the URL
-          updateUrlParams(params); // Call the function without the hash (keep it intact)
-        } else {
-          // If another template is selected, update the "template" parameter
-          params.template = currentTemplate;
-          updateUrlParams(params); // Keep the template in the URL
+      if (!nextTemplateId) {
+        const $targetPane = $(targetClass);
+        if ($targetPane.length) {
+          nextTemplateId = $targetPane.data("template-id") || "";
         }
-      }, 200);
+      }
+
+      if (nextTemplateId)
+        setCurrentTemplate(nextTemplateId, { clearType: true });
+
+      if (!isInit) resetTemplateConfig(previousTemplate);
     }
 
     return true; // Tab change is allowed
@@ -304,7 +425,9 @@ $(document).ready(() => {
 
     // Get step number and template from container
     const stepNumber = currentStepContainer.data("step");
-    const template = currentStepContainer.attr("id").split("-")[2]; // Extract template name
+    const template =
+      normalizeTemplateId(currentStepContainer.data("templateId")) ||
+      currentTemplate;
 
     // Find the nav item for this step
     const $navItem = $(
@@ -500,7 +623,7 @@ $(document).ready(() => {
     if (currentMode === "easy") {
       appendHiddenInput(form, "USE_TEMPLATE", currentTemplate);
 
-      const templateContainer = $(`#navs-templates-${currentTemplate}`);
+      const templateContainer = getTemplateContainer(currentTemplate);
       addChildrenToForm(form, templateContainer, true);
 
       templateContainer.find(".ace-editor").each(function () {
@@ -652,8 +775,10 @@ $(document).ready(() => {
       if (currentMode !== "easy") return;
 
       // In easy mode, ensure there are no validation errors in the current template
-      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(
+        currentTemplate,
+        currentStep,
+      );
 
       if (!validateCurrentStepInputs(currentStepContainer)) {
         e.preventDefault(); // Prevent tab change
@@ -677,8 +802,10 @@ $(document).ready(() => {
       if (isInit || currentMode !== "easy") return;
 
       // Validate current step before allowing template change
-      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(
+        currentTemplate,
+        currentStep,
+      );
 
       if (!validateCurrentStepInputs(currentStepContainer)) {
         e.preventDefault(); // Prevent tab change
@@ -691,11 +818,12 @@ $(document).ready(() => {
   $('#templates-dropdown-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
     (e) => {
-      if (!handleTabChange($(e.target).data("bs-target"))) {
+      const $target = $(e.target);
+      const templateId = normalizeTemplateId($target.data("template-id"));
+      if (!handleTabChange($(e.target).data("bs-target"), { templateId })) {
         // If handleTabChange returns false, revert to the previous tab
-        $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
-          "show",
-        );
+        showTemplateTab(currentTemplate);
+        return;
       }
     },
   );
@@ -722,8 +850,10 @@ $(document).ready(() => {
 
       // If switching from easy mode, validate current step first
       if (currentMode === "easy" && targetMode !== "easy") {
-        const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-        const currentStepContainer = $(`#${currentStepId}`);
+        const currentStepContainer = getStepContainer(
+          currentTemplate,
+          currentStep,
+        );
 
         if (!validateCurrentStepInputs(currentStepContainer)) {
           e.preventDefault(); // Prevent tab change
@@ -1149,8 +1279,7 @@ $(document).ready(() => {
 
     // Validate each step
     for (let step = 1; step <= totalSteps; step++) {
-      const stepId = `navs-steps-${template}-${step}`;
-      const stepContainer = $(`#${stepId}`);
+      const stepContainer = getStepContainer(template, step);
 
       // Validate without focusing (we'll handle focus separately)
       const isStepValid = validateCurrentStepInputs(stepContainer, {
@@ -1168,8 +1297,7 @@ $(document).ready(() => {
 
     // If there are invalid steps, navigate to the first one
     if (!allValid && firstInvalidStep) {
-      const targetStepId = `navs-steps-${template}-${firstInvalidStep}`;
-      const targetStepContainer = $(`#${targetStepId}`);
+      const targetStepContainer = getStepContainer(template, firstInvalidStep);
 
       // Navigate to the invalid step
       navigateToStep(template, firstInvalidStep);
@@ -1203,8 +1331,10 @@ $(document).ready(() => {
       ).length;
 
       // First validate the current step
-      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(
+        currentTemplate,
+        currentStep,
+      );
       if (!validateCurrentStepInputs(currentStepContainer)) {
         return; // Don't proceed if current step is invalid
       }
@@ -1215,8 +1345,7 @@ $(document).ready(() => {
       for (let step = 1; step <= totalSteps; step++) {
         if (step === currentStep) continue; // Skip current step as it was already validated
 
-        const stepToValidateId = `navs-steps-${currentTemplate}-${step}`;
-        const stepToValidateContainer = $(`#${stepToValidateId}`);
+        const stepToValidateContainer = getStepContainer(currentTemplate, step);
 
         if (!validateCurrentStepInputs(stepToValidateContainer)) {
           // Navigate to the invalid step
@@ -1442,7 +1571,7 @@ $(document).ready(() => {
         .join("/")}/global-config?as_json=true`,
       type: "GET",
       success: function (globalConfig) {
-        const templateContainer = $(`#navs-templates-${currentTemplate}`);
+        const templateContainer = getTemplateContainer(currentTemplate);
 
         const settingsInTemplate = new Set();
         templateContainer.find(".plugin-setting").each(function () {
@@ -1586,15 +1715,15 @@ $(document).ready(() => {
   ) {
     $('button[data-bs-target="#navs-modes-advanced"]').tab("show");
   } else if (usedTemplate !== "low" && currentMode === "easy") {
-    $(`button[data-bs-target="#navs-templates-${usedTemplate}"]`).tab("show");
-  } else if (
-    !$(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).hasClass(
-      "active",
-    )
-  ) {
-    $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
-      "show",
-    );
+    showTemplateTab(usedTemplate);
+  } else {
+    const $currentTemplateButton = getTemplateTabButton(currentTemplate);
+    if (
+      $currentTemplateButton.length &&
+      !$currentTemplateButton.hasClass("active")
+    ) {
+      showTemplateTab(currentTemplate);
+    }
   }
 
   var hasExternalPlugins = false;
@@ -1813,8 +1942,6 @@ $(document).ready(() => {
 
     if (!$targetStepItem.length) return; // Target step not found
 
-    const stepId = $targetStepItem.data("step-id");
-
     // Get validation state of all steps before changing active state
     const stepStates = [];
     $(`.step-navigation-item[data-template="${template}"]`).each(function () {
@@ -1842,10 +1969,11 @@ $(document).ready(() => {
     currentStep = targetStep;
 
     // Properly handle fade transition to ensure it happens every time
-    const $currentPane = $(
-      `#navs-templates-${template} .template-steps-content .tab-pane.active`,
+    const templateContainer = getTemplateContainer(template);
+    const $currentPane = templateContainer.find(
+      ".template-steps-content .tab-pane.active",
     );
-    const $targetPane = $(`#${stepId}`);
+    const $targetPane = getStepContainer(template, targetStep);
 
     // First remove 'show' to start fade-out transition
     $currentPane.removeClass("show");
@@ -1865,8 +1993,8 @@ $(document).ready(() => {
     const totalSteps = $(
       `.step-navigation-item[data-template="${template}"]`,
     ).length;
-    const $previousBtn = $(`#navs-templates-${template} .previous-step`);
-    const $nextBtn = $(`#navs-templates-${template} .next-step`);
+    const $previousBtn = templateContainer.find(".previous-step");
+    const $nextBtn = templateContainer.find(".next-step");
 
     $previousBtn.toggleClass("visually-hidden", targetStep === 1);
     $nextBtn.toggleClass("visually-hidden", targetStep === totalSteps);
@@ -1895,19 +2023,20 @@ $(document).ready(() => {
 
       if (isDirectStepClick) {
         targetStep = parseInt($(this).data("step"));
-        template = $(this).data("template");
+        template = normalizeTemplateId($(this).data("template"));
 
         // Don't proceed if already on this step
         if (targetStep === currentStep) return;
       } else {
-        template = $(this).data("template");
+        template = normalizeTemplateId($(this).data("template"));
         targetStep = isNextButton ? currentStep + 1 : currentStep - 1;
       }
 
+      if (!template) template = currentTemplate;
+
       // Always validate current step to update its validation state
       // regardless of whether we're going forward or backward
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(template, currentStep);
 
       // Validate but don't block navigation - just update the UI indicators
       validateCurrentStepInputs(currentStepContainer, {
@@ -1941,7 +2070,9 @@ $(document).ready(() => {
     // Debounce to avoid excessive validation
     debounce(() => {
       // Get the template and step number
-      const template = stepContainer.attr("id").split("-")[2];
+      const template =
+        normalizeTemplateId(stepContainer.data("templateId")) ||
+        currentTemplate;
       const step = parseInt(stepContainer.data("step"));
 
       // Validate without focusing

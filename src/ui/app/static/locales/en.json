@@ -747,6 +747,9 @@
       "confirmation_instance_deletion": "Are you sure you want to delete the selected instance?",
       "delete_confirmation_alert": "Are you sure you want to delete the selected instance?",
       "delete_confirmation_alert_plural": "Are you sure you want to delete the selected instances?",
+      "delete_confirmation_template_used": "One or more selected templates are assigned to services ({{services_count}} service(s) total). Removing them will clear those assignments. Do you want to continue?",
+      "delete_template_global_usage": "Used by the global configuration",
+      "delete_template_services_list": "Used by services: {{services}}",
       "instance_creation_alert": "You don't need to provide the port or the server name; the values of `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT`, and `API_SERVER_NAME` will be used for the instance configuration.",
       "next_step_in_case_of_issue": "If you encounter issues, you can manually accept the unsafe certificate:",
       "recovery_codes_save_alert": "Please save these recovery codes in a secure location (like a password manager or bunker). You can use them to access your account if you lose your authentication device.",
@@ -1534,6 +1537,7 @@
         "method": "Creation method of the Service (e.g., ui, file)",
         "name": "Name of the Service",
         "select_all": "Select all Services",
+        "template": "The template used by the Service",
         "type": "Service type (Online/Draft)"
       }
     },

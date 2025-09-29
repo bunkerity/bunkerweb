@@ -1524,6 +1524,7 @@
         "method": "Método de criação do Serviço (ex. ui, file)",
         "name": "Nome do Serviço",
         "select_all": "Selecionar todos os Serviços",
+        "template": "O modelo usado pelo Serviço",
         "type": "Tipo de Serviço (Online/Rascunho)"
       }
     },

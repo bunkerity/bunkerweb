@@ -1527,6 +1527,7 @@
         "method": "Erstellungsmethode des Dienstes (z. B. ui, file)",
         "name": "Name des Dienstes",
         "select_all": "Alle Dienste auswählen",
+        "template": "Die vom Dienst verwendete Vorlage",
         "type": "Diensttyp (Online/Entwurf)"
       }
     },

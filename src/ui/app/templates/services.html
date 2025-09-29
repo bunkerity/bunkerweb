@@ -56,7 +56,7 @@
                     </th>
                     <th data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        data-bs-original-title="The Service's template"
+                        data-bs-original-title="The template used by the Service"
                         data-i18n="tooltip.table.services.template">
                         <span data-i18n="table.header.template">Template</span>
                     </th>
@@ -108,7 +108,11 @@
                         <td id="method-{{ service['id'].replace('.', '-') }}">{{ service["method"] }}</td>
                         <td>
                             {% if service["template"] %}
-                                <span class="badge rounded-pill bg-label-primary">{{ service["template"] }}</span>
+                                <a href="{{ url_for("templates") }}/{{ service["template"] }}"
+                                   class="d-flex align-items-center"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="{% if is_readonly or service["template"] in ["low", "medium", "high", "ui", "api"] %}View{% else %}Edit{% endif %} template {{ service["template"] }}"><i class="bx bx-{% if is_readonly or service["template"] in ["low", "medium", "high", "ui", "api"] %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ service["template"] }}</a>
                             {% else %}
                                 <span class="badge rounded-pill bg-label-secondary"
                                       data-i18n="badge.no_template">No template</span>

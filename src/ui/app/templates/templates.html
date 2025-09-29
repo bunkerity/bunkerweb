@@ -16,6 +16,7 @@
                   id="columns_preferences_defaults"
                   class="visually-hidden">{{ columns_preferences_defaults['templates']|tojson }}</textarea>
         <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
+        <textarea type="hidden" id="templates-usage" class="visually-hidden">{{ template_usage|default({})|tojson }}</textarea>
         <input type="hidden"
                id="csrf_token"
                name="csrf_token"
@@ -204,6 +205,7 @@
                         <div class="modal-body">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                             <input type="hidden" id="selected-templates-input" name="templates" value="" />
+                            <input type="hidden" id="force-delete-input" name="force" value="false" />
                             <div class="alert alert-danger text-center"
                                  role="alert"
                                  data-i18n="modal.body.delete_confirmation_alert">
@@ -214,7 +216,7 @@
                         <div class="modal-footer justify-content-center">
                             <button type="submit"
                                     class="btn btn-outline-danger me-2"
-                                    data-i18n="button.delete_template">Delete templates</button>
+                                    data-i18n="button.delete">Delete</button>
                             <button type="reset"
                                     class="btn btn-outline-secondary"
                                     data-bs-dismiss="modal"

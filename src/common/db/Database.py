@@ -87,7 +87,7 @@ class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
     RESTRICTED_TEMPLATE_SETTINGS = ("USE_TEMPLATE", "IS_DRAFT")
-    MULTISITE_CUSTOM_CONFIG_TYPES = ("server-http", "modsec-crs", "modsec", "server-stream", "crs-plugins-before", "crs-plugins-after")
+    MULTISITE_CUSTOM_CONFIG_TYPES = ("server_http", "modsec_crs", "modsec", "server_stream", "crs_plugins_before", "crs_plugins_after")
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
@@ -959,7 +959,7 @@ class Database:
                                         f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has invalid config "{config}"'
                                     )
                                     continue
-                                if config_type not in getattr(self, "MULTISITE_CUSTOM_CONFIG_TYPES", []):
+                                if config_type.replace("-", "_") not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
                                     self.logger.error(
                                         f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has invalid config type "{config_type}"'
                                     )
@@ -974,7 +974,7 @@ class Database:
 
                                 content = config_file.read_bytes()
                                 checksum = bytes_hash(content, algorithm="sha256")
-                                config_name_clean = config_name.replace(".conf", "")
+                                config_name_clean = config_name.replace(".conf", "").replace("-", "_").lower()
 
                                 # Check if belongs to a step
                                 step_id = None
@@ -3187,7 +3187,7 @@ class Database:
                             order += 1
 
                         db_template_configs = [
-                            f"{config.type}/{config.name}.conf"
+                            f"{config.type.replace('_', '-')}/{config.name}.conf"
                             for config in session.query(Template_custom_configs)
                             .with_entities(Template_custom_configs.type, Template_custom_configs.name)
                             .filter_by(template_id=template_id)
@@ -3209,7 +3209,7 @@ class Database:
                                 )
                                 continue
 
-                            if config_type not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
+                            if config_type.replace("-", "_") not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
                                 self.logger.error(
                                     f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" is not a valid type, skipping it'
                                 )
@@ -3223,8 +3223,7 @@ class Database:
 
                             content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
                             checksum = bytes_hash(content, algorithm="sha256")
-
-                            config_name = config_name.replace(".conf", "")
+                            config_name = config_name.replace(".conf", "").replace("-", "_").lower()
 
                             step_id = None
                             for step, configs in steps_configs.items():
@@ -3476,7 +3475,7 @@ class Database:
                             )
                             continue
 
-                        if config_type not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
+                        if config_type.replace("-", "_") not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
                             self.logger.error(
                                 f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" is not a valid type, skipping it'
                             )
@@ -3490,8 +3489,7 @@ class Database:
 
                         content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
                         checksum = bytes_hash(content, algorithm="sha256")
-
-                        config_name = config_name.replace(".conf", "")
+                        config_name = config_name.replace(".conf", "").replace("-", "_").lower()
 
                         step_id = None
                         for step, configs in steps_configs.items():
