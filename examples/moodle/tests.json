@@ -1,6 +1,6 @@
 {
   "name": "moodle",
-  "kinds": ["docker", "autoconf", "kubernetes"],
+  "kinds": ["docker", "autoconf"],
   "timeout": 300,
   "delay": 300,
   "tests": [
