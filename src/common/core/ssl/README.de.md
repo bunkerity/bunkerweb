@@ -33,38 +33,38 @@ SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachste
 
 === "Moderne Sicherheit (Standard)"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_LEVEL: "modern"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-REDIRECT_HTTP_TO_HTTPS: "no"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
 
 === "Maximale Sicherheit"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.3"
-SSL_CIPHERS_LEVEL: "modern"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-REDIRECT_HTTP_TO_HTTPS: "yes"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
 
 === "Legacy-Kompatibilität"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_LEVEL: "old"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "old"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
 
 === "Benutzerdefinierte Suiten"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```

@@ -87,7 +87,7 @@ class Database:
     DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
     READONLY_ERROR = ("readonly", "read-only", "command denied", "Access denied")
     RESTRICTED_TEMPLATE_SETTINGS = ("USE_TEMPLATE", "IS_DRAFT")
-    MULTISITE_CUSTOM_CONFIG_TYPES = ("server-http", "modsec-crs", "modsec", "server-stream", "crs-plugins-before", "crs-plugins-after")
+    MULTISITE_CUSTOM_CONFIG_TYPES = ("server_http", "modsec_crs", "modsec", "server_stream", "crs_plugins_before", "crs_plugins_after")
     SUFFIX_RX = re_compile(r"(?P<setting>.+)_(?P<suffix>\d+)$")
 
     def __init__(
@@ -485,7 +485,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.5-rc4"
+                return "1.6.5"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -518,7 +518,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.5-rc4",
+            "version": "1.6.5",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -702,18 +702,22 @@ class Database:
                 old_cli_commands[(c.plugin_id, c.name)] = c
 
             # For templates:
-            old_templates = {(t.plugin_id, t.id): t for t in old_data.get("bw_templates", [])}
+            managed_template_ids = {t.id for t in old_data.get("bw_templates", []) if t.plugin_id}
+            old_templates = {(t.plugin_id, t.id): t for t in old_data.get("bw_templates", []) if t.plugin_id}
             old_template_steps = {}
             for st in old_data.get("bw_template_steps", []):
-                old_template_steps[(st.template_id, st.id)] = st
+                if st.template_id in managed_template_ids:
+                    old_template_steps[(st.template_id, st.id)] = st
 
             old_template_settings = {}
             for ts in old_data.get("bw_template_settings", []):
-                old_template_settings[(ts.template_id, ts.setting_id, ts.suffix, ts.step_id, ts.order)] = ts.default
+                if ts.template_id in managed_template_ids:
+                    old_template_settings[(ts.template_id, ts.setting_id, ts.suffix, ts.step_id, ts.order)] = ts.default
 
             old_template_configs = {}
             for tc in old_data.get("bw_template_custom_configs", []):
-                old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id, ts.order)] = tc
+                if tc.template_id in managed_template_ids:
+                    old_template_configs[(tc.template_id, tc.type, tc.name, tc.step_id, tc.order)] = tc
 
             # Build desired data from default_plugins
             # The following logic is similar to the original code but uses dicts/sets for comparisons.
@@ -959,7 +963,7 @@ class Database:
                                         f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has invalid config "{config}"'
                                     )
                                     continue
-                                if config_type not in getattr(self, "MULTISITE_CUSTOM_CONFIG_TYPES", []):
+                                if config_type.replace("-", "_") not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
                                     self.logger.error(
                                         f'{base_plugin.get("type", "core").title()} Plugin "{base_plugin["id"]}"\'s Template {template_id} has invalid config type "{config_type}"'
                                     )
@@ -974,7 +978,7 @@ class Database:
 
                                 content = config_file.read_bytes()
                                 checksum = bytes_hash(content, algorithm="sha256")
-                                config_name_clean = config_name.replace(".conf", "")
+                                config_name_clean = config_name.replace(".conf", "").replace("-", "_").lower()
 
                                 # Check if belongs to a step
                                 step_id = None
@@ -2496,20 +2500,31 @@ class Database:
 
     def get_services(self, *, with_drafts: bool = False) -> List[Dict[str, Any]]:
         """Get the services from the database"""
+        services = []
         with self._db_session() as session:
-            return [
-                {
-                    "id": service.id,
-                    "method": service.method,
-                    "is_draft": service.is_draft,
-                    "creation_date": service.creation_date,
-                    "last_update": service.last_update,
-                }
-                for service in session.query(Services).with_entities(
-                    Services.id, Services.method, Services.is_draft, Services.creation_date, Services.last_update
+            db_services = (
+                session.query(Services).with_entities(Services.id, Services.method, Services.is_draft, Services.creation_date, Services.last_update).all()
+            )
+
+        for service in db_services:
+            if with_drafts or not service.is_draft:
+                service_settings = self.get_non_default_settings(
+                    with_drafts=with_drafts,
+                    filtered_settings=("USE_TEMPLATE",),
+                    service=service.id,
                 )
-                if with_drafts or not service.is_draft
-            ]
+                services.append(
+                    {
+                        "id": service.id,
+                        "method": service.method,
+                        "is_draft": service.is_draft,
+                        "creation_date": service.creation_date,
+                        "last_update": service.last_update,
+                        "template": service_settings.get("USE_TEMPLATE", ""),
+                    }
+                )
+
+        return services
 
     def add_job_run(self, job_name: str, success: bool, start_date: datetime, end_date: Optional[datetime] = None) -> str:
         """Add a job run."""
@@ -3176,7 +3191,7 @@ class Database:
                             order += 1
 
                         db_template_configs = [
-                            f"{config.type}/{config.name}.conf"
+                            f"{config.type.replace('_', '-')}/{config.name}.conf"
                             for config in session.query(Template_custom_configs)
                             .with_entities(Template_custom_configs.type, Template_custom_configs.name)
                             .filter_by(template_id=template_id)
@@ -3198,7 +3213,7 @@ class Database:
                                 )
                                 continue
 
-                            if config_type not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
+                            if config_type.replace("-", "_") not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
                                 self.logger.error(
                                     f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" is not a valid type, skipping it'
                                 )
@@ -3212,8 +3227,7 @@ class Database:
 
                             content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
                             checksum = bytes_hash(content, algorithm="sha256")
-
-                            config_name = config_name.replace(".conf", "")
+                            config_name = config_name.replace(".conf", "").replace("-", "_").lower()
 
                             step_id = None
                             for step, configs in steps_configs.items():
@@ -3465,7 +3479,7 @@ class Database:
                             )
                             continue
 
-                        if config_type not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
+                        if config_type.replace("-", "_") not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
                             self.logger.error(
                                 f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" is not a valid type, skipping it'
                             )
@@ -3479,8 +3493,7 @@ class Database:
 
                         content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
                         checksum = bytes_hash(content, algorithm="sha256")
-
-                        config_name = config_name.replace(".conf", "")
+                        config_name = config_name.replace(".conf", "").replace("-", "_").lower()
 
                         step_id = None
                         for step, configs in steps_configs.items():
@@ -4455,7 +4468,7 @@ class Database:
         self,
         template_id: str,
         *,
-        plugin_id: str,
+        plugin_id: Optional[str] = None,
         name: str,
         settings: Dict[str, Any],
         steps: List[Dict[str, Any]],
@@ -4476,9 +4489,10 @@ class Database:
             if not normalized_name:
                 return "Template name cannot be empty"
 
-            normalized_plugin = plugin_id.strip()
-            if not normalized_plugin:
-                return "plugin_id cannot be empty"
+            normalized_plugin = None
+            if isinstance(plugin_id, str):
+                normalized_value = plugin_id.strip()
+                normalized_plugin = normalized_value or None
 
             if session.query(Templates.id).filter_by(id=template_id).first():
                 return f"Template {template_id} already exists"
@@ -4486,8 +4500,9 @@ class Database:
             if session.query(Templates.id).filter(Templates.name == normalized_name).first():
                 return f"Template name {normalized_name} already exists"
 
-            if session.query(Plugins.id).filter_by(id=normalized_plugin).first() is None:
-                return f"Plugin {normalized_plugin} does not exist"
+            if normalized_plugin:
+                if session.query(Plugins.id).filter_by(id=normalized_plugin).first() is None:
+                    return f"Plugin {normalized_plugin} does not exist"
 
             error, step_entities, setting_entities, config_entities = self._prepare_template_entities(session, template_id, settings, steps, configs)
             if error:
@@ -4570,15 +4585,18 @@ class Database:
                 return "Template not found"
 
             if plugin_id is not None:
-                normalized_plugin = plugin_id.strip()
-                if not normalized_plugin:
-                    return "plugin_id cannot be empty"
+                normalized_plugin = None
+                if isinstance(plugin_id, str):
+                    normalized_value = plugin_id.strip()
+                    normalized_plugin = normalized_value or None
+                else:
+                    normalized_plugin = str(plugin_id) or None
+
                 if normalized_plugin != template.plugin_id:
-                    if session.query(Plugins.id).filter_by(id=normalized_plugin).first() is None:
+                    if normalized_plugin and session.query(Plugins.id).filter_by(id=normalized_plugin).first() is None:
                         return f"Plugin {normalized_plugin} does not exist"
                     template.plugin_id = normalized_plugin
 
-            old_template_name = template.name
             if name is not None:
                 normalized_name = name.strip()
                 if not normalized_name:
@@ -4586,22 +4604,6 @@ class Database:
                 conflict = session.query(Templates.id).filter(Templates.name == normalized_name, Templates.id != template_id).first()
                 if conflict:
                     return f"Template name {normalized_name} already exists"
-
-                # Handle template renaming - migrate USE_TEMPLATE references
-                if normalized_name != old_template_name:
-                    self.logger.info(f"Migrating template references from '{old_template_name}' to '{normalized_name}'")
-
-                    # Update global USE_TEMPLATE references
-                    global_templates = session.query(Global_values).filter_by(setting_id="USE_TEMPLATE", value=old_template_name).all()
-                    for global_template in global_templates:
-                        global_template.value = normalized_name
-                        self.logger.debug(f"Updated global USE_TEMPLATE from '{old_template_name}' to '{normalized_name}'")
-
-                    # Update service USE_TEMPLATE references
-                    service_templates = session.query(Services_settings).filter_by(setting_id="USE_TEMPLATE", value=old_template_name).all()
-                    for service_template in service_templates:
-                        service_template.value = normalized_name
-                        self.logger.debug(f"Updated service '{service_template.service_id}' USE_TEMPLATE from '{old_template_name}' to '{normalized_name}'")
 
                 template.name = normalized_name
 

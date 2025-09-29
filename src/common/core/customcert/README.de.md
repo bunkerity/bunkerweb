@@ -45,44 +45,44 @@ Wenn eine Zwischenkette erforderlich ist, stellen Sie das vollständige Bundle i
 
 === "Dateien"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "file"
-CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
-CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "file"
+    CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
+    CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
+    ```
 
 === "Base64-Daten"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "data"
-CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
-CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "data"
+    CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
+    CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
+    ```
 
 === "Klartext-PEM"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "data"
-CUSTOM_SSL_CERT_DATA: |
-  -----BEGIN CERTIFICATE-----
-  MIIDdzCCAl+gAwIBAgIUJH...certificate content...AAAA
-  -----END CERTIFICATE-----
-CUSTOM_SSL_KEY_DATA: |
-  -----BEGIN PRIVATE KEY-----
-  MIIEvQIBADAN...key content...AAAA
-  -----END PRIVATE KEY-----
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "data"
+    CUSTOM_SSL_CERT_DATA: |
+    -----BEGIN CERTIFICATE-----
+    MIIDdzCCAl+gAwIBAgIUJH...certificate content...AAAA
+    -----END CERTIFICATE-----
+    CUSTOM_SSL_KEY_DATA: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADAN...key content...AAAA
+    -----END PRIVATE KEY-----
+    ```
 
 === "Fallback"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "file"
-CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
-CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
-CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
-CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "file"
+    CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
+    CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
+    CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
+    CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
+    ```

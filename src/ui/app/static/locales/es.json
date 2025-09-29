@@ -1525,6 +1525,7 @@
         "method": "Método de creación del Servicio (ej. ui, file)",
         "name": "Nombre del Servicio",
         "select_all": "Seleccionar todos los Servicios",
+        "template": "La plantilla utilizada por el Servicio",
         "type": "Tipo de Servicio (En línea/Borrador)"
       }
     },

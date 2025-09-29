@@ -35,19 +35,19 @@ Die Standardseiten sind klar and lehrreich: Fehlerbeschreibung, mögliche Ursach
 
 === "Standardverwaltung"
 
-```yaml
-INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
-```
+    ```yaml
+    INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+    ```
 
 === "Benutzerdefinierte Seiten"
 
-```yaml
-ERRORS: "404=/custom/404.html 500=/custom/500.html"
-INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
-```
+    ```yaml
+    ERRORS: "404=/custom/404.html 500=/custom/500.html"
+    INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+    ```
 
 === "Selektive Verwaltung"
 
-```yaml
-INTERCEPTED_ERROR_CODES: "404 500"
-```
+    ```yaml
+    INTERCEPTED_ERROR_CODES: "404 500"
+    ```

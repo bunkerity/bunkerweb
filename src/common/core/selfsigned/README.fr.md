@@ -33,28 +33,28 @@ En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour définir le port d’é
 
 === "Basique"
 
-```yaml
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
-SELF_SIGNED_SSL_EXPIRY: "365"
-SELF_SIGNED_SSL_SUBJ: "/CN=mysite.local/"
-```
+    ```yaml
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
+    SELF_SIGNED_SSL_EXPIRY: "365"
+    SELF_SIGNED_SSL_SUBJ: "/CN=mysite.local/"
+    ```
 
 === "Certificats courte durée"
 
-```yaml
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
-SELF_SIGNED_SSL_EXPIRY: "90"
-SELF_SIGNED_SSL_SUBJ: "/CN=dev.example.com/"
-```
+    ```yaml
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
+    SELF_SIGNED_SSL_EXPIRY: "90"
+    SELF_SIGNED_SSL_SUBJ: "/CN=dev.example.com/"
+    ```
 
 === "Test en RSA"
 
-```yaml
-SERVER_NAME: "test.example.com"
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
-SELF_SIGNED_SSL_EXPIRY: "365"
-SELF_SIGNED_SSL_SUBJ: "/CN=test.example.com/"
-```
+    ```yaml
+    SERVER_NAME: "test.example.com"
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
+    SELF_SIGNED_SSL_EXPIRY: "365"
+    SELF_SIGNED_SSL_SUBJ: "/CN=test.example.com/"
+    ```

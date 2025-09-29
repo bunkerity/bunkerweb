@@ -43,35 +43,35 @@ Toutes les URLs (sauf `mailto:` et `tel:`) DOIVENT utiliser HTTPS. BunkerWeb con
 
 === "Basique"
 
-```yaml
-USE_SECURITYTXT: "yes"
-SECURITYTXT_CONTACT: "mailto:security@example.com"
-SECURITYTXT_POLICY: "https://example.com/security-policy"
-```
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    ```
 
 === "Complet"
 
-```yaml
-USE_SECURITYTXT: "yes"
-SECURITYTXT_CONTACT: "mailto:security@example.com"
-SECURITYTXT_CONTACT_2: "https://example.com/security-contact-form"
-SECURITYTXT_EXPIRES: "2023-12-31T23:59:59+00:00"
-SECURITYTXT_ENCRYPTION: "https://example.com/pgp-key.txt"
-SECURITYTXT_ACKNOWLEDGEMENTS: "https://example.com/hall-of-fame"
-SECURITYTXT_POLICY: "https://example.com/security-policy"
-SECURITYTXT_HIRING: "https://example.com/jobs/security"
-SECURITYTXT_CANONICAL: "https://example.com/.well-known/security.txt"
-SECURITYTXT_PREFERRED_LANG: "en"
-SECURITYTXT_CSAF: "https://example.com/provider-metadata.json"
-```
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_CONTACT_2: "https://example.com/security-contact-form"
+    SECURITYTXT_EXPIRES: "2023-12-31T23:59:59+00:00"
+    SECURITYTXT_ENCRYPTION: "https://example.com/pgp-key.txt"
+    SECURITYTXT_ACKNOWLEDGEMENTS: "https://example.com/hall-of-fame"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    SECURITYTXT_HIRING: "https://example.com/jobs/security"
+    SECURITYTXT_CANONICAL: "https://example.com/.well-known/security.txt"
+    SECURITYTXT_PREFERRED_LANG: "en"
+    SECURITYTXT_CSAF: "https://example.com/provider-metadata.json"
+    ```
 
 === "Contacts multiples"
 
-```yaml
-USE_SECURITYTXT: "yes"
-SECURITYTXT_CONTACT: "mailto:security@example.com"
-SECURITYTXT_CONTACT_2: "tel:+1-201-555-0123"
-SECURITYTXT_CONTACT_3: "https://example.com/security-form"
-SECURITYTXT_POLICY: "https://example.com/security-policy"
-SECURITYTXT_EXPIRES: "2024-06-30T23:59:59+00:00"
-```
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_CONTACT_2: "tel:+1-201-555-0123"
+    SECURITYTXT_CONTACT_3: "https://example.com/security-form"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    SECURITYTXT_EXPIRES: "2024-06-30T23:59:59+00:00"
+    ```

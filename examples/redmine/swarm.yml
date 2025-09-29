@@ -22,7 +22,7 @@ services:
         - bunkerweb.REVERSE_PROXY_HOST=http://myredmine:3000
 
   mydb:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:

@@ -6,6 +6,7 @@ from time import time
 from typing import Dict, List
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
+from regex import sub
 
 from app.dependencies import BW_CONFIG, DATA, DB
 
@@ -18,7 +19,7 @@ services = Blueprint("services", __name__)
 @services.route("/services", methods=["GET"])
 @login_required
 def services_page():
-    return render_template("services.html", services=DB.get_services(with_drafts=True))
+    return render_template("services.html", services=DB.get_services(with_drafts=True), templates=DB.get_templates())
 
 
 @services.route("/services/", methods=["GET"])
@@ -398,6 +399,22 @@ def services_service_page(service: str):
     search_type = request.args.get("type", "all")
     template = request.args.get("template", "low")
     db_templates = DB.get_templates()
+    used_dom_ids = set()
+
+    for template_id, template_data in db_templates.items():
+        dom_id = sub(r"[^0-9A-Za-z_-]+", "-", template_id).strip("-")
+        if not dom_id:
+            dom_id = "template"
+
+        base_dom_id = dom_id
+        suffix = 2
+        while dom_id in used_dom_ids:
+            dom_id = f"{base_dom_id}-{suffix}"
+            suffix += 1
+
+        used_dom_ids.add(dom_id)
+        template_data["dom_id"] = dom_id
+
     db_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
     clone = None
     if service == "new":

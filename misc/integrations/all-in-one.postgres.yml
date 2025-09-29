@@ -1,6 +1,6 @@
 services:
   bunkerweb-all-in-one:
-    image: bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -17,12 +17,11 @@ services:
       - bw-db
 
   bw-db:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: "bunkerweb"
       POSTGRES_PASSWORD: "changeme" # Remember to set a stronger password for the database
       POSTGRES_DB: "db"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - bw-data:/var/lib/postgresql/data
     networks:

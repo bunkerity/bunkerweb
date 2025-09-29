@@ -45,27 +45,27 @@ Supporte SQLite, MySQL/MariaDB, PostgreSQL. Oracle non pris en charge pour sauve
 
 === "Quotidien, rétention 7 jours" (défaut)
 
-```yaml
-USE_BACKUP: "yes"
-BACKUP_SCHEDULE: "daily"
-BACKUP_ROTATION: "7"
-BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
-```
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "daily"
+    BACKUP_ROTATION: "7"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
 
 === "Hebdomadaire, rétention étendue"
 
-```yaml
-USE_BACKUP: "yes"
-BACKUP_SCHEDULE: "weekly"
-BACKUP_ROTATION: "12"
-BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
-```
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "weekly"
+    BACKUP_ROTATION: "12"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
 
 === "Mensuel, emplacement personnalisé"
 
-```yaml
-USE_BACKUP: "yes"
-BACKUP_SCHEDULE: "monthly"
-BACKUP_ROTATION: "24"
-BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
-```
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "monthly"
+    BACKUP_ROTATION: "24"
+    BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
+    ```

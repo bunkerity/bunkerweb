@@ -88,7 +88,7 @@ Aunque BunkerWeb optimiza las búsquedas de DNSBL para el rendimiento, agregar u
     -   Archivo combinado por servicio: `/var/cache/bunkerweb/dnsbl/<service>/IGNORE_IP.list`.
     -   Se carga al inicio y se combina con `DNSBL_IGNORE_IP`.
 
-Ejemplo que combina fuentes estáticas y de URL:
+    Ejemplo que combina fuentes estáticas y de URL:
 
     ```yaml
     USE_DNSBL: "yes"

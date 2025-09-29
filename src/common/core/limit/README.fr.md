@@ -20,11 +20,11 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 
 === "Limitation de requêtes"
 
-| Paramètre        | Défaut | Contexte  | Multiple | Description                                                                                                                                                                  |
-| ---------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_REQ`  | `yes`  | multisite | non      | **Activer la limitation de requêtes :** Mettre à `yes` pour activer la fonctionnalité de limitation de débit par requêtes.                                                   |
-| `LIMIT_REQ_URL`  | `/`    | multisite | oui      | **Motif d’URL :** Motif d’URL (regex PCRE) auquel la limite de débit sera appliquée ; utilisez `/` pour l'appliquer à toutes les requêtes.                                   |
-| `LIMIT_REQ_RATE` | `2r/s` | multisite | oui      | **Limite de débit :** Taux de requêtes maximal au format `Nr/t`, où N est le nombre de requêtes et t est l'unité de temps : s (seconde), m (minute), h (heure), ou d (jour). |
+    | Paramètre        | Défaut | Contexte  | Multiple | Description                                                                                                                                                                  |
+    | ---------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ`  | `yes`  | multisite | non      | **Activer la limitation de requêtes :** Mettre à `yes` pour activer la fonctionnalité de limitation de débit par requêtes.                                                   |
+    | `LIMIT_REQ_URL`  | `/`    | multisite | oui      | **Motif d’URL :** Motif d’URL (regex PCRE) auquel la limite de débit sera appliquée ; utilisez `/` pour l'appliquer à toutes les requêtes.                                   |
+    | `LIMIT_REQ_RATE` | `2r/s` | multisite | oui      | **Limite de débit :** Taux de requêtes maximal au format `Nr/t`, où N est le nombre de requêtes et t est l'unité de temps : s (seconde), m (minute), h (heure), ou d (jour). |
 
 !!! tip "Format de la limitation de débit"
 Le format de la limite de débit est spécifié comme `Nr/t` où :
@@ -38,13 +38,13 @@ Le format de la limite de débit est spécifié comme `Nr/t` où :
 
 === "Limitation de connexions"
 
-| Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                    |
-| ----------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_CONN`        | `yes`  | multisite | non      | **Activer la limitation de connexions :** Mettre à `yes` pour activer la limitation de connexions simultanées. |
-| `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | non      | **Connexions HTTP/1.X :** Nombre maximal de connexions HTTP/1.X simultanées par adresse IP.                    |
-| `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | non      | **Flux HTTP/2 :** Nombre maximal de flux HTTP/2 simultanés par adresse IP.                                     |
-| `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
-| `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
+    | Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                    |
+    | ----------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`  | multisite | non      | **Activer la limitation de connexions :** Mettre à `yes` pour activer la limitation de connexions simultanées. |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | non      | **Connexions HTTP/1.X :** Nombre maximal de connexions HTTP/1.X simultanées par adresse IP.                    |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | non      | **Flux HTTP/2 :** Nombre maximal de flux HTTP/2 simultanés par adresse IP.                                     |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
+    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
 
 !!! info "Limitation de connexions vs de requêtes" - La **limitation de connexions** restreint le nombre de connexions simultanées qu'une seule adresse IP peut maintenir. - La **limitation de débit de requêtes** restreint le nombre de requêtes qu'une adresse IP peut effectuer dans une période de temps définie.
 

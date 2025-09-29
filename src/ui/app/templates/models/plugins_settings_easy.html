@@ -24,14 +24,17 @@
                            aria-label="Search..."
                            data-i18n="form.placeholder.search">
                 </div>
-                {% for template in templates if template != "ui" %}
+                {% for template, template_data in templates.items() if template != "ui" %}
                     <li class="nav-item">
                         <button type="button"
                                 class="dropdown-item{% if loop.index == 1 %} active{% endif %}"
                                 role="tab"
                                 data-bs-toggle="tab"
-                                data-bs-target="#navs-templates-{{ template }}"
-                                aria-controls="navs-templates-{{ template }}"
+                                id="navs-templates-{{ template_data['dom_id'] }}-tab"
+                                data-template-id="{{ template }}"
+                                data-template-dom-id="{{ template_data['dom_id'] }}"
+                                data-bs-target="#navs-templates-{{ template_data['dom_id'] }}"
+                                aria-controls="navs-templates-{{ template_data['dom_id'] }}"
                                 {% if loop.index == 1 %}aria-selected="true"{% endif %}>
                             {{ template|capitalize }}
                         </button>
@@ -90,11 +93,18 @@
 </div>
 <div class="card tab-content m-1 p-2 position-relative">
     {% for template, template_data in templates.items() if template != "ui" %}
-        {% set template_plugin = plugins[template_data['plugin_id']] %}
-        <div id="navs-templates-{{ template }}"
+        {% set template_plugin_id = template_data.get('plugin_id') %}
+        {% set plugin_dom_id = template_plugin_id if template_plugin_id else 'ui' %}
+        {% set template_plugin = plugins.get(template_plugin_id) %}
+        {% if template_plugin is none %}
+            {% set template_plugin = {'id': plugin_dom_id, 'type': 'ui', 'name': 'UI'} %}
+        {% endif %}
+        <div id="navs-templates-{{ template_data['dom_id'] }}"
              class="tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
              role="tabpanel"
-             aria-labelledby="navs-templates-{{ template }}-tab">
+             data-template-id="{{ template }}"
+             data-template-dom-id="{{ template_data['dom_id'] }}"
+             aria-labelledby="navs-templates-{{ template_data['dom_id'] }}-tab">
             <div class="card-header d-flex align-items-center mw-100">
                 <div class="pt-1">
                     <h5 class="card-title d-flex align-items-center don-jose{{ plugin_types[template_plugin['type']].get('text-class', '') }}{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
@@ -119,11 +129,11 @@
                                             {% for step in template_data["steps"] %}
                                                 <li class="list-group-item step-navigation-item d-flex align-items-center p-2 cursor-pointer{% if loop.index == 1 %} show active{% endif %}"
                                                     role="tab"
-                                                    id="step-nav-{{ template }}-{{ loop.index }}"
+                                                    id="step-nav-{{ template_data['dom_id'] }}-{{ loop.index }}"
                                                     data-step="{{ loop.index }}"
                                                     data-template="{{ template }}"
-                                                    data-step-id="navs-steps-{{ template }}-{{ loop.index }}"
-                                                    aria-controls="navs-steps-{{ template }}-{{ loop.index }}"
+                                                    data-step-id="navs-steps-{{ template_data['dom_id'] }}-{{ loop.index }}"
+                                                    aria-controls="navs-steps-{{ template_data['dom_id'] }}-{{ loop.index }}"
                                                     aria-selected="{% if loop.index == 1 %}true{% else %}false{% endif %}"
                                                     tabindex="{% if loop.index == 1 %}0{% else %}-1{% endif %}">
                                                     <div class="step-number-wrapper me-3">
@@ -163,18 +173,20 @@
                                     </div>
                                     <div class="step-content-wrapper">
                                         {% for step in template_data["steps"] %}
-                                            <div id="navs-steps-{{ template }}-{{ loop.index }}"
+                                            <div id="navs-steps-{{ template_data['dom_id'] }}-{{ loop.index }}"
                                                  class="ps-1 pe-1 tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
                                                  role="tabpanel"
                                                  data-step="{{ loop.index }}"
-                                                 aria-labelledby="step-nav-{{ template }}-{{ loop.index }}">
+                                                 data-template-id="{{ template }}"
+                                                 data-template-dom-id="{{ template_data['dom_id'] }}"
+                                                 aria-labelledby="step-nav-{{ template_data['dom_id'] }}-{{ loop.index }}">
                                                 <div class="pt-1 pb-4">
                                                     <h5 class="mb-1 fw-bold{{ plugin_types[template_plugin['type']].get('text-class', '') }}">{{ step["title"] }}</h5>
                                                     <p class="card-subtitle text-muted">{{ step["subtitle"] }}</p>
                                                 </div>
                                                 <div class="row pb-0">
                                                     {% for setting in step["settings"] %}
-                                                        {% set setting_id_prefix = template + "-setting-" + template_data['plugin_id'] +"-" %}
+                                                        {% set setting_id_prefix = template + "-setting-" + plugin_dom_id +"-" %}
                                                         {% set setting_config = config.get(setting, {}) %}
                                                         {% set setting_data = plugins_settings.get(setting, {}) %}
                                                         {% set setting_default = setting_data.get("default", "") %}
@@ -196,8 +208,8 @@
                                                         <div class="col-12 col-sm-6 col-lg-4 pb-3"
                                                              {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
                                                             <div class="d-flex justify-content-between align-items-center">
-                                                                <label id="label-{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
-                                                                       for="{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
+                                                                <label id="label-{{ template }}-setting-{{ plugin_dom_id }}-{{ setting_data['id'] }}"
+                                                                       for="{{ template }}-setting-{{ plugin_dom_id }}-{{ setting_data['id'] }}"
                                                                        class="form-label fw-semibold text-truncate">
                                                                     {{ setting_data["label"] }}
                                                                 </label>
@@ -283,7 +295,7 @@
                                                         </h5>
                                                     </div>
                                                     {% for step_config in step_configs %}
-                                                        {% set step_config_id = template + "-config-" + template_data['plugin_id'] + "-" + step_config.replace("/", "-").replace(".conf", "") %}
+                                                        {% set step_config_id = template + "-config-" + plugin_dom_id + "-" + step_config.replace("/", "-").replace(".conf", "") %}
                                                         {% set step_config_value = configs.get(current_endpoint + "_" + step_config.replace(".conf", "").replace("/", "_")) %}
                                                         {% set step_config_method = "ui" %}
                                                         {% if step_config_value is none %}

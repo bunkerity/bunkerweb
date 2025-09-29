@@ -31,36 +31,36 @@ Des valeurs trop élevées augmentent l’usage mémoire. Surveillez et ajustez.
 
 === "Configuration par défaut"
 
-```yaml
-USE_METRICS: "yes"
-METRICS_MEMORY_SIZE: "16m"
-METRICS_MAX_BLOCKED_REQUESTS: "1000"
-METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
-METRICS_SAVE_TO_REDIS: "yes"
-```
+    ```yaml
+    USE_METRICS: "yes"
+    METRICS_MEMORY_SIZE: "16m"
+    METRICS_MAX_BLOCKED_REQUESTS: "1000"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_SAVE_TO_REDIS: "yes"
+    ```
 
 === "Ressources limitées"
 
-```yaml
-USE_METRICS: "yes"
-METRICS_MEMORY_SIZE: "8m"
-METRICS_MAX_BLOCKED_REQUESTS: "500"
-METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
-METRICS_SAVE_TO_REDIS: "no"
-```
+    ```yaml
+    USE_METRICS: "yes"
+    METRICS_MEMORY_SIZE: "8m"
+    METRICS_MAX_BLOCKED_REQUESTS: "500"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    METRICS_SAVE_TO_REDIS: "no"
+    ```
 
 === "Fort trafic"
 
-```yaml
-USE_METRICS: "yes"
-METRICS_MEMORY_SIZE: "64m"
-METRICS_MAX_BLOCKED_REQUESTS: "5000"
-METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
-METRICS_SAVE_TO_REDIS: "yes"
-```
+    ```yaml
+    USE_METRICS: "yes"
+    METRICS_MEMORY_SIZE: "64m"
+    METRICS_MAX_BLOCKED_REQUESTS: "5000"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    METRICS_SAVE_TO_REDIS: "yes"
+    ```
 
 === "Désactivation"
 
-```yaml
-USE_METRICS: "no"
-```
+    ```yaml
+    USE_METRICS: "no"
+    ```

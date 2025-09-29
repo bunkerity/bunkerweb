@@ -20,11 +20,11 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 === "Anforderungsratenbegrenzung"
 
-| Einstellung      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                             |
-| ---------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_LIMIT_REQ`  | `yes`    | multisite | nein     | **Anforderungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Ratenbegrenzung von Anfragen zu aktivieren.                                                 |
-| `LIMIT_REQ_URL`  | `/`      | multisite | ja       | **URL-Muster:** URL-Muster (PCRE-Regex), auf das die Ratenbegrenzung angewendet wird; verwenden Sie `/`, um es für alle Anfragen anzuwenden.                             |
-| `LIMIT_REQ_RATE` | `2r/s`   | multisite | ja       | **Ratenbegrenzung:** Maximale Anfragerate im Format `Nr/t`, wobei N die Anzahl der Anfragen und t die Zeiteinheit ist: s (Sekunde), m (Minute), h (Stunde) oder d (Tag). |
+    | Einstellung      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                             |
+    | ---------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_LIMIT_REQ`  | `yes`    | multisite | nein     | **Anforderungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Ratenbegrenzung von Anfragen zu aktivieren.                                                 |
+    | `LIMIT_REQ_URL`  | `/`      | multisite | ja       | **URL-Muster:** URL-Muster (PCRE-Regex), auf das die Ratenbegrenzung angewendet wird; verwenden Sie `/`, um es für alle Anfragen anzuwenden.                             |
+    | `LIMIT_REQ_RATE` | `2r/s`   | multisite | ja       | **Ratenbegrenzung:** Maximale Anfragerate im Format `Nr/t`, wobei N die Anzahl der Anfragen und t die Zeiteinheit ist: s (Sekunde), m (Minute), h (Stunde) oder d (Tag). |
 
 !!! tip "Format der Ratenbegrenzung"
 Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
@@ -38,13 +38,13 @@ Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
 
 === "Verbindungsbegrenzung"
 
-| Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                     |
-| ----------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_CONN`        | `yes`    | multisite | nein     | **Verbindungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Verbindungsbegrenzung zu aktivieren. |
-| `LIMIT_CONN_MAX_HTTP1`  | `10`     | multisite | nein     | **HTTP/1.X-Verbindungen:** Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse.                  |
-| `LIMIT_CONN_MAX_HTTP2`  | `100`    | multisite | nein     | **HTTP/2-Streams:** Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse.                                |
-| `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse.                                |
-| `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse.                      |
+    | Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                     |
+    | ----------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`    | multisite | nein     | **Verbindungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Verbindungsbegrenzung zu aktivieren. |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`     | multisite | nein     | **HTTP/1.X-Verbindungen:** Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse.                  |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`    | multisite | nein     | **HTTP/2-Streams:** Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse.                                |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse.                                |
+    | `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse.                      |
 
 !!! info "Verbindungs- vs. Anforderungsbegrenzung"
 

@@ -1523,8 +1523,9 @@
         "last_update": "Servisin en son güncellendiği tarih ve saati",
         "method": "Servisin oluşturulma yöntemi (örn. ui, dosya)",
         "name": "Servisin adı",
-        "select_all": "Tüm Servisleri seç",
-        "type": "Servis türü (Çevrimiçi/Taslak)"
+        "select_all": "Tüm Servisleri Seç",
+        "template": "Hizmet tarafından kullanılan şablon",
+        "type": "Servis Türü (Çevrimiçi/Taslak)"
       }
     },
     "ui_host": "BunkerWeb kullanıcı arayüzünü ters proxy üzerinden sunacak ana bilgisayar adı veya IP adresi.",

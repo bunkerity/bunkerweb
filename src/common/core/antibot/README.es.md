@@ -72,9 +72,9 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-| Configuración | Valor por defecto | Contexto  | Múltiple | Descripción                                                                        |
-| ------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------- |
-| `USE_ANTIBOT` | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `cookie` para habilitar el desafío de Cookie. |
+    | Configuración | Valor por defecto | Contexto  | Múltiple | Descripción                                                                        |
+    | ------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT` | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `cookie` para habilitar el desafío de Cookie. |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
@@ -95,9 +95,9 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-| Configuración | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
-| ------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
-| `USE_ANTIBOT` | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `javascript` para habilitar el desafío de JavaScript. |
+    | Configuración | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                |
+    | ------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT` | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `javascript` para habilitar el desafío de JavaScript. |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
@@ -129,10 +129,10 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-| Configuración              | Valor por defecto                                      | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                               |
-| -------------------------- | ------------------------------------------------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_ANTIBOT`              | `no`                                                   | multisite | no       | **Habilitar Antibot:** Establezca en `captcha` para habilitar el desafío de Captcha.                                                                                                                                                      |
-| `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no       | **Alfabeto del Captcha:** Una cadena de caracteres para usar en la generación del CAPTCHA. Caracteres admitidos: todas las letras (a-z, A-Z), números 2-9 (excluye 0 y 1) y caracteres especiales: ``+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„`` |
+    | Configuración              | Valor por defecto                                      | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                               |
+    | -------------------------- | ------------------------------------------------------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`                                                   | multisite | no       | **Habilitar Antibot:** Establezca en `captcha` para habilitar el desafío de Captcha.                                                                                                                                                      |
+    | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no       | **Alfabeto del Captcha:** Una cadena de caracteres para usar en la generación del CAPTCHA. Caracteres admitidos: todas las letras (a-z, A-Z), números 2-9 (excluye 0 y 1) y caracteres especiales: ``+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„`` |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
@@ -149,17 +149,17 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-| Configuración                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                |
-| ------------------------------ | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `USE_ANTIBOT`                  | `no`              | multisite | no       | Habilitar antibot; establezca en `recaptcha` para habilitar reCAPTCHA.                                                     |
-| `ANTIBOT_RECAPTCHA_CLASSIC`    | `yes`             | multisite | no       | Usar reCAPTCHA clásico. Establezca en `no` para usar la nueva versión basada en Google Cloud.                              |
-| `ANTIBOT_RECAPTCHA_SITEKEY`    |                   | multisite | no       | Clave de sitio de reCAPTCHA. Requerida para las versiones clásica y nueva.                                                 |
-| `ANTIBOT_RECAPTCHA_SECRET`     |                   | multisite | no       | Clave secreta de reCAPTCHA. Requerida solo para la versión clásica.                                                        |
-| `ANTIBOT_RECAPTCHA_PROJECT_ID` |                   | multisite | no       | ID del proyecto de Google Cloud. Requerido solo para la nueva versión.                                                     |
-| `ANTIBOT_RECAPTCHA_API_KEY`    |                   | multisite | no       | Clave de API de Google Cloud utilizada para llamar a la API de reCAPTCHA Enterprise. Requerida solo para la nueva versión. |
-| `ANTIBOT_RECAPTCHA_JA3`        |                   | multisite | no       | Huella digital JA3 TLS opcional para incluir en las evaluaciones de Enterprise.                                            |
-| `ANTIBOT_RECAPTCHA_JA4`        |                   | multisite | no       | Huella digital JA4 TLS opcional para incluir en las evaluaciones de Enterprise.                                            |
-| `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`             | multisite | no       | Puntuación mínima requerida para pasar (se aplica tanto a la v3 clásica como a la nueva versión).                          |
+    | Configuración                  | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                |
+    | ------------------------------ | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                  | `no`              | multisite | no       | Habilitar antibot; establezca en `recaptcha` para habilitar reCAPTCHA.                                                     |
+    | `ANTIBOT_RECAPTCHA_CLASSIC`    | `yes`             | multisite | no       | Usar reCAPTCHA clásico. Establezca en `no` para usar la nueva versión basada en Google Cloud.                              |
+    | `ANTIBOT_RECAPTCHA_SITEKEY`    |                   | multisite | no       | Clave de sitio de reCAPTCHA. Requerida para las versiones clásica y nueva.                                                 |
+    | `ANTIBOT_RECAPTCHA_SECRET`     |                   | multisite | no       | Clave secreta de reCAPTCHA. Requerida solo para la versión clásica.                                                        |
+    | `ANTIBOT_RECAPTCHA_PROJECT_ID` |                   | multisite | no       | ID del proyecto de Google Cloud. Requerido solo para la nueva versión.                                                     |
+    | `ANTIBOT_RECAPTCHA_API_KEY`    |                   | multisite | no       | Clave de API de Google Cloud utilizada para llamar a la API de reCAPTCHA Enterprise. Requerida solo para la nueva versión. |
+    | `ANTIBOT_RECAPTCHA_JA3`        |                   | multisite | no       | Huella digital JA3 TLS opcional para incluir en las evaluaciones de Enterprise.                                            |
+    | `ANTIBOT_RECAPTCHA_JA4`        |                   | multisite | no       | Huella digital JA4 TLS opcional para incluir en las evaluaciones de Enterprise.                                            |
+    | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`             | multisite | no       | Puntuación mínima requerida para pasar (se aplica tanto a la v3 clásica como a la nueva versión).                          |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
@@ -171,11 +171,11 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-| Configuración              | Valor por defecto | Contexto  | Múltiple | Descripción                                                                             |
-| -------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------- |
-| `USE_ANTIBOT`              | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `hcaptcha` para habilitar el desafío de hCaptcha.  |
-| `ANTIBOT_HCAPTCHA_SITEKEY` |                   | multisite | no       | **Clave del sitio de hCaptcha:** Su clave de sitio de hCaptcha (obtenerla de hCaptcha). |
-| `ANTIBOT_HCAPTCHA_SECRET`  |                   | multisite | no       | **Clave secreta de hCaptcha:** Su clave secreta de hCaptcha (obtenerla de hCaptcha).    |
+    | Configuración              | Valor por defecto | Contexto  | Múltiple | Descripción                                                                             |
+    | -------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `hcaptcha` para habilitar el desafío de hCaptcha.  |
+    | `ANTIBOT_HCAPTCHA_SITEKEY` |                   | multisite | no       | **Clave del sitio de hCaptcha:** Su clave de sitio de hCaptcha (obtenerla de hCaptcha). |
+    | `ANTIBOT_HCAPTCHA_SECRET`  |                   | multisite | no       | **Clave secreta de hCaptcha:** Su clave secreta de hCaptcha (obtenerla de hCaptcha).    |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
@@ -187,11 +187,11 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-| Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                 |
-| --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
-| `USE_ANTIBOT`               | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `turnstile` para habilitar el desafío Turnstile.       |
-| `ANTIBOT_TURNSTILE_SITEKEY` |                   | multisite | no       | **Clave del sitio de Turnstile:** Su clave de sitio de Turnstile (obtenerla de Cloudflare). |
-| `ANTIBOT_TURNSTILE_SECRET`  |                   | multisite | no       | **Clave secreta de Turnstile:** Su clave secreta de Turnstile (obtenerla de Cloudflare).    |
+    | Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                 |
+    | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`               | `no`              | multisite | no       | **Habilitar Antibot:** Establezca en `turnstile` para habilitar el desafío Turnstile.       |
+    | `ANTIBOT_TURNSTILE_SITEKEY` |                   | multisite | no       | **Clave del sitio de Turnstile:** Su clave de sitio de Turnstile (obtenerla de Cloudflare). |
+    | `ANTIBOT_TURNSTILE_SECRET`  |                   | multisite | no       | **Clave secreta de Turnstile:** Su clave secreta de Turnstile (obtenerla de Cloudflare).    |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 
@@ -205,12 +205,12 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
 
     **Ajustes de configuración:**
 
-| Configuración              | Valor por defecto           | Contexto  | Múltiple | Descripción                                                                             |
-| -------------------------- | --------------------------- | --------- | -------- | --------------------------------------------------------------------------------------- |
-| `USE_ANTIBOT`              | `no`                        | multisite | no       | **Habilitar Antibot:** Establezca en `mcaptcha` para habilitar el desafío mCaptcha.     |
-| `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no       | **Clave del sitio de mCaptcha:** Su clave de sitio de mCaptcha (obtenerla de mCaptcha). |
-| `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no       | **Clave secreta de mCaptcha:** Su clave secreta de mCaptcha (obtenerla de mCaptcha).    |
-| `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no       | **Dominio de mCaptcha:** El dominio a utilizar para el desafío mCaptcha.                |
+    | Configuración              | Valor por defecto           | Contexto  | Múltiple | Descripción                                                                             |
+    | -------------------------- | --------------------------- | --------- | -------- | --------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`                        | multisite | no       | **Habilitar Antibot:** Establezca en `mcaptcha` para habilitar el desafío mCaptcha.     |
+    | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no       | **Clave del sitio de mCaptcha:** Su clave de sitio de mCaptcha (obtenerla de mCaptcha). |
+    | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no       | **Clave secreta de mCaptcha:** Su clave secreta de mCaptcha (obtenerla de mCaptcha).    |
+    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no       | **Dominio de mCaptcha:** El dominio a utilizar para el desafío mCaptcha.                |
 
     Consulte los [Ajustes comunes](#configuraciones-comunes) para opciones de configuración adicionales.
 

@@ -1524,6 +1524,7 @@
         "method": "Méthode de création du Service (ex: ui, file)",
         "name": "Nom du Service",
         "select_all": "Sélectionner tous les Services",
+        "template": "Le modèle utilisé par le Service",
         "type": "Type du Service (En Ligne/Brouillon)"
       }
     },

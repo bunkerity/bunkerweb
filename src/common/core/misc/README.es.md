@@ -56,9 +56,9 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 
     Alternativamente, establecerlo en `444` cierra la conexión inmediatamente sin enviar ninguna respuesta. Este [código de estado no estándar](https://http.dev/444), específico de NGINX, es útil para descartar silenciosamente las solicitudes no deseadas.
 
-| Ajuste             | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                 |
-| ------------------ | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DENY_HTTP_STATUS` | `403`             | global   | no       | **Estado HTTP de Denegación:** Código de estado HTTP a enviar cuando se deniega la solicitud (403 o 444). El código 444 cierra la conexión. |
+    | Ajuste             | Valor por defecto | Contexto | Múltiple | Descripción                                                                                                                                 |
+    | ------------------ | ----------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `DENY_HTTP_STATUS` | `403`             | global   | no       | **Estado HTTP de Denegación:** Código de estado HTTP a enviar cuando se deniega la solicitud (403 o 444). El código 444 cierra la conexión. |
 
     !!! warning "Consideraciones del Código de Estado 444"
         Dado que los clientes no reciben retroalimentación, la solución de problemas puede ser más desafiante. Se recomienda establecer `444` solo si ha abordado a fondo los falsos positivos, tiene experiencia con BunkerWeb y requiere un mayor nivel de seguridad.
@@ -150,10 +150,10 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
 
     BunkerWeb puede servir archivos estáticos directamente o actuar como un proxy inverso a un servidor de aplicaciones. Por defecto, los archivos se sirven desde `/var/www/html/{server_name}`.
 
-| Ajuste        | Valor por defecto             | Contexto  | Múltiple | Descripción                                                                                                                |
-| ------------- | ----------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `SERVE_FILES` | `yes`                         | multisite | no       | **Servir Archivos:** Cuando se establece en `yes`, BunkerWeb servirá archivos estáticos desde la carpeta raíz configurada. |
-| `ROOT_FOLDER` | `/var/www/html/{server_name}` | multisite | no       | **Carpeta Raíz:** El directorio desde el cual servir archivos estáticos. Vacío significa usar la ubicación predeterminada. |
+    | Ajuste        | Valor por defecto             | Contexto  | Múltiple | Descripción                                                                                                                |
+    | ------------- | ----------------------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+    | `SERVE_FILES` | `yes`                         | multisite | no       | **Servir Archivos:** Cuando se establece en `yes`, BunkerWeb servirá archivos estáticos desde la carpeta raíz configurada. |
+    | `ROOT_FOLDER` | `/var/www/html/{server_name}` | multisite | no       | **Carpeta Raíz:** El directorio desde el cual servir archivos estáticos. Vacío significa usar la ubicación predeterminada. |
 
     !!! tip "Mejores Prácticas para la Entrega de Archivos Estáticos"
         -   **Servicio Directo:** Habilite el servicio de archivos (`SERVE_FILES=yes`) cuando BunkerWeb sea responsable de servir los archivos estáticos directamente.

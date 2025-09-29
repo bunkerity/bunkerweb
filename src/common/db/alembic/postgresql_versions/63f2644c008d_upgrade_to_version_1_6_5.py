@@ -1,11 +1,12 @@
-"""Upgrade to version 1.6.5-rc4
+"""Upgrade to version 1.6.5
 
-Revision ID: 8aa2b3429298
+Revision ID: 63f2644c008d
 Revises: 0fd76e951eac
-Create Date: 2025-09-19 14:00:36.658418
+Create Date: 2025-09-26 13:32:25.552533
 
 """
 
+from datetime import datetime, timezone
 from typing import Sequence, Union
 
 from alembic import op
@@ -13,13 +14,16 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = "8aa2b3429298"
+revision: str = "63f2644c008d"
 down_revision: Union[str, None] = "0fd76e951eac"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    current_timestamp = datetime.now(timezone.utc)
+    bind = op.get_bind()
+
     op.execute("ALTER TYPE methods_enum ADD VALUE 'api'")
 
     op.create_table(
@@ -51,29 +55,62 @@ def upgrade() -> None:
     )
     op.add_column("bw_instances", sa.Column("listen_https", sa.Boolean(), nullable=False, server_default=sa.text("false")))
     op.add_column("bw_instances", sa.Column("https_port", sa.Integer(), nullable=False, server_default=sa.text("5443")))
-    op.alter_column("bw_metadata", "pro_expire", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)
-    op.alter_column("bw_metadata", "last_pro_check", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)
-    op.alter_column("bw_metadata", "last_custom_configs_change", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)
-    op.alter_column(
-        "bw_metadata", "last_external_plugins_change", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True
+    op.add_column(
+        "bw_templates",
+        sa.Column(
+            "method",
+            sa.Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum"),
+            nullable=False,
+            server_default=sa.text("'manual'::methods_enum"),
+        ),
     )
-    op.alter_column("bw_metadata", "last_pro_plugins_change", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)
-    op.alter_column("bw_metadata", "last_instances_change", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)
-    op.alter_column("bw_plugins", "last_config_change", existing_type=postgresql.TIMESTAMP(), type_=sa.DateTime(timezone=True), existing_nullable=True)
-    op.execute("UPDATE bw_metadata SET version = '1.6.5-rc4' WHERE id = 1")
+    op.add_column(
+        "bw_templates",
+        sa.Column(
+            "creation_date",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("timezone('utc', now())"),
+        ),
+    )
+    op.add_column(
+        "bw_templates",
+        sa.Column(
+            "last_update",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.text("timezone('utc', now())"),
+        ),
+    )
+    bind.execute(
+        sa.text("UPDATE bw_instances SET listen_https = :listen_https, https_port = :https_port"),
+        {"listen_https": False, "https_port": 5443},
+    )
+    bind.execute(
+        sa.text("UPDATE bw_templates SET method = :method, creation_date = :ts, last_update = :ts"),
+        {"method": "manual", "ts": current_timestamp},
+    )
+    op.alter_column(
+        "bw_templates",
+        "plugin_id",
+        existing_type=sa.String(length=64),
+        existing_nullable=False,
+        nullable=True,
+    )
+    op.execute("UPDATE bw_metadata SET version = '1.6.5' WHERE id = 1")
 
 
 def downgrade() -> None:
-    op.create_unique_constraint(op.f("bw_ui_users_username_key"), "bw_ui_users", ["username"], postgresql_nulls_not_distinct=False)
-    op.alter_column("bw_plugins", "last_config_change", existing_type=sa.DateTime(timezone=True), type_=postgresql.TIMESTAMP(), existing_nullable=True)
-    op.alter_column("bw_metadata", "last_instances_change", existing_type=sa.DateTime(timezone=True), type_=postgresql.TIMESTAMP(), existing_nullable=True)
-    op.alter_column("bw_metadata", "last_pro_plugins_change", existing_type=sa.DateTime(timezone=True), type_=postgresql.TIMESTAMP(), existing_nullable=True)
     op.alter_column(
-        "bw_metadata", "last_external_plugins_change", existing_type=sa.DateTime(timezone=True), type_=postgresql.TIMESTAMP(), existing_nullable=True
+        "bw_templates",
+        "plugin_id",
+        existing_type=sa.String(length=64),
+        existing_nullable=True,
+        nullable=False,
     )
-    op.alter_column("bw_metadata", "last_custom_configs_change", existing_type=sa.DateTime(timezone=True), type_=postgresql.TIMESTAMP(), existing_nullable=True)
-    op.alter_column("bw_metadata", "last_pro_check", existing_type=sa.DateTime(timezone=True), type_=postgresql.TIMESTAMP(), existing_nullable=True)
-    op.alter_column("bw_metadata", "pro_expire", existing_type=sa.DateTime(timezone=True), type_=postgresql.TIMESTAMP(), existing_nullable=True)
+    op.drop_column("bw_templates", "last_update")
+    op.drop_column("bw_templates", "creation_date")
+    op.drop_column("bw_templates", "method")
     op.drop_column("bw_instances", "https_port")
     op.drop_column("bw_instances", "listen_https")
     op.drop_table("bw_api_user_permissions")

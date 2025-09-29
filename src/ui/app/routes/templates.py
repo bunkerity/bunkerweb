@@ -160,7 +160,6 @@ def template_create_page():
     templates_index = DB.get_templates()
     template_payload = {
         "id": "",
-        "plugin_id": "templates",
         "name": "",
         "settings": {},
         "steps": [],
@@ -237,14 +236,13 @@ def templates_create():
     if not template_id:
         return jsonify({"status": "error", "message": "Template id is required"}), 400
 
-    err = DB.create_template(
-        template_id,
-        plugin_id="templates",
+    create_kwargs = dict(
         name=template_data.get("name", template_id),
         settings=template_data.get("settings", {}),
         steps=template_data.get("steps", []),
         configs=template_data.get("configs", []),
     )
+    err = DB.create_template(template_id, **create_kwargs)
     if err:
         return jsonify({"status": "error", "message": err}), 400
 
@@ -276,14 +274,13 @@ def templates_update(template_id: str):
     steps = template_data.get("steps")
     configs = template_data.get("configs")
 
-    err = DB.update_template(
-        template_id,
-        plugin_id="templates",
+    update_kwargs = dict(
         name=template_data.get("name", current.get("name", template_id)),
         settings=settings if settings is not None else current.get("settings", {}),
         steps=steps if steps is not None else current.get("steps", []),
         configs=configs if configs is not None else current.get("configs", []),
     )
+    err = DB.update_template(template_id, **update_kwargs)
     if err:
         return jsonify({"status": "error", "message": err}), 400
 
