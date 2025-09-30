@@ -9,7 +9,7 @@
 
 BunkerWeb Cloud will be the easiest way to get started with BunkerWeb. It offers you a fully managed BunkerWeb service with no hassle. Think of it as a BunkerWeb-as-a-Service!
 
-Try our [BunkerWeb Cloud offer](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) and get access to:
+Order your [BunkerWeb Cloud instance](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) and get access to:
 
 - A fully managed BunkerWeb instance hosted in our cloud
 - All BunkerWeb features, including PRO ones
