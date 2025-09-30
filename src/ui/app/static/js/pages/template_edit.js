@@ -1347,14 +1347,6 @@ const createSettingRow = ({
   valueInput.type = "text";
   valueInput.className = "form-control setting-value";
   valueInput.value = value;
-  valueInput.placeholder = translate(
-    "template.editor.placeholder_setting_value",
-    "Default value",
-  );
-  valueInput.setAttribute(
-    "data-i18n-placeholder",
-    "template.editor.placeholder_setting_value",
-  );
   valueInput.id = valueId;
   valueCol.append(valueLabel, valueInput);
 
