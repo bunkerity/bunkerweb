@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import getenv, sep
+from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, Popen
@@ -45,12 +45,13 @@ try:
 
     JOB = Job(LOGGER, __file__)
 
-    cmd_env = {
-        "PATH": getenv("PATH", ""),
-        "PYTHONPATH": getenv("PYTHONPATH", ""),
-        "RELOAD_MIN_TIMEOUT": getenv("RELOAD_MIN_TIMEOUT", "5"),
-        "DISABLE_CONFIGURATION_TESTING": getenv("DISABLE_CONFIGURATION_TESTING", "no").lower(),
-    }
+    cmd_env = environ.copy()
+
+    db_config = JOB.db.get_config()
+    for key in db_config:
+        if key in cmd_env:
+            del cmd_env[key]
+
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
     if getenv("DATABASE_URI", ""):
         cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")

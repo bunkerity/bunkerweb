@@ -42,13 +42,20 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-# Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
+WORKDIR /tmp
+
+COPY src/deps/package.json package.json
+COPY src/deps/package-lock.json package-lock.json
+
+RUN apk add --no-cache nodejs npm parallel && \
+  cd /tmp && \
+  npm ci --ignore-scripts
+
+# Minify HTML files
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
-  apk add --no-cache nodejs npm parallel && \
-  npm install -g html-minifier-terser && \
-  find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
-  parallel 'html-minifier-terser \
+  find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
+  parallel 'npx html-minifier-terser \
   --collapse-whitespace \
   --remove-comments \
   --remove-optional-tags \

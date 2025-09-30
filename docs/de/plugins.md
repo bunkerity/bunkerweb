@@ -343,6 +343,7 @@ Hier sind die Details der Felder:
 |   `stream`    |      ja       | string | Informationen zur Stream-Unterstützung: `no`, `yes` oder `partial`.                                                                          |
 |  `settings`   |      ja       | dict   | Liste der Einstellungen Ihres Plugins.                                                                                                       |
 |    `jobs`     |     nein      | list   | Liste der Jobs Ihres Plugins.                                                                                                                |
+|    `bwcli`    |     nein      |  dict  | Ordnet CLI-Befehlsnamen den in dem 'bwcli'-Verzeichnis des Plugins gespeicherten Dateien zu, um CLI-Plugins verfügbar zu machen.      |
 
 Jede Einstellung hat die folgenden Felder (der Schlüssel ist die ID der in einer Konfiguration verwendeten Einstellungen):
 
@@ -365,6 +366,24 @@ Jeder Job hat die folgenden Felder:
 | `name`  |      ja       | string | Name des Jobs.                                                                                                                                      |
 | `file`  |      ja       | string | Name der Datei im Jobs-Ordner.                                                                                                                      |
 | `every` |      ja       | string | Häufigkeit der Job-Planung: `minute`, `hour`, `day`, `week` oder `once` (keine Häufigkeit, nur einmal vor der (Neu-)Generierung der Konfiguration). |
+
+### CLI-Befehle
+
+Plugins können das 'bwcli'-Tool mit benutzerdefinierten Befehlen erweitern, die unter 'bwcli plugin <plugin_id> ...' ausgeführt werden:
+
+1. Fügen Sie ein 'bwcli'-Verzeichnis in Ihrem Plugin hinzu und legen Sie eine Datei pro Befehl ab (zum Beispiel 'bwcli/list.py'). Die CLI fügt den Plugin-Pfad zu 'sys.path' hinzu, bevor die Datei ausgeführt wird.
+2. Deklarieren Sie die Befehle im optionalen 'bwcli'-Abschnitt von 'plugin.json', indem Sie jeden Befehlsnamen seinem ausführbaren Dateinamen zuordnen.
+
+```json
+{
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py"
+  }
+}
+```
+
+Der Scheduler stellt die deklarierten Befehle automatisch bereit, sobald das Plugin installiert ist. Core-Plugins wie 'backup' in 'src/common/core/backup' folgen demselben Muster.
 
 ### Konfigurationen
 

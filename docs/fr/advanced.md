@@ -2070,6 +2070,52 @@ Par défaut, BunkerWeb n'écoutera que les adresses IPv4 et n'utilisera pas IPv6
     systemctl start bunkerweb
     ```
 
+### Meilleures pratiques de journalisation Docker
+
+Lors de l'utilisation de Docker, il est important de gérer les journaux des conteneurs pour éviter qu'ils ne consomment un espace disque excessif. Par défaut, Docker utilise le pilote de journalisation `json-file`, ce qui peut entraîner des fichiers journaux très volumineux s'il n'est pas configuré.
+
+Pour éviter cela, vous pouvez configurer la rotation des journaux. Cela peut être fait pour des services spécifiques dans votre fichier `docker-compose.yml`, ou globalement pour le démon Docker.
+
+**Configuration par service**
+
+Vous pouvez configurer le pilote de journalisation pour vos services dans votre fichier `docker-compose.yml` afin de faire pivoter automatiquement les journaux. Voici un exemple qui conserve jusqu'à 10 fichiers journaux de 20 Mo chacun :
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    ...
+```
+
+Cette configuration garantit la rotation des journaux, les empêchant de remplir votre disque. Vous pouvez l'appliquer à n'importe quel service de votre configuration Docker Compose.
+
+**Configuration globale (daemon.json)**
+
+Si vous souhaitez appliquer ces paramètres de journalisation à tous les conteneurs de l'hôte par défaut, vous pouvez configurer le démon Docker en modifiant (ou en créant) le fichier `/etc/docker/daemon.json` :
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "10"
+  }
+}
+```
+
+Après avoir modifié `daemon.json`, vous devez redémarrer le démon Docker pour que les modifications prennent effet :
+
+```shell
+sudo systemctl restart docker
+```
+
+Cette configuration globale sera héritée par tous les conteneurs. Cependant, toute configuration de journalisation définie par service dans un fichier `docker-compose.yml` remplacera les paramètres globaux dans `daemon.json`.
+
 ## Réglage de la sécurité
 
 BunkerWeb offre de nombreuses fonctionnalités de sécurité que vous pouvez configurer avec les [fonctionnalités](features.md). Même si les valeurs par défaut des paramètres assurent une "sécurité par défaut" minimale, nous vous recommandons vivement de les régler. Ce faisant, vous serez en mesure de vous assurer du niveau de sécurité de votre choix, mais aussi de gérer les faux positifs.

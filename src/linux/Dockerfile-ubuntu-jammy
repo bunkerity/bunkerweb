@@ -67,35 +67,47 @@ COPY src/VERSION VERSION
 COPY src/ui ui
 COPY src/api api
 
-# Minify JS files (can be skipped with SKIP_MINIFY_JS=yes)
+WORKDIR /tmp
+
+COPY src/deps/package.json package.json
+COPY src/deps/package-lock.json package-lock.json
+
+ARG NODE_MAJOR=22
+RUN set -eux; \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg; \
+    chmod 644 /usr/share/keyrings/nodesource.gpg; \
+    arch="$(dpkg --print-architecture)"; \
+    echo "deb [arch=${arch} signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_MAJOR}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends nodejs parallel; \
+    node --version; npm --version; \
+    cd /tmp; npm ci --ignore-scripts; \
+    apt-get purge -y --auto-remove gnupg || true; \
+    rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nodesource.list /usr/share/keyrings/nodesource.gpg
+
+# Minify JS files
 ARG SKIP_MINIFY_JS=no
 RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
-    apt-get install -y nodejs npm parallel && \
-    npm install -g uglify-js && \
-    find ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
-    | parallel -0 --no-run-if-empty 'uglifyjs {} --compress --mangle --output {}'; \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+    | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
     else \
     echo "Skipping JS minification"; \
     fi
 
-# Minify CSS files (can be skipped with SKIP_MINIFY_CSS=yes)
+# Minify CSS files
 ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
-    apt-get install -y nodejs npm parallel && \
-    npm install -g clean-css-cli && \
-    find ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
-    | parallel -0 --no-run-if-empty 'cleancss -O2 -o {} {}'; \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+    | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
     else \
     echo "Skipping CSS minification"; \
     fi
 
-# Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
+# Minify HTML files
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
-    apt-get install -y nodejs npm parallel && \
-    npm install -g html-minifier-terser && \
-    find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
-    parallel 'html-minifier-terser \
+    find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
+    parallel 'npx html-minifier-terser \
     --collapse-whitespace \
     --remove-comments \
     --remove-optional-tags \

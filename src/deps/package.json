@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "cssnano": "7.1.1",
+    "html-minifier-terser": "7.2.0",
+    "postcss": "8.5.6",
+    "postcss-cli": "^11.0.1",
+    "uglify-js": "3.19.3"
+  }
+}
