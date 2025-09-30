@@ -2070,6 +2070,52 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     systemctl start bunkerweb
     ```
 
+### Docker logging best practices
+
+When using Docker, it's important to manage container logs to prevent them from consuming excessive disk space. By default, Docker uses the `json-file` logging driver, which can lead to very large log files if left unconfigured.
+
+To avoid this, you can configure log rotation. This can be done for specific services in your `docker-compose.yml` file, or globally for the Docker daemon.
+
+**Per-service configuration**
+
+You can configure the logging driver for your services in your `docker-compose.yml` file to automatically rotate the logs. Here is an example that keeps up to 10 log files of 20MB each:
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    ...
+```
+
+This configuration ensures that logs are rotated, preventing them from filling up your disk. You can apply this to any service in your Docker Compose setup.
+
+**Global configuration (daemon.json)**
+
+If you want to apply these logging settings to all containers on the host by default, you can configure the Docker daemon by editing (or creating) the `/etc/docker/daemon.json` file:
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "10"
+  }
+}
+```
+
+After modifying `daemon.json`, you need to restart the Docker daemon for the changes to take effect:
+
+```shell
+sudo systemctl restart docker
+```
+
+This global configuration will be inherited by all containers. However, any logging configuration defined on a per-service basis in a `docker-compose.yml` file will override the global settings in `daemon.json`.
+
 ## Security tuning
 
 BunkerWeb offers many security features that you can configure with [features](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.

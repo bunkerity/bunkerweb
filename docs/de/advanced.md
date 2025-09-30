@@ -2070,6 +2070,52 @@ Standardmäßig lauscht BunkerWeb nur auf IPv4-Adressen und verwendet kein IPv6 
     systemctl start bunkerweb
     ```
 
+### Docker Logging Best Practices
+
+Bei der Verwendung von Docker ist es wichtig, die Container-Protokolle zu verwalten, um zu verhindern, dass sie übermäßig viel Speicherplatz beanspruchen. Standardmäßig verwendet Docker den `json-file`-Protokollierungstreiber, der bei fehlender Konfiguration zu sehr großen Protokolldateien führen kann.
+
+Um dies zu vermeiden, können Sie die Protokollrotation konfigurieren. Dies kann für bestimmte Dienste in Ihrer `docker-compose.yml`-Datei oder global für den Docker-Daemon erfolgen.
+
+**Konfiguration pro Dienst**
+
+Sie können den Protokollierungstreiber für Ihre Dienste in Ihrer `docker-compose.yml`-Datei so konfigurieren, dass die Protokolle automatisch rotiert werden. Hier ist ein Beispiel, das bis zu 10 Protokolldateien mit jeweils 20 MB aufbewahrt:
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    ...
+```
+
+Diese Konfiguration stellt sicher, dass die Protokolle rotiert werden, und verhindert, dass sie Ihre Festplatte füllen. Sie können dies auf jeden Dienst in Ihrer Docker Compose-Einrichtung anwenden.
+
+**Globale Konfiguration (daemon.json)**
+
+Wenn Sie diese Protokollierungseinstellungen standardmäßig auf alle Container auf dem Host anwenden möchten, können Sie den Docker-Daemon konfigurieren, indem Sie die Datei `/etc/docker/daemon.json` bearbeiten (oder erstellen):
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "10"
+  }
+}
+```
+
+Nachdem Sie `daemon.json` geändert haben, müssen Sie den Docker-Daemon neu starten, damit die Änderungen wirksam werden:
+
+```shell
+sudo systemctl restart docker
+```
+
+Diese globale Konfiguration wird von allen Containern übernommen. Jede pro Dienst in einer `docker-compose.yml`-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in `daemon.json`.
+
 ## Sicherheits-Tuning
 
 BunkerWeb bietet viele Sicherheitsfunktionen, die Sie mit [Features](features.md) konfigurieren können. Auch wenn die Standardwerte der Einstellungen eine minimale "Sicherheit von Haus aus" gewährleisten, empfehlen wir dringend, sie anzupassen. Dadurch können Sie das Sicherheitsniveau Ihrer Wahl sicherstellen und auch Fehlalarme verwalten.

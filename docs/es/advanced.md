@@ -2070,6 +2070,52 @@ Por defecto, BunkerWeb solo escuchará en direcciones IPv4 y no usará IPv6 para
     systemctl start bunkerweb
     ```
 
+### Buenas prácticas de registro de Docker
+
+Cuando se utiliza Docker, es importante gestionar los registros de los contenedores para evitar que consuman un espacio excesivo en el disco. Por defecto, Docker utiliza el controlador de registro `json-file`, lo que puede dar lugar a archivos de registro muy grandes si no se configura.
+
+Para evitar esto, puede configurar la rotación de registros. Esto se puede hacer para servicios específicos en su archivo `docker-compose.yml`, o globalmente para el demonio de Docker.
+
+**Configuración por servicio**
+
+Puede configurar el controlador de registro para sus servicios en su archivo `docker-compose.yml` para rotar automáticamente los registros. Aquí hay un ejemplo que mantiene hasta 10 archivos de registro de 20 MB cada uno:
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    ...
+```
+
+Esta configuración asegura que los registros se roten, evitando que llenen su disco. Puede aplicar esto a cualquier servicio en su configuración de Docker Compose.
+
+**Configuración global (daemon.json)**
+
+Si desea aplicar esta configuración de registro a todos los contenedores en el host por defecto, puede configurar el demonio de Docker editando (o creando) el archivo `/etc/docker/daemon.json`:
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "10"
+  }
+}
+```
+
+Después de modificar `daemon.json`, debe reiniciar el demonio de Docker para que los cambios surtan efecto:
+
+```shell
+sudo systemctl restart docker
+```
+
+Esta configuración global será heredada por todos los contenedores. Sin embargo, cualquier configuración de registro definida por servicio en un archivo `docker-compose.yml` anulará la configuración global en `daemon.json`.
+
 ## Ajuste de seguridad
 
 BunkerWeb ofrece muchas características de seguridad que puedes configurar con [características](features.md). Aunque los valores predeterminados de las configuraciones aseguran una "seguridad por defecto" mínima, te recomendamos encarecidamente que los ajustes. Al hacerlo, podrás asegurar el nivel de seguridad de tu elección y también gestionar los falsos positivos.
