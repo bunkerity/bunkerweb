@@ -267,6 +267,7 @@ plugin /
          blueprints / <blueprint_file(s)>
               templates / <blueprint_template(s)>
     jobs / my-job.py
+    bwcli / my-command.py
     templates / my-template.json
           my-template / configs / conf_type / conf_name.conf
     plugin.lua
@@ -285,6 +286,8 @@ plugin /
   This folder is used to override existing Flask blueprints or create new ones. Inside, you can include blueprint files and an optional **templates** subfolder for blueprint-specific templates.
 
 - **jobs py file** : Custom Python files executed as jobs by the scheduler.
+
+- **bwcli folder** : Python (or executable) files that extend the `bwcli` CLI through custom commands.
 
 - **my-template.json** : Add [custom templates](concepts.md#templates) to override the default values of settings and apply custom configurations easily.
 
@@ -344,6 +347,7 @@ Here are the details of the fields :
 |   `stream`    |    yes    | string | Information about stream support : `no`, `yes` or `partial`.                                                              |
 |  `settings`   |    yes    |  dict  | List of the settings of your plugin.                                                                                      |
 |    `jobs`     |    no     |  list  | List of the jobs of your plugin.                                                                                          |
+|    `bwcli`    |    no     |  dict  | Map CLI command names to files stored in the plugin's `bwcli` directory to expose CLI plugins.                            |
 
 Each setting has the following fields (the key is the ID of the settings used in a configuration) :
 
@@ -366,6 +370,24 @@ Each job has the following fields :
 | `name`  |    yes    | string | Name of the job.                                                                                                                        |
 | `file`  |    yes    | string | Name of the file inside the jobs folder.                                                                                                |
 | `every` |    yes    | string | Job scheduling frequency : `minute`, `hour`, `day`, `week` or `once` (no frequency, only once before (re)generating the configuration). |
+
+### CLI commands
+
+Plugins can extend the `bwcli` tool with custom commands that run under `bwcli plugin <plugin_id> ...`:
+
+1. Add a `bwcli` directory in your plugin and drop one file per command (for example `bwcli/list.py`). The CLI adds the plugin path to `sys.path` before executing the file.
+2. Declare the commands in the optional `bwcli` section of `plugin.json`, mapping each command name to its executable file name.
+
+```json
+{
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py"
+  }
+}
+```
+
+The scheduler automatically exposes the declared commands once the plugin is installed. Core plugins, such as `backup` in `src/common/core/backup`, follow the same pattern.
 
 ### Configurations
 

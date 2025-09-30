@@ -344,6 +344,7 @@ Aquí están los detalles de los campos:
 |   `stream`    |     sí      | cadena | Información sobre el soporte de stream: `no`, `yes` o `partial`.                                                                    |
 |  `settings`   |     sí      |  dict  | Lista de las configuraciones de tu plugin.                                                                                          |
 |    `jobs`     |     no      | lista  | Lista de los trabajos de tu plugin.                                                                                                 |
+|    `bwcli`    |     no      |  dict  | Mapea los nombres de los comandos de la CLI a los archivos almacenados en el directorio 'bwcli' del plugin para exponer los plugins de la CLI. |
 
 Cada configuración tiene los siguientes campos (la clave es el ID de las configuraciones utilizadas en una configuración):
 
@@ -366,6 +367,24 @@ Cada trabajo tiene los siguientes campos:
 | `name`  |     sí      | cadena | Nombre del trabajo.                                                                                                                                    |
 | `file`  |     sí      | cadena | Nombre del archivo dentro de la carpeta de trabajos.                                                                                                   |
 | `every` |     sí      | cadena | Frecuencia de programación del trabajo: `minute`, `hour`, `day`, `week` u `once` (sin frecuencia, solo una vez antes de (re)generar la configuración). |
+
+### Comandos de CLI
+
+Los plugins pueden extender la herramienta 'bwcli' con comandos personalizados que se ejecutan bajo 'bwcli plugin <plugin_id> ...':
+
+1. Agregue un directorio 'bwcli' en su plugin y coloque un archivo por comando (por ejemplo, 'bwcli/list.py'). La CLI agrega la ruta del plugin a 'sys.path' antes de ejecutar el archivo.
+2. Declare los comandos en la sección opcional 'bwcli' de 'plugin.json', mapeando cada nombre de comando a su nombre de archivo ejecutable.
+
+```json
+{
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py"
+  }
+}
+```
+
+El planificador expone automáticamente los comandos declarados una vez que se instala el plugin. Los plugins principales, como 'backup' en 'src/common/core/backup', siguen el mismo patrón.
 
 ### Configuraciones
 

@@ -344,6 +344,7 @@ cd myplugin
 |   `stream`    |  是   | 字符串 | 关于流支持的信息：`no`、`yes` 或 `partial`。                                |
 |  `settings`   |  是   |  字典  | 您的插件的设置列表。                                                        |
 |    `jobs`     |  否   |  列表  | 您的插件的作业列表。                                                        |
+|    `bwcli`    |  否   |  字典  | 将 CLI 命令名称映射到存储在插件 'bwcli' 目录中的文件，以公开 CLI 插件。 |
 
 每个设置都有以下字段（键是在配置中使用的设置的 ID）：
 
@@ -366,6 +367,24 @@ cd myplugin
 | `name`  |  是   | 字符串 | 作业的名称。                                                                                      |
 | `file`  |  是   | 字符串 | 作业文件夹内的文件名。                                                                            |
 | `every` |  是   | 字符串 | 作业调度频率：`minute`、`hour`、`day`、`week` 或 `once`（无频率，仅在（重新）生成配置之前一次）。 |
+
+### CLI 命令
+
+插件可以使用在 `bwcli plugin <plugin_id> ...` 下运行的自定义命令扩展 `bwcli` 工具：
+
+1. 在您的插件中添加一个 `bwcli` 目录，并为每个命令放置一个文件（例如 `bwcli/list.py`）。CLI 在执行文件之前将插件路径添加到 `sys.path`。
+2. 在 `plugin.json` 的可选 `bwcli` 部分中声明命令，将每个命令名称映射到其可执行文件名。
+
+```json
+{
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py"
+  }
+}
+```
+
+一旦安装了插件，调度程序就会自动公开声明的命令。核心插件（例如 `src/common/core/backup` 中的 `backup`）也遵循相同的模式。
 
 ### 配置
 

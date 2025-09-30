@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.5-rc4 - ????/??/??
+## v1.6.5 - ????/??/??
 
 - [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
 - [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes
@@ -15,6 +15,7 @@
 - [UI] Add new `Template` column in the services page to display the template a service is based on (if any) and allow filtering by template.
 - [MISC] Update default value for Permissions-Policy header to include additional features and remove the deprecated ones
 - [DOCS] Add multi-language support to the documentation, including French, German, Spanish and Chinese (Mandarin) translations.
+- [DOCS] Add documentation about the possibility to extend bwcli via plugins commands
 - [DEPS] Updated luajit2 version to v2.1-20250826
 - [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the `Let's Encrypt` plugin.
 
