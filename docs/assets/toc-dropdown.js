@@ -81,6 +81,17 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  function expandFirstDropdownIfNeeded() {
+    if (window.location.hash) return; // Respect explicit anchors
+    if (window.scrollY !== 0) return; // Only expand when the page loads at the top
+
+    const firstDropdown = dropdowns[0];
+    if (firstDropdown && !firstDropdown.open) {
+      firstDropdown.open = true;
+    }
+  }
+
   window.addEventListener("hashchange", updateActiveLink);
   updateActiveLink(); // Set the correct state on initial page load
+  expandFirstDropdownIfNeeded(); // Ensure the first dropdown is open when landing at the top
 });
