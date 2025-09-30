@@ -33,7 +33,7 @@ from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, a
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
-from jobs import Job  # type: ignore
+from jobs import Job, _write_atomic  # type: ignore
 from API import API  # type: ignore
 
 from ApiCaller import ApiCaller  # type: ignore
@@ -274,7 +274,7 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                         f"{Path(custom_config['name']).stem}.conf",
                     )
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
-                    tmp_path.write_bytes(custom_config["data"])
+                    _write_atomic(tmp_path, custom_config["data"])
                     desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
                     if tmp_path.stat().st_mode & 0o777 != desired_perms:
                         tmp_path.chmod(desired_perms)
@@ -402,8 +402,7 @@ def generate_caches():
                         LOGGER.error(f"Error extracting tar file: {e}")
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
-            cache_path.parent.mkdir(parents=True, exist_ok=True)
-            cache_path.write_bytes(job_cache_file["data"])
+            _write_atomic(cache_path, job_cache_file["data"])
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
             if cache_path.stat().st_mode & 0o777 != desired_perms:
                 cache_path.chmod(desired_perms)

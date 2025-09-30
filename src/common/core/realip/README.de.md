@@ -45,8 +45,8 @@ Mit `REAL_IP_RECURSIVE` wird, wenn der Header mehrere IPs enthält, die erste IP
 
 === "Basis (hinter Reverse Proxy)"
 
-```yaml
-USE_REAL_IP: "yes"
-REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
-REAL_IP_HEADER: "X-Forwarded-For"
-```
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
+    REAL_IP_HEADER: "X-Forwarded-For"
+    ```

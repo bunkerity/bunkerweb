@@ -68,7 +68,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | ------------------ | ----------------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`             | global   | Non      | **Activer l’API :** Active l’API pour piloter BunkerWeb.                                                        |
     | `API_HTTP_PORT`    | `5000`            | global   | Non      | **Port de l’API :** Numéro de port d’écoute de l’API.                                                           |
-    | `API_HTTPS_PORT`   | `6000`            | global   | Non      | **Port HTTPS de l’API :** Numéro de port d’écoute (TLS) de l’API.                                               |
+    | `API_HTTPS_PORT`   | `5443`            | global   | Non      | **Port HTTPS de l’API :** Numéro de port d’écoute (TLS) de l’API.                                               |
     | `API_LISTEN_HTTP`  | `yes`             | global   | Non      | **Écoute HTTP de l’API :** Active l’écoute HTTP pour l’API.                                                     |
     | `API_LISTEN_HTTPS` | `no`              | global   | Non      | **Écoute HTTPS de l’API :** Active l’écoute HTTPS (TLS) pour l’API.                                             |
     | `API_LISTEN_IP`    | `0.0.0.0`         | global   | Non      | **IP d’écoute de l’API :** Adresse IP d’écoute de l’API.                                                        |
@@ -76,7 +76,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     | `API_WHITELIST_IP` | `127.0.0.0/8`     | global   | Non      | **Liste blanche API :** Liste IP/réseaux autorisés à contacter l’API.                                           |
     | `API_TOKEN`        |                   | global   | Non      | **Jeton d’accès API (optionnel) :** Si défini, chaque requête API doit inclure `Authorization: Bearer <token>`. |
 
-    Remarque : pour des raisons d’amorçage, si vous activez `API_TOKEN`, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête `Authorization` quand `API_TOKEN` est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant `API_LISTEN_HTTPS=yes` (port : `API_HTTPS_PORT`, `6000` par défaut).
+    Remarque : pour des raisons d’amorçage, si vous activez `API_TOKEN`, vous devez le définir dans l’environnement à la fois de l’instance BunkerWeb et du Scheduler. Le Scheduler ajoute automatiquement l’en-tête `Authorization` quand `API_TOKEN` est présent dans son environnement. S’il n’est pas défini, aucun en-tête n’est envoyé et BunkerWeb n’applique pas l’authentification par jeton. Vous pouvez exposer l’API en HTTPS en définissant `API_LISTEN_HTTPS=yes` (port : `API_HTTPS_PORT`, `5443` par défaut).
 
     Exemple de test avec curl (remplacez le jeton et l’hôte) :
 
@@ -88,7 +88,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          --insecure \
-         https://<bunkerweb-host>:6000/ping
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "Paramètres réseau et ports"
@@ -208,7 +208,7 @@ Passer en mode `detect` aide à identifier et corriger les faux positifs sans im
     USE_UDP: "no"
     ```
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -247,10 +247,10 @@ Suivez ces étapes pour activer et configurer Antibot :
 4. Important : assurez‑vous que `ANTIBOT_URI` est une URL unique de votre site et qu’elle n’est pas utilisée ailleurs.
 
 !!! important "À propos du paramètre `ANTIBOT_URI`"
-Assurez‑vous que `ANTIBOT_URI` est une URL unique de votre site et qu’elle n’est pas utilisée ailleurs.
+    Assurez‑vous que `ANTIBOT_URI` est une URL unique de votre site et qu’elle n’est pas utilisée ailleurs.
 
 !!! warning "Sessions en environnement cluster"
-La fonction antibot utilise des cookies pour suivre si un utilisateur a complété le défi. Si vous exécutez BunkerWeb en cluster (plusieurs instances), vous devez configurer correctement la gestion des sessions : définissez `SESSIONS_SECRET` et `SESSIONS_NAME` avec les mêmes valeurs sur toutes les instances BunkerWeb. Sinon, les utilisateurs pourront être invités à répéter le défi. Plus d’informations sur la configuration des sessions [ici](#sessions).
+    La fonction antibot utilise des cookies pour suivre si un utilisateur a complété le défi. Si vous exécutez BunkerWeb en cluster (plusieurs instances), vous devez configurer correctement la gestion des sessions : définissez `SESSIONS_SECRET` et `SESSIONS_NAME` avec les mêmes valeurs sur toutes les instances BunkerWeb. Sinon, les utilisateurs pourront être invités à répéter le défi. Plus d’informations sur la configuration des sessions [ici](#sessions).
 
 ### Paramètres communs
 
@@ -434,39 +434,39 @@ Exemples :
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | non      | Clé secrète mCaptcha.                                               |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | non      | Domaine à utiliser pour mCaptcha.                                   |
 
-Reportez‑vous aux Paramètres communs pour les options supplémentaires.
+    Reportez‑vous aux Paramètres communs pour les options supplémentaires.
 
 ### Exemples de configuration
 
 === "Défi Cookie"
 
-```yaml
-USE_ANTIBOT: "cookie"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "cookie"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "Défi JavaScript"
 
-```yaml
-USE_ANTIBOT: "javascript"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "javascript"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "Défi Captcha"
 
-```yaml
-USE_ANTIBOT: "captcha"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-ANTIBOT_CAPTCHA_ALPHABET: "23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-```
+    ```yaml
+    USE_ANTIBOT: "captcha"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ANTIBOT_CAPTCHA_ALPHABET: "23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    ```
 
-Remarque : l’exemple ci‑dessus utilise les chiffres 2‑9 et toutes les lettres, fréquemment utilisés pour les CAPTCHA. Vous pouvez personnaliser l’alphabet pour inclure des caractères spéciaux si nécessaire.
+    Remarque : l’exemple ci‑dessus utilise les chiffres 2‑9 et toutes les lettres, fréquemment utilisés pour les CAPTCHA. Vous pouvez personnaliser l’alphabet pour inclure des caractères spéciaux si nécessaire.
 
 === "Défi reCAPTCHA Classique"
 
@@ -504,37 +504,37 @@ Remarque : l’exemple ci‑dessus utilise les chiffres 2‑9 et toutes les let
 
 === "Défi hCaptcha"
 
-```yaml
-USE_ANTIBOT: "hcaptcha"
-ANTIBOT_HCAPTCHA_SITEKEY: "your-site-key"
-ANTIBOT_HCAPTCHA_SECRET: "your-secret-key"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "hcaptcha"
+    ANTIBOT_HCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_HCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "Défi Turnstile"
 
-```yaml
-USE_ANTIBOT: "turnstile"
-ANTIBOT_TURNSTILE_SITEKEY: "your-site-key"
-ANTIBOT_TURNSTILE_SECRET: "your-secret-key"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "turnstile"
+    ANTIBOT_TURNSTILE_SITEKEY: "your-site-key"
+    ANTIBOT_TURNSTILE_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "Défi mCaptcha"
 
-```yaml
-USE_ANTIBOT: "mcaptcha"
-ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
-ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
-ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "mcaptcha"
+    ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 ## Auth basic
 
@@ -567,52 +567,52 @@ Comment ça marche :
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l’invite d’authentification.          |
 
 !!! warning "Sécurité"
-Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
+    Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
 
 !!! tip "Plusieurs comptes"
-Définissez des paires `AUTH_BASIC_USER[_n]`/`AUTH_BASIC_PASSWORD[_n]` pour gérer plusieurs utilisateurs.
+    Définissez des paires `AUTH_BASIC_USER[_n]`/`AUTH_BASIC_PASSWORD[_n]` pour gérer plusieurs utilisateurs.
 
 ### Exemples
 
 === "Tout le site"
 
-```yaml
-USE_AUTH_BASIC: "yes"
-AUTH_BASIC_LOCATION: "sitewide"
-AUTH_BASIC_USER: "admin"
-AUTH_BASIC_PASSWORD: "secure_password"
-AUTH_BASIC_TEXT: "Admin Access Only"
-```
+    ```yaml
+    USE_AUTH_BASIC: "yes"
+    AUTH_BASIC_LOCATION: "sitewide"
+    AUTH_BASIC_USER: "admin"
+    AUTH_BASIC_PASSWORD: "secure_password"
+    AUTH_BASIC_TEXT: "Admin Access Only"
+    ```
 
 === "Zone spécifique"
 
-```yaml
-USE_AUTH_BASIC: "yes"
-AUTH_BASIC_LOCATION: "/admin/"
-AUTH_BASIC_USER: "admin"
-AUTH_BASIC_PASSWORD: "secure_password"
-AUTH_BASIC_TEXT: "Admin Access Only"
-```
+    ```yaml
+    USE_AUTH_BASIC: "yes"
+    AUTH_BASIC_LOCATION: "/admin/"
+    AUTH_BASIC_USER: "admin"
+    AUTH_BASIC_PASSWORD: "secure_password"
+    AUTH_BASIC_TEXT: "Admin Access Only"
+    ```
 
 === "Utilisateurs multiples"
 
-```yaml
-USE_AUTH_BASIC: "yes"
-AUTH_BASIC_LOCATION: "sitewide"
-AUTH_BASIC_TEXT: "Staff Area"
+    ```yaml
+    USE_AUTH_BASIC: "yes"
+    AUTH_BASIC_LOCATION: "sitewide"
+    AUTH_BASIC_TEXT: "Staff Area"
 
-# Premier utilisateur
-AUTH_BASIC_USER: "admin"
-AUTH_BASIC_PASSWORD: "admin_password"
+    # Premier utilisateur
+    AUTH_BASIC_USER: "admin"
+    AUTH_BASIC_PASSWORD: "admin_password"
 
-# Deuxième utilisateur
-AUTH_BASIC_USER_2: "editor"
-AUTH_BASIC_PASSWORD_2: "editor_password"
+    # Deuxième utilisateur
+    AUTH_BASIC_USER_2: "editor"
+    AUTH_BASIC_PASSWORD_2: "editor_password"
 
-# Troisième utilisateur
-AUTH_BASIC_USER_3: "viewer"
-AUTH_BASIC_PASSWORD_3: "viewer_password"
-```
+    # Troisième utilisateur
+    AUTH_BASIC_USER_3: "viewer"
+    AUTH_BASIC_PASSWORD_3: "viewer_password"
+    ```
 
 ## Backup
 
@@ -656,41 +656,41 @@ bwcli plugin backup restore /chemin/backup-sqlite-YYYY-MM-DD_HH-MM-SS.zip   # Re
 ```
 
 !!! tip "Sécurité"
-Avant toute restauration, un backup de l’état courant est créé automatiquement dans un emplacement temporaire.
+    Avant toute restauration, un backup de l’état courant est créé automatiquement dans un emplacement temporaire.
 
 !!! warning "Compatibilité bases"
-Supporte SQLite, MySQL/MariaDB, PostgreSQL. Oracle non pris en charge pour sauvegarde/restauration.
+    Supporte SQLite, MySQL/MariaDB, PostgreSQL. Oracle non pris en charge pour sauvegarde/restauration.
 
 ### Exemples
 
 === "Quotidien, rétention 7 jours" (défaut)
 
-```yaml
-USE_BACKUP: "yes"
-BACKUP_SCHEDULE: "daily"
-BACKUP_ROTATION: "7"
-BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
-```
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "daily"
+    BACKUP_ROTATION: "7"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
 
 === "Hebdomadaire, rétention étendue"
 
-```yaml
-USE_BACKUP: "yes"
-BACKUP_SCHEDULE: "weekly"
-BACKUP_ROTATION: "12"
-BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
-```
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "weekly"
+    BACKUP_ROTATION: "12"
+    BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
+    ```
 
 === "Mensuel, emplacement personnalisé"
 
-```yaml
-USE_BACKUP: "yes"
-BACKUP_SCHEDULE: "monthly"
-BACKUP_ROTATION: "24"
-BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
-```
+    ```yaml
+    USE_BACKUP: "yes"
+    BACKUP_SCHEDULE: "monthly"
+    BACKUP_ROTATION: "24"
+    BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
+    ```
 
-## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :white_check_mark:
@@ -735,7 +735,7 @@ Comment ça marche :
 5. Portée : `BAD_BEHAVIOR_BAN_SCOPE` (`service` ou `global`).
 
 !!! tip "Mode stream"
-En mode stream, seul `444` est considéré comme « mauvais ».
+    En mode stream, seul `444` est considéré comme « mauvais ».
 
 ### Paramètres
 
@@ -749,53 +749,53 @@ En mode stream, seul `444` est considéré comme « mauvais ».
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). |
 
 !!! warning "Faux positifs"
-Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.
+    Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.
 
 ### Exemples
 
 === "Défaut"
 
-```yaml
-USE_BAD_BEHAVIOR: "yes"
-BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"
-BAD_BEHAVIOR_THRESHOLD: "10"
-BAD_BEHAVIOR_COUNT_TIME: "60"
-BAD_BEHAVIOR_BAN_TIME: "86400"
-BAD_BEHAVIOR_BAN_SCOPE: "service"
-```
+    ```yaml
+    USE_BAD_BEHAVIOR: "yes"
+    BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"
+    BAD_BEHAVIOR_THRESHOLD: "10"
+    BAD_BEHAVIOR_COUNT_TIME: "60"
+    BAD_BEHAVIOR_BAN_TIME: "86400"
+    BAD_BEHAVIOR_BAN_SCOPE: "service"
+    ```
 
 === "Strict"
 
-```yaml
-USE_BAD_BEHAVIOR: "yes"
-BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444 500 502 503"
-BAD_BEHAVIOR_THRESHOLD: "5"
-BAD_BEHAVIOR_COUNT_TIME: "120"
-BAD_BEHAVIOR_BAN_TIME: "604800"
-BAD_BEHAVIOR_BAN_SCOPE: "global"
-```
+    ```yaml
+    USE_BAD_BEHAVIOR: "yes"
+    BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444 500 502 503"
+    BAD_BEHAVIOR_THRESHOLD: "5"
+    BAD_BEHAVIOR_COUNT_TIME: "120"
+    BAD_BEHAVIOR_BAN_TIME: "604800"
+    BAD_BEHAVIOR_BAN_SCOPE: "global"
+    ```
 
 === "Tolérant"
 
-```yaml
-USE_BAD_BEHAVIOR: "yes"
-BAD_BEHAVIOR_STATUS_CODES: "401 403 429"
-BAD_BEHAVIOR_THRESHOLD: "20"
-BAD_BEHAVIOR_COUNT_TIME: "30"
-BAD_BEHAVIOR_BAN_TIME: "3600"
-BAD_BEHAVIOR_BAN_SCOPE: "service"
-```
+    ```yaml
+    USE_BAD_BEHAVIOR: "yes"
+    BAD_BEHAVIOR_STATUS_CODES: "401 403 429"
+    BAD_BEHAVIOR_THRESHOLD: "20"
+    BAD_BEHAVIOR_COUNT_TIME: "30"
+    BAD_BEHAVIOR_BAN_TIME: "3600"
+    BAD_BEHAVIOR_BAN_SCOPE: "service"
+    ```
 
 === "Ban permanent"
 
-```yaml
-USE_BAD_BEHAVIOR: "yes"
-BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"
-BAD_BEHAVIOR_THRESHOLD: "10"
-BAD_BEHAVIOR_COUNT_TIME: "60"
-BAD_BEHAVIOR_BAN_TIME: "0"
-BAD_BEHAVIOR_BAN_SCOPE: "global"
-```
+    ```yaml
+    USE_BAD_BEHAVIOR: "yes"
+    BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"
+    BAD_BEHAVIOR_THRESHOLD: "10"
+    BAD_BEHAVIOR_COUNT_TIME: "60"
+    BAD_BEHAVIOR_BAN_TIME: "0"
+    BAD_BEHAVIOR_BAN_SCOPE: "global"
+    ```
 
 ## Blacklist
 
@@ -822,7 +822,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
 5.  **Surveiller l’efficacité :** Consultez l'[interface web](web-ui.md) pour voir les statistiques sur les requêtes bloquées.
 
 !!! info "Mode stream"
-En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées.
+    En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées.
 
 ### Paramètres de configuration
 
@@ -834,7 +834,7 @@ En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | non      | **Listes noires communautaires :** Sélectionnez des listes noires pré-configurées et maintenues par la communauté à inclure dans le blocage. |
 
 === "Listes noires communautaires"
-**Ce que ça fait :** Vous permet d’ajouter rapidement des listes noires bien entretenues et sourcées par la communauté sans avoir à configurer manuellement les URL.
+    **Ce que ça fait :** Vous permet d’ajouter rapidement des listes noires bien entretenues et sourcées par la communauté sans avoir à configurer manuellement les URL.
 
     Le paramètre `BLACKLIST_COMMUNITY_LISTS` vous permet de choisir parmi des sources de listes noires sélectionnées. Les options disponibles incluent :
 
@@ -853,7 +853,7 @@ En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées
         Les listes noires communautaires offrent un moyen pratique de démarrer avec des sources de listes noires éprouvées. Vous pouvez les utiliser en parallèle de configurations manuelles d’URL pour une flexibilité maximale.
 
 === "Adresse IP"
-**Ce que ça fait :** Bloque les visiteurs en fonction de leur adresse IP ou de leur réseau.
+    **Ce que ça fait :** Bloque les visiteurs en fonction de leur adresse IP ou de leur réseau.
 
     | Paramètre                  | Défaut                                | Contexte  | Multiple | Description                                                                                                                     |
     | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -865,7 +865,7 @@ En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées
     Le paramètre par défaut `BLACKLIST_IP_URLS` inclut une URL qui fournit une **liste des nœuds de sortie Tor connus**. C’est une source courante de trafic malveillant et un bon point de départ pour de nombreux sites.
 
 === "Reverse DNS"
-**Ce que ça fait :** Bloque les visiteurs en fonction de leur nom de domaine inversé. C’est utile pour bloquer les scanners et les crawlers connus en se basant sur les domaines de leur organisation.
+    **Ce que ça fait :** Bloque les visiteurs en fonction de leur nom de domaine inversé. C’est utile pour bloquer les scanners et les crawlers connus en se basant sur les domaines de leur organisation.
 
     | Paramètre                    | Défaut                  | Contexte  | Multiple | Description                                                                                                                    |
     | ---------------------------- | ----------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -878,7 +878,7 @@ En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées
     Le paramètre par défaut `BLACKLIST_RDNS` inclut des domaines de scanners courants comme **Shodan** et **Censys**. Ils sont souvent utilisés par des chercheurs en sécurité et des scanners pour identifier des sites vulnérables.
 
 === "ASN"
-**Ce que ça fait :** Bloque les visiteurs provenant de fournisseurs de réseaux spécifiques. Les ASN sont comme des codes postaux pour Internet—ils identifient à quel fournisseur ou organisation une IP appartient.
+    **Ce que ça fait :** Bloque les visiteurs provenant de fournisseurs de réseaux spécifiques. Les ASN sont comme des codes postaux pour Internet—ils identifient à quel fournisseur ou organisation une IP appartient.
 
     | Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                                 |
     | --------------------------- | ------ | --------- | -------- | ----------------------------------------------------------------------------------------------------------- |
@@ -888,7 +888,7 @@ En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées
     | `BLACKLIST_IGNORE_ASN_URLS` |        | multisite | non      | **URL de listes d’ignorance d’ASN :** Liste d’URL contenant des ASN à ignorer.                              |
 
 === "User-Agent"
-**Ce que ça fait :** Bloque les visiteurs en fonction du navigateur ou de l’outil qu’ils prétendent utiliser. C’est efficace contre les bots qui s’identifient honnêtement (comme "ScannerBot" ou "WebHarvestTool").
+    **Ce que ça fait :** Bloque les visiteurs en fonction du navigateur ou de l’outil qu’ils prétendent utiliser. C’est efficace contre les bots qui s’identifient honnêtement (comme "ScannerBot" ou "WebHarvestTool").
 
     | Paramètre                          | Défaut                                                                                                                         | Contexte  | Multiple | Description                                                                                                                                   |
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -900,7 +900,7 @@ En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées
     Le paramètre par défaut `BLACKLIST_USER_AGENT_URLS` inclut une URL qui fournit une **liste de user agents malveillants connus**. Ils sont souvent utilisés par des bots et des scanners malveillants pour identifier des sites vulnérables.
 
 === "URI"
-**Ce que ça fait :** Bloque les requêtes vers des URL spécifiques de votre site. C’est utile pour bloquer les tentatives d’accès aux pages d’administration, aux formulaires de connexion ou à d’autres zones sensibles qui pourraient être ciblées.
+    **Ce que ça fait :** Bloque les requêtes vers des URL spécifiques de votre site. C’est utile pour bloquer les tentatives d’accès aux pages d’administration, aux formulaires de connexion ou à d’autres zones sensibles qui pourraient être ciblées.
 
     | Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                                           |
     | --------------------------- | ------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -910,10 +910,10 @@ En mode stream, seules les vérifications par IP, rDNS et ASN seront effectuées
     | `BLACKLIST_IGNORE_URI_URLS` |        | multisite | non      | **URL de listes d’ignorance d’URI :** Liste d’URL contenant des motifs d’URI à ignorer.                               |
 
 !!! info "Support des formats d’URL"
-Tous les paramètres `*_URLS` supportent les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux en utilisant le préfixe `file:///`. L’authentification basique est supportée en utilisant le format `http://user:pass@url`.
+    Tous les paramètres `*_URLS` supportent les URL HTTP/HTTPS ainsi que les chemins de fichiers locaux en utilisant le préfixe `file:///`. L’authentification basique est supportée en utilisant le format `http://user:pass@url`.
 
 !!! tip "Mises à jour régulières"
-Les listes noires provenant d’URL sont automatiquement téléchargées et mises à jour toutes les heures pour garantir que votre protection reste à jour contre les dernières menaces.
+    Les listes noires provenant d’URL sont automatiquement téléchargées et mises à jour toutes les heures pour garantir que votre protection reste à jour contre les dernières menaces.
 
 ### Exemples de configuration
 
@@ -1002,36 +1002,36 @@ Comment ça marche :
 | `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | non      | Niveau 0–11 : plus haut = meilleure compression mais plus de CPU. |
 
 !!! tip "Niveau de compression"
-`6` offre un bon compromis. Pour du statique et CPU disponible : 9–11. Pour du dynamique ou CPU contraint : 4–5.
+    `6` offre un bon compromis. Pour du statique et CPU disponible : 9–11. Pour du dynamique ou CPU contraint : 4–5.
 
 ### Exemples
 
 === "Basique"
 
-```yaml
-USE_BROTLI: "yes"
-BROTLI_TYPES: "application/javascript application/json application/xml application/xhtml+xml text/css text/html text/javascript text/plain text/xml"
-BROTLI_MIN_LENGTH: "1000"
-BROTLI_COMP_LEVEL: "6"
-```
+    ```yaml
+    USE_BROTLI: "yes"
+    BROTLI_TYPES: "application/javascript application/json application/xml application/xhtml+xml text/css text/html text/javascript text/plain text/xml"
+    BROTLI_MIN_LENGTH: "1000"
+    BROTLI_COMP_LEVEL: "6"
+    ```
 
 === "Compression maximale"
 
-```yaml
-USE_BROTLI: "yes"
-BROTLI_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
-BROTLI_MIN_LENGTH: "500"
-BROTLI_COMP_LEVEL: "11"
-```
+    ```yaml
+    USE_BROTLI: "yes"
+    BROTLI_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
+    BROTLI_MIN_LENGTH: "500"
+    BROTLI_COMP_LEVEL: "11"
+    ```
 
 === "Performance équilibrée"
 
-```yaml
-USE_BROTLI: "yes"
-BROTLI_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
-BROTLI_MIN_LENGTH: "1000"
-BROTLI_COMP_LEVEL: "4"
-```
+    ```yaml
+    USE_BROTLI: "yes"
+    BROTLI_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
+    BROTLI_MIN_LENGTH: "1000"
+    BROTLI_COMP_LEVEL: "4"
+    ```
 
 ## BunkerNet
 
@@ -1063,7 +1063,7 @@ Comment ça marche :
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | non      | URL de l’API BunkerNet.             |
 
 !!! info "Confidentialité"
-Seules les données nécessaires à l’identification de la menace sont partagées (IP, raison du blocage, contexte minimal).
+    Seules les données nécessaires à l’identification de la menace sont partagées (IP, raison du blocage, contexte minimal).
 
 ### Intégration CrowdSec Console
 
@@ -1080,23 +1080,23 @@ Grâce au partenariat avec [CrowdSec](https://www.crowdsec.net/?utm_campaign=bun
 
 === "Configuration par défaut (recommandée)"
 
-```yaml
-USE_BUNKERNET: "yes"
-BUNKERNET_SERVER: "https://api.bunkerweb.io"
-```
+    ```yaml
+    USE_BUNKERNET: "yes"
+    BUNKERNET_SERVER: "https://api.bunkerweb.io"
+    ```
 
 === "Désactivation"
 
-```yaml
-USE_BUNKERNET: "no"
-```
+    ```yaml
+    USE_BUNKERNET: "no"
+    ```
 
 === "Serveur personnalisé"
 
-```yaml
-USE_BUNKERNET: "yes"
-BUNKERNET_SERVER: "https://bunkernet.example.com"
-```
+    ```yaml
+    USE_BUNKERNET: "yes"
+    BUNKERNET_SERVER: "https://bunkernet.example.com"
+    ```
 
 ## CORS
 
@@ -1137,72 +1137,72 @@ Comment ça marche :
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | non      | Refuser les origines non autorisées avec un code d’erreur.                    |
 
 !!! tip "Optimiser le preflight"
-Augmenter `CORS_MAX_AGE` réduit la fréquence des preflights (par défaut 24h).
+    Augmenter `CORS_MAX_AGE` réduit la fréquence des preflights (par défaut 24h).
 
 !!! warning "Sécurité"
-Soyez prudent avec `CORS_ALLOW_ORIGIN: *` et/ou `CORS_ALLOW_CREDENTIALS: yes`. Préférez lister explicitement les origines de confiance.
+    Soyez prudent avec `CORS_ALLOW_ORIGIN: *` et/ou `CORS_ALLOW_CREDENTIALS: yes`. Préférez lister explicitement les origines de confiance.
 
 ### Exemples
 
 === "Configuration basique"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "self"
-CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, Authorization"
-CORS_ALLOW_CREDENTIALS: "no"
-CORS_DENY_REQUEST: "yes"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "self"
+    CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, Authorization"
+    CORS_ALLOW_CREDENTIALS: "no"
+    CORS_DENY_REQUEST: "yes"
+    ```
 
 === "API publique"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "*"
-CORS_ALLOW_METHODS: "GET, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, X-API-Key"
-CORS_ALLOW_CREDENTIALS: "no"
-CORS_MAX_AGE: "3600"
-CORS_DENY_REQUEST: "no"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "*"
+    CORS_ALLOW_METHODS: "GET, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, X-API-Key"
+    CORS_ALLOW_CREDENTIALS: "no"
+    CORS_MAX_AGE: "3600"
+    CORS_DENY_REQUEST: "no"
+    ```
 
 === "Plusieurs domaines de confiance"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "^https://(app|api|dashboard)\\.example\\.com$"
-CORS_ALLOW_METHODS: "GET, POST, PUT, DELETE, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, Authorization, X-Requested-With"
-CORS_ALLOW_CREDENTIALS: "yes"
-CORS_EXPOSE_HEADERS: "Content-Length, Content-Range, X-RateLimit-Remaining"
-CORS_MAX_AGE: "86400"
-CORS_DENY_REQUEST: "yes"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "^https://(app|api|dashboard)\\.example\\.com$"
+    CORS_ALLOW_METHODS: "GET, POST, PUT, DELETE, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, Authorization, X-Requested-With"
+    CORS_ALLOW_CREDENTIALS: "yes"
+    CORS_EXPOSE_HEADERS: "Content-Length, Content-Range, X-RateLimit-Remaining"
+    CORS_MAX_AGE: "86400"
+    CORS_DENY_REQUEST: "yes"
+    ```
 
 === "Wildcard sous‑domaine"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "^https://.*\\.example\\.com$"
-CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, Authorization"
-CORS_ALLOW_CREDENTIALS: "no"
-CORS_MAX_AGE: "86400"
-CORS_DENY_REQUEST: "yes"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "^https://.*\\.example\\.com$"
+    CORS_ALLOW_METHODS: "GET, POST, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, Authorization"
+    CORS_ALLOW_CREDENTIALS: "no"
+    CORS_MAX_AGE: "86400"
+    CORS_DENY_REQUEST: "yes"
+    ```
 
 === "Multiples motifs de domaine"
 
-```yaml
-USE_CORS: "yes"
-CORS_ALLOW_ORIGIN: "^https://(.*\\.example\\.com|.*\\.trusted-partner\\.org|api\\.third-party\\.net)$"
-CORS_ALLOW_METHODS: "GET, POST, PUT, OPTIONS"
-CORS_ALLOW_HEADERS: "Content-Type, Authorization, X-Custom-Header"
-CORS_ALLOW_CREDENTIALS: "no"
-CORS_MAX_AGE: "86400"
-CORS_DENY_REQUEST: "yes"
-```
+    ```yaml
+    USE_CORS: "yes"
+    CORS_ALLOW_ORIGIN: "^https://(.*\\.example\\.com|.*\\.trusted-partner\\.org|api\\.third-party\\.net)$"
+    CORS_ALLOW_METHODS: "GET, POST, PUT, OPTIONS"
+    CORS_ALLOW_HEADERS: "Content-Type, Authorization, X-Custom-Header"
+    CORS_ALLOW_CREDENTIALS: "no"
+    CORS_MAX_AGE: "86400"
+    CORS_DENY_REQUEST: "yes"
+    ```
 
 ## Client cache
 
@@ -1235,36 +1235,36 @@ Comment ça marche :
 | `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | non      | Envoi d’un ETag pour les ressources statiques.               |
 
 !!! tip "Optimiser le cache"
-Contenu fréquemment mis à jour : durée plus courte. Contenu versionné ou peu changeant : durée plus longue. La valeur par défaut (180 jours) convient souvent.
+    Contenu fréquemment mis à jour : durée plus courte. Contenu versionné ou peu changeant : durée plus longue. La valeur par défaut (180 jours) convient souvent.
 
 ### Exemples
 
 === "Basique"
 
-```yaml
-USE_CLIENT_CACHE: "yes"
-CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|gif|css|js|svg|woff|woff2"
-CLIENT_CACHE_CONTROL: "public, max-age=86400"
-CLIENT_CACHE_ETAG: "yes"
-```
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|gif|css|js|svg|woff|woff2"
+    CLIENT_CACHE_CONTROL: "public, max-age=86400"
+    CLIENT_CACHE_ETAG: "yes"
+    ```
 
 === "Agressif"
 
-```yaml
-USE_CLIENT_CACHE: "yes"
-CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2|pdf|xml|txt"
-CLIENT_CACHE_CONTROL: "public, max-age=31536000, immutable"
-CLIENT_CACHE_ETAG: "yes"
-```
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2|pdf|xml|txt"
+    CLIENT_CACHE_CONTROL: "public, max-age=31536000, immutable"
+    CLIENT_CACHE_ETAG: "yes"
+    ```
 
 === "Mixte"
 
-```yaml
-USE_CLIENT_CACHE: "yes"
-CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2"
-CLIENT_CACHE_CONTROL: "public, max-age=604800"
-CLIENT_CACHE_ETAG: "yes"
-```
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2"
+    CLIENT_CACHE_CONTROL: "public, max-age=604800"
+    CLIENT_CACHE_ETAG: "yes"
+    ```
 
 ## Country
 
@@ -1295,39 +1295,39 @@ Comment ça marche :
 | `BLACKLIST_COUNTRY` |        | multisite | non      | Liste noire : codes pays ISO 3166‑1 alpha‑2 séparés par des espaces. Ces pays sont bloqués.           |
 
 !!! tip "Liste blanche vs noire"
-Liste blanche : accès restreint à quelques pays. Liste noire : bloquer des régions problématiques et autoriser le reste.
+    Liste blanche : accès restreint à quelques pays. Liste noire : bloquer des régions problématiques et autoriser le reste.
 
 !!! warning "Priorité"
-Si une liste blanche et une liste noire sont définies, la liste blanche a priorité : si le pays n’y figure pas, l’accès est refusé.
+    Si une liste blanche et une liste noire sont définies, la liste blanche a priorité : si le pays n’y figure pas, l’accès est refusé.
 
 !!! info "Détection du pays"
-BunkerWeb utilise la base mmdb [db‑ip lite](https://db-ip.com/db/download/ip-to-country-lite).
+    BunkerWeb utilise la base mmdb [db‑ip lite](https://db-ip.com/db/download/ip-to-country-lite).
 
 ### Exemples
 
 === "Liste blanche uniquement"
 
-```yaml
-WHITELIST_COUNTRY: "US CA GB"
-```
+    ```yaml
+    WHITELIST_COUNTRY: "US CA GB"
+    ```
 
 === "Liste noire uniquement"
 
-```yaml
-BLACKLIST_COUNTRY: "RU CN KP"
-```
+    ```yaml
+    BLACKLIST_COUNTRY: "RU CN KP"
+    ```
 
 === "UE uniquement"
 
-```yaml
-WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
-```
+    ```yaml
+    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    ```
 
 === "Blocage pays à risque"
 
-```yaml
-BLACKLIST_COUNTRY: "RU CN KP IR SY"
-```
+    ```yaml
+    BLACKLIST_COUNTRY: "RU CN KP IR SY"
+    ```
 
 ## CrowdSec
 
@@ -1359,7 +1359,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
 ### Mise en place
 
 === "Docker"
-**Fichier d'acquisition**
+    **Fichier d'acquisition**
 
     Vous devrez exécuter une instance de CrowdSec et la configurer pour analyser les journaux de BunkerWeb. Comme BunkerWeb est basé sur NGINX, vous pouvez utiliser la valeur `nginx` pour le paramètre `type` dans votre fichier d'acquisition (en supposant que les journaux de BunkerWeb sont stockés tels quels sans données supplémentaires) :
 
@@ -1676,7 +1676,7 @@ Comment ça marche :
 5. Vous gardez le contrôle total sur le cycle de vie des certificats.
 
 !!! info "Surveillance automatique"
-Avec `USE_CUSTOM_SSL: yes`, BunkerWeb surveille le certificat `CUSTOM_SSL_CERT`, détecte les changements et recharge NGINX si nécessaire.
+    Avec `USE_CUSTOM_SSL: yes`, BunkerWeb surveille le certificat `CUSTOM_SSL_CERT`, détecte les changements et recharge NGINX si nécessaire.
 
 ### Comment l’utiliser
 
@@ -1686,7 +1686,7 @@ Avec `USE_CUSTOM_SSL: yes`, BunkerWeb surveille le certificat `CUSTOM_SSL_CERT`,
 4. Données : fournissez les chaînes base64 ou PEM en clair.
 
 !!! tip "Mode stream"
-En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour le port SSL/TLS.
+    En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour le port SSL/TLS.
 
 ### Paramètres
 
@@ -1700,59 +1700,59 @@ En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour le port SSL/TLS.
 | `CUSTOM_SSL_KEY_DATA`      |        | multisite | non      | Données de la clé privée (base64 ou PEM en clair).            |
 
 !!! warning "Sécurité"
-Protégez la clé privée (droits adaptés, lisible par le scheduler BunkerWeb uniquement).
+    Protégez la clé privée (droits adaptés, lisible par le scheduler BunkerWeb uniquement).
 
 !!! tip "Format"
-Les certificats doivent être au format PEM. Convertissez si nécessaire.
+    Les certificats doivent être au format PEM. Convertissez si nécessaire.
 
 !!! info "Chaînes de certification"
-Si une chaîne intermédiaire est nécessaire, fournissez le bundle complet dans l’ordre (certificat puis intermédiaires).
+    Si une chaîne intermédiaire est nécessaire, fournissez le bundle complet dans l’ordre (certificat puis intermédiaires).
 
 ### Exemples
 
 === "Fichiers"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "file"
-CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
-CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "file"
+    CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
+    CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
+    ```
 
 === "Données base64"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "data"
-CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
-CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "data"
+    CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
+    CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
+    ```
 
 === "PEM en clair"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "data"
-CUSTOM_SSL_CERT_DATA: |
-  -----BEGIN CERTIFICATE-----
-  MIIDdzCCAl+gAwIBAgIUJH...certificate content...AAAA
-  -----END CERTIFICATE-----
-CUSTOM_SSL_KEY_DATA: |
-  -----BEGIN PRIVATE KEY-----
-  MIIEvQIBADAN...key content...AAAA
-  -----END PRIVATE KEY-----
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "data"
+    CUSTOM_SSL_CERT_DATA: |
+    -----BEGIN CERTIFICATE-----
+    MIIDdzCCAl+gAwIBAgIUJH...certificate content...AAAA
+    -----END CERTIFICATE-----
+    CUSTOM_SSL_KEY_DATA: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADAN...key content...AAAA
+    -----END PRIVATE KEY-----
+    ```
 
 === "Fallback"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "file"
-CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
-CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
-CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
-CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "file"
+    CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
+    CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
+    CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
+    CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
+    ```
 
 ## DNSBL
 
@@ -1794,17 +1794,17 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité DNSBL :
 | `DNSBL_IGNORE_IP_URLS` | ``     | multisite | oui      | URL séparées par des espaces fournissant des IP/CIDR à ignorer. Supporte `http(s)://` et `file://`. |
 
 !!! tip "Choisir des serveurs DNSBL"
-Choisissez des fournisseurs DNSBL réputés pour minimiser les faux positifs. La liste par défaut inclut des services bien établis qui conviennent à la plupart des sites web :
+    Choisissez des fournisseurs DNSBL réputés pour minimiser les faux positifs. La liste par défaut inclut des services bien établis qui conviennent à la plupart des sites web :
 
     - **bl.blocklist.de :** Liste les IP qui ont été détectées en train d'attaquer d'autres serveurs.
     - **sbl.spamhaus.org :** Se concentre sur les sources de spam et autres activités malveillantes.
     - **xbl.spamhaus.org :** Cible les systèmes infectés, tels que les machines compromises ou les proxys ouverts.
 
 !!! info "Principe de fonctionnement de DNSBL"
-Les serveurs DNSBL fonctionnent en répondant à des requêtes DNS spécialement formatées. Lorsque BunkerWeb vérifie une adresse IP, il inverse l'IP et y ajoute le nom de domaine du DNSBL. Si la requête DNS résultante renvoie une réponse de « succès », l'IP est considérée comme étant sur la liste noire.
+    Les serveurs DNSBL fonctionnent en répondant à des requêtes DNS spécialement formatées. Lorsque BunkerWeb vérifie une adresse IP, il inverse l'IP et y ajoute le nom de domaine du DNSBL. Si la requête DNS résultante renvoie une réponse de « succès », l'IP est considérée comme étant sur la liste noire.
 
 !!! warning "Considérations sur la performance"
-Bien que BunkerWeb optimise les recherches DNSBL pour la performance, l'ajout d'un grand nombre de serveurs DNSBL pourrait potentiellement impacter les temps de réponse. Commencez avec quelques serveurs DNSBL réputés et surveillez la performance avant d'en ajouter d'autres.
+    Bien que BunkerWeb optimise les recherches DNSBL pour la performance, l'ajout d'un grand nombre de serveurs DNSBL pourrait potentiellement impacter les temps de réponse. Commencez avec quelques serveurs DNSBL réputés et surveillez la performance avant d'en ajouter d'autres.
 
 ### Exemples de configuration
 
@@ -1893,21 +1893,27 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre                | Défaut                                    | Contexte | Multiple | Description                                                                    |
-| ------------------------ | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | non      | URI principale de connexion (format SQLAlchemy).                               |
-| `DATABASE_URI_READONLY`  |                                           | global   | non      | URI optionnelle en lecture seule (offload/HA).                                 |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global   | non      | Niveau de verbosité des logs DB : `debug`, `info`, `warn`, `warning`, `error`. |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global   | non      | Nombre max d’entrées de runs de jobs conservées avant purge automatique.       |
+| Paramètre                       | Défaut                                    | Contexte | Multiple | Description                                                                    |
+| ------------------------------- | ----------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------ |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global   | non      | URI principale de connexion (format SQLAlchemy).                               |
+| `DATABASE_URI_READONLY`         |                                           | global   | non      | URI optionnelle en lecture seule (offload/HA).                                 |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global   | non      | Niveau de verbosité des logs DB : `debug`, `info`, `warn`, `warning`, `error`. |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global   | non      | Nombre max d’entrées de runs de jobs conservées avant purge automatique.       |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global   | non      | Durée max de conservation des sessions UI (en jours) avant purge automatique.  |
 
 !!! tip "Choix du moteur" - SQLite (défaut) : simple et fichier unique, idéal mono‑nœud/tests. - PostgreSQL : recommandé en production multi‑instances (robustesse, concurrence). - MySQL/MariaDB : alternative solide aux capacités proches de PostgreSQL. - Oracle : adapté aux environnements d’entreprise standardisés sur Oracle.
 
 !!! info "Format SQLAlchemy" - SQLite : `sqlite:////chemin/vers/database.sqlite3` - PostgreSQL : `postgresql://user:password@hôte:port/base` - MySQL/MariaDB : `mysql://user:password@hôte:port/base` ou `mariadb://user:password@hôte:port/base` - Oracle : `oracle://user:password@hôte:port/base`
 
 !!! warning "Maintenance"
-Une tâche quotidienne purge automatiquement les runs de jobs excédentaires selon `DATABASE_MAX_JOBS_RUNS` pour éviter une croissance illimitée tout en conservant un historique utile.
+    Des tâches quotidiennes assurent la maintenance automatique :
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+- **Purge des runs de jobs excédentaires** : supprime l’historique au-delà de `DATABASE_MAX_JOBS_RUNS`.
+- **Purge des sessions UI expirées** : enlève les sessions plus anciennes que `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+Ces jobs évitent la croissance illimitée tout en conservant un historique d’exploitation pertinent.
+
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -1944,7 +1950,7 @@ Comment ça marche :
 | `INTERCEPTED_ERROR_CODES` | `400 401 403 404 405 413 429 500 501 502 503 504` | multisite | non      | Codes interceptés : liste de codes gérés avec la page par défaut si aucune page personnalisée n’est définie. |
 
 !!! tip "Conception des pages"
-Les pages par défaut sont claires et pédagogiques : description de l’erreur, causes possibles, actions suggérées et repères visuels.
+    Les pages par défaut sont claires et pédagogiques : description de l’erreur, causes possibles, actions suggérées et repères visuels.
 
 !!! info "Types d’erreurs" - 4xx (côté client) : requêtes invalides, ressource inexistante, authentification manquante… - 5xx (côté serveur) : impossibilité de traiter une requête valide (erreur interne, indisponibilité temporaire…).
 
@@ -1952,22 +1958,22 @@ Les pages par défaut sont claires et pédagogiques : description de l’erreur
 
 === "Gestion par défaut"
 
-```yaml
-INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
-```
+    ```yaml
+    INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+    ```
 
 === "Pages personnalisées"
 
-```yaml
-ERRORS: "404=/custom/404.html 500=/custom/500.html"
-INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
-```
+    ```yaml
+    ERRORS: "404=/custom/404.html 500=/custom/500.html"
+    INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+    ```
 
 === "Gestion sélective"
 
-```yaml
-INTERCEPTED_ERROR_CODES: "404 500"
-```
+    ```yaml
+    INTERCEPTED_ERROR_CODES: "404 500"
+    ```
 
 ## Greylist
 
@@ -1992,7 +1998,7 @@ Comment ça marche :
 !!! tip "Comportement d’accès" - Visiteurs greylist : accès autorisé mais contrôles appliqués. - Autres visiteurs : accès refusé.
 
 !!! info "Mode stream"
-En mode stream, seuls IP, rDNS et ASN sont pris en compte.
+    En mode stream, seuls IP, rDNS et ASN sont pris en compte.
 
 ### Paramètres
 
@@ -2004,45 +2010,45 @@ Général
 
 === "Adresse IP"
 
-| Paramètre          | Défaut | Contexte  | Multiple | Description                                                    |
-| ------------------ | ------ | --------- | -------- | -------------------------------------------------------------- |
-| `GREYLIST_IP`      |        | multisite | non      | Liste d’IP/réseaux (CIDR) à greylist, séparés par des espaces. |
-| `GREYLIST_IP_URLS` |        | multisite | non      | URLs contenant des IP/réseaux à greylist.                      |
+    | Paramètre          | Défaut | Contexte  | Multiple | Description                                                    |
+    | ------------------ | ------ | --------- | -------- | -------------------------------------------------------------- |
+    | `GREYLIST_IP`      |        | multisite | non      | Liste d’IP/réseaux (CIDR) à greylist, séparés par des espaces. |
+    | `GREYLIST_IP_URLS` |        | multisite | non      | URLs contenant des IP/réseaux à greylist.                      |
 
 === "Reverse DNS"
 
-| Paramètre              | Défaut | Contexte  | Multiple | Description                                  |
-| ---------------------- | ------ | --------- | -------- | -------------------------------------------- |
-| `GREYLIST_RDNS`        |        | multisite | non      | Suffixes de DNS inversés à greylist.         |
-| `GREYLIST_RDNS_GLOBAL` | `yes`  | multisite | non      | Vérifier seulement les IP globales si `yes`. |
-| `GREYLIST_RDNS_URLS`   |        | multisite | non      | URLs contenant des suffixes rDNS à greylist. |
+    | Paramètre              | Défaut | Contexte  | Multiple | Description                                  |
+    | ---------------------- | ------ | --------- | -------- | -------------------------------------------- |
+    | `GREYLIST_RDNS`        |        | multisite | non      | Suffixes de DNS inversés à greylist.         |
+    | `GREYLIST_RDNS_GLOBAL` | `yes`  | multisite | non      | Vérifier seulement les IP globales si `yes`. |
+    | `GREYLIST_RDNS_URLS`   |        | multisite | non      | URLs contenant des suffixes rDNS à greylist. |
 
 === "ASN"
 
-| Paramètre           | Défaut | Contexte  | Multiple | Description                                        |
-| ------------------- | ------ | --------- | -------- | -------------------------------------------------- |
-| `GREYLIST_ASN`      |        | multisite | non      | Numéros d’AS à greylist (séparés par des espaces). |
-| `GREYLIST_ASN_URLS` |        | multisite | non      | URLs contenant des AS à greylist.                  |
+    | Paramètre           | Défaut | Contexte  | Multiple | Description                                        |
+    | ------------------- | ------ | --------- | -------- | -------------------------------------------------- |
+    | `GREYLIST_ASN`      |        | multisite | non      | Numéros d’AS à greylist (séparés par des espaces). |
+    | `GREYLIST_ASN_URLS` |        | multisite | non      | URLs contenant des AS à greylist.                  |
 
 === "User‑Agent"
 
-| Paramètre                  | Défaut | Contexte  | Multiple | Description                                        |
-| -------------------------- | ------ | --------- | -------- | -------------------------------------------------- |
-| `GREYLIST_USER_AGENT`      |        | multisite | non      | Motifs (regex PCRE) d’User‑Agent à greylist.       |
-| `GREYLIST_USER_AGENT_URLS` |        | multisite | non      | URLs contenant des motifs d’User‑Agent à greylist. |
+    | Paramètre                  | Défaut | Contexte  | Multiple | Description                                        |
+    | -------------------------- | ------ | --------- | -------- | -------------------------------------------------- |
+    | `GREYLIST_USER_AGENT`      |        | multisite | non      | Motifs (regex PCRE) d’User‑Agent à greylist.       |
+    | `GREYLIST_USER_AGENT_URLS` |        | multisite | non      | URLs contenant des motifs d’User‑Agent à greylist. |
 
 === "URI"
 
-| Paramètre           | Défaut | Contexte  | Multiple | Description                                 |
-| ------------------- | ------ | --------- | -------- | ------------------------------------------- |
-| `GREYLIST_URI`      |        | multisite | non      | Motifs d’URI (regex PCRE) à greylist.       |
-| `GREYLIST_URI_URLS` |        | multisite | non      | URLs contenant des motifs d’URI à greylist. |
+    | Paramètre           | Défaut | Contexte  | Multiple | Description                                 |
+    | ------------------- | ------ | --------- | -------- | ------------------------------------------- |
+    | `GREYLIST_URI`      |        | multisite | non      | Motifs d’URI (regex PCRE) à greylist.       |
+    | `GREYLIST_URI_URLS` |        | multisite | non      | URLs contenant des motifs d’URI à greylist. |
 
 !!! info "Format d’URL"
-Les paramètres `*_URLS` supportent HTTP/HTTPS et `file:///`. Auth basique possible avec `http://user:pass@url`.
+    Les paramètres `*_URLS` supportent HTTP/HTTPS et `file:///`. Auth basique possible avec `http://user:pass@url`.
 
 !!! tip "Mises à jour"
-Les listes récupérées par URL sont mises à jour automatiquement toutes les heures.
+    Les listes récupérées par URL sont mises à jour automatiquement toutes les heures.
 
 ## Gzip
 
@@ -2076,48 +2082,48 @@ Le plugin GZIP compresse les réponses HTTP avec l’algorithme gzip pour rédui
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | multisite | non      | Précise quels contenus proxifiés doivent être compressés selon les en‑têtes de réponse. |
 
 !!! tip "Niveau de compression"
-`5` est un bon compromis. Statique/CPU dispo : 7–9. Dynamique/CPU limité : 1–3.
+    `5` est un bon compromis. Statique/CPU dispo : 7–9. Dynamique/CPU limité : 1–3.
 
 ### Exemples
 
 === "Basique"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json application/xml text/css text/html text/javascript text/plain text/xml"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "5"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json application/xml text/css text/html text/javascript text/plain text/xml"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "5"
+    ```
 
 === "Compression maximale"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
-GZIP_MIN_LENGTH: "500"
-GZIP_COMP_LEVEL: "9"
-GZIP_PROXIED: "any"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
+    GZIP_MIN_LENGTH: "500"
+    GZIP_COMP_LEVEL: "9"
+    GZIP_PROXIED: "any"
+    ```
 
 === "Performance équilibrée"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "3"
-GZIP_PROXIED: "no-cache no-store private expired"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "3"
+    GZIP_PROXIED: "no-cache no-store private expired"
+    ```
 
 === "Contenu proxifié"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "4"
-GZIP_PROXIED: "any"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "4"
+    GZIP_PROXIED: "any"
+    ```
 
 ## HTML injection
 
@@ -2151,31 +2157,31 @@ Comment ça marche :
 
 === "Google Analytics"
 
-```yaml
-INJECT_HEAD: ""
-INJECT_BODY: '<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag(''js'', new Date());gtag(''config'', ''G-XXXXXXXXXX'');</script>'
-```
+    ```yaml
+    INJECT_HEAD: ""
+    INJECT_BODY: '<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag(''js'', new Date());gtag(''config'', ''G-XXXXXXXXXX'');</script>'
+    ```
 
 === "Styles personnalisés"
 
-```yaml
-INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .custom-element { color: blue; }</style>"
-INJECT_BODY: ""
-```
+    ```yaml
+    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .custom-element { color: blue; }</style>"
+    INJECT_BODY: ""
+    ```
 
 === "Intégrations multiples"
 
-```yaml
-INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .notification-banner { background: #f8f9fa; padding: 10px; text-align: center; }</style>"
-INJECT_BODY: '<script src="https://cdn.example.com/js/widget.js"></script><script>initializeWidget(''your-api-key'');</script>'
-```
+    ```yaml
+    INJECT_HEAD: "<style>body { font-family: 'Arial', sans-serif; } .notification-banner { background: #f8f9fa; padding: 10px; text-align: center; }</style>"
+    INJECT_BODY: '<script src="https://cdn.example.com/js/widget.js"></script><script>initializeWidget(''your-api-key'');</script>'
+    ```
 
 === "Bandeau cookies"
 
-```yaml
-INJECT_HEAD: "<style>.cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #f1f1f1; padding: 20px; text-align: center; z-index: 1000; } .cookie-banner button { background: #4CAF50; border: none; color: white; padding: 10px 20px; cursor: pointer; }</style>"
-INJECT_BODY: '<div id="cookie-banner" class="cookie-banner">This website uses cookies to ensure you get the best experience. <button onclick="acceptCookies()">Accept</button></div><script>function acceptCookies() { document.getElementById(''cookie-banner'').style.display = ''none''; localStorage.setItem(''cookies-accepted'', ''true''); } if(localStorage.getItem(''cookies-accepted'') === ''true'') { document.getElementById(''cookie-banner'').style.display = ''none''; }</script>'
-```
+    ```yaml
+    INJECT_HEAD: "<style>.cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #f1f1f1; padding: 20px; text-align: center; z-index: 1000; } .cookie-banner button { background: #4CAF50; border: none; color: white; padding: 10px 20px; cursor: pointer; }</style>"
+    INJECT_BODY: '<div id="cookie-banner" class="cookie-banner">This website uses cookies to ensure you get the best experience. <button onclick="acceptCookies()">Accept</button></div><script>function acceptCookies() { document.getElementById(''cookie-banner'').style.display = ''none''; localStorage.setItem(''cookies-accepted'', ''true''); } if(localStorage.getItem(''cookies-accepted'') === ''true'') { document.getElementById(''cookie-banner'').style.display = ''none''; }</script>'
+    ```
 
 ## Headers
 
@@ -2340,7 +2346,7 @@ Le plugin Let’s Encrypt simplifie la gestion des certificats SSL/TLS en automa
 6.  L'ensemble du processus est entièrement automatisé, ne nécessitant qu'une intervention minimale après la configuration initiale.
 
 !!! info "Prérequis"
-Pour utiliser cette fonctionnalité, assurez-vous que des enregistrements DNS **A** corrects sont configurés pour chaque domaine, pointant vers la ou les IP publiques où BunkerWeb est accessible. Sans une configuration DNS correcte, le processus de vérification de domaine échouera.
+    Pour utiliser cette fonctionnalité, assurez-vous que des enregistrements DNS **A** corrects sont configurés pour chaque domaine, pointant vers la ou les IP publiques où BunkerWeb est accessible. Sans une configuration DNS correcte, le processus de vérification de domaine échouera.
 
 ### Comment l’utiliser
 
@@ -2354,10 +2360,10 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt 
 6.  **Laissez BunkerWeb s'occuper du reste :** Une fois configuré, les certificats sont automatiquement émis, installés et renouvelés selon les besoins.
 
 !!! tip "Profils de certificat"
-Let's Encrypt propose différents profils de certificat pour différents cas d'usage : - **classic** : Certificats à usage général avec une validité de 90 jours (par défaut) - **tlsserver** : Optimisé pour l'authentification de serveur TLS avec une validité de 90 jours et une charge utile plus petite - **shortlived** : Sécurité renforcée avec une validité de 7 jours pour les environnements automatisés - **custom** : Si votre serveur ACME prend en charge un profil différent, définissez-le avec `LETS_ENCRYPT_CUSTOM_PROFILE`.
+    Let's Encrypt propose différents profils de certificat pour différents cas d'usage : - **classic** : Certificats à usage général avec une validité de 90 jours (par défaut) - **tlsserver** : Optimisé pour l'authentification de serveur TLS avec une validité de 90 jours et une charge utile plus petite - **shortlived** : Sécurité renforcée avec une validité de 7 jours pour les environnements automatisés - **custom** : Si votre serveur ACME prend en charge un profil différent, définissez-le avec `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Disponibilité des profils"
-Notez que les profils `tlsserver` et `shortlived` peuvent ne pas être disponibles dans tous les environnements ou avec tous les clients ACME pour le moment. Le profil `classic` a la compatibilité la plus large et est recommandé pour la plupart des utilisateurs. Si un profil sélectionné n'est pas disponible, le système basculera automatiquement sur le profil `classic`.
+    Notez que les profils `tlsserver` et `shortlived` peuvent ne pas être disponibles dans tous les environnements ou avec tous les clients ACME pour le moment. Le profil `classic` a la compatibilité la plus large et est recommandé pour la plupart des utilisateurs. Si un profil sélectionné n'est pas disponible, le système basculera automatiquement sur le profil `classic`.
 
 ### Paramètres de configuration
 
@@ -2380,7 +2386,7 @@ Notez que les profils `tlsserver` et `shortlived` peuvent ne pas être disponibl
 !!! info "Information et comportement" - Le paramètre `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` est un paramètre multiple et peut être utilisé pour définir plusieurs éléments pour le fournisseur DNS. Les éléments seront enregistrés dans un fichier de cache, et Certbot lira les informations d'identification à partir de celui-ci. - Si aucun paramètre `LETS_ENCRYPT_DNS_PROPAGATION` n'est fourni, le temps de propagation par défaut du fournisseur est utilisé. - L'automatisation complète de Let's Encrypt avec le défi `http` fonctionne en mode stream tant que vous ouvrez le port `80/tcp` depuis l'extérieur. Utilisez le paramètre `LISTEN_STREAM_PORT_SSL` pour choisir votre port d'écoute SSL/TLS. - Si `LETS_ENCRYPT_PASSTHROUGH` est mis à `yes`, BunkerWeb ne gérera pas les requêtes de défi ACME lui-même mais les transmettra au serveur web backend. Ceci est utile dans les scénarios où BunkerWeb agit comme un reverse proxy devant un autre serveur configuré pour gérer les défis Let's Encrypt.
 
 !!! tip "Défis HTTP vs. DNS"
-**Les défis HTTP** sont plus simples à configurer et fonctionnent bien pour la plupart des sites web :
+    **Les défis HTTP** sont plus simples à configurer et fonctionnent bien pour la plupart des sites web :
 
     - Nécessite que votre site soit publiquement accessible sur le port 80
     - Configuré automatiquement par BunkerWeb
@@ -2394,10 +2400,10 @@ Notez que les profils `tlsserver` et `shortlived` peuvent ne pas être disponibl
     - Utile lorsque le port 80 est bloqué ou indisponible
 
 !!! warning "Certificats wildcard"
-Les certificats wildcard ne sont disponibles qu'avec les défis DNS. Si vous souhaitez les utiliser, vous devez mettre le paramètre `USE_LETS_ENCRYPT_WILDCARD` à `yes` et configurer correctement les identifiants de votre fournisseur DNS.
+    Les certificats wildcard ne sont disponibles qu'avec les défis DNS. Si vous souhaitez les utiliser, vous devez mettre le paramètre `USE_LETS_ENCRYPT_WILDCARD` à `yes` et configurer correctement les identifiants de votre fournisseur DNS.
 
 !!! warning "Limites de débit"
-Let's Encrypt impose des limites de débit sur l'émission de certificats. Lors du test de configurations, utilisez l'environnement de staging en mettant `USE_LETS_ENCRYPT_STAGING` à `yes` pour éviter d'atteindre les limites de production. Les certificats de staging ne sont pas reconnus par les navigateurs mais sont utiles pour valider votre configuration.
+    Let's Encrypt impose des limites de débit sur l'émission de certificats. Lors du test de configurations, utilisez l'environnement de staging en mettant `USE_LETS_ENCRYPT_STAGING` à `yes` pour éviter d'atteindre les limites de production. Les certificats de staging ne sont pas reconnus par les navigateurs mais sont utiles pour valider votre configuration.
 
 ### Fournisseurs DNS supportés
 
@@ -2533,14 +2539,14 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 
 === "Limitation de requêtes"
 
-| Paramètre        | Défaut | Contexte  | Multiple | Description                                                                                                                                                                  |
-| ---------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_REQ`  | `yes`  | multisite | non      | **Activer la limitation de requêtes :** Mettre à `yes` pour activer la fonctionnalité de limitation de débit par requêtes.                                                   |
-| `LIMIT_REQ_URL`  | `/`    | multisite | oui      | **Motif d’URL :** Motif d’URL (regex PCRE) auquel la limite de débit sera appliquée ; utilisez `/` pour l'appliquer à toutes les requêtes.                                   |
-| `LIMIT_REQ_RATE` | `2r/s` | multisite | oui      | **Limite de débit :** Taux de requêtes maximal au format `Nr/t`, où N est le nombre de requêtes et t est l'unité de temps : s (seconde), m (minute), h (heure), ou d (jour). |
+    | Paramètre        | Défaut | Contexte  | Multiple | Description                                                                                                                                                                  |
+    | ---------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_REQ`  | `yes`  | multisite | non      | **Activer la limitation de requêtes :** Mettre à `yes` pour activer la fonctionnalité de limitation de débit par requêtes.                                                   |
+    | `LIMIT_REQ_URL`  | `/`    | multisite | oui      | **Motif d’URL :** Motif d’URL (regex PCRE) auquel la limite de débit sera appliquée ; utilisez `/` pour l'appliquer à toutes les requêtes.                                   |
+    | `LIMIT_REQ_RATE` | `2r/s` | multisite | oui      | **Limite de débit :** Taux de requêtes maximal au format `Nr/t`, où N est le nombre de requêtes et t est l'unité de temps : s (seconde), m (minute), h (heure), ou d (jour). |
 
 !!! tip "Format de la limitation de débit"
-Le format de la limite de débit est spécifié comme `Nr/t` où :
+    Le format de la limite de débit est spécifié comme `Nr/t` où :
 
     - `N` est le nombre de requêtes autorisées
     - `r` est la lettre littérale 'r' (pour 'requêtes')
@@ -2551,20 +2557,20 @@ Le format de la limite de débit est spécifié comme `Nr/t` où :
 
 === "Limitation de connexions"
 
-| Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                    |
-| ----------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_CONN`        | `yes`  | multisite | non      | **Activer la limitation de connexions :** Mettre à `yes` pour activer la limitation de connexions simultanées. |
-| `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | non      | **Connexions HTTP/1.X :** Nombre maximal de connexions HTTP/1.X simultanées par adresse IP.                    |
-| `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | non      | **Flux HTTP/2 :** Nombre maximal de flux HTTP/2 simultanés par adresse IP.                                     |
-| `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
-| `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
+    | Paramètre               | Défaut | Contexte  | Multiple | Description                                                                                                    |
+    | ----------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`  | multisite | non      | **Activer la limitation de connexions :** Mettre à `yes` pour activer la limitation de connexions simultanées. |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`   | multisite | non      | **Connexions HTTP/1.X :** Nombre maximal de connexions HTTP/1.X simultanées par adresse IP.                    |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`  | multisite | non      | **Flux HTTP/2 :** Nombre maximal de flux HTTP/2 simultanés par adresse IP.                                     |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | non      | **Flux HTTP/3 :** Nombre maximal de flux HTTP/3 simultanés par adresse IP.                                     |
+    | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | non      | **Connexions Stream :** Nombre maximal de connexions stream simultanées par adresse IP.                        |
 
 !!! info "Limitation de connexions vs de requêtes" - La **limitation de connexions** restreint le nombre de connexions simultanées qu'une seule adresse IP peut maintenir. - La **limitation de débit de requêtes** restreint le nombre de requêtes qu'une adresse IP peut effectuer dans une période de temps définie.
 
     L'utilisation des deux méthodes offre une protection complète contre divers types d'abus.
 
 !!! warning "Réglages adaptés"
-Des limites trop strictes peuvent impacter des clients légitimes, notamment pour HTTP/2 et HTTP/3 où les navigateurs utilisent souvent plusieurs flux. Les valeurs par défaut sont équilibrées pour la plupart des cas d'utilisation, mais envisagez de les ajuster en fonction des besoins de votre application et du comportement des utilisateurs.
+    Des limites trop strictes peuvent impacter des clients légitimes, notamment pour HTTP/2 et HTTP/3 où les navigateurs utilisent souvent plusieurs flux. Les valeurs par défaut sont équilibrées pour la plupart des cas d'utilisation, mais envisagez de les ajuster en fonction des besoins de votre application et du comportement des utilisateurs.
 
 ### Exemples de configuration
 
@@ -2658,7 +2664,7 @@ Des limites trop strictes peuvent impacter des clients légitimes, notamment pou
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -2673,6 +2679,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_UPSTREAM_MODE`              | `round-robin`     | global   | oui      | Load balancing mode (round-robin or sticky).                       |
 | `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`              | global   | oui      | Sticky session method (ip or cookie).                              |
 | `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`              | global   | oui      | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |                   | global   | oui      | Number of keepalive connections to cache per worker.               |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`             | global   | oui      | Keepalive timeout for upstream connections.                        |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`              | global   | oui      | Keepalive time for upstream connections.                           |
 | `LOADBALANCER_HEALTHCHECK_URL`            | `/status`         | global   | oui      | The healthcheck URL.                                               |
@@ -2711,53 +2718,53 @@ Comment ça marche :
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | non      | Sauvegarder compteurs/tableaux dans Redis pour agrégation cluster. |
 
 !!! tip "Dimensionnement mémoire"
-Ajustez `METRICS_MEMORY_SIZE` selon le trafic et le nombre d’instances.
+    Ajustez `METRICS_MEMORY_SIZE` selon le trafic et le nombre d’instances.
 
 !!! info "Intégration Redis"
-Avec [Redis](#redis), les requêtes bloquées sont synchronisées pour une vue centralisée multi‑nœuds.
+    Avec [Redis](#redis), les requêtes bloquées sont synchronisées pour une vue centralisée multi‑nœuds.
 
 !!! warning "Performance"
-Des valeurs trop élevées augmentent l’usage mémoire. Surveillez et ajustez.
+    Des valeurs trop élevées augmentent l’usage mémoire. Surveillez et ajustez.
 
 ### Exemples
 
 === "Configuration par défaut"
 
-```yaml
-USE_METRICS: "yes"
-METRICS_MEMORY_SIZE: "16m"
-METRICS_MAX_BLOCKED_REQUESTS: "1000"
-METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
-METRICS_SAVE_TO_REDIS: "yes"
-```
+    ```yaml
+    USE_METRICS: "yes"
+    METRICS_MEMORY_SIZE: "16m"
+    METRICS_MAX_BLOCKED_REQUESTS: "1000"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "100000"
+    METRICS_SAVE_TO_REDIS: "yes"
+    ```
 
 === "Ressources limitées"
 
-```yaml
-USE_METRICS: "yes"
-METRICS_MEMORY_SIZE: "8m"
-METRICS_MAX_BLOCKED_REQUESTS: "500"
-METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
-METRICS_SAVE_TO_REDIS: "no"
-```
+    ```yaml
+    USE_METRICS: "yes"
+    METRICS_MEMORY_SIZE: "8m"
+    METRICS_MAX_BLOCKED_REQUESTS: "500"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "10000"
+    METRICS_SAVE_TO_REDIS: "no"
+    ```
 
 === "Fort trafic"
 
-```yaml
-USE_METRICS: "yes"
-METRICS_MEMORY_SIZE: "64m"
-METRICS_MAX_BLOCKED_REQUESTS: "5000"
-METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
-METRICS_SAVE_TO_REDIS: "yes"
-```
+    ```yaml
+    USE_METRICS: "yes"
+    METRICS_MEMORY_SIZE: "64m"
+    METRICS_MAX_BLOCKED_REQUESTS: "5000"
+    METRICS_MAX_BLOCKED_REQUESTS_REDIS: "500000"
+    METRICS_SAVE_TO_REDIS: "yes"
+    ```
 
 === "Désactivation"
 
-```yaml
-USE_METRICS: "no"
-```
+    ```yaml
+    USE_METRICS: "no"
+    ```
 
-## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :white_check_mark:
@@ -3110,7 +3117,7 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 | `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | no       | **CRS Global :** Si activé, applique les règles CRS globalement au niveau HTTP plutôt que par serveur.                                                                                     |
 
 !!! warning "ModSecurity et le Jeu de Règles de Base OWASP"
-**Nous recommandons vivement de garder ModSecurity et le Jeu de Règles de Base OWASP (CRS) activés** pour fournir une protection robuste contre les vulnérabilités web courantes. Bien que des faux positifs occasionnels puissent se produire, ils peuvent être résolus avec un peu d'effort en affinant les règles ou en utilisant des exclusions prédéfinies.
+    **Nous recommandons vivement de garder ModSecurity et le Jeu de Règles de Base OWASP (CRS) activés** pour fournir une protection robuste contre les vulnérabilités web courantes. Bien que des faux positifs occasionnels puissent se produire, ils peuvent être résolus avec un peu d'effort en affinant les règles ou en utilisant des exclusions prédéfinies.
 
     L'équipe du CRS maintient activement une liste d'exclusions pour des applications populaires telles que WordPress, Nextcloud, Drupal et Cpanel, facilitant ainsi l'intégration sans impacter la fonctionnalité. Les avantages en matière de sécurité l'emportent de loin sur l'effort de configuration minimal requis pour traiter les faux positifs.
 
@@ -3123,10 +3130,10 @@ Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécu
 - **`nightly`** : [Version de nuit](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offrant les dernières mises à jour de règles.
 
 !!! example "Version de nuit (Nightly Build)"
-La **version de nuit** contient les règles les plus à jour, offrant les dernières protections contre les menaces émergentes. Cependant, comme elle est mise à jour quotidiennement et peut inclure des changements expérimentaux ou non testés, il est recommandé d'utiliser d'abord la version de nuit dans un **environnement de pré-production** avant de la déployer en production.
+    La **version de nuit** contient les règles les plus à jour, offrant les dernières protections contre les menaces émergentes. Cependant, comme elle est mise à jour quotidiennement et peut inclure des changements expérimentaux ou non testés, il est recommandé d'utiliser d'abord la version de nuit dans un **environnement de pré-production** avant de la déployer en production.
 
 !!! tip "Niveaux de paranoïa"
-Le Jeu de Règles de Base OWASP utilise des "niveaux de paranoïa" (PL) pour contrôler la rigueur des règles :
+    Le Jeu de Règles de Base OWASP utilise des "niveaux de paranoïa" (PL) pour contrôler la rigueur des règles :
 
     - **PL1 (défaut) :** Protection de base avec un minimum de faux positifs
     - **PL2 :** Sécurité renforcée avec une correspondance de motifs plus stricte
@@ -3182,7 +3189,7 @@ Dans cet exemple :
 - **Règle 3** : Supprime une règle spécifique (ID `930120`) pour les requêtes correspondant à `/wp-json/yoast`.
 
 !!! info "Ordre d'exécution"
-L'ordre d'exécution pour ModSecurity dans BunkerWeb est le suivant, assurant une progression claire et logique de l'application des règles :
+    L'ordre d'exécution pour ModSecurity dans BunkerWeb est le suivant, assurant une progression claire et logique de l'application des règles :
 
     1.  **Configuration OWASP CRS** : Configuration de base pour le Jeu de Règles de Base OWASP.
     2.  **Configuration des plugins personnalisés (`crs-plugins-before`)** : Paramètres spécifiques aux plugins, appliqués avant toute règle CRS.
@@ -3205,7 +3212,7 @@ L'ordre d'exécution pour ModSecurity dans BunkerWeb est le suivant, assurant un
 Le Jeu de Règles de Base OWASP prend également en charge une gamme de **plugins** conçus pour étendre ses fonctionnalités et améliorer la compatibilité avec des applications ou des environnements spécifiques. Ces plugins peuvent aider à affiner le CRS pour une utilisation avec des plateformes populaires telles que WordPress, Nextcloud et Drupal, ou même des configurations personnalisées. Pour plus d'informations et une liste des plugins disponibles, consultez le [registre des plugins OWASP CRS](https://github.com/coreruleset/plugin-registry).
 
 !!! tip "Téléchargement de plugins"
-Le paramètre `MODSECURITY_CRS_PLUGINS` vous permet de télécharger et d'installer des plugins pour étendre les fonctionnalités du Jeu de Règles de Base OWASP (CRS). Ce paramètre accepte une liste de noms de plugins avec des balises ou des URL optionnelles, facilitant l'intégration de fonctionnalités de sécurité supplémentaires adaptées à vos besoins spécifiques.
+    Le paramètre `MODSECURITY_CRS_PLUGINS` vous permet de télécharger et d'installer des plugins pour étendre les fonctionnalités du Jeu de Règles de Base OWASP (CRS). Ce paramètre accepte une liste de noms de plugins avec des balises ou des URL optionnelles, facilitant l'intégration de fonctionnalités de sécurité supplémentaires adaptées à vos besoins spécifiques.
 
     Voici une liste non exhaustive des valeurs acceptées pour le paramètre `MODSECURITY_CRS_PLUGINS` :
 
@@ -3214,7 +3221,7 @@ Le paramètre `MODSECURITY_CRS_PLUGINS` vous permet de télécharger et d'instal
     *   `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` - Télécharge le plugin directement depuis l'URL.
 
 !!! warning "Faux positifs"
-Des paramètres de sécurité plus élevés peuvent bloquer le trafic légitime. Commencez avec les paramètres par défaut et surveillez les journaux avant d'augmenter les niveaux de sécurité. Soyez prêt à ajouter des règles d'exclusion pour les besoins spécifiques de votre application.
+    Des paramètres de sécurité plus élevés peuvent bloquer le trafic légitime. Commencez avec les paramètres par défaut et surveillez les journaux avant d'augmenter les niveaux de sécurité. Soyez prêt à ajouter des règles d'exclusion pour les besoins spécifiques de votre application.
 
 ### Exemples de configuration
 
@@ -3291,9 +3298,9 @@ Des paramètres de sécurité plus élevés peuvent bloquer le trafic légitime.
     ```
 
 !!! note "Valeurs de taille lisibles"
-Pour les paramètres de taille comme `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, les suffixes `k`, `m`, et `g` (insensibles à la casse) sont pris en charge et représentent les kibioctets, mébioctets et gibioctets (multiples de 1024). Exemples : `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+    Pour les paramètres de taille comme `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, les suffixes `k`, `m`, et `g` (insensibles à la casse) sont pris en charge et représentent les kibioctets, mébioctets et gibioctets (multiples de 1024). Exemples : `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
-## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -3337,45 +3344,45 @@ Comment ça marche :
 | `LOCAL_PHP_PATH`  |        | multisite | non      | Chemin racine des fichiers côté PHP‑FPM local.                                 |
 
 !!! tip "Local vs distant"
-Local : meilleures perfs (socket). Distant : flexibilité et scalabilité.
+    Local : meilleures perfs (socket). Distant : flexibilité et scalabilité.
 
 !!! warning "Chemins"
-`REMOTE_PHP_PATH`/`LOCAL_PHP_PATH` doivent correspondre au chemin réel des fichiers sous peine d’erreurs « File not found ».
+    `REMOTE_PHP_PATH`/`LOCAL_PHP_PATH` doivent correspondre au chemin réel des fichiers sous peine d’erreurs « File not found ».
 
 !!! info "Réécriture d’URL"
-Le plugin configure automatiquement la réécriture pour diriger les requêtes vers `index.php` si le fichier demandé n’existe pas.
+    Le plugin configure automatiquement la réécriture pour diriger les requêtes vers `index.php` si le fichier demandé n’existe pas.
 
 ### Exemples
 
 === "PHP‑FPM local"
 
-```yaml
-LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
-LOCAL_PHP_PATH: "/var/www/html"
-```
+    ```yaml
+    LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html"
+    ```
 
 === "PHP‑FPM distant"
 
-```yaml
-REMOTE_PHP: "php-server.example.com"
-REMOTE_PHP_PORT: "9000"
-REMOTE_PHP_PATH: "/var/www/html"
-```
+    ```yaml
+    REMOTE_PHP: "php-server.example.com"
+    REMOTE_PHP_PORT: "9000"
+    REMOTE_PHP_PATH: "/var/www/html"
+    ```
 
 === "Port personnalisé"
 
-```yaml
-REMOTE_PHP: "php-server.example.com"
-REMOTE_PHP_PORT: "9001"
-REMOTE_PHP_PATH: "/var/www/html"
-```
+    ```yaml
+    REMOTE_PHP: "php-server.example.com"
+    REMOTE_PHP_PORT: "9001"
+    REMOTE_PHP_PATH: "/var/www/html"
+    ```
 
 === "WordPress"
 
-```yaml
-LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
-LOCAL_PHP_PATH: "/var/www/html/wordpress"
-```
+    ```yaml
+    LOCAL_PHP: "/var/run/php/php8.1-fpm.sock"
+    LOCAL_PHP_PATH: "/var/www/html/wordpress"
+    ```
 
 ## Pro
 
@@ -3413,13 +3420,13 @@ Comment ça marche :
 | `PRO_LICENSE_KEY` |        | global   | non      | Clé de licence BunkerWeb Pro (authentification). |
 
 !!! tip "Gestion de licence"
-La licence est liée à votre environnement de déploiement. Pour un transfert ou une question d’abonnement, contactez le support via le [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
+    La licence est liée à votre environnement de déploiement. Pour un transfert ou une question d’abonnement, contactez le support via le [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
 
 !!! info "Fonctionnalités Pro"
-Le périmètre des fonctionnalités peut évoluer. Le plugin Pro gère automatiquement l’installation et la configuration des capacités disponibles.
+    Le périmètre des fonctionnalités peut évoluer. Le plugin Pro gère automatiquement l’installation et la configuration des capacités disponibles.
 
 !!! warning "Accès réseau"
-Le plugin Pro requiert un accès Internet sortant pour contacter l’API BunkerWeb (vérification de licence) et télécharger les plugins premium. Autorisez les connexions HTTPS vers `api.bunkerweb.io:443`.
+    Le plugin Pro requiert un accès Internet sortant pour contacter l’API BunkerWeb (vérification de licence) et télécharger les plugins premium. Autorisez les connexions HTTPS vers `api.bunkerweb.io:443`.
 
 ### FAQ
 
@@ -3440,7 +3447,7 @@ R : Oui. Deux offres existent :
 
 Un essai gratuit d’1 mois est disponible avec le code `freetrial`. Rendez‑vous sur le [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) pour l’activer.
 
-## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -3480,7 +3487,7 @@ Comment ça marche :
 6. PROXY protocol : activez `USE_PROXY_PROTOCOL` si l’amont le supporte.
 
 !!! danger "Avertissement PROXY protocol"
-Activer `USE_PROXY_PROTOCOL` sans un amont correctement configuré pour l’émettre cassera votre application. Assurez‑vous de l’avoir configuré avant activation.
+    Activer `USE_PROXY_PROTOCOL` sans un amont correctement configuré pour l’émettre cassera votre application. Assurez‑vous de l’avoir configuré avant activation.
 
 ### Paramètres
 
@@ -3494,23 +3501,23 @@ Activer `USE_PROXY_PROTOCOL` sans un amont correctement configuré pour l’éme
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | non      | Activer le support PROXY protocol pour la communication directe proxy→BunkerWeb. |
 
 !!! tip "Fournisseurs cloud"
-Ajoutez les IP de vos load balancers (AWS/GCP/Azure…) à `REAL_IP_FROM` pour une identification correcte.
+    Ajoutez les IP de vos load balancers (AWS/GCP/Azure…) à `REAL_IP_FROM` pour une identification correcte.
 
 !!! danger "Considérations sécurité"
-N’ajoutez que des sources de confiance, sinon risque d’usurpation d’IP via en‑têtes manipulés.
+    N’ajoutez que des sources de confiance, sinon risque d’usurpation d’IP via en‑têtes manipulés.
 
 !!! info "Multiples adresses"
-Avec `REAL_IP_RECURSIVE`, si l’en‑tête contient plusieurs IPs, la première non listée comme proxy de confiance est retenue comme IP client.
+    Avec `REAL_IP_RECURSIVE`, si l’en‑tête contient plusieurs IPs, la première non listée comme proxy de confiance est retenue comme IP client.
 
 ### Exemples
 
 === "Basique (derrière reverse proxy)"
 
-```yaml
-USE_REAL_IP: "yes"
-REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
-REAL_IP_HEADER: "X-Forwarded-For"
-```
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
+    REAL_IP_HEADER: "X-Forwarded-For"
+    ```
 
 ## Redirect
 
@@ -3543,63 +3550,63 @@ Comment ça marche :
 | `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | oui      | Code de statut HTTP : `301` (permanent) ou `302` (temporaire).      |
 
 !!! tip "Choisir le bon code"
-`301` pour une redirection permanente (migrations, canonicals). `302` pour temporaire.
+    `301` pour une redirection permanente (migrations, canonicals). `302` pour temporaire.
 
 !!! info "Conservation du chemin"
-Avec `REDIRECT_TO_REQUEST_URI: yes`, `/blog/post-1` vers `https://new.com` devient `https://new.com/blog/post-1`.
+    Avec `REDIRECT_TO_REQUEST_URI: yes`, `/blog/post-1` vers `https://new.com` devient `https://new.com/blog/post-1`.
 
 ### Exemples
 
 === "Multiples chemins"
 
-```yaml
-REDIRECT_FROM: "/blog/"
-REDIRECT_TO: "https://blog.example.com/"
-REDIRECT_TO_REQUEST_URI: "yes"
-REDIRECT_TO_STATUS_CODE: "301"
+    ```yaml
+    REDIRECT_FROM: "/blog/"
+    REDIRECT_TO: "https://blog.example.com/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
 
-REDIRECT_FROM_2: "/shop/"
-REDIRECT_TO_2: "https://shop.example.com/"
-REDIRECT_TO_REQUEST_URI_2: "no"
-REDIRECT_TO_STATUS_CODE_2: "301"
+    REDIRECT_FROM_2: "/shop/"
+    REDIRECT_TO_2: "https://shop.example.com/"
+    REDIRECT_TO_REQUEST_URI_2: "no"
+    REDIRECT_TO_STATUS_CODE_2: "301"
 
-REDIRECT_FROM_3: "/"
-REDIRECT_TO_3: "https://new-domain.com"
-REDIRECT_TO_REQUEST_URI_3: "no"
-REDIRECT_TO_STATUS_CODE_3: "301"
-```
+    REDIRECT_FROM_3: "/"
+    REDIRECT_TO_3: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI_3: "no"
+    REDIRECT_TO_STATUS_CODE_3: "301"
+    ```
 
 === "Domaine entier"
 
-```yaml
-REDIRECT_TO: "https://new-domain.com"
-REDIRECT_TO_REQUEST_URI: "no"
-REDIRECT_TO_STATUS_CODE: "301"
-```
+    ```yaml
+    REDIRECT_TO: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```
 
 === "Conserver le chemin"
 
-```yaml
-REDIRECT_TO: "https://new-domain.com"
-REDIRECT_TO_REQUEST_URI: "yes"
-REDIRECT_TO_STATUS_CODE: "301"
-```
+    ```yaml
+    REDIRECT_TO: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```
 
 === "Temporaire"
 
-```yaml
-REDIRECT_TO: "https://maintenance.example.com"
-REDIRECT_TO_REQUEST_URI: "no"
-REDIRECT_TO_STATUS_CODE: "302"
-```
+    ```yaml
+    REDIRECT_TO: "https://maintenance.example.com"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "302"
+    ```
 
 === "Sous‑domaine → chemin"
 
-```yaml
-REDIRECT_TO: "https://example.com/support"
-REDIRECT_TO_REQUEST_URI: "yes"
-REDIRECT_TO_STATUS_CODE: "301"
-```
+    ```yaml
+    REDIRECT_TO: "https://example.com/support"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```
 
 ## Redis
 
@@ -3644,7 +3651,7 @@ Comment ça marche :
 | `REDIS_KEEPALIVE_POOL`    | `3`        | global   | non      | Nb max de connexions conservées dans le pool.                  |
 
 !!! tip "Haute disponibilité"
-Configurez Redis Sentinel pour un failover automatique en production.
+    Configurez Redis Sentinel pour un failover automatique en production.
 
 !!! warning "Sécurité" - Mots de passe forts pour Redis et Sentinel - Envisagez SSL/TLS - Ne pas exposer Redis sur Internet - Restreignez l’accès au port Redis (pare‑feu, segmentation)
 
@@ -3652,47 +3659,47 @@ Configurez Redis Sentinel pour un failover automatique en production.
 
 === "Configuration basique"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "localhost"
-REDIS_PORT: "6379"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "localhost"
+    REDIS_PORT: "6379"
+    ```
 
 === "Configuration sécurisée"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "redis.example.com"
-REDIS_PORT: "6379"
-REDIS_PASSWORD: "your-strong-password"
-REDIS_SSL: "yes"
-REDIS_SSL_VERIFY: "yes"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "redis.example.com"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: "your-strong-password"
+    REDIS_SSL: "yes"
+    REDIS_SSL_VERIFY: "yes"
+    ```
 
 === "Redis Sentinel"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
-REDIS_SENTINEL_MASTER: "mymaster"
-REDIS_SENTINEL_PASSWORD: "sentinel-password"
-REDIS_PASSWORD: "redis-password"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
+    REDIS_SENTINEL_MASTER: "mymaster"
+    REDIS_SENTINEL_PASSWORD: "sentinel-password"
+    REDIS_PASSWORD: "redis-password"
+    ```
 
 === "Tuning avancé"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "redis.example.com"
-REDIS_PORT: "6379"
-REDIS_PASSWORD: "your-strong-password"
-REDIS_DATABASE: "3"
-REDIS_TIMEOUT: "3"
-REDIS_KEEPALIVE_IDLE: "60"
-REDIS_KEEPALIVE_POOL: "5"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "redis.example.com"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: "your-strong-password"
+    REDIS_DATABASE: "3"
+    REDIS_TIMEOUT: "3"
+    REDIS_KEEPALIVE_IDLE: "60"
+    REDIS_KEEPALIVE_POOL: "5"
+    ```
 
-## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -3940,7 +3947,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
         - Surveillez les taux de réussite du cache et ajustez les paramètres en conséquence
 
 !!! danger "Utilisateurs de Docker Compose - Variables NGINX"
-Lorsque vous utilisez Docker Compose avec des variables NGINX dans vos configurations, vous devez échapper le signe dollar (`$`) en utilisant des doubles signes dollar (`$$`). Cela s'applique à tous les paramètres contenant des variables NGINX comme `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
+    Lorsque vous utilisez Docker Compose avec des variables NGINX dans vos configurations, vous devez échapper le signe dollar (`$`) en utilisant des doubles signes dollar (`$$`). Cela s'applique à tous les paramètres contenant des variables NGINX comme `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
 
     Sans cet échappement, Docker Compose essaiera de substituer ces variables par des variables d'environnement, qui n'existent généralement pas, ce qui entraînera des valeurs vides dans votre configuration NGINX.
 
@@ -4071,44 +4078,44 @@ Comment ça marche :
 | `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | non      | Délai max par port en millisecondes.        |
 
 !!! warning "Performance"
-Scanner de nombreux ports ajoute de la latence. Limitez la liste et adaptez le timeout.
+    Scanner de nombreux ports ajoute de la latence. Limitez la liste et adaptez le timeout.
 
 !!! info "Ports de proxy courants"
-La configuration par défaut inclut 80, 443, 8080, 3128 et SSH (22). Adaptez selon votre modèle de menace.
+    La configuration par défaut inclut 80, 443, 8080, 3128 et SSH (22). Adaptez selon votre modèle de menace.
 
 ### Exemples
 
 === "Basique"
 
-```yaml
-USE_REVERSE_SCAN: "yes"
-REVERSE_SCAN_TIMEOUT: "500"
-REVERSE_SCAN_PORTS: "80 443 8080"
-```
+    ```yaml
+    USE_REVERSE_SCAN: "yes"
+    REVERSE_SCAN_TIMEOUT: "500"
+    REVERSE_SCAN_PORTS: "80 443 8080"
+    ```
 
 === "Approfondi"
 
-```yaml
-USE_REVERSE_SCAN: "yes"
-REVERSE_SCAN_TIMEOUT: "1000"
-REVERSE_SCAN_PORTS: "22 80 443 3128 8080 8000 8888 1080 3333 8081"
-```
+    ```yaml
+    USE_REVERSE_SCAN: "yes"
+    REVERSE_SCAN_TIMEOUT: "1000"
+    REVERSE_SCAN_PORTS: "22 80 443 3128 8080 8000 8888 1080 3333 8081"
+    ```
 
 === "Optimisé performance"
 
-```yaml
-USE_REVERSE_SCAN: "yes"
-REVERSE_SCAN_TIMEOUT: "250"
-REVERSE_SCAN_PORTS: "80 443 8080"
-```
+    ```yaml
+    USE_REVERSE_SCAN: "yes"
+    REVERSE_SCAN_TIMEOUT: "250"
+    REVERSE_SCAN_PORTS: "80 443 8080"
+    ```
 
 === "Haute sécurité"
 
-```yaml
-USE_REVERSE_SCAN: "yes"
-REVERSE_SCAN_TIMEOUT: "1500"
-REVERSE_SCAN_PORTS: "22 25 80 443 1080 3128 3333 4444 5555 6588 6666 7777 8000 8080 8081 8800 8888 9999"
-```
+    ```yaml
+    USE_REVERSE_SCAN: "yes"
+    REVERSE_SCAN_TIMEOUT: "1500"
+    REVERSE_SCAN_PORTS: "22 25 80 443 1080 3128 3333 4444 5555 6588 6666 7777 8000 8080 8081 8800 8888 9999"
+    ```
 
 ## Robots.txt
 
@@ -4232,50 +4239,50 @@ Comment ça marche :
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | non      | Suites personnalisées (liste séparée par `:`) qui remplacent le niveau. |
 
 !!! tip "Test SSL Labs"
-Testez votre configuration via [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Une configuration BunkerWeb bien réglée atteint généralement A+.
+    Testez votre configuration via [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Une configuration BunkerWeb bien réglée atteint généralement A+.
 
 !!! warning "Protocoles anciens"
-SSLv3, TLSv1.0 et TLSv1.1 sont désactivés par défaut (vulnérabilités connues). Activez‑les uniquement si nécessaire pour clients hérités.
+    SSLv3, TLSv1.0 et TLSv1.1 sont désactivés par défaut (vulnérabilités connues). Activez‑les uniquement si nécessaire pour clients hérités.
 
 ### Exemples
 
 === "Sécurité moderne (défaut)"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_LEVEL: "modern"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-REDIRECT_HTTP_TO_HTTPS: "no"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
 
 === "Sécurité maximale"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.3"
-SSL_CIPHERS_LEVEL: "modern"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-REDIRECT_HTTP_TO_HTTPS: "yes"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
 
 === "Compatibilité héritée"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_LEVEL: "old"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "old"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
 
 === "Suites personnalisées"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
 
 ## Security.txt
 
@@ -4314,50 +4321,50 @@ Comment ça marche :
 | `SECURITYTXT_CSAF`             |                             | multisite | oui      | Lien vers le provider-metadata.json du fournisseur CSAF.    |
 
 !!! warning "Expiration requise"
-Le champ `Expires` est obligatoire. Si absent, BunkerWeb définit par défaut une expiration à un an.
+    Le champ `Expires` est obligatoire. Si absent, BunkerWeb définit par défaut une expiration à un an.
 
 !!! info "Contacts essentiels"
-Fournissez au moins un moyen de contact : email, formulaire, téléphone, etc.
+    Fournissez au moins un moyen de contact : email, formulaire, téléphone, etc.
 
 !!! warning "HTTPS obligatoire"
-Toutes les URLs (sauf `mailto:` et `tel:`) DOIVENT utiliser HTTPS. BunkerWeb convertit les URL non‑HTTPS pour la conformité.
+    Toutes les URLs (sauf `mailto:` et `tel:`) DOIVENT utiliser HTTPS. BunkerWeb convertit les URL non‑HTTPS pour la conformité.
 
 ### Exemples
 
 === "Basique"
 
-```yaml
-USE_SECURITYTXT: "yes"
-SECURITYTXT_CONTACT: "mailto:security@example.com"
-SECURITYTXT_POLICY: "https://example.com/security-policy"
-```
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    ```
 
 === "Complet"
 
-```yaml
-USE_SECURITYTXT: "yes"
-SECURITYTXT_CONTACT: "mailto:security@example.com"
-SECURITYTXT_CONTACT_2: "https://example.com/security-contact-form"
-SECURITYTXT_EXPIRES: "2023-12-31T23:59:59+00:00"
-SECURITYTXT_ENCRYPTION: "https://example.com/pgp-key.txt"
-SECURITYTXT_ACKNOWLEDGEMENTS: "https://example.com/hall-of-fame"
-SECURITYTXT_POLICY: "https://example.com/security-policy"
-SECURITYTXT_HIRING: "https://example.com/jobs/security"
-SECURITYTXT_CANONICAL: "https://example.com/.well-known/security.txt"
-SECURITYTXT_PREFERRED_LANG: "en"
-SECURITYTXT_CSAF: "https://example.com/provider-metadata.json"
-```
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_CONTACT_2: "https://example.com/security-contact-form"
+    SECURITYTXT_EXPIRES: "2023-12-31T23:59:59+00:00"
+    SECURITYTXT_ENCRYPTION: "https://example.com/pgp-key.txt"
+    SECURITYTXT_ACKNOWLEDGEMENTS: "https://example.com/hall-of-fame"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    SECURITYTXT_HIRING: "https://example.com/jobs/security"
+    SECURITYTXT_CANONICAL: "https://example.com/.well-known/security.txt"
+    SECURITYTXT_PREFERRED_LANG: "en"
+    SECURITYTXT_CSAF: "https://example.com/provider-metadata.json"
+    ```
 
 === "Contacts multiples"
 
-```yaml
-USE_SECURITYTXT: "yes"
-SECURITYTXT_CONTACT: "mailto:security@example.com"
-SECURITYTXT_CONTACT_2: "tel:+1-201-555-0123"
-SECURITYTXT_CONTACT_3: "https://example.com/security-form"
-SECURITYTXT_POLICY: "https://example.com/security-policy"
-SECURITYTXT_EXPIRES: "2024-06-30T23:59:59+00:00"
-```
+    ```yaml
+    USE_SECURITYTXT: "yes"
+    SECURITYTXT_CONTACT: "mailto:security@example.com"
+    SECURITYTXT_CONTACT_2: "tel:+1-201-555-0123"
+    SECURITYTXT_CONTACT_3: "https://example.com/security-form"
+    SECURITYTXT_POLICY: "https://example.com/security-policy"
+    SECURITYTXT_EXPIRES: "2024-06-30T23:59:59+00:00"
+    ```
 
 ## Self-signed certificate
 
@@ -4373,7 +4380,7 @@ Comment ça marche :
 4. Le renouvellement est automatique avant expiration.
 
 !!! warning "Avertissements navigateurs"
-Les navigateurs afficheront des alertes de sécurité car un certificat auto‑signé n’est pas émis par une AC de confiance. En production, préférez [Let’s Encrypt](#lets-encrypt).
+    Les navigateurs afficheront des alertes de sécurité car un certificat auto‑signé n’est pas émis par une AC de confiance. En production, préférez [Let’s Encrypt](#lets-encrypt).
 
 ### Comment l’utiliser
 
@@ -4383,7 +4390,7 @@ Les navigateurs afficheront des alertes de sécurité car un certificat auto‑s
 4. Sujet : champ subject via `SELF_SIGNED_SSL_SUBJ`.
 
 !!! tip "Mode stream"
-En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour définir le port d’écoute SSL/TLS.
+    En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour définir le port d’écoute SSL/TLS.
 
 ### Paramètres
 
@@ -4398,31 +4405,31 @@ En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour définir le port d’é
 
 === "Basique"
 
-```yaml
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
-SELF_SIGNED_SSL_EXPIRY: "365"
-SELF_SIGNED_SSL_SUBJ: "/CN=mysite.local/"
-```
+    ```yaml
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
+    SELF_SIGNED_SSL_EXPIRY: "365"
+    SELF_SIGNED_SSL_SUBJ: "/CN=mysite.local/"
+    ```
 
 === "Certificats courte durée"
 
-```yaml
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
-SELF_SIGNED_SSL_EXPIRY: "90"
-SELF_SIGNED_SSL_SUBJ: "/CN=dev.example.com/"
-```
+    ```yaml
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
+    SELF_SIGNED_SSL_EXPIRY: "90"
+    SELF_SIGNED_SSL_SUBJ: "/CN=dev.example.com/"
+    ```
 
 === "Test en RSA"
 
-```yaml
-SERVER_NAME: "test.example.com"
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
-SELF_SIGNED_SSL_EXPIRY: "365"
-SELF_SIGNED_SSL_SUBJ: "/CN=test.example.com/"
-```
+    ```yaml
+    SERVER_NAME: "test.example.com"
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
+    SELF_SIGNED_SSL_EXPIRY: "365"
+    SELF_SIGNED_SSL_SUBJ: "/CN=test.example.com/"
+    ```
 
 ## Sessions
 
@@ -4466,47 +4473,47 @@ Comment ça marche :
 
 === "Basique (instance unique)"
 
-```yaml
-SESSIONS_SECRET: "your-strong-random-secret-key-here"
-SESSIONS_NAME: "myappsession"
-SESSIONS_IDLING_TIMEOUT: "1800"
-SESSIONS_ROLLING_TIMEOUT: "3600"
-SESSIONS_ABSOLUTE_TIMEOUT: "86400"
-```
+    ```yaml
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "myappsession"
+    SESSIONS_IDLING_TIMEOUT: "1800"
+    SESSIONS_ROLLING_TIMEOUT: "3600"
+    SESSIONS_ABSOLUTE_TIMEOUT: "86400"
+    ```
 
 === "Sécurité renforcée"
 
-```yaml
-SESSIONS_SECRET: "your-very-strong-random-secret-key-here"
-SESSIONS_NAME: "securesession"
-SESSIONS_IDLING_TIMEOUT: "900"
-SESSIONS_ROLLING_TIMEOUT: "1800"
-SESSIONS_ABSOLUTE_TIMEOUT: "43200"
-SESSIONS_CHECK_IP: "yes"
-SESSIONS_CHECK_USER_AGENT: "yes"
-```
+    ```yaml
+    SESSIONS_SECRET: "your-very-strong-random-secret-key-here"
+    SESSIONS_NAME: "securesession"
+    SESSIONS_IDLING_TIMEOUT: "900"
+    SESSIONS_ROLLING_TIMEOUT: "1800"
+    SESSIONS_ABSOLUTE_TIMEOUT: "43200"
+    SESSIONS_CHECK_IP: "yes"
+    SESSIONS_CHECK_USER_AGENT: "yes"
+    ```
 
 === "Cluster + Redis"
 
-```yaml
-SESSIONS_SECRET: "your-strong-random-secret-key-here"
-SESSIONS_NAME: "clustersession"
-SESSIONS_IDLING_TIMEOUT: "1800"
-SESSIONS_ROLLING_TIMEOUT: "3600"
-SESSIONS_ABSOLUTE_TIMEOUT: "86400"
-USE_REDIS: "yes"
-# Configurez la connexion Redis
-```
+    ```yaml
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "clustersession"
+    SESSIONS_IDLING_TIMEOUT: "1800"
+    SESSIONS_ROLLING_TIMEOUT: "3600"
+    SESSIONS_ABSOLUTE_TIMEOUT: "86400"
+    USE_REDIS: "yes"
+    # Configurez la connexion Redis
+    ```
 
 === "Sessions longue durée"
 
-```yaml
-SESSIONS_SECRET: "your-strong-random-secret-key-here"
-SESSIONS_NAME: "persistentsession"
-SESSIONS_IDLING_TIMEOUT: "86400"
-SESSIONS_ROLLING_TIMEOUT: "172800"
-SESSIONS_ABSOLUTE_TIMEOUT: "604800"
-```
+    ```yaml
+    SESSIONS_SECRET: "your-strong-random-secret-key-here"
+    SESSIONS_NAME: "persistentsession"
+    SESSIONS_IDLING_TIMEOUT: "86400"
+    SESSIONS_ROLLING_TIMEOUT: "172800"
+    SESSIONS_ABSOLUTE_TIMEOUT: "604800"
+    ```
 
 ## UI
 
@@ -4519,7 +4526,7 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`  | `no`              | multisite | non      | Use UI                                       |
 | `UI_HOST` |                   | global    | non      | Address of the web UI used for initial setup |
 
-## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 Prise en charge STREAM :x:
@@ -4544,7 +4551,7 @@ Comment ça marche :
 4. Les listes peuvent être mises à jour automatiquement depuis des sources externes.
 
 !!! info "Mode stream"
-En stream, uniquement IP, rDNS et ASN sont évalués.
+    En stream, uniquement IP, rDNS et ASN sont évalués.
 
 ### Paramètres
 
@@ -4556,46 +4563,46 @@ Général
 
 === "Adresse IP"
 
-| Paramètre                  | Défaut | Contexte  | Multiple | Description                                          |
-| -------------------------- | ------ | --------- | -------- | ---------------------------------------------------- |
-| `WHITELIST_IP`             |        | multisite | non      | IP/réseaux (CIDR) autorisés.                         |
-| `WHITELIST_IGNORE_IP`      |        | multisite | non      | IP/réseaux ignorés (bypassent les vérifications IP). |
-| `WHITELIST_IP_URLS`        |        | multisite | non      | URLs contenant IP/réseaux à autoriser.               |
-| `WHITELIST_IGNORE_IP_URLS` |        | multisite | non      | URLs contenant IP/réseaux à ignorer.                 |
+    | Paramètre                  | Défaut | Contexte  | Multiple | Description                                          |
+    | -------------------------- | ------ | --------- | -------- | ---------------------------------------------------- |
+    | `WHITELIST_IP`             |        | multisite | non      | IP/réseaux (CIDR) autorisés.                         |
+    | `WHITELIST_IGNORE_IP`      |        | multisite | non      | IP/réseaux ignorés (bypassent les vérifications IP). |
+    | `WHITELIST_IP_URLS`        |        | multisite | non      | URLs contenant IP/réseaux à autoriser.               |
+    | `WHITELIST_IGNORE_IP_URLS` |        | multisite | non      | URLs contenant IP/réseaux à ignorer.                 |
 
 === "Reverse DNS"
 
-| Paramètre                    | Défaut | Contexte  | Multiple | Description                                  |
-| ---------------------------- | ------ | --------- | -------- | -------------------------------------------- |
-| `WHITELIST_RDNS`             |        | multisite | non      | Suffixes rDNS autorisés.                     |
-| `WHITELIST_RDNS_GLOBAL`      | `yes`  | multisite | non      | Vérifier seulement les IP globales si `yes`. |
-| `WHITELIST_IGNORE_RDNS`      |        | multisite | non      | Suffixes rDNS ignorés.                       |
-| `WHITELIST_RDNS_URLS`        |        | multisite | non      | URLs contenant des suffixes rDNS autorisés.  |
-| `WHITELIST_IGNORE_RDNS_URLS` |        | multisite | non      | URLs contenant des suffixes rDNS à ignorer.  |
+    | Paramètre                    | Défaut | Contexte  | Multiple | Description                                  |
+    | ---------------------------- | ------ | --------- | -------- | -------------------------------------------- |
+    | `WHITELIST_RDNS`             |        | multisite | non      | Suffixes rDNS autorisés.                     |
+    | `WHITELIST_RDNS_GLOBAL`      | `yes`  | multisite | non      | Vérifier seulement les IP globales si `yes`. |
+    | `WHITELIST_IGNORE_RDNS`      |        | multisite | non      | Suffixes rDNS ignorés.                       |
+    | `WHITELIST_RDNS_URLS`        |        | multisite | non      | URLs contenant des suffixes rDNS autorisés.  |
+    | `WHITELIST_IGNORE_RDNS_URLS` |        | multisite | non      | URLs contenant des suffixes rDNS à ignorer.  |
 
 === "ASN"
 
-| Paramètre                   | Défaut | Contexte  | Multiple | Description                          |
-| --------------------------- | ------ | --------- | -------- | ------------------------------------ |
-| `WHITELIST_ASN`             |        | multisite | non      | Numéros d’AS autorisés.              |
-| `WHITELIST_IGNORE_ASN`      |        | multisite | non      | AS ignorés (bypassent la vérif ASN). |
-| `WHITELIST_ASN_URLS`        |        | multisite | non      | URLs de listes d’AS autorisés.       |
-| `WHITELIST_IGNORE_ASN_URLS` |        | multisite | non      | URLs de listes d’AS à ignorer.       |
+    | Paramètre                   | Défaut | Contexte  | Multiple | Description                          |
+    | --------------------------- | ------ | --------- | -------- | ------------------------------------ |
+    | `WHITELIST_ASN`             |        | multisite | non      | Numéros d’AS autorisés.              |
+    | `WHITELIST_IGNORE_ASN`      |        | multisite | non      | AS ignorés (bypassent la vérif ASN). |
+    | `WHITELIST_ASN_URLS`        |        | multisite | non      | URLs de listes d’AS autorisés.       |
+    | `WHITELIST_IGNORE_ASN_URLS` |        | multisite | non      | URLs de listes d’AS à ignorer.       |
 
 === "User‑Agent"
 
-| Paramètre                          | Défaut | Contexte  | Multiple | Description                                  |
-| ---------------------------------- | ------ | --------- | -------- | -------------------------------------------- |
-| `WHITELIST_USER_AGENT`             |        | multisite | non      | Motifs (regex PCRE) de User‑Agent autorisés. |
-| `WHITELIST_IGNORE_USER_AGENT`      |        | multisite | non      | Motifs ignorés.                              |
-| `WHITELIST_USER_AGENT_URLS`        |        | multisite | non      | URLs de motifs User‑Agent autorisés.         |
-| `WHITELIST_IGNORE_USER_AGENT_URLS` |        | multisite | non      | URLs de motifs User‑Agent à ignorer.         |
+    | Paramètre                          | Défaut | Contexte  | Multiple | Description                                  |
+    | ---------------------------------- | ------ | --------- | -------- | -------------------------------------------- |
+    | `WHITELIST_USER_AGENT`             |        | multisite | non      | Motifs (regex PCRE) de User‑Agent autorisés. |
+    | `WHITELIST_IGNORE_USER_AGENT`      |        | multisite | non      | Motifs ignorés.                              |
+    | `WHITELIST_USER_AGENT_URLS`        |        | multisite | non      | URLs de motifs User‑Agent autorisés.         |
+    | `WHITELIST_IGNORE_USER_AGENT_URLS` |        | multisite | non      | URLs de motifs User‑Agent à ignorer.         |
 
 === "URI"
 
-| Paramètre                   | Défaut | Contexte  | Multiple | Description                          |
-| --------------------------- | ------ | --------- | -------- | ------------------------------------ |
-| `WHITELIST_URI`             |        | multisite | non      | Motifs d’URI (regex PCRE) autorisés. |
-| `WHITELIST_IGNORE_URI`      |        | multisite | non      | Motifs d’URI ignorés.                |
-| `WHITELIST_URI_URLS`        |        | multisite | non      | URLs de motifs d’URI autorisés.      |
-| `WHITELIST_IGNORE_URI_URLS` |        | multisite | non      | URLs de motifs d’URI à ignorer.      |
+    | Paramètre                   | Défaut | Contexte  | Multiple | Description                          |
+    | --------------------------- | ------ | --------- | -------- | ------------------------------------ |
+    | `WHITELIST_URI`             |        | multisite | non      | Motifs d’URI (regex PCRE) autorisés. |
+    | `WHITELIST_IGNORE_URI`      |        | multisite | non      | Motifs d’URI ignorés.                |
+    | `WHITELIST_URI_URLS`        |        | multisite | non      | URLs de motifs d’URI autorisés.      |
+    | `WHITELIST_IGNORE_URI_URLS` |        | multisite | non      | URLs de motifs d’URI à ignorer.      |

@@ -262,7 +262,10 @@ class Templates(Base):
 
     id = Column(String(256), primary_key=True)
     name = Column(String(256), unique=True, nullable=False)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    method = Column(METHODS_ENUM, nullable=False, default="manual")
+    creation_date = Column(DateTime(timezone=True), nullable=False)
+    last_update = Column(DateTime(timezone=True), nullable=False)
 
     plugin = relationship("Plugins", back_populates="templates")
     steps = relationship("Template_steps", back_populates="template", cascade="all")
@@ -348,7 +351,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.5-rc4", nullable=False)
+    version = Column(String(32), default="1.6.5", nullable=False)
 
 
 ## UI Models

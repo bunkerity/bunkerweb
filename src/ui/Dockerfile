@@ -35,24 +35,29 @@ COPY src/common/helpers helpers
 COPY src/VERSION VERSION
 COPY src/ui ui
 
-# Minify JS files (can be skipped with SKIP_MINIFY_JS=yes)
+WORKDIR /tmp
+
+COPY src/deps/package.json package.json
+COPY src/deps/package-lock.json package-lock.json
+
+RUN apk add --no-cache nodejs npm parallel && \
+  cd /tmp && \
+  npm ci --ignore-scripts
+
+# Minify JS files
 ARG SKIP_MINIFY_JS=no
 RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
-  apk add --no-cache nodejs npm parallel && \
-  npm install -g uglify-js && \
-  find ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
-  | parallel -0 --no-run-if-empty 'uglifyjs {} --compress --mangle --output {}'; \
+  find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+  | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
   else \
   echo "Skipping JS minification"; \
   fi
 
-# Minify CSS files (can be skipped with SKIP_MINIFY_CSS=yes)
+# Minify CSS files
 ARG SKIP_MINIFY_CSS=no
 RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
-  apk add --no-cache nodejs npm parallel && \
-  npm install -g clean-css-cli && \
-  find ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
-  | parallel -0 --no-run-if-empty 'cleancss -O2 -o {} {}'; \
+  find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+  | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
   else \
   echo "Skipping CSS minification"; \
   fi
@@ -96,7 +101,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.5-rc4"
+LABEL version="1.6.5"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

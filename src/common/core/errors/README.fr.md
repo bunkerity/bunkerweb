@@ -32,19 +32,19 @@ Les pages par défaut sont claires et pédagogiques : description de l’erreur
 
 === "Gestion par défaut"
 
-```yaml
-INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
-```
+    ```yaml
+    INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+    ```
 
 === "Pages personnalisées"
 
-```yaml
-ERRORS: "404=/custom/404.html 500=/custom/500.html"
-INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
-```
+    ```yaml
+    ERRORS: "404=/custom/404.html 500=/custom/500.html"
+    INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+    ```
 
 === "Gestion sélective"
 
-```yaml
-INTERCEPTED_ERROR_CODES: "404 500"
-```
+    ```yaml
+    INTERCEPTED_ERROR_CODES: "404 500"
+    ```

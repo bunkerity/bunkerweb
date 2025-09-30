@@ -34,51 +34,51 @@ Avec `REDIRECT_TO_REQUEST_URI: yes`, `/blog/post-1` vers `https://new.com` devie
 
 === "Multiples chemins"
 
-```yaml
-REDIRECT_FROM: "/blog/"
-REDIRECT_TO: "https://blog.example.com/"
-REDIRECT_TO_REQUEST_URI: "yes"
-REDIRECT_TO_STATUS_CODE: "301"
+    ```yaml
+    REDIRECT_FROM: "/blog/"
+    REDIRECT_TO: "https://blog.example.com/"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
 
-REDIRECT_FROM_2: "/shop/"
-REDIRECT_TO_2: "https://shop.example.com/"
-REDIRECT_TO_REQUEST_URI_2: "no"
-REDIRECT_TO_STATUS_CODE_2: "301"
+    REDIRECT_FROM_2: "/shop/"
+    REDIRECT_TO_2: "https://shop.example.com/"
+    REDIRECT_TO_REQUEST_URI_2: "no"
+    REDIRECT_TO_STATUS_CODE_2: "301"
 
-REDIRECT_FROM_3: "/"
-REDIRECT_TO_3: "https://new-domain.com"
-REDIRECT_TO_REQUEST_URI_3: "no"
-REDIRECT_TO_STATUS_CODE_3: "301"
-```
+    REDIRECT_FROM_3: "/"
+    REDIRECT_TO_3: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI_3: "no"
+    REDIRECT_TO_STATUS_CODE_3: "301"
+    ```
 
 === "Domaine entier"
 
-```yaml
-REDIRECT_TO: "https://new-domain.com"
-REDIRECT_TO_REQUEST_URI: "no"
-REDIRECT_TO_STATUS_CODE: "301"
-```
+    ```yaml
+    REDIRECT_TO: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```
 
 === "Conserver le chemin"
 
-```yaml
-REDIRECT_TO: "https://new-domain.com"
-REDIRECT_TO_REQUEST_URI: "yes"
-REDIRECT_TO_STATUS_CODE: "301"
-```
+    ```yaml
+    REDIRECT_TO: "https://new-domain.com"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```
 
 === "Temporaire"
 
-```yaml
-REDIRECT_TO: "https://maintenance.example.com"
-REDIRECT_TO_REQUEST_URI: "no"
-REDIRECT_TO_STATUS_CODE: "302"
-```
+    ```yaml
+    REDIRECT_TO: "https://maintenance.example.com"
+    REDIRECT_TO_REQUEST_URI: "no"
+    REDIRECT_TO_STATUS_CODE: "302"
+    ```
 
 === "Sous‑domaine → chemin"
 
-```yaml
-REDIRECT_TO: "https://example.com/support"
-REDIRECT_TO_REQUEST_URI: "yes"
-REDIRECT_TO_STATUS_CODE: "301"
-```
+    ```yaml
+    REDIRECT_TO: "https://example.com/support"
+    REDIRECT_TO_REQUEST_URI: "yes"
+    REDIRECT_TO_STATUS_CODE: "301"
+    ```

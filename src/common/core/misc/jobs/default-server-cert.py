@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import chmod, getenv, sep
+from os import chmod, getenv, sep, replace
 from os.path import join
 from pathlib import Path
 from stat import S_IRUSR, S_IWUSR
@@ -8,6 +8,7 @@ from subprocess import DEVNULL, run, PIPE
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from tempfile import NamedTemporaryFile
+from typing import Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
@@ -26,6 +27,13 @@ try:
     if not JOB.is_cached_file("default-server-cert.pem", "month") or not JOB.is_cached_file("default-server-cert.key", "month"):
         LOGGER.info("Generating self-signed certificate for default server")
         cert_path.mkdir(parents=True, exist_ok=True)
+        tmp_key_path: Optional[Path] = None
+        tmp_cert_path: Optional[Path] = None
+        with NamedTemporaryFile(dir=cert_path, prefix="default-server-cert.", suffix=".key", delete=False) as tmp_key:
+            tmp_key_path = Path(tmp_key.name)
+        with NamedTemporaryFile(dir=cert_path, prefix="default-server-cert.", suffix=".pem", delete=False) as tmp_cert:
+            tmp_cert_path = Path(tmp_cert.name)
+        assert tmp_key_path is not None and tmp_cert_path is not None
 
         # Create a temporary OpenSSL config file with enhanced security settings
         with NamedTemporaryFile(mode="w", delete=False) as config_file:
@@ -68,9 +76,9 @@ DNS.1 = www.example.org
                     "-pkeyopt",
                     "ec_paramgen_curve:secp384r1",
                     "-keyout",
-                    str(cert_path.joinpath("default-server-cert.key")),
+                    str(tmp_key_path),
                     "-out",
-                    str(cert_path.joinpath("default-server-cert.pem")),
+                    str(tmp_cert_path),
                     "-days",
                     "3650",
                     "-sha512",
@@ -91,6 +99,8 @@ DNS.1 = www.example.org
                 status = 2
             else:
                 LOGGER.info("Successfully generated self-signed certificate for default server")
+                replace(tmp_key_path, cert_path.joinpath("default-server-cert.key"))
+                replace(tmp_cert_path, cert_path.joinpath("default-server-cert.pem"))
                 try:
                     chmod(str(cert_path.joinpath("default-server-cert.key")), S_IRUSR | S_IWUSR)  # 0o600 - read/write for owner only
                 except OSError as e:
@@ -114,6 +124,10 @@ DNS.1 = www.example.org
                 Path(config_path).unlink()
             except Exception as e:
                 LOGGER.warning(f"Failed to delete temporary OpenSSL config file: {e}")
+            if tmp_key_path is not None:
+                tmp_key_path.unlink(missing_ok=True)
+            if tmp_cert_path is not None:
+                tmp_cert_path.unlink(missing_ok=True)
     else:
         LOGGER.info("Skipping generation of self-signed certificate for default server (already present)")
 except BaseException as e:

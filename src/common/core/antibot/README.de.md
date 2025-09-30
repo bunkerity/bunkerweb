@@ -204,39 +204,39 @@ Beispiele:
     | `ANTIBOT_MCAPTCHA_SECRET`  |                               | Multisite | nein     | mCaptcha Geheimschlüssel.                                               |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                   |
 
-Siehe Allgemeine Parameter für zusätzliche Optionen.
+    Siehe Allgemeine Parameter für zusätzliche Optionen.
 
 ### Konfigurationsbeispiele
 
 === "Cookie-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "cookie"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "cookie"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "JavaScript-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "javascript"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "javascript"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "Captcha-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "captcha"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-ANTIBOT_CAPTCHA_ALPHABET: "23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-```
+    ```yaml
+    USE_ANTIBOT: "captcha"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ANTIBOT_CAPTCHA_ALPHABET: "23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    ```
 
-Hinweis: Das obige Beispiel verwendet die Ziffern 2-9 und alle Buchstaben, die häufig für CAPTCHAs verwendet werden. Sie können das Alphabet bei Bedarf anpassen, um Sonderzeichen einzuschließen.
+    Hinweis: Das obige Beispiel verwendet die Ziffern 2-9 und alle Buchstaben, die häufig für CAPTCHAs verwendet werden. Sie können das Alphabet bei Bedarf anpassen, um Sonderzeichen einzuschließen.
 
 === "Klassische reCAPTCHA-Herausforderung"
 
@@ -274,34 +274,34 @@ Hinweis: Das obige Beispiel verwendet die Ziffern 2-9 und alle Buchstaben, die h
 
 === "hCaptcha-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "hcaptcha"
-ANTIBOT_HCAPTCHA_SITEKEY: "your-site-key"
-ANTIBOT_HCAPTCHA_SECRET: "your-secret-key"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "hcaptcha"
+    ANTIBOT_HCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_HCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "Turnstile-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "turnstile"
-ANTIBOT_TURNSTILE_SITEKEY: "your-site-key"
-ANTIBOT_TURNSTILE_SECRET: "your-secret-key"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "turnstile"
+    ANTIBOT_TURNSTILE_SITEKEY: "your-site-key"
+    ANTIBOT_TURNSTILE_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "mCaptcha-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "mcaptcha"
-ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
-ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
-ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "mcaptcha"
+    ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```

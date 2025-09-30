@@ -23,14 +23,14 @@ STREAM 支持 :warning:
 
 当 `MULTISITE` 设置为 `yes` 时，BunkerWeb 可以托管和保护多个网站，每个网站都有其独特的配置。此功能在以下场景中特别有用：
 
--   托管具有不同配置的多个域
--   运行具有不同安全要求的多个应用程序
--   对不同服务应用量身定制的安全策略
+- 托管具有不同配置的多个域
+- 运行具有不同安全要求的多个应用程序
+- 对不同服务应用量身定制的安全策略
 
 在多站点模式下，每个站点都由一个唯一的 `SERVER_NAME` 标识。要应用特定于站点的设置，请将主 `SERVER_NAME` 作为前缀添加到设置名称中。例如：
 
--   `www.example.com_USE_ANTIBOT=captcha` 为 `www.example.com` 启用验证码。
--   `myapp.example.com_USE_GZIP=yes` 为 `myapp.example.com` 启用 GZIP 压缩。
+- `www.example.com_USE_ANTIBOT=captcha` 为 `www.example.com` 启用验证码。
+- `myapp.example.com_USE_GZIP=yes` 为 `myapp.example.com` 启用 GZIP 压缩。
 
 这种方法可确保在多站点环境中将设置应用于正确的站点。
 
@@ -38,8 +38,8 @@ STREAM 支持 :warning:
 
 BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组设置，请在设置名称后附加一个数字后缀。例如：
 
--   `REVERSE_PROXY_URL_1=/subdir` 和 `REVERSE_PROXY_HOST_1=http://myhost1` 配置第一个反向代理。
--   `REVERSE_PROXY_URL_2=/anotherdir` 和 `REVERSE_PROXY_HOST_2=http://myhost2` 配置第二个反向代理。
+- `REVERSE_PROXY_URL_1=/subdir` 和 `REVERSE_PROXY_HOST_1=http://myhost1` 配置第一个反向代理。
+- `REVERSE_PROXY_URL_2=/anotherdir` 和 `REVERSE_PROXY_HOST_2=http://myhost2` 配置第二个反向代理。
 
 这种模式允许您为需要不同用例的不同值的功能（如反向代理、端口或其他设置）管理多个配置。
 
@@ -47,8 +47,8 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 `SECURITY_MODE` 设置决定了 BunkerWeb 如何处理检测到的威胁。这个灵活的功能允许您根据具体需求在监控或主动阻止可疑活动之间进行选择：
 
--   **`detect`**：记录潜在威胁而不阻止访问。此模式对于以安全、无干扰的方式识别和分析误报非常有用。
--   **`block`**（默认）：主动阻止检测到的威胁，同时记录事件以防止未经授权的访问并保护您的应用程序。
+- **`detect`**：记录潜在威胁而不阻止访问。此模式对于以安全、无干扰的方式识别和分析误报非常有用。
+- **`block`**（默认）：主动阻止检测到的威胁，同时记录事件以防止未经授权的访问并保护您的应用程序。
 
 切换到 `detect` 模式可以帮助您识别和解决潜在的误报，而不会干扰合法客户端。一旦这些问题得到解决，您就可以自信地切换回 `block` 模式以获得全面保护。
 
@@ -70,7 +70,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | ------------------ | ------------- | ------ | ---- | ---------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`         | global | 否   | **激活 API：** 激活 API 以控制 BunkerWeb。                                                     |
     | `API_HTTP_PORT`    | `5000`        | global | 否   | **API 端口：** API 的监听端口号。                                                              |
-    | `API_HTTPS_PORT`   | `6000`        | global | 否   | **API HTTPS 端口：** API 的监听端口号 (TLS)。                                                  |
+    | `API_HTTPS_PORT`   | `5443`        | global | 否   | **API HTTPS 端口：** API 的监听端口号 (TLS)。                                                  |
     | `API_LISTEN_HTTP`  | `yes`         | global | 否   | **API 监听 HTTP：** 启用 API 的 HTTP 监听器。                                                  |
     | `API_LISTEN_HTTPS` | `no`          | global | 否   | **API 监听 HTTPS：** 启用 API 的 HTTPS (TLS) 监听器。                                          |
     | `API_LISTEN_IP`    | `0.0.0.0`     | global | 否   | **API 监听 IP：** API 的监听 IP 地址。                                                         |
@@ -78,7 +78,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     | `API_WHITELIST_IP` | `127.0.0.0/8` | global | 否   | **API 白名单 IP：** 允许联系 API 的 IP/网络列表。                                              |
     | `API_TOKEN`        |               | global | 否   | **API 访问令牌（可选）：** 如果设置，所有 API 请求都必须包含 `Authorization: Bearer <token>`。 |
 
-    注意：出于引导原因，如果您启用 `API_TOKEN`，您必须在 BunkerWeb 实例和调度程序的**两个**环境中都设置它。当 `API_TOKEN` 存在于其环境中时，调度程序会自动包含 `Authorization` 标头。如果未设置，则不发送标头，BunkerWeb 将不强制执行令牌身份验证。您可以通过设置 `API_LISTEN_HTTPS=yes`（端口：`API_HTTPS_PORT`，默认 `6000`）通过 HTTPS 公开 API。
+    注意：出于引导原因，如果您启用 `API_TOKEN`，您必须在 BunkerWeb 实例和调度程序的**两个**环境中都设置它。当 `API_TOKEN` 存在于其环境中时，调度程序会自动包含 `Authorization` 标头。如果未设置，则不发送标头，BunkerWeb 将不强制执行令牌身份验证。您可以通过设置 `API_LISTEN_HTTPS=yes`（端口：`API_HTTPS_PORT`，默认 `5443`）通过 HTTPS 公开 API。
 
     使用 curl 的测试示例（替换令牌和主机）：
 
@@ -90,7 +90,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          --insecure \
-         https://<bunkerweb-host>:6000/ping
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "网络和端口设置"
@@ -210,7 +210,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
     USE_UDP: "no"
     ```
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :x:
@@ -744,7 +744,7 @@ bwcli plugin backup restore /path/to/backup/backup-sqlite-2023-08-15_12-34-56.zi
     BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
     ```
 
-## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :white_check_mark:
@@ -1306,12 +1306,12 @@ CORS 插件为您的网站启用跨源资源共享，允许从不同域受控地
 
 以下是 `CORS_ALLOW_ORIGIN` 设置的可能值及其行为的示例：
 
--   **`*`**：允许来自所有来源的请求。
--   **`self`**：自动允许来自与配置的 server_name 相同的来源的请求。
--   **`^https://www\.example\.com$`**：仅允许来自 `https://www.example.com` 的请求。
--   **`^https://.+\.example\.com$`**：允许来自以 `.example.com` 结尾的任何子域的请求。
--   **`^https://(www\.example1\.com|www\.example2\.com)$`**：允许来自 `https://www.example1.com` 或 `https://www.example2.com` 的请求。
--   **`^https?://www\.example\.com$`**：允许来自 `https://www.example.com` 和 `http://www.example.com` 的请求。
+- **`*`**：允许来自所有来源的请求。
+- **`self`**：自动允许来自与配置的 server_name 相同的来源的请求。
+- **`^https://www\.example\.com$`**：仅允许来自 `https://www.example.com` 的请求。
+- **`^https://.+\.example\.com$`**：允许来自以 `.example.com` 结尾的任何子域的请求。
+- **`^https://(www\.example1\.com|www\.example2\.com)$`**：允许来自 `https://www.example1.com` 或 `https://www.example2.com` 的请求。
+- **`^https?://www\.example\.com$`**：允许来自 `https://www.example.com` 和 `http://www.example.com` 的请求。
 
 === "基本配置"
 
@@ -1831,9 +1831,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 | `CROWDSEC_ALWAYS_SEND_TO_APPSEC`  | `no`          | global | 否   | **始终发送：** 设置为 `yes` 以始终将请求发送到 AppSec，即使存在 IP 级别的决策。   |
 | `CROWDSEC_APPSEC_SSL_VERIFY`      | `no`          | global | 否   | **SSL 验证：** 设置为 `yes` 以验证 AppSec 组件的 SSL 证书。                       |
 
-!!! info "关于操作模式"
-    -   **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。
-    -   **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
+!!! info "关于操作模式" - **实时模式**会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。- **流模式**会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。
 
 ### 示例配置
 
@@ -1916,7 +1914,6 @@ STREAM 支持 :white_check_mark:
 
 !!! info "证书链"
     如果您的证书包含一个链（中间证书），您应该按正确的顺序提供完整的证书链，首先是您的证书，然后是任何中间证书。
-
 
 ### 示例配置
 
@@ -2111,18 +2108,15 @@ STREAM 支持 :white_check_mark:
 
 ### 配置设置
 
-| 设置                     | 默认值                                    | 上下文 | 多个 | 描述                                                                                       |
-| ------------------------ | ----------------------------------------- | ------ | ---- | ------------------------------------------------------------------------------------------ |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global | 否   | **数据库 URI：** SQLAlchemy 格式的主数据库连接字符串。                                     |
-| `DATABASE_URI_READONLY`  |                                           | global | 否   | **只读数据库 URI：** 用于只读操作或在主数据库宕机时作为故障转移的可选数据库。              |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global | 否   | **日志级别：** 数据库日志的详细程度。选项：`debug`、`info`、`warn`、`warning` 或 `error`。 |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global | 否   | **最大作业运行次数：** 在自动清理之前，数据库中保留的作业执行记录的最大数量。              |
+| 设置                            | 默认值                                    | 上下文 | 多个 | 描述                                                                                       |
+| ------------------------------- | ----------------------------------------- | ------ | ---- | ------------------------------------------------------------------------------------------ |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global | 否   | **数据库 URI：** SQLAlchemy 格式的主数据库连接字符串。                                     |
+| `DATABASE_URI_READONLY`         |                                           | global | 否   | **只读数据库 URI：** 用于只读操作或在主数据库宕机时作为故障转移的可选数据库。              |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global | 否   | **日志级别：** 数据库日志的详细程度。选项：`debug`、`info`、`warn`、`warning` 或 `error`。 |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global | 否   | **最大作业运行次数：** 在自动清理之前，数据库中保留的作业执行记录的最大数量。              |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global | 否   | **会话保留：** UI 用户会话在自动清理前允许存在的最大天数。                                 |
 
-!!! tip "数据库选择"
-    -   **SQLite**（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。
-    -   **PostgreSQL**：由于其健壮性和并发支持，推荐用于具有多个 BunkerWeb 实例的生产环境。
-    -   **MySQL/MariaDB**：是 PostgreSQL 的一个很好的替代品，具有类似的生产级功能。
-    -   **Oracle**：适用于 Oracle 已经是标准数据库平台的企业环境。
+!!! tip "数据库选择" - **SQLite**（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。- **PostgreSQL**：由于其健壮性和并发支持，推荐用于具有多个 BunkerWeb 实例的生产环境。- **MySQL/MariaDB**：是 PostgreSQL 的一个很好的替代品，具有类似的生产级功能。- **Oracle**：适用于 Oracle 已经是标准数据库平台的企业环境。
 
 !!! info "SQLAlchemy URI 格式"
     数据库 URI 遵循 SQLAlchemy 格式：
@@ -2133,9 +2127,14 @@ STREAM 支持 :white_check_mark:
     -   Oracle: `oracle://username:password@hostname:port/database`
 
 !!! warning "数据库维护"
-    该插件会自动运行一个每日作业，根据 `DATABASE_MAX_JOBS_RUNS` 设置清理多余的作业运行记录。这可以防止数据库无限增长，同时保留有用的作业执行历史记录。
+    该插件会自动运行每日维护作业：
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+- **清理多余的作业运行记录：** 根据 `DATABASE_MAX_JOBS_RUNS` 限制清除超出的历史。
+- **清理过期的 UI 会话：** 删除超过 `DATABASE_MAX_SESSION_AGE_DAYS` 的 UI 用户会话。
+
+这些作业可以防止数据库无限增长，同时保留有价值的运行历史。
+
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :x:
@@ -2153,8 +2152,8 @@ STREAM 支持 :x:
 1.  当客户端遇到 HTTP 错误（例如，400、404 或 500）时，BunkerWeb 会拦截错误响应。
 2.  BunkerWeb 会显示一个自定义的、专业设计的错误页面，而不是显示默认的错误页面。
 3.  错误页面可以通过您的配置完全定制，允许您为特定的错误代码指定自定义页面。**自定义错误页面文件必须放置在由 `ROOT_FOLDER` 设置定义的目录中（请参阅杂项插件文档）。**
-    -   默认情况下，`ROOT_FOLDER` 是 `/var/www/html/{server_name}`（其中 `{server_name}` 会被实际的服务器名称替换）。
-    -   在多站点模式下，每个站点都可以有自己的 `ROOT_FOLDER`，因此自定义错误页面必须放置在每个站点的相应目录中。
+    - 默认情况下，`ROOT_FOLDER` 是 `/var/www/html/{server_name}`（其中 `{server_name}` 会被实际的服务器名称替换）。
+    - 在多站点模式下，每个站点都可以有自己的 `ROOT_FOLDER`，因此自定义错误页面必须放置在每个站点的相应目录中。
 4.  默认的错误页面提供了清晰的解释，帮助用户了解出了什么问题以及他们接下来可以做什么。
 
 ### 如何使用
@@ -2224,7 +2223,7 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
 
 **工作原理：**
 
-1.  您定义了要被列入灰名单的访问者的标准（*IP 地址、网络、rDNS、ASN、用户代理或 URI 模式*）。
+1.  您定义了要被列入灰名单的访问者的标准（_IP 地址、网络、rDNS、ASN、用户代理或 URI 模式_）。
 2.  当访问者匹配这些标准中的任何一个时，他们将被授予访问您网站的权限，而其他安全功能仍然有效。
 3.  如果访问者不匹配任何灰名单标准，他们的访问将被拒绝。
 4.  灰名单数据可以定期从外部来源自动更新。
@@ -2301,7 +2300,6 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
 
 !!! tip "定期更新"
     来自 URL 的灰名单会每小时自动下载和更新，以确保您的保护始终与最新的受信任来源保持同步。
-
 
 ### 示例配置
 
@@ -2479,17 +2477,9 @@ HTML 注入插件允许您无缝地将自定义 HTML 代码添加到您网站页
 | `INJECT_HEAD` |        | multisite | 否   | **头部 HTML 代码：** 在 `</head>` 标签前注入的 HTML 代码。 |
 | `INJECT_BODY` |        | multisite | 否   | **主体 HTML 代码：** 在 `</body>` 标签前注入的 HTML 代码。 |
 
-!!! tip "最佳实践"
-    - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。
-    - 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。
-    - 请谨慎处理可能破坏您网站功能的注入内容。
+!!! tip "最佳实践" - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。- 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。- 请谨慎处理可能破坏您网站功能的注入内容。
 
-!!! info "常见用例"
-    - 添加分析脚本（如 Google Analytics, Matomo）
-    - 集成聊天小部件或客户支持工具
-    - 为营销活动添加跟踪像素
-    - 添加自定义 CSS 样式或 JavaScript 功能
-    - 无需修改应用程序代码即可引入第三方库
+!!! info "常见用例" - 添加分析脚本（如 Google Analytics, Matomo）- 集成聊天小部件或客户支持工具 - 为营销活动添加跟踪像素 - 添加自定义 CSS 样式或 JavaScript 功能 - 无需修改应用程序代码即可引入第三方库
 
 ### 配置示例
 
@@ -2706,11 +2696,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 6.  **让 BunkerWeb 处理其余部分：** 配置完成后，证书将根据需要自动颁发、安装和续订。
 
 !!! tip "证书配置文件"
-    Let's Encrypt 为不同的用例提供了不同的证书配置文件：
-    - **classic**：通用证书，有效期为 90 天（默认）
-    - **tlsserver**：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小
-    - **shortlived**：增强安全性，有效期为 7 天，适用于自动化环境
-    - **custom**：如果您的 ACME 服务器支持不同的配置文件，请使用 `LETS_ENCRYPT_CUSTOM_PROFILE` 进行设置。
+    Let's Encrypt 为不同的用例提供了不同的证书配置文件：- **classic**：通用证书，有效期为 90 天（默认）- **tlsserver**：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小 - **shortlived**：增强安全性，有效期为 7 天，适用于自动化环境 - **custom**：如果您的 ACME 服务器支持不同的配置文件，请使用 `LETS_ENCRYPT_CUSTOM_PROFILE` 进行设置。
 
 !!! info "配置文件可用性"
     请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。
@@ -2733,11 +2719,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 | `LETS_ENCRYPT_CUSTOM_PROFILE`      |                          | multisite | 否   | **自定义证书配置文件：** 如果您的 ACME 服务器支持非标准配置文件，请输入自定义证书配置文件。如果设置了此项，它将覆盖 `LETS_ENCRYPT_PROFILE`。          |
 | `LETS_ENCRYPT_MAX_RETRIES`         | `3`                      | multisite | 否   | **最大重试次数：** 证书生成失败时重试的次数。设置为 `0` 以禁用重试。用于处理临时网络问题或 API 速率限制。                                             |
 
-!!! info "信息和行为"
-    - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。
-    - 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。
-    - 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。
-    - 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
+!!! info "信息和行为" - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。- 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。- 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。- 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
 
 !!! tip "HTTP 与 DNS 验证"
     **HTTP 验证** 更容易设置，并且适用于大多数网站：
@@ -2758,7 +2740,6 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 
 !!! warning "速率限制"
     Let's Encrypt 对证书颁发施加速率限制。在测试配置时，通过将 `USE_LETS_ENCRYPT_STAGING` 设置为 `yes` 来使用测试环境，以避免达到生产环境的速率限制。测试证书不受浏览器信任，但对于验证您的设置很有用。
-
 
 ### 支持的 DNS 提供商
 
@@ -2874,8 +2855,8 @@ STREAM 支持 :warning:
 
 BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执行限制策略，确保公平使用并保护您的资源免受滥用、拒绝服务攻击和过度的资源消耗。这些策略包括：
 
--   **每个 IP 地址的连接数** (流支持 :white_check_mark:)
--   **在特定时间段内每个 IP 地址和 URL 的请求数** (流支持 :x:)
+- **每个 IP 地址的连接数** (流支持 :white_check_mark:)
+- **在特定时间段内每个 IP 地址和 URL 的请求数** (流支持 :x:)
 
 ### 工作原理
 
@@ -2920,9 +2901,7 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
     | `LIMIT_CONN_MAX_HTTP3`  | `100`  | multisite | 否   | **HTTP/3 流数：** 每个 IP 地址的最大并发 HTTP/3 流数。         |
     | `LIMIT_CONN_MAX_STREAM` | `10`   | multisite | 否   | **流连接数：** 每个 IP 地址的最大并发流连接数。                |
 
-!!! info "连接限制与请求限制"
-    -   **连接限制** 限制单个 IP 地址可以维持的并发连接数。
-    -   **请求速率限制** 限制一个 IP 地址在定义的时间段内可以发出的请求数。
+!!! info "连接限制与请求限制" - **连接限制** 限制单个 IP 地址可以维持的并发连接数。- **请求速率限制** 限制一个 IP 地址在定义的时间段内可以发出的请求数。
 
     同时使用这两种方法可以全面防护各种类型的滥用。
 
@@ -3021,7 +3000,7 @@ BunkerWeb 中的限制插件提供了强大的功能来对您的网站强制执�
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :x:
@@ -3036,6 +3015,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global | 是     | Load balancing mode (round-robin or sticky).                       |
 | `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global | 是     | Sticky session method (ip or cookie).                              |
 | `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global | 是     | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global | 是     | Number of keepalive connections to cache per worker.               |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global | 是     | Keepalive timeout for upstream connections.                        |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global | 是     | Keepalive time for upstream connections.                           |
 | `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global | 是     | The healthcheck URL.                                               |
@@ -3068,12 +3048,12 @@ STREAM 支持 :warning:
 
 指标插件的工作方式如下：
 
--   在 NGINX 中使用共享字典，其中 `metrics_datastore` 用于 HTTP，`metrics_datastore_stream` 用于 TCP/UDP 流量
--   利用 LRU 缓存进行高效的内存存储
--   使用计时器在工作进程之间定期同步数据
--   存储有关被阻止请求的详细信息，包括客户端 IP 地址、国家/地区、时间戳、请求详情和阻止原因
--   通过通用的指标收集接口支持插件特定的指标
--   提供用于查询收集到的指标的 API 端点
+- 在 NGINX 中使用共享字典，其中 `metrics_datastore` 用于 HTTP，`metrics_datastore_stream` 用于 TCP/UDP 流量
+- 利用 LRU 缓存进行高效的内存存储
+- 使用计时器在工作进程之间定期同步数据
+- 存储有关被阻止请求的详细信息，包括客户端 IP 地址、国家/地区、时间戳、请求详情和阻止原因
+- 通过通用的指标收集接口支持插件特定的指标
+- 提供用于查询收集到的指标的 API 端点
 
 ### 如何使用
 
@@ -3090,14 +3070,14 @@ STREAM 支持 :warning:
 指标插件收集以下信息：
 
 1.  **被阻止的请求**：对于每个被阻止的请求，将存储以下数据：
-    *   请求 ID 和时间戳
-    *   客户端 IP 地址和国家/地区（如果可用）
-    *   HTTP 方法和 URL
-    *   HTTP 状态码
-    *   用户代理
-    *   阻止原因和安全模式
-    *   服务器名称
-    *   与阻止原因相关的其他数据
+    - 请求 ID 和时间戳
+    - 客户端 IP 地址和国家/地区（如果可用）
+    - HTTP 方法和 URL
+    - HTTP 状态码
+    - 用户代理
+    - 阻止原因和安全模式
+    - 服务器名称
+    - 与阻止原因相关的其他数据
 
 2.  **插件计数器**：跟踪活动和事件的各种插件特定计数器。
 
@@ -3105,10 +3085,10 @@ STREAM 支持 :warning:
 
 指标数据可以通过 BunkerWeb 的内部 API 端点访问：
 
--   **端点**：`/metrics/{filter}`
--   **方法**：GET
--   **描述**：根据指定的过滤器检索指标数据
--   **响应格式**：包含所请求指标的 JSON 对象
+- **端点**：`/metrics/{filter}`
+- **方法**：GET
+- **描述**：根据指定的过滤器检索指标数据
+- **响应格式**：包含所请求指标的 JSON 对象
 
 例如，`/metrics/requests` 返回有关被阻止请求的信息。
 
@@ -3208,7 +3188,7 @@ STREAM 支持 :warning:
     USE_METRICS: "no"
     ```
 
-## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :white_check_mark:
@@ -3221,11 +3201,11 @@ STREAM 支持 :warning:
 
 杂项插件提供了**必要的基准设置**，有助于维护您网站的安全性和功能性。这个核心组件提供了全面的控制，包括：
 
--   **服务器行为** - 配置您的服务器如何响应各种请求
--   **HTTP 设置** - 管理方法、请求大小和协议选项
--   **文件管理** - 控制静态文件的提供并优化交付
--   **协议支持** - 启用现代 HTTP 协议以获得更好的性能
--   **系统配置** - 扩展功能并提高安全性
+- **服务器行为** - 配置您的服务器如何响应各种请求
+- **HTTP 设置** - 管理方法、请求大小和协议选项
+- **文件管理** - 控制静态文件的提供并优化交付
+- **协议支持** - 启用现代 HTTP 协议以获得更好的性能
+- **系统配置** - 扩展功能并提高安全性
 
 无论您是需要限制 HTTP 方法、管理请求大小、优化文件缓存，还是控制服务器如何响应各种请求，此插件都为您提供了**微调 Web 服务行为**的工具，同时优化了性能和安全性。
 
@@ -3570,9 +3550,9 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
 选择一个 CRS 版本以最符合您的安全需求：
 
--   **`3`**：稳定版 [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7)。
--   **`4`**：稳定版 [v4.18.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0) (**默认**)。
--   **`nightly`**：[每日构建版](https://github.com/coreruleset/coreruleset/releases/tag/nightly)，提供最新的规则更新。
+- **`3`**：稳定版 [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7)。
+- **`4`**：稳定版 [v4.18.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0) (**默认**)。
+- **`nightly`**：[每日构建版](https://github.com/coreruleset/coreruleset/releases/tag/nightly)，提供最新的规则更新。
 
 !!! example "每日构建版"
     **每日构建版**包含最新的规则，提供针对新兴威胁的最新保护。然而，由于它每天更新，并且可能包含实验性或未经测试的更改，建议在将其部署到生产环境之前，首先在**预演环境**中使用每日构建版。
@@ -3591,10 +3571,10 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
 可以通过自定义配置来调整 ModSecurity 和 OWASP 核心规则集 (CRS)。这些配置允许您在安全规则处理的特定阶段自定义行为：
 
--   **`modsec-crs`**：在加载 OWASP 核心规则集**之前**应用。
--   **`modsec`**：在加载 OWASP 核心规则集**之后**应用。如果根本没有加载 CRS，也会使用此配置。
--   **`crs-plugins-before`**：在加载 CRS 插件**之前**应用。
--   **`crs-plugins-after`**：在加载 CRS 插件**之后**应用。
+- **`modsec-crs`**：在加载 OWASP 核心规则集**之前**应用。
+- **`modsec`**：在加载 OWASP 核心规则集**之后**应用。如果根本没有加载 CRS，也会使用此配置。
+- **`crs-plugins-before`**：在加载 CRS 插件**之前**应用。
+- **`crs-plugins-after`**：在加载 CRS 插件**之后**应用。
 
 这种结构提供了灵活性，允许您根据应用程序的特定需求微调 ModSecurity 和 CRS 设置，同时保持清晰的配置流程。
 
@@ -3614,8 +3594,8 @@ SecAction \
 
 在此示例中：
 
--   该操作在**阶段 1**（请求生命周期的早期）执行。
--   它通过设置变量 `tx.crs_exclusions_wordpress` 来启用 WordPress 特定的 CRS 排除项。
+- 该操作在**阶段 1**（请求生命周期的早期）执行。
+- 它通过设置变量 `tx.crs_exclusions_wordpress` 来启用 WordPress 特定的 CRS 排除项。
 
 #### 使用 `modsec` 更新 CRS 规则
 
@@ -3629,9 +3609,9 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 
 在此示例中：
 
--   **规则 1**：为对 `/wp-admin/admin-ajax.php` 的请求删除标记为 `attack-xss` 和 `attack-rce` 的规则。
--   **规则 2**：为对 `/wp-admin/options.php` 的请求删除标记为 `attack-xss` 的规则。
--   **规则 3**：为匹配 `/wp-json/yoast` 的请求删除特定规则（ID `930120`）。
+- **规则 1**：为对 `/wp-admin/admin-ajax.php` 的请求删除标记为 `attack-xss` 和 `attack-rce` 的规则。
+- **规则 2**：为对 `/wp-admin/options.php` 的请求删除标记为 `attack-xss` 的规则。
+- **规则 3**：为匹配 `/wp-json/yoast` 的请求删除特定规则（ID `930120`）。
 
 !!! info "执行顺序"
     BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰和逻辑性：
@@ -3746,7 +3726,7 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
 !!! note "人类可读的大小值"
     对于像 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 这样的 大小设置，支持 `k`、`m` 和 `g`（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：`256k` = 262144，`1m` = 1048576，`2g` = 2147483648。
 
-## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :x:
@@ -3904,12 +3884,12 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 
 答：当然可以！BunkerWeb 提供两种 Pro 计划以满足您的需求：
 
--   **BunkerWeb PRO Standard：** 完全访问 Pro 功能，但不提供技术支持。
--   **BunkerWeb PRO Enterprise：** 完全访问 Pro 功能，并提供专属技术支持。
+- **BunkerWeb PRO Standard：** 完全访问 Pro 功能，但不提供技术支持。
+- **BunkerWeb PRO Enterprise：** 完全访问 Pro 功能，并提供专属技术支持。
 
 您可以使用促销码 `freetrial` 免费试用 Pro 功能 1 个月。请访问 [BunkerWeb 面板](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) 激活您的试用，并了解更多关于基于 BunkerWeb PRO 保护的服务数量的灵活定价选项。
 
-## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :x:
@@ -4077,9 +4057,7 @@ STREAM 支持 :x:
 | `REDIRECT_TO_REQUEST_URI` | `no`   | multisite | 是   | **保留路径：** 设置为 `yes` 时，将原始请求 URI 附加到目标 URL。                   |
 | `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | 是   | **HTTP 状态码：** 用于重定向的 HTTP 状态码。选项：`301`（永久）或 `302`（临时）。 |
 
-!!! tip "选择正确的状态码"
-    - 当重定向是永久性的时，例如域名迁移或建立规范 URL，请使用 `301`（永久移动）。这有助于搜索引擎更新其索引。
-    - 当重定向是临时性的，或者如果您将来可能想重新使用原始 URL，请使用 `302`（找到/临时重定向）。
+!!! tip "选择正确的状态码" - 当重定向是永久性的时，例如域名迁移或建立规范 URL，请使用 `301`（永久移动）。这有助于搜索引擎更新其索引。- 当重定向是临时性的，或者如果您将来可能想重新使用原始 URL，请使用 `302`（找到/临时重定向）。
 
 !!! info "路径保留"
     当 `REDIRECT_TO_REQUEST_URI` 设置为 `yes` 时，BunkerWeb 会保留原始请求路径。例如，如果用户访问 `https://old-domain.com/blog/post-1`，并且您已设置为重定向到 `https://new-domain.com`，他们将被重定向到 `https://new-domain.com/blog/post-1`。
@@ -4269,29 +4247,32 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 在使用 Redis 或 Valkey 与 BunkerWeb 时，请考虑以下最佳实践以确保最佳性能、安全性和可靠性：
 
 #### 内存管理
--   **监控内存使用情况：** 使用适当的 `maxmemory` 设置配置 Redis，以防止内存不足错误
--   **设置淘汰策略：** 使用适合您用例的 `maxmemory-policy`（例如 `volatile-lru` 或 `allkeys-lru`）
--   **避免大键：** 确保将单个 Redis 键保持在合理的大小，以防止性能下降
+
+- **监控内存使用情况：** 使用适当的 `maxmemory` 设置配置 Redis，以防止内存不足错误
+- **设置淘汰策略：** 使用适合您用例的 `maxmemory-policy`（例如 `volatile-lru` 或 `allkeys-lru`）
+- **避免大键：** 确保将单个 Redis 键保持在合理的大小，以防止性能下降
 
 #### 数据持久性
--   **启用 RDB 快照：** 配置定期快照以实现数据持久性，而不会对性能产生重大影响
--   **考虑 AOF：** 对于关键数据，启用具有适当 fsync 策略的 AOF（仅追加文件）持久性
--   **备份策略：** 将定期 Redis 备份作为灾难恢复计划的一部分
+
+- **启用 RDB 快照：** 配置定期快照以实现数据持久性，而不会对性能产生重大影响
+- **考虑 AOF：** 对于关键数据，启用具有适当 fsync 策略的 AOF（仅追加文件）持久性
+- **备份策略：** 将定期 Redis 备份作为灾难恢复计划的一部分
 
 #### 性能优化
--   **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践
--   **管道：** 如果可能，请使用管道进行批量操作以减少网络开销
--   **避免昂贵的操作：** 在生产环境中谨慎使用像 KEYS 这样的命令
--   **对您的工作负载进行基准测试：** 使用 redis-benchmark 测试您的特定工作负载模式
+
+- **连接池：** BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践
+- **管道：** 如果可能，请使用管道进行批量操作以减少网络开销
+- **避免昂贵的操作：** 在生产环境中谨慎使用像 KEYS 这样的命令
+- **对您的工作负载进行基准测试：** 使用 redis-benchmark 测试您的特定工作负载模式
 
 ### 更多资源
 
--   [Redis 文档](https://redis.io/documentation)
--   [Redis 安全指南](https://redis.io/topics/security)
--   [Redis 高可用性](https://redis.io/topics/sentinel)
--   [Redis 持久性](https://redis.io/topics/persistence)
+- [Redis 文档](https://redis.io/documentation)
+- [Redis 安全指南](https://redis.io/topics/security)
+- [Redis 高可用性](https://redis.io/topics/sentinel)
+- [Redis 持久性](https://redis.io/topics/persistence)
 
-## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :x:
@@ -4754,10 +4735,10 @@ Robots.txt 插件为您的网站管理 [robots.txt](https://www.robotstxt.org/) 
 
 1.  **启用该功能：** 将 `USE_ROBOTSTXT` 设置为 `yes`。
 2.  **配置规则：** 选择一种或多种方法来定义您的 `robots.txt` 规则：
-    -   **DarkVisitors API：** 提供 `ROBOTSTXT_DARKVISITORS_TOKEN`，并可选择性地提供 `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` 和 `ROBOTSTXT_DARKVISITORS_DISALLOW`。
-    -   **社区列表：** 指定 `ROBOTSTXT_COMMUNITY_LISTS`（以空格分隔的 ID）。
-    -   **自定义 URL：** 提供 `ROBOTSTXT_URLS`（以空格分隔的 URL）。
-    -   **手动规则：** 使用 `ROBOTSTXT_RULE` 定义单个规则（可以使用 `ROBOTSTXT_RULE_N` 指定多个规则）。
+    - **DarkVisitors API：** 提供 `ROBOTSTXT_DARKVISITORS_TOKEN`，并可选择性地提供 `ROBOTSTXT_DARKVISITORS_AGENT_TYPES` 和 `ROBOTSTXT_DARKVISITORS_DISALLOW`。
+    - **社区列表：** 指定 `ROBOTSTXT_COMMUNITY_LISTS`（以空格分隔的 ID）。
+    - **自定义 URL：** 提供 `ROBOTSTXT_URLS`（以空格分隔的 URL）。
+    - **手动规则：** 使用 `ROBOTSTXT_RULE` 定义单个规则（可以使用 `ROBOTSTXT_RULE_N` 指定多个规则）。
 3.  **过滤规则（可选）：** 使用 `ROBOTSTXT_IGNORE_RULE_N` 通过正则表达式模式排除特定规则。
 4.  **添加站点地图（可选）：** 使用 `ROBOTSTXT_SITEMAP_N` 定义站点地图 URL。
 5.  **获取生成的 robots.txt 文件：** 在 BunkerWeb 使用上述设置运行后，您可以通过向 `http(s)://your-domain.com/robots.txt` 发出 HTTP GET 请求来访问动态生成的 `robots.txt` 文件。
@@ -4782,7 +4763,7 @@ Robots.txt 插件为您的网站管理 [robots.txt](https://www.robotstxt.org/) 
 
 **基本手动规则**
 
-```yaml
+````yaml
 USE_ROBOTSTXT: "yes"
 ROBOTSTXT_RULE: "User-agent: *"
 ROBOTSTXT_RULE_1: "Disallow: /private"
@@ -4796,7 +4777,7 @@ ROBOTSTXT_DARKVISITORS_TOKEN: "your-darkvisitors-token-here"
 ROBOTSTXT_DARKVISITORS_AGENT_TYPES: "AI Data Scraper"
 ROBOTSTXT_COMMUNITY_LISTS: "robots-disallowed"
 ROBOTSTT_IGNORE_RULE: "User-agent: Googlebot-Image"
-```
+````
 
 **组合配置**
 
@@ -4839,11 +4820,7 @@ SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功�
 3.  优化的 SSL 会话参数可在不牺牲安全性的情况下提高连接性能。
 4.  证书的呈现根据最佳实践进行配置，以确保兼容性和安全性。
 
-!!! success "安全优势"
-    - **数据保护：** 加密传输中的数据，防止窃听和中间人攻击
-    - **身份验证：** 向客户端验证您服务器的身份
-    - **完整性：** 确保数据在传输过程中未被篡改
-    - **现代标准：** 配置符合行业最佳实践和安全标准
+!!! success "安全优势" - **数据保护：** 加密传输中的数据，防止窃听和中间人攻击 - **身份验证：** 向客户端验证您服务器的身份 - **完整性：** 确保数据在传输过程中未被篡改 - **现代标准：** 配置符合行业最佳实践和安全标准
 
 ### 如何使用
 
@@ -4862,7 +4839,6 @@ SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功�
 | `SSL_PROTOCOLS`               | `TLSv1.2 TLSv1.3` | multisite | 否   | **SSL 协议：** 要支持的 SSL/TLS 协议的空格分隔列表。                                               |
 | `SSL_CIPHERS_LEVEL`           | `modern`          | multisite | 否   | **SSL 密码级别：** 密码套件的预设安全级别（`modern`、`intermediate` 或 `old`）。                   |
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | 否   | **自定义 SSL 密码：** 用于 SSL/TLS 连接的密码套件的冒号分隔列表（覆盖级别）。                      |
-
 
 !!! tip "SSL Labs 测试"
     配置 SSL 设置后，请使用 [Qualys SSL Labs 服务器测试](https://www.ssllabs.com/ssltest/) 来验证您的配置并检查潜在的安全问题。一个正确的 BunkerWeb SSL 配置应该能获得 A+ 评级。
@@ -5206,7 +5182,7 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`  | `no`   | multisite | 否     | Use UI                                       |
 | `UI_HOST` |        | global    | 否     | Address of the web UI used for initial setup |
 
-## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM 支持 :x:
@@ -5228,7 +5204,7 @@ STREAM 支持 :warning:
 
 **工作原理：**
 
-1.  您定义应被“列入白名单”的访问者的标准（*IP 地址、网络、反向 DNS、ASN、用户代理或 URI 模式*）。
+1.  您定义应被“列入白名单”的访问者的标准（_IP 地址、网络、反向 DNS、ASN、用户代理或 URI 模式_）。
 2.  当访问者尝试访问您的网站时，BunkerWeb 会检查他们是否符合任何这些白名单标准。
 3.  如果访问者符合任何白名单规则（并且不符合任何忽略规则），他们将被授予访问您网站的权限，并**绕过所有其他安全检查**。
 4.  如果访问者不符合任何白名单标准，他们将照常通过所有正常的安全检查。
@@ -5314,7 +5290,6 @@ STREAM 支持 :warning:
 
 !!! warning "安全绕过"
     被列入白名单的访问者将完全**绕过 BunkerWeb 中的所有其他安全检查**，包括 WAF 规则、速率限制、恶意机器人检测以及任何其他安全机制。仅对您绝对信任的来源使用白名单。
-
 
 ### 配置示例
 

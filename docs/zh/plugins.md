@@ -89,7 +89,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - ./bw-data:/data
     ...
@@ -125,7 +125,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - ./bw-data:/data
     ...
@@ -168,7 +168,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -215,7 +215,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+              image: bunkerity/bunkerweb-scheduler:1.6.5
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -255,7 +255,7 @@ BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件�
 
 !!! tip "现有插件"
 
-    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
+    如果文档不够，您可以查看[官方插件](https://github.com/bunkerity/bunkerweb-plugins)和[核心插件](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/common/core)的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。
 
 插件结构如下所示：
 ```
@@ -344,6 +344,7 @@ cd myplugin
 |   `stream`    |  是   | 字符串 | 关于流支持的信息：`no`、`yes` 或 `partial`。                                |
 |  `settings`   |  是   |  字典  | 您的插件的设置列表。                                                        |
 |    `jobs`     |  否   |  列表  | 您的插件的作业列表。                                                        |
+|    `bwcli`    |  否   |  字典  | 将 CLI 命令名称映射到存储在插件 'bwcli' 目录中的文件，以公开 CLI 插件。 |
 
 每个设置都有以下字段（键是在配置中使用的设置的 ID）：
 
@@ -366,6 +367,24 @@ cd myplugin
 | `name`  |  是   | 字符串 | 作业的名称。                                                                                      |
 | `file`  |  是   | 字符串 | 作业文件夹内的文件名。                                                                            |
 | `every` |  是   | 字符串 | 作业调度频率：`minute`、`hour`、`day`、`week` 或 `once`（无频率，仅在（重新）生成配置之前一次）。 |
+
+### CLI 命令
+
+插件可以使用在 `bwcli plugin <plugin_id> ...` 下运行的自定义命令扩展 `bwcli` 工具：
+
+1. 在您的插件中添加一个 `bwcli` 目录，并为每个命令放置一个文件（例如 `bwcli/list.py`）。CLI 在执行文件之前将插件路径添加到 `sys.path`。
+2. 在 `plugin.json` 的可选 `bwcli` 部分中声明命令，将每个命令名称映射到其可执行文件名。
+
+```json
+{
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py"
+  }
+}
+```
+
+一旦安装了插件，调度程序就会自动公开声明的命令。核心插件（例如 `src/common/core/backup` 中的 `backup`）也遵循相同的模式。
 
 ### 配置
 
@@ -541,7 +560,7 @@ end
 
 !!! tip "更多示例"
 
-    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/src/bw/lua/bunkerweb)中存在的文件。
+    如果您想查看可用函数的完整列表，可以查看仓库的 [lua 目录](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/bw/lua/bunkerweb)中存在的文件。
 
 ### 作业
 

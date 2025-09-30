@@ -1,14 +1,24 @@
 # Changelog
 
-## v1.6.5-rc4 - ????/??/??
+## v1.6.5 - ????/??/??
 
 - [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
+- [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes
 - [FEATURE] Add the possibility use HTTPS with BunkerWeb's internal API
 - [FEATURE] Add reason data for bad behavior bans/reports
+- [FEATURE] Add session retention configuration via the `DATABASE_MAX_SESSION_AGE_DAYS` setting in the `Database` plugin and automatic cleanup job to purge old UI user sessions from the database
 - [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
 - [UI] Tweak the bad behavior details to look nice in the report page
+- [UI] Prevent renaming of template-based custom configs in update and edit functions for consistency
+- [UI] Fix template config not being editable in service easy mode
+- [UI] Introduce a `Templates` management page to create, edit, clone and delete service templates.
+- [UI] Add new `Template` column in the services page to display the template a service is based on (if any) and allow filtering by template.
+- [MISC] Update default value for Permissions-Policy header to include additional features and remove the deprecated ones
 - [DOCS] Add multi-language support to the documentation, including French, German, Spanish and Chinese (Mandarin) translations.
+- [DOCS] Add documentation about the possibility to extend bwcli via plugins commands
+- [DOCS] Add Docker logging best practices to advanced documentation
 - [DEPS] Updated luajit2 version to v2.1-20250826
+- [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the `Let's Encrypt` plugin.
 
 ## v1.6.5-rc3 - 2025/09/16
 

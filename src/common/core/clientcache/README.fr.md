@@ -31,27 +31,27 @@ Contenu fréquemment mis à jour : durée plus courte. Contenu versionné ou pe
 
 === "Basique"
 
-```yaml
-USE_CLIENT_CACHE: "yes"
-CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|gif|css|js|svg|woff|woff2"
-CLIENT_CACHE_CONTROL: "public, max-age=86400"
-CLIENT_CACHE_ETAG: "yes"
-```
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|gif|css|js|svg|woff|woff2"
+    CLIENT_CACHE_CONTROL: "public, max-age=86400"
+    CLIENT_CACHE_ETAG: "yes"
+    ```
 
 === "Agressif"
 
-```yaml
-USE_CLIENT_CACHE: "yes"
-CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2|pdf|xml|txt"
-CLIENT_CACHE_CONTROL: "public, max-age=31536000, immutable"
-CLIENT_CACHE_ETAG: "yes"
-```
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2|pdf|xml|txt"
+    CLIENT_CACHE_CONTROL: "public, max-age=31536000, immutable"
+    CLIENT_CACHE_ETAG: "yes"
+    ```
 
 === "Mixte"
 
-```yaml
-USE_CLIENT_CACHE: "yes"
-CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2"
-CLIENT_CACHE_CONTROL: "public, max-age=604800"
-CLIENT_CACHE_ETAG: "yes"
-```
+    ```yaml
+    USE_CLIENT_CACHE: "yes"
+    CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|gif|css|js|otf|ttf|eot|woff|woff2"
+    CLIENT_CACHE_CONTROL: "public, max-age=604800"
+    CLIENT_CACHE_ETAG: "yes"
+    ```

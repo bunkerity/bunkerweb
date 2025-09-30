@@ -70,6 +70,7 @@ from app.routes.services import services
 from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
+from app.routes.templates import templates as templates_bp
 
 BLUEPRINTS = (
     about,
@@ -88,6 +89,7 @@ BLUEPRINTS = (
     logs,
     login,
     configs,
+    templates_bp,
     bans,
     setup,
     support,

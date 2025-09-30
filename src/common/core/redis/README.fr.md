@@ -45,42 +45,42 @@ Configurez Redis Sentinel pour un failover automatique en production.
 
 === "Configuration basique"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "localhost"
-REDIS_PORT: "6379"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "localhost"
+    REDIS_PORT: "6379"
+    ```
 
 === "Configuration sécurisée"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "redis.example.com"
-REDIS_PORT: "6379"
-REDIS_PASSWORD: "your-strong-password"
-REDIS_SSL: "yes"
-REDIS_SSL_VERIFY: "yes"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "redis.example.com"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: "your-strong-password"
+    REDIS_SSL: "yes"
+    REDIS_SSL_VERIFY: "yes"
+    ```
 
 === "Redis Sentinel"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
-REDIS_SENTINEL_MASTER: "mymaster"
-REDIS_SENTINEL_PASSWORD: "sentinel-password"
-REDIS_PASSWORD: "redis-password"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
+    REDIS_SENTINEL_MASTER: "mymaster"
+    REDIS_SENTINEL_PASSWORD: "sentinel-password"
+    REDIS_PASSWORD: "redis-password"
+    ```
 
 === "Tuning avancé"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "redis.example.com"
-REDIS_PORT: "6379"
-REDIS_PASSWORD: "your-strong-password"
-REDIS_DATABASE: "3"
-REDIS_TIMEOUT: "3"
-REDIS_KEEPALIVE_IDLE: "60"
-REDIS_KEEPALIVE_POOL: "5"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "redis.example.com"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: "your-strong-password"
+    REDIS_DATABASE: "3"
+    REDIS_TIMEOUT: "3"
+    REDIS_KEEPALIVE_IDLE: "60"
+    REDIS_KEEPALIVE_POOL: "5"
+    ```

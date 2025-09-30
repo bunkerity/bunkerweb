@@ -1,8 +1,8 @@
 # 高级用法
 
-GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/examples) 文件夹中提供了许多真实世界的用例示例。
+GitHub 仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) 文件夹中提供了许多真实世界的用例示例。
 
-我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/misc/integrations) 文件夹中找到。
+我们还提供了许多样板文件，例如用于各种集成和数据库类型的 YAML 文件。这些都可以在 [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations) 文件夹中找到。
 
 本节仅关注高级用法和安全调整，请参阅文档的[功能部分](features.md)以查看所有可用的设置。
 
@@ -87,7 +87,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+            bunkerity/bunkerweb-all-in-one:1.6.5
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -98,7 +98,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +106,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +123,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +131,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -178,7 +178,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +186,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+            bunkerity/bunkerweb-all-in-one:1.6.5
         ```
 
         请注意，如果您的容器已经创建，您需要删除并重新创建它，以便更新新的环境变量。
@@ -262,7 +262,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +272,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +290,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +300,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -352,7 +352,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +362,7 @@ BunkerWeb 实际上支持两种方法来检索客户端的真实 IP 地址：
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -514,7 +514,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
 === "Docker"
@@ -542,7 +542,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -553,7 +553,7 @@ systemctl status systemd-resolved
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -667,7 +667,7 @@ systemctl status systemd-resolved
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -707,7 +707,7 @@ systemctl status systemd-resolved
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
 === "Docker"
@@ -730,7 +730,7 @@ systemctl status systemd-resolved
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -773,7 +773,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       volumes:
         - ./bw-data:/data
       ...
@@ -843,7 +843,7 @@ systemctl status systemd-resolved
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       volumes:
         - ./bw-data:/data
       ...
@@ -1055,7 +1055,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1078,7 +1078,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1093,7 +1093,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -1144,7 +1144,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080" # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - "10000:10000" # app1
@@ -1374,7 +1374,7 @@ BunkerWeb 能够作为**通用的 UDP/TCP 反向代理**，让您可以保护任
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           # 如果您想在使用 http 挑战类型时使用 Let's Encrypt 自动化，请保留此项
           - published: 80
@@ -1504,7 +1504,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     请注意，如果您的容器已经创建，您需要删除并重新创建它，以便应用新的环境变量。
@@ -1548,7 +1548,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1563,7 +1563,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 此设置是指定 BunkerWeb 实例所必需的
@@ -1657,7 +1657,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1670,7 +1670,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测
@@ -1685,7 +1685,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1925,7 +1925,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2024,7 +2024,7 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           USE_IPv6: "yes"
 
@@ -2070,6 +2070,52 @@ BunkerWeb 支持使用外部或远程的 [PHP-FPM](https://www.php.net/manual/en
     systemctl start bunkerweb
     ```
 
+### Docker 日志记录最佳实践
+
+使用 Docker 时，管理容器日志以防止其占用过多磁盘空间非常重要。默认情况下，Docker 使用 `json-file` 日志记录驱动程序，如果未进行配置，可能会导致日志文件非常大。
+
+为避免这种情况，您可以配置日志轮换。这可以在您的 `docker-compose.yml` 文件中为特定服务配置，也可以为 Docker 守护进程全局配置。
+
+**按服务配置**
+
+您可以在 `docker-compose.yml` 文件中为您的服务配置日志记录驱动程序以自动轮换日志。以下是一个示例，最多保留 10 个每个 20MB 的日志文件：
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    ...
+```
+
+此配置可确保日志轮换，防止它们占满您的磁盘。您可以将其应用于 Docker Compose 设置中的任何服务。
+
+**全局配置 (daemon.json)**
+
+如果您想默认将这些日志记录设置应用于主机上的所有容器，您可以通过编辑（或创建）`/etc/docker/daemon.json` 文件来配置 Docker 守护进程：
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "10"
+  }
+}
+```
+
+修改 `daemon.json` 后，您需要重新启动 Docker 守护进程才能使更改生效：
+
+```shell
+sudo systemctl restart docker
+```
+
+此全局配置将由所有容器继承。但是，在 `docker-compose.yml` 文件中按服务定义的任何日志记录配置都将覆盖 `daemon.json` 中的全局设置。
+
 ## 安全性调整
 
 BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进行配置。尽管设置的默认值确保了最低限度的“默认安全”，我们强烈建议您对它们进行调整。这样做，您不仅能够确保您所选择的安全级别，还能管理误报。
@@ -2097,7 +2143,7 @@ BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进�
 
 ## 监控和报告
 
-#### 监控 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### 监控 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2117,7 +2163,7 @@ STREAM 支持 :x:
 | `USE_MONITORING`               | `yes` | 全局   | 否   | 启用 BunkerWeb 的监控。      |
 | `MONITORING_METRICS_DICT_SIZE` | `10M` | 全局   | 否   | 用于存储监控指标的字典大小。 |
 
-#### Prometheus 导出器 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Prometheus 导出器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2143,7 +2189,7 @@ Prometheus 导出器插件在您的 BunkerWeb 实例上添加了一个 [Promethe
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | 全局   | 否   | Prometheus 导出器的 HTTP URL。                 |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | 全局   | 否   | 允许联系 Prometheus 导出器端点的 IP/网络列表。 |
 
-#### 报告 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### 报告 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2187,7 +2233,7 @@ STREAM 支持 :x:
 
 ### 备份和恢复
 
-#### S3 备份 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :white_check_mark:
 
@@ -2368,7 +2414,7 @@ S3 备份工具可以无缝地自动化数据保护，类似于社区备份插�
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-### 迁移 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### 迁移 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :white_check_mark:
 
@@ -2482,7 +2528,7 @@ STREAM 支持 :white_check_mark:
 
 此命令将您的 BunkerWeb 数据无缝迁移，以精确匹配迁移文件中概述的配置。
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 STREAM 支持 :x:
 
@@ -2519,7 +2565,7 @@ STREAM 支持 :x:
 - **状态码审查：** 定期更新 `ANTIDDOS_STATUS_CODES` 以捕获新的或不断演变的可疑行为。
 - **监控：** 定期分析日志和指标以微调设置并提高整体保护。
 
-## 用户管理器 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## 用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 用户管理插件提供了一个强大的界面，用于管理系统内的用户帐户。
 
@@ -2548,7 +2594,7 @@ STREAM 支持 :x:
   <figcaption>用户管理器 - 活动页面</figcaption>
 </figure>
 
-## 轻松解决 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## 轻松解决 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 轻松解决插件让您可以直接从报告页面快速修复误报和重复出现的问题。它将引导式的“解决”操作转化为安全、范围受限的配置更新——无需手动编辑。
 

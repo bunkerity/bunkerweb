@@ -40,6 +40,7 @@ extra_javascript:
   - assets/extra.js
   - https://chatbot.bunkerweb.io/static/js/chatbot.js
   - assets/preserve-version-on-language-switch.js
+  - assets/toc-dropdown.js
 
 markdown_extensions:
   - attr_list

@@ -41,12 +41,28 @@
       "label": "The maximum number of jobs runs",
       "regex": "^\\d+$",
       "type": "number"
+    },
+    "DATABASE_MAX_SESSION_AGE_DAYS": {
+      "context": "global",
+      "default": "14",
+      "help": "The maximum age in days for UI user sessions before they are purged.",
+      "id": "database-max-session-age-days",
+      "label": "The maximum age in days for UI user sessions",
+      "regex": "^\\d+$",
+      "type": "number"
     }
   },
   "jobs": [
     {
       "name": "cleanup-excess-jobs-runs",
       "file": "cleanup-excess-jobs-runs.py",
+      "every": "day",
+      "reload": false,
+      "async": true
+    },
+    {
+      "name": "cleanup-expired-ui-sessions",
+      "file": "cleanup-expired-ui-sessions.py",
       "every": "day",
       "reload": false,
       "async": true

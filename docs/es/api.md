@@ -37,7 +37,7 @@ Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -50,7 +50,7 @@ Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía 
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb"  # Coincide con el nombre del servicio de la instancia
@@ -70,7 +70,7 @@ Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía 
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.5-rc4
+        image: bunkerity/bunkerweb-api:1.6.5
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # Usa una contraseña fuerte
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # Lista blanca de la API
@@ -124,7 +124,7 @@ Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -138,7 +138,7 @@ Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía 
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *api-env
           BUNKERWEB_INSTANCES: ""    # Descubierto por Autoconf
@@ -153,7 +153,7 @@ Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía 
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -167,7 +167,7 @@ Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía 
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.5-rc4
+        image: bunkerity/bunkerweb-api:1.6.5
         environment:
           <<: *api-env
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
@@ -242,7 +242,7 @@ docker run -d \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+  bunkerity/bunkerweb-all-in-one:1.6.5
 ```
 
 ## Autenticación

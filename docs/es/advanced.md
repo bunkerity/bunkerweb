@@ -1,8 +1,8 @@
 # Usos avanzados
 
-Muchos ejemplos de casos de uso del mundo real están disponibles en la carpeta [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/examples) del repositorio de GitHub.
+Muchos ejemplos de casos de uso del mundo real están disponibles en la carpeta [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) del repositorio de GitHub.
 
-También proporcionamos numerosos boilerplates, como archivos YAML para diversas integraciones y tipos de bases de datos. Estos están disponibles en la carpeta [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/misc/integrations).
+También proporcionamos numerosos boilerplates, como archivos YAML para diversas integraciones y tipos de bases de datos. Estos están disponibles en la carpeta [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations).
 
 Esta sección solo se enfoca en usos avanzados y ajustes de seguridad, consulta la [sección de características](features.md) de la documentación para ver todas las configuraciones disponibles.
 
@@ -87,7 +87,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+            bunkerity/bunkerweb-all-in-one:1.6.5
         ```
 
         Ten en cuenta que si tu contenedor ya está creado, necesitarás eliminarlo y recrearlo para que se actualicen las nuevas variables de entorno.
@@ -98,7 +98,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +106,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +123,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +131,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -178,7 +178,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +186,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+            bunkerity/bunkerweb-all-in-one:1.6.5
         ```
 
         Ten en cuenta que si tu contenedor ya está creado, necesitarás eliminarlo y recrearlo para que se actualicen las nuevas variables de entorno.
@@ -262,7 +262,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +272,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +290,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +300,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -352,7 +352,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +362,7 @@ Encontrarás más configuraciones sobre la IP real en la [sección de caracterí
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -514,7 +514,7 @@ Para habilitar systemd-resolved como tu resolutor de DNS en BunkerWeb, establece
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
 === "Docker"
@@ -542,7 +542,7 @@ Para habilitar systemd-resolved como tu resolutor de DNS en BunkerWeb, establece
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -553,7 +553,7 @@ Para habilitar systemd-resolved como tu resolutor de DNS en BunkerWeb, establece
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -667,7 +667,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     Ten en cuenta que si tu contenedor ya está creado, necesitarás eliminarlo y recrearlo para que se apliquen las nuevas variables de entorno.
@@ -707,7 +707,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
 === "Docker"
@@ -730,7 +730,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -773,7 +773,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       volumes:
         - ./bw-data:/data
       ...
@@ -843,7 +843,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       volumes:
         - ./bw-data:/data
       ...
@@ -1055,7 +1055,7 @@ Para obtener una lista completa de las configuraciones relacionadas con el modo 
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     Ten en cuenta que si tu contenedor ya está creado, necesitarás eliminarlo y recrearlo para que se apliquen las nuevas variables de entorno.
@@ -1078,7 +1078,7 @@ Para obtener una lista completa de las configuraciones relacionadas con el modo 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080" # Mantenlo si quieres usar la automatización de Let's Encrypt al usar el tipo de desafío http
           - "10000:10000" # app1
@@ -1093,7 +1093,7 @@ Para obtener una lista completa de las configuraciones relacionadas con el modo 
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Esta configuración es obligatoria para especificar la instancia de BunkerWeb
@@ -1144,7 +1144,7 @@ Para obtener una lista completa de las configuraciones relacionadas con el modo 
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080" # Mantenlo si quieres usar la automatización de Let's Encrypt cuando usas el tipo de desafío http
           - "10000:10000" # app1
@@ -1374,7 +1374,7 @@ Para obtener una lista completa de las configuraciones relacionadas con el modo 
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           # Mantenlo si quieres usar la automatización de Let's Encrypt cuando usas el tipo de desafío http
           - published: 80
@@ -1504,7 +1504,7 @@ Se pueden usar las siguientes configuraciones:
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     Ten en cuenta que si tu contenedor ya está creado, necesitarás eliminarlo y recrearlo para que se apliquen las nuevas variables de entorno.
@@ -1548,7 +1548,7 @@ Se pueden usar las siguientes configuraciones:
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1563,7 +1563,7 @@ Se pueden usar las siguientes configuraciones:
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Esta configuración es obligatoria para especificar la instancia de BunkerWeb
@@ -1657,7 +1657,7 @@ Se pueden usar las siguientes configuraciones:
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1670,7 +1670,7 @@ Se pueden usar las siguientes configuraciones:
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # No necesitamos especificar la instancia de BunkerWeb aquí, ya que son detectadas automáticamente por el servicio de autoconfiguración
@@ -1685,7 +1685,7 @@ Se pueden usar las siguientes configuraciones:
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1925,7 +1925,7 @@ Se pueden usar las siguientes configuraciones:
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2024,7 +2024,7 @@ Por defecto, BunkerWeb solo escuchará en direcciones IPv4 y no usará IPv6 para
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           USE_IPv6: "yes"
 
@@ -2070,6 +2070,52 @@ Por defecto, BunkerWeb solo escuchará en direcciones IPv4 y no usará IPv6 para
     systemctl start bunkerweb
     ```
 
+### Buenas prácticas de registro de Docker
+
+Cuando se utiliza Docker, es importante gestionar los registros de los contenedores para evitar que consuman un espacio excesivo en el disco. Por defecto, Docker utiliza el controlador de registro `json-file`, lo que puede dar lugar a archivos de registro muy grandes si no se configura.
+
+Para evitar esto, puede configurar la rotación de registros. Esto se puede hacer para servicios específicos en su archivo `docker-compose.yml`, o globalmente para el demonio de Docker.
+
+**Configuración por servicio**
+
+Puede configurar el controlador de registro para sus servicios en su archivo `docker-compose.yml` para rotar automáticamente los registros. Aquí hay un ejemplo que mantiene hasta 10 archivos de registro de 20 MB cada uno:
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    ...
+```
+
+Esta configuración asegura que los registros se roten, evitando que llenen su disco. Puede aplicar esto a cualquier servicio en su configuración de Docker Compose.
+
+**Configuración global (daemon.json)**
+
+Si desea aplicar esta configuración de registro a todos los contenedores en el host por defecto, puede configurar el demonio de Docker editando (o creando) el archivo `/etc/docker/daemon.json`:
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "10"
+  }
+}
+```
+
+Después de modificar `daemon.json`, debe reiniciar el demonio de Docker para que los cambios surtan efecto:
+
+```shell
+sudo systemctl restart docker
+```
+
+Esta configuración global será heredada por todos los contenedores. Sin embargo, cualquier configuración de registro definida por servicio en un archivo `docker-compose.yml` anulará la configuración global en `daemon.json`.
+
 ## Ajuste de seguridad
 
 BunkerWeb ofrece muchas características de seguridad que puedes configurar con [características](features.md). Aunque los valores predeterminados de las configuraciones aseguran una "seguridad por defecto" mínima, te recomendamos encarecidamente que los ajustes. Al hacerlo, podrás asegurar el nivel de seguridad de tu elección y también gestionar los falsos positivos.
@@ -2097,7 +2143,7 @@ Consejo profesional: Al ver tus alertas, haz clic en la opción "columnas" y mar
 
 ## Monitoreo y reportes
 
-#### Monitoreo <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Monitoreo <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :x:
 
@@ -2117,7 +2163,7 @@ El plugin de monitoreo te permite recolectar y recuperar métricas sobre BunkerW
 | `USE_MONITORING`               | `yes`          | global   | no       | Habilitar el monitoreo de BunkerWeb.                         |
 | `MONITORING_METRICS_DICT_SIZE` | `10M`          | global   | no       | Tamaño del diccionario para almacenar métricas de monitoreo. |
 
-#### Exportador de Prometheus <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Exportador de Prometheus <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :x:
 
@@ -2143,7 +2189,7 @@ También proporcionamos un [panel de control de Grafana](https://grafana.com/gra
 | `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global   | no       | URL HTTP del exportador de Prometheus.                                                   |
 | `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global   | no       | Lista de IP/redes permitidas para contactar el punto final del exportador de Prometheus. |
 
-#### Reportes <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Reportes <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :x:
 
@@ -2187,7 +2233,7 @@ El plugin de Reportes proporciona una solución integral para la generación de 
 
 ### Copia de seguridad y restauración
 
-#### Copia de seguridad S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+#### Copia de seguridad S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :white_check_mark:
 
@@ -2368,7 +2414,7 @@ También puedes especificar un archivo de copia de seguridad personalizado para 
         docker exec -it <scheduler_container> bwcli plugin backup_s3 restore
         ```
 
-### Migración <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+### Migración <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :white_check_mark:
 
@@ -2482,7 +2528,7 @@ Para iniciar manualmente una migración, ejecuta el siguiente comando:
 
 Este comando migra sin problemas tus datos de BunkerWeb para que coincidan precisamente con la configuración descrita en el archivo de migración.
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 Soporte STREAM :x:
 
@@ -2519,7 +2565,7 @@ Personaliza el comportamiento del plugin usando las siguientes configuraciones:
 - **Revisión de códigos de estado:** Actualiza regularmente `ANTIDDOS_STATUS_CODES` para capturar comportamientos sospechosos nuevos o en evolución.
 - **Monitoreo:** Analiza los registros y las métricas periódicamente para ajustar la configuración y mejorar la protección general.
 
-## Administrador de usuarios <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Administrador de usuarios <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 El Plugin de gestión de usuarios ofrece una interfaz robusta para administrar cuentas de usuario dentro de tu sistema.
 
@@ -2548,7 +2594,7 @@ Con este plugin, los administradores pueden crear, actualizar y deshabilitar cue
   <figcaption>Administrador de usuarios - Página de actividades</figcaption>
 </figure>
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
 El plugin Easy Resolve te permite remediar rápidamente falsos positivos y problemas recurrentes directamente desde la página de Informes. Convierte las acciones guiadas de "Resolver" en actualizaciones de configuración seguras y acotadas, sin edición manual.
 

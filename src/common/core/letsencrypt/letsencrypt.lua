@@ -81,21 +81,24 @@ function letsencrypt:init()
 					)
 				then
 					local data
+					local server_names = multisite_vars["SERVER_NAME"]
+					local cert_identifier = server_names:match("%S+")
+
 					if
 						multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 						and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 					then
-						for part in server_name:gmatch("%S+") do
+						for part in server_names:gmatch("%S+") do
 							wildcard_servers[part] = true
 						end
 						local parts = {}
-						for part in server_name:gmatch("[^.]+") do
+						for part in cert_identifier:gmatch("[^.]+") do
 							table.insert(parts, part)
 						end
-						server_name = table.concat(parts, ".", 2)
-						data = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
+						cert_identifier = table.concat(parts, ".", 2)
+						data = self.datastore:get("plugin_letsencrypt_" .. cert_identifier, true)
 					else
-						for part in server_name:gmatch("%S+") do
+						for part in server_names:gmatch("%S+") do
 							wildcard_servers[part] = false
 						end
 					end
@@ -103,8 +106,8 @@ function letsencrypt:init()
 						-- Load certificate
 						local check
 						check, data = read_files({
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem",
+							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
+							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
 						})
 						if not check then
 							self.logger:log(ERR, "error while reading files : " .. data)
@@ -115,7 +118,7 @@ function letsencrypt:init()
 								multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 								and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 							then
-								check, err = self:load_data(data, server_name)
+								check, err = self:load_data(data, cert_identifier)
 							else
 								check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 							end

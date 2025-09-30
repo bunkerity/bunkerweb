@@ -32,39 +32,39 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
 
 === "Standard"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json application/xml text/css text/html text/javascript text/plain text/xml"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "5"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json application/xml text/css text/html text/javascript text/plain text/xml"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "5"
+    ```
 
 === "Maximale Kompression"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
-GZIP_MIN_LENGTH: "500"
-GZIP_COMP_LEVEL: "9"
-GZIP_PROXIED: "any"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
+    GZIP_MIN_LENGTH: "500"
+    GZIP_COMP_LEVEL: "9"
+    GZIP_PROXIED: "any"
+    ```
 
 === "Ausgewogene Leistung"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "3"
-GZIP_PROXIED: "no-cache no-store private expired"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "3"
+    GZIP_PROXIED: "no-cache no-store private expired"
+    ```
 
 === "Proxied-Inhalt"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "4"
-GZIP_PROXIED: "any"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "4"
+    GZIP_PROXIED: "any"
+    ```

@@ -249,6 +249,10 @@ def update_config(service: str, config_type: str, name: str, req: ConfigUpdateRe
     type_new = req.type if req.type is not None else current.get("type")
     name_new = req.name if req.name is not None else current.get("name")
     data_new = req.data if req.data is not None else _decode_data(current.get("data"))
+
+    # Disallow renaming (changing the name) for template-derived configs; content edits are allowed
+    if current.get("template") and name_new != current.get("name"):
+        return JSONResponse(status_code=403, content={"status": "error", "message": "Renaming a template-based custom config is not allowed"})
     if not _service_exists(service_new):
         return JSONResponse(status_code=404, content={"status": "error", "message": "Service not found"})
 
@@ -304,8 +308,15 @@ async def update_config_upload(
         # If no explicit new_name, derive name from uploaded file if different
         filename = file.filename or ""
         derived = _sanitize_name_from_filename(filename)
+        # Disallow implicit rename for template-derived configs
+        if current.get("template") and derived and derived != n_new:
+            return JSONResponse(status_code=403, content={"status": "error", "message": "Renaming a template-based custom config is not allowed"})
         if derived and derived != n_new:
             n_new = derived
+
+    # If explicit new_name is provided and differs, forbid for template-derived configs
+    if current.get("template") and new_name and n_new != current.get("name"):
+        return JSONResponse(status_code=403, content={"status": "error", "message": "Renaming a template-based custom config is not allowed"})
 
     if t_new not in _CONFIG_TYPES:
         return JSONResponse(status_code=422, content={"status": "error", "message": "Invalid type"})

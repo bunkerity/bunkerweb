@@ -5,7 +5,7 @@ __pycache__
 env/
 tmp_venv/
 node_modules
-package-lock.json
+docs/package-lock.json
 /src/ui/*.txt
 .mypy_cache
 .cache/

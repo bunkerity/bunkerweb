@@ -98,7 +98,7 @@ Lorsque vous utilisez BunkerWeb, vous avez le choix de la version que vous souha
 
 Qu'il s'agisse d'une sécurité renforcée, d'une expérience utilisateur enrichie ou d'une surveillance technique, la version BunkerWeb PRO vous permet de profiter pleinement de BunkerWeb et de répondre à vos besoins professionnels.
 
-Dans la documentation ou l'interface utilisateur, les fonctionnalités PRO sont annotées d'une couronne <img src="../assets/img/pro-icon.svg" alt="crown pro icon" height="32px" width="32px"> pour les distinguer de celles intégrées dans la version open-source.
+Dans la documentation ou l'interface utilisateur, les fonctionnalités PRO sont annotées d'une couronne <img src="../../assets/img/pro-icon.svg" alt="crown pro icon" height="32px" width="32px"> pour les distinguer de celles intégrées dans la version open-source.
 
 Vous pouvez passer de la version open-source à la version PRO facilement et à tout moment. Le processus est simple :
 

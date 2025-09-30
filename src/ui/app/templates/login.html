@@ -1,3 +1,4 @@
+{% from 'macros/docs_link.html' import docs_url %}
 {% extends "base.html" %}
 {% block head %}
     <link rel="stylesheet"
@@ -93,9 +94,12 @@
                                                        for="remember-me"
                                                        data-i18n="form.checkbox.remember_me">Remember Me</label>
                                             </div>
-                                            <a href="https://docs.bunkerweb.io/{{ bw_version }}/troubleshooting/?utm_campaign=self&utm_source=ui#__tabbed_6_2"
+                                            <a href="{{ docs_url('/troubleshooting', '#__tabbed_6_2') }}"
                                                target="_blank"
-                                               rel="noopener">
+                                               rel="noopener"
+                                               class="docs-link"
+                                               data-endpoint="/troubleshooting"
+                                               data-fragment="#__tabbed_6_2">
                                                 <span data-i18n="link.forgot_password">Forgot Password?</span>
                                             </a>
                                         </div>

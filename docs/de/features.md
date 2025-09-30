@@ -68,7 +68,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
 | `USE_API`          | `yes`         | global  | Nein     | **API aktivieren:** Aktivieren Sie die API, um BunkerWeb zu steuern.                                                |
 | `API_HTTP_PORT`    | `5000`        | global  | Nein     | **API-Port:** Lauschportnummer für die API.                                                                         |
-| `API_HTTPS_PORT`   | `6000`        | global  | Nein     | **API-HTTPS-Port:** Lauschportnummer (TLS) für die API.                                                             |
+| `API_HTTPS_PORT`   | `5443`        | global  | Nein     | **API-HTTPS-Port:** Lauschportnummer (TLS) für die API.                                                             |
 | `API_LISTEN_HTTP`  | `yes`         | global  | Nein     | **API-HTTP-Lauschen:** HTTP-Listener für die API aktivieren.                                                        |
 | `API_LISTEN_HTTPS` | `no`          | global  | Nein     | **API-HTTPS-Lauschen:** HTTPS (TLS)-Listener für die API aktivieren.                                                |
 | `API_LISTEN_IP`    | `0.0.0.0`     | global  | Nein     | **API-Lausch-IP:** Lausch-IP-Adresse für die API.                                                                   |
@@ -76,7 +76,7 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | Nein     | **API-Whitelist-IP:** Liste der IP/Netzwerke, die die API kontaktieren dürfen.                                      |
 | `API_TOKEN`        |               | global  | Nein     | **API-Zugriffstoken (optional):** Wenn gesetzt, müssen alle API-Anfragen `Authorization: Bearer <token>` enthalten. |
 
-Hinweis: Aus Bootstrap-Gründen müssen Sie, wenn Sie `API_TOKEN` aktivieren, es in der Umgebung SOWOHL der BunkerWeb-Instanz als auch des Schedulers setzen. Der Scheduler fügt den `Authorization`-Header automatisch hinzu, wenn `API_TOKEN` in seiner Umgebung vorhanden ist. Wenn es nicht gesetzt ist, wird kein Header gesendet und BunkerWeb erzwingt keine Token-Authentifizierung. Sie können die API über HTTPS bereitstellen, indem Sie `API_LISTEN_HTTPS=yes` setzen (Port: `API_HTTPS_PORT`, Standard `6000`).
+Hinweis: Aus Bootstrap-Gründen müssen Sie, wenn Sie `API_TOKEN` aktivieren, es in der Umgebung SOWOHL der BunkerWeb-Instanz als auch des Schedulers setzen. Der Scheduler fügt den `Authorization`-Header automatisch hinzu, wenn `API_TOKEN` in seiner Umgebung vorhanden ist. Wenn es nicht gesetzt ist, wird kein Header gesendet und BunkerWeb erzwingt keine Token-Authentifizierung. Sie können die API über HTTPS bereitstellen, indem Sie `API_LISTEN_HTTPS=yes` setzen (Port: `API_HTTPS_PORT`, Standard `5443`).
 
 Beispieltest mit curl (Token und Host ersetzen):
 
@@ -88,7 +88,7 @@ curl -H "Host: bwapi" \
 curl -H "Host: bwapi" \
      -H "Authorization: Bearer $API_TOKEN" \
      --insecure \
-     https://<bunkerweb-host>:6000/ping
+     https://<bunkerweb-host>:5443/ping
 ```
 
 === "Netzwerk- & Port-Einstellungen"
@@ -209,7 +209,7 @@ curl -H "Host: bwapi" \
     USE_UDP: "no"
     ```
 
-## Anti DDoS <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Anti DDoS <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -248,10 +248,10 @@ Befolgen Sie diese Schritte, um Antibot zu aktivieren und zu konfigurieren:
 4. Wichtig: Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
 
 !!! important "Über den Parameter `ANTIBOT_URI`"
-Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
+    Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
 
 !!! warning "Sitzungen in Cluster-Umgebungen"
-Die Antibot-Funktion verwendet Cookies, um zu verfolgen, ob ein Benutzer die Herausforderung abgeschlossen hat. Wenn Sie BunkerWeb in einem Cluster (mehrere Instanzen) betreiben, müssen Sie die Sitzungsverwaltung korrekt konfigurieren: Setzen Sie `SESSIONS_SECRET` und `SESSIONS_NAME` auf allen BunkerWeb-Instanzen auf dieselben Werte. Andernfalls könnten Benutzer aufgefordert werden, die Herausforderung zu wiederholen. Weitere Informationen zur Sitzungskonfiguration finden Sie [hier](#sessions).
+    Die Antibot-Funktion verwendet Cookies, um zu verfolgen, ob ein Benutzer die Herausforderung abgeschlossen hat. Wenn Sie BunkerWeb in einem Cluster (mehrere Instanzen) betreiben, müssen Sie die Sitzungsverwaltung korrekt konfigurieren: Setzen Sie `SESSIONS_SECRET` und `SESSIONS_NAME` auf allen BunkerWeb-Instanzen auf dieselben Werte. Andernfalls könnten Benutzer aufgefordert werden, die Herausforderung zu wiederholen. Weitere Informationen zur Sitzungskonfiguration finden Sie [hier](#sessions).
 
 ### Allgemeine Parameter
 
@@ -435,39 +435,39 @@ Beispiele:
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | Multisite | nein     | mCaptcha Geheimschlüssel.                                                       |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                             |
 
-Siehe Allgemeine Parameter für zusätzliche Optionen.
+    Siehe Allgemeine Parameter für zusätzliche Optionen.
 
 ### Konfigurationsbeispiele
 
 === "Cookie-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "cookie"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "cookie"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "JavaScript-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "javascript"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "javascript"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "Captcha-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "captcha"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-ANTIBOT_CAPTCHA_ALPHABET: "23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-```
+    ```yaml
+    USE_ANTIBOT: "captcha"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ANTIBOT_CAPTCHA_ALPHABET: "23456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    ```
 
-Hinweis: Das obige Beispiel verwendet die Ziffern 2-9 und alle Buchstaben, die häufig für CAPTCHAs verwendet werden. Sie können das Alphabet bei Bedarf anpassen, um Sonderzeichen einzuschließen.
+    Hinweis: Das obige Beispiel verwendet die Ziffern 2-9 und alle Buchstaben, die häufig für CAPTCHAs verwendet werden. Sie können das Alphabet bei Bedarf anpassen, um Sonderzeichen einzuschließen.
 
 === "Klassische reCAPTCHA-Herausforderung"
 
@@ -505,37 +505,37 @@ Hinweis: Das obige Beispiel verwendet die Ziffern 2-9 und alle Buchstaben, die h
 
 === "hCaptcha-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "hcaptcha"
-ANTIBOT_HCAPTCHA_SITEKEY: "your-site-key"
-ANTIBOT_HCAPTCHA_SECRET: "your-secret-key"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "hcaptcha"
+    ANTIBOT_HCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_HCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "Turnstile-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "turnstile"
-ANTIBOT_TURNSTILE_SITEKEY: "your-site-key"
-ANTIBOT_TURNSTILE_SECRET: "your-secret-key"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "turnstile"
+    ANTIBOT_TURNSTILE_SITEKEY: "your-site-key"
+    ANTIBOT_TURNSTILE_SECRET: "your-secret-key"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 === "mCaptcha-Herausforderung"
 
-```yaml
-USE_ANTIBOT: "mcaptcha"
-ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
-ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
-ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
-ANTIBOT_URI: "/challenge"
-ANTIBOT_TIME_RESOLVE: "60"
-ANTIBOT_TIME_VALID: "86400"
-```
+    ```yaml
+    USE_ANTIBOT: "mcaptcha"
+    ANTIBOT_MCAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_MCAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_MCAPTCHA_URL: "https://demo.mcaptcha.org"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
 
 ## Auth basic
 
@@ -571,10 +571,10 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                              |
 
 !!! warning "Sicherheitshinweise"
-Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.
+    Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.
 
 !!! tip "Verwendung mehrerer Anmeldeinformationen"
-Sie können mehrere Paare aus Benutzername/Passwort für den Zugriff konfigurieren. Jede `AUTH_BASIC_USER`-Einstellung sollte eine entsprechende `AUTH_BASIC_PASSWORD`-Einstellung haben.
+    Sie können mehrere Paare aus Benutzername/Passwort für den Zugriff konfigurieren. Jede `AUTH_BASIC_USER`-Einstellung sollte eine entsprechende `AUTH_BASIC_PASSWORD`-Einstellung haben.
 
 ### Beispielkonfigurationen
 
@@ -679,10 +679,10 @@ bwcli plugin backup restore /pfad/zum/backup/backup-sqlite-2023-08-15_12-34-56.z
 ```
 
 !!! tip "Sicherheit geht vor"
-Vor jeder Wiederherstellung erstellt das Backup-Plugin automatisch ein Backup des aktuellen Zustands Ihrer Datenbank an einem temporären Ort. Dies bietet eine zusätzliche Absicherung für den Fall, dass Sie die Wiederherstellung rückgängig machen müssen.
+    Vor jeder Wiederherstellung erstellt das Backup-Plugin automatisch ein Backup des aktuellen Zustands Ihrer Datenbank an einem temporären Ort. Dies bietet eine zusätzliche Absicherung für den Fall, dass Sie die Wiederherstellung rückgängig machen müssen.
 
 !!! warning "Datenbankkompatibilität"
-Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit für Backup- und Wiederherstellungsvorgänge nicht unterstützt.
+    Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit für Backup- und Wiederherstellungsvorgänge nicht unterstützt.
 
 ### Beispielkonfigurationen
 
@@ -719,7 +719,7 @@ Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken.
     BACKUP_DIRECTORY: "/mnt/backup-drive/bunkerweb-backups"
     ```
 
-## Backup S3 <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Backup S3 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :white_check_mark:
@@ -774,7 +774,7 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 5.  **Sperrbereich wählen:** Entscheiden Sie mit der Einstellung `BAD_BEHAVIOR_BAN_SCOPE`, ob die Sperren nur für den aktuellen Dienst oder global für alle Dienste gelten sollen.
 
 !!! tip "Stream-Modus"
-Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen und löst dieses Verhalten aus.
+    Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen und löst dieses Verhalten aus.
 
 ### Konfigurationseinstellungen
 
@@ -788,10 +788,10 @@ Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen u
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten.                                                    |
 
 !!! warning "Falsch-Positive"
-Seien Sie vorsichtig bei der Einstellung des Schwellenwerts und der Zählzeit. Zu niedrige Werte können versehentlich legitime Benutzer sperren, die beim Surfen auf Ihrer Website auf Fehler stoßen.
+    Seien Sie vorsichtig bei der Einstellung des Schwellenwerts und der Zählzeit. Zu niedrige Werte können versehentlich legitime Benutzer sperren, die beim Surfen auf Ihrer Website auf Fehler stoßen.
 
 !!! tip "Anpassen Ihrer Konfiguration"
-Beginnen Sie mit konservativen Einstellungen (höherer Schwellenwert, kürzere Sperrzeit) und passen Sie diese je nach Ihren spezifischen Bedürfnissen und Verkehrsmustern an. Überwachen Sie Ihre Protokolle, um sicherzustellen, dass legitime Benutzer nicht fälschlicherweise gesperrt werden.
+    Beginnen Sie mit konservativen Einstellungen (höherer Schwellenwert, kürzere Sperrzeit) und passen Sie diese je nach Ihren spezifischen Bedürfnissen und Verkehrsmustern an. Überwachen Sie Ihre Protokolle, um sicherzustellen, dass legitime Benutzer nicht fälschlicherweise gesperrt werden.
 
 ### Beispielkonfigurationen
 
@@ -872,7 +872,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 5.  **Effektivität überwachen:** Konsultieren Sie die [Web-Oberfläche](web-ui.md), um Statistiken über blockierte Anfragen anzuzeigen.
 
 !!! info "Stream-Modus"
-Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
+    Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
 
 ### Konfigurationsparameter[9][10][11][12][13][14][15][16][17]
 
@@ -884,7 +884,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | Multisite | Nein     | **Community-Blacklists:** Wählen Sie vorkonfigurierte und von der Community gepflegte Blacklists aus, die in die Blockierung einbezogen werden sollen. |
 
 === "Community-Blacklists"
-**Was es bewirkt:** Ermöglicht Ihnen, schnell gut gepflegte und von der Community stammende Blacklists hinzuzufügen, ohne die URLs manuell konfigurieren zu müssen.
+    **Was es bewirkt:** Ermöglicht Ihnen, schnell gut gepflegte und von der Community stammende Blacklists hinzuzufügen, ohne die URLs manuell konfigurieren zu müssen.
 
     Der Parameter `BLACKLIST_COMMUNITY_LISTS` ermöglicht Ihnen die Auswahl aus ausgewählten Blacklist-Quellen. Die verfügbaren Optionen umfassen:
 
@@ -903,7 +903,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
         Community-Blacklists bieten eine bequeme Möglichkeit, mit bewährten Blacklist-Quellen zu beginnen. Sie können diese parallel zu manuellen URL-Konfigurationen für maximale Flexibilität verwenden.
 
 === "IP-Adresse"[18][19][20][21][22]
-**Was es bewirkt:** Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.
+    **Was es bewirkt:** Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.
 
     | Parameter                  | Standard                              | Kontext   | Mehrfach | Beschreibung                                                                                                                 |
     | :------------------------- | :------------------------------------ | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------- |
@@ -915,7 +915,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     Der Standardparameter `BLACKLIST_IP_URLS` enthält eine URL, die eine **Liste bekannter Tor-Exit-Nodes** bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.
 
 === "Reverse DNS"[23][24][25][26][27]
-**Was es bewirkt:** Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.
+    **Was es bewirkt:** Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.
 
     | Parameter                    | Standard                | Kontext   | Mehrfach | Beschreibung                                                                                               |
     | :--------------------------- | :---------------------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------- |
@@ -928,7 +928,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
 
 === "ASN"
-**Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
+    **Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
     | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                     |
     | :-------------------------- | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------- |
@@ -938,7 +938,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     | `BLACKLIST_IGNORE_ASN_URLS` |          | Multisite | Nein     | **ASN-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende ASNs enthalten.                 |
 
 === "User-Agent"[28][29][30][31][32]
-**Was es bewirkt:** Blockiert Besucher basierend auf dem Browser oder Tool, das sie angeblich verwenden. Dies ist effektiv gegen Bots, die sich ehrlich identifizieren (wie "ScannerBot" oder "WebHarvestTool").
+    **Was es bewirkt:** Blockiert Besucher basierend auf dem Browser oder Tool, das sie angeblich verwenden. Dies ist effektiv gegen Bots, die sich ehrlich identifizieren (wie "ScannerBot" oder "WebHarvestTool").
 
     | Parameter                          | Standard                                                                                                                       | Kontext   | Mehrfach | Beschreibung                                                                                                       |
     | :--------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------- |
@@ -950,7 +950,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **Liste bekannter bösartiger User-Agents** bereitstellt. Diese werden oft von bösartigen Bots und Scannern verwendet, um anfällige Websites zu identifizieren.
 
 === "URI"[33][34][35][36][37]
-**Was es bewirkt:** Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.
+    **Was es bewirkt:** Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.
 
     | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                      |
     | :-------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------ |
@@ -960,10 +960,10 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     | `BLACKLIST_IGNORE_URI_URLS` |          | Multisite | Nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende URI-Muster enthalten.            |
 
 !!! info "Unterstützung von URL-Formaten"
-Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
+    Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Updates"[4][5][6][7][8]
-Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.
+    Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.
 
 ### Konfigurationsbeispiele[38]
 
@@ -1052,36 +1052,36 @@ So funktioniert's:
 | `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | Multisite | nein     | Stufe 0–11: höher = bessere Komprimierung, aber mehr CPU. |
 
 !!! tip "Komprimierungsstufe"
-`6` bietet einen guten Kompromiss. Für statische Inhalte and verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.
+    `6` bietet einen guten Kompromiss. Für statische Inhalte and verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.
 
 ### Beispiele
 
 === "Basis"
 
-```yaml
-USE_BROTLI: "yes"
-BROTLI_TYPES: "application/javascript application/json application/xml application/xhtml+xml text/css text/html text/javascript text/plain text/xml"
-BROTLI_MIN_LENGTH: "1000"
-BROTLI_COMP_LEVEL: "6"
-```
+    ```yaml
+    USE_BROTLI: "yes"
+    BROTLI_TYPES: "application/javascript application/json application/xml application/xhtml+xml text/css text/html text/javascript text/plain text/xml"
+    BROTLI_MIN_LENGTH: "1000"
+    BROTLI_COMP_LEVEL: "6"
+    ```
 
 === "Maximale Komprimierung"
 
-```yaml
-USE_BROTLI: "yes"
-BROTLI_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
-BROTLI_MIN_LENGTH: "500"
-BROTLI_COMP_LEVEL: "11"
-```
+    ```yaml
+    USE_BROTLI: "yes"
+    BROTLI_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
+    BROTLI_MIN_LENGTH: "500"
+    BROTLI_COMP_LEVEL: "11"
+    ```
 
 === "Ausgewogene Leistung"
 
-```yaml
-USE_BROTLI: "yes"
-BROTLI_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
-BROTLI_MIN_LENGTH: "1000"
-BROTLI_COMP_LEVEL: "4"
-```
+    ```yaml
+    USE_BROTLI: "yes"
+    BROTLI_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
+    BROTLI_MIN_LENGTH: "1000"
+    BROTLI_COMP_LEVEL: "4"
+    ```
 
 ## BunkerNet
 
@@ -1123,10 +1123,10 @@ Führen Sie die folgenden Schritte aus, um die BunkerNet-Funktion zu konfigurier
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | nein     | **BunkerNet-Server:** Die Adresse des BunkerNet-API-Servers für den Austausch von Bedrohungsdaten. |
 
 !!! tip "Netzwerkschutz"
-Wenn BunkerNet feststellt, dass eine IP-Adresse an bösartigen Aktivitäten auf mehreren BunkerWeb-Instanzen beteiligt war, wird diese IP zu einer kollektiven schwarzen Liste hinzugefügt. Dies bietet eine proaktive Verteidigungsebene, die Ihre Website vor Bedrohungen schützt, bevor sie Sie direkt angreifen können.
+    Wenn BunkerNet feststellt, dass eine IP-Adresse an bösartigen Aktivitäten auf mehreren BunkerWeb-Instanzen beteiligt war, wird diese IP zu einer kollektiven schwarzen Liste hinzugefügt. Dies bietet eine proaktive Verteidigungsebene, die Ihre Website vor Bedrohungen schützt, bevor sie Sie direkt angreifen können.
 
 !!! info "Anonymes Melden"
-Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.
+    Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.
 
 ### Beispielkonfigurationen
 
@@ -1259,10 +1259,10 @@ Führen Sie die folgenden Schritte aus, um die CORS-Funktion zu konfigurieren un
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | nein     | **Nicht autorisierte Ursprünge ablehnen:** Wenn `yes`, werden Anfragen von nicht autorisierten Ursprüngen mit einem Fehlercode abgelehnt. |
 
 !!! tip "Optimierung von Preflight-Anfragen"
-Die Einstellung `CORS_MAX_AGE` bestimmt, wie lange Browser die Ergebnisse einer Preflight-Anfrage zwischenspeichern. Ein höherer Wert (wie der Standardwert von 86400 Sekunden/24 Stunden) reduziert die Anzahl der Preflight-Anfragen und verbessert die Leistung für häufig aufgerufene Ressourcen.
+    Die Einstellung `CORS_MAX_AGE` bestimmt, wie lange Browser die Ergebnisse einer Preflight-Anfrage zwischenspeichern. Ein höherer Wert (wie der Standardwert von 86400 Sekunden/24 Stunden) reduziert die Anzahl der Preflight-Anfragen und verbessert die Leistung für häufig aufgerufene Ressourcen.
 
 !!! warning "Sicherheitshinweise"
-Seien Sie vorsichtig, wenn Sie `CORS_ALLOW_ORIGIN` auf `*` (alle Ursprünge) oder `CORS_ALLOW_CREDENTIALS` auf `yes` setzen, da diese Konfigurationen bei unsachgemäßer Verwaltung Sicherheitsrisiken mit sich bringen können. Es ist im Allgemeinen sicherer, vertrauenswürdige Ursprünge explizit aufzulisten und die erlaubten Methoden und Header zu beschränken.
+    Seien Sie vorsichtig, wenn Sie `CORS_ALLOW_ORIGIN` auf `*` (alle Ursprünge) oder `CORS_ALLOW_CREDENTIALS` auf `yes` setzen, da diese Konfigurationen bei unsachgemäßer Verwaltung Sicherheitsrisiken mit sich bringen können. Es ist im Allgemeinen sicherer, vertrauenswürdige Ursprünge explizit aufzulisten und die erlaubten Methoden und Header zu beschränken.
 
 ### Beispielkonfigurationen
 
@@ -1379,10 +1379,10 @@ Führen Sie die folgenden Schritte aus, um die Client-Cache-Funktion zu konfigur
 | `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | nein     | **ETags aktivieren:** Auf `yes` setzen, um den HTTP-ETag-Header für statische Ressourcen zu senden.               |
 
 !!! tip "Optimierung der Cache-Einstellungen"
-Für häufig aktualisierte Inhalte sollten Sie kürzere `max-age`-Werte verwenden. Für Inhalte, die sich selten ändern (wie versionierte JavaScript-Bibliotheken oder Logos), verwenden Sie längere Cache-Zeiten. Der Standardwert von 15552000 Sekunden (180 Tage) ist für die meisten statischen Assets angemessen.
+    Für häufig aktualisierte Inhalte sollten Sie kürzere `max-age`-Werte verwenden. Für Inhalte, die sich selten ändern (wie versionierte JavaScript-Bibliotheken oder Logos), verwenden Sie längere Cache-Zeiten. Der Standardwert von 15552000 Sekunden (180 Tage) ist für die meisten statischen Assets angemessen.
 
 !!! info "Browser-Verhalten"
-Unterschiedliche Browser implementieren Caching geringfügig anders, aber alle modernen Browser respektieren die Standard-Cache-Control-Anweisungen. ETags bieten einen zusätzlichen Validierungsmechanismus, der Browsern hilft festzustellen, ob zwischengespeicherte Inhalte noch gültig sind.
+    Unterschiedliche Browser implementieren Caching geringfügig anders, aber alle modernen Browser respektieren die Standard-Cache-Control-Anweisungen. ETags bieten einen zusätzlichen Validierungsmechanismus, der Browsern hilft festzustellen, ob zwischengespeicherte Inhalte noch gültig sind.
 
 ### Beispielkonfigurationen
 
@@ -1448,39 +1448,39 @@ So funktioniert's:
 | `BLACKLIST_COUNTRY` |          | Multisite | Nein     | Blacklist: ISO 3166-1 Alpha-2 Ländercodes, durch Leerzeichen getrennt. Diese Länder sind blockiert.      |
 
 !!! tip "Whitelist vs. Blacklist"
-Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.
+    Whitelist: Zugriff auf wenige Länder beschränkt. Blacklist: Problematische Regionen blockieren und den Rest zulassen.
 
 !!! warning "Priorität"
-Wenn eine Whitelist und eine Blacklist definiert sind, hat die Whitelist Vorrang: Wenn das Land nicht auf der Whitelist steht, wird der Zugriff verweigert.
+    Wenn eine Whitelist und eine Blacklist definiert sind, hat die Whitelist Vorrang: Wenn das Land nicht auf der Whitelist steht, wird der Zugriff verweigert.
 
 !!! info "Ländererkennung"
-BunkerWeb verwendet die mmdb-Datenbank [db-ip lite](https://db-ip.com/db/download/ip-to-country-lite).
+    BunkerWeb verwendet die mmdb-Datenbank [db-ip lite](https://db-ip.com/db/download/ip-to-country-lite).
 
 ### Beispiele
 
 === "Nur Whitelist"
 
-```yaml
-WHITELIST_COUNTRY: "US CA GB"
-```
+    ```yaml
+    WHITELIST_COUNTRY: "US CA GB"
+    ```
 
 === "Nur Blacklist"
 
-```yaml
-BLACKLIST_COUNTRY: "RU CN KP"
-```
+    ```yaml
+    BLACKLIST_COUNTRY: "RU CN KP"
+    ```
 
 === "Nur EU"
 
-```yaml
-WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
-```
+    ```yaml
+    WHITELIST_COUNTRY: "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE"
+    ```
 
 === "Blockierung von Risikoländern"
 
-```yaml
-BLACKLIST_COUNTRY: "RU CN KP IR SY"
-```
+    ```yaml
+    BLACKLIST_COUNTRY: "RU CN KP IR SY"
+    ```
 
 ## CrowdSec
 
@@ -1512,7 +1512,7 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
 ### Einrichtung
 
 === "Docker"
-**Akquisitionsdatei**
+    **Akquisitionsdatei**
 
     Sie müssen eine CrowdSec-Instanz ausführen und diese so konfigurieren, dass sie die BunkerWeb-Protokolle analysiert. Da BunkerWeb auf NGINX basiert, können Sie den Wert `nginx` für den Parameter `type` in Ihrer Akquisitionsdatei verwenden (vorausgesetzt, die BunkerWeb-Protokolle werden unverändert ohne zusätzliche Daten gespeichert):
 
@@ -1675,9 +1675,7 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
         name: bw-db
     ```
 
-===
-"Linux"
-
+=== "Linux"
     Sie müssen CrowdSec installieren und so konfigurieren, dass es die BunkerWeb-Protokolle analysiert. Befolgen Sie die [offizielle Dokumentation](https://doc.crowdsec.net/docs/getting_started/install_crowdsec?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs#scenarios).
 
     Damit CrowdSec die BunkerWeb-Protokolle analysieren kann, fügen Sie die folgenden Zeilen zu Ihrer Akquisitionsdatei unter `/etc/crowdsec/acquis.yaml` hinzu:
@@ -1749,9 +1747,7 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
     sudo systemctl reload bunkerweb
     ```
 
-===
-"All-in-one"
-
+=== "All-in-one"
     Das Docker-Image BunkerWeb All-In-One (AIO) wird mit vollständig integriertem CrowdSec geliefert. Sie müssen keine separate CrowdSec-Instanz einrichten oder die Akquisitionsdateien für die BunkerWeb-Protokolle manuell konfigurieren, wenn Sie den internen CrowdSec-Agenten verwenden.
 
     Beachten Sie die [Integrationsdokumentation des All-In-One (AIO)-Images](integrations.md#crowdsec-integration).
@@ -1797,8 +1793,7 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
     CROWDSEC_MODE: "live"
     ```
 
-===
-"Erweiterte Konfiguration mit AppSec"
+=== "Erweiterte Konfiguration mit AppSec"
 
     Eine umfassendere Konfiguration, einschließlich der Anwendungssicherheitskomponente:
 
@@ -1811,6 +1806,11 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
     CROWDSEC_EXCLUDE_LOCATION: "/health,/metrics"
 
     # AppSec-Konfiguration
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
+    CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
+    CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```
     CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
     CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
@@ -1832,7 +1832,7 @@ So funktioniert's:
 5.  Sie behalten die volle Kontrolle über den Lebenszyklus der Zertifikate.
 
 !!! info "Automatische Überwachung"
-Mit `USE_CUSTOM_SSL: yes` überwacht BunkerWeb das Zertifikat `CUSTOM_SSL_CERT`, erkennt Änderungen und lädt NGINX bei Bedarf neu.
+    Mit `USE_CUSTOM_SSL: yes` überwacht BunkerWeb das Zertifikat `CUSTOM_SSL_CERT`, erkennt Änderungen und lädt NGINX bei Bedarf neu.
 
 ### Verwendung
 
@@ -1842,7 +1842,7 @@ Mit `USE_CUSTOM_SSL: yes` überwacht BunkerWeb das Zertifikat `CUSTOM_SSL_CERT`,
 4.  Daten: Geben Sie die base64- oder Klartext-PEM-Strings an.
 
 !!! tip "Stream-Modus"
-Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL` für den SSL/TLS-Port.
+    Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL` für den SSL/TLS-Port.
 
 ### Parameter
 
@@ -1856,59 +1856,59 @@ Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL` für den SSL/TLS-Port
 | `CUSTOM_SSL_KEY_DATA`      |          | multisite | nein     | Daten des privaten Schlüssels (base64 oder Klartext-PEM).       |
 
 !!! warning "Sicherheit"
-Schützen Sie den privaten Schlüssel (angemessene Berechtigungen, nur vom BunkerWeb-Scheduler lesbar).
+    Schützen Sie den privaten Schlüssel (angemessene Berechtigungen, nur vom BunkerWeb-Scheduler lesbar).
 
 !!! tip "Format"
-Zertifikate müssen im PEM-Format vorliegen. Konvertieren Sie bei Bedarf.
+    Zertifikate müssen im PEM-Format vorliegen. Konvertieren Sie bei Bedarf.
 
 !!! info "Zertifikatsketten"
-Wenn eine Zwischenkette erforderlich ist, stellen Sie das vollständige Bundle in der richtigen Reihenfolge bereit (Zertifikat, dann Zwischenzertifikate).
+    Wenn eine Zwischenkette erforderlich ist, stellen Sie das vollständige Bundle in der richtigen Reihenfolge bereit (Zertifikat, dann Zwischenzertifikate).
 
 ### Beispiele
 
 === "Dateien"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "file"
-CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
-CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "file"
+    CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
+    CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
+    ```
 
 === "Base64-Daten"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "data"
-CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
-CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "data"
+    CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
+    CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
+    ```
 
 === "Klartext-PEM"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "data"
-CUSTOM_SSL_CERT_DATA: |
-  -----BEGIN CERTIFICATE-----
-  MIIDdzCCAl+gAwIBAgIUJH...certificate content...AAAA
-  -----END CERTIFICATE-----
-CUSTOM_SSL_KEY_DATA: |
-  -----BEGIN PRIVATE KEY-----
-  MIIEvQIBADAN...key content...AAAA
-  -----END PRIVATE KEY-----
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "data"
+    CUSTOM_SSL_CERT_DATA: |
+    -----BEGIN CERTIFICATE-----
+    MIIDdzCCAl+gAwIBAgIUJH...certificate content...AAAA
+    -----END CERTIFICATE-----
+    CUSTOM_SSL_KEY_DATA: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADAN...key content...AAAA
+    -----END PRIVATE KEY-----
+    ```
 
 === "Fallback"
 
-```yaml
-USE_CUSTOM_SSL: "yes"
-CUSTOM_SSL_CERT_PRIORITY: "file"
-CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
-CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
-CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
-CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
-```
+    ```yaml
+    USE_CUSTOM_SSL: "yes"
+    CUSTOM_SSL_CERT_PRIORITY: "file"
+    CUSTOM_SSL_CERT: "/path/to/your/certificate.pem"
+    CUSTOM_SSL_KEY: "/path/to/your/private-key.pem"
+    CUSTOM_SSL_CERT_DATA: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR..."
+    CUSTOM_SSL_KEY_DATA: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSEV..."
+    ```
 
 ## DNSBL
 
@@ -1950,17 +1950,17 @@ Führen Sie die folgenden Schritte aus, um die DNSBL-Funktion zu konfigurieren u
 | `DNSBL_IGNORE_IP_URLS` | ``       | multisite | ja       | Durch Leerzeichen getrennte URLs, die IPs/CIDRs zum Überspringen bereitstellen. Unterstützt `http(s)://` und `file://`. |
 
 !!! tip "Auswahl von DNSBL-Servern"
-Wählen Sie seriöse DNSBL-Anbieter, um Falschmeldungen zu minimieren. Die Standardliste enthält etablierte Dienste, die für die meisten Websites geeignet sind:
+    Wählen Sie seriöse DNSBL-Anbieter, um Falschmeldungen zu minimieren. Die Standardliste enthält etablierte Dienste, die für die meisten Websites geeignet sind:
 
     - **bl.blocklist.de:** Listet IPs, die bei Angriffen auf andere Server erkannt wurden.
     - **sbl.spamhaus.org:** Konzentriert sich auf Spam-Quellen und andere bösartige Aktivitäten.
     - **xbl.spamhaus.org:** Zielt auf infizierte Systeme ab, wie z. B. kompromittierte Maschinen oder offene Proxys.
 
 !!! info "Wie DNSBL funktioniert"
-DNSBL-Server funktionieren, indem sie auf speziell formatierte DNS-Anfragen antworten. Wenn BunkerWeb eine IP-Adresse überprüft, kehrt es die IP um und hängt den DNSBL-Domainnamen an. Wenn die resultierende DNS-Anfrage eine „Erfolgs“-Antwort zurückgibt, wird die IP als auf der schwarzen Liste stehend betrachtet.
+    DNSBL-Server funktionieren, indem sie auf speziell formatierte DNS-Anfragen antworten. Wenn BunkerWeb eine IP-Adresse überprüft, kehrt es die IP um und hängt den DNSBL-Domainnamen an. Wenn die resultierende DNS-Anfrage eine „Erfolgs“-Antwort zurückgibt, wird die IP als auf der schwarzen Liste stehend betrachtet.
 
 !!! warning "Leistungsüberlegungen"
-Obwohl BunkerWeb DNSBL-Abfragen auf Leistung optimiert, könnte das Hinzufügen einer großen Anzahl von DNSBL-Servern potenziell die Antwortzeiten beeinträchtigen. Beginnen Sie mit einigen seriösen DNSBL-Servern und überwachen Sie die Leistung, bevor Sie weitere hinzufügen.
+    Obwohl BunkerWeb DNSBL-Abfragen auf Leistung optimiert, könnte das Hinzufügen einer großen Anzahl von DNSBL-Servern potenziell die Antwortzeiten beeinträchtigen. Beginnen Sie mit einigen seriösen DNSBL-Servern und überwachen Sie die Leistung, bevor Sie weitere hinzufügen.
 
 ### Beispielkonfigurationen
 
@@ -2049,17 +2049,18 @@ Führen Sie die folgenden Schritte aus, um die Datenbankfunktion zu konfiguriere
 
 ### Konfigurationseinstellungen
 
-| Einstellung              | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                |
-| ------------------------ | ----------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                       |
-| `DATABASE_URI_READONLY`  |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                               |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.    |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden. |
+| Einstellung                     | Standard                                  | Kontext | Mehrfach | Beschreibung                                                                                                                                |
+| ------------------------------- | ----------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | nein     | **Datenbank-URI:** Die primäre Datenbankverbindungszeichenfolge im SQLAlchemy-Format.                                                       |
+| `DATABASE_URI_READONLY`         |                                           | global  | nein     | **Schreibgeschützte Datenbank-URI:** Optionale Datenbank für schreibgeschützte Operationen oder als Failover.                               |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | nein     | **Protokollierungsstufe:** Die Ausführlichkeitsstufe für Datenbankprotokolle. Optionen: `debug`, `info`, `warn`, `warning` oder `error`.    |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | nein     | **Maximale Job-Ausführungen:** Die maximale Anzahl von Job-Ausführungsdatensätzen, die vor der automatischen Bereinigung aufbewahrt werden. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | nein     | **Sitzungsaufbewahrung:** Das maximale Alter (in Tagen) von UI-Benutzersitzungen, bevor sie automatisch bereinigt werden.                   |
 
 !!! tip "Auswahl der Datenbank" - **SQLite** (Standard): Ideal für Single-Node-Bereitstellungen oder Testumgebungen aufgrund seiner Einfachheit und dateibasierten Natur. - **PostgreSQL**: Empfohlen für Produktionsumgebungen mit mehreren BunkerWeb-Instanzen aufgrund seiner Robustheit und Unterstützung für Gleichzeitigkeit. - **MySQL/MariaDB**: Eine gute Alternative zu PostgreSQL mit ähnlichen produktionsreifen Fähigkeiten. - **Oracle**: Geeignet für Unternehmensumgebungen, in denen Oracle bereits die Standard-Datenbankplattform ist.
 
 !!! info "SQLAlchemy-URI-Format"
-Die Datenbank-URI folgt dem SQLAlchemy-Format:
+    Die Datenbank-URI folgt dem SQLAlchemy-Format:
 
     - SQLite: `sqlite:////pfad/zur/datenbank.sqlite3`
     - PostgreSQL: `postgresql://benutzername:passwort@hostname:port/datenbank`
@@ -2067,9 +2068,14 @@ Die Datenbank-URI folgt dem SQLAlchemy-Format:
     - Oracle: `oracle://benutzername:passwort@hostname:port/datenbank`
 
 !!! warning "Datenbankwartung"
-Das Plugin führt automatisch einen täglichen Job aus, der überschüssige Job-Ausführungen basierend auf der Einstellung `DATABASE_MAX_JOBS_RUNS` bereinigt. Dies verhindert unbegrenztes Datenbankwachstum und bewahrt gleichzeitig eine nützliche Historie der Job-Ausführungen.
+    Das Plugin führt automatisch tägliche Wartungsjobs aus:
 
-## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+- **Bereinigung überschüssiger Job-Ausführungen:** Entfernt Historien, die über dem Wert von `DATABASE_MAX_JOBS_RUNS` liegen.
+- **Bereinigung abgelaufener UI-Sitzungen:** Löscht UI-Benutzersitzungen, die älter sind als `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+Diese Aufgaben verhindern ein unbegrenztes Datenbankwachstum und bewahren gleichzeitig eine nützliche Betriebshistorie.
+
+## Easy Resolve <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -2106,7 +2112,7 @@ Das Errors-Plugin bietet eine anpassbare Verwaltung von HTTP-Fehlern, um das Ers
 | `INTERCEPTED_ERROR_CODES` | `400 401 403 404 405 413 429 500 501 502 503 504` | Multisite | Nein     | Abgefangene Codes: Liste der Codes, die mit der Standardseite verwaltet werden, wenn keine benutzerdefinierte Seite definiert ist. |
 
 !!! tip "Seiten-Design"
-Die Standardseiten sind klar and lehrreich: Fehlerbeschreibung, mögliche Ursachen, vorgeschlagene Maßnahmen and visuelle Anhaltspunkte.
+    Die Standardseiten sind klar and lehrreich: Fehlerbeschreibung, mögliche Ursachen, vorgeschlagene Maßnahmen and visuelle Anhaltspunkte.
 
 !!! info "Fehlertypen"
 
@@ -2117,22 +2123,22 @@ Die Standardseiten sind klar and lehrreich: Fehlerbeschreibung, mögliche Ursach
 
 === "Standardverwaltung"
 
-```yaml
-INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
-```
+    ```yaml
+    INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+    ```
 
 === "Benutzerdefinierte Seiten"
 
-```yaml
-ERRORS: "404=/custom/404.html 500=/custom/500.html"
-INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
-```
+    ```yaml
+    ERRORS: "404=/custom/404.html 500=/custom/500.html"
+    INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+    ```
 
 === "Selektive Verwaltung"
 
-```yaml
-INTERCEPTED_ERROR_CODES: "404 500"
-```
+    ```yaml
+    INTERCEPTED_ERROR_CODES: "404 500"
+    ```
 
 ## Greylist
 
@@ -2159,13 +2165,13 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
 4.  **Zugriff überwachen:** Überprüfen Sie die [Web-Benutzeroberfläche](web-ui.md), um zu sehen, welchen Besuchern der Zugriff gewährt oder verweigert wird.
 
 !!! tip "Verhalten der Zugriffskontrolle"
-Wenn die Greylist-Funktion aktiviert ist, indem die Einstellung `USE_GREYLIST` auf `yes` gesetzt wird:
+    Wenn die Greylist-Funktion aktiviert ist, indem die Einstellung `USE_GREYLIST` auf `yes` gesetzt wird:
 
     1. **Greylist-Besucher:** Erhalten Zugriff, unterliegen aber weiterhin allen Sicherheitsprüfungen.
     2. **Nicht-Greylist-Besucher:** Wird der Zugriff vollständig verweigert.
 
 !!! info "Stream-Modus"
-Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
+    Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
 
 ### Konfigurationseinstellungen
 
@@ -2176,7 +2182,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
 | `USE_GREYLIST` | `no`     | multisite | nein     | **Greylist aktivieren:** Auf `yes` setzen, um Greylisting zu aktivieren. |
 
 === "IP-Adresse"
-**Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Greylist. Diese Besucher erhalten Zugriff, unterliegen aber weiterhin den Sicherheitsprüfungen.
+    **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Greylist. Diese Besucher erhalten Zugriff, unterliegen aber weiterhin den Sicherheitsprüfungen.
 
     | Einstellung        | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
     | ------------------ | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2184,7 +2190,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_IP_URLS` |          | multisite | nein     | **IP-Greylist-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
 === "Reverse DNS"
-**Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Greylist. Nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken bedingten Zugriff zu gewähren.
+    **Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Greylist. Nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken bedingten Zugriff zu gewähren.
 
     | Einstellung            | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                       |
     | ---------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2193,7 +2199,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_RDNS_URLS`   |          | multisite | nein     | **rDNS-Greylist-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
 === "ASN"
-**Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
+    **Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
     | Einstellung         | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                       |
     | ------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -2201,7 +2207,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_ASN_URLS` |          | multisite | nein     | **ASN-Greylist-URLs:** Liste von URLs, die ASNs enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
 === "User-Agent"
-**Was dies bewirkt:** Setzt Besucher basierend auf dem Browser oder Tool, das sie angeben zu verwenden, auf die Greylist. Dies ermöglicht kontrollierten Zugriff für bestimmte Tools, während die Sicherheitsprüfungen aufrechterhalten werden.
+    **Was dies bewirkt:** Setzt Besucher basierend auf dem Browser oder Tool, das sie angeben zu verwenden, auf die Greylist. Dies ermöglicht kontrollierten Zugriff für bestimmte Tools, während die Sicherheitsprüfungen aufrechterhalten werden.
 
     | Einstellung                | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                |
     | -------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2209,7 +2215,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_USER_AGENT_URLS` |          | multisite | nein     | **User-Agent-Greylist-URLs:** Liste von URLs, die User-Agent-Muster enthalten, die auf die Greylist gesetzt werden sollen.                  |
 
 === "URI"
-**Was dies bewirkt:** Setzt Anfragen an bestimmte URLs auf Ihrer Website auf die Greylist. Dies ermöglicht bedingten Zugriff auf bestimmte Endpunkte, während die Sicherheitsprüfungen aufrechterhalten werden.
+    **Was dies bewirkt:** Setzt Anfragen an bestimmte URLs auf Ihrer Website auf die Greylist. Dies ermöglicht bedingten Zugriff auf bestimmte Endpunkte, während die Sicherheitsprüfungen aufrechterhalten werden.
 
     | Einstellung         | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                             |
     | ------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2217,10 +2223,10 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_URI_URLS` |          | multisite | nein     | **URI-Greylist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
 !!! info "Unterstützung von URL-Formaten"
-Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
+    Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Aktualisierungen"
-Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
+    Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
 
 ### Beispielkonfigurationen
 
@@ -2308,48 +2314,48 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | Multisite | nein     | Gibt an, welche proxied-Inhalte basierend auf den Antwort-Headern komprimiert werden sollen. |
 
 !!! tip "Kompressionsstufe"
-`5` ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.
+    `5` ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.
 
 ### Beispiele
 
 === "Standard"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json application/xml text/css text/html text/javascript text/plain text/xml"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "5"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json application/xml text/css text/html text/javascript text/plain text/xml"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "5"
+    ```
 
 === "Maximale Kompression"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
-GZIP_MIN_LENGTH: "500"
-GZIP_COMP_LEVEL: "9"
-GZIP_PROXIED: "any"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml"
+    GZIP_MIN_LENGTH: "500"
+    GZIP_COMP_LEVEL: "9"
+    GZIP_PROXIED: "any"
+    ```
 
 === "Ausgewogene Leistung"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "3"
-GZIP_PROXIED: "no-cache no-store private expired"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript text/plain"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "3"
+    GZIP_PROXIED: "no-cache no-store private expired"
+    ```
 
 === "Proxied-Inhalt"
 
-```yaml
-USE_GZIP: "yes"
-GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript"
-GZIP_MIN_LENGTH: "1000"
-GZIP_COMP_LEVEL: "4"
-GZIP_PROXIED: "any"
-```
+    ```yaml
+    USE_GZIP: "yes"
+    GZIP_TYPES: "application/javascript application/json text/css text/html text/javascript"
+    GZIP_MIN_LENGTH: "1000"
+    GZIP_COMP_LEVEL: "4"
+    GZIP_PROXIED: "any"
+    ```
 
 ## HTML injection
 
@@ -2586,7 +2592,7 @@ Das Let's Encrypt-Plugin vereinfacht die Verwaltung von SSL/TLS-Zertifikaten dur
 6.  Der gesamte Prozess ist vollständig automatisiert und erfordert nach der Ersteinrichtung nur minimale Eingriffe.
 
 !!! info "Voraussetzungen"
-Um diese Funktion nutzen zu können, stellen Sie sicher, dass für jede Domain korrekte DNS-**A-Einträge** konfiguriert sind, die auf die öffentliche(n) IP(s) verweisen, unter der/denen BunkerWeb erreichbar ist. Ohne korrekte DNS-Konfiguration schlägt der Domain-Verifizierungsprozess fehl.
+    Um diese Funktion nutzen zu können, stellen Sie sicher, dass für jede Domain korrekte DNS-**A-Einträge** konfiguriert sind, die auf die öffentliche(n) IP(s) verweisen, unter der/denen BunkerWeb erreichbar ist. Ohne korrekte DNS-Konfiguration schlägt der Domain-Verifizierungsprozess fehl.
 
 ### Wie man es benutzt
 
@@ -2600,10 +2606,10 @@ Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigu
 6.  **Lassen Sie BunkerWeb den Rest erledigen:** Nach der Konfiguration werden Zertifikate automatisch ausgestellt, installiert und bei Bedarf erneuert.
 
 !!! tip "Zertifikatsprofile"
-Let's Encrypt bietet verschiedene Zertifikatsprofile für unterschiedliche Anwendungsfälle: - **classic**: Allzweck-Zertifikate mit 90-tägiger Gültigkeit (Standard) - **tlsserver**: Optimiert für die TLS-Server-Authentifizierung mit 90-tägiger Gültigkeit und kleinerem Payload - **shortlived**: Erhöhte Sicherheit mit 7-tägiger Gültigkeit für automatisierte Umgebungen - **custom**: Wenn Ihr ACME-Server ein anderes Profil unterstützt, legen Sie es mit `LETS_ENCRYPT_CUSTOM_PROFILE` fest.
+    Let's Encrypt bietet verschiedene Zertifikatsprofile für unterschiedliche Anwendungsfälle: - **classic**: Allzweck-Zertifikate mit 90-tägiger Gültigkeit (Standard) - **tlsserver**: Optimiert für die TLS-Server-Authentifizierung mit 90-tägiger Gültigkeit und kleinerem Payload - **shortlived**: Erhöhte Sicherheit mit 7-tägiger Gültigkeit für automatisierte Umgebungen - **custom**: Wenn Ihr ACME-Server ein anderes Profil unterstützt, legen Sie es mit `LETS_ENCRYPT_CUSTOM_PROFILE` fest.
 
 !!! info "Profilverfügbarkeit"
-Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherweise nicht in allen Umgebungen oder mit allen ACME-Clients verfügbar sind. Das `classic`-Profil hat die breiteste Kompatibilität und wird für die meisten Benutzer empfohlen. Wenn ein ausgewähltes Profil nicht verfügbar ist, greift das System automatisch auf das `classic`-Profil zurück.
+    Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherweise nicht in allen Umgebungen oder mit allen ACME-Clients verfügbar sind. Das `classic`-Profil hat die breiteste Kompatibilität und wird für die meisten Benutzer empfohlen. Wenn ein ausgewähltes Profil nicht verfügbar ist, greift das System automatisch auf das `classic`-Profil zurück.
 
 ### Konfigurationseinstellungen
 
@@ -2626,7 +2632,7 @@ Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherwe
 !!! info "Informationen und Verhalten" - Die Einstellung `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` ist eine Mehrfacheinstellung und kann verwendet werden, um mehrere Elemente für den DNS-Anbieter festzulegen. Die Elemente werden als Cache-Datei gespeichert, und Certbot liest die Anmeldeinformationen daraus. - Wenn keine `LETS_ENCRYPT_DNS_PROPAGATION`-Einstellung angegeben ist, wird die Standard-Propagationszeit des Anbieters verwendet. - Die vollständige Let's Encrypt-Automatisierung mit der `http`-Challenge funktioniert im Stream-Modus, solange Sie den Port `80/tcp` von außen öffnen. Verwenden Sie die Einstellung `LISTEN_STREAM_PORT_SSL`, um Ihren SSL/TLS-Listening-Port zu wählen. - Wenn `LETS_ENCRYPT_PASSTHROUGH` auf `yes` gesetzt ist, behandelt BunkerWeb die ACME-Challenge-Anfragen nicht selbst, sondern leitet sie an den Backend-Webserver weiter. Dies ist nützlich in Szenarien, in denen BunkerWeb als Reverse-Proxy vor einem anderen Server fungiert, der für die Verarbeitung von Let's Encrypt-Challenges konfiguriert ist.
 
 !!! tip "HTTP- vs. DNS-Challenges"
-**HTTP-Challenges** sind einfacher einzurichten und funktionieren für die meisten Websites gut:
+    **HTTP-Challenges** sind einfacher einzurichten und funktionieren für die meisten Websites gut:
 
     - Erfordert, dass Ihre Website öffentlich auf Port 80 erreichbar ist
     - Wird automatisch von BunkerWeb konfiguriert
@@ -2640,10 +2646,10 @@ Beachten Sie, dass die Profile `tlsserver` und `shortlived` derzeit möglicherwe
     - Nützlich, wenn Port 80 blockiert oder nicht verfügbar ist
 
 !!! warning "Wildcard-Zertifikate"
-Wildcard-Zertifikate sind nur mit DNS-Challenges verfügbar. Wenn Sie sie verwenden möchten, müssen Sie die Einstellung `USE_LETS_ENCRYPT_WILDCARD` auf `yes` setzen und Ihre DNS-Anbieter-Anmeldeinformationen korrekt konfigurieren.
+    Wildcard-Zertifikate sind nur mit DNS-Challenges verfügbar. Wenn Sie sie verwenden möchten, müssen Sie die Einstellung `USE_LETS_ENCRYPT_WILDCARD` auf `yes` setzen und Ihre DNS-Anbieter-Anmeldeinformationen korrekt konfigurieren.
 
 !!! warning "Ratenbegrenzungen"
-Let's Encrypt hat Ratenbegrenzungen für die Ausstellung von Zertifikaten. Verwenden Sie beim Testen von Konfigurationen die Staging-Umgebung, indem Sie `USE_LETS_ENCRYPT_STAGING` auf `yes` setzen, um zu vermeiden, dass Sie die Produktions-Ratenbegrenzungen erreichen. Staging-Zertifikate sind von Browsern nicht vertrauenswürdig, aber nützlich zur Validierung Ihrer Einrichtung.
+    Let's Encrypt hat Ratenbegrenzungen für die Ausstellung von Zertifikaten. Verwenden Sie beim Testen von Konfigurationen die Staging-Umgebung, indem Sie `USE_LETS_ENCRYPT_STAGING` auf `yes` setzen, um zu vermeiden, dass Sie die Produktions-Ratenbegrenzungen erreichen. Staging-Zertifikate sind von Browsern nicht vertrauenswürdig, aber nützlich zur Validierung Ihrer Einrichtung.
 
 ### Unterstützte DNS-Anbieter
 
@@ -2779,14 +2785,14 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 
 === "Anforderungsratenbegrenzung"
 
-| Einstellung      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                             |
-| ---------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_LIMIT_REQ`  | `yes`    | multisite | nein     | **Anforderungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Ratenbegrenzung von Anfragen zu aktivieren.                                                 |
-| `LIMIT_REQ_URL`  | `/`      | multisite | ja       | **URL-Muster:** URL-Muster (PCRE-Regex), auf das die Ratenbegrenzung angewendet wird; verwenden Sie `/`, um es für alle Anfragen anzuwenden.                             |
-| `LIMIT_REQ_RATE` | `2r/s`   | multisite | ja       | **Ratenbegrenzung:** Maximale Anfragerate im Format `Nr/t`, wobei N die Anzahl der Anfragen und t die Zeiteinheit ist: s (Sekunde), m (Minute), h (Stunde) oder d (Tag). |
+    | Einstellung      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                             |
+    | ---------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `USE_LIMIT_REQ`  | `yes`    | multisite | nein     | **Anforderungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Ratenbegrenzung von Anfragen zu aktivieren.                                                 |
+    | `LIMIT_REQ_URL`  | `/`      | multisite | ja       | **URL-Muster:** URL-Muster (PCRE-Regex), auf das die Ratenbegrenzung angewendet wird; verwenden Sie `/`, um es für alle Anfragen anzuwenden.                             |
+    | `LIMIT_REQ_RATE` | `2r/s`   | multisite | ja       | **Ratenbegrenzung:** Maximale Anfragerate im Format `Nr/t`, wobei N die Anzahl der Anfragen und t die Zeiteinheit ist: s (Sekunde), m (Minute), h (Stunde) oder d (Tag). |
 
 !!! tip "Format der Ratenbegrenzung"
-Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
+    Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
 
     - `N` die Anzahl der erlaubten Anfragen ist
     - `r` ein literales 'r' ist (für 'requests')
@@ -2797,13 +2803,13 @@ Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
 
 === "Verbindungsbegrenzung"
 
-| Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                     |
-| ----------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
-| `USE_LIMIT_CONN`        | `yes`    | multisite | nein     | **Verbindungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Verbindungsbegrenzung zu aktivieren. |
-| `LIMIT_CONN_MAX_HTTP1`  | `10`     | multisite | nein     | **HTTP/1.X-Verbindungen:** Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse.                  |
-| `LIMIT_CONN_MAX_HTTP2`  | `100`    | multisite | nein     | **HTTP/2-Streams:** Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse.                                |
-| `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse.                                |
-| `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse.                      |
+    | Einstellung             | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                     |
+    | ----------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+    | `USE_LIMIT_CONN`        | `yes`    | multisite | nein     | **Verbindungsbegrenzung aktivieren:** Auf `yes` setzen, um die Funktion zur Verbindungsbegrenzung zu aktivieren. |
+    | `LIMIT_CONN_MAX_HTTP1`  | `10`     | multisite | nein     | **HTTP/1.X-Verbindungen:** Maximale Anzahl gleichzeitiger HTTP/1.X-Verbindungen pro IP-Adresse.                  |
+    | `LIMIT_CONN_MAX_HTTP2`  | `100`    | multisite | nein     | **HTTP/2-Streams:** Maximale Anzahl gleichzeitiger HTTP/2-Streams pro IP-Adresse.                                |
+    | `LIMIT_CONN_MAX_HTTP3`  | `100`    | multisite | nein     | **HTTP/3-Streams:** Maximale Anzahl gleichzeitiger HTTP/3-Streams pro IP-Adresse.                                |
+    | `LIMIT_CONN_MAX_STREAM` | `10`     | multisite | nein     | **Stream-Verbindungen:** Maximale Anzahl gleichzeitiger Stream-Verbindungen pro IP-Adresse.                      |
 
 !!! info "Verbindungs- vs. Anforderungsbegrenzung"
 
@@ -2813,7 +2819,7 @@ Das Format der Ratenbegrenzung wird als `Nr/t` angegeben, wobei:
   Die Verwendung beider Methoden bietet einen umfassenden Schutz gegen verschiedene Arten von Missbrauch.
 
 !!! warning "Festlegen angemessener Grenzwerte"
-Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesondere bei HTTP/2 und HTTP/3, wo Browser oft mehrere Streams verwenden. Die Standardwerte sind für die meisten Anwendungsfälle ausgewogen, aber erwägen Sie, sie je nach den Bedürfnissen Ihrer Anwendung und dem Benutzerverhalten anzupassen.
+    Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesondere bei HTTP/2 und HTTP/3, wo Browser oft mehrere Streams verwenden. Die Standardwerte sind für die meisten Anwendungsfälle ausgewogen, aber erwägen Sie, sie je nach den Bedürfnissen Ihrer Anwendung und dem Benutzerverhalten anzupassen.
 
 ### Beispielkonfigurationen
 
@@ -2907,7 +2913,7 @@ Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesonde
     LIMIT_CONN_MAX_STREAM: "20"
     ```
 
-## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -2922,6 +2928,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | ja       | Load balancing mode (round-robin or sticky).                       |
 | `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | ja       | Sticky session method (ip or cookie).                              |
 | `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | ja       | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | ja       | Number of keepalive connections to cache per worker.               |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | ja       | Keepalive timeout for upstream connections.                        |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | ja       | Keepalive time for upstream connections.                           |
 | `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global  | ja       | The healthcheck URL.                                               |
@@ -2999,7 +3006,7 @@ Auf Metrikdaten kann über die internen API-Endpunkte von BunkerWeb zugegriffen 
 Zum Beispiel gibt `/metrics/requests` Informationen über blockierte Anfragen zurück.
 
 !!! info "Konfiguration des API-Zugriffs"
-Um über die API auf Metriken zuzugreifen, müssen Sie sicherstellen, dass:
+    Um über die API auf Metriken zuzugreifen, müssen Sie sicherstellen, dass:
 
     1. Die API-Funktion mit `USE_API: "yes"` aktiviert ist (standardmäßig aktiviert)
     2. Ihre Client-IP in der Einstellung `API_WHITELIST_IP` enthalten ist (Standard ist `127.0.0.0/8`)
@@ -3037,16 +3044,16 @@ Um über die API auf Metriken zuzugreifen, müssen Sie sicherstellen, dass:
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | nein     | **Metriken in Redis speichern:** Auf `yes` setzen, um Metriken (Zähler und Tabellen) zur clusterweiten Aggregation in Redis zu speichern. |
 
 !!! tip "Dimensionierung der Speicherzuweisung"
-Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
+    Die Einstellung `METRICS_MEMORY_SIZE` sollte basierend auf Ihrem Verkehrsaufkommen und der Anzahl der Instanzen angepasst werden. Bei stark frequentierten Websites sollten Sie diesen Wert erhöhen, um sicherzustellen, dass alle Metriken ohne Datenverlust erfasst werden.
 
 !!! info "Redis-Integration"
-Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg.
+    Wenn BunkerWeb für die Verwendung von [Redis](#redis) konfiguriert ist, synchronisiert das Metrics-Plugin blockierte Anfragedaten automatisch mit dem Redis-Server. Dies bietet eine zentralisierte Ansicht von Sicherheitsereignissen über mehrere BunkerWeb-Instanzen hinweg.
 
 !!! warning "Leistungsüberlegungen"
-Das Festlegen sehr hoher Werte für `METRICS_MAX_BLOCKED_REQUESTS` oder `METRICS_MAX_BLOCKED_REQUESTS_REDIS` kann den Speicherverbrauch erhöhen. Überwachen Sie Ihre Systemressourcen und passen Sie diese Werte entsprechend Ihren tatsächlichen Bedürfnissen und verfügbaren Ressourcen an.
+    Das Festlegen sehr hoher Werte für `METRICS_MAX_BLOCKED_REQUESTS` oder `METRICS_MAX_BLOCKED_REQUESTS_REDIS` kann den Speicherverbrauch erhöhen. Überwachen Sie Ihre Systemressourcen und passen Sie diese Werte entsprechend Ihren tatsächlichen Bedürfnissen und verfügbaren Ressourcen an.
 
 !!! note "Worker-spezifischer Speicher"
-Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff auf Metriken über die API werden die Daten aller Worker automatisch aggregiert, um eine vollständige Ansicht zu erhalten.
+    Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff auf Metriken über die API werden die Daten aller Worker automatisch aggregiert, um eine vollständige Ansicht zu erhalten.
 
 ### Beispielkonfigurationen
 
@@ -3094,7 +3101,7 @@ Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff au
     USE_METRICS: "no"
     ```
 
-## Migration <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Migration <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :white_check_mark:
@@ -3448,7 +3455,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 | `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | nein     | **Globales CRS:** Wenn aktiviert, werden CRS-Regeln global auf HTTP-Ebene anstatt pro Server angewendet.                                                                        |
 
 !!! warning "ModSecurity und das OWASP Core Rule Set"
-**Wir empfehlen dringend, sowohl ModSecurity als auch das OWASP Core Rule Set (CRS) aktiviert zu lassen**, um einen robusten Schutz gegen gängige Web-Schwachstellen zu bieten. Obwohl gelegentlich Falsch-Positive auftreten können, können diese mit etwas Aufwand durch Feinabstimmung von Regeln oder die Verwendung vordefinierter Ausschlüsse behoben werden.
+    **Wir empfehlen dringend, sowohl ModSecurity als auch das OWASP Core Rule Set (CRS) aktiviert zu lassen**, um einen robusten Schutz gegen gängige Web-Schwachstellen zu bieten. Obwohl gelegentlich Falsch-Positive auftreten können, können diese mit etwas Aufwand durch Feinabstimmung von Regeln oder die Verwendung vordefinierter Ausschlüsse behoben werden.
 
     Das CRS-Team pflegt aktiv eine Liste von Ausschlüssen für beliebte Anwendungen wie WordPress, Nextcloud, Drupal und Cpanel, was die Integration erleichtert, ohne die Funktionalität zu beeinträchtigen. Die Sicherheitsvorteile überwiegen bei weitem den minimalen Konfigurationsaufwand, der zur Behebung von Falsch-Positiven erforderlich ist.
 
@@ -3461,10 +3468,10 @@ Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entsp
 - **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
 
 !!! example "Nightly-Build"
-Der **Nightly-Build** enthält die aktuellsten Regeln und bietet den neuesten Schutz gegen aufkommende Bedrohungen. Da er jedoch täglich aktualisiert wird und experimentelle oder ungetestete Änderungen enthalten kann, wird empfohlen, den Nightly-Build zunächst in einer **Staging-Umgebung** zu verwenden, bevor er in der Produktion eingesetzt wird.
+    Der **Nightly-Build** enthält die aktuellsten Regeln und bietet den neuesten Schutz gegen aufkommende Bedrohungen. Da er jedoch täglich aktualisiert wird und experimentelle oder ungetestete Änderungen enthalten kann, wird empfohlen, den Nightly-Build zunächst in einer **Staging-Umgebung** zu verwenden, bevor er in der Produktion eingesetzt wird.
 
 !!! tip "Paranoia-Stufen"
-Das OWASP Core Rule Set verwendet "Paranoia-Stufen" (PL), um die Strenge der Regeln zu steuern:
+    Das OWASP Core Rule Set verwendet "Paranoia-Stufen" (PL), um die Strenge der Regeln zu steuern:
 
     - **PL1 (Standard):** Grundlegender Schutz mit minimalen Falsch-Positiven
     - **PL2:** Strengere Sicherheit mit strengerem Musterabgleich
@@ -3520,7 +3527,7 @@ In diesem Beispiel:
 - **Regel 3**: Entfernt eine bestimmte Regel (ID `930120`) für Anfragen, die auf `/wp-json/yoast` passen.
 
 !!! info "Reihenfolge der Ausführung"
-Die Ausführungsreihenfolge für ModSecurity in BunkerWeb ist wie folgt, um eine klare und logische Abfolge der Regelanwendung zu gewährleisten:
+    Die Ausführungsreihenfolge für ModSecurity in BunkerWeb ist wie folgt, um eine klare und logische Abfolge der Regelanwendung zu gewährleisten:
 
     1.  **OWASP CRS-Konfiguration**: Basiskonfiguration für das OWASP Core Rule Set.
     2.  **Konfiguration benutzerdefinierter Plugins (`crs-plugins-before`)**: Einstellungen, die für Plugins spezifisch sind und vor allen CRS-Regeln angewendet werden.
@@ -3544,7 +3551,7 @@ Die Ausführungsreihenfolge für ModSecurity in BunkerWeb ist wie folgt, um eine
 Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwickelt wurden, um seine Funktionalität zu erweitern und die Kompatibilität mit bestimmten Anwendungen oder Umgebungen zu verbessern. Diese Plugins können dabei helfen, das CRS für die Verwendung mit beliebten Plattformen wie WordPress, Nextcloud und Drupal oder sogar benutzerdefinierten Setups zu optimieren. Weitere Informationen und eine Liste der verfügbaren Plugins finden Sie im [OWASP CRS Plugin-Verzeichnis](https://github.com/coreruleset/plugin-registry).
 
 !!! tip "Plugin-Download"
-Die Einstellung `MODSECURITY_CRS_PLUGINS` ermöglicht es Ihnen, Plugins herunterzuladen und zu installieren, um die Funktionalität des OWASP Core Rule Set (CRS) zu erweitern. Diese Einstellung akzeptiert eine Liste von Plugin-Namen mit optionalen Tags oder URLs, was es einfach macht, zusätzliche Sicherheitsfunktionen zu integrieren, die auf Ihre spezifischen Bedürfnisse zugeschnitten sind.
+    Die Einstellung `MODSECURITY_CRS_PLUGINS` ermöglicht es Ihnen, Plugins herunterzuladen und zu installieren, um die Funktionalität des OWASP Core Rule Set (CRS) zu erweitern. Diese Einstellung akzeptiert eine Liste von Plugin-Namen mit optionalen Tags oder URLs, was es einfach macht, zusätzliche Sicherheitsfunktionen zu integrieren, die auf Ihre spezifischen Bedürfnisse zugeschnitten sind.
 
     Hier ist eine nicht erschöpfende Liste der akzeptierten Werte für die Einstellung `MODSECURITY_CRS_PLUGINS`:
 
@@ -3553,7 +3560,7 @@ Die Einstellung `MODSECURITY_CRS_PLUGINS` ermöglicht es Ihnen, Plugins herunter
     *   `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` - Lädt das Plugin direkt von der URL herunter.
 
 !!! warning "Falsch-Positive"
-Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen Sie mit den Standardeinstellungen und überwachen Sie die Protokolle, bevor Sie die Sicherheitsstufen erhöhen. Seien Sie bereit, Ausnahmeregeln für die spezifischen Anforderungen Ihrer Anwendung hinzuzufügen.
+    Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen Sie mit den Standardeinstellungen und überwachen Sie die Protokolle, bevor Sie die Sicherheitsstufen erhöhen. Seien Sie bereit, Ausnahmeregeln für die spezifischen Anforderungen Ihrer Anwendung hinzuzufügen.
 
 ### Beispielkonfigurationen
 
@@ -3630,9 +3637,9 @@ Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen 
     ```
 
 !!! note "Menschenlesbare Größenwerte"
-Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+    Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
 
-## Monitoring <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Monitoring <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -3679,16 +3686,16 @@ Führen Sie die folgenden Schritte aus, um die PHP-Funktion zu konfigurieren und
 | `LOCAL_PHP_PATH`  |          | multisite | nein     | **Lokaler Pfad:** Stammordner mit Dateien in der lokalen PHP-FPM-Instanz.                                           |
 
 !!! tip "Lokales vs. entferntes PHP-FPM"
-Wählen Sie das Setup, das am besten zu Ihrer Infrastruktur passt:
+    Wählen Sie das Setup, das am besten zu Ihrer Infrastruktur passt:
 
     - **Lokales PHP-FPM** bietet aufgrund der Socket-basierten Kommunikation eine bessere Leistung und ist ideal, wenn PHP auf derselben Maschine wie BunkerWeb läuft.
     - **Entferntes PHP-FPM** bietet mehr Flexibilität und Skalierbarkeit, indem die PHP-Verarbeitung auf separaten Servern erfolgen kann.
 
 !!! warning "Pfadkonfiguration"
-Der `REMOTE_PHP_PATH` oder `LOCAL_PHP_PATH` muss mit dem tatsächlichen Dateisystempfad übereinstimmen, in dem Ihre PHP-Dateien gespeichert sind; andernfalls tritt ein "Datei nicht gefunden"-Fehler auf.
+    Der `REMOTE_PHP_PATH` oder `LOCAL_PHP_PATH` muss mit dem tatsächlichen Dateisystempfad übereinstimmen, in dem Ihre PHP-Dateien gespeichert sind; andernfalls tritt ein "Datei nicht gefunden"-Fehler auf.
 
 !!! info "URL-Umschreibung"
-Das PHP-Plugin konfiguriert automatisch die URL-Umschreibung, um moderne PHP-Anwendungen zu unterstützen. Anfragen für nicht existierende Dateien werden an `index.php` weitergeleitet, wobei die ursprüngliche Anfrage-URI als Abfrageparameter verfügbar ist.
+    Das PHP-Plugin konfiguriert automatisch die URL-Umschreibung, um moderne PHP-Anwendungen zu unterstützen. Anfragen für nicht existierende Dateien werden an `index.php` weitergeleitet, wobei die ursprüngliche Anfrage-URI als Abfrageparameter verfügbar ist.
 
 ### Beispielkonfigurationen
 
@@ -3768,13 +3775,13 @@ Führen Sie die folgenden Schritte aus, um die Pro-Funktionen zu konfigurieren u
 | `PRO_LICENSE_KEY` |          | global  | nein     | **Pro-Lizenzschlüssel:** Ihr BunkerWeb Pro-Lizenzschlüssel zur Authentifizierung. |
 
 !!! tip "Lizenzverwaltung"
-Ihre Pro-Lizenz ist an Ihre spezifische Bereitstellungsumgebung gebunden. Wenn Sie Ihre Lizenz übertragen müssen oder Fragen zu Ihrem Abonnement haben, wenden Sie sich bitte über das [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) an den Support.
+    Ihre Pro-Lizenz ist an Ihre spezifische Bereitstellungsumgebung gebunden. Wenn Sie Ihre Lizenz übertragen müssen oder Fragen zu Ihrem Abonnement haben, wenden Sie sich bitte über das [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) an den Support.
 
 !!! info "Pro-Funktionen"
-Die spezifischen verfügbaren Pro-Funktionen können sich im Laufe der Zeit weiterentwickeln, wenn neue Funktionen hinzugefügt werden. Das Pro-Plugin übernimmt automatisch die Installation und Konfiguration aller verfügbaren Funktionen.
+    Die spezifischen verfügbaren Pro-Funktionen können sich im Laufe der Zeit weiterentwickeln, wenn neue Funktionen hinzugefügt werden. Das Pro-Plugin übernimmt automatisch die Installation und Konfiguration aller verfügbaren Funktionen.
 
 !!! warning "Netzwerkanforderungen"
-Das Pro-Plugin benötigt ausgehenden Internetzugang, um sich zur Lizenzüberprüfung mit der BunkerWeb-API zu verbinden und Premium-Plugins herunterzuladen. Stellen Sie sicher, dass Ihre Firewall Verbindungen zu `api.bunkerweb.io` auf Port 443 (HTTPS) zulässt.
+    Das Pro-Plugin benötigt ausgehenden Internetzugang, um sich zur Lizenzüberprüfung mit der BunkerWeb-API zu verbinden und Premium-Plugins herunterzuladen. Stellen Sie sicher, dass Ihre Firewall Verbindungen zu `api.bunkerweb.io` auf Port 443 (HTTPS) zulässt.
 
 ### Häufig gestellte Fragen
 
@@ -3795,7 +3802,7 @@ A: Auf jeden Fall! BunkerWeb bietet zwei Pro-Pläne, die Ihren Bedürfnissen ent
 
 Sie können die Pro-Funktionen mit einer kostenlosen 1-monatigen Testversion erkunden, indem Sie den Promo-Code `freetrial` verwenden. Besuchen Sie das [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), um Ihre Testversion zu aktivieren und mehr über flexible Preisoptionen basierend auf der Anzahl der von BunkerWeb PRO geschützten Dienste zu erfahren.
 
-## Prometheus exporter <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Prometheus exporter <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -3835,7 +3842,7 @@ So funktioniert's:
 6.  PROXY-Protokoll: Aktivieren Sie `USE_PROXY_PROTOCOL`, wenn das Upstream-System es unterstützt.
 
 !!! danger "Warnung PROXY-Protokoll"
-Das Aktivieren von `USE_PROXY_PROTOCOL` ohne ein korrekt konfiguriertes Upstream-System, das es aussendet, führt dazu, dass Ihre Anwendung nicht funktioniert. Stellen Sie sicher, dass Sie es vor der Aktivierung konfiguriert haben.
+    Das Aktivieren von `USE_PROXY_PROTOCOL` ohne ein korrekt konfiguriertes Upstream-System, das es aussendet, führt dazu, dass Ihre Anwendung nicht funktioniert. Stellen Sie sicher, dass Sie es vor der Aktivierung konfiguriert haben.
 
 ### Parameter
 
@@ -3849,23 +3856,23 @@ Das Aktivieren von `USE_PROXY_PROTOCOL` ohne ein korrekt konfiguriertes Upstream
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | nein     | Aktiviert die PROXY-Protokoll-Unterstützung für die direkte Proxy→BunkerWeb-Kommunikation.   |
 
 !!! tip "Cloud-Anbieter"
-Fügen Sie die IPs Ihrer Load Balancer (AWS/GCP/Azure…) zu `REAL_IP_FROM` hinzu, um eine korrekte Identifizierung zu gewährleisten.
+    Fügen Sie die IPs Ihrer Load Balancer (AWS/GCP/Azure…) zu `REAL_IP_FROM` hinzu, um eine korrekte Identifizierung zu gewährleisten.
 
 !!! danger "Sicherheitsaspekte"
-Fügen Sie nur vertrauenswürdige Quellen hinzu, da sonst die Gefahr der IP-Spoofing über manipulierte Header besteht.
+    Fügen Sie nur vertrauenswürdige Quellen hinzu, da sonst die Gefahr der IP-Spoofing über manipulierte Header besteht.
 
 !!! info "Mehrere Adressen"
-Mit `REAL_IP_RECURSIVE` wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.
+    Mit `REAL_IP_RECURSIVE` wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.
 
 ### Beispiele
 
 === "Basis (hinter Reverse Proxy)"
 
-```yaml
-USE_REAL_IP: "yes"
-REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
-REAL_IP_HEADER: "X-Forwarded-For"
-```
+    ```yaml
+    USE_REAL_IP: "yes"
+    REAL_IP_FROM: "192.168.1.0/24 10.0.0.5"
+    REAL_IP_HEADER: "X-Forwarded-For"
+    ```
 
 ## Redirect
 
@@ -3906,7 +3913,7 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
 - Verwenden Sie `302` (Found/Temporary Redirect), wenn die Umleitung vorübergehend ist oder wenn Sie die ursprüngliche URL in Zukunft möglicherweise wiederverwenden möchten.
 
 !!! info "Beibehaltung des Pfades"
-Wenn `REDIRECT_TO_REQUEST_URI` auf `yes` gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise `https://old-domain.com/blog/post-1` besucht und Sie eine Umleitung zu `https://new-domain.com` eingerichtet haben, wird er zu `https://new-domain.com/blog/post-1` umgeleitet.
+    Wenn `REDIRECT_TO_REQUEST_URI` auf `yes` gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise `https://old-domain.com/blog/post-1` besucht und Sie eine Umleitung zu `https://new-domain.com` eingerichtet haben, wird er zu `https://new-domain.com/blog/post-1` umgeleitet.
 
 ### Beispielkonfigurationen
 
@@ -4017,7 +4024,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_KEEPALIVE_POOL`    | `3`        | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen.          |
 
 !!! tip "Hochverfügbarkeit"
-Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
+    Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
 
 !!! warning "Sicherheit"
 
@@ -4030,47 +4037,47 @@ Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produkti
 
 === "Basiskonfiguration"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "localhost"
-REDIS_PORT: "6379"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "localhost"
+    REDIS_PORT: "6379"
+    ```
 
 === "Sichere Konfiguration"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "redis.example.com"
-REDIS_PORT: "6379"
-REDIS_PASSWORD: "your-strong-password"
-REDIS_SSL: "yes"
-REDIS_SSL_VERIFY: "yes"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "redis.example.com"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: "your-strong-password"
+    REDIS_SSL: "yes"
+    REDIS_SSL_VERIFY: "yes"
+    ```
 
 === "Redis Sentinel"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
-REDIS_SENTINEL_MASTER: "mymaster"
-REDIS_SENTINEL_PASSWORD: "sentinel-password"
-REDIS_PASSWORD: "redis-password"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_SENTINEL_HOSTS: "sentinel1:26379 sentinel2:26379 sentinel3:26379"
+    REDIS_SENTINEL_MASTER: "mymaster"
+    REDIS_SENTINEL_PASSWORD: "sentinel-password"
+    REDIS_PASSWORD: "redis-password"
+    ```
 
 === "Erweitertes Tuning"
 
-```yaml
-USE_REDIS: "yes"
-REDIS_HOST: "redis.example.com"
-REDIS_PORT: "6379"
-REDIS_PASSWORD: "your-strong-password"
-REDIS_DATABASE: "3"
-REDIS_TIMEOUT: "3"
-REDIS_KEEPALIVE_IDLE: "60"
-REDIS_KEEPALIVE_POOL: "5"
-```
+    ```yaml
+    USE_REDIS: "yes"
+    REDIS_HOST: "redis.example.com"
+    REDIS_PORT: "6379"
+    REDIS_PASSWORD: "your-strong-password"
+    REDIS_DATABASE: "3"
+    REDIS_TIMEOUT: "3"
+    REDIS_KEEPALIVE_IDLE: "60"
+    REDIS_KEEPALIVE_POOL: "5"
+    ```
 
-## Reporting <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## Reporting <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -4318,7 +4325,7 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Proxy-Funktion zu konfigu
         - Überwachen Sie die Cache-Trefferquoten und passen Sie die Einstellungen entsprechend an
 
 !!! danger "Docker Compose-Benutzer - NGINX-Variablen"
-Wenn Sie Docker Compose mit NGINX-Variablen in Ihren Konfigurationen verwenden, müssen Sie das Dollarzeichen (`$`) durch doppelte Dollarzeichen (`$$`) maskieren. Dies gilt für alle Einstellungen, die NGINX-Variablen wie `$remote_addr`, `$proxy_add_x_forwarded_for` usw. enthalten.
+    Wenn Sie Docker Compose mit NGINX-Variablen in Ihren Konfigurationen verwenden, müssen Sie das Dollarzeichen (`$`) durch doppelte Dollarzeichen (`$$`) maskieren. Dies gilt für alle Einstellungen, die NGINX-Variablen wie `$remote_addr`, `$proxy_add_x_forwarded_for` usw. enthalten.
 
     Ohne diese Maskierung versucht Docker Compose, diese Variablen durch Umgebungsvariablen zu ersetzen, die normalerweise nicht existieren, was zu leeren Werten in Ihrer NGINX-Konfiguration führt.
 
@@ -4459,10 +4466,10 @@ Führen Sie die folgenden Schritte aus, um die Reverse-Scan-Funktion zu konfigur
 | `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | nein     | **Scan-Timeout:** Maximale Zeit in Millisekunden, die für das Scannen eines Ports zulässig ist.     |
 
 !!! warning "Leistungsüberlegungen"
-Das Scannen mehrerer Ports kann die Latenz bei Client-Verbindungen erhöhen. Verwenden Sie einen angemessenen Zeitüberschreitungswert und begrenzen Sie die Anzahl der gescannten Ports, um eine gute Leistung aufrechtzuerhalten.
+    Das Scannen mehrerer Ports kann die Latenz bei Client-Verbindungen erhöhen. Verwenden Sie einen angemessenen Zeitüberschreitungswert und begrenzen Sie die Anzahl der gescannten Ports, um eine gute Leistung aufrechtzuerhalten.
 
 !!! info "Gängige Proxy-Ports"
-Die Standardkonfiguration umfasst gängige Ports, die von Proxyservern (80, 443, 8080, 3128) und SSH (22) verwendet werden. Sie können diese Liste basierend auf Ihrem Bedrohungsmodell anpassen.
+    Die Standardkonfiguration umfasst gängige Ports, die von Proxyservern (80, 443, 8080, 3128) und SSH (22) verwendet werden. Sie können diese Liste basierend auf Ihrem Bedrohungsmodell anpassen.
 
 ### Beispielkonfigurationen
 
@@ -4636,50 +4643,50 @@ So funktioniert's:
 | `SSL_CIPHERS_CUSTOM`          |                   | Multisite | nein     | Benutzerdefinierte Suiten (durch `:` getrennte Liste), die das Niveau ersetzen. |
 
 !!! tip "SSL Labs Test"
-Testen Sie Ihre Konfiguration über [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Eine gut eingestellte BunkerWeb-Konfiguration erreicht in der Regel A+.
+    Testen Sie Ihre Konfiguration über [Qualys SSL Labs](https://www.ssllabs.com/ssltest/). Eine gut eingestellte BunkerWeb-Konfiguration erreicht in der Regel A+.
 
 !!! warning "Veraltete Protokolle"
-SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachstellen). Aktivieren Sie diese nur bei Bedarf für ältere Clients.
+    SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachstellen). Aktivieren Sie diese nur bei Bedarf für ältere Clients.
 
 ### Beispiele
 
 === "Moderne Sicherheit (Standard)"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_LEVEL: "modern"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-REDIRECT_HTTP_TO_HTTPS: "no"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
 
 === "Maximale Sicherheit"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.3"
-SSL_CIPHERS_LEVEL: "modern"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-REDIRECT_HTTP_TO_HTTPS: "yes"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.3"
+    SSL_CIPHERS_LEVEL: "modern"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
 
 === "Legacy-Kompatibilität"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_LEVEL: "old"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_LEVEL: "old"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "no"
+    ```
 
 === "Benutzerdefinierte Suiten"
 
-```yaml
-LISTEN_HTTPS: "yes"
-SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
-SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
-AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
-```
+    ```yaml
+    LISTEN_HTTPS: "yes"
+    SSL_PROTOCOLS: "TLSv1.2 TLSv1.3"
+    SSL_CIPHERS_CUSTOM: "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
+    AUTO_REDIRECT_HTTP_TO_HTTPS: "yes"
+    ```
 
 ## Security.txt
 
@@ -4721,13 +4728,13 @@ Führen Sie die folgenden Schritte aus, um die Security.txt-Funktion zu konfigur
 | `SECURITYTXT_CSAF`             |                             | multisite | ja       | **CSAF:** Link zur provider-metadata.json Ihres Common Security Advisory Framework-Anbieters.                                   |
 
 !!! warning "Ablaufdatum erforderlich"
-Gemäß RFC 9116 ist das Feld `Expires` erforderlich. Wenn Sie keinen Wert für `SECURITYTXT_EXPIRES` angeben, setzt BunkerWeb das Ablaufdatum automatisch auf ein Jahr ab dem aktuellen Datum.
+    Gemäß RFC 9116 ist das Feld `Expires` erforderlich. Wenn Sie keinen Wert für `SECURITYTXT_EXPIRES` angeben, setzt BunkerWeb das Ablaufdatum automatisch auf ein Jahr ab dem aktuellen Datum.
 
 !!! info "Kontaktinformationen sind unerlässlich"
-Das Feld `Contact` ist der wichtigste Teil der security.txt-Datei. Sie sollten mindestens eine Möglichkeit für Sicherheitsforscher angeben, Sie zu kontaktieren. Dies kann eine E-Mail-Adresse, ein Webformular, eine Telefonnummer oder eine andere Methode sein, die für Ihre Organisation funktioniert.
+    Das Feld `Contact` ist der wichtigste Teil der security.txt-Datei. Sie sollten mindestens eine Möglichkeit für Sicherheitsforscher angeben, Sie zu kontaktieren. Dies kann eine E-Mail-Adresse, ein Webformular, eine Telefonnummer oder eine andere Methode sein, die für Ihre Organisation funktioniert.
 
 !!! warning "URLs müssen HTTPS verwenden"
-Gemäß RFC 9116 MÜSSEN alle URLs in der security.txt-Datei (außer `mailto:`- und `tel:`-Links) HTTPS verwenden. Nicht-HTTPS-URLs werden von BunkerWeb automatisch in HTTPS konvertiert, um die Einhaltung des Standards zu gewährleisten.
+    Gemäß RFC 9116 MÜSSEN alle URLs in der security.txt-Datei (außer `mailto:`- und `tel:`-Links) HTTPS verwenden. Nicht-HTTPS-URLs werden von BunkerWeb automatisch in HTTPS konvertiert, um die Einhaltung des Standards zu gewährleisten.
 
 ### Beispielkonfigurationen
 
@@ -4786,7 +4793,7 @@ So funktioniert's:
 4.  Die Verlängerung erfolgt automatisch vor dem Ablaufdatum.
 
 !!! warning "Browser-Warnungen"
-Browser zeigen Sicherheitswarnungen an, da ein selbstsigniertes Zertifikat nicht von einer vertrauenswürdigen CA ausgestellt wurde. Verwenden Sie in der Produktion vorzugsweise [Let's Encrypt](#lets-encrypt).
+    Browser zeigen Sicherheitswarnungen an, da ein selbstsigniertes Zertifikat nicht von einer vertrauenswürdigen CA ausgestellt wurde. Verwenden Sie in der Produktion vorzugsweise [Let's Encrypt](#lets-encrypt).
 
 ### Verwendung
 
@@ -4796,7 +4803,7 @@ Browser zeigen Sicherheitswarnungen an, da ein selbstsigniertes Zertifikat nicht
 4.  Betreff: Betrefffeld über `SELF_SIGNED_SSL_SUBJ`.
 
 !!! tip "Stream-Modus"
-Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL`, um den SSL/TLS-Listening-Port zu definieren.
+    Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL`, um den SSL/TLS-Listening-Port zu definieren.
 
 ### Parameter
 
@@ -4811,31 +4818,31 @@ Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL`, um den SSL/TLS-Liste
 
 === "Standard"
 
-```yaml
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
-SELF_SIGNED_SSL_EXPIRY: "365"
-SELF_SIGNED_SSL_SUBJ: "/CN=mysite.local/"
-```
+    ```yaml
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
+    SELF_SIGNED_SSL_EXPIRY: "365"
+    SELF_SIGNED_SSL_SUBJ: "/CN=mysite.local/"
+    ```
 
 === "Kurzzeit-Zertifikate"
 
-```yaml
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
-SELF_SIGNED_SSL_EXPIRY: "90"
-SELF_SIGNED_SSL_SUBJ: "/CN=dev.example.com/"
-```
+    ```yaml
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "ec-prime256v1"
+    SELF_SIGNED_SSL_EXPIRY: "90"
+    SELF_SIGNED_SSL_SUBJ: "/CN=dev.example.com/"
+    ```
 
 === "Test in RSA"
 
-```yaml
-SERVER_NAME: "test.example.com"
-GENERATE_SELF_SIGNED_SSL: "yes"
-SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
-SELF_SIGNED_SSL_EXPIRY: "365"
-SELF_SIGNED_SSL_SUBJ: "/CN=test.example.com/"
-```
+    ```yaml
+    SERVER_NAME: "test.example.com"
+    GENERATE_SELF_SIGNED_SSL: "yes"
+    SELF_SIGNED_SSL_ALGORITHM: "rsa-4096"
+    SELF_SIGNED_SSL_EXPIRY: "365"
+    SELF_SIGNED_SSL_SUBJ: "/CN=test.example.com/"
+    ```
 
 ## Sessions
 
@@ -4875,7 +4882,7 @@ Führen Sie die folgenden Schritte aus, um die Sessions-Funktion zu konfiguriere
 | `SESSIONS_CHECK_USER_AGENT` | `yes`    | global  | nein     | **User-Agent prüfen:** Wenn auf `yes` gesetzt, wird die Sitzung zerstört, wenn sich der User-Agent des Clients ändert.                                                     |
 
 !!! warning "Sicherheitshinweise"
-Die Einstellung `SESSIONS_SECRET` ist für die Sicherheit von entscheidender Bedeutung. In Produktionsumgebungen:
+    Die Einstellung `SESSIONS_SECRET` ist für die Sicherheit von entscheidender Bedeutung. In Produktionsumgebungen:
 
     1. Verwenden Sie einen starken, zufälligen Wert (mindestens 32 Zeichen)
     2. Halten Sie diesen Wert vertraulich
@@ -4883,7 +4890,7 @@ Die Einstellung `SESSIONS_SECRET` ist für die Sicherheit von entscheidender Bed
     4. Erwägen Sie die Verwendung von Umgebungsvariablen oder Geheimnisverwaltung, um die Speicherung im Klartext zu vermeiden
 
 !!! tip "Cluster-Umgebungen"
-Wenn Sie mehrere BunkerWeb-Instanzen hinter einem Load Balancer betreiben:
+    Wenn Sie mehrere BunkerWeb-Instanzen hinter einem Load Balancer betreiben:
 
     1. Setzen Sie `USE_REDIS` auf `yes` und konfigurieren Sie Ihre Redis-Verbindung
     2. Stellen Sie sicher, dass alle Instanzen genau denselben `SESSIONS_SECRET` und `SESSIONS_NAME` verwenden
@@ -4954,7 +4961,7 @@ Integrate easily the BunkerWeb UI.
 | `USE_UI`    | `no`         | multisite | nein     | Use UI                                       |
 | `UI_HOST`   |              | global    | nein     | Address of the web UI used for initial setup |
 
-## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
 STREAM-Unterstützung :x:
@@ -4993,7 +5000,7 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
 5.  **Zugriff überwachen:** Überprüfen Sie die [Web-Benutzeroberfläche](web-ui.md), um zu sehen, welchen Besuchern der Zugriff gewährt oder verweigert wird.
 
 !!! info "Stream-Modus"
-Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
+    Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
 
 ### Konfigurationseinstellungen
 
@@ -5004,7 +5011,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
 | `USE_WHITELIST` | `no`     | multisite | nein     | **Whitelist aktivieren:** Auf `yes` setzen, um die Whitelist-Funktion zu aktivieren. |
 
 === "IP-Adresse"
-**Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.
+    **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.
 
     | Einstellung                | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                              |
     | -------------------------- | -------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -5014,7 +5021,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `WHITELIST_IGNORE_IP_URLS` |          | multisite | nein     | **IP-Ignorierlisten-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die ignoriert werden sollen.                                        |
 
 === "Reverse DNS"
-**Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Whitelist. Dies ist nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken den Zugriff nach ihrer Domain zu ermöglichen.
+    **Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Whitelist. Dies ist nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken den Zugriff nach ihrer Domain zu ermöglichen.
 
     | Einstellung                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                         |
     | ---------------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -5025,7 +5032,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `WHITELIST_IGNORE_RDNS_URLS` |          | multisite | nein     | **rDNS-Ignorierlisten-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die ignoriert werden sollen.                                        |
 
 === "ASN"
-**Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Whitelist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
+    **Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Whitelist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
     | Einstellung                 | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                         |
     | --------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -5035,7 +5042,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `WHITELIST_IGNORE_ASN_URLS` |          | multisite | nein     | **ASN-Ignorierlisten-URLs:** Liste von URLs, die ASNs enthalten, die ignoriert werden sollen.                                        |
 
 === "User-Agent"
-**Was dies bewirkt:** Setzt Besucher basierend darauf auf die Whitelist, welchen Browser oder welches Tool sie angeben zu verwenden. Dies ist effektiv, um den Zugriff auf bestimmte bekannte Tools oder Dienste zu ermöglichen.
+    **Was dies bewirkt:** Setzt Besucher basierend darauf auf die Whitelist, welchen Browser oder welches Tool sie angeben zu verwenden. Dies ist effektiv, um den Zugriff auf bestimmte bekannte Tools oder Dienste zu ermöglichen.
 
     | Einstellung                        | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                 |
     | ---------------------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -5045,7 +5052,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `WHITELIST_IGNORE_USER_AGENT_URLS` |          | multisite | nein     | **User-Agent-Ignorierlisten-URLs:** Liste von URLs, die User-Agent-Muster enthalten, die ignoriert werden sollen.            |
 
 === "URI"
-**Was dies bewirkt:** Setzt Anfragen an bestimmte URLs auf Ihrer Website auf die Whitelist. Dies ist hilfreich, um den Zugriff auf bestimmte Endpunkte unabhängig von anderen Faktoren zu ermöglichen.
+    **Was dies bewirkt:** Setzt Anfragen an bestimmte URLs auf Ihrer Website auf die Whitelist. Dies ist hilfreich, um den Zugriff auf bestimmte Endpunkte unabhängig von anderen Faktoren zu ermöglichen.
 
     | Einstellung                 | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                               |
     | --------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -5055,13 +5062,13 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `WHITELIST_IGNORE_URI_URLS` |          | multisite | nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die URI-Muster enthalten, die ignoriert werden sollen.                                        |
 
 !!! info "Unterstützung von URL-Formaten"
-Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
+    Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Aktualisierungen"
-Whitelists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
+    Whitelists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
 
 !!! warning "Sicherheitsumgehung"
-Auf der Whitelist stehende Besucher **umgehen vollständig alle anderen Sicherheitsprüfungen** in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.
+    Auf der Whitelist stehende Besucher **umgehen vollständig alle anderen Sicherheitsprüfungen** in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.
 
 ### Beispielkonfigurationen
 

@@ -89,7 +89,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - ./bw-data:/data
     ...
@@ -124,7 +124,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - ./bw-data:/data
     ...
@@ -167,7 +167,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -214,7 +214,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+              image: bunkerity/bunkerweb-scheduler:1.6.5
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -254,7 +254,7 @@ Der erste Schritt besteht darin, das Plugin zu installieren, indem Sie seine Dat
 
 !!! tip "Bestehende Plugins"
 
-    Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der [offiziellen Plugins](https://github.com/bunkerity/bunkerweb-plugins) und der [Kern-Plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/src/common/core) ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).
+    Wenn die Dokumentation nicht ausreicht, können Sie sich den bestehenden Quellcode der [offiziellen Plugins](https://github.com/bunkerity/bunkerweb-plugins) und der [Kern-Plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/common/core) ansehen (bereits in BunkerWeb enthalten, aber technisch gesehen sind es Plugins).
 
 Wie eine Plugin-Struktur aussieht:
 ```
@@ -343,6 +343,7 @@ Hier sind die Details der Felder:
 |   `stream`    |      ja       | string | Informationen zur Stream-Unterstützung: `no`, `yes` oder `partial`.                                                                          |
 |  `settings`   |      ja       | dict   | Liste der Einstellungen Ihres Plugins.                                                                                                       |
 |    `jobs`     |     nein      | list   | Liste der Jobs Ihres Plugins.                                                                                                                |
+|    `bwcli`    |     nein      |  dict  | Ordnet CLI-Befehlsnamen den in dem 'bwcli'-Verzeichnis des Plugins gespeicherten Dateien zu, um CLI-Plugins verfügbar zu machen.      |
 
 Jede Einstellung hat die folgenden Felder (der Schlüssel ist die ID der in einer Konfiguration verwendeten Einstellungen):
 
@@ -365,6 +366,24 @@ Jeder Job hat die folgenden Felder:
 | `name`  |      ja       | string | Name des Jobs.                                                                                                                                      |
 | `file`  |      ja       | string | Name der Datei im Jobs-Ordner.                                                                                                                      |
 | `every` |      ja       | string | Häufigkeit der Job-Planung: `minute`, `hour`, `day`, `week` oder `once` (keine Häufigkeit, nur einmal vor der (Neu-)Generierung der Konfiguration). |
+
+### CLI-Befehle
+
+Plugins können das 'bwcli'-Tool mit benutzerdefinierten Befehlen erweitern, die unter 'bwcli plugin <plugin_id> ...' ausgeführt werden:
+
+1. Fügen Sie ein 'bwcli'-Verzeichnis in Ihrem Plugin hinzu und legen Sie eine Datei pro Befehl ab (zum Beispiel 'bwcli/list.py'). Die CLI fügt den Plugin-Pfad zu 'sys.path' hinzu, bevor die Datei ausgeführt wird.
+2. Deklarieren Sie die Befehle im optionalen 'bwcli'-Abschnitt von 'plugin.json', indem Sie jeden Befehlsnamen seinem ausführbaren Dateinamen zuordnen.
+
+```json
+{
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py"
+  }
+}
+```
+
+Der Scheduler stellt die deklarierten Befehle automatisch bereit, sobald das Plugin installiert ist. Core-Plugins wie 'backup' in 'src/common/core/backup' folgen demselben Muster.
 
 ### Konfigurationen
 
@@ -459,7 +478,7 @@ Die deklarierten Funktionen werden automatisch in bestimmten Kontexten aufgerufe
 
 #### Bibliotheken
 
-Alle Direktiven aus dem [NGINX LUA-Modul](https://github.com/openresty/lua-nginx-module) und dem [NGINX Stream LUA-Modul](https://github.com/openresty/stream-lua-nginx-module) sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe [dieses Skript](https://github.com/bunkerity/bunkerweb/blob/v1.6.5-rc4/src/deps/clone.sh) für die vollständige Liste.
+Alle Direktiven aus dem [NGINX LUA-Modul](https://github.com/openresty/lua-nginx-module) und dem [NGINX Stream LUA-Modul](https://github.com/openresty/stream-lua-nginx-module) sind verfügbar. Darüber hinaus können Sie die in BunkerWeb enthaltenen LUA-Bibliotheken verwenden: siehe [dieses Skript](https://github.com/bunkerity/bunkerweb/blob/v1.6.5/src/deps/clone.sh) für die vollständige Liste.
 
 Wenn Sie zusätzliche Bibliotheken benötigen, können Sie diese in den Stammordner des Plugins legen und darauf zugreifen, indem Sie ihnen Ihre Plugin-ID voranstellen. Hier ist ein Beispiel für eine Datei namens **mylibrary.lua**:
 
@@ -540,7 +559,7 @@ end
 
 !!! tip "Weitere Beispiele"
 
-    Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im [lua-Verzeichnis](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc4/src/bw/lua/bunkerweb) des Repositorys ansehen.
+    Wenn Sie die vollständige Liste der verfügbaren Funktionen sehen möchten, können Sie sich die Dateien im [lua-Verzeichnis](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/bw/lua/bunkerweb) des Repositorys ansehen.
 
 ### Jobs
 
