@@ -51,7 +51,7 @@ services:
       - bw-services
 
   mydb:
-    image: postgres:18-alpine
+    image: postgres:17-alpine
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
