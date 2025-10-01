@@ -79,7 +79,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client postgresql-
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libcrypto3>=3.5.4-r0" "libssl3>=3.5.4-r0" # CVE-2025-9230 CVE-2025-9231 CVE-2025-9232
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
