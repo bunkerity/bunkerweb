@@ -240,11 +240,14 @@
                                         Define the settings exposed by this template and their default values.
                                     </p>
                                 </div>
-                                <div class="d-grid gap-2 d-md-flex">
+                                <div class="d-flex align-items-center">
                                     <button type="button"
-                                            class="btn btn-sm btn-outline-primary"
-                                            id="add-setting-btn">
-                                        <i class="bx bx-plus"></i>&nbsp;
+                                            class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                                            id="open-setting-selector"
+                                            aria-haspopup="dialog"
+                                            aria-controls="setting-selector-modal"
+                                            aria-expanded="false">
+                                        <i class="bx bx-plus"></i>
                                         <span data-i18n="template.editor.button_add_setting">Add setting</span>
                                     </button>
                                 </div>
@@ -319,6 +322,138 @@
             </div>
         </div>
     </form>
+    <div class="modal modal-lg fade setting-selector-modal"
+         id="setting-selector-modal"
+         tabindex="-1"
+         aria-labelledby="setting-selector-modal-title"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-sm">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title" id="setting-selector-modal-title" data-i18n="template.editor.button_add_setting">Add setting</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n-aria-label="button.close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-selector-toolbar">
+                        <div class="mb-3">
+                            <label for="setting-selector-search"
+                                   class="form-label text-uppercase small fw-semibold mb-1"
+                                   data-i18n="template.editor.setting_selector_search_label">Find a multisite setting</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="search"
+                                       class="form-control"
+                                       id="setting-selector-search"
+                                       autocomplete="off"
+                                       placeholder="Search by label, key, or plugin"
+                                       data-i18n="template.editor.setting_selector_search_placeholder"
+                                       data-i18n-attr="placeholder">
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        id="setting-selector-clear"
+                                        aria-label="Clear search"
+                                        data-i18n-aria-label="template.editor.setting_selector_clear">
+                                    <i class="bx bx-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-12 col-lg-6">
+                                <label for="setting-selector-plugin"
+                                       class="form-label text-uppercase small fw-semibold mb-1"
+                                       data-i18n="template.editor.setting_selector_filter_plugin">Plugin</label>
+                                <select id="setting-selector-plugin"
+                                        class="form-select form-select-sm">
+                                    <option value=""
+                                            data-i18n="template.editor.setting_selector_filter_plugin_all">All plugins</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <label for="setting-selector-type"
+                                       class="form-label text-uppercase small fw-semibold mb-1"
+                                       data-i18n="template.editor.setting_selector_filter_type">Type</label>
+                                <select id="setting-selector-type"
+                                        class="form-select form-select-sm">
+                                    <option value=""
+                                            data-i18n="template.editor.setting_selector_filter_type_all">All types</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-0 setting-selector-helper"
+                           id="setting-selector-helper"
+                           data-i18n="template.editor.setting_selector_helper">Only multisite settings are available. Use the filters to narrow down the list.</p>
+                    </div>
+                    <div class="list-group setting-selector-results"
+                         id="setting-selector-results"
+                         role="listbox"
+                         aria-labelledby="setting-selector-search"></div>
+                    <div class="text-muted small py-2 d-none"
+                         id="setting-selector-empty"
+                         data-i18n="template.editor.setting_selector_empty">No settings match the current filters.</div>
+                </div>
+                <div class="modal-footer border-0 d-flex justify-content-between align-items-center">
+                    <span class="text-muted small" id="setting-selector-count"></span>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button"
+                                class="btn btn-outline-secondary btn-sm"
+                                data-bs-dismiss="modal"
+                                data-i18n="button.cancel">Cancel</button>
+                        <button type="button"
+                                class="btn btn-sm btn-bw-green"
+                                id="setting-selector-apply"
+                                disabled>
+                            <i class="bx bx-plus"></i>
+                            <span data-i18n="template.editor.setting_selector_add_selected">Add selected</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade"
+         id="setting-remove-modal"
+         tabindex="-1"
+         aria-labelledby="setting-remove-modal-title"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-sm">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title d-flex align-items-center gap-2"
+                        id="setting-remove-modal-title">
+                        <i class="bx bx-trash text-danger"></i>
+                        <span data-i18n="template.editor.setting_remove_title">Remove setting</span>
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            data-i18n-aria-label="button.close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-3"
+                       data-i18n="template.editor.setting_remove_confirm">
+                        Are you sure you want to remove this setting from the template?
+                    </p>
+                    <div class="border rounded p-3 bg-light small">
+                        <div class="fw-semibold text-uppercase text-muted"
+                             data-i18n="template.editor.setting_remove_key">Setting</div>
+                        <div id="setting-remove-name"
+                             class="mt-1 fw-semibold"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"
+                            data-i18n="button.cancel">Cancel</button>
+                    <button type="button"
+                            class="btn btn-danger"
+                            id="confirm-setting-remove"
+                            data-i18n="button.delete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='libs/ace/src-min/ace.js') }}"
@@ -333,6 +468,7 @@
             'canEdit': can_edit_template,
             'editRestrictions': edit_restrictions,
             'multisiteConfigTypes': multisite_config_types,
+            'multisiteSettingsCatalog': multisite_settings_catalog,
             'routes': routes,
             'csrfToken': csrf_token_value
         } %}

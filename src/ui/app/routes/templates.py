@@ -1,17 +1,168 @@
 from datetime import datetime
 from json import JSONDecodeError, loads
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from app.dependencies import DB
+from app.dependencies import BW_CONFIG, DB
 from app.routes.configs import CONFIG_TYPES
 from app.routes.utils import cors_required
-from app.utils import flash
+from app.utils import LOGGER, flash
 
 
 templates = Blueprint("templates", __name__)
+
+
+def _normalise_tags(raw: Any) -> List[str]:
+    if isinstance(raw, (list, tuple, set)):
+        return [str(item) for item in raw if isinstance(item, (str, int, float, bool))]
+    if isinstance(raw, (str, int, float, bool)):
+        return [str(raw)]
+    return []
+
+
+def _build_multisite_settings_catalog() -> List[Dict[str, Any]]:
+    catalog: List[Dict[str, Any]] = []
+    seen_keys: Set[str] = set()
+
+    def append_entry(
+        key: str,
+        meta: Dict[str, Any],
+        plugin_info: Dict[str, Any],
+        plugin_order: int,
+        setting_order: int,
+    ) -> None:
+        if not key or key in seen_keys or not isinstance(meta, dict):
+            return
+        if meta.get("context") != "multisite":
+            return
+
+        entry: Dict[str, Any] = {
+            "key": key,
+            "label": meta.get("label") or key,
+            "type": meta.get("type") or "",
+            "plugin": {
+                "id": plugin_info.get("id", ""),
+                "name": plugin_info.get("name") or plugin_info.get("id", ""),
+                "type": plugin_info.get("type", "core"),
+            },
+            "plugin_order": plugin_order,
+            "setting_order": setting_order,
+        }
+
+        plugin_category = plugin_info.get("category")
+        if plugin_category:
+            entry["plugin"]["category"] = plugin_category
+
+        description = meta.get("help") or meta.get("description")
+        if description:
+            entry["description"] = description
+
+        if "default" in meta:
+            entry["default"] = meta.get("default")
+
+        if meta.get("multiple"):
+            entry["multiple"] = meta.get("multiple")
+
+        regex = meta.get("regex")
+        if regex:
+            entry["regex"] = regex
+
+        category = meta.get("category")
+        if category and category != plugin_category:
+            entry["category"] = category
+
+        docs = meta.get("docs") or meta.get("doc") or plugin_info.get("docs")
+        if docs:
+            entry["docs"] = docs
+
+        tags = meta.get("tags") or meta.get("keywords")
+        tag_list = _normalise_tags(tags)
+        if tag_list:
+            entry["tags"] = tag_list
+
+        entry["advanced"] = bool(meta.get("advanced")) if "advanced" in meta else False
+
+        if isinstance(meta.get("select"), list):
+            options_list = [option for option in meta["select"] if isinstance(option, (str, int, float, bool, dict))]
+            if options_list:
+                entry["options"] = options_list
+
+        if isinstance(meta.get("multiselect"), list):
+            entry["multiselect"] = [option for option in meta["multiselect"] if isinstance(option, dict) and option.get("id")]
+
+        if isinstance(meta.get("separator"), str):
+            entry["separator"] = meta["separator"]
+
+        seen_keys.add(key)
+        catalog.append(entry)
+
+    try:
+        base_settings = BW_CONFIG.get_settings()
+    except Exception as exc:  # pragma: no cover - defensive
+        LOGGER.warning("Unable to load base settings catalog: %s", exc)
+        base_settings = {}
+
+    general_info = {
+        "id": "general",
+        "name": "General",
+        "type": "core",
+        "category": "core",
+    }
+
+    for setting_index, (key, meta) in enumerate(base_settings.items()):
+        if isinstance(meta, dict):
+            append_entry(key, meta, general_info, -1, setting_index)
+
+    try:
+        raw_plugin_records = DB.get_plugins(_type="all", with_data=True)
+    except Exception as exc:  # pragma: no cover - defensive
+        LOGGER.warning("Unable to load plugin order from database: %s", exc)
+        raw_plugin_records = []
+
+    plugin_order_map = {record.get("id"): index for index, record in enumerate(raw_plugin_records, start=1)}
+
+    try:
+        plugins = BW_CONFIG.get_plugins(with_data=True)
+    except Exception as exc:  # pragma: no cover - defensive
+        LOGGER.warning("Unable to load plugin settings catalog: %s", exc)
+        plugins = {}
+
+    if isinstance(plugins, dict):
+        plugin_items = list(plugins.items())
+    else:
+        plugin_items = [(plugin.get("id"), plugin) for plugin in plugins or []]
+
+    plugin_items.sort(key=lambda item: plugin_order_map.get(item[0], len(plugin_order_map) + 1000))
+
+    for plugin_id, plugin_data in plugin_items:
+        if not isinstance(plugin_data, dict):
+            continue
+        plugin_settings = plugin_data.get("settings")
+        if not isinstance(plugin_settings, dict):
+            continue
+
+        plugin_order = plugin_order_map.get(plugin_id, len(plugin_order_map) + 1000)
+
+        plugin_info = {
+            "id": plugin_id,
+            "name": plugin_data.get("name") or plugin_id,
+            "type": plugin_data.get("type", "core"),
+            "category": plugin_data.get("category"),
+            "docs": plugin_data.get("docs") or plugin_data.get("doc"),
+        }
+
+        for setting_index, (key, meta) in enumerate(plugin_settings.items()):
+            append_entry(key, meta, plugin_info, plugin_order, setting_index)
+
+    catalog.sort(
+        key=lambda item: (
+            item.get("plugin_order", len(plugin_order_map) + 1000),
+            item.get("setting_order", 10**6),
+        )
+    )
+    return catalog
 
 
 def _convert_template_details(details: Dict[str, Any]) -> Dict[str, Any]:
@@ -132,6 +283,8 @@ def _build_editor_context(
         if details.get("context") == "multisite"
     ]
 
+    multisite_settings_catalog = _build_multisite_settings_catalog()
+
     return {
         "mode": mode,
         "template_id": template_id,
@@ -143,6 +296,7 @@ def _build_editor_context(
         "edit_restrictions": edit_restrictions,
         "routes": routes,
         "multisite_config_types": multisite_config_types,
+        "multisite_settings_catalog": multisite_settings_catalog,
     }
 
 

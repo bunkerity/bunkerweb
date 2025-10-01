@@ -2550,3 +2550,152 @@ code.bad-behavior-event__value {
     justify-content: center;
   }
 }
+
+.setting-selector-results {
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.setting-selector-modal .modal-dialog {
+  max-width: 34rem;
+}
+
+.setting-selector-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.setting-selector-results .setting-selector-option {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.9rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.setting-selector-results .setting-selector-option:hover,
+.setting-selector-results .setting-selector-option:focus {
+  border-color: rgba(var(--bs-primary-rgb), 0.35);
+  box-shadow: 0 0.25rem 0.75rem rgba(var(--bs-primary-rgb), 0.08);
+  transform: translateY(-1px);
+}
+
+.setting-selector-results .setting-selector-option.active {
+  border-color: rgba(var(--bs-primary-rgb), 0.6);
+  box-shadow: 0 0.35rem 1rem rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.setting-selector-results .setting-selector-option.disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.setting-remove-modal .modal-body .border {
+  border-style: dashed !important;
+}
+
+.setting-row .setting-meta {
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+}
+
+.setting-row .setting-meta .badge {
+  font-weight: 600;
+}
+
+.setting-value-wrapper {
+  width: 100%;
+}
+
+.setting-value-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.setting-value-container .form-control,
+.setting-value-container .form-select {
+  min-height: 2.5rem;
+}
+
+.setting-value-container .form-check-input {
+  cursor: pointer;
+}
+
+.setting-password-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.setting-multiselect .setting-multiselect-toggle {
+  text-align: left;
+}
+
+.setting-multiselect-menu {
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+.setting-remove-btn {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .setting-remove-btn {
+    width: auto;
+  }
+}
+
+.setting-multivalue-list {
+  width: 100%;
+}
+
+.setting-multivalue-row .form-control {
+  min-width: 0;
+}
+
+.setting-multivalue-row .btn {
+  flex: 0 0 auto;
+}
+
+.setting-multivalue-row .btn i {
+  pointer-events: none;
+}
+.setting-selector-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.setting-selector-helper {
+  margin-bottom: 0;
+}
+.setting-actions {
+  gap: 0.75rem;
+  align-self: flex-start;
+}
+
+.setting-remove-btn {
+  min-height: 2.25rem;
+  padding-inline: 0.85rem;
+}
+
+.setting-remove-btn i {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 991.98px) {
+  .setting-actions {
+    justify-content: flex-start;
+    margin-top: 0.25rem;
+  }
+
+  .setting-remove-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
