@@ -1,4 +1,5 @@
 docker==7.1.0
-kubernetes==33.1.0
+kubernetes==34.1.0
 pytz==2025.2
 redis[hiredis]==6.4.0
+urllib3<2.4.0

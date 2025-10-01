@@ -1,5 +1,5 @@
-bcrypt==4.3.0
-biscuit-python==0.3.2
+bcrypt==5.0.0
+biscuit-python==0.4.0
 certbot==5.0.0
 Flask==3.1.2
 Flask-Login==0.6.3
@@ -7,8 +7,9 @@ Flask-Session[cachelib]==0.8.0
 Flask-WTF==1.2.2
 gunicorn[gthread]==23.0.0
 pillow==11.3.0
-psutil==7.0.0
+psutil==7.1.0
 python_dateutil==2.9.0.post0
 qrcode==8.2
 regex==2025.9.1
+urllib3<2.4.0
 user_agents==2.2.0
