@@ -358,7 +358,8 @@ def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
         else:
             wildcards.add(domain)
 
-    return sorted(list(wildcards), key=lambda x: x.startswith("*"))
+    # Sort non-wildcard domains before wildcard domains, and sort each group lexicographically
+    return sorted(list(wildcards), key=lambda x: (x.startswith("*"), x))
 
 
 def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
