@@ -1,4 +1,22 @@
+import {
+  createSettingControl,
+  getSettingControlPrimary,
+  getSettingControlValue,
+  updateSettingControl,
+} from "../modules/setting_controls.js";
+
 const ctx = window.templateEditorContext || {};
+
+const runTranslations = () => {
+  if (
+    typeof window !== "undefined" &&
+    typeof window.applyTranslations === "function"
+  ) {
+    window.applyTranslations();
+  } else if (typeof applyTranslations === "function") {
+    applyTranslations();
+  }
+};
 
 const translate = (key, fallback, options) => {
   if (typeof i18next !== "undefined" && typeof i18next.t === "function") {
@@ -17,7 +35,19 @@ const dom = {
   feedback: document.getElementById("template-form-feedback"),
   settingsList: document.getElementById("settings-list"),
   settingsEmpty: document.getElementById("settings-empty"),
-  addSettingBtn: document.getElementById("add-setting-btn"),
+  settingSelectorOpenBtn: document.getElementById("open-setting-selector"),
+  settingSelectorModal: document.getElementById("setting-selector-modal"),
+  settingRemoveModal: document.getElementById("setting-remove-modal"),
+  settingRemoveName: document.getElementById("setting-remove-name"),
+  confirmSettingRemoveBtn: document.getElementById("confirm-setting-remove"),
+  settingSelectorSearch: document.getElementById("setting-selector-search"),
+  settingSelectorClear: document.getElementById("setting-selector-clear"),
+  settingSelectorPlugin: document.getElementById("setting-selector-plugin"),
+  settingSelectorType: document.getElementById("setting-selector-type"),
+  settingSelectorResults: document.getElementById("setting-selector-results"),
+  settingSelectorEmpty: document.getElementById("setting-selector-empty"),
+  settingSelectorCount: document.getElementById("setting-selector-count"),
+  settingSelectorApply: document.getElementById("setting-selector-apply"),
   stepsList: document.getElementById("steps-list"),
   stepsEmpty: document.getElementById("steps-empty"),
   addStepBtn: document.getElementById("add-step-btn"),
@@ -34,6 +64,220 @@ const dom = {
   confirmDeleteStepBtn: document.getElementById("confirm-delete-step-btn"),
 };
 
+const normalizeSettingKey = (value) =>
+  typeof value === "string" ? value.trim().toUpperCase() : "";
+
+const rawSettingsCatalog = Array.isArray(ctx.multisiteSettingsCatalog)
+  ? ctx.multisiteSettingsCatalog
+  : [];
+
+const pluginTypeLabels = {
+  general: translate("plugin.type.core", "Core"),
+  core: translate("plugin.type.core", "Core"),
+  pro: translate("plugin.type.pro", "Pro"),
+  external: translate("plugin.type.external", "External"),
+  ui: translate("plugin.type.external", "External"),
+};
+
+const normalizeCatalogEntry = (entry, index) => {
+  if (!entry || typeof entry !== "object") return null;
+  const key = typeof entry.key === "string" ? entry.key.trim() : "";
+  if (!key) return null;
+
+  const plugin =
+    entry.plugin && typeof entry.plugin === "object" ? entry.plugin : {};
+  const pluginId =
+    typeof plugin.id === "string" && plugin.id.trim()
+      ? plugin.id.trim()
+      : "general";
+  const pluginName =
+    typeof plugin.name === "string" && plugin.name.trim()
+      ? plugin.name.trim()
+      : pluginId;
+  const pluginTypeRaw =
+    typeof plugin.type === "string" && plugin.type.trim()
+      ? plugin.type.trim().toLowerCase()
+      : pluginId === "general"
+        ? "general"
+        : "core";
+  const pluginCategory =
+    typeof plugin.category === "string" ? plugin.category.trim() : "";
+
+  const label =
+    typeof entry.label === "string" && entry.label.trim()
+      ? entry.label.trim()
+      : key;
+  const description =
+    typeof entry.description === "string" ? entry.description.trim() : "";
+  const type = typeof entry.type === "string" ? entry.type.trim() : "";
+
+  let defaultValue = "";
+  if (Object.prototype.hasOwnProperty.call(entry, "default")) {
+    const rawDefault = entry.default;
+    if (
+      rawDefault !== null &&
+      typeof rawDefault === "object" &&
+      typeof rawDefault.toJSON !== "function"
+    ) {
+      defaultValue = JSON.stringify(rawDefault);
+    } else if (rawDefault === null || typeof rawDefault === "undefined") {
+      defaultValue = "";
+    } else {
+      defaultValue = String(rawDefault);
+    }
+  }
+
+  const tags = Array.isArray(entry.tags)
+    ? entry.tags
+        .map((tag) =>
+          typeof tag === "string" || typeof tag === "number" ? String(tag) : "",
+        )
+        .filter(Boolean)
+    : [];
+
+  const keyUpper = key.toUpperCase();
+  const keyLower = keyUpper.toLowerCase();
+  const labelLower = label.toLowerCase();
+  const pluginNameLower = pluginName.toLowerCase();
+  const pluginCategoryLower = pluginCategory.toLowerCase();
+  const descriptionLower = description.toLowerCase();
+  const typeLower = type.toLowerCase();
+
+  const tagTokens = tags.map((tag) => tag.toLowerCase());
+
+  const pluginOrder = Number.isFinite(entry.plugin_order)
+    ? Number(entry.plugin_order)
+    : 100000;
+  const settingOrder = Number.isFinite(entry.setting_order)
+    ? Number(entry.setting_order)
+    : 100000;
+
+  const tokenSet = new Set([
+    keyLower,
+    labelLower,
+    pluginNameLower,
+    pluginTypeRaw,
+    pluginCategoryLower,
+    ...tagTokens,
+  ]);
+  labelLower.split(/\s+/).forEach((token) => {
+    if (token) tokenSet.add(token);
+  });
+  pluginNameLower.split(/\s+/).forEach((token) => {
+    if (token) tokenSet.add(token);
+  });
+
+  const popularity = Math.max(
+    0,
+    200000 - pluginOrder * 1000 - settingOrder * 10 - index,
+  );
+
+  return {
+    key,
+    keyUpper,
+    keyLower,
+    label,
+    labelLower,
+    description,
+    descriptionLower,
+    type,
+    typeLower,
+    defaultValue,
+    default: entry.default,
+    pluginId,
+    pluginName,
+    pluginNameLower,
+    pluginType: pluginTypeRaw,
+    pluginCategory,
+    pluginCategoryLower,
+    tags,
+    tagTokens,
+    pluginOrder,
+    settingOrder,
+    options: Array.isArray(entry.options) ? entry.options : [],
+    multiselect: Array.isArray(entry.multiselect) ? entry.multiselect : [],
+    separator: typeof entry.separator === "string" ? entry.separator : "",
+    docs:
+      typeof entry.docs === "string"
+        ? entry.docs.trim()
+        : typeof plugin.docs === "string"
+          ? plugin.docs.trim()
+          : "",
+    multiple: Boolean(entry.multiple),
+    regex: typeof entry.regex === "string" ? entry.regex : "",
+    advanced: Boolean(entry.advanced),
+    tokens: Array.from(tokenSet),
+    popularity,
+  };
+};
+
+const settingsCatalog = rawSettingsCatalog
+  .map(normalizeCatalogEntry)
+  .filter(Boolean);
+
+settingsCatalog.sort((a, b) => {
+  if (a.pluginOrder !== b.pluginOrder) {
+    return a.pluginOrder - b.pluginOrder;
+  }
+  if (a.settingOrder !== b.settingOrder) {
+    return a.settingOrder - b.settingOrder;
+  }
+  return a.labelLower.localeCompare(b.labelLower, undefined, {
+    sensitivity: "base",
+  });
+});
+
+const catalogByKey = new Map();
+settingsCatalog.forEach((entry) => {
+  if (!catalogByKey.has(entry.keyUpper)) {
+    catalogByKey.set(entry.keyUpper, entry);
+  }
+});
+
+const getCatalogEntry = (key) => catalogByKey.get(normalizeSettingKey(key));
+
+const pluginOptionMap = new Map();
+settingsCatalog.forEach((entry) => {
+  const existing = pluginOptionMap.get(entry.pluginId);
+  if (!existing || entry.pluginOrder < existing.order) {
+    pluginOptionMap.set(entry.pluginId, {
+      id: entry.pluginId,
+      name: entry.pluginName,
+      type: entry.pluginType,
+      order: entry.pluginOrder,
+    });
+  }
+});
+
+const typeOptions = Array.from(
+  new Set(settingsCatalog.map((entry) => entry.type).filter(Boolean)),
+).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+const settingSelectorState = {
+  query: "",
+  plugin: "",
+  type: "",
+  entries: [],
+  selectedKey: null,
+  modalOpen: false,
+};
+
+let settingSelectorModalInstance = null;
+const ensureSettingRemoveModal = () => {
+  if (settingRemoveModalInstance || !dom.settingRemoveModal) return;
+  if (typeof bootstrap === "undefined" || !bootstrap.Modal) return;
+  settingRemoveModalInstance = bootstrap.Modal.getOrCreateInstance(
+    dom.settingRemoveModal,
+    {},
+  );
+};
+
+const closeSettingRemoveModal = () => {
+  if (!dom.settingRemoveModal) return;
+  ensureSettingRemoveModal();
+  settingRemoveModalInstance?.hide();
+};
+
 const counters = {
   settings: document.getElementById("summary-settings-count"),
   steps: document.getElementById("summary-steps-count"),
@@ -46,9 +290,11 @@ const state = {
   stepCounter: 0,
   isSaving: false,
   stepToDelete: null,
+  settingToRemove: null,
 };
 
 let deleteStepModalInstance = null;
+let settingRemoveModalInstance = null;
 
 const buildDeleteStepModalHTML = () => {
   const title = translate("modal.title.delete_step", "Delete step");
@@ -570,6 +816,623 @@ const getSettingKeys = () =>
   Array.from(dom.settingsList.querySelectorAll(".setting-key"))
     .map((input) => input.value.trim())
     .filter((value) => value.length > 0);
+
+const getUsedSettingKeySet = () =>
+  new Set(getSettingKeys().map((key) => normalizeSettingKey(key)));
+
+const getSettingOrdering = (key) => {
+  const entry = getCatalogEntry(key);
+  if (!entry) {
+    return {
+      pluginOrder: 100000,
+      settingOrder: 100000,
+      label: key.toLowerCase(),
+    };
+  }
+  return {
+    pluginOrder: entry.pluginOrder,
+    settingOrder: entry.settingOrder,
+    label: entry.labelLower,
+  };
+};
+
+const compareSettingKeys = (keyA, keyB) => {
+  const orderA = getSettingOrdering(keyA);
+  const orderB = getSettingOrdering(keyB);
+  if (orderA.pluginOrder !== orderB.pluginOrder) {
+    return orderA.pluginOrder - orderB.pluginOrder;
+  }
+  if (orderA.settingOrder !== orderB.settingOrder) {
+    return orderA.settingOrder - orderB.settingOrder;
+  }
+  return orderA.label.localeCompare(orderB.label, undefined, {
+    sensitivity: "base",
+  });
+};
+
+const sortSettingRows = () => {
+  if (!dom.settingsList) return;
+  const rows = Array.from(dom.settingsList.querySelectorAll(".setting-row"));
+  rows
+    .map((row) => ({
+      row,
+      key:
+        row.dataset.settingKey ||
+        row.querySelector(".setting-key")?.value.trim() ||
+        "",
+    }))
+    .sort((a, b) => compareSettingKeys(a.key, b.key))
+    .forEach(({ row }) => dom.settingsList.append(row));
+};
+
+const ensureSettingSelectorModal = () => {
+  if (settingSelectorModalInstance || !dom.settingSelectorModal) return;
+  if (typeof bootstrap === "undefined" || !bootstrap.Modal) return;
+  settingSelectorModalInstance = bootstrap.Modal.getOrCreateInstance(
+    dom.settingSelectorModal,
+    {},
+  );
+};
+
+const closeSettingSelector = () => {
+  if (!dom.settingSelectorModal) return;
+  ensureSettingSelectorModal();
+  settingSelectorModalInstance?.hide();
+  if (dom.settingSelectorOpenBtn) {
+    dom.settingSelectorOpenBtn.setAttribute("aria-expanded", "false");
+  }
+};
+
+const openSettingSelector = () => {
+  if (!dom.settingSelectorModal) return;
+  ensureSettingSelectorModal();
+  refreshSettingSelector({ maintainSelection: true });
+  runTranslations();
+  if (dom.settingSelectorOpenBtn) {
+    dom.settingSelectorOpenBtn.setAttribute("aria-expanded", "true");
+  }
+  settingSelectorModalInstance?.show();
+};
+
+const updateSettingSelectorCount = (available, used) => {
+  if (!dom.settingSelectorCount) return;
+  const applyCountMessage = (key, fallback, options) => {
+    dom.settingSelectorCount.textContent = translate(key, fallback, options);
+    if (key) {
+      dom.settingSelectorCount.setAttribute("data-i18n", key);
+      if (options && Object.keys(options).length > 0) {
+        dom.settingSelectorCount.setAttribute(
+          "data-i18n-options",
+          JSON.stringify(options),
+        );
+      } else {
+        dom.settingSelectorCount.removeAttribute("data-i18n-options");
+      }
+    } else {
+      dom.settingSelectorCount.removeAttribute("data-i18n");
+      dom.settingSelectorCount.removeAttribute("data-i18n-options");
+    }
+  };
+  if (!available && !used) {
+    applyCountMessage(
+      "template.editor.setting_selector_count_empty",
+      "No settings to display.",
+    );
+    return;
+  }
+  if (!available && used) {
+    applyCountMessage(
+      "template.editor.setting_selector_count_all_used",
+      "All matching settings have already been added.",
+    );
+    return;
+  }
+  if (available && !used) {
+    applyCountMessage(
+      "template.editor.setting_selector_count_only_available",
+      available === 1
+        ? "1 setting available"
+        : `${available} settings available`,
+      { count: available },
+    );
+    return;
+  }
+  applyCountMessage(
+    "template.editor.setting_selector_count_with_used",
+    `${available} available, ${used} already added`,
+    { available, used },
+  );
+};
+
+const highlightSettingSelectorOption = (
+  key,
+  { scrollIntoView = false } = {},
+) => {
+  if (!dom.settingSelectorResults) return;
+  const normalizedKey = normalizeSettingKey(key);
+  const options = dom.settingSelectorResults.querySelectorAll(
+    ".setting-selector-option",
+  );
+  options.forEach((option) => {
+    const optionKey = normalizeSettingKey(option.dataset.key || "");
+    const isActive = optionKey && optionKey === normalizedKey;
+    option.classList.toggle("active", isActive);
+    option.setAttribute("aria-selected", isActive ? "true" : "false");
+    if (isActive && scrollIntoView) {
+      option.scrollIntoView({ block: "nearest" });
+    }
+  });
+};
+
+const settingSelectorMatchesQuery = (entry, tokens) => {
+  if (!tokens.length) return { matched: true, score: entry.popularity };
+
+  let score = entry.popularity;
+  for (const token of tokens) {
+    const needle = token.toLowerCase();
+    const inKey = entry.keyLower.includes(needle);
+    const inLabel = entry.labelLower.includes(needle);
+    const inPlugin = entry.pluginNameLower.includes(needle);
+    const inDescription = entry.descriptionLower.includes(needle);
+    const inTags = entry.tagTokens.some((tag) => tag.includes(needle));
+
+    if (!(inKey || inLabel || inPlugin || inDescription || inTags)) {
+      return { matched: false, score: 0 };
+    }
+
+    if (entry.keyLower === needle) score += 400;
+    else if (entry.keyLower.startsWith(needle)) score += 220;
+    else if (inKey) score += 120;
+
+    if (entry.labelLower === needle) score += 260;
+    else if (entry.labelLower.startsWith(needle)) score += 160;
+    else if (inLabel) score += 120;
+
+    if (inPlugin) score += 80;
+    if (inDescription) score += 40;
+    if (inTags) score += 30;
+  }
+
+  return { matched: true, score };
+};
+
+const renderSettingSelectorResults = () => {
+  if (!dom.settingSelectorResults) return;
+
+  dom.settingSelectorResults.innerHTML = "";
+
+  const availableCount = settingSelectorState.entries.filter(
+    (item) => !item.used,
+  ).length;
+  const usedCount = settingSelectorState.entries.length - availableCount;
+
+  updateSettingSelectorCount(availableCount, usedCount);
+
+  if (settingSelectorState.entries.length === 0) {
+    dom.settingSelectorResults.classList.add("d-none");
+    dom.settingSelectorEmpty?.classList.remove("d-none");
+    highlightSettingSelectorOption(null);
+    return;
+  }
+
+  dom.settingSelectorResults.classList.remove("d-none");
+  dom.settingSelectorEmpty?.classList.add("d-none");
+
+  const fragment = document.createDocumentFragment();
+
+  const defaultBadgeText = translate(
+    "template.editor.setting_selector_default",
+    "Default",
+  );
+
+  settingSelectorState.entries.forEach((item) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className =
+      "list-group-item list-group-item-action setting-selector-option text-start";
+    button.dataset.key = item.entry.key;
+    button.setAttribute("role", "option");
+    button.setAttribute("aria-selected", "false");
+
+    if (item.used) {
+      button.classList.add("disabled", "opacity-75");
+      button.setAttribute("aria-disabled", "true");
+    }
+
+    const header = document.createElement("div");
+    header.className =
+      "d-flex justify-content-between align-items-center gap-2";
+
+    const title = document.createElement("div");
+    title.className = "fw-semibold text-body";
+    title.textContent = item.entry.label || item.entry.key;
+
+    const keyBadge = document.createElement("span");
+    keyBadge.className = "badge bg-label-secondary text-uppercase";
+    keyBadge.textContent = item.entry.key;
+
+    header.append(title, keyBadge);
+    button.append(header);
+
+    const metaLine = document.createElement("div");
+    metaLine.className =
+      "d-flex flex-wrap align-items-center gap-2 small text-muted mt-1";
+
+    const pluginBadge = document.createElement("span");
+    pluginBadge.className =
+      "badge rounded-pill bg-label-primary text-uppercase";
+    pluginBadge.textContent = item.entry.pluginName;
+    metaLine.append(pluginBadge);
+
+    if (item.entry.pluginType && pluginTypeLabels[item.entry.pluginType]) {
+      const typeBadge = document.createElement("span");
+      typeBadge.className = "badge rounded-pill bg-label-info text-uppercase";
+      typeBadge.textContent = pluginTypeLabels[item.entry.pluginType];
+      metaLine.append(typeBadge);
+    }
+
+    if (item.entry.type) {
+      const settingTypeBadge = document.createElement("span");
+      settingTypeBadge.className =
+        "badge rounded-pill bg-label-secondary text-uppercase";
+      settingTypeBadge.textContent = item.entry.type;
+      metaLine.append(settingTypeBadge);
+    }
+
+    if (item.entry.multiple) {
+      const multipleBadge = document.createElement("span");
+      multipleBadge.className =
+        "badge rounded-pill bg-label-warning text-uppercase";
+      multipleBadge.textContent = translate(
+        "template.editor.setting_selector_multiple",
+        "Multiple",
+      );
+      multipleBadge.setAttribute(
+        "data-i18n",
+        "template.editor.setting_selector_multiple",
+      );
+      metaLine.append(multipleBadge);
+    }
+
+    button.append(metaLine);
+
+    if (item.entry.description) {
+      const description = document.createElement("p");
+      description.className = "mb-1 small text-muted";
+      description.textContent = item.entry.description;
+      button.append(description);
+    }
+
+    if (item.entry.defaultValue) {
+      const defaultLine = document.createElement("div");
+      defaultLine.className = "small text-muted";
+      const defaultLabel = document.createElement("span");
+      defaultLabel.className = "me-1";
+      defaultLabel.textContent = defaultBadgeText;
+      defaultLabel.setAttribute(
+        "data-i18n",
+        "template.editor.setting_selector_default",
+      );
+      defaultLabel.setAttribute("data-i18n-attr", "text");
+      const defaultValue = document.createElement("code");
+      defaultValue.textContent = item.entry.defaultValue;
+      defaultLine.append(
+        defaultLabel,
+        document.createTextNode(": "),
+        defaultValue,
+      );
+      button.append(defaultLine);
+    }
+
+    if (item.used) {
+      const usedLabel = document.createElement("div");
+      usedLabel.className = "small text-danger mt-1";
+      usedLabel.textContent = translate(
+        "template.editor.setting_selector_already_added",
+        "Already added",
+      );
+      usedLabel.setAttribute(
+        "data-i18n",
+        "template.editor.setting_selector_already_added",
+      );
+      button.append(usedLabel);
+    }
+
+    button.addEventListener("click", (event) => {
+      if (item.used) return;
+      settingSelectorState.selectedKey = item.entry.key;
+      highlightSettingSelectorOption(item.entry.key, {
+        scrollIntoView: false,
+      });
+      updateSettingSelectorApplyState();
+      if (event.detail && event.detail > 1) {
+        commitSelectedSetting({ keepOpen: event.shiftKey });
+      }
+    });
+
+    button.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !item.used) {
+        event.preventDefault();
+        settingSelectorState.selectedKey = item.entry.key;
+        updateSettingSelectorApplyState();
+        commitSelectedSetting({ keepOpen: event.shiftKey });
+      }
+    });
+
+    fragment.append(button);
+  });
+
+  dom.settingSelectorResults.append(fragment);
+  highlightSettingSelectorOption(settingSelectorState.selectedKey);
+  runTranslations();
+};
+
+const updateSettingSelectorApplyState = () => {
+  if (!dom.settingSelectorApply) return;
+  if (!settingSelectorState.selectedKey) {
+    dom.settingSelectorApply.setAttribute("disabled", "disabled");
+    return;
+  }
+  const entry = getCatalogEntry(settingSelectorState.selectedKey);
+  const usedKeys = getUsedSettingKeySet();
+  const isUsed = usedKeys.has(
+    normalizeSettingKey(settingSelectorState.selectedKey),
+  );
+  if (!entry || isUsed) {
+    dom.settingSelectorApply.setAttribute("disabled", "disabled");
+    return;
+  }
+  dom.settingSelectorApply.removeAttribute("disabled");
+};
+
+const refreshSettingSelector = ({ maintainSelection = true } = {}) => {
+  if (!dom.settingSelectorResults) return;
+
+  const usedKeys = getUsedSettingKeySet();
+  const queryTokens = settingSelectorState.query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((token) => token.length > 0);
+
+  const pluginFilter = settingSelectorState.plugin;
+  const typeFilter = settingSelectorState.type;
+
+  const availableEntries = [];
+  const usedEntries = [];
+
+  settingsCatalog.forEach((entry) => {
+    if (pluginFilter && entry.pluginId !== pluginFilter) return;
+    if (typeFilter && entry.type !== typeFilter) return;
+
+    const { matched, score } = settingSelectorMatchesQuery(entry, queryTokens);
+    if (!matched) return;
+
+    const isUsed = usedKeys.has(entry.keyUpper);
+    const bucket = isUsed ? usedEntries : availableEntries;
+    bucket.push({ entry, score, used: isUsed });
+  });
+
+  const rankEntries = (a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (a.entry.pluginOrder !== b.entry.pluginOrder) {
+      return a.entry.pluginOrder - b.entry.pluginOrder;
+    }
+    if (a.entry.settingOrder !== b.entry.settingOrder) {
+      return a.entry.settingOrder - b.entry.settingOrder;
+    }
+    const pluginCompare = a.entry.pluginNameLower.localeCompare(
+      b.entry.pluginNameLower,
+      undefined,
+      { sensitivity: "base" },
+    );
+    if (pluginCompare) return pluginCompare;
+    return a.entry.labelLower.localeCompare(b.entry.labelLower, undefined, {
+      sensitivity: "base",
+    });
+  };
+
+  availableEntries.sort(rankEntries);
+  usedEntries.sort(rankEntries);
+
+  const previousSelection = maintainSelection
+    ? normalizeSettingKey(settingSelectorState.selectedKey)
+    : "";
+
+  settingSelectorState.entries = [...availableEntries, ...usedEntries];
+
+  const selectionExists = settingSelectorState.entries.some(
+    (item) =>
+      !item.used && normalizeSettingKey(item.entry.key) === previousSelection,
+  );
+
+  if (!selectionExists) {
+    const firstAvailable = settingSelectorState.entries.find(
+      (item) => !item.used,
+    );
+    settingSelectorState.selectedKey = firstAvailable
+      ? firstAvailable.entry.key
+      : null;
+  }
+
+  renderSettingSelectorResults();
+  updateSettingSelectorApplyState();
+};
+
+const moveSettingSelectorSelection = (direction) => {
+  if (!settingSelectorState.entries.length) return;
+  const normalizedSelected = normalizeSettingKey(
+    settingSelectorState.selectedKey,
+  );
+  const selectable = settingSelectorState.entries.filter((item) => !item.used);
+  if (!selectable.length) return;
+
+  let currentIndex = selectable.findIndex(
+    (item) => normalizeSettingKey(item.entry.key) === normalizedSelected,
+  );
+
+  if (currentIndex === -1) {
+    currentIndex = direction > 0 ? -1 : 0;
+  }
+
+  let nextIndex;
+  if (direction > 0) {
+    nextIndex = currentIndex + 1;
+    if (nextIndex >= selectable.length) nextIndex = 0;
+  } else {
+    nextIndex = currentIndex - 1;
+    if (nextIndex < 0) nextIndex = selectable.length - 1;
+  }
+
+  const nextEntry = selectable[nextIndex];
+  if (!nextEntry) return;
+
+  settingSelectorState.selectedKey = nextEntry.entry.key;
+  highlightSettingSelectorOption(nextEntry.entry.key, { scrollIntoView: true });
+  updateSettingSelectorApplyState();
+};
+
+const handleSettingSelectorSearchKeydown = (event) => {
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    moveSettingSelectorSelection(event.key === "ArrowDown" ? 1 : -1);
+    return;
+  }
+  if (event.key === "Enter") {
+    const added = commitSelectedSetting({ keepOpen: event.shiftKey });
+    if (added) {
+      event.preventDefault();
+    }
+    return;
+  }
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeSettingSelector();
+  }
+};
+
+const addSettingFromCatalog = (entry, { keepOpen = false } = {}) => {
+  if (!entry) return false;
+  const usedKeys = getUsedSettingKeySet();
+  if (usedKeys.has(entry.keyUpper)) return false;
+
+  const newRow = createSettingRow({
+    key: entry.key,
+    value: entry.defaultValue || "",
+    catalogEntry: entry,
+  });
+
+  if (!newRow) return false;
+
+  if (!keepOpen) {
+    closeSettingSelector();
+  }
+
+  const keyInput = newRow.querySelector(".setting-key");
+  if (keyInput) {
+    keyInput.focus({ preventScroll: false });
+    keyInput.select();
+  }
+
+  newRow.scrollIntoView({ behavior: "smooth", block: "center" });
+  sortSettingRows();
+  return true;
+};
+
+const removeSettingRow = (wrapper) => {
+  if (!wrapper) return;
+  const keyInput = wrapper.querySelector(".setting-key");
+  const settingKey = wrapper.dataset.settingKey || keyInput?.value.trim();
+  let handledByStep = false;
+  if (settingKey) {
+    const owner = settingAssignments.get(settingKey);
+    if (owner) {
+      const ownerCard = findStepCardById(owner);
+      if (ownerCard) {
+        removeSettingFromStep(ownerCard, settingKey);
+        handledByStep = true;
+      } else {
+        settingAssignments.delete(settingKey);
+      }
+    }
+  }
+  delete wrapper.settingControl;
+  wrapper.remove();
+  toggleEmptyState(dom.settingsList, dom.settingsEmpty);
+  if (!handledByStep) {
+    refreshStepOptions();
+    updateSummary();
+  }
+  refreshSettingSelector({ maintainSelection: false });
+  sortSettingRows();
+  runTranslations();
+};
+
+const showSettingRemoveModal = (wrapper) => {
+  if (!wrapper || !dom.settingRemoveModal) return;
+  ensureSettingRemoveModal();
+
+  const keyInput = wrapper.querySelector(".setting-key");
+  const key = keyInput ? keyInput.value.trim() : wrapper.dataset.settingKey;
+  const entry = getCatalogEntry(key);
+  if (dom.settingRemoveName) {
+    dom.settingRemoveName.textContent = entry?.label
+      ? `${entry.label} (${key})`
+      : key || "";
+  }
+  state.settingToRemove = wrapper;
+  runTranslations();
+  settingRemoveModalInstance?.show();
+};
+
+const commitSelectedSetting = ({ keepOpen = false } = {}) => {
+  if (!settingSelectorState.selectedKey) return false;
+  const entry = getCatalogEntry(settingSelectorState.selectedKey);
+  if (!entry) return false;
+  return addSettingFromCatalog(entry, { keepOpen });
+};
+
+const populateSettingSelectorFilters = () => {
+  if (dom.settingSelectorPlugin) {
+    const currentValue = dom.settingSelectorPlugin.value;
+    dom.settingSelectorPlugin
+      .querySelectorAll("option[data-generated]")
+      .forEach((option) => option.remove());
+    const fragment = document.createDocumentFragment();
+    Array.from(pluginOptionMap.values())
+      .sort((a, b) => a.order - b.order)
+      .forEach((option) => {
+        const opt = document.createElement("option");
+        opt.value = option.id;
+        opt.textContent = option.name;
+        opt.dataset.generated = "true";
+        if (option.type && pluginTypeLabels[option.type]) {
+          opt.dataset.pluginTypeLabel = pluginTypeLabels[option.type];
+        }
+        fragment.append(opt);
+      });
+    dom.settingSelectorPlugin.append(fragment);
+    dom.settingSelectorPlugin.value = currentValue;
+  }
+
+  if (dom.settingSelectorType) {
+    const currentValue = dom.settingSelectorType.value;
+    dom.settingSelectorType
+      .querySelectorAll("option[data-generated]")
+      .forEach((option) => option.remove());
+    const fragment = document.createDocumentFragment();
+    typeOptions.forEach((type) => {
+      const opt = document.createElement("option");
+      opt.value = type;
+      opt.textContent = type;
+      opt.dataset.generated = "true";
+      fragment.append(opt);
+    });
+    dom.settingSelectorType.append(fragment);
+    dom.settingSelectorType.value = currentValue;
+  }
+
+  runTranslations();
+};
 
 const normalizeConfigType = (rawType) =>
   (rawType || "").toString().trim().replace(/-/g, "_").toLowerCase();
@@ -1246,10 +2109,134 @@ const smoothScrollTo = (selector) => {
   window.scrollTo({ top: position < 0 ? 0 : position, behavior: "smooth" });
 };
 
+const updateSettingRowMeta = (container, entry) => {
+  if (!container) return;
+  container.innerHTML = "";
+  if (!entry) {
+    container.classList.add("d-none");
+    container.dataset.catalogKey = "";
+    return;
+  }
+
+  container.classList.remove("d-none");
+  container.dataset.catalogKey = entry.key;
+
+  const badges = document.createElement("div");
+  badges.className = "d-flex flex-wrap align-items-center gap-1 mb-1";
+
+  const pluginBadge = document.createElement("span");
+  pluginBadge.className = "badge bg-label-primary text-uppercase";
+  pluginBadge.textContent = entry.pluginName;
+  badges.append(pluginBadge);
+
+  if (entry.pluginType && pluginTypeLabels[entry.pluginType]) {
+    const typeBadge = document.createElement("span");
+    typeBadge.className = "badge bg-label-info text-uppercase";
+    typeBadge.textContent = pluginTypeLabels[entry.pluginType];
+    badges.append(typeBadge);
+  }
+
+  if (entry.type) {
+    const dataTypeBadge = document.createElement("span");
+    dataTypeBadge.className = "badge bg-label-secondary text-uppercase";
+    dataTypeBadge.textContent = entry.type;
+    badges.append(dataTypeBadge);
+  }
+
+  if (entry.multiple) {
+    const multipleBadge = document.createElement("span");
+    multipleBadge.className = "badge bg-label-warning text-uppercase";
+    multipleBadge.textContent = translate(
+      "template.editor.setting_selector_multiple",
+      "Multiple",
+    );
+    badges.append(multipleBadge);
+  }
+
+  if (entry.advanced) {
+    const advancedBadge = document.createElement("span");
+    advancedBadge.className = "badge bg-label-dark text-uppercase";
+    advancedBadge.textContent = translate(
+      "template.editor.setting_selector_advanced",
+      "Advanced",
+    );
+    badges.append(advancedBadge);
+  }
+
+  container.append(badges);
+
+  if (entry.label && entry.label !== entry.key) {
+    const labelLine = document.createElement("div");
+    labelLine.className = "fw-semibold text-body";
+    labelLine.textContent = entry.label;
+    container.append(labelLine);
+  }
+
+  if (entry.description) {
+    const description = document.createElement("div");
+    description.className = "text-muted";
+    description.textContent = entry.description;
+    container.append(description);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(entry, "default")) {
+    const defaultLine = document.createElement("div");
+    defaultLine.className = "small text-muted mt-1";
+    const defaultLabel = document.createElement("span");
+    defaultLabel.className = "me-1";
+    defaultLabel.textContent = `${translate(
+      "template.editor.setting_selector_default",
+      "Default",
+    )}:`;
+    const defaultValue = document.createElement("code");
+    const displayDefault =
+      typeof entry.defaultValue === "string"
+        ? entry.defaultValue
+        : entry.default === null || typeof entry.default === "undefined"
+          ? ""
+          : String(entry.default);
+    defaultValue.textContent = displayDefault;
+    defaultLine.append(defaultLabel, defaultValue);
+    container.append(defaultLine);
+  }
+
+  if (entry.regex) {
+    const regexLine = document.createElement("div");
+    regexLine.className = "small text-muted mt-1";
+    const regexLabel = document.createElement("span");
+    regexLabel.className = "me-1";
+    regexLabel.textContent = `${translate(
+      "template.editor.setting_selector_pattern",
+      "Pattern",
+    )}:`;
+    const regexValue = document.createElement("code");
+    regexValue.textContent = entry.regex;
+    regexLine.append(regexLabel, regexValue);
+    container.append(regexLine);
+  }
+
+  if (entry.docs) {
+    const docsLine = document.createElement("div");
+    docsLine.className = "small mt-2";
+    const docsLink = document.createElement("a");
+    docsLink.href = entry.docs;
+    docsLink.target = "_blank";
+    docsLink.rel = "noopener noreferrer";
+    docsLink.className = "link-primary";
+    docsLink.textContent = translate(
+      "template.editor.setting_selector_docs",
+      "View documentation",
+    );
+    docsLine.append(docsLink);
+    container.append(docsLine);
+  }
+};
+
 const createSettingRow = ({
   key = "",
   value = "",
   pendingStepId = "",
+  catalogEntry = null,
 } = {}) => {
   state.settingCounter += 1;
   const wrapper = document.createElement("article");
@@ -1263,12 +2250,12 @@ const createSettingRow = ({
   body.className = "card-body p-3";
 
   const row = document.createElement("div");
-  row.className = "row g-3 align-items-center";
+  row.className = "row g-3 align-items-start";
 
   const keyCol = document.createElement("div");
-  keyCol.className = "col-12 col-lg-5";
+  keyCol.className = "col-12 col-lg-6";
   const settingId = `${wrapper.dataset.settingId}-key`;
-  const valueId = `${wrapper.dataset.settingId}-value`;
+  const resolvedEntry = catalogEntry || getCatalogEntry(key);
 
   const keyLabel = document.createElement("label");
   keyLabel.className = "form-label";
@@ -1330,56 +2317,82 @@ const createSettingRow = ({
       refreshStepOptions();
       updateSummary();
     }
+    const catalogMatch = getCatalogEntry(newKey);
+    if (catalogMatch) {
+      wrapper.dataset.catalogKey = catalogMatch.key;
+      wrapper.dataset.settingType = catalogMatch.type || "";
+    } else {
+      delete wrapper.dataset.catalogKey;
+      delete wrapper.dataset.settingType;
+    }
+    const currentValue = wrapper.settingControl
+      ? getSettingControlValue(wrapper.settingControl)
+      : "";
+    updateSettingControl(wrapper.settingControl, {
+      entry: catalogMatch,
+      value: currentValue,
+    });
+    syncValueLabelTarget();
+    updateSettingRowMeta(metaContainer, catalogMatch);
+    refreshSettingSelector({ maintainSelection: true });
+    sortSettingRows();
+    runTranslations();
   });
   keyCol.append(keyLabel, keyInput);
+
+  const metaContainer = document.createElement("div");
+  metaContainer.className = "setting-meta small text-muted mt-2";
+  keyCol.append(metaContainer);
 
   const valueCol = document.createElement("div");
   valueCol.className = "col-12 col-lg-6";
   const valueLabel = document.createElement("label");
   valueLabel.className = "form-label";
   valueLabel.setAttribute("data-i18n", "template.editor.label_setting_value");
-  valueLabel.setAttribute("for", valueId);
   valueLabel.textContent = translate(
     "template.editor.label_setting_value",
     "Default value",
   );
-  const valueInput = document.createElement("input");
-  valueInput.type = "text";
-  valueInput.className = "form-control setting-value";
-  valueInput.value = value;
-  valueInput.id = valueId;
-  valueCol.append(valueLabel, valueInput);
+  valueCol.append(valueLabel);
+
+  const valueContainer = document.createElement("div");
+  valueContainer.className = "setting-value-wrapper";
+  valueCol.append(valueContainer);
+
+  const syncValueLabelTarget = () => {
+    let target = valueContainer.querySelector(
+      '.setting-value:not([type="hidden"])',
+    );
+    if (!target) {
+      target = valueContainer.querySelector(
+        "input.form-check-input, select, textarea",
+      );
+    }
+    if (target && target.tagName !== "BUTTON") {
+      if (!target.id) {
+        target.id = `${wrapper.dataset.settingId}-value`;
+      }
+      valueLabel.setAttribute("for", target.id);
+    } else {
+      valueLabel.removeAttribute("for");
+    }
+  };
 
   const actionsCol = document.createElement("div");
   actionsCol.className =
-    "col-12 col-lg-1 d-flex justify-content-lg-end align-items-start";
+    "col-12 col-lg-auto setting-actions d-flex justify-content-start justify-content-lg-end";
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
-  removeBtn.className = "btn btn-outline-danger btn-sm w-100 w-lg-auto";
-  removeBtn.innerHTML = '<i class="bx bx-trash"></i>';
-  removeBtn.title = translate("template.editor.button_remove", "Remove");
-  removeBtn.setAttribute("data-i18n-title", "template.editor.button_remove");
+  removeBtn.className =
+    "btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1 setting-remove-btn";
+  removeBtn.innerHTML = `<i class="bx bx-trash"></i><span class="d-none d-sm-inline" data-i18n="button.delete">${translate(
+    "button.delete",
+    "Delete",
+  )}</span>`;
+  removeBtn.title = translate("button.delete", "Delete");
+  removeBtn.setAttribute("data-i18n-title", "button.delete");
   removeBtn.addEventListener("click", () => {
-    const settingKey = wrapper.dataset.settingKey || keyInput.value.trim();
-    let handledByStep = false;
-    if (settingKey) {
-      const owner = settingAssignments.get(settingKey);
-      if (owner) {
-        const ownerCard = findStepCardById(owner);
-        if (ownerCard) {
-          removeSettingFromStep(ownerCard, settingKey);
-          handledByStep = true;
-        } else {
-          settingAssignments.delete(settingKey);
-        }
-      }
-    }
-    wrapper.remove();
-    toggleEmptyState(dom.settingsList, dom.settingsEmpty);
-    if (!handledByStep) {
-      refreshStepOptions();
-      updateSummary();
-    }
+    showSettingRemoveModal(wrapper);
   });
   actionsCol.append(removeBtn);
 
@@ -1388,10 +2401,30 @@ const createSettingRow = ({
   wrapper.append(body);
   dom.settingsList.append(wrapper);
   wrapper.dataset.settingKey = (key || "").trim();
+  if (resolvedEntry) {
+    wrapper.dataset.catalogKey = resolvedEntry.key;
+    wrapper.dataset.settingType = resolvedEntry.type || "";
+  } else {
+    delete wrapper.dataset.catalogKey;
+    delete wrapper.dataset.settingType;
+  }
+  const settingControl = createSettingControl({
+    entry: resolvedEntry,
+    value,
+    settingId: wrapper.dataset.settingId,
+    translate,
+  });
+  valueContainer.append(settingControl.root);
+  wrapper.settingControl = settingControl;
+  syncValueLabelTarget();
+  updateSettingRowMeta(metaContainer, resolvedEntry);
   toggleEmptyState(dom.settingsList, dom.settingsEmpty);
   refreshStepOptions();
   updateSummary();
   tryFulfilPendingSettingAssignment(wrapper);
+  refreshSettingSelector({ maintainSelection: true });
+  sortSettingRows();
+  runTranslations();
   return wrapper;
 };
 
@@ -2044,7 +3077,12 @@ const initialiseCollections = () => {
 
   const settingsEntries = Object.entries(template.settings || {});
   if (settingsEntries.length > 0) {
-    settingsEntries.forEach(([key, value]) => createSettingRow({ key, value }));
+    settingsEntries
+      .sort((a, b) => compareSettingKeys(a[0], b[0]))
+      .forEach(([key, value]) =>
+        createSettingRow({ key, value, catalogEntry: getCatalogEntry(key) }),
+      );
+    sortSettingRows();
   } else {
     toggleEmptyState(dom.settingsList, dom.settingsEmpty);
   }
@@ -2077,6 +3115,7 @@ const initialiseCollections = () => {
   refreshStepOptions();
   reindexSteps();
   updateSummary();
+  refreshSettingSelector({ maintainSelection: false });
 };
 
 const collectFormData = () => {
@@ -2101,7 +3140,6 @@ const collectFormData = () => {
   const seenSettings = new Set();
   dom.settingsList.querySelectorAll(".setting-row").forEach((row) => {
     const keyInput = row.querySelector(".setting-key");
-    const valueInput = row.querySelector(".setting-value");
     if (!keyInput) return;
     const key = keyInput.value.trim();
     if (!key) {
@@ -2125,7 +3163,9 @@ const collectFormData = () => {
       return;
     }
     seenSettings.add(key);
-    settings[key] = valueInput ? valueInput.value : "";
+    const control = row.settingControl;
+    const value = control ? getSettingControlValue(control) : "";
+    settings[key] = value;
   });
 
   const configs = [];
@@ -2314,9 +3354,102 @@ const resetValidationStyles = () => {
 };
 
 const initEventListeners = () => {
-  if (dom.addSettingBtn) {
-    dom.addSettingBtn.addEventListener("click", () => {
-      createSettingRow();
+  if (dom.settingSelectorOpenBtn) {
+    dom.settingSelectorOpenBtn.setAttribute("aria-expanded", "false");
+    dom.settingSelectorOpenBtn.addEventListener("click", () => {
+      openSettingSelector();
+    });
+  }
+
+  if (dom.settingSelectorPlugin) {
+    dom.settingSelectorPlugin.addEventListener("change", (event) => {
+      settingSelectorState.plugin = event.target.value || "";
+      refreshSettingSelector({ maintainSelection: false });
+    });
+  }
+
+  if (dom.settingSelectorType) {
+    dom.settingSelectorType.addEventListener("change", (event) => {
+      settingSelectorState.type = event.target.value || "";
+      refreshSettingSelector({ maintainSelection: false });
+    });
+  }
+
+  if (dom.settingSelectorSearch) {
+    dom.settingSelectorSearch.addEventListener("input", (event) => {
+      settingSelectorState.query = event.target.value || "";
+      refreshSettingSelector({ maintainSelection: false });
+    });
+    dom.settingSelectorSearch.addEventListener(
+      "keydown",
+      handleSettingSelectorSearchKeydown,
+    );
+  }
+
+  if (dom.settingSelectorClear) {
+    dom.settingSelectorClear.addEventListener("click", () => {
+      if (dom.settingSelectorSearch) {
+        dom.settingSelectorSearch.value = "";
+        dom.settingSelectorSearch.focus();
+      }
+      settingSelectorState.query = "";
+      refreshSettingSelector({ maintainSelection: false });
+    });
+  }
+
+  if (dom.settingSelectorApply) {
+    dom.settingSelectorApply.addEventListener("click", (event) => {
+      const added = commitSelectedSetting({ keepOpen: event.shiftKey });
+      if (added && event.shiftKey && dom.settingSelectorSearch) {
+        dom.settingSelectorSearch.focus();
+        dom.settingSelectorSearch.select();
+      } else if (added && dom.settingSelectorOpenBtn) {
+        dom.settingSelectorOpenBtn.focus();
+      }
+    });
+  }
+
+  if (dom.settingSelectorModal) {
+    dom.settingSelectorModal.addEventListener("shown.bs.modal", () => {
+      settingSelectorState.modalOpen = true;
+      if (dom.settingSelectorSearch) {
+        settingSelectorState.query = dom.settingSelectorSearch.value || "";
+        dom.settingSelectorSearch.focus();
+        dom.settingSelectorSearch.select();
+      }
+      if (dom.settingSelectorOpenBtn) {
+        dom.settingSelectorOpenBtn.setAttribute("aria-expanded", "true");
+      }
+      refreshSettingSelector({ maintainSelection: true });
+      runTranslations();
+    });
+
+    dom.settingSelectorModal.addEventListener("hidden.bs.modal", () => {
+      settingSelectorState.modalOpen = false;
+      settingSelectorState.selectedKey = null;
+      settingSelectorState.query = "";
+      if (dom.settingSelectorSearch) dom.settingSelectorSearch.value = "";
+      updateSettingSelectorApplyState();
+      if (dom.settingSelectorOpenBtn) {
+        dom.settingSelectorOpenBtn.focus();
+        dom.settingSelectorOpenBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  if (dom.settingRemoveModal) {
+    dom.settingRemoveModal.addEventListener("hidden.bs.modal", () => {
+      state.settingToRemove = null;
+      if (dom.settingRemoveName) dom.settingRemoveName.textContent = "";
+    });
+  }
+
+  if (dom.confirmSettingRemoveBtn) {
+    dom.confirmSettingRemoveBtn.addEventListener("click", () => {
+      if (!state.settingToRemove) return;
+      removeSettingRow(state.settingToRemove);
+      state.settingToRemove = null;
+      closeSettingRemoveModal();
     });
   }
 
@@ -2378,9 +3511,11 @@ const initEventListeners = () => {
 const initTemplateEditor = () => {
   if (!dom.form) return;
   setupThemeSync();
+  populateSettingSelectorFilters();
   initialiseCollections();
   refreshConfigEditorThemes();
   initEventListeners();
 };
 
 initTemplateEditor();
+applyTranslations();
