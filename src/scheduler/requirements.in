@@ -32,3 +32,4 @@ pydantic==2.11.9
 python-magic==0.4.27
 requests==2.32.5
 schedule==1.2.2
+urllib3<2.4.0
