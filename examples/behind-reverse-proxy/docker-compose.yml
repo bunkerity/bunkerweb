@@ -40,6 +40,8 @@ services:
 
   myproxy:
     image: haproxy:3.1-alpine
+    depends_on:
+      - bunkerweb
     ports:
       - "80:8080/tcp"
     volumes:

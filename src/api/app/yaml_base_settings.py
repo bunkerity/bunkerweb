@@ -7,11 +7,16 @@ from os import getenv
 from pathlib import Path
 from re import compile as re_compile
 from typing import Any, Dict, Mapping, Optional, Tuple, Type, Union
+from warnings import filterwarnings
 
 from pydantic.fields import FieldInfo
 from pydantic_settings import BaseSettings, DotEnvSettingsSource, EnvSettingsSource, InitSettingsSource, SecretsSettingsSource, SettingsConfigDict
 from pydantic_settings.sources import DotenvType, ENV_FILE_SENTINEL
 from yaml import safe_load
+
+# Suppress pydantic_settings warnings about custom config keys (yaml_file, yaml_config_section, etc.)
+# These are intentionally used by YamlConfigSettingsSource via settings_customise_sources
+filterwarnings("ignore", message=r".*yaml_file.*is set in model_config but will be ignored.*", category=UserWarning, module="pydantic_settings")
 
 
 class YamlSettingsConfigDict(SettingsConfigDict):

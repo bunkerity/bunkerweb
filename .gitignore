@@ -11,6 +11,7 @@ docs/package-lock.json
 .cache/
 .pytest_cache/
 .env
+.venv/
 /package*.json
 src/ui/client/static
 src/ui/client/templates

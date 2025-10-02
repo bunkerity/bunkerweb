@@ -2,6 +2,7 @@ from os import getenv, sep
 from os.path import join
 from sys import path as sys_path
 from typing import Optional, Union
+from warnings import filterwarnings
 
 # Ensure shared libs are importable when running in container
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
@@ -9,12 +10,8 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 
-def _bool_env(name: str, default: bool = False) -> bool:
-    val = getenv(name)
-    if val is None:
-        return default
-    return val.lower() in ("1", "true", "yes", "on")
-
+# Suppress pydantic_settings warning about missing secrets directory in dev environments
+filterwarnings("ignore", message=r'.*directory ".*" does not exist', category=UserWarning, module="pydantic_settings")
 
 from .yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore
 
