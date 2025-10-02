@@ -1,6 +1,6 @@
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.4
+    image: bunkerity/bunkerweb:1.6.5
     container_name: bunkerweb
     ports:
       - "80:8080/tcp"
@@ -23,12 +23,12 @@ services:
       - net-app2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.4
+    image: bunkerity/bunkerweb-scheduler:1.6.5
     container_name: bw-scheduler
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       BUNKERWEB_INSTANCES: "bunkerweb"
       SERVER_NAME: "app1.example.com app2.example.com" # replace with your domains
@@ -69,7 +69,7 @@ services:
       - net-app2
 
 volumes:
-  bw-data:
+  bw-storage:
 
 
 networks:

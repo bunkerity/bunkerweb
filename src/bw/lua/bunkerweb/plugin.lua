@@ -6,12 +6,14 @@ local datastore = require "bunkerweb.datastore"
 local logger = require "bunkerweb.logger"
 local utils = require "bunkerweb.utils"
 local plugin = class("plugin")
-
+local cjson = require "cjson"
 local ERR = ngx.ERR
 local get_phase = ngx.get_phase
 local get_variable = utils.get_variable
 local get_ctx_obj = utils.get_ctx_obj
 local subsystem = ngx.config.subsystem
+local shared = ngx.shared
+local decode = cjson.decode
 
 function plugin:initialize(id, ctx)
 	-- Store common, values
@@ -106,6 +108,64 @@ function plugin:set_metric(kind, key, value)
 		end
 		self.ctx.bw.metrics[self.id][kind][key] = value
 	end
+end
+
+function plugin:get_metric(kind, key)
+	-- Resolve the metrics datastore used by metrics
+	local dict
+	if subsystem == "http" then
+		dict = shared.metrics_datastore
+	else
+		dict = shared.metrics_datastore_stream
+	end
+	local metrics_ds = datastore:new(dict)
+
+	-- Build the base key like metrics does in LRU/SHM
+	local base
+	if kind == "counters" then
+		base = self.id .. "_counter_" .. key
+	elseif kind == "tables" then
+		base = self.id .. "_table_" .. key
+	else
+		return nil
+	end
+
+	-- Aggregate across workers
+	local result_table
+	local result_number = 0
+	local found_number = false
+
+	for _, k in ipairs(metrics_ds:keys()) do
+		if k:match("^" .. base .. "_%d+$") then
+			local value, err = metrics_ds:get(k)
+			if not value and err ~= "not found" then
+				self.logger:log(ERR, "error while fetching metric " .. k .. " : " .. err)
+			end
+			if value then
+				local ok, decoded = pcall(decode, value)
+				if ok then
+					value = decoded
+				end
+				if type(value) == "table" then
+					result_table = result_table or {}
+					for _, v in ipairs(value) do
+						table.insert(result_table, v)
+					end
+				else
+					found_number = true
+					result_number = result_number + (tonumber(value) or 0)
+				end
+			end
+		end
+	end
+
+	if result_table then
+		return result_table
+	end
+	if found_number then
+		return result_number
+	end
+	return nil
 end
 
 return plugin

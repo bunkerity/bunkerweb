@@ -18,7 +18,7 @@ This quickstart guide will help you to quickly install BunkerWeb and secure a we
 
 Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb: it will act as a classical [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) with extra security features.
 
-See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/examples) of the repository to get real-world examples.
+See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) of the repository to get real-world examples.
 
 ## Basic setup
 
@@ -33,7 +33,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
       -p 80:8080/tcp \
       -p 443:8443/tcp \
       -p 443:8443/udp \
-      bunkerity/bunkerweb-all-in-one:1.6.4
+      bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     By default, the container exposes:
@@ -47,162 +47,25 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
 
 === "Linux"
 
-    Please ensure that you have **NGINX 1.28.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
+    Use the Easy Install script to set up BunkerWeb on supported Linux distributions. It automatically installs and configures NGINX, adds the BunkerWeb repository, and sets up the required services.
 
-    === "Debian Bookworm/Trixie"
+    ```bash
+    # Download the script and its checksum
+    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5/install-bunkerweb.sh
+    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5/install-bunkerweb.sh.sha256
 
-        The first step is to add the official NGINX repository:
+    # Verify the checksum
+    sha256sum -c install-bunkerweb.sh.sha256
 
-        ```shell
-        sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring && \
-        curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-        | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
-        echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-        http://nginx.org/packages/debian `lsb_release -cs` nginx" \
-        | sudo tee /etc/apt/sources.list.d/nginx.list
-        ```
+    # If the check is successful, run the script
+    chmod +x install-bunkerweb.sh
+    sudo ./install-bunkerweb.sh
+    ```
 
-        You should now be able to install NGINX 1.28.0:
+    !!! danger "Security Notice"
+        Always verify the script integrity with the provided checksum before executing it.
 
-        ```shell
-        sudo apt update && \
-        sudo apt install -y nginx=1.28.0-1~$(lsb_release -cs)
-        ```
-
-        !!! warning "Testing/dev version"
-            If you use the `testing` or `dev` version, you need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-            ```shell
-            echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-            ```
-
-        And finally install BunkerWeb 1.6.4:
-
-        ```shell
-        curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
-        sudo apt update && \
-        sudo -E apt install -y bunkerweb=1.6.4
-        ```
-
-        To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
-
-        ```shell
-        sudo apt-mark hold nginx bunkerweb
-        ```
-
-    === "Ubuntu"
-
-        The first step is to add the official NGINX repository:
-
-        ```shell
-        sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring && \
-        curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
-        | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null && \
-        echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-        http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
-        | sudo tee /etc/apt/sources.list.d/nginx.list
-        ```
-
-        You should now be able to install NGINX 1.28.0:
-
-        ```shell
-        sudo apt update && \
-        sudo apt install -y nginx=1.28.0-1~$(lsb_release -cs)
-        ```
-
-        !!! warning "Testing/dev version"
-            If you use the `testing` or `dev` version, you need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
-
-            ```shell
-            echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-            ```
-
-        And finally install BunkerWeb 1.6.4:
-
-        ```shell
-        curl -s https://repo.bunkerweb.io/install/script.deb.sh | sudo bash && \
-        sudo apt update && \
-        sudo -E apt install -y bunkerweb=1.6.4
-        ```
-
-        To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command:
-
-        ```shell
-        sudo apt-mark hold nginx bunkerweb
-        ```
-
-    === "Fedora"
-
-        !!! info "Fedora Update Testing"
-            If you cannot find the NGINX version listed in the stable repository, you can enable the `updates-testing` repository:
-
-            ```shell
-            sudo dnf config-manager setopt updates-testing.enabled=1
-            ```
-
-        Fedora already provides NGINX 1.28.0 that we support
-
-        ```shell
-        sudo dnf install -y nginx-1.28.0
-        ```
-
-        And finally install BunkerWeb 1.6.4:
-
-        ```shell
-        curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
-        sudo dnf makecache && \
-        sudo -E dnf install -y bunkerweb-1.6.4
-        ```
-
-        To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
-
-        ```shell
-        sudo dnf versionlock add nginx && \
-        sudo dnf versionlock add bunkerweb
-        ```
-
-    === "RedHat"
-
-        The first step is to add the NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo`:
-
-        ```conf
-        [nginx-stable]
-        name=nginx stable repo
-        baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-        gpgcheck=1
-        enabled=1
-        gpgkey=https://nginx.org/keys/nginx_signing.key
-        module_hotfixes=true
-
-        [nginx-mainline]
-        name=nginx mainline repo
-        baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
-        gpgcheck=1
-        enabled=0
-        gpgkey=https://nginx.org/keys/nginx_signing.key
-        module_hotfixes=true
-        ```
-
-        You should now be able to install NGINX 1.28.0:
-
-        ```shell
-        sudo dnf install nginx-1.28.0
-        ```
-
-        And finally install BunkerWeb 1.6.4:
-
-        ```shell
-        curl -s https://repo.bunkerweb.io/install/script.rpm.sh | sudo bash && \
-        sudo dnf check-update && \
-        sudo -E dnf install -y bunkerweb-1.6.4
-        ```
-
-        To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command:
-
-        ```shell
-        sudo dnf versionlock add nginx && \
-        sudo dnf versionlock add bunkerweb
-        ```
+    For advanced installation methods (package manager, installation types, non-interactive flags, CrowdSec integration, etc.), see the [Linux Integration](integrations.md#linux).
 
 === "Docker"
 
@@ -212,12 +75,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
     x-bw-env: &bw-env
       # We use an anchor to avoid repeating the same settings for both services
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+      # Optional: set an API token and mirror it in both containers
+      API_TOKEN: ""
       DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
 
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -230,7 +95,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -247,7 +112,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.4
+        image: bunkerity/bunkerweb-ui:1.6.5
         environment:
           <<: *bw-env
         restart: "unless-stopped"
@@ -314,7 +179,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -330,7 +195,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -348,7 +213,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         depends_on:
           - bw-docker
         environment:
@@ -371,7 +236,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.4
+        image: bunkerity/bunkerweb-ui:1.6.5
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -466,7 +331,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - published: 80
             target: 8080
@@ -496,7 +361,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: ""
@@ -514,7 +379,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         environment:
           <<: *bw-ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -543,7 +408,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/exa
               - "node.role == manager"
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.4
+        image: bunkerity/bunkerweb-ui:1.6.5
         environment:
           <<: *bw-ui-env
           TOTP_ENCRYPTION_KEYS: "mysecret" # Remember to set a stronger secret key (see the Prerequisites section)
@@ -636,8 +501,8 @@ Once you're on the setup page, you can enter the **administrator username, email
     If you expand the `Advanced settings` section, you can also configure the following options:
 
     * **Reverse Proxy**: Tweak the Reverse Proxy settings for your administrator interface (e.g., if you want to use a path).
-    * [Real IP](features.md#real-ip): Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).
-    * [Custom Certificate](features.md#custom-ssl-certificate): Upload a custom TLS certificate if you don't want to use Let's Encrypt.
+    * [**Real IP**](features.md#real-ip): Configure the Real IP settings to properly identify the client's IP address (e.g., if you are behind a load balancer or a CDN).
+    * [**Custom Certificate**](features.md#custom-ssl-certificate): Upload a custom TLS certificate if you don't want to use Let's Encrypt.
 
     <figure markdown>
       ![Setup Wizard step 2](assets/img/ui-wizard-step2-advanced.png){ align=center }
@@ -704,7 +569,6 @@ You can now log in with the administrator account you created during the setup w
           <figcaption>Web interface create service easy</figcaption>
         </figure>
 
-        * To navigate between the different plugins, you can use the dropdown menu on the top left corner of the page.
         * Once you've selected the template, you can fill in the required fields and follow the instructions to create the service.
         * Once you're done configuring the service, you can click on the `💾 Save` button to save the configuration.
 
@@ -717,7 +581,7 @@ You can now log in with the administrator account you created during the setup w
           <figcaption>Web interface create service advanced</figcaption>
         </figure>
 
-        * To navigate between the different plugins, you can use the dropdown menu on the top left corner of the page.
+        * To navigate between the different plugins, you can use the navigation menu on the left side of the page.
         * Each setting has a small piece of information that will help you understand what it does.
         * Once you're done configuring the service, you can click on the `💾 Save` button to save the configuration.
 
@@ -766,7 +630,7 @@ You can now log in with the administrator account you created during the setup w
       -e "www.example.com_REVERSE_PROXY_HOST=http://myapp:8080" \
       -e "www.example.com_REVERSE_PROXY_URL=/" \
       # --- Include any other existing environment variables for UI, Redis, CrowdSec, etc. ---
-      bunkerity/bunkerweb-all-in-one:1.6.4
+      bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     Your application container (`myapp`) and the `bunkerweb-aio` container must be on the same Docker network for BunkerWeb to reach it using the hostname `myapp`.
@@ -788,14 +652,14 @@ You can now log in with the administrator account you created during the setup w
       -p 443:8443/tcp \
       -p 443:8443/udp \
     #   ... (all other relevant environment variables as shown in the main example above) ...
-      bunkerity/bunkerweb-all-in-one:1.6.4
+      bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     Make sure to replace `myapp` with the actual name or IP of your application container and `http://myapp:8080` with its correct address and port.
 
 === "Linux variables.env file"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Linux integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_2) and that the Linux integration is running on your machine.
 
     You can create a new service by editing the `variables.env` file located in the `/etc/bunkerweb/` directory.
 
@@ -821,7 +685,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Docker"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_1) and that the Docker integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_3) and that the Docker integration is running on your machine.
 
     You must have a network called `bw-services` so that you can connect your existing application and configure BunkerWeb:
 
@@ -865,7 +729,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Docker autoconf labels"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_2) and that the Docker autoconf integration is running on your machine.
+    We assume that you followed the [Basic setup](#__tabbed_1_4) and that the Docker autoconf integration is running on your machine.
 
     You must have a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
 
@@ -891,7 +755,7 @@ You can now log in with the administrator account you created during the setup w
 
 === "Kubernetes annotations"
 
-    We assume that you followed the [Basic setup](#__tabbed_1_4) and that the Kubernetes stack is running on your cluster.
+    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Kubernetes stack is running on your cluster.
 
     Let's assume that you have a typical Deployment with a Service to access the web application from within the cluster:
 
@@ -957,11 +821,11 @@ You can now log in with the administrator account you created during the setup w
 === "Swarm labels"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    We assume that you followed the [Basic setup](#__tabbed_1_3) and that the Swarm stack is running on your cluster and connected to a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
+    We assume that you followed the [Basic setup](#__tabbed_1_5) and that the Swarm stack is running on your cluster and connected to a network called `bw-services` so that you can connect your existing application and configure BunkerWeb with labels:
 
     ```yaml
     services:
@@ -989,7 +853,7 @@ You can now log in with the administrator account you created during the setup w
 
 Congratulations! You have just installed BunkerWeb and secured your first web service. Please note that BunkerWeb offers much more, both in terms of security and integrations with other systems and solutions. Here's a list of resources and actions that may help you continue to deepen your knowledge of the solution:
 
-- Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X](https://x.com/bunkerity)
+- Join the Bunker community: [Discord](https://discord.com/invite/fTf46FmtyD), [LinkedIn](https://www.linkedin.com/company/bunkerity/), [GitHub](https://github.com/bunkerity), [X (Formerly Twitter)](https://x.com/bunkerity)
 - Check out the [official blog](https://www.bunkerweb.io/blog?utm_campaign=self&utm_source=doc)
 - Explore [advanced use cases](advanced.md) in the documentation
 - [Get in touch with us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) to discuss your organization's needs

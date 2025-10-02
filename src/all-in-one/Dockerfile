@@ -1,4 +1,4 @@
-FROM nginx:1.28-alpine-slim@sha256:b08e95f5c81ffce8f64319f7928b555a062c37daa47439dee5f99c62577a8763 AS builder
+FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -71,6 +71,7 @@ COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/autoconf/requirements.txt /tmp/req/requirements-autoconf.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
 COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
+COPY src/api/requirements.txt /tmp/req/requirements-api.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 COPY src/common/db/requirements.armv7.txt /tmp/req/requirements-db.armv7.txt
@@ -98,21 +99,57 @@ COPY src/common/utils utils
 COPY src/autoconf autoconf
 COPY src/scheduler scheduler
 COPY src/ui ui
+COPY src/api api
 COPY src/all-in-one all-in-one
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-# Minify JS files (can be skipped with SKIP_MINIFY=yes)
-ARG SKIP_MINIFY=no
-RUN if [ "$SKIP_MINIFY" != "yes" ]; then \
-    apk add --no-cache nodejs npm parallel && \
-    npm install -g uglify-js && \
-    find ui/app/static -type f -name "*.js" | parallel 'uglifyjs {} --compress --mangle --verbose --output {}' ; \
+WORKDIR /tmp
+
+COPY src/deps/package.json package.json
+COPY src/deps/package-lock.json package-lock.json
+
+RUN apk add --no-cache nodejs npm parallel && \
+    cd /tmp && \
+    npm ci --ignore-scripts
+
+# Minify JS files
+ARG SKIP_MINIFY_JS=no
+RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+    | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
     else \
     echo "Skipping JS minification"; \
     fi
 
-FROM nginx:1.28-alpine-slim@sha256:b08e95f5c81ffce8f64319f7928b555a062c37daa47439dee5f99c62577a8763
+# Minify CSS files
+ARG SKIP_MINIFY_CSS=no
+RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+    | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
+    else \
+    echo "Skipping CSS minification"; \
+    fi
+
+# Minify HTML files
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+    find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
+    parallel 'npx html-minifier-terser \
+    --collapse-whitespace \
+    --remove-comments \
+    --remove-optional-tags \
+    --remove-redundant-attributes \
+    --remove-script-type-attributes \
+    --remove-style-link-type-attributes \
+    --minify-css true \
+    --minify-js true \
+    --output {} {}'; \
+    else \
+    echo "Skipping HTML minification"; \
+    fi
+
+FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -121,7 +158,10 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
-RUN apk add --no-cache "pyc>=3.12.11-r0" "python3>=3.12.11-r0" "python3-pyc>=3.12.11-r0" "python3-pycache-pyc0>=3.12.11-r0" # CVE-2024-12718 CVE-2025-4138 CVE-2025-4517 CVE-2025-4330
+RUN apk add --no-cache "sqlite>=3.48.0-r4" "sqlite-libs>=3.48.0-r4" # CVE-2025-29088
+RUN apk add --no-cache "libcrypto3>=3.3.5-r0" "libssl3>=3.3.5-r0" "openssl>=3.3.5-r0" # CVE-2025-9230 CVE-2025-9231 CVE-2025-9232
+RUN apk add --no-cache "libexpat>=2.7.2-r0" # CVE-2025-59375
+RUN apk add --no-cache "tiff>=4.7.1-r0" # CVE-2025-8961 CVE-2025-9165
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -138,16 +178,17 @@ WORKDIR /usr/share/bunkerweb
 # Move bwcli, create data folders and set permissions
 RUN cp helpers/bwcli /usr/bin/ && \
     echo "Docker" > INTEGRATION && \
-	mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
-	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
-	mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-	mkdir -p /data/www && ln -s /data/www /var/www/html && \
-	for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-	for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
-	chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
-	chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
-    find . \( -path './all-in-one' -o -path './scheduler' -o -path './ui' -o -path './autoconf' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
-    find all-in-one scheduler ui autoconf cli lua core db gen helpers deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+    mkdir -p /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /var/www && \
+    mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
+    mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
+    mkdir -p /data/www && ln -s /data/www /var/www/html && \
+    for dir in $(echo "pro configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
+    for dir in $(echo "pro/plugins configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs configs/crs-plugins-before configs/crs-plugins-after") ; do mkdir "/data/${dir}" ; done && \
+    chown -R root:nginx INTEGRATION /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+    chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
+    chmod 2770 /var/tmp/bunkerweb && \
+    find . \( -path './all-in-one' -o -path './api' -o -path './scheduler' -o -path './ui' -o -path './autoconf' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+    find all-in-one api scheduler ui autoconf cli lua core db gen utils helpers deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
     chmod 770 -R db/alembic && \
     chmod 550 entrypoint.sh && \
     chmod 660 INTEGRATION && \
@@ -166,7 +207,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
     mv all-in-one/conf/appsec.yaml /etc/crowdsec/acquis.d/appsec.yaml && \
     rm -rf crowdsec* all-in-one/deps all-in-one/scripts && \
     chown -R root:nginx /data /var/lib/crowdsec /etc/crowdsec /usr/local/lib/crowdsec && \
-	chmod -R 770 /data /var/lib/bunkerweb /etc/crowdsec /usr/local/lib/crowdsec && \
+    chmod -R 770 /data /var/lib/bunkerweb /etc/crowdsec /usr/local/lib/crowdsec && \
     find /etc/crowdsec/ -type f -name "*.yaml" -print0 | xargs -0 chmod 660 && \
     mv /etc/crowdsec/online_api_credentials.yaml /var/lib/crowdsec/online_api_credentials.yaml && \
     mv /etc/crowdsec/local_api_credentials.yaml /var/lib/crowdsec/local_api_credentials.yaml && \
@@ -194,13 +235,14 @@ LABEL bunkerweb.INSTANCE="bunkerweb"
 
 VOLUME /data
 
-EXPOSE 8080/tcp 8443/tcp 8443/udp 7000/tcp
+EXPOSE 8080/tcp 8443/tcp 8443/udp 7000/tcp 8888/tcp
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-all-in-one.sh
 
 ENV PYTHONPATH="/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db"
 ENV SERVICE_UI="yes"
 ENV SERVICE_SCHEDULER="yes"
+ENV SERVICE_API="no"
 ENV AUTOCONF_MODE="no"
 ENV USE_CROWDSEC="no"
 ENV USE_REDIS="yes"

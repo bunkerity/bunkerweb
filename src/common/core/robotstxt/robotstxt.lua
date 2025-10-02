@@ -5,6 +5,7 @@ local utils = require "bunkerweb.utils"
 local ngx = ngx
 local ERR = ngx.ERR
 local INFO = ngx.INFO
+local OK = ngx.OK
 local get_phase = ngx.get_phase
 local has_variable = utils.has_variable
 local get_variable = utils.get_variable
@@ -27,44 +28,110 @@ end
 
 function robotstxt:initialize(ctx)
 	plugin.initialize(self, "robotstxt", ctx)
+	self.policies = {
+		rule = {},
+		header = {},
+		footer = {},
+		sitemap = {},
+	}
 	if get_phase() ~= "init" and self:is_needed() then
-		local robot_policies, err = self.datastore:get("plugin_robotstxt_policies_" .. self.ctx.bw.server_name, true)
-		if not robot_policies then
+		local server_name = self.ctx.bw.server_name
+		local robots_rules, err = self.datastore:get("plugin_robotstxt_rules_" .. server_name, true)
+		if not robots_rules then
 			self.logger:log(ERR, err)
-			self.robot_policies = {}
 		else
-			self.robot_policies = robot_policies
-		end
-		if not self.robot_policies["rule"] then
-			self.robot_policies["rule"] = {}
-		end
-		if not self.robot_policies["sitemap"] then
-			self.robot_policies["sitemap"] = {}
-		end
-		if not self.robot_policies["header"] then
-			self.robot_policies["header"] = {}
-		end
-		if not self.robot_policies["footer"] then
-			self.robot_policies["footer"] = {}
+			self.policies.rule = robots_rules
 		end
 
-		-- Get ignore rules from environment variables
-		local ignore_rules = {}
-		for data in self.variables["ROBOTSTXT_IGNORE_RULES"]:gmatch("[^\r\n]+") do
-			if data ~= "" then
-				table.insert(ignore_rules, data)
+		-- Get all rules and sitemaps from environment variables
+		local variables, err = get_multiple_variables({
+			"ROBOTSTXT_RULE",
+			"ROBOTSTXT_HEADER",
+			"ROBOTSTXT_FOOTER",
+			"ROBOTSTXT_SITEMAP",
+			"ROBOTSTXT_IGNORE_RULE",
+		})
+		if variables == nil then
+			return self:ret(false, err)
+		end
+
+		local multisite, err = get_variable("MULTISITE", false)
+		if not multisite then
+			return self:ret(false, "can't get MULTISITE variable : " .. err)
+		end
+		if multisite == "no" then
+			server_name = "global"
+		end
+
+		-- Add rules and sitemaps from environment variables
+		local sorted_vars = {}
+		for var, _ in pairs(variables[server_name] or {}) do
+			if var:match("^ROBOTSTXT_") then
+				table.insert(sorted_vars, var)
 			end
 		end
 
-		if #ignore_rules > 0 then
+		-- Natural sort for variables like ROBOTSTXT_RULE, ROBOTSTXT_RULE_1, ROBOTSTXT_RULE_2, ROBOTSTXT_RULE_10
+		table.sort(sorted_vars, function(a, b)
+			-- Try to split into <base>_<number>
+			local base_a, num_a = a:match("^(.-)_(%d+)$")
+			local base_b, num_b = b:match("^(.-)_(%d+)$")
+
+			-- If no numeric suffix, keep full string as base and use 0
+			base_a, num_a = base_a or a, tonumber(num_a) or 0
+			base_b, num_b = base_b or b, tonumber(num_b) or 0
+
+			if base_a ~= base_b then
+				return base_a < base_b
+			end
+			if num_a ~= num_b then
+				return num_a < num_b
+			end
+			-- Final tie-break to keep sort stable for exact same base/num
+			return a < b
+		end)
+
+		local ignore_rules = {}
+		for _, var in ipairs(sorted_vars) do
+			local value = variables[server_name][var]
+			if value ~= "" then
+				local policy_key = string.lower(string.gsub(string.gsub(var, "^ROBOTSTXT_", ""), "_%d+$", ""))
+				if policy_key == "rule" then
+					table.insert(self.policies.rule, value)
+				elseif policy_key == "sitemap" then
+					table.insert(self.policies.sitemap, value)
+				elseif policy_key == "header" then
+					local decoded = decode_base64(value)
+					table.insert(self.policies.header, decoded or value)
+				elseif policy_key == "footer" then
+					local decoded = decode_base64(value)
+					table.insert(self.policies.footer, decoded or value)
+				elseif policy_key == "ignore_rule" then
+					table.insert(ignore_rules, value)
+				end
+			end
+		end
+
+		-- Apply ignore rules filtering if provided
+		if ignore_rules and #ignore_rules > 0 then
 			local filtered_rules = {}
-			for _, rule in ipairs(self.robot_policies["rule"]) do
+			for _, rule in ipairs(self.policies.rule) do
 				if not is_ignored(rule, ignore_rules) then
 					table.insert(filtered_rules, rule)
 				end
 			end
-			self.robot_policies["rule"] = filtered_rules
+			self.policies.rule = filtered_rules
 		end
+
+		self.logger:log(
+			INFO,
+			"loaded "
+				.. tostring(#self.policies.rule)
+				.. " rules and "
+				.. tostring(#self.policies.sitemap)
+				.. " sitemaps for the service: "
+				.. self.ctx.bw.server_name
+		)
 	end
 end
 
@@ -91,42 +158,24 @@ function robotstxt:init()
 		return self:ret(true, "init not needed")
 	end
 
-	-- Get all server names
 	local server_name, err = get_variable("SERVER_NAME", false)
 	if not server_name then
 		return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 	end
 
-	-- Get all rules and sitemaps from environment variables
-	local variables, err = get_multiple_variables({
-		"ROBOTSTXT_RULE",
-		"ROBOTSTXT_SITEMAP",
-		"ROBOTSTXT_IGNORE_RULES",
-		"ROBOTSTXT_HEADER",
-		"ROBOTSTXT_FOOTER",
-	})
-	if variables == nil then
-		return self:ret(false, err)
-	end
-
-	-- Iterate over each server
-	for key in server_name:gmatch("%S+") do
-		local policies = {
-			["rule"] = {},
-			["sitemap"] = {},
-			["header"] = {},
-			["footer"] = {},
-		}
+	-- Iterate over each kind and server
+	for srv in server_name:gmatch("%S+") do
 		-- Read rules from files
 		local rule_files = {
-			"/var/cache/bunkerweb/robotstxt/" .. key .. "/darkvisitors.list",
-			"/var/cache/bunkerweb/robotstxt/" .. key .. "/rules.list",
+			"/var/cache/bunkerweb/robotstxt/" .. srv .. "/darkvisitors.list",
+			"/var/cache/bunkerweb/robotstxt/" .. srv .. "/rules.list",
 		}
+		local rules = {}
 		for _, file_path in ipairs(rule_files) do
 			local f = open(file_path, "r")
 			if f then
 				local is_darkvisitors_list = (
-					file_path == "/var/cache/bunkerweb/robotstxt/" .. key .. "/darkvisitors.list"
+					file_path == "/var/cache/bunkerweb/robotstxt/" .. srv .. "/darkvisitors.list"
 				)
 				local first_line_skipped = false
 				for line in f:lines() do
@@ -134,140 +183,37 @@ function robotstxt:init()
 						first_line_skipped = true
 						-- Skip this line
 					elseif line ~= "" then
-						table.insert(policies["rule"], line)
+						table.insert(rules, line)
 					end
 				end
 				f:close()
 			end
 		end
 
-		-- Add rules and sitemaps from environment variables
-		if variables[key] then
-			local sorted_vars = {}
-			for var_name, _ in pairs(variables[key]) do
-				table.insert(sorted_vars, var_name)
-			end
-			-- Natural sort for variables like ROBOTSTXT_RULE_1, ROBOTSTXT_RULE_2, ROBOTSTXT_RULE_10
-			table.sort(sorted_vars, function(a, b)
-				local base_a = a:gsub("_[0-9]+$", "")
-				local base_b = b:gsub("_[0-9]+$", "")
-				if base_a < base_b then
-					return true
-				end
-				if base_a > base_b then
-					return false
-				end
-				local num_a = tonumber(a:match("_([0-9]+)$")) or 0
-				local num_b = tonumber(b:match("_([0-9]+)$")) or 0
-				return num_a < num_b
-			end)
-
-			for _, var in ipairs(sorted_vars) do
-				local value = variables[key][var]
-				if value ~= "" then
-					local policy_key = string.lower(string.gsub(string.gsub(var, "^ROBOTSTXT_", ""), "_%d*$", ""))
-					if policy_key == "rule" then
-						policies.rule[#policies.rule + 1] = value
-					elseif policy_key == "sitemap" then
-						policies.sitemap[#policies.sitemap + 1] = value
-					elseif policy_key == "header" then
-						local decoded = decode_base64(value)
-						policies.header[#policies.header + 1] = decoded or value
-					elseif policy_key == "footer" then
-						local decoded = decode_base64(value)
-						policies.footer[#policies.footer + 1] = decoded or value
-					end
-				end
-			end
-		end
-
-		-- Get ignore rules for this service
-		local ignore_rules = {}
-		if variables[key] and variables[key]["ROBOTSTXT_IGNORE_RULES"] then
-			for data in string.gmatch(variables[key]["ROBOTSTXT_IGNORE_RULES"], "[^\r\n]+") do
-				if data ~= "" then
-					table.insert(ignore_rules, data)
-				end
-			end
-		end
-
-		if #ignore_rules > 0 then
-			local filtered_rules = {}
-			for _, rule in ipairs(policies.rule) do
-				if not is_ignored(rule, ignore_rules) then
-					table.insert(filtered_rules, rule)
-				end
-			end
-			policies.rule = filtered_rules
-		end
-
-		-- Load policies into datastore
+		-- Load rules into datastore
 		local ok
-		ok, err = self.datastore:set("plugin_robotstxt_policies_" .. key, policies, nil, true)
+		ok, err = self.datastore:set("plugin_robotstxt_rules_" .. srv, rules, nil, true)
 		if not ok then
-			return self:ret(false, "can't store robotstxt policies for " .. key .. " into datastore : " .. err)
+			return self:ret(false, "can't store robotstxt rules for " .. srv .. " into datastore : " .. err)
 		end
 
-		self.logger:log(
-			INFO,
-			"successfully loaded "
-				.. tostring(#policies.rule + #policies.sitemap + #policies.header + #policies.footer)
-				.. " policies for the service: "
-				.. key
-		)
+		self.logger:log(INFO, "successfully loaded " .. tostring(#rules) .. " rules for the service: " .. srv)
 	end
-	return self:ret(true, "successfully loaded all robots.txt policies")
-end
 
-local function sanitize_rules(rules)
-	local sanitized = {}
-	local has_user_agent = false
-	for _, rule in ipairs(rules) do
-		local trimmed = rule:match("^%s*(.-)%s*$")
-		table.insert(sanitized, trimmed)
-		if trimmed:lower():find("^user%-agent:") then
-			has_user_agent = true
-		end
-	end
-	if not has_user_agent and #sanitized > 0 then
-		table.insert(sanitized, 1, "User-agent: *")
-	end
-	return sanitized
-end
-
-local function sanitize_sitemaps(sitemaps)
-	local seen = {}
-	local sanitized = {}
-	for _, url in ipairs(sitemaps) do
-		local trimmed = url:match("^%s*(.-)%s*$")
-		if trimmed ~= "" then
-			-- Force HTTPS for sitemaps
-			if trimmed:match("^http://") then
-				trimmed = trimmed:gsub("^http://", "https://")
-			end
-			if not seen[trimmed] then
-				seen[trimmed] = true
-				table.insert(sanitized, trimmed)
-			end
-		end
-	end
-	return sanitized
+	return self:ret(true, "successfully loaded all robots.txt rules from files")
 end
 
 function robotstxt:access()
 	if self.ctx.bw.uri == "/robots.txt" and self:is_needed() then
-		local rules = self.robot_policies and self.robot_policies["rule"] or {}
-		local sitemaps = self.robot_policies and self.robot_policies["sitemap"] or {}
-		local headers = self.robot_policies and self.robot_policies["header"] or {}
-		local footers = self.robot_policies and self.robot_policies["footer"] or {}
+		local rules = self.policies.rule or {}
+		local sitemaps = self.policies.sitemap or {}
+		local headers = self.policies.header or {}
+		local footers = self.policies.footer or {}
 
 		-- If no rules are set, use the default rule
 		if #rules == 0 then
 			rules = { "User-agent: *", "Disallow: /" }
 		end
-
-		local sanitized_rules = sanitize_rules(rules)
-		local sanitized_sitemaps = sanitize_sitemaps(sitemaps)
 
 		ngx.header["Content-Type"] = "text/plain; charset=utf-8"
 		local output = {}
@@ -279,14 +225,14 @@ function robotstxt:access()
 			end
 		end
 
-		if #sanitized_rules > 0 then
-			for _, rule in ipairs(sanitized_rules) do
+		if #rules > 0 then
+			for _, rule in ipairs(rules) do
 				table.insert(output, rule)
 			end
 		end
 
-		if #sanitized_sitemaps > 0 then
-			for _, sitemap in ipairs(sanitized_sitemaps) do
+		if #sitemaps > 0 then
+			for _, sitemap in ipairs(sitemaps) do
 				table.insert(output, "Sitemap: " .. sitemap)
 			end
 		end
@@ -298,7 +244,7 @@ function robotstxt:access()
 		end
 
 		ngx.say(table.concat(output, "\n"))
-		return ngx.exit(ngx.HTTP_OK)
+		return self:ret(true, "served robots.txt", OK)
 	end
 	return self:ret(true, "success")
 end

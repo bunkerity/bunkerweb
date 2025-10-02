@@ -79,12 +79,16 @@ class ConfigurableCustomUndefined(Undefined):
     def __eq__(self, other: Any) -> bool:
         value = self._config_dict.get(self._undefined_name)
         if value is not None:
+            if other == "" and isinstance(value, str):
+                value = value.strip()
             return value == other
         return super().__eq__(other)
 
     def __ne__(self, other: Any) -> bool:
         value = self._config_dict.get(self._undefined_name)
         if value is not None:
+            if other == "" and isinstance(value, str):
+                value = value.strip()
             return value != other
         return super().__ne__(other)
 
@@ -109,6 +113,8 @@ class ConfigurableCustomUndefined(Undefined):
     def __bool__(self) -> bool:
         value = self._config_dict.get(self._undefined_name)
         if value is not None:
+            if isinstance(value, str):
+                value = value.strip()
             return bool(value)
         return super().__bool__()
 

@@ -10,7 +10,7 @@ services:
       - onion-net
 
   bunkerweb:
-    image: bunkerity/bunkerweb:1.6.4
+    image: bunkerity/bunkerweb:1.6.5
     container_name: bunkerweb
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
@@ -21,12 +21,12 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.4
+    image: bunkerity/bunkerweb-scheduler:1.6.5
     container_name: bunkerweb-scheduler
     depends_on:
       - bunkerweb
     volumes:
-      - bw-data:/data
+      - bw-storage:/data
     environment:
       BUNKERWEB_INSTANCES: "bunkerweb"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
@@ -54,7 +54,7 @@ services:
       - bw-services
 
 volumes:
-  bw-data:
+  bw-storage:
 
 
 networks:

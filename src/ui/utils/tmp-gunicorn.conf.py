@@ -19,9 +19,9 @@ HEALTH_FILE = TMP_DIR.joinpath("tmp-ui.healthy")
 PID_FILE = RUN_DIR.joinpath("tmp-ui.pid")
 
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
-LISTEN_ADDR = getenv("LISTEN_ADDR", "0.0.0.0")
-LISTEN_PORT = getenv("LISTEN_PORT", "7000")
-FORWARDED_ALLOW_IPS = getenv("FORWARDED_ALLOW_IPS", "*")
+LISTEN_ADDR = getenv("UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
+LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))
+FORWARDED_ALLOW_IPS = getenv("UI_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "*"))
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 DEBUG = getenv("DEBUG", False)
 

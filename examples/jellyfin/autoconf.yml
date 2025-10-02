@@ -1,0 +1,40 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:10.10.7
+    networks:
+      bw-services:
+        aliases:
+          - jellyfin
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://www.example.com # replace with your domain
+    volumes:
+      - ./jellyfin-data/config:/config
+      - ./jellyfin-data/cache:/cache
+      - ./jellyfin-data/media:/media
+    labels:
+      - bunkerweb.SERVER_NAME=www.example.com # replace with your domain
+      - bunkerweb.USE_REVERSE_PROXY=yes
+      - bunkerweb.REVERSE_PROXY_URL=/
+      - bunkerweb.REVERSE_PROXY_HOST=http://jellyfin:8096
+      - bunkerweb.REVERSE_PROXY_WS=yes
+      - bunkerweb.REVERSE_PROXY_BUFFERING=no
+      - bunkerweb.REVERSE_PROXY_SEND_TIMEOUT=300s
+      - bunkerweb.REVERSE_PROXY_READ_TIMEOUT=300s
+      - bunkerweb.MAX_CLIENT_SIZE=20m
+      - bunkerweb.LIMIT_REQ_RATE=10r/s
+      - bunkerweb.USE_CLIENT_CACHE=yes
+      - bunkerweb.USE_GZIP=yes
+      - bunkerweb.COOKIE_FLAGS="* SameSite=Lax"
+      - bunkerweb.PERMISSIONS_POLICY="accelerometer=(), ambient-light-sensor=(), battery=(), bluetooth=(), camera=(), clipboard-read=(), display-capture=(), document-domain=(), encrypted-media=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), payment=(), publickey-credentials-get=(), serial=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+      - |
+        bunkerweb.CONTENT_SECURITY_POLICY=default-src https: data: blob: ; img-src 'self' https://* ; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.youtube.com blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'self'; font-src 'self'
+      - bunkerweb.REVERSE_PROXY_URL_1=/socket
+      - bunkerweb.REVERSE_PROXY_HOST_1=http://jellyfin:8096
+      - |
+        bunkerweb.CUSTOM_CONF_MODSEC_CRS_jellyfin=
+        SecRule REQUEST_FILENAME "/web/config.json" "id:1000000,ctl:ruleRemoveById=930130,ctl:ruleRemoveById=949110,nolog"
+
+networks:
+  bw-services:
+    external: true
+    name: bw-services

@@ -3,27 +3,25 @@ site_url: https://docs.bunkerweb.io/
 repo_url: https://github.com/bunkerity/bunkerweb
 site_description: Documentation of BunkerWeb, the open source and next generation WAF.
 copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
-#remote_branch: ?
-#remote_name: ?
 
-nav:
-  - Introduction: 'index.md'
-  - Concepts: 'concepts.md'
-  - Integrations: 'integrations.md'
-  - Quickstart guide: 'quickstart-guide.md'
-  - Features: 'features.md'
-  - Advanced usages: 'advanced.md'
-  # - Security tuning: 'security-tuning.md'
-  - Web UI: 'web-ui.md'
-  - Upgrading: 'upgrading.md'
-  - Troubleshooting: 'troubleshooting.md'
-  - Plugins: 'plugins.md'
-  - Professional services: 'professional-services.md'
-  - About: 'about.md'
+nav: # language-agnostic structure (same file names in each locale folder)
+  - Introduction: "index.md"
+  - Concepts: "concepts.md"
+  - Integrations: "integrations.md"
+  - Quickstart guide: "quickstart-guide.md"
+  - Features: "features.md"
+  - Advanced usages: "advanced.md"
+  - Web UI: "web-ui.md"
+  - API: "api.md"
+  - Upgrading: "upgrading.md"
+  - Troubleshooting: "troubleshooting.md"
+  - Plugins: "plugins.md"
+  - Professional services: "professional-services.md"
+  - About: "about.md"
 
 theme:
   name: material
-  locale: en
+  language: en
   logo: assets/logo.png
   favicon: assets/favicon.png
   font: false
@@ -41,6 +39,8 @@ extra_css:
 extra_javascript:
   - assets/extra.js
   - https://chatbot.bunkerweb.io/static/js/chatbot.js
+  - assets/preserve-version-on-language-switch.js
+  - assets/toc-dropdown.js
 
 markdown_extensions:
   - attr_list
@@ -59,7 +59,6 @@ extra:
   version:
     provider: mike
     version: latest
-
   generator: false
   social:
     - icon: fontawesome/brands/discord
@@ -68,10 +67,91 @@ extra:
       link: https://github.com/bunkerity
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/company/bunkerity/
+    - icon: fontawesome/brands/reddit
+      link: https://www.reddit.com/r/BunkerWeb/
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/bunkerweb/
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/bunkerity
+      link: https://x.com/bunkerity
 
 plugins:
+  # i18n must run early so other plugins (search, social, print-site, mike) see localized pages
+  - i18n:
+      docs_structure: folder
+      reconfigure_material: true
+      languages:
+        - locale: en
+          name: English - 🇬🇧
+          default: true
+          site_name: BunkerWeb documentation
+        - locale: fr
+          name: Français - 🇫🇷
+          site_name: Documentation BunkerWeb
+          nav_translations:
+            Introduction: Introduction
+            Concepts: Concepts
+            Integrations: Intégrations
+            "Quickstart guide": "Guide de démarrage rapide"
+            Features: Fonctionnalités
+            "Advanced usages": "Utilisations avancées"
+            "Web UI": "Interface Web"
+            API: "API"
+            Upgrading: "Mise à niveau"
+            Troubleshooting: Dépannage
+            Plugins: Plugins
+            "Professional services": "Services professionnels"
+            About: "À propos"
+        - locale: de
+          name: Deutsch - 🇩🇪
+          site_name: BunkerWeb Dokumentation
+          nav_translations:
+            Introduction: Einführung
+            Concepts: Konzepte
+            Integrations: Integrationen
+            "Quickstart guide": Schnellstart
+            Features: Funktionen
+            "Advanced usages": "Erweiterte Nutzung"
+            "Web UI": "Weboberfläche"
+            API: "API"
+            Upgrading: Aktualisierung
+            Troubleshooting: Fehlerbehebung
+            Plugins: Plugins
+            "Professional services": "Professionelle Dienste"
+            About: Über
+        - locale: es
+          name: Español - 🇪🇸
+          site_name: Documentación de BunkerWeb
+          nav_translations:
+            Introduction: Introducción
+            Concepts: Conceptos
+            Integrations: Integraciones
+            "Quickstart guide": "Guía de inicio rápido"
+            Features: Funcionalidades
+            "Advanced usages": "Usos avanzados"
+            "Web UI": "Interfaz web"
+            API: "API"
+            Upgrading: Actualización
+            Troubleshooting: "Solución de problemas"
+            Plugins: Plugins
+            "Professional services": "Servicios profesionales"
+            About: "Acerca de"
+        - locale: zh
+          name: 中文 - 🇨🇳
+          site_name: BunkerWeb 文档
+          nav_translations:
+            Introduction: 介绍
+            Concepts: 概念
+            Integrations: 集成
+            "Quickstart guide": "快速入门指南"
+            Features: 功能
+            "Advanced usages": "高级用法"
+            "Web UI": "Web 界面"
+            API: "API"
+            Upgrading: 升级
+            Troubleshooting: 故障排除
+            Plugins: 插件
+            "Professional services": "专业服务"
+            About: 关于
   - search
   - social:
       cards_layout_options:

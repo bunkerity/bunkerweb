@@ -1,6 +1,6 @@
 {
   "name": "wordpress",
-  "kinds": ["docker", "autoconf", "swarm", "kubernetes", "linux"],
+  "kinds": ["docker", "autoconf", "linux"],
   "timeout": 120,
   "delay": 120,
   "no_copy_container": true,

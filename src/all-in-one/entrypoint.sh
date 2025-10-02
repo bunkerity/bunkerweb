@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
@@ -169,6 +172,17 @@ else
 	log "ENTRYPOINT" "ℹ️" "UI service is disabled, autostart not enabled"
 fi
 
+# Enable autorestart for API service if enabled
+if [ "${SERVICE_API}" = "yes" ]; then
+    export API_LISTEN_ADDR="${API_LISTEN_ADDR:-${LISTEN_ADDR:-0.0.0.0}}"
+    export API_LISTEN_PORT="${API_LISTEN_PORT:-${LISTEN_PORT:-8888}}"
+    sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/api.ini
+    log "ENTRYPOINT" "✅" "Enabled autorestart for API service"
+else
+    sed -i 's/autostart=true/autostart=false/' /etc/supervisor.d/api.ini
+    log "ENTRYPOINT" "ℹ️" "API service is disabled, autostart not enabled"
+fi
+
 # Enable autorestart for scheduler service if enabled
 if [ "${SERVICE_SCHEDULER}" = "yes" ]; then
 	sed -i 's/autorestart=false/autorestart=true/' /etc/supervisor.d/scheduler.ini
@@ -214,6 +228,7 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Processing required collections and parsers..."
 	install_or_upgrade_collection "crowdsecurity/nginx"
+	install_or_upgrade_collection "crowdsecurity/linux"
 
 	if [[ "${CROWDSEC_APPSEC_URL}" == http://127.0.0.1* || "${CROWDSEC_APPSEC_URL}" == http://localhost* ]]; then
 		install_or_upgrade_collection "crowdsecurity/appsec-virtual-patching"
@@ -224,7 +239,22 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	fi
 
 	install_or_upgrade_parser "crowdsecurity/geoip-enrich"
+	install_or_upgrade_parser "crowdsecurity/docker-logs"
+	install_or_upgrade_parser "crowdsecurity/cri-logs"
 	log "ENTRYPOINT" "✅" "[CROWDSEC] Required parsers and collections processed."
+
+	# Optionally disable specific parsers provided by user
+	if [ -n "${CROWDSEC_DISABLE_PARSERS}" ]; then
+		log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Disabling parsers: ${CROWDSEC_DISABLE_PARSERS}"
+		IFS=' ' read -ra PARSERS <<< "${CROWDSEC_DISABLE_PARSERS}"
+		for parser in "${PARSERS[@]}"; do
+			if cscli parsers remove "$parser" --force; then
+				log "ENTRYPOINT" "✅" "[CROWDSEC] Disabled parser: $parser"
+			else
+				log "ENTRYPOINT" "❌" "[CROWDSEC] Failed to disable parser: $parser"
+			fi
+		done
+	fi
 
 	if [ -n "${CROWDSEC_EXTRA_COLLECTIONS}" ]; then
 		log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Processing extra collections: ${CROWDSEC_EXTRA_COLLECTIONS}"

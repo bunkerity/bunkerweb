@@ -1,0 +1,14 @@
+{
+  "name": "moodle",
+  "kinds": ["docker", "autoconf"],
+  "timeout": 300,
+  "delay": 300,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "moodle",
+      "tls": "www.example.com"
+    }
+  ]
+}

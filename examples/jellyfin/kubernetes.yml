@@ -1,0 +1,73 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+    bunkerweb.io/www.example.com_USE_REVERSE_PROXY: "yes"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_URL: "/"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_HOST: "http://jellyfin.default.svc.cluster.local:8096"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_WS: "yes"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_BUFFERING: "no"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_SEND_TIMEOUT: "300s"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_READ_TIMEOUT: "300s"
+    bunkerweb.io/www.example.com_MAX_CLIENT_SIZE: "20m"
+    bunkerweb.io/www.example.com_LIMIT_REQ_RATE: "10r/s"
+    bunkerweb.io/www.example.com_USE_CLIENT_CACHE: "yes"
+    bunkerweb.io/www.example.com_USE_GZIP: "yes"
+    bunkerweb.io/www.example.com_COOKIE_FLAGS: "* SameSite=Lax"
+    bunkerweb.io/www.example.com_PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), battery=(), bluetooth=(), camera=(), clipboard-read=(), display-capture=(), document-domain=(), encrypted-media=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), payment=(), publickey-credentials-get=(), serial=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+    bunkerweb.io/www.example.com_CONTENT_SECURITY_POLICY: "default-src https: data: blob: ; img-src 'self' https://* ; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.youtube.com blob:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'self'; font-src 'self'"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_URL_1: "/socket"
+    bunkerweb.io/www.example.com_REVERSE_PROXY_HOST_1: "http://jellyfin.default.svc.cluster.local:8096"
+spec:
+  rules:
+    - host: www.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jellyfin
+                port:
+                  number: 8096
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  labels:
+    app: jellyfin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:10.10.7
+          env:
+            - name: JELLYFIN_PublishedServerUrl
+              value: "https://www.example.com"
+          ports:
+            - containerPort: 8096
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin
+spec:
+  selector:
+    app: jellyfin
+  ports:
+    - protocol: TCP
+      port: 8096
+      targetPort: 8096

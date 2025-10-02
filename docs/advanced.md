@@ -1,10 +1,10 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations) folder.
 
-This section only focuses on advanced usages and security tuning, see the [settings section](features.md) of the documentation to see all the available settings.
+This section only focuses on advanced usages and security tuning, see the [features section](features.md) of the documentation to see all the available settings.
 
 ## Use cases
 
@@ -37,7 +37,7 @@ The following settings can be used :
 - `REAL_IP_FROM` : list of trusted IP/network address allowed to send us the "real IP"
 - `REAL_IP_HEADER` : the HTTP header containing the real IP or special value `proxy_protocol` when using PROXY protocol
 
-You will find more settings about real IP in the [settings section](features.md#real-ip) of the documentation.
+You will find more settings about real IP in the [features section](features.md#real-ip) of the documentation.
 
 === "HTTP header"
 
@@ -87,7 +87,7 @@ You will find more settings about real IP in the [settings section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.4
+            bunkerity/bunkerweb-all-in-one:1.6.5
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -98,7 +98,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +106,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +123,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +131,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -170,7 +170,7 @@ You will find more settings about real IP in the [settings section](features.md#
     === "Swarm"
 
         !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
             **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
@@ -178,7 +178,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +186,7 @@ You will find more settings about real IP in the [settings section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ You will find more settings about real IP in the [settings section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.4
+            bunkerity/bunkerweb-all-in-one:1.6.5
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -262,7 +262,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +272,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +290,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +300,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -344,7 +344,7 @@ You will find more settings about real IP in the [settings section](features.md#
     === "Swarm"
 
         !!! warning "Deprecated"
-            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_3_2) instead.
+            The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
             **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
@@ -352,7 +352,7 @@ You will find more settings about real IP in the [settings section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.4
+          image: bunkerity/bunkerweb:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +362,7 @@ You will find more settings about real IP in the [settings section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.4
+          image: bunkerity/bunkerweb-scheduler:1.6.5
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -398,6 +398,8 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
 
     Navigate to the **Global config** page and set the DNS resolvers to `127.0.0.53`
 
+    <figure markdown>![DNS resolvers setting using web UI](assets/img/advanced-dns-resolvers.png){ align=center }<figcaption>DNS resolvers setting using web UI</figcaption></figure>
+
 === "Linux"
 
     You will need to modify the `/etc/bunkerweb/variables.env` file:
@@ -408,7 +410,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
     ...
     ```
 
-    After making this change, reload BunkerWeb to apply the configuration:
+    After making this change, reload the Scheduler to apply the configuration:
 
     ```shell
     sudo systemctl reload bunkerweb-scheduler
@@ -464,6 +466,8 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
 
         Navigate to the **Global config** page, select the **NGINX** plugin and set the DNS resolvers to `127.0.0.1`.
 
+        <figure markdown>![DNS resolvers setting using web UI](assets/img/advanced-dns-resolvers2.png){ align=center }<figcaption>DNS resolvers setting using web UI</figcaption></figure>
+
     === "Linux"
 
         You will need to modify the `/etc/bunkerweb/variables.env` file:
@@ -474,7 +478,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         ...
         ```
 
-        After making this change, reload BunkerWeb:
+        After making this change, reload the Scheduler:
 
         ```shell
         sudo systemctl reload bunkerweb-scheduler
@@ -510,7 +514,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
 === "Docker"
@@ -538,7 +542,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -549,7 +553,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -592,15 +596,15 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     <figure markdown>![Custom configurations using web UI](assets/img/advanced-config.png){ align=center }<figcaption>Custom configurations using web UI</figcaption></figure>
 
-    Don't forget to click on the save button.
+    Don't forget to click on the `💾 Save` button.
 
 === "Linux"
 
-    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the /etc/bunkerweb/configs folder.
+    When using the [Linux integration](integrations.md#linux), custom configurations must be written to the `/etc/bunkerweb/configs` folder.
 
     Here is an example for server-http/hello-world.conf :
 
-    ```conf
+    ```nginx
     location /hello {
       default_type 'text/plain';
       content_by_lua_block {
@@ -663,7 +667,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -678,12 +682,12 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     You can now write your configurations :
 
-    ```shell
+    ```nginx
     echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
 
@@ -703,7 +707,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
 === "Docker"
@@ -726,7 +730,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -734,7 +738,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
             default_type 'text/plain';
             content_by_lua_block {
               ngx.say('world')
-    	      }
+            }
           }
       ...
     ```
@@ -749,12 +753,12 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     You can now write your configurations :
 
-    ```shell
+    ```nginx
     echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
 
@@ -769,7 +773,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       volumes:
         - ./bw-data:/data
       ...
@@ -805,7 +809,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
             content_by_lua_block {
                 ngx.say('world')
             }
-    	    }
+          }
       ...
     ```
 
@@ -819,12 +823,12 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     You can now write your configurations :
 
-    ```shell
+    ```nginx
     echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
 
@@ -839,7 +843,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.4
+      image: bunkerity/bunkerweb-scheduler:1.6.5
       volumes:
         - ./bw-data:/data
       ...
@@ -864,19 +868,19 @@ Some integrations provide more convenient ways to apply configurations, such as 
     metadata:
       name: cfg-bunkerweb-all-server-http
       annotations:
-    	  bunkerweb.io/CONFIG_TYPE: "server-http"
+        bunkerweb.io/CONFIG_TYPE: "server-http"
     data:
       myconf: |
-    	location /hello {
-    		default_type 'text/plain';
-    		content_by_lua_block {
-    			ngx.say('world')
-    		}
-    	}
+      location /hello {
+        default_type 'text/plain';
+        content_by_lua_block {
+          ngx.say('world')
+        }
+      }
     ```
 
     !!! tip "Custom Extra Config"
-        Since the `1.6.0-rc3` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
+        Since the `1.6.0` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
 
         ```yaml
         apiVersion: v1
@@ -894,7 +898,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_5_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
@@ -909,12 +913,12 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     Here is the example :
 
-    ```shell
+    ```nginx
     echo "location /hello {
-    	default_type 'text/plain';
-    	content_by_lua_block {
-    		ngx.say('world')
-    	}
+      default_type 'text/plain';
+      content_by_lua_block {
+        ngx.say('world')
+      }
     }" | docker config create -l bunkerweb.CONFIG_TYPE=server-http my-config -
     ```
 
@@ -927,9 +931,9 @@ Some integrations provide more convenient ways to apply configurations, such as 
 !!! warning "CRS plugins"
     When the CRS is loaded globally, **CRS plugins are not supported**. If you need to use them, you will need to load the CRS per service.
 
-If you use BunkerWeb in production with a large number of services, and you enable the ModSecurity feature globally with CRS rules, the time required to load BunkerWeb configurations may become too long, potentially resulting in a timeout.
+If you use BunkerWeb in production with a large number of services, and you enable the **ModSecurity feature globally** with CRS rules, the time required to load BunkerWeb configurations may become too long, potentially resulting in a timeout.
 
-The workaround is to load the CRS rules globally rather than per service. This behavior is not enabled by default for backward compatibility reasons and because it has a drawback: if you enable global CRS rule loading, it will no longer be possible to define modsec-crs rules (executed before the CRS rules) on a per-service basis. However, this limitation can be bypassed by writing global `modsec-crs` exclusion rules like this:
+The workaround is to load the CRS rules globally rather than per service. This behavior is not enabled by default for backward compatibility reasons and because it has a drawback: if you enable global CRS rule loading, **it will no longer be possible to define modsec-crs rules** (executed before the CRS rules) on a per-service basis. However, this limitation can be bypassed by writing global `modsec-crs` exclusion rules like this:
 
 ```
 SecRule REQUEST_FILENAME "@rx ^/somewhere$" "nolog,phase:4,allow,id:1010,chain"
@@ -995,11 +999,11 @@ If you require more advanced settings, such as authentication, SSL/TLS support, 
 
 !!! example "Experimental feature"
 
-	This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+	  This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
 BunkerWeb offers the capability to function as a **generic UDP/TCP reverse proxy**, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX.
 
-It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [settings](features.md) sections of the documentation.
+It's important to note that **not all settings and security features are available when using the stream module**. Additional information on this can be found in the [features](features.md) sections of the documentation.
 
 Configuring a basic reverse proxy is quite similar to the HTTP setup, as it involves using the same settings: `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:9000`. Even when BunkerWeb is positioned behind a Load Balancer, the settings remain the same (with **PROXY protocol** being the supported option due to evident reasons).
 
@@ -1010,11 +1014,11 @@ On top of that, the following specific settings are used :
 - `LISTEN_STREAM_PORT_SSL=4343` : the listening "ssl/tls" port that BunkerWeb will listen on
 - `USE_UDP=no` : listen for and forward UDP packets instead of TCP
 
-For complete list of settings regarding `stream` mode, please refer to the [settings](features.md) section of the documentation.
+For complete list of settings regarding `stream` mode, please refer to the [features](features.md) section of the documentation.
 
 !!! tip "multiple listening ports"
 
-    Since the `1.6.0-rc2` version, BunkerWeb supports multiple listening ports for the `stream` mode. You can specify them using the `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` settings.
+    Since the `1.6.0` version, BunkerWeb supports multiple listening ports for the `stream` mode. You can specify them using the `LISTEN_STREAM_PORT` and `LISTEN_STREAM_PORT_SSL` settings.
 
     Here is an example :
 
@@ -1051,7 +1055,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1069,10 +1073,12 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     x-bw-api-env: &bw-api-env
       # We use an anchor to avoid repeating the same settings for all services
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      # Optional API token for authenticated API calls
+      API_TOKEN: ""
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1087,7 +1093,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1138,7 +1144,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1173,81 +1179,6 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
           - "bunkerweb.LISTEN_STREAM_PORT=20000"
-
-    networks:
-      bw-services:
-        external: true
-        name: bw-services
-    ```
-
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_4_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
-
-    ```yaml
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
-        ports:
-          # Keep it if you want to use Let's Encrypt automation when using http challenge type
-          - published: 80
-            target: 8080
-            mode: host
-            protocol: tcp
-          # app1
-          - published: 10000
-            target: 10000
-            mode: host
-            protocol: tcp
-          # app2
-          - published: 20000
-            target: 20000
-            mode: host
-            protocol: tcp
-    ...
-    ```
-
-    Once the stack is running, you can connect your existing applications to the `bw-services` network and configure BunkerWeb with labels :
-
-    ```yaml
-    services:
-
-      myapp1:
-        image: istio/tcp-echo-server:1.3
-        command: [ "9000", "app1" ]
-        networks:
-          - bw-services
-        deploy:
-          placement:
-            constraints:
-              - "node.role==worker"
-          labels:
-            - "bunkerweb.SERVER_NAME=app1.example.com"
-            - "bunkerweb.SERVER_TYPE=stream"
-            - "bunkerweb.USE_REVERSE_PROXY=yes"
-            - "bunkerweb.REVERSE_PROXY_HOST=myapp1:9000"
-            - "bunkerweb.LISTEN_STREAM_PORT=10000"
-
-      myapp2:
-        image: istio/tcp-echo-server:1.3
-        command: [ "9000", "app2" ]
-        networks:
-          - bw-services
-        deploy:
-          placement:
-            constraints:
-              - "node.role==worker"
-          labels:
-            - "bunkerweb.SERVER_NAME=app2.example.com"
-            - "bunkerweb.SERVER_TYPE=stream"
-            - "bunkerweb.USE_REVERSE_PROXY=yes"
-            - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
-            - "bunkerweb.LISTEN_STREAM_PORT=20000"
 
     networks:
       bw-services:
@@ -1431,10 +1362,85 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
     systemctl start bunkerweb-scheduler
     ```
 
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    Before running the [Swarm integration](integrations.md#swarm) stack on your machine, you will need to edit the ports :
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.5
+        ports:
+          # Keep it if you want to use Let's Encrypt automation when using http challenge type
+          - published: 80
+            target: 8080
+            mode: host
+            protocol: tcp
+          # app1
+          - published: 10000
+            target: 10000
+            mode: host
+            protocol: tcp
+          # app2
+          - published: 20000
+            target: 20000
+            mode: host
+            protocol: tcp
+    ...
+    ```
+
+    Once the stack is running, you can connect your existing applications to the `bw-services` network and configure BunkerWeb with labels :
+
+    ```yaml
+    services:
+
+      myapp1:
+        image: istio/tcp-echo-server:1.3
+        command: [ "9000", "app1" ]
+        networks:
+          - bw-services
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+            - "bunkerweb.SERVER_NAME=app1.example.com"
+            - "bunkerweb.SERVER_TYPE=stream"
+            - "bunkerweb.USE_REVERSE_PROXY=yes"
+            - "bunkerweb.REVERSE_PROXY_HOST=myapp1:9000"
+            - "bunkerweb.LISTEN_STREAM_PORT=10000"
+
+      myapp2:
+        image: istio/tcp-echo-server:1.3
+        command: [ "9000", "app2" ]
+        networks:
+          - bw-services
+        deploy:
+          placement:
+            constraints:
+              - "node.role==worker"
+          labels:
+            - "bunkerweb.SERVER_NAME=app2.example.com"
+            - "bunkerweb.SERVER_TYPE=stream"
+            - "bunkerweb.USE_REVERSE_PROXY=yes"
+            - "bunkerweb.REVERSE_PROXY_HOST=myapp2:9000"
+            - "bunkerweb.LISTEN_STREAM_PORT=20000"
+
+    networks:
+      bw-services:
+        external: true
+        name: bw-services
+    ```
+
 ### PHP
 
 !!! example "Experimental feature"
-	At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
+	  At the moment, PHP support with BunkerWeb is still in beta and we recommend you use a reverse-proxy architecture if you can. By the way, PHP is not supported at all for some integrations like Kubernetes.
 
 BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/manual/en/install.fpm.php) instances. We will assume that you are already familiar with managing that kind of services.
 
@@ -1498,7 +1504,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.4
+        bunkerity/bunkerweb-all-in-one:1.6.5
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1542,7 +1548,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1557,7 +1563,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1651,7 +1657,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1664,7 +1670,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1679,7 +1685,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1705,6 +1711,8 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -1781,125 +1789,10 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         name: bw-services
     ```
 
-=== "Swarm"
-
-    !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_6_2) instead.
-
-        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
-
-    !!! info "Multisite mode enabled"
-        The [Swarm integration](integrations.md#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
-
-    !!! info "Shared volume"
-        Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances which is not covered in this documentation.
-
-    When using the [Docker autoconf integration](integrations.md#docker-autoconf), to support PHP applications, you will need to :
-
-    - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
-    - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
-    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
-
-    Since the Swarm integration implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
-
-    ```
-    www
-    ├── app1.example.com
-    │   └── index.php
-    ├── app2.example.com
-    │   └── index.php
-    └── app3.example.com
-        └── index.php
-
-    3 directories, 3 files
-    ```
-
-    As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
-
-    Once the folders are created, copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
-
-    ```shell
-    chown -R 33:101 /shared/www && \
-    find /shared/www -type f -exec chmod 0640 {} \; && \
-    find /shared/www -type d -exec chmod 0750 {} \;
-    ```
-
-	  When you start the BunkerWeb stack, mount the `/shared/www` folder into `/var/www/html` for the **Scheduler** container :
-
-    ```yaml
-    services:
-      bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
-        volumes:
-          - /shared/www:/var/www/html
-    ...
-    ```
-
-    You can now create your PHP-FPM services, mount the correct subfolders and use labels to configure BunkerWeb :
-
-    ```yaml
-    services:
-      myapp1:
-          image: php:fpm
-          volumes:
-            - ./www/app1.example.com:/app
-          networks:
-            bw-services:
-                aliases:
-                  - myapp1
-          deploy:
-            placement:
-              constraints:
-                - "node.role==worker"
-            labels:
-              - "bunkerweb.SERVER_NAME=app1.example.com"
-              - "bunkerweb.REMOTE_PHP=myapp1"
-              - "bunkerweb.REMOTE_PHP_PATH=/app"
-
-      myapp2:
-          image: php:fpm
-          volumes:
-            - ./www/app2.example.com:/app
-          networks:
-            bw-services:
-                aliases:
-                  - myapp2
-          deploy:
-            placement:
-              constraints:
-                - "node.role==worker"
-            labels:
-              - "bunkerweb.SERVER_NAME=app2.example.com"
-              - "bunkerweb.REMOTE_PHP=myapp2"
-              - "bunkerweb.REMOTE_PHP_PATH=/app"
-
-      myapp3:
-          image: php:fpm
-          volumes:
-            - ./www/app3.example.com:/app
-          networks:
-            bw-services:
-                aliases:
-                  - myapp3
-          deploy:
-            placement:
-              constraints:
-                - "node.role==worker"
-            labels:
-              - "bunkerweb.SERVER_NAME=app3.example.com"
-              - "bunkerweb.REMOTE_PHP=myapp3"
-              - "bunkerweb.REMOTE_PHP_PATH=/app"
-
-    networks:
-      bw-services:
-        external: true
-        name: bw-services
-    ```
-
 === "Kubernetes"
 
-	!!! warning "PHP is not supported for Kubernetes"
-		Kubernetes integration allows configuration through [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) and the BunkerWeb controller only supports HTTP applications at the moment.
+    !!! warning "PHP is not supported for Kubernetes"
+        Kubernetes integration allows configuration through [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) and the BunkerWeb controller only supports HTTP applications at the moment.
 
 === "Linux"
 
@@ -1984,6 +1877,121 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     systemctl start bunkerweb-scheduler
     ```
 
+=== "Swarm"
+
+    !!! warning "Deprecated"
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
+
+        **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
+
+    !!! info "Multisite mode enabled"
+        The [Swarm integration](integrations.md#docker-autoconf) integration implies the use of multisite mode : protecting one PHP application is the same as protecting multiple ones.
+
+    !!! info "Shared volume"
+        Using PHP with the Docker Swarm integration needs a shared volume between all BunkerWeb and PHP-FPM instances which is not covered in this documentation.
+
+    When using the [Swarm](integrations.md#swarm), to support PHP applications, you will need to :
+
+    - Mount your PHP files into the `/var/www/html` folder of BunkerWeb
+    - Set up a PHP-FPM containers for your applications and mount the folder containing PHP apps
+    - Use the specific settings `REMOTE_PHP` and `REMOTE_PHP_PATH` as labels for your PHP-FPM container
+
+    Since the Swarm integration implies using the [multisite mode](concepts.md#multisite-mode), you will need to create separate directories for each of your applications. Each subdirectory should be named using the first value of `SERVER_NAME`. Here is a dummy example :
+
+    ```
+    www
+    ├── app1.example.com
+    │   └── index.php
+    ├── app2.example.com
+    │   └── index.php
+    └── app3.example.com
+        └── index.php
+
+    3 directories, 3 files
+    ```
+
+    As an example, we will consider that you have a shared folder mounted on your worker nodes on the `/shared` endpoint.
+
+    Once the folders are created, copy your files and fix the permissions so BunkerWeb (UID/GID 101) can at least read files and list folders and PHP-FPM (UID/GID 33 if you use the `php:fpm` image) is the owner of the files and folders :
+
+    ```shell
+    chown -R 33:101 /shared/www && \
+    find /shared/www -type f -exec chmod 0640 {} \; && \
+    find /shared/www -type d -exec chmod 0750 {} \;
+    ```
+
+    When you start the BunkerWeb stack, mount the `/shared/www` folder into `/var/www/html` for the **Scheduler** container :
+
+    ```yaml
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.6.5
+        volumes:
+          - /shared/www:/var/www/html
+    ...
+    ```
+
+    You can now create your PHP-FPM services, mount the correct subfolders and use labels to configure BunkerWeb :
+
+    ```yaml
+    services:
+      myapp1:
+          image: php:fpm
+          volumes:
+            - ./www/app1.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp1
+          deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
+            labels:
+              - "bunkerweb.SERVER_NAME=app1.example.com"
+              - "bunkerweb.REMOTE_PHP=myapp1"
+              - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+      myapp2:
+          image: php:fpm
+          volumes:
+            - ./www/app2.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp2
+          deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
+            labels:
+              - "bunkerweb.SERVER_NAME=app2.example.com"
+              - "bunkerweb.REMOTE_PHP=myapp2"
+              - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+      myapp3:
+          image: php:fpm
+          volumes:
+            - ./www/app3.example.com:/app
+          networks:
+            bw-services:
+                aliases:
+                  - myapp3
+          deploy:
+            placement:
+              constraints:
+                - "node.role==worker"
+            labels:
+              - "bunkerweb.SERVER_NAME=app3.example.com"
+              - "bunkerweb.REMOTE_PHP=myapp3"
+              - "bunkerweb.REMOTE_PHP_PATH=/app"
+
+    networks:
+      bw-services:
+        external: true
+        name: bw-services
+    ```
+
 ### IPv6
 
 !!! example "Experimental feature"
@@ -2016,7 +2024,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           USE_IPv6: "yes"
 
@@ -2062,12 +2070,58 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     systemctl start bunkerweb
     ```
 
+### Docker logging best practices
+
+When using Docker, it's important to manage container logs to prevent them from consuming excessive disk space. By default, Docker uses the `json-file` logging driver, which can lead to very large log files if left unconfigured.
+
+To avoid this, you can configure log rotation. This can be done for specific services in your `docker-compose.yml` file, or globally for the Docker daemon.
+
+**Per-service configuration**
+
+You can configure the logging driver for your services in your `docker-compose.yml` file to automatically rotate the logs. Here is an example that keeps up to 10 log files of 20MB each:
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    ...
+```
+
+This configuration ensures that logs are rotated, preventing them from filling up your disk. You can apply this to any service in your Docker Compose setup.
+
+**Global configuration (daemon.json)**
+
+If you want to apply these logging settings to all containers on the host by default, you can configure the Docker daemon by editing (or creating) the `/etc/docker/daemon.json` file:
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "10"
+  }
+}
+```
+
+After modifying `daemon.json`, you need to restart the Docker daemon for the changes to take effect:
+
+```shell
+sudo systemctl restart docker
+```
+
+This global configuration will be inherited by all containers. However, any logging configuration defined on a per-service basis in a `docker-compose.yml` file will override the global settings in `daemon.json`.
+
 ## Security tuning
 
-BunkerWeb offers many security features that you can configure with [settings](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
+BunkerWeb offers many security features that you can configure with [features](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
-!!! tip "Other settings"
-    This section only focuses on security tuning, see the [settings section](features.md) of the documentation for other settings.
+!!! tip "Other features"
+    This section only focuses on security tuning, see the [features](features.md) section of the documentation for other settings.
 
 <figure markdown>
   ![Overview](assets/img/core-order.svg){ align=center }
@@ -2187,7 +2241,7 @@ The Backup S3 tool seamlessly automates data protection, similar to the communit
 
 By activating this feature, you're proactively safeguarding your **data's integrity**. Storing backups **remotely** shields crucial information from threats like **hardware failures**, **cyberattacks**, or **natural disasters**. This ensures both **security** and **availability**, enabling swift recovery during **unexpected events**, preserving **operational continuity**, and ensuring **peace of mind**.
 
-!!! warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
+??? warning "Information for Red Hat Enterprise Linux (RHEL) 8.9 users"
     If you are using **RHEL 8.9** and plan on using an **external database**, you will need to install the `mysql-community-client` package to ensure the `mysqldump` command is available. You can install the package by executing the following commands:
 
     === "MySQL/MariaDB"
@@ -2519,11 +2573,15 @@ With this plugin, administrators can effortlessly create, update, and disable us
 
 #### Features
 
-- **User Account Operations:** Create, edit, and delete user accounts with ease.
+- **User Account Operations:** Import in CSV/XSLX format, Create, edit, and delete user accounts with ease.
 - **Role-Based Access Control:** Assign and modify user roles to manage permissions and access levels.
 - **2FA Management:** Disable two-factor authentication based on administrative decisions.
 - **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
 - **Audit Logging:** Maintain an audit trail for all user management actions for enhanced security and compliance.
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
 
 <figure markdown>
   ![Overview](assets/img/user-manager.png){ align=center }
@@ -2539,3 +2597,54 @@ With this plugin, administrators can effortlessly create, update, and disable us
   ![Activities page](assets/img/user-manager-activities.png){ align=center }
   <figcaption>User Manager - Activities page</figcaption>
 </figure>
+
+## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+The Easy Resolve Plugin lets you quickly remediate false positives and recurring issues directly from the Reports page. It turns guided "Resolve" actions into safe, scoped configuration updates—without manual editing.
+
+#### Features
+
+- One‑click actions from Reports and report details.
+- Context‑aware suggestions for ModSecurity, blacklist, and DNSBL.
+- Generates safe ModSecurity exclusions or updates ignore lists.
+- Applies changes at service or global scope with permission checks.
+- Optional auto‑open of the related configuration page after apply.
+
+<figure markdown>
+  ![Overview](assets/img/easy-resolve.png){ align=center }
+  <figcaption>Reports page - with Easy Resolve</figcaption>
+</figure>
+
+<div class="grid grid-2" markdown>
+<figure markdown>
+  ![ModSecurity resolve](assets/img/easy-resolve-modsecurity.png){ width="100%" }
+  <figcaption>ModSecurity resolve</figcaption>
+</figure>
+<figure markdown>
+  ![DNSBL resolve](assets/img/easy-resolve-dnsbl.png){ width="100%" }
+  <figcaption>DNSBL resolve</figcaption>
+</figure>
+</div>
+
+<div class="grid grid-5" markdown>
+<figure markdown>
+  ![Blacklist resolve - IP](assets/img/easy-resolve-blacklist-ip.png){ width="100%" }
+  <figcaption>Blacklist - IP</figcaption>
+</figure>
+<figure markdown>
+  ![Blacklist resolve - User‑Agent](assets/img/easy-resolve-blacklist-ua.png){ width="100%" }
+  <figcaption>Blacklist - User‑Agent</figcaption>
+</figure>
+<figure markdown>
+  ![Blacklist resolve - rDNS](assets/img/easy-resolve-blacklist-rdns.png){ width="100%" }
+  <figcaption>Blacklist - rDNS</figcaption>
+</figure>
+<figure markdown>
+  ![Blacklist resolve - ASN](assets/img/easy-resolve-blacklist-asn.png){ width="100%" }
+  <figcaption>Blacklist - ASN</figcaption>
+</figure>
+<figure markdown>
+  ![Blacklist resolve - URI](assets/img/easy-resolve-blacklist-uri.png){ width="100%" }
+  <figcaption>Blacklist - URI</figcaption>
+</figure>
+</div>

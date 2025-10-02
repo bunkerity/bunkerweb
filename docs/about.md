@@ -44,7 +44,7 @@ Please don't use [GitHub issues](https://github.com/bunkerity/bunkerweb/issues) 
 Here is a non-exhaustive list of what you can do:
 
 - Join the [Discord server](https://discord.com/invite/fTf46FmtyD), [/r/BunkerWeb](https://www.reddit.com/r/BunkerWeb) subreddit and [GitHub discussions](https://github.com/bunkerity/bunkerweb/discussions) to talk about the project and help others
-- Follow us on [LinkedIn](https://www.linkedin.com/company/bunkerity/), [Twitter](https://twitter.com/bunkerity) and [GitHub](https://github.com/bunkerity)
+- Follow us on [LinkedIn](https://www.linkedin.com/company/bunkerity/), [X (Formerly Twitter)](https://x.com/bunkerity) and [GitHub](https://github.com/bunkerity)
 - Report bugs and propose new features using [issues](https://github.com/bunkerity/bunkerweb/issues)
 - Contribute to the code using [pull requests](https://github.com/bunkerity/bunkerweb/pulls)
 - Write an awesome [plugin](plugins.md)

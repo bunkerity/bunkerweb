@@ -1,4 +1,5 @@
 local class = require "middleclass"
+local ipmatcher = require "resty.ipmatcher"
 local plugin = require "bunkerweb.plugin"
 local resolver = require "resty.dns.resolver"
 local utils = require "bunkerweb.utils"
@@ -7,7 +8,9 @@ local dnsbl = class("dnsbl", plugin)
 
 local ngx = ngx
 local ERR = ngx.ERR
+local INFO = ngx.INFO
 local NOTICE = ngx.NOTICE
+local get_phase = ngx.get_phase
 local spawn = ngx.thread.spawn
 local wait = ngx.thread.wait
 local arpa_str = resolver.arpa_str
@@ -15,6 +18,9 @@ local get_ips = utils.get_ips
 local has_variable = utils.has_variable
 local get_deny_status = utils.get_deny_status
 local kill_all_threads = utils.kill_all_threads
+local deduplicate_list = utils.deduplicate_list
+local get_variable = utils.get_variable
+local ipmatcher_new = ipmatcher.new
 
 local is_in_dnsbl = function(addr, server)
 	local request = arpa_str(addr):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "") .. "." .. server
@@ -33,6 +39,95 @@ end
 function dnsbl:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "dnsbl", ctx)
+	-- Decode ignore lists during request phases when needed
+	local phase = get_phase()
+	if phase ~= "init" and phase ~= "timer" and self:is_needed() then
+		-- Load pre-downloaded lists from datastore if available
+		local datastore_lists, err = self.datastore:get("plugin_dnsbl_lists_" .. self.ctx.bw.server_name, true)
+		if not datastore_lists then
+			self.logger:log(ERR, err)
+			self.lists = {}
+		else
+			self.lists = datastore_lists
+		end
+		-- Ensure kinds and merge with variable values
+		local kinds = { ["IGNORE_IP"] = {} }
+		for kind, _ in pairs(kinds) do
+			if not self.lists[kind] then
+				self.lists[kind] = {}
+			end
+			for data in (self.variables["DNSBL_" .. kind] or ""):gmatch("%S+") do
+				if data ~= "" then
+					table.insert(self.lists[kind], data)
+				end
+			end
+			self.lists[kind] = deduplicate_list(self.lists[kind])
+		end
+	end
+end
+
+function dnsbl:is_needed()
+	-- Loading case
+	if self.is_loading then
+		return false
+	end
+	-- Request phases (no default)
+	if self.is_request and (self.ctx.bw.server_name ~= "_") then
+		return self.variables["USE_DNSBL"] == "yes"
+	end
+	-- Other cases : at least one service uses it
+	local is_needed, err = has_variable("USE_DNSBL", "yes")
+	if is_needed == nil then
+		self.logger:log(ERR, "can't check USE_DNSBL variable : " .. err)
+	end
+	return is_needed
+end
+
+function dnsbl:init()
+	-- Check if init is needed
+	if not self:is_needed() then
+		return self:ret(true, "init not needed")
+	end
+
+	-- Only IGNORE_IP is supported for now
+	local lists = { ["IGNORE_IP"] = {} }
+
+	local server_name, err = get_variable("SERVER_NAME", false)
+	if not server_name then
+		return self:ret(false, "can't get SERVER_NAME variable : " .. err)
+	end
+
+	-- Iterate over each server and load cache files
+	local i = 0
+	for key in server_name:gmatch("%S+") do
+		for kind, _ in pairs(lists) do
+			local file_path = "/var/cache/bunkerweb/dnsbl/" .. key .. "/" .. kind .. ".list"
+			local f = io.open(file_path, "r")
+			if f then
+				for line in f:lines() do
+					if line ~= "" then
+						table.insert(lists[kind], line)
+						i = i + 1
+					end
+				end
+				f:close()
+			end
+			lists[kind] = deduplicate_list(lists[kind])
+		end
+
+		-- Store service-specific lists into datastore
+		local ok
+		ok, err = self.datastore:set("plugin_dnsbl_lists_" .. key, lists, nil, true)
+		if not ok then
+			return self:ret(false, "can't store dnsbl " .. key .. " lists into datastore : " .. err)
+		end
+
+		self.logger:log(INFO, "successfully loaded " .. tostring(i) .. " IGNORE_IP entries for the service: " .. key)
+
+		i = 0
+		lists = { ["IGNORE_IP"] = {} }
+	end
+	return self:ret(true, "successfully loaded DNSBL IGNORE_IP lists")
 end
 
 function dnsbl:init_worker()
@@ -83,6 +178,27 @@ function dnsbl:access()
 	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "client IP is not global, skipping DNSBL check")
 	end
+
+	-- Ignore specific IPs/networks if configured
+	if self.lists and self.lists["IGNORE_IP"] and #self.lists["IGNORE_IP"] > 0 then
+		local ipm, err = ipmatcher_new(self.lists["IGNORE_IP"])
+		if not ipm then
+			self.logger:log(ERR, "error while building DNSBL ignore matcher: " .. err)
+		else
+			local match, merr = ipm:match(self.ctx.bw.remote_addr)
+			if merr then
+				self.logger:log(ERR, "error while matching DNSBL ignore list: " .. merr)
+			elseif match then
+				-- Cache as OK to avoid repeated checks
+				local ok_cache, err_cache = self:add_to_cache(self.ctx.bw.remote_addr, "ok")
+				if not ok_cache then
+					self.logger:log(ERR, "error while adding element to cache : " .. err_cache)
+				end
+				return self:ret(true, "client IP " .. self.ctx.bw.remote_addr .. " is ignored for DNSBL checks")
+			end
+		end
+	end
+
 	-- Check if IP is in cache
 	local ok, cached = self:is_in_cache(self.ctx.bw.remote_addr)
 	if not ok then

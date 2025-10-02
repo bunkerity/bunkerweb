@@ -70,8 +70,8 @@ try:
         LOGGER.warning("Not sending BunkerNet data because instance is not registered")
         sys_exit(2)
 
-    # Create API instances for each database instance
-    apis = [API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in JOB.db.get_instances()]
+    # Create API instances for each database instance (HTTPS-aware)
+    apis = [API.from_instance(instance) for instance in JOB.db.get_instances()]
 
     apiCaller = ApiCaller(apis)
 

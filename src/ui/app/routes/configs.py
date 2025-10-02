@@ -303,6 +303,14 @@ def configs_edit(service: str, config_type: str, name: str):
         if not match(r"^[\w_-]{1,64}$", new_name):
             return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
 
+        # Forbid renaming template-based configs (content can still be edited)
+        if db_config.get("template") and new_name != name:
+            return handle_error(
+                "Renaming a template-based custom config is not allowed.",
+                "configs",
+                True,
+            )
+
         verify_data_in_form(
             data={"value": None},
             err_message="Missing value parameter on /configs/new.",

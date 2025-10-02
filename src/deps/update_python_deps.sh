@@ -40,7 +40,7 @@ pip install --no-cache-dir --require-hashes -r requirements-deps.txt
 
 echo "Updating python requirements files"
 
-files=("requirements.in" "../autoconf/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in")
+files=("requirements.in" "../api/requirements.in" "../autoconf/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in")
 
 shopt -s globstar
 for file in ../{common,../{docs,misc}}/**/requirements*.in

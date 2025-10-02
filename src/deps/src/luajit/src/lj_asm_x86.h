@@ -2084,7 +2084,8 @@ static void asm_intarith(ASMState *as, IRIns *ir, x86Arith xa)
   RegSet allow = RSET_GPR;
   Reg dest, right;
   int32_t k = 0;
-  if (as->flagmcp == as->mcp) {  /* Drop test r,r instruction. */
+  if (as->flagmcp == as->mcp && xa != XOg_X_IMUL) {
+    /* Drop test r,r instruction. */
     MCode *p = as->mcp + ((LJ_64 && *as->mcp < XI_TESTb) ? 3 : 2);
     MCode *q = p[0] == 0x0f ? p+1 : p;
     if ((*q & 15) < 14) {

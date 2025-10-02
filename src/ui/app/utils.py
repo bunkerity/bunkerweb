@@ -6,6 +6,7 @@ from os.path import sep
 from pathlib import Path
 from string import printable
 from subprocess import PIPE, Popen, call
+from time import sleep
 from typing import Dict, Optional, Set, Union
 from urllib.parse import unquote
 
@@ -75,23 +76,35 @@ COLUMNS_PREFERENCES_DEFAULTS = {
         "8": True,
     },
     "reports": {
-        "2": True,
         "3": True,
         "4": True,
-        "5": False,
-        "6": True,
-        "7": False,
+        "5": True,
+        "6": False,
+        "7": True,
         "8": False,
-        "9": True,
+        "9": False,
         "10": True,
         "11": True,
         "12": True,
+        "13": True,
+        "14": True,
     },
     "services": {
         "3": True,
         "4": True,
         "5": True,
         "6": True,
+        "7": True,
+    },
+    "templates": {
+        "3": False,
+        "4": True,
+        "5": True,
+        "6": True,
+        "7": True,
+        "8": True,
+        "9": True,
+        "10": True,
     },
 }
 
@@ -127,6 +140,17 @@ def stop(status, _stop: bool = True):
             pid, _ = p.communicate()
         call(["kill", "-SIGTERM", pid.strip().decode().split("\n")[0]])
     _exit(status)
+
+
+def restart_workers():
+    sleep(3)
+    pid_file = Path(sep, "var", "run", "bunkerweb", "ui.pid")
+    if pid_file.is_file():
+        pid = pid_file.read_bytes()
+    else:
+        p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+        pid, _ = p.communicate()
+    call(["kill", "-HUP", pid.strip().decode().split("\n")[0]])
 
 
 def handle_stop(signum, frame):

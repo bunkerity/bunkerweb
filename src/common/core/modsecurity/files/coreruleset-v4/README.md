@@ -12,9 +12,9 @@
 
 The OWASP CRS is a set of generic attack detection rules for use with ModSecurity or compatible web application firewalls. The CRS aims to protect web applications from a wide range of attacks, including the OWASP Top Ten, with a minimum of false alerts.
 
-## CRS Resources
+## CRS Resources, Related Projects and Tools
 
-Please see the [OWASP CRS page](https://coreruleset.org/) to get introduced to CRS and view resources on installation, configuration, and working with CRS.
+Please see the [OWASP CRS page](https://coreruleset.org/) to get introduced to CRS and view resources on installation, configuration, and working with CRS. There you can also find a [list of projects related to CRS](https://coreruleset.org/) and a [list of tools](https://coreruleset.org/docs/6-development/6-6-useful_tools/) for both developers and users.
 
 ## Contributing to CRS
 

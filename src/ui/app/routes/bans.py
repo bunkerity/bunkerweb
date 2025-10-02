@@ -130,7 +130,13 @@ def bans_fetch():
     start = int(request.form.get("start", 0))
     length = int(request.form.get("length", 10))
     search_value = request.form.get("search[value]", "").lower()
-    order_column_index = int(request.form.get("order[0][column]", 0)) - 1
+    # DataTables includes two leading non-data columns (details-control and select)
+    # Adjust incoming index to align with backend data columns
+    try:
+        order_column_index_dt = int(request.form.get("order[0][column]", 0))
+    except Exception:
+        order_column_index_dt = 0
+    order_column_index = max(order_column_index_dt - 2, 0)
     order_direction = request.form.get("order[0][dir]", "desc")
     search_panes = defaultdict(list)
     for key, value in request.form.items():
@@ -253,6 +259,16 @@ def bans_fetch():
         return any(search_value in str(ban.get(col, "")).lower() for col in columns)
 
     # Sort bans
+    def _to_float(value, default=0.0):
+        try:
+            if isinstance(value, (int, float)):
+                return float(value)
+            if value is None:
+                return float(default)
+            return float(str(value))
+        except Exception:
+            return float(default)
+
     def sort_bans(bans):
         if 0 <= order_column_index < len(columns):
             sort_key = columns[order_column_index]
@@ -264,6 +280,8 @@ def bans_fetch():
                     key=lambda x: ("0" if order_direction == "desc" else "z") if x.get("permanent", False) else x.get(sort_key, ""),
                     reverse=(order_direction == "desc"),
                 )
+            elif sort_key == "date":
+                bans.sort(key=lambda x: _to_float(x.get("date", 0.0), 0.0), reverse=(order_direction == "desc"))
             else:
                 bans.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
 
@@ -337,11 +355,18 @@ def bans_fetch():
     # Special handling for country searchpane options
     search_panes_options["country"] = []
     for code, counts in pane_counts["country"].items():
-        country_code = str(code).lower()
+        str_code = str(code)
+        country_code = str_code.lower()
+        is_unknown = str_code in ("unknown", "local", "n/a")
+        flag_code = "zz" if is_unknown else country_code
+        # Show both the alpha-2 code and the translated country name so users can search by either
+        code_text = "N/A" if is_unknown else str_code.upper()
+        i18n_key = "not_applicable" if str_code in ("unknown", "local") else str_code.upper()
+        fallback_name = "N/A" if is_unknown else str_code
         search_panes_options["country"].append(
             {
-                "label": f'<img src="{base_flags_url}/{"zz" if code in ("unknown", "local", "n/a")  else country_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span data-i18n="country.{"not_applicable" if code in ("unknown", "local") else str(code).upper()}">{"N/A" if code in ("unknown", "local") else code}</span>',
-                "value": code,
+                "label": f'<img src="{base_flags_url}/{flag_code}.svg" class="border border-1 p-0 me-1" height="17" />&nbsp;－&nbsp;<span class="me-1"><code>{code_text}</code></span><span data-i18n="country.{i18n_key}">{fallback_name}</span>',
+                "value": str_code,
                 "total": counts["total"],
                 "count": counts["count"],
             }

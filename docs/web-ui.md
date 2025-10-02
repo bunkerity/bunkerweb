@@ -111,10 +111,12 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
     x-bw-env: &bw-env
       # We anchor the environment variables to avoid duplication
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      # Optional API token when securing API access
+      API_TOKEN: ""
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -132,7 +134,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -160,7 +162,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.4
+        image: bunkerity/bunkerweb-ui:1.6.5
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
           ADMIN_USERNAME: "changeme"
@@ -180,6 +182,8 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -192,8 +196,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
           - bw-db
 
       bw-syslog:
-        image: balabit/syslog-ng:4.8.0
-        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        image: balabit/syslog-ng:4.9.0
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts
@@ -239,7 +242,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -258,7 +261,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-ui-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -278,7 +281,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -297,7 +300,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
             syslog-address: "udp://10.20.30.254:514" # This is the syslog-ng container address
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.4
+        image: bunkerity/bunkerweb-ui:1.6.5
         environment:
           <<: *bw-ui-env
           ADMIN_USERNAME: "changeme"
@@ -323,6 +326,8 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -346,8 +351,7 @@ To keep the logs accessible from the web UI, we recommend that you use a syslog 
           - bw-docker
 
       bw-syslog:
-        image: balabit/syslog-ng:4.8.0
-        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        image: balabit/syslog-ng:4.9.0
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts
@@ -445,7 +449,7 @@ You can update your username or password by filling the dedicated forms in the *
 Please note that when your username or password is updated, you will be logout from the web UI to log in again.
 
 <figure markdown>
-  ![Overview](assets/img/profile-username-password.png){ align=center, width="650" }
+  ![Overview](assets/img/profile-username-password.png){ align=center }
   <figcaption>Username / Password form</figcaption>
 </figure>
 
@@ -494,7 +498,7 @@ The following steps are needed to enable the TOTP feature from the web UI:
 You can enable or disable 2FA and also refresh recovery codes in the **Security** tab:
 
 <figure markdown>
-  ![Overview](assets/img/profile-totp.png){ align=center, width="800" }
+  ![Overview](assets/img/profile-totp.png){ align=center }
   <figcaption>TOTP enable / disable / refresh recovery codes forms</figcaption>
 </figure>
 
@@ -510,7 +514,7 @@ After a successful login/password combination, you will be prompted to enter you
 In the **Session** tab, you will be able to list and revoke current sessions:
 
 <figure markdown>
-  ![Overview](assets/img/sessions.png){ align=center, width="800" }
+  ![Overview](assets/img/sessions.png){ align=center }
   <figcaption>Manage sessions</figcaption>
 </figure>
 
@@ -527,8 +531,8 @@ The web UI can be deployed and configured without going through the setup wizard
     - `ADMIN_PASSWORD`: password to access the web UI.
     - `FLASK_SECRET`: a secret key used to encrypt the session cookie (if not set, a random key will be generated).
     - `TOTP_ENCRYPTION_KEYS` (or `TOTP_SECRETS`): a list of TOTP encryption keys separated by spaces or a dictionary (e.g.: `{"1": "mysecretkey"}` or `mysecretkey` or `mysecretkey mysecretkey1`). **We strongly recommend you to set this variable if you want to use 2FA, as it will be used to encrypt the TOTP secret keys** (if not set, a random number of secret keys will be generated). Check out the [passlib documentation](https://passlib.readthedocs.io/en/stable/narr/totp-tutorial.html#application-secrets) for more information.
-    - `LISTEN_ADDR`: the address where the web UI will listen (default is `0.0.0.0` in **Docker images** and `127.0.0.1` on **Linux installations**).
-    - `LISTEN_PORT`: the port where the web UI will listen (default is `7000`).
+    - `UI_LISTEN_ADDR` (preferred): the address where the web UI will listen (default is `0.0.0.0` in **Docker images** and `127.0.0.1` on **Linux installations**). Falls back to `LISTEN_ADDR` if not set.
+    - `UI_LISTEN_PORT` (preferred): the port where the web UI will listen (default is `7000`). Falls back to `LISTEN_PORT` if not set.
     - `MAX_WORKERS`: the number of workers used by the web UI (default is the number of CPUs).
     - `MAX_THREADS`: the number of threads used by the web UI (default is `MAX_WORKERS` * 2).
     - `FORWARDED_ALLOW_IPS`: a list of IP addresses or networks that are allowed to be used in the `X-Forwarded-For` header (default is `*` in **Docker images** and `127.0.0.1` on **Linux installations**).
@@ -625,7 +629,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -636,25 +640,27 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
           - "443:8443/udp" # For QUIC / HTTP3 support
         environment:
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+          API_TOKEN: "" # Mirror API_TOKEN if you use it
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
           SERVER_NAME: "www.example.com"
           MULTISITE: "yes"
           API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # We mirror the API_WHITELIST_IP from the bunkerweb service
+          API_TOKEN: "" # Mirror API_TOKEN if you use it
           SERVE_FILES: "no"
           DISABLE_DEFAULT_SERVER: "yes"
           USE_CLIENT_CACHE: "yes"
@@ -670,7 +676,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.4
+        image: bunkerity/bunkerweb-ui:1.6.5
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -682,6 +688,8 @@ The web UI can be deployed and configured without going through the setup wizard
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -733,7 +741,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -745,7 +753,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -760,7 +768,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -774,7 +782,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         depends_on:
           - bw-docker
         environment:
@@ -797,6 +805,8 @@ The web UI can be deployed and configured without going through the setup wizard
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -808,7 +818,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.4
+        image: bunkerity/bunkerweb-ui:1.6.5
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -851,7 +861,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations) of the repository.
 
     Here is the corresponding part of your values.yaml file that you can use:
 
@@ -897,7 +907,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data):
 
@@ -909,7 +919,7 @@ The web UI can be deployed and configured without going through the setup wizard
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - published: 80
             target: 8080
@@ -938,7 +948,7 @@ The web UI can be deployed and configured without going through the setup wizard
             - "bunkerweb.INSTANCE=yes"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *ui-env
           BUNKERWEB_INSTANCES: ""
@@ -954,7 +964,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.4
+        image: bunkerity/bunkerweb-autoconf:1.6.5
         environment:
           <<: *ui-env
           DOCKER_HOST: "tcp://bw-docker:2375"
@@ -983,6 +993,8 @@ The web UI can be deployed and configured without going through the setup wizard
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -999,7 +1011,7 @@ The web UI can be deployed and configured without going through the setup wizard
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.6.4
+        image: bunkerity/bunkerweb-ui:1.6.5
         environment:
           <<: *ui-env
           ADMIN_USERNAME: "changeme"
@@ -1059,7 +1071,7 @@ The BunkerWeb UI supports multiple languages. Translations are managed in the `s
 - German (de)
 - Italian (it)
 
-See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.4/src/ui/app/static/locales/README.md) for details on translation provenance and review status.
+See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.5/src/ui/app/static/locales/README.md) for details on translation provenance and review status.
 
 ### Contributing Translations
 
@@ -1075,4 +1087,4 @@ We welcome contributions to improve or add new locale files!
 
 For updates, edit the relevant file and update the provenance table as needed.
 
-See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.4/src/ui/app/static/locales/README.md) for full guidelines.
+See the [locales/README.md](https://github.com/bunkerity/bunkerweb/raw/v1.6.5/src/ui/app/static/locales/README.md) for full guidelines.

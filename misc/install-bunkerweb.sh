@@ -13,7 +13,10 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default values
-BUNKERWEB_VERSION="1.6.4"
+# Hardcoded default version (immutable reference)
+DEFAULT_BUNKERWEB_VERSION="1.6.5"
+# Mutable effective version (can be overridden by --version)
+BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
 ENABLE_WIZARD=""
 FORCE_INSTALL="no"
@@ -22,6 +25,9 @@ CROWDSEC_INSTALL="no"
 CROWDSEC_APPSEC_INSTALL="no"
 INSTALL_TYPE=""
 BUNKERWEB_INSTANCES_INPUT=""
+UPGRADE_SCENARIO="no"
+BACKUP_DIRECTORY=""
+AUTO_BACKUP="yes"
 
 # Function to print colored output
 print_status() {
@@ -205,6 +211,27 @@ ask_user_preferences() {
         else
             # CrowdSec not applicable for worker, scheduler-only, or ui-only installations
             CROWDSEC_INSTALL="no"
+        fi
+
+        # Ask about API service enablement
+        if [ -z "$SERVICE_API" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🧩 BunkerWeb API Service${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "The BunkerWeb API provides a programmatic interface (FastAPI) to manage instances,"
+            echo "perform actions (reload/stop), and integrate with external systems."
+            echo "It is optional and disabled by default on Linux installations."
+            echo
+            while true; do
+                echo -e "${YELLOW}Enable the API service? (y/N):${NC} "
+                read -p "" -r
+                case $REPLY in
+                    [Yy]*) SERVICE_API=yes; break ;;
+                    ""|[Nn]*) SERVICE_API=no; break ;;
+                    *) echo "Please answer yes (y) or no (n)." ;;
+                esac
+            done
         fi
 
         # Ask about AppSec installation if CrowdSec is chosen
@@ -613,6 +640,10 @@ show_final_info() {
     echo "Services status:"
     systemctl status bunkerweb --no-pager -l || true
     systemctl status bunkerweb-scheduler --no-pager -l || true
+    # Show API service status if present on this system
+    if systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+        systemctl status bunkerweb-api --no-pager -l || true
+    fi
 
     if [ "$ENABLE_WIZARD" = "yes" ]; then
         systemctl status bunkerweb-ui --no-pager -l || true
@@ -627,6 +658,9 @@ show_final_info() {
     fi
 
     echo "  - Scheduler config: /etc/bunkerweb/scheduler.env"
+    if [ "${SERVICE_API:-no}" = "yes" ] || systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+        echo "  - API config: /etc/bunkerweb/api.env"
+    fi
     echo "  - Logs: /var/log/bunkerweb/"
     echo
 
@@ -675,10 +709,12 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo
     echo "Options:"
-    echo "  -v, --version VERSION    BunkerWeb version to install (default: $BUNKERWEB_VERSION)"
+    echo "  -v, --version VERSION    BunkerWeb version to install (default: ${DEFAULT_BUNKERWEB_VERSION})"
     echo "  -w, --enable-wizard      Enable the setup wizard (default in interactive mode)"
     echo "  -n, --no-wizard          Disable the setup wizard"
     echo "  -y, --yes                Non-interactive mode, use defaults"
+    echo "      --api, --enable-api  Enable the API service (disabled by default on Linux)"
+    echo "      --no-api             Explicitly disable the API service"
     echo "  -f, --force              Force installation on unsupported OS versions"
     echo "  -q, --quiet              Silent installation (suppress output)"
     echo "  -h, --help               Show this help message"
@@ -699,6 +735,8 @@ usage() {
     echo "Advanced options:"
     echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
     echo "                           (required for --manager and --scheduler-only)"
+    echo "  --backup-dir PATH        Directory to store automatic backup before upgrade"
+    echo "  --no-auto-backup         Skip automatic backup (you MUST have done it manually)"
     echo
     echo "Examples:"
     echo "  $0                       # Interactive installation"
@@ -719,7 +757,12 @@ usage() {
 while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--version)
-            BUNKERWEB_VERSION="1.6.4"
+            # Fix: actually use provided argument for version
+            if [ -z "$2" ] || [[ "$2" == -* ]]; then
+                print_error "Missing version after $1"
+                exit 1
+            fi
+            BUNKERWEB_VERSION="$2"
             shift 2
             ;;
         -w|--enable-wizard)
@@ -780,6 +823,18 @@ while [[ $# -gt 0 ]]; do
             BUNKERWEB_INSTANCES_INPUT="$2"
             shift 2
             ;;
+        --api|--enable-api)
+            SERVICE_API=yes
+            shift
+            ;;
+        --no-api)
+            SERVICE_API=no
+            shift
+            ;;
+        --backup-dir)
+            BACKUP_DIRECTORY="$2"; shift 2 ;;
+        --no-auto-backup)
+            AUTO_BACKUP="no"; shift ;;
         -q|--quiet)
             exec >/dev/null 2>&1
             shift
@@ -823,6 +878,155 @@ if [[ "$CROWDSEC_INSTALL" = "yes" || "$CROWDSEC_APPSEC_INSTALL" = "yes" ]] && [[
     exit 1
 fi
 
+# Detect existing installation and handle reinstall/upgrade
+check_existing_installation() {
+    if [ -f /usr/share/bunkerweb/VERSION ]; then
+        INSTALLED_VERSION=$(cat /usr/share/bunkerweb/VERSION 2>/dev/null || echo "unknown")
+        print_status "Detected existing BunkerWeb installation (version ${INSTALLED_VERSION})"
+        if [ "$INSTALLED_VERSION" = "$BUNKERWEB_VERSION" ]; then
+            if [ "$INTERACTIVE_MODE" = "yes" ]; then
+                echo
+                read -p "BunkerWeb ${INSTALLED_VERSION} already installed. Show status and exit? (Y/n): " -r
+                case $REPLY in
+                    [Nn]*) print_status "Nothing to do."; exit 0 ;;
+                    *) show_final_info; exit 0 ;;
+                esac
+            else
+                print_status "BunkerWeb ${INSTALLED_VERSION} already installed. Nothing to do."; exit 0
+            fi
+        else
+            print_warning "Requested version ${BUNKERWEB_VERSION} differs from installed version ${INSTALLED_VERSION}. Upgrade will be attempted."
+            if [ "$INTERACTIVE_MODE" = "yes" ]; then
+                read -p "Proceed with upgrade? (Y/n): " -r
+                case $REPLY in
+                    [Nn]*) print_status "Upgrade cancelled."; exit 0 ;;
+                esac
+            fi
+            UPGRADE_SCENARIO="yes"
+        fi
+    fi
+}
+
+perform_upgrade_backup() {
+    [ "$UPGRADE_SCENARIO" != "yes" ] && return 0
+    if [ "$AUTO_BACKUP" != "yes" ]; then
+        print_warning "Automatic backup disabled. Ensure you already performed a manual backup (see https://docs.bunkerweb.io/latest/upgrading)."
+        return 0
+    fi
+    if ! command -v bwcli >/dev/null 2>&1; then
+        print_warning "bwcli not found, cannot run automatic backup. Perform manual backup per documentation."
+        return 0
+    fi
+    if ! systemctl is-active --quiet bunkerweb-scheduler; then
+        print_warning "Scheduler service not active; starting temporarily for backup."
+        systemctl start bunkerweb-scheduler || print_warning "Failed to start scheduler; backup may fail."
+        TEMP_STARTED="yes"
+    fi
+    if [ -z "$BACKUP_DIRECTORY" ]; then
+        BACKUP_DIRECTORY="/var/tmp/bunkerweb-backup-$(date +%Y%m%d-%H%M%S)"
+    fi
+    mkdir -p "$BACKUP_DIRECTORY" || {
+        print_warning "Unable to create backup directory $BACKUP_DIRECTORY. Skipping automatic backup."; return 0; }
+    print_step "Creating pre-upgrade backup in $BACKUP_DIRECTORY"
+    if BACKUP_DIRECTORY="$BACKUP_DIRECTORY" bwcli plugin backup save; then
+        print_status "Backup completed: $BACKUP_DIRECTORY"
+    else
+        print_warning "Automatic backup failed. Verify manually before continuing."
+    fi
+    if [ "$TEMP_STARTED" = "yes" ]; then
+        systemctl stop bunkerweb-scheduler || print_warning "Failed to stop bunkerweb-scheduler after temporary start."
+    fi
+}
+
+upgrade_only() {
+    # Interactive confirmation about backup (optional, enabled by default)
+    if [ "$INTERACTIVE_MODE" = "yes" ]; then
+        if [ "$AUTO_BACKUP" = "yes" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}💾 Pre-upgrade Backup${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "A pre-upgrade backup is recommended to preserve configuration and database."
+            echo "You can change the destination directory or accept the default."
+            DEFAULT_BACKUP_DIR="/var/tmp/bunkerweb-backup-$(date +%Y%m%d-%H%M%S)"
+            echo
+            echo -e "${YELLOW}Create automatic backup before upgrade? (Y/n):${NC} "
+            read -p "" -r
+            case $REPLY in
+                [Nn]*) AUTO_BACKUP="no" ;;
+                *)
+                    echo -e "${YELLOW}Backup directory [${DEFAULT_BACKUP_DIR}]:${NC} "
+                    read -p "" -r BACKUP_DIRECTORY_INPUT
+                    if [ -n "$BACKUP_DIRECTORY_INPUT" ]; then
+                        BACKUP_DIRECTORY="$BACKUP_DIRECTORY_INPUT"
+                    else
+                        BACKUP_DIRECTORY="${BACKUP_DIRECTORY:-$DEFAULT_BACKUP_DIR}"
+                    fi
+                    ;;
+            esac
+        else
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}⚠️  Backup Confirmation${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "Automatic backup is disabled. Make sure you already performed a manual backup as described in the documentation."
+            echo
+            echo -e "${YELLOW}Confirm manual backup was performed? (y/N):${NC} "
+            read -p "" -r
+            case $REPLY in
+                [Yy]*) ;; * ) print_error "Upgrade aborted until backup is confirmed."; exit 1 ;;
+            esac
+        fi
+    fi
+
+    print_status "Upgrade mode: $INSTALLED_VERSION -> $BUNKERWEB_VERSION"
+    perform_upgrade_backup
+    # Remove holds/version locks
+    case "$DISTRO_ID" in
+        debian|ubuntu)
+            if command -v apt-mark >/dev/null 2>&1; then
+                print_status "Removing holds (bunkerweb, nginx)"
+                apt-mark unhold bunkerweb nginx >/dev/null 2>&1 || true
+            fi
+            ;;
+        fedora|rhel|rocky|almalinux)
+            if command -v dnf >/dev/null 2>&1; then
+                print_status "Removing versionlock (bunkerweb, nginx)"
+                dnf versionlock delete bunkerweb nginx >/dev/null 2>&1 || true
+            fi
+            ;;
+    esac
+    # Stop services (best effort)
+    print_step "Stopping services prior to upgrade"
+    for svc in bunkerweb-ui bunkerweb-scheduler bunkerweb; do
+        if systemctl list-units --type=service --all | grep -q "^${svc}.service"; then
+            if systemctl is-active --quiet "$svc"; then
+                run_cmd systemctl stop "$svc"
+            fi
+        fi
+    done
+    # Install new version only (do NOT reinstall nginx)
+    print_step "Upgrading BunkerWeb package"
+    case "$DISTRO_ID" in
+        debian|ubuntu)
+            run_cmd apt update
+            run_cmd apt install -y "bunkerweb=$BUNKERWEB_VERSION"
+            run_cmd apt-mark hold bunkerweb nginx
+            ;;
+        fedora|rhel|rocky|almalinux)
+            if [ "$DISTRO_ID" = "fedora" ]; then
+                run_cmd dnf makecache || true
+            else
+                dnf check-update || true
+            fi
+            run_cmd dnf install -y --allowerasing "bunkerweb-$BUNKERWEB_VERSION"
+            run_cmd dnf versionlock add bunkerweb nginx
+            ;;
+    esac
+    show_final_info
+    exit 0
+}
+
 # Main installation function
 main() {
     echo "========================================="
@@ -834,6 +1038,13 @@ main() {
     check_root
     detect_os
     check_supported_os
+    # New: check if already installed (after OS detection)
+    check_existing_installation
+
+    # If upgrade scenario, skip prompts & ancillary installs
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        upgrade_only
+    fi
 
     # Show RHEL database warning early
     show_rhel_database_warning
@@ -844,6 +1055,11 @@ main() {
     if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
         # Use a temporary file to pass the setting to the postinstall script
         echo "BUNKERWEB_INSTANCES=$BUNKERWEB_INSTANCES_INPUT" > /var/tmp/bunkerweb_instances.env
+    fi
+
+    # Persist API enablement for postinstall if chosen
+    if [ "${SERVICE_API:-no}" = "yes" ]; then
+        touch /var/tmp/bunkerweb_enable_api
     fi
 
     # Set environment variables based on installation type
@@ -893,6 +1109,35 @@ main() {
         esac
     fi
 
+    # If upgrading, remove holds/versionlocks so upgrade can proceed
+    if [ "$UPGRADE_SCENARIO" = "yes" ]; then
+        case "$DISTRO_ID" in
+            debian|ubuntu)
+                if command -v apt-mark >/dev/null 2>&1; then
+                    print_status "Removing holds on bunkerweb & nginx (upgrade scenario)"
+                    apt-mark unhold bunkerweb nginx >/dev/null 2>&1 || true
+                fi
+                ;;
+            fedora|rhel|rocky|almalinux)
+                if command -v dnf >/dev/null 2>&1; then
+                    print_status "Removing versionlock on bunkerweb & nginx (upgrade scenario)"
+                    dnf versionlock delete bunkerweb nginx >/dev/null 2>&1 || true
+                fi
+                ;;
+        esac
+        # Stop services before upgrading (per upgrading.md procedure)
+        print_step "Stopping BunkerWeb services before upgrade"
+        for svc in bunkerweb bunkerweb-ui bunkerweb-scheduler; do
+            if systemctl list-units --type=service --all | grep -q "^${svc}.service"; then
+                if systemctl is-active --quiet "$svc"; then
+                    run_cmd systemctl stop "$svc"
+                else
+                    print_status "Service $svc not active, skipping stop"
+                fi
+            fi
+        done
+    fi
+
     # Install NGINX based on distribution
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
@@ -911,7 +1156,7 @@ main() {
         install_crowdsec
     fi
 
-    # Install NGINX based on distribution
+    # Install BunkerWeb based on distribution
     case "$DISTRO_ID" in
         "debian"|"ubuntu")
             install_bunkerweb_debian

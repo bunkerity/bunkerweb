@@ -1,0 +1,99 @@
+services:
+  bunkerweb:
+    build:
+      context: ../..
+      dockerfile: ./src/bw/Dockerfile
+      args:
+        SKIP_MINIFY_HTML: "yes"
+    ports:
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bunkerweb
+      bw-services:
+        aliases:
+          - bunkerweb
+
+  bw-scheduler:
+    build:
+      context: ../..
+      dockerfile: ./src/scheduler/Dockerfile
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-storage:/data
+      - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
+    environment:
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "app1.example.com"
+      LOG_LEVEL: "info"
+      CUSTOM_LOG_LEVEL: "debug"
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      USE_WHITELIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
+      EXTERNAL_PLUGIN_URLS: "https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/dev.zip"
+      CUSTOM_CONF_MODSEC_CRS_reqbody-suppress: "SecRuleRemoveById 200002"
+      app1.example.com_USE_REVERSE_PROXY: "yes"
+      app1.example.com_REVERSE_PROXY_URL: "/"
+      app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-scheduler
+
+  bw-api:
+    build:
+      context: ../..
+      dockerfile: ./src/api/Dockerfile
+    ports:
+      - 8888:8888
+    volumes:
+      - bw-storage:/data
+      - ../../src/api/app:/usr/share/bunkerweb/api/app:ro
+      - ../../src/api/utils:/usr/share/bunkerweb/api/utils:ro
+    environment:
+      API_USERNAME: "admin"
+      API_PASSWORD: "P@ssw0rd"
+      CUSTOM_LOG_LEVEL: "debug"
+      DEBUG: "1"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-api
+
+  app1:
+    image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
+    networks:
+      bw-services:
+        aliases:
+          - app1
+
+volumes:
+  bw-storage:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services

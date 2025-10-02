@@ -144,16 +144,26 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     When enabled, reCAPTCHA runs in the background (v3) to assign a score based on user behavior. A score lower than the configured threshold will prompt further verification or block the request. For visible challenges (v2), users must interact with the reCAPTCHA widget before continuing.
 
-    To use reCAPTCHA with BunkerWeb, you need to obtain your site and secret keys from the [Google reCAPTCHA admin console](https://www.google.com/recaptcha/admin). Once you have the keys, you can configure BunkerWeb to use reCAPTCHA as an antibot mechanism.
+    There are now two ways to integrate reCAPTCHA:
+    - The classic version (site/secret keys, v2/v3 verify endpoint)
+    - The new version using Google Cloud (Project ID + API key). The classic version remains available and can be toggled with `ANTIBOT_RECAPTCHA_CLASSIC`.
+
+    For the classic version, obtain your site and secret keys from the [Google reCAPTCHA admin console](https://www.google.com/recaptcha/admin).
+    For the new version, create a reCAPTCHA key in your Google Cloud project and use the Project ID and an API key (see the [Google Cloud reCAPTCHA console](https://console.cloud.google.com/security/recaptcha)). A site key is still required.
 
     **Configuration Settings:**
 
-    | Setting                     | Default | Context   | Multiple | Description                                                                                                   |
-    | --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`               | `no`    | multisite | no       | **Enable Antibot:** Set to `recaptcha` to enable the reCAPTCHA challenge.                                     |
-    | `ANTIBOT_RECAPTCHA_SITEKEY` |         | multisite | no       | **reCAPTCHA Site Key:** Your reCAPTCHA site key (get this from Google).                                       |
-    | `ANTIBOT_RECAPTCHA_SECRET`  |         | multisite | no       | **reCAPTCHA Secret Key:** Your reCAPTCHA secret key (get this from Google).                                   |
-    | `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`   | multisite | no       | **reCAPTCHA Minimum Score:** The minimum score required for reCAPTCHA to pass a user (only for reCAPTCHA v3). |
+    | Setting                          | Default | Context   | Multiple | Description |
+    | -------------------------------- | ------- | --------- | -------- | ----------- |
+    | `USE_ANTIBOT`                    | `no`    | multisite | no       | Enable antibot; set to `recaptcha` to enable reCAPTCHA. |
+    | `ANTIBOT_RECAPTCHA_CLASSIC`      | `yes`   | multisite | no       | Use classic reCAPTCHA. Set to `no` to use the new Google Cloud-based version. |
+    | `ANTIBOT_RECAPTCHA_SITEKEY`      |         | multisite | no       | reCAPTCHA site key. Required for both classic and new versions. |
+    | `ANTIBOT_RECAPTCHA_SECRET`       |         | multisite | no       | reCAPTCHA secret key. Required for the classic version only. |
+    | `ANTIBOT_RECAPTCHA_PROJECT_ID`   |         | multisite | no       | Google Cloud Project ID. Required for the new version only. |
+    | `ANTIBOT_RECAPTCHA_API_KEY`      |         | multisite | no       | Google Cloud API key used to call the reCAPTCHA Enterprise API. Required for the new version only. |
+    | `ANTIBOT_RECAPTCHA_JA3`          |         | multisite | no       | Optional JA3 TLS fingerprint to include in Enterprise assessments. |
+    | `ANTIBOT_RECAPTCHA_JA4`          |         | multisite | no       | Optional JA4 TLS fingerprint to include in Enterprise assessments. |
+    | `ANTIBOT_RECAPTCHA_SCORE`        | `0.7`   | multisite | no       | Minimum score required to pass (applies to both classic v3 and the new version). |
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
@@ -246,14 +256,34 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     Note: The example above uses numbers 2-9 and all letters, which are the most commonly used characters for CAPTCHA challenges. You can customize the alphabet to include special characters as needed.
 
-=== "reCAPTCHA Challenge"
+=== "reCAPTCHA Classic"
 
-    Example configuration for enabling the reCAPTCHA challenge:
+    Example configuration for the classic reCAPTCHA (site/secret keys):
 
     ```yaml
     USE_ANTIBOT: "recaptcha"
+    ANTIBOT_RECAPTCHA_CLASSIC: "yes"
     ANTIBOT_RECAPTCHA_SITEKEY: "your-site-key"
     ANTIBOT_RECAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_RECAPTCHA_SCORE: "0.7"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "reCAPTCHA (new)"
+
+    Example configuration for the new Google Cloud-based reCAPTCHA (Project ID + API key):
+
+    ```yaml
+    USE_ANTIBOT: "recaptcha"
+    ANTIBOT_RECAPTCHA_CLASSIC: "no"
+    ANTIBOT_RECAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_RECAPTCHA_PROJECT_ID: "your-gcp-project-id"
+    ANTIBOT_RECAPTCHA_API_KEY: "your-gcp-api-key"
+    # Optional fingerprints to improve Enterprise assessments
+    # ANTIBOT_RECAPTCHA_JA3: "<ja3-fingerprint>"
+    # ANTIBOT_RECAPTCHA_JA4: "<ja4-fingerprint>"
     ANTIBOT_RECAPTCHA_SCORE: "0.7"
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"

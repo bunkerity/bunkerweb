@@ -46,9 +46,7 @@ try:
     reload_min_timeout = int(reload_min_timeout)
 
     for instance in instances:
-        endpoint = f"http://{instance['hostname']}:{instance['port']}"
-        host = instance["server_name"]
-        api = API(endpoint, host=host)
+        api = API.from_instance(instance)
 
         sent, err, status, resp = api.request("POST", "/lets-encrypt/certificates", files=files)
         if not sent:

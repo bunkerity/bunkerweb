@@ -53,14 +53,7 @@ class Instance:
             instance["type"],
             instance["creation_date"],
             instance["last_seen"],
-            ApiCaller(
-                [
-                    API(
-                        f"http://{instance['hostname']}:{instance['port']}",
-                        instance["server_name"],
-                    )
-                ]
-            ),
+            ApiCaller([API.from_instance(instance)]),
         )
 
     @property
@@ -127,7 +120,7 @@ class Instance:
             return f"IP {ip} has been banned {scope_text} on instance {self.hostname} for {exp} seconds{f' with reason: {reason}' if reason else ''}."
         return f"Can't ban {ip} on instance {self.hostname}"
 
-    def unban(self, ip: str, service: str = None, ban_scope: str = "global") -> str:
+    def unban(self, ip: str, service: Optional[str] = None, ban_scope: str = "global") -> str:
         try:
             # Prepare request data
             data = {"ip": ip, "ban_scope": ban_scope}
@@ -147,7 +140,7 @@ class Instance:
         try:
             result = self.apiCaller.send_to_apis("GET", "/bans", response=True)
         except BaseException as e:
-            return f"Can't get bans from instance {self.hostname}: {e}", result[1]
+            return f"Can't get bans from instance {self.hostname}: {e}", {}
 
         if result[0]:
             return "", result[1]
@@ -192,14 +185,7 @@ class InstancesUtils:
                 instance["type"],
                 instance["creation_date"],
                 instance["last_seen"],
-                ApiCaller(
-                    [
-                        API(
-                            f"http://{instance['hostname']}:{instance['port']}",
-                            instance["server_name"],
-                        )
-                    ]
-                ),
+                ApiCaller([API.from_instance(instance)]),
             )
             for instance in self.__db.get_instances()
             if not status or instance["status"] == status
@@ -219,7 +205,7 @@ class InstancesUtils:
             if instance.ban(ip, exp, reason, service, ban_scope).startswith("Can't ban")
         ] or ""
 
-    def unban(self, ip: str, service: str = None, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
+    def unban(self, ip: str, service: Optional[str] = None, ban_scope: str = "global", *, instances: Optional[List[Instance]] = None) -> Union[list[str], str]:
         return [
             instance.name for instance in instances or self.get_instances(status="up") if instance.unban(ip, service, ban_scope).startswith("Can't unban")
         ] or ""
@@ -264,7 +250,7 @@ class InstancesUtils:
     def get_reports(self, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None) -> List[dict[str, Any]]:
         """Get reports from all instances or a specific instance and sort them by date"""
 
-        def get_instance_reports(instance: Instance) -> Tuple[bool, dict[str, Any]]:
+        def get_instance_reports(instance: Instance) -> List[dict[str, Any]]:
             resp, instance_reports = instance.reports()
             if not resp:
                 return []

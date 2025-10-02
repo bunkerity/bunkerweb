@@ -32,7 +32,7 @@ try:
 
         LOGGER.info(f"Cleaning challenge from {len(instances)} instances")
         for instance in instances:
-            api = API(f"http://{instance['hostname']}:{instance['port']}", host=instance["server_name"])
+            api = API.from_instance(instance)
             sent, err, status, resp = api.request("DELETE", "/lets-encrypt/challenge", data={"token": token})
             if not sent:
                 status = 1

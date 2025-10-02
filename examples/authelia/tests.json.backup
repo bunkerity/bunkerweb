@@ -1,0 +1,20 @@
+{
+  "name": "authelia",
+  "kinds": ["docker", "autoconf", "linux"],
+  "timeout": 120,
+  "delay": 90,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://app1.example.com",
+      "string": "authelia",
+      "tls": "app1.example.com"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com",
+      "string": "authelia",
+      "tls": "app2.example.com"
+    }
+  ]
+}

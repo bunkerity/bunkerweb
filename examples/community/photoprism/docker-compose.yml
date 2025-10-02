@@ -75,13 +75,14 @@ services:
 
   bw-db:
     image: mariadb:10.10
+    command: --max-allowed-packet=67108864
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=db
       - MYSQL_USER=bunkerweb
       - MYSQL_PASSWORD=DBPassword   # Remember to set a stronger password for the database 
     volumes:
-      - bw-data:/var/lib/mysql
+      - bw-storage:/var/lib/mysql
     networks:
       - bw-docker
 
@@ -101,7 +102,7 @@ services:
       - DATABASE_URI=mariadb+pymysql://bunkerweb:DBPassword@bw-db:3306/db # Remember to set a stronger password for the database
 
 volumes:
-  bw-data:
+  bw-storage:
   certs:
 
 networks:

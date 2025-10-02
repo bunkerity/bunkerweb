@@ -16,8 +16,28 @@ $(document).ready(function () {
   let toastNum = 0;
   let actionLock = false;
   const serviceNumber = parseInt($("#services_number").val(), 10) || 0;
+  const templates = ($("#templates").val() || "").trim().split(" ");
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
+
+  const templatesSearchPanesOptions = [
+    {
+      label: `<span data-i18n="template.none">${t(
+        "template.none",
+        "no template",
+      )}</span>`,
+      value: (rowData) => rowData[5].includes("template.none"),
+    },
+  ];
+
+  templates.forEach((template) => {
+    if (template) {
+      templatesSearchPanesOptions.push({
+        label: template,
+        value: (rowData) => $(rowData[5]).text().trim() === template,
+      });
+    }
+  });
 
   const setupModal = (services, modal) => {
     const headerList = $(`
@@ -105,7 +125,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6],
+        columns: [3, 4, 5, 6, 7],
       },
     },
     topStart: {},
@@ -390,7 +410,7 @@ $(document).ready(function () {
   const services_config = {
     tableSelector: "#services",
     tableName: "services",
-    columnVisibilityCondition: (column) => column > 2 && column < 7,
+    columnVisibilityCondition: (column) => column > 2 && column < 8,
     dataTableOptions: {
       columnDefs: [
         {
@@ -405,7 +425,7 @@ $(document).ready(function () {
         },
         { orderable: false, targets: -1 },
         {
-          targets: [5, 6],
+          targets: [6, 7],
           render: function (data, type, row) {
             if (type === "display" || type === "filter") {
               const date = new Date(data);
@@ -449,50 +469,16 @@ $(document).ready(function () {
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.created", "Created"),
-            options: [
-              {
-                label: `<span data-i18n="searchpane.last_24h">${t(
-                  "searchpane.last_24h",
-                  "Last 24 hours",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[5]) < 86400000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_7d">${t(
-                  "searchpane.last_7d",
-                  "Last 7 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[5]) < 604800000,
-              },
-              {
-                label: `<span data-i18n="searchpane.last_30d">${t(
-                  "searchpane.last_30d",
-                  "Last 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[5]) < 2592000000,
-              },
-              {
-                label: `<span data-i18n="searchpane.older_30d">${t(
-                  "searchpane.older_30d",
-                  "More than 30 days",
-                )}</span>`,
-                value: (rowData) =>
-                  new Date() - new Date(rowData[5]) >= 2592000000,
-              },
-            ],
+            header: t("searchpane.template", "Template"),
             combiner: "or",
-            orderable: false,
+            options: templatesSearchPanesOptions,
           },
           targets: 5,
         },
         {
           searchPanes: {
             show: true,
-            header: t("searchpane.last_update", "Last update"),
+            header: t("searchpane.created", "Created"),
             options: [
               {
                 label: `<span data-i18n="searchpane.last_24h">${t(
@@ -531,6 +517,49 @@ $(document).ready(function () {
             orderable: false,
           },
           targets: 6,
+        },
+        {
+          searchPanes: {
+            show: true,
+            header: t("searchpane.last_update", "Last update"),
+            options: [
+              {
+                label: `<span data-i18n="searchpane.last_24h">${t(
+                  "searchpane.last_24h",
+                  "Last 24 hours",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[7]) < 86400000,
+              },
+              {
+                label: `<span data-i18n="searchpane.last_7d">${t(
+                  "searchpane.last_7d",
+                  "Last 7 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[7]) < 604800000,
+              },
+              {
+                label: `<span data-i18n="searchpane.last_30d">${t(
+                  "searchpane.last_30d",
+                  "Last 30 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[7]) < 2592000000,
+              },
+              {
+                label: `<span data-i18n="searchpane.older_30d">${t(
+                  "searchpane.older_30d",
+                  "More than 30 days",
+                )}</span>`,
+                value: (rowData) =>
+                  new Date() - new Date(rowData[7]) >= 2592000000,
+              },
+            ],
+            combiner: "or",
+            orderable: false,
+          },
+          targets: 7,
         },
       ],
       order: [[2, "asc"]],

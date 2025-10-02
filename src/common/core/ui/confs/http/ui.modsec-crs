@@ -7,7 +7,7 @@ SecRule REQUEST_FILENAME "@rx ^/" \
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
 
-SecRule REQUEST_FILENAME "@rx /(support/config|global-config|services/.+)$" \
+SecRule REQUEST_FILENAME "@rx /(support/config|global-config|services/.+|templates/.+)$" \
     "id:1007771,ctl:ruleRemoveById=932235,ctl:ruleRemoveById=941130,ctl:ruleRemoveByTag=attack-rfi,ctl:ruleRemoveByTag=attack-lfi,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-ssrf,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
@@ -17,7 +17,7 @@ SecRule REQUEST_FILENAME "@rx /(services|cache)/.+$" \
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
 
-SecRule REQUEST_FILENAME "@rx /(configs)/.+$" \
+SecRule REQUEST_FILENAME "@rx /configs/.+$" \
     "id:1007773,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-rfi,ctl:ruleRemoveByTag=attack-lfi,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-sqli,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
     "nolog"
