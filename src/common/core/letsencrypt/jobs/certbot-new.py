@@ -100,6 +100,30 @@ PSL_STATIC_FILE = "public_suffix_list.dat"
 psl_lines = None
 psl_rules = None
 
+def get_registrable_domain(domain: str) -> str:
+    global psl_rules
+    if not psl_rules or not psl_rules.get("rules"):
+        LOGGER.warning("PSL rules not loaded or empty. Falling back to simple domain extraction.")
+        parts = domain.split(".")
+        return ".".join(parts[-2:]) if len(parts) >= 2 else domain
+
+    domain = domain.lower().strip(".")
+    parts = domain.split(".")
+
+    for i in range(len(parts)):
+        suffix = ".".join(parts[i:])
+        wildcard_suffix = f"*.{'.'.join(parts[i+1:])}" if i + 1 < len(parts) else None
+
+        if suffix in psl_rules["exceptions"]:
+            # This is the registrable domain.
+            return ".".join(parts[i:])
+
+        if suffix in psl_rules["rules"] or (wildcard_suffix and wildcard_suffix in psl_rules["rules"]):
+            if i == 0:
+                return ".".join(parts)
+            return ".".join(parts[i - 1 :])
+
+    return ".".join(parts[-2:]) if len(parts) >= 2 else domain
 
 def load_public_suffix_list(job):
     job_cache = job.get_cache(PSL_STATIC_FILE, with_info=True, with_data=True)
@@ -350,14 +374,13 @@ def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
         if not domain:
             continue
 
-        parts = domain.split(".")
-        if len(parts) >= 2:
-            base_domain = ".".join(parts[-2:])
+        base_domain = get_registrable_domain(domain)
+        if base_domain:
             wildcards.add(base_domain)
             wildcards.add(f"*.{base_domain}")
         else:
             wildcards.add(domain)
-
+            
     # Sort non-wildcard domains before wildcard domains, and sort each group lexicographically
     return sorted(list(wildcards), key=lambda x: (x.startswith("*"), x))
 
@@ -501,6 +524,10 @@ try:
     if not server_names:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
+    
+    JOB = Job(LOGGER, __file__.replace("new", "renew"))
+    psl_lines = load_public_suffix_list(JOB)
+    psl_rules = parse_psl(psl_lines)
 
     services = {}
     processed_base_domains = set()
@@ -508,11 +535,7 @@ try:
         if not service.strip():
             continue
 
-        parts = service.split('.')
-        if len(parts) >= 2:
-            base_domain = ".".join(parts[-2:])
-        else:
-            base_domain = service
+        base_domain = get_registrable_domain(service)
 
         if base_domain in processed_base_domains:
             continue
@@ -530,12 +553,13 @@ try:
     JOB = Job(LOGGER, __file__.replace("new", "renew"))
 
     # ? Fetch existing certificates
-    cmd_env = {
-        "PATH": getenv("PATH", ""),
-        "PYTHONPATH": getenv("PYTHONPATH", ""),
-        "RELOAD_MIN_TIMEOUT": getenv("RELOAD_MIN_TIMEOUT", "5"),
-        "DISABLE_CONFIGURATION_TESTING": getenv("DISABLE_CONFIGURATION_TESTING", "no").lower(),
-    }
+    cmd_env = environ.copy()
+
+    db_config = JOB.db.get_config()
+    for key in db_config:
+        if key in cmd_env:
+            del cmd_env[key]
+
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
     if getenv("DATABASE_URI", ""):
         cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")
