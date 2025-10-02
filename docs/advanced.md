@@ -2579,6 +2579,10 @@ With this plugin, administrators can effortlessly create, update, and disable us
 - **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
 - **Audit Logging:** Maintain an audit trail for all user management actions for enhanced security and compliance.
 
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <figure markdown>
   ![Overview](assets/img/user-manager.png){ align=center }
   <figcaption>User Manager page</figcaption>

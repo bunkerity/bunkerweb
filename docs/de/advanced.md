@@ -2579,6 +2579,10 @@ Mit diesem Plugin können Administratoren mühelos Benutzerkonten erstellen, akt
 -   **Umfassende Benutzereinblicke:** Überwachen Sie wichtige Benutzerdaten, einschließlich letzter Anmeldezeiten, Kontoerstellungsdaten und Aktiv/Inaktiv-Status.
 -   **Audit-Protokollierung:** Führen Sie eine Audit-Spur für alle Benutzerverwaltungsaktionen für verbesserte Sicherheit und Compliance.
 
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Benutzer-Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <figure markdown>
   ![Übersicht](assets/img/user-manager.png){ align=center }
   <figcaption>Benutzer-Manager-Seite</figcaption>

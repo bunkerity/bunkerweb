@@ -2579,6 +2579,10 @@ Con este plugin, los administradores pueden crear, actualizar y deshabilitar cue
 - **Información completa del usuario:** Supervisa los datos clave del usuario, incluidas las últimas horas de inicio de sesión, las fechas de creación de la cuenta y el estado activo/inactivo.
 - **Registro de auditoría:** Mantiene un registro de auditoría de todas las acciones de gestión de usuarios para mejorar la seguridad y el cumplimiento.
 
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Página del Administrador de usuarios" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <figure markdown>
   ![Descripción general](assets/img/user-manager.png){ align=center }
   <figcaption>Página del Administrador de usuarios</figcaption>

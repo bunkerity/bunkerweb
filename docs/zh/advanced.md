@@ -2579,6 +2579,10 @@ STREAM 支持 :x:
 - **全面的用户洞察：** 监控关键用户数据，包括上次登录时间、帐户创建日期以及活动/非活动状态。
 - **审计日志记录：** 维护所有用户管理操作的审计跟踪，以增强安全性和合规性。
 
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="用户管理器页面" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <figure markdown>
   ![概述](assets/img/user-manager.png){ align=center }
   <figcaption>用户管理器页面</figcaption>

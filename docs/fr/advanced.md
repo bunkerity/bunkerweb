@@ -2579,6 +2579,10 @@ Avec ce plugin, les administrateurs peuvent sans effort créer, mettre à jour e
 - **Informations complètes sur les utilisateurs :** surveillez les données clés des utilisateurs, notamment les heures de dernière connexion, les dates de création de compte et le statut actif/inactif.
 - **Journalisation des audits :** conservez une piste d'audit pour toutes les actions de gestion des utilisateurs afin d'améliorer la sécurité et la conformité.
 
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Gestionnaire d'utilisateurs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <figure markdown>
   ![Vue d'ensemble](assets/img/user-manager.png){ align=center }
   <figcaption>Page Gestionnaire d'utilisateurs</figcaption>
