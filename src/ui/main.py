@@ -14,10 +14,15 @@ from sys import path as sys_path, modules as sys_modules
 from threading import Thread
 from time import time
 from traceback import format_exc
+from warnings import filterwarnings
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+# Suppress passlib's pkg_resources deprecation warning
+# This is a known issue in passlib that will be fixed in future versions
+filterwarnings("ignore", message=r".*pkg_resources is deprecated.*", category=UserWarning, module="passlib")
 
 from cachelib import FileSystemCache
 from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
