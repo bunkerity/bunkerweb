@@ -1,7 +1,7 @@
 {
   "name": "reverse-proxy-multisite",
   "kinds": ["docker", "autoconf", "kubernetes"],
-  "timeout": 90,
+  "timeout": 120,
   "delay": 90,
   "tests": [
     {

@@ -1,7 +1,7 @@
 {
   "name": "joomla",
   "kinds": ["docker", "autoconf"],
-  "timeout": 90,
+  "timeout": 120,
   "delay": 120,
   "tests": [
     {

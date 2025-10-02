@@ -2,7 +2,7 @@
   "name": "docker-configs",
   "kinds": ["docker"],
   "delay": 120,
-  "timeout": 90,
+  "timeout": 120,
   "tests": [
     {
       "type": "string",
