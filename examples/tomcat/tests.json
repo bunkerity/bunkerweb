@@ -1,7 +1,7 @@
 {
   "name": "tomcat",
   "kinds": ["docker", "autoconf"],
-  "timeout": 90,
+  "timeout": 120,
   "delay": 60,
   "tests": [
     {

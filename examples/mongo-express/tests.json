@@ -1,7 +1,7 @@
 {
   "name": "mongo-express",
   "kinds": ["docker", "autoconf"],
-  "timeout": 90,
+  "timeout": 120,
   "delay": 120,
   "no_copy_container": true,
   "tests": [

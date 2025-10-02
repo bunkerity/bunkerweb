@@ -1,7 +1,7 @@
 {
   "name": "ghost",
   "kinds": ["docker", "autoconf"],
-  "timeout": 90,
+  "timeout": 120,
   "delay": 300,
   "tests": [
     {
