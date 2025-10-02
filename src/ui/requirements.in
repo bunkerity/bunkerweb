@@ -1,5 +1,5 @@
 bcrypt==5.0.0
-biscuit-python==0.4.0
+biscuit-python<0.4.0
 certbot==5.0.0
 Flask==3.1.2
 Flask-Login==0.6.3
