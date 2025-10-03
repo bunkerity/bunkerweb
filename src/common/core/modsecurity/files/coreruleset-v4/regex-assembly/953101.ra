@@ -1,0 +1,28 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! For more information, see comments at the beginning of the php-errors.data file.
+
+##!+ i
+
+Empty string
+File size is
+Freeing memory
+Header "
+Header name "
+Invalid date
+No active class
+Out of memory
+Pair level
+Password is too long
+Reading file
+Restarting!
+Session is not active
+Static function\b
+Telling\.\.\.
+The function\b
+Unknown reason
+cannot be empty
+empty password
+error reading
+invalid option

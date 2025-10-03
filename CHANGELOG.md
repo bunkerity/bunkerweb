@@ -18,6 +18,7 @@
 - [DOCS] Add documentation about the possibility to extend bwcli via plugins commands
 - [DOCS] Add Docker logging best practices to advanced documentation
 - [DEPS] Updated luajit2 version to v2.1-20250826
+- [DEPS] Update coreruleset-v4 version to v4.19.0
 - [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the `Let's Encrypt` plugin.
 
 ## v1.6.5-rc3 - 2025/09/16
