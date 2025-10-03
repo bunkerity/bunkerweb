@@ -3,7 +3,7 @@ FROM python:3.13-alpine@sha256:9ba6d8cbebf0fb6546ae71f2a1c14f6ffd2fdab83af7fa566
 ARG TARGETPLATFORM
 
 # Build-time deps
-RUN apk add --no-cache build-base libffi-dev cargo
+RUN apk add --no-cache build-base libffi-dev postgresql-dev cargo zlib-dev
 
 # Copy requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
