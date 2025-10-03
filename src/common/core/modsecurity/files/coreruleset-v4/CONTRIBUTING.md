@@ -363,7 +363,7 @@ Rule tests also provide an excellent way to test WAF engines and implementations
 
 The rule tests are located under `tests/regression/tests`. Each CRS rule *file* has a corresponding *directory* and each individual *rule* has a corresponding *YAML file* containing all the tests for that rule. For example, the tests for rule 911100 *(Method is not allowed by policy)* are in the file `REQUEST-911-METHOD-ENFORCEMENT/911100.yaml`.
 
-Full documentation of the required formatting and available options of the YAML tests can be found in the SPECs at https://github.com/coreruleset/ftw-tests-schema/tree/main/spec. Be aware that the spec is evolving and the latest versions will be supported by the latests versions of the test engine.
+Full documentation of the required formatting and available options of the YAML tests can be found in the SPECs at https://github.com/coreruleset/ftw-tests-schema/tree/main/spec. Be aware that the spec is evolving and the latest versions will be supported by the latest versions of the test engine.
 
 Documentation on how to run the CRS test suite can be found in the [online documentation](https://coreruleset.org/docs/development/testing/).
 
