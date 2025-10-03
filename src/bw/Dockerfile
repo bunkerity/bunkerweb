@@ -82,6 +82,7 @@ RUN apk add --no-cache "sqlite-libs>=3.48.0-r4" # CVE-2025-29088
 RUN apk add --no-cache "libcrypto3>=3.3.5-r0" "libssl3>=3.3.5-r0" "openssl>=3.3.5-r0" # CVE-2025-9230 CVE-2025-9231 CVE-2025-9232
 RUN apk add --no-cache "libexpat>=2.7.2-r0" # CVE-2025-59375
 RUN apk add --no-cache "tiff>=4.7.1-r0" # CVE-2025-8961 CVE-2025-9165
+RUN apk add --no-cache "curl>=8.14.1-r2" "libcurl>=8.14.1-r2" # CVE-2025-10148 CVE-2025-4947 CVE-2025-5025 CVE-2025-5399 CVE-2025-9086
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
