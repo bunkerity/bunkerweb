@@ -1,0 +1,139 @@
+{
+  "id": "Adidos",
+  "name": "Adidos",
+  "description": "Adaptive DDoS Protection System",
+  "category": "antibot",
+  "help": "Monitor remote server system load and enable|disable antibot feature based on load metrics.",
+  "version": "1.2",
+  "stream": "no",
+  "settings": {
+    "USE_ADIDOS": {
+      "context": "global",
+      "default": "no",
+      "help": "Enable load-based antibot control.",
+      "id": "use-adidos",
+      "label": "Use ADIDOS",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "ADIDOS_HOST": {
+      "context": "global",
+      "default": "85.198.111.8",
+      "help": "Remote server hostname or IP to monitor.",
+      "id": "adidos-host",
+      "label": "Monitor host",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ADIDOS_SSH_KEY": {
+      "context": "global",
+      "default": "/usr/share/bunkerweb/scheduler/.ssh/id_rsa",
+      "help": "SSH private key for remote server access.",
+      "id": "adidos-ssh-key",
+      "label": "SSH private key",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ADIDOS_THRESHOLD_HIGH": {
+      "context": "global",
+      "default": "80",
+      "help": "CPU load threshold to enable antibot (%).",
+      "id": "adidos-threshold-high",
+      "label": "High load threshold",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "ADIDOS_THRESHOLD_LOW": {
+      "context": "global",
+      "default": "50",
+      "help": "CPU load threshold to disable antibot (%).",
+      "id": "adidos-threshold-low",
+      "label": "Low load threshold",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "ADIDOS_COOLDOWN_MINUTES": {
+      "context": "global",
+      "default": "5",
+      "help": "Minutes to wait before disabling antibot after load drops.",
+      "id": "adidos-cooldown-minutes",
+      "label": "Cooldown period (minutes)",
+      "regex": "^[0-9]+$",
+      "type": "text"
+    },
+    "ADIDOS_CAPTCHA_TYPE": {
+      "context": "global",
+      "default": "no",
+      "help": "Activate captcha challenge.",
+      "id": "adidos-captcha-type",
+      "label": "Captcha type",
+      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile|mcaptcha)$",
+      "type": "select",
+      "select": [
+        "no",
+        "cookie",
+        "javascript",
+        "captcha",
+        "recaptcha",
+        "hcaptcha",
+        "turnstile",
+        "mcaptcha"
+      ]
+    },
+    "ADIDOS_SERVICES": {
+      "context": "global",
+      "default": "",
+      "help": "List of services, separated with spaces, to serve.",
+      "id": "adidos-services",
+      "label": "Services",
+      "regex": "^.*$",
+      "type": "multivalue",
+      "separator": " "
+    },
+    "ADIDOS_USE_WEBHOOK": {
+      "context": "global",
+      "default": "no",
+      "help": "Enable webhook notification.",
+      "id": "adidos-use-webhook",
+      "label": "Use webhook",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "ADIDOS_WEB_HOOK_URL": {
+      "context": "global",
+      "default": "https://ashoo:ashooPaZZword@n8n.its.bz/webhook/ashoo-telegram-send",
+      "help": "Web hook URL-address used to POST message",
+      "id": "adidos-seb-hook-url",
+      "label": "Web hook URL",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ADIDOS_WEB_HOOK_BODY": {
+      "context": "global",
+      "default": "{\"chat\": \"<TG_CHAT_ID>\", \"text\": \"{{MESSAGE}}\"}",
+      "help": "Web hook body template used to POST message",
+      "id": "adidos-web-hook-body",
+      "label": "Web hook body",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "ADIDOS_LOG": {
+      "context": "global",
+      "default": "no",
+      "help": "Enable load-based antibot control log.",
+      "id": "adidos-log",
+      "label": "Enable logging",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    }
+  },
+  "jobs": [
+    {
+      "name": "adidos-monitor",
+      "file": "adidos-monitor.py",
+      "every": "minute",
+      "reload": false,
+      "async": true
+    }
+  ]
+}
