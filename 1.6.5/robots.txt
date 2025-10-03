@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /latest/
+
+Sitemap: https://docs.bunkerweb.io/latest/sitemap.xml

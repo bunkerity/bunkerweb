@@ -1,0 +1,2344 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation of BunkerWeb, the open source and next generation WAF.">
+      
+      
+      
+        <link rel="canonical" href="https://docs.bunkerweb.io/latest/es/plugins/">
+      
+      
+        <link rel="prev" href="../troubleshooting/">
+      
+      
+        <link rel="next" href="../professional-services/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Plugins - Documentación de BunkerWeb</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+      
+
+
+    
+    
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+
+    <script defer>
+  // Lazy load images and embed youtube videos
+  window.addEventListener("load", () => {
+    document.querySelectorAll("[data-src]").forEach((el) => {
+      el.setAttribute("src", el.getAttribute("data-src"));
+    });
+  });
+  // Add missing label
+  try {
+    document
+      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
+      .setAttribute("aria-label", "Search in documentation");
+  } catch (err) {}
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        startBannerLoop();
+        // Try to get dynamic content
+        // Else keep static ones
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
+
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="Plugins - Documentación de BunkerWeb" >
+      
+        <meta  property="og:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  property="og:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/es/plugins.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://docs.bunkerweb.io/latest/es/plugins/" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="Plugins - Documentación de BunkerWeb" >
+      
+        <meta  name="twitter:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  name="twitter:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/es/plugins.png" >
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#plugins" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../../..">
+        <strong>Click here to view latest.</strong>
+    </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href="../" title="Documentación de BunkerWeb" class="md-header__button md-logo" aria-label="Documentación de BunkerWeb" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Documentación de BunkerWeb
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Plugins
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Seleccionar idioma">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../plugins/" hreflang="en" class="md-select__link">
+              English - 🇬🇧
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../fr/plugins/" hreflang="fr" class="md-select__link">
+              Français - 🇫🇷
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../de/plugins/" hreflang="de" class="md-select__link">
+              Deutsch - 🇩🇪
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="es" class="md-select__link">
+              Español - 🇪🇸
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../zh/plugins/" hreflang="zh" class="md-select__link">
+              中文 - 🇨🇳
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bunkerity/bunkerweb" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Introducción
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Conceptos
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../integrations/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Integraciones
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart-guide/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Guía de inicio rápido
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../features/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Funcionalidades
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../advanced/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Usos avanzados
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../web-ui/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Interfaz web
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../upgrading/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Actualización
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../troubleshooting/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Solución de problemas
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Plugins
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../professional-services/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Servicios profesionales
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../about/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Acerca de
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="Documentación de BunkerWeb" class="md-nav__button md-logo" aria-label="Documentación de BunkerWeb" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    Documentación de BunkerWeb
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bunkerity/bunkerweb" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Introducción
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Conceptos
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integraciones
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Guía de inicio rápido
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Funcionalidades
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Usos avanzados
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Interfaz web
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Actualización
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Solución de problemas
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Plugins
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugins
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#plugins-oficiales" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugins oficiales
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#como-usar-un-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cómo usar un plugin
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cómo usar un plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatico" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automático
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#escribir-un-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Escribir un plugin
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Escribir un plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#estructura" class="md-nav__link">
+    <span class="md-ellipsis">
+      Estructura
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#empezando" class="md-nav__link">
+    <span class="md-ellipsis">
+      Empezando
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metadatos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Metadatos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comandos-de-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comandos de CLI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuraciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuraciones
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plantillas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plantillas
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lua" class="md-nav__link">
+    <span class="md-ellipsis">
+      LUA
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LUA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script-principal" class="md-nav__link">
+    <span class="md-ellipsis">
+      Script principal
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#librerias" class="md-nav__link">
+    <span class="md-ellipsis">
+      Librerías
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ayudantes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ayudantes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trabajos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trabajos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pagina-del-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      Página del plugin
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Página del plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#requisitos-previos" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requisitos previos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejemplo-basico" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ejemplo básico
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#actionspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Actions.py
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sobrescribir-un-blueprint-existente" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sobrescribir un Blueprint existente
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#convenciones-de-nomenclatura" class="md-nav__link">
+    <span class="md-ellipsis">
+      Convenciones de nomenclatura
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../professional-services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Servicios profesionales
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Acerca de
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="plugins">Plugins</h1>
+<p>BunkerWeb viene con un sistema de plugins que permite añadir fácilmente nuevas características. Una vez que un plugin está instalado, puedes gestionarlo usando configuraciones adicionales definidas por el plugin.</p>
+<h2 id="plugins-oficiales">Plugins oficiales</h2>
+<p>Aquí está la lista de plugins "oficiales" que mantenemos (consulta el repositorio <a href="https://github.com/bunkerity/bunkerweb-plugins">bunkerweb-plugins</a> para más información):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Nombre</th>
+<th style="text-align: center;">Versión</th>
+<th style="text-align: left;">Descripción</th>
+<th style="text-align: center;">Enlace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>ClamAV</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">Escanea automáticamente los archivos subidos con el motor antivirus ClamAV y deniega la solicitud cuando un archivo es detectado como malicioso.</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Coraza</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">Inspecciona las solicitudes usando el WAF de Coraza (alternativa a ModSecurity).</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Discord</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">Envía notificaciones de seguridad a un canal de Discord usando un Webhook.</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Slack</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">Envía notificaciones de seguridad a un canal de Slack usando un Webhook.</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>VirusTotal</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">Escanea automáticamente los archivos subidos con la API de VirusTotal y deniega la solicitud cuando un archivo es detectado como malicioso.</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>WebHook</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">Envía notificaciones de seguridad a un punto final HTTP personalizado usando un Webhook.</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="como-usar-un-plugin">Cómo usar un plugin</h2>
+<h3 id="automatico">Automático</h3>
+<p>Si quieres instalar rápidamente plugins externos, puedes usar la configuración <code>EXTERNAL_PLUGIN_URLS</code>. Acepta una lista de URLs separadas por espacios, cada una apuntando a un archivo comprimido (formato zip) que contiene uno o más plugins.</p>
+<p>Puedes usar el siguiente valor si quieres instalar automáticamente los plugins oficiales: <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.9.zip</code></p>
+<h3 id="manual">Manual</h3>
+<p>El primer paso es instalar el plugin colocando sus archivos dentro de la carpeta de datos <code>plugins</code> correspondiente. El procedimiento depende de tu integración:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Cuando se utiliza la <a href="../integrations/#docker">integración de Docker</a>, los plugins deben colocarse en el volumen montado en <code>/data/plugins</code> en el contenedor del programador.</p>
+<p>Lo primero que hay que hacer es crear la carpeta de plugins:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>./bw-data/plugins
+</code></pre></div>
+<p>Luego, puedes colocar los plugins de tu elección en esa carpeta:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>./bw-data/plugins
+</code></pre></div>
+<details class="warning">
+<summary>Usar una carpeta local para datos persistentes</summary>
+<p>El programador se ejecuta como un <strong>usuario sin privilegios con UID 101 y GID 101</strong> dentro del contenedor. La razón detrás de esto es la seguridad: en caso de que se explote una vulnerabilidad, el atacante no tendrá privilegios completos de root (UID/GID 0).
+Pero hay una desventaja: si usas una <strong>carpeta local para los datos persistentes</strong>, necesitarás <strong>establecer los permisos correctos</strong> para que el usuario sin privilegios pueda escribir datos en ella. Algo como esto debería funcionar:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Alternativamente, si la carpeta ya existe:</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Si estás utilizando <a href="https://docs.docker.com/engine/security/rootless">Docker en modo sin raíz</a> o <a href="https://podman.io/">podman</a>, los UID y GID en el contenedor se mapearán a diferentes en el host. Primero necesitarás verificar tu subuid y subgid iniciales:</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>Por ejemplo, si tienes un valor de <strong>100000</strong>, el UID/GID mapeado será <strong>100100</strong> (100000 + 100):</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>O si la carpeta ya existe:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+</details>
+<p>Luego puedes montar el volumen al iniciar tu pila de Docker:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="nn">...</span>
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
+<span class="nn">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Cuando se utiliza la <a href="../integrations/#docker-autoconf">integración de Docker autoconf</a>, los plugins deben colocarse en el volumen montado en <code>/data/plugins</code> en el contenedor del programador.</p>
+<p>Lo primero que hay que hacer es crear la carpeta de plugins:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>./bw-data/plugins
+</code></pre></div>
+<p>Luego, puedes colocar los plugins de tu elección en esa carpeta:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>./bw-data/plugins
+</code></pre></div>
+<p>Debido a que el programador se ejecuta como un usuario sin privilegios con UID y GID 101, necesitarás editar los permisos:</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">101</span>:101<span class="w"> </span>./bw-data
+</code></pre></div>
+<p>Luego puedes montar el volumen al iniciar tu pila de Docker:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="nn">...</span>
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
+<span class="nn">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">Obsoleto</p>
+<p>La integración de Swarm está obsoleta y se eliminará en una futura versión. Por favor, considera usar la <a href="../integrations/#kubernetes">integración de Kubernetes</a> en su lugar.</p>
+<p><strong>Puedes encontrar más información en la <a href="../integrations/#swarm">documentación de la integración de Swarm</a>.</strong></p>
+</div>
+<p>Cuando se utiliza la <a href="../integrations/#swarm">integración de Swarm</a>, los plugins deben colocarse en el volumen montado en <code>/data/plugins</code> en el contenedor del programador.</p>
+<div class="admonition info">
+<p class="admonition-title">Volumen de Swarm</p>
+<p>La configuración de un volumen de Swarm que persistirá cuando el servicio del programador se ejecute en diferentes nodos no se cubre en esta documentación. Asumiremos que tienes una carpeta compartida montada en <code>/shared</code> en todos los nodos.</p>
+</div>
+<p>Lo primero que hay que hacer es crear la carpeta de plugins:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/shared/bw-plugins
+</code></pre></div>
+<p>Luego, puedes colocar los plugins de tu elección en esa carpeta:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>/shared/bw-plugins
+</code></pre></div>
+<p>Debido a que el programador se ejecuta como un usuario sin privilegios con UID y GID 101, necesitarás editar los permisos:</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">101</span>:101<span class="w"> </span>/shared/bw-plugins
+</code></pre></div>
+<p>Luego puedes montar el volumen al iniciar tu pila de Swarm:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="nn">...</span>
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
+<span class="nn">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Cuando se utiliza la <a href="../integrations/#kubernetes">integración de Kubernetes</a>, los plugins deben colocarse en el volumen montado en <code>/data/plugins</code> en el contenedor del programador.</p>
+<p>Lo primero que hay que hacer es declarar una <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">PersistentVolumeClaim</a> que contendrá los datos de nuestros plugins:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb-plugins</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
+<span class="nt">resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5Gi</span>
+</code></pre></div>
+<p>Ahora puedes añadir el montaje del volumen y un contenedor de inicialización para aprovisionar automáticamente el volumen:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
+<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
+<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;DATABASE_URI&quot;</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db&quot;</span>
+<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/data/plugins&quot;</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
+<span class="w">      </span><span class="nt">initContainers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler-init</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpine/git</span>
+<span class="w">          </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;git</span><span class="nv"> </span><span class="s">clone</span><span class="nv"> </span><span class="s">https://github.com/bunkerity/bunkerweb-plugins</span><span class="nv"> </span><span class="s">/data/plugins</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">chown</span><span class="nv"> </span><span class="s">-R</span><span class="nv"> </span><span class="s">101:101</span><span class="nv"> </span><span class="s">/data/plugins&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/data/plugins&quot;</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
+<span class="w">          </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb-plugins</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Cuando se utiliza la <a href="../integrations/#linux">integración de Linux</a>, los plugins deben escribirse en la carpeta <code>/etc/bunkerweb/plugins</code>:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>/etc/bunkerweb/plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w"> </span>/etc/bunkerweb/plugins
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="escribir-un-plugin">Escribir un plugin</h2>
+<h3 id="estructura">Estructura</h3>
+<div class="admonition tip">
+<p class="admonition-title">Plugins existentes</p>
+<p>Si la documentación no es suficiente, puedes echar un vistazo al código fuente existente de los <a href="https://github.com/bunkerity/bunkerweb-plugins">plugins oficiales</a> y los <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/common/core">plugins del núcleo</a> (ya incluidos en BunkerWeb, pero técnicamente son plugins).</p>
+</div>
+<p>Así es como se ve la estructura de un plugin:
+<div class="highlight"><pre><span></span><code>plugin /
+    confs / tipo_conf / nombre_conf.conf
+    ui / actions.py
+         hooks.py
+         template.html
+         blueprints / &lt;archivo(s)_blueprint&gt;
+              templates / &lt;plantilla(s)_blueprint&gt;
+    jobs / mi-trabajo.py
+    templates / mi-plantilla.json
+          mi-plantilla / configs / tipo_conf / nombre_conf.conf
+    plugin.lua
+    plugin.json
+</code></pre></div></p>
+<ul>
+<li>
+<p><strong>nombre_conf.conf</strong>: Añade <a href="../advanced/#custom-configurations">configuraciones personalizadas de NGINX</a> (como plantillas de Jinja2).</p>
+</li>
+<li>
+<p><strong>actions.py</strong>: Script para ejecutar en el servidor Flask. Este script se ejecuta en un contexto de Flask, dándote acceso a librerías y utilidades como <code>jinja2</code> y <code>requests</code>.</p>
+</li>
+<li>
+<p><strong>hooks.py</strong>: Archivo Python personalizado que contiene los hooks de Flask y que se ejecutará cuando se cargue el plugin.</p>
+</li>
+<li>
+<p><strong>template.html</strong>: Página del plugin personalizada a la que se accede a través de la UI.</p>
+</li>
+<li>
+<p><strong>carpeta blueprints (dentro de ui)</strong>:
+  Esta carpeta se utiliza para sobrescribir los blueprints de Flask existentes o crear nuevos. Dentro, puedes incluir archivos de blueprint y una subcarpeta opcional <strong>templates</strong> para las plantillas específicas del blueprint.</p>
+</li>
+<li>
+<p><strong>archivo py de trabajos</strong>: Archivos Python personalizados ejecutados como trabajos por el programador.</p>
+</li>
+<li>
+<p><strong>mi-plantilla.json</strong>: Añade <a href="../concepts/#templates">plantillas personalizadas</a> para sobrescribir los valores predeterminados de las configuraciones y aplicar configuraciones personalizadas fácilmente.</p>
+</li>
+<li>
+<p><strong>plugin.lua</strong>: Código ejecutado en NGINX usando el <a href="https://github.com/openresty/lua-nginx-module">módulo LUA de NGINX</a>.</p>
+</li>
+<li>
+<p><strong>plugin.json</strong>: Metadatos, configuraciones y definiciones de trabajos para tu plugin.</p>
+</li>
+</ul>
+<h3 id="empezando">Empezando</h3>
+<p>El primer paso es crear una carpeta que contendrá el plugin:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>miplugin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="nb">cd</span><span class="w"> </span>miplugin
+</code></pre></div>
+<h3 id="metadatos">Metadatos</h3>
+<p>Un archivo llamado <strong>plugin.json</strong> y escrito en la raíz de la carpeta del plugin debe contener metadatos sobre el plugin. Aquí hay un ejemplo:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;miplugin&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mi Plugin&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Solo un plugin de ejemplo.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;parcial&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;DUMMY_SETTING&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;multisite&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;help&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Aquí está la ayuda de la configuración.&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dummy-id&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Configuración de ejemplo&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^.*$&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;jobs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mi-trabajo&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mi-trabajo.py&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;every&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hour&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Aquí están los detalles de los campos:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Campo</th>
+<th style="text-align: center;">Obligatorio</th>
+<th style="text-align: center;">Tipo</th>
+<th style="text-align: left;">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>id</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">ID interno para el plugin: debe ser único entre otros plugins (incluidos los del "núcleo") y contener solo caracteres en minúscula.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>name</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Nombre de tu plugin.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>description</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Descripción de tu plugin.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>version</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Versión de tu plugin.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>stream</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Información sobre el soporte de stream: <code>no</code>, <code>yes</code> o <code>partial</code>.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>settings</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">dict</td>
+<td style="text-align: left;">Lista de las configuraciones de tu plugin.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>jobs</code></td>
+<td style="text-align: center;">no</td>
+<td style="text-align: center;">lista</td>
+<td style="text-align: left;">Lista de los trabajos de tu plugin.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>bwcli</code></td>
+<td style="text-align: center;">no</td>
+<td style="text-align: center;">dict</td>
+<td style="text-align: left;">Mapea los nombres de los comandos de la CLI a los archivos almacenados en el directorio 'bwcli' del plugin para exponer los plugins de la CLI.</td>
+</tr>
+</tbody>
+</table>
+<p>Cada configuración tiene los siguientes campos (la clave es el ID de las configuraciones utilizadas en una configuración):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Campo</th>
+<th style="text-align: center;">Obligatorio</th>
+<th style="text-align: center;">Tipo</th>
+<th style="text-align: left;">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>context</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Contexto de la configuración: <code>multisite</code> o <code>global</code>.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>default</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">El valor predeterminado de la configuración.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>help</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Texto de ayuda sobre el plugin (mostrado en la interfaz de usuario web).</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>id</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">ID interno utilizado por la interfaz de usuario web para los elementos HTML.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>label</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Etiqueta mostrada por la interfaz de usuario web.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>regex</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">La expresión regular utilizada para validar el valor proporcionado por el usuario.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>type</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">El tipo del campo: <code>text</code>, <code>check</code>, <code>select</code> o <code>password</code>.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>multiple</code></td>
+<td style="text-align: center;">no</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">ID único para agrupar múltiples configuraciones con números como sufijo.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>select</code></td>
+<td style="text-align: center;">no</td>
+<td style="text-align: center;">lista</td>
+<td style="text-align: left;">Lista de posibles valores de cadena cuando <code>type</code> es <code>select</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Cada trabajo tiene los siguientes campos:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Campo</th>
+<th style="text-align: center;">Obligatorio</th>
+<th style="text-align: center;">Tipo</th>
+<th style="text-align: left;">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>name</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Nombre del trabajo.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>file</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Nombre del archivo dentro de la carpeta de trabajos.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>every</code></td>
+<td style="text-align: center;">sí</td>
+<td style="text-align: center;">cadena</td>
+<td style="text-align: left;">Frecuencia de programación del trabajo: <code>minute</code>, <code>hour</code>, <code>day</code>, <code>week</code> u <code>once</code> (sin frecuencia, solo una vez antes de (re)generar la configuración).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="comandos-de-cli">Comandos de CLI</h3>
+<p>Los plugins pueden extender la herramienta 'bwcli' con comandos personalizados que se ejecutan bajo 'bwcli plugin <plugin_id> ...':</p>
+<ol>
+<li>Agregue un directorio 'bwcli' en su plugin y coloque un archivo por comando (por ejemplo, 'bwcli/list.py'). La CLI agrega la ruta del plugin a 'sys.path' antes de ejecutar el archivo.</li>
+<li>Declare los comandos en la sección opcional 'bwcli' de 'plugin.json', mapeando cada nombre de comando a su nombre de archivo ejecutable.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;bwcli&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;list&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;list.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;save&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;save.py&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>El planificador expone automáticamente los comandos declarados una vez que se instala el plugin. Los plugins principales, como 'backup' en 'src/common/core/backup', siguen el mismo patrón.</p>
+<h3 id="configuraciones">Configuraciones</h3>
+<p>Puedes añadir configuraciones personalizadas de NGINX añadiendo una carpeta llamada <strong>confs</strong> con contenido similar a las <a href="../advanced/#custom-configurations">configuraciones personalizadas</a>. Cada subcarpeta dentro de <strong>confs</strong> contendrá plantillas de <a href="https://jinja.palletsprojects.com">jinja2</a> que se generarán y cargarán en el contexto correspondiente (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>stream</code>, <code>server-stream</code>, <code>modsec</code>, <code>modsec-crs</code>, <code>crs-plugins-before</code> y <code>crs-plugins-after</code>).</p>
+<p>Aquí hay un ejemplo para un archivo de plantilla de configuración dentro de la carpeta <strong>confs/server-http</strong> llamado <strong>example.conf</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">location</span><span class="w"> </span><span class="s">/setting</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kn">default_type</span><span class="w"> </span><span class="s">&#39;text/plain&#39;</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">content_by_lua_block</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">ngx.say(&#39;{{</span><span class="w"> </span><span class="s">DUMMY_SETTING</span><span class="w"> </span><span class="err">}}</span><span class="s">&#39;)</span>
+<span class="w">    </span><span class="err">}</span>
+<span class="err">}</span>
+</code></pre></div>
+<p><code>{{ DUMMY_SETTING }}</code> será reemplazado por el valor de <code>DUMMY_SETTING</code> elegido por el usuario del plugin.</p>
+<h3 id="plantillas">Plantillas</h3>
+<p>Consulta la <a href="../concepts/#templates">documentación de plantillas</a> para obtener más información.</p>
+<h3 id="lua">LUA</h3>
+<h4 id="script-principal">Script principal</h4>
+<p>Internamente, BunkerWeb utiliza el <a href="https://github.com/openresty/lua-nginx-module">módulo LUA de NGINX</a> para ejecutar código dentro de NGINX. Los plugins que necesiten ejecutar código deben proporcionar un archivo lua en el directorio raíz de la carpeta del plugin utilizando el valor <code>id</code> de <strong>plugin.json</strong> como su nombre. Aquí hay un ejemplo llamado <strong>miplugin.lua</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">class</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;middleclass&quot;</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">plugin</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.plugin&quot;</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">utils</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.utils&quot;</span>
+
+
+<span class="kd">local</span><span class="w"> </span><span class="nv">myplugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">class</span><span class="p">(</span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">plugin</span><span class="p">)</span>
+
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">ctx</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">plugin</span><span class="p">.</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">self</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">ctx</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">dummy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;dummy&quot;</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">init</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;init called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">set</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;set called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">access</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;access called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log_default</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log_default called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">preread</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;preread called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log_stream</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log_stream called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">return</span><span class="w"> </span><span class="nv">myplugin</span>
+</code></pre></div>
+<p>Las funciones declaradas se llaman automáticamente durante contextos específicos. Aquí están los detalles de cada función:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Función</th>
+<th style="text-align: center;">Contexto</th>
+<th style="text-align: left;">Descripción</th>
+<th style="text-align: left;">Valor de retorno</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>init</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#init_by_lua">init_by_lua</a></td>
+<td style="text-align: left;">Se llama cuando NGINX acaba de iniciarse o recibió una orden de recarga. El caso de uso típico es preparar cualquier dato que será utilizado por tu plugin.</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>set</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#set_by_lua">set_by_lua</a></td>
+<td style="text-align: left;">Se llama antes de cada solicitud recibida por el servidor. El caso de uso típico es para computar antes de la fase de acceso.</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>access</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#access_by_lua">access_by_lua</a></td>
+<td style="text-align: left;">Se llama en cada solicitud recibida por el servidor. El caso de uso típico es hacer las comprobaciones de seguridad aquí y denegar la solicitud si es necesario.</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code>,<code>status</code>,<code>redirect</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li><li><code>status</code> (número): interrumpe el proceso actual y devuelve el <a href="https://github.com/openresty/lua-nginx-module#http-status-constants">estado HTTP</a></li><li><code>redirect</code> (URL): si se establece, redirigirá a la URL dada</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>log</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
+<td style="text-align: left;">Se llama cuando una solicitud ha terminado (y antes de que se registre en los registros de acceso). El caso de uso típico es hacer estadísticas o calcular contadores, por ejemplo.</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>log_default</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
+<td style="text-align: left;">Igual que <code>log</code> pero solo se llama en el servidor predeterminado.</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>preread</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block">preread_by_lua</a></td>
+<td style="text-align: left;">Similar a la función <code>access</code> pero para el modo stream.</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code>,<code>status</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li><li><code>status</code> (número): interrumpe el proceso actual y devuelve el <a href="https://github.com/openresty/lua-nginx-module#http-status-constants">estado</a></li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>log_stream</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block">log_by_lua</a></td>
+<td style="text-align: left;">Similar a la función <code>log</code> pero para el modo stream.</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (booleano): true si no hay error, de lo contrario false</li><li><code>msg</code> (cadena): mensaje de éxito o error</li></ul></td>
+</tr>
+</tbody>
+</table>
+<h4 id="librerias">Librerías</h4>
+<p>Todas las directivas del <a href="https://github.com/openresty/lua-nginx-module">módulo LUA de NGINX</a> y del <a href="https://github.com/openresty/stream-lua-nginx-module">módulo LUA de stream de NGINX</a> están disponibles. Además de eso, puedes usar las librerías LUA incluidas en BunkerWeb: consulta <a href="https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh">este script</a> para la lista completa.</p>
+<p>Si necesitas librerías adicionales, puedes ponerlas en la carpeta raíz del plugin y acceder a ellas prefijándolas con el ID de tu plugin. Aquí hay un ejemplo de archivo llamado <strong>mialibreria.lua</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">_M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="nv">_M</span><span class="p">.</span><span class="py">dummy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">function</span><span class="w"> </span><span class="p">()</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="s2">&quot;dummy&quot;</span>
+<span class="kr">end</span>
+
+<span class="kr">return</span><span class="w"> </span><span class="nv">_M</span>
+</code></pre></div>
+<p>Y aquí está cómo puedes usarla desde el archivo <strong>miplugin.lua</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">mialibreria</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;miplugin.mialibreria&quot;</span>
+
+<span class="p">...</span>
+
+<span class="nv">mialibreria</span><span class="p">.</span><span class="nf">dummy</span><span class="p">()</span>
+
+<span class="p">...</span>
+</code></pre></div>
+<h4 id="ayudantes">Ayudantes</h4>
+<p>Algunos módulos de ayudantes proporcionan ayudantes comunes y útiles:</p>
+<ul>
+<li><code>self.variables</code>: permite acceder y almacenar los atributos de los plugins</li>
+<li><code>self.logger</code>: imprime registros</li>
+<li><code>bunkerweb.utils</code>: varias funciones útiles</li>
+<li><code>bunkerweb.datastore</code>: accede a los datos compartidos globales en una instancia (almacén de clave/valor)</li>
+<li><code>bunkerweb.clusterstore</code>: accede a un almacén de datos Redis compartido entre las instancias de BunkerWeb (almacén de clave/valor)</li>
+</ul>
+<p>Para acceder a las funciones, primero necesitas <strong>requerir</strong> los módulos:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">utils</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.utils&quot;</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">datastore</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.datastore&quot;</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">clustestore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.clustertore&quot;</span>
+</code></pre></div>
+<p>Recuperar el valor de una configuración:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">myvar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">self</span><span class="p">.</span><span class="py">variables</span><span class="p">[</span><span class="s2">&quot;DUMMY_SETTING&quot;</span><span class="p">]</span>
+<span class="kr">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">myvar</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;no se puede recuperar la configuración DUMMY_SETTING&quot;</span><span class="p">)</span>
+<span class="kr">else</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;DUMMY_SETTING = &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">value</span><span class="p">)</span>
+<span class="kr">end</span>
+</code></pre></div>
+<p>Almacenar algo en la caché local:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">ok</span><span class="p">,</span><span class="w"> </span><span class="nv">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">self</span><span class="p">.</span><span class="py">datastore</span><span class="p">:</span><span class="nf">set</span><span class="p">(</span><span class="s2">&quot;plugin_myplugin_something&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;somevalue&quot;</span><span class="p">)</span>
+<span class="kr">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">ok</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;no se puede guardar plugin_myplugin_something en el datastore: &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">err</span><span class="p">)</span>
+<span class="kr">else</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;se guardó correctamente plugin_myplugin_something en el datastore&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+</code></pre></div>
+<p>Comprobar si una dirección IP es global:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">ret</span><span class="p">,</span><span class="w"> </span><span class="nv">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">utils</span><span class="p">.</span><span class="nf">ip_is_global</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="p">)</span>
+<span class="kr">if</span><span class="w"> </span><span class="nv">ret</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;error al comprobar si la IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; es global o no: &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">err</span><span class="p">)</span>
+<span class="kr">elseif</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">ret</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;la IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; no es global&quot;</span><span class="p">)</span>
+<span class="kr">else</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;la IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; es global&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Más ejemplos</p>
+<p>Si quieres ver la lista completa de funciones disponibles, puedes echar un vistazo a los archivos presentes en el <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/bw/lua/bunkerweb">directorio lua</a> del repositorio.</p>
+</div>
+<h3 id="trabajos">Trabajos</h3>
+<p>BunkerWeb utiliza un programador de trabajos interno para tareas periódicas como renovar certificados con certbot, descargar listas negras, descargar archivos MMDB, ... Puedes añadir tareas de tu elección colocándolas dentro de una subcarpeta llamada <strong>jobs</strong> y listándolas en el archivo de metadatos <strong>plugin.json</strong>. No olvides añadir los permisos de ejecución para todos para evitar cualquier problema cuando un usuario clone e instale tu plugin.</p>
+<h3 id="pagina-del-plugin">Página del plugin</h3>
+<p>Todo lo relacionado con la interfaz de usuario web se encuentra dentro de la subcarpeta <strong>ui</strong>, como vimos en la <a href="#estructura">sección de estructura anterior.</a>.</p>
+<h4 id="requisitos-previos">Requisitos previos</h4>
+<p>Cuando quieras crear una página de plugin, necesitas dos archivos:</p>
+<ul>
+<li>
+<p><strong>template.html</strong> que será accesible con un <strong>GET /plugins/&lt;<em>id_plugin</em>&gt;</strong>.</p>
+</li>
+<li>
+<p><strong>actions.py</strong> donde puedes añadir algo de scripting y lógica con un <strong>POST /plugins/&lt;<em>id_plugin</em>&gt;</strong>. Ten en cuenta que este archivo <strong>necesita una función con el mismo nombre que el plugin</strong> para funcionar. Este archivo es necesario incluso si la función está vacía.</p>
+</li>
+</ul>
+<h4 id="ejemplo-basico">Ejemplo básico</h4>
+<div class="admonition info">
+<p class="admonition-title">Plantilla de Jinja 2</p>
+<p>El archivo <strong>template.html</strong> es una plantilla de Jinja2, por favor consulta la <a href="https://jinja.palletsprojects.com">documentación de Jinja2</a> si es necesario.</p>
+</div>
+<p>Podemos dejar de lado el archivo <strong>actions.py</strong> y empezar a <strong>usar solo la plantilla en una situación GET</strong>. La plantilla puede acceder al contexto y las librerías de la aplicación, por lo que puedes usar Jinja, request o las utilidades de Flask.</p>
+<p>Por ejemplo, puedes obtener los argumentos de la solicitud en tu plantilla de esta manera:</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>argumentos de la solicitud: {{ request.args.get() }}.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</code></pre></div>
+<h4 id="actionspy">Actions.py</h4>
+<div class="admonition warning">
+<p class="admonition-title">Token CSRF</p>
+<p>Ten en cuenta que cada envío de formulario está protegido mediante un token CSRF, necesitarás incluir el siguiente fragmento en tus formularios:
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;hidden&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;csrf_token&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;{{ csrf_token() }}&quot;</span> <span class="p">/&gt;</span>
+</code></pre></div></p>
+</div>
+<p>Puedes potenciar tu página de plugin con scripting adicional con el archivo <strong>actions.py</strong> al enviar un <strong>POST /plugins/&lt;<em>id_plugin</em>&gt;</strong>.</p>
+<p>Tienes dos funciones por defecto en <strong>actions.py</strong>:</p>
+<p><strong>Función pre_render</strong></p>
+<p>Esto te permite recuperar datos cuando haces un <strong>GET</strong> de la plantilla, y usar los datos con la variable pre_render disponible en Jinja para mostrar contenido de forma más dinámica.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">pre_render</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="o">&lt;</span><span class="n">datos_pre_render</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>BunkerWeb te enviará este tipo de respuesta:</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok|ko&quot;</span><span class="p">,</span> <span class="s2">&quot;code&quot;</span> <span class="p">:</span> <span class="n">XXX</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">datos_pre_render</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
+</code></pre></div>
+<p><strong>Función &lt;<em>id_plugin</em>&gt;</strong></p>
+<p>Esto te permite recuperar datos cuando haces un <strong>POST</strong> desde el punto final de la plantilla, que debe usarse en AJAX.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">miplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="o">&lt;</span><span class="n">datos_id_plugin</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>BunkerWeb te enviará este tipo de respuesta:</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">datos_id_plugin</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span><span class="err">```</span>
+
+<span class="o">**</span><span class="n">A</span> <span class="n">qué</span> <span class="n">puedes</span> <span class="n">acceder</span> <span class="n">desde</span> <span class="n">action</span><span class="o">.</span><span class="n">py</span><span class="o">**</span>
+
+<span class="n">Aquí</span> <span class="n">están</span> <span class="n">los</span> <span class="n">argumentos</span> <span class="n">que</span> <span class="n">se</span> <span class="n">pasan</span> <span class="n">y</span> <span class="n">a</span> <span class="n">los</span> <span class="n">que</span> <span class="n">se</span> <span class="n">accede</span> <span class="n">en</span> <span class="n">las</span> <span class="n">funciones</span> <span class="n">de</span> <span class="n">action</span><span class="o">.</span><span class="n">py</span><span class="p">:</span>
+
+<span class="err">```</span><span class="n">python</span>
+<span class="n">funcion</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Librerías de Python disponibles</p>
+<p>La interfaz de usuario web de BunkerWeb incluye un conjunto de librerías de Python preinstaladas que puedes usar en el archivo <code>actions.py</code> de tu plugin u otros scripts relacionados con la interfaz de usuario. Estas están disponibles de serie sin necesidad de instalaciones adicionales.</p>
+<p>Aquí está la lista completa de librerías incluidas:</p>
+<ul>
+<li><strong>bcrypt</strong> - Librería para el hashing de contraseñas</li>
+<li><strong>biscuit-python</strong> - Tokens de autenticación Biscuit</li>
+<li><strong>certbot</strong> - Cliente ACME para Let's Encrypt</li>
+<li><strong>Flask</strong> - Framework web</li>
+<li><strong>Flask-Login</strong> - Gestión de sesiones de usuario</li>
+<li><strong>Flask-Session[cachelib]</strong> - Almacenamiento de sesiones del lado del servidor</li>
+<li><strong>Flask-WTF</strong> - Manejo de formularios y protección CSRF</li>
+<li><strong>gunicorn[gthread]</strong> - Servidor HTTP WSGI</li>
+<li><strong>pillow</strong> - Procesamiento de imágenes</li>
+<li><strong>psutil</strong> - Utilidades del sistema y de procesos</li>
+<li><strong>python_dateutil</strong> - Utilidades de fecha y hora</li>
+<li><strong>qrcode</strong> - Generación de códigos QR</li>
+<li><strong>regex</strong> - Expresiones regulares avanzadas</li>
+<li><strong>urllib3</strong> - Cliente HTTP</li>
+<li><strong>user_agents</strong> - Análisis de agentes de usuario</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Uso de librerías en tu plugin</p>
+<p>Para importar y usar estas librerías en tu archivo <code>actions.py</code>, simplemente usa la declaración estándar de <code>import</code> de Python. Por ejemplo:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">bcrypt</span>
+</code></pre></div>
+</div>
+<details class="warning">
+<summary>Librerías externas</summary>
+<p>Si necesitas librerías que no están en la lista anterior, instálalas dentro de la carpeta <code>ui</code> de tu plugin e impórtalas usando la directiva clásica de <code>import</code>. Asegúrate de la compatibilidad con el entorno existente para evitar conflictos.</p>
+</details>
+</div>
+<p><strong>Algunos ejemplos</strong></p>
+<ul>
+<li>Recuperar datos enviados de un formulario</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">miplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">mi_valor_formulario</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s2">&quot;mi_entrada_formulario&quot;</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">mi_valor_formulario</span>
+</code></pre></div>
+<ul>
+<li>Acceder a la configuración de la aplicación</li>
+</ul>
+<p><strong>action.py</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pre_render</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;CONFIG&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">methods</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">config</span><span class="err">```</span>
+
+<span class="o">**</span><span class="n">plantilla</span><span class="o">**</span>
+<span class="err">```</span><span class="n">html</span>
+<span class="o">&lt;</span><span class="err">!</span><span class="o">--</span> <span class="n">metadatos</span> <span class="o">+</span> <span class="n">configuración</span> <span class="o">--&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;</span><span class="p">{{</span> <span class="n">pre_render</span> <span class="p">}}</span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="err">```</span>
+
+<span class="c1">### Hooks.py</span>
+
+<span class="n">Esta</span> <span class="n">documentación</span> <span class="n">describe</span> <span class="n">los</span> <span class="n">ganchos</span> <span class="n">de</span> <span class="n">ciclo</span> <span class="n">de</span> <span class="n">vida</span> <span class="n">utilizados</span> <span class="n">para</span> <span class="n">gestionar</span> <span class="n">diferentes</span> <span class="n">etapas</span> <span class="n">de</span> <span class="n">una</span> <span class="n">solicitud</span> <span class="n">dentro</span> <span class="n">de</span> <span class="n">la</span> <span class="n">aplicación</span><span class="o">.</span> <span class="n">Cada</span> <span class="n">gancho</span> <span class="n">está</span> <span class="n">asociado</span> <span class="n">a</span> <span class="n">una</span> <span class="n">fase</span> <span class="n">específica</span><span class="o">.</span>
+
+<span class="o">===</span> <span class="s2">&quot;before_request&quot;</span>
+    <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">ejecutan</span> <span class="o">**</span><span class="n">antes</span><span class="o">**</span> <span class="n">de</span> <span class="n">procesar</span> <span class="n">una</span> <span class="n">solicitud</span> <span class="n">entrante</span><span class="o">.</span> <span class="n">Se</span> <span class="n">utilizan</span> <span class="n">normalmente</span> <span class="n">para</span> <span class="n">tareas</span> <span class="n">de</span> <span class="n">preprocesamiento</span> <span class="n">como</span> <span class="n">autenticación</span><span class="p">,</span> <span class="n">validación</span> <span class="n">o</span> <span class="n">registro</span><span class="o">.</span>
+
+    <span class="n">Si</span> <span class="n">el</span> <span class="n">gancho</span> <span class="n">devuelve</span> <span class="n">un</span> <span class="n">objeto</span> <span class="n">de</span> <span class="n">respuesta</span><span class="p">,</span> <span class="n">Flask</span> <span class="n">omitirá</span> <span class="n">el</span> <span class="n">manejo</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">y</span> <span class="n">devolverá</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">directamente</span><span class="o">.</span> <span class="n">Esto</span> <span class="n">puede</span> <span class="n">ser</span> <span class="n">útil</span> <span class="n">para</span> <span class="n">cortocircuitar</span> <span class="n">el</span> <span class="n">pipeline</span> <span class="n">de</span> <span class="n">procesamiento</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span><span class="o">.</span>
+
+    <span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span><span class="o">**</span>
+
+    <span class="err">```</span><span class="n">python</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">Response</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">before_request</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Antes de la solicitud: validando la solicitud...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Realizar autenticación, validación o registro aquí</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span> <span class="c1"># Estamos en el contexto de la aplicación</span>
+            <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="s2">&quot;¡Solicitud inválida!&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="c1"># Lógica de validación ficticia</span>
+        <span class="k">return</span> <span class="s2">&quot;user&quot;</span> <span class="ow">in</span> <span class="n">request</span>
+    <span class="err">```</span>
+<span class="o">===</span> <span class="s2">&quot;after_request&quot;</span>
+    <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">ejecutan</span> <span class="o">**</span><span class="n">después</span><span class="o">**</span> <span class="n">de</span> <span class="n">que</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">ha</span> <span class="n">sido</span> <span class="n">procesada</span><span class="o">.</span> <span class="n">Son</span> <span class="n">ideales</span> <span class="n">para</span> <span class="n">tareas</span> <span class="n">de</span> <span class="n">postprocesamiento</span> <span class="n">como</span> <span class="n">limpieza</span><span class="p">,</span> <span class="n">registro</span> <span class="n">adicional</span> <span class="n">o</span> <span class="n">modificación</span> <span class="n">de</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">antes</span> <span class="n">de</span> <span class="n">que</span> <span class="n">se</span> <span class="n">envíe</span> <span class="n">de</span> <span class="n">vuelta</span><span class="o">.</span>
+
+    <span class="n">Reciben</span> <span class="n">el</span> <span class="n">objeto</span> <span class="n">de</span> <span class="n">respuesta</span> <span class="n">como</span> <span class="n">argumento</span> <span class="n">y</span> <span class="n">pueden</span> <span class="n">modificarlo</span> <span class="n">antes</span> <span class="n">de</span> <span class="n">devolverlo</span><span class="o">.</span> <span class="n">El</span> <span class="n">primer</span> <span class="n">gancho</span> <span class="n">after_request</span> <span class="n">que</span> <span class="n">devuelva</span> <span class="n">una</span> <span class="n">respuesta</span> <span class="n">se</span> <span class="n">utilizará</span> <span class="n">como</span> <span class="n">la</span> <span class="n">respuesta</span> <span class="n">final</span><span class="o">.</span>
+
+    <span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span><span class="o">**</span>
+
+    <span class="err">```</span><span class="n">python</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">after_request</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Después de la solicitud: registrando la respuesta...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Realizar registro, limpieza o modificaciones de la respuesta aquí</span>
+        <span class="n">log_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+        <span class="c1"># Lógica de registro ficticia</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Respuesta registrada:&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="err">```</span>
+<span class="o">===</span> <span class="s2">&quot;teardown_request&quot;</span>
+    <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">invocan</span> <span class="n">cuando</span> <span class="n">el</span> <span class="n">contexto</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">se</span> <span class="n">está</span> <span class="n">desmontando</span><span class="o">.</span> <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">utilizan</span> <span class="n">para</span> <span class="n">liberar</span> <span class="n">recursos</span> <span class="n">o</span> <span class="n">manejar</span> <span class="n">errores</span> <span class="n">que</span> <span class="n">ocurrieron</span> <span class="n">durante</span> <span class="n">el</span> <span class="n">ciclo</span> <span class="n">de</span> <span class="n">vida</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span><span class="o">.</span>
+
+    <span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span><span class="o">**</span>
+
+    <span class="err">```</span><span class="n">python</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">teardown_request</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Desmontaje de la solicitud: limpiando recursos...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Realizar limpieza, liberar recursos o manejar errores aquí</span>
+        <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+        <span class="n">cleanup_resources</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+        <span class="c1"># Lógica de manejo de errores ficticia</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error encontrado:&quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cleanup_resources</span><span class="p">():</span>
+        <span class="c1"># Lógica de limpieza de recursos ficticia</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Los recursos han sido limpiados.&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="err">```</span>
+<span class="o">===</span> <span class="s2">&quot;context_processor&quot;</span>
+    <span class="n">Estos</span> <span class="n">ganchos</span> <span class="n">se</span> <span class="n">utilizan</span> <span class="n">para</span> <span class="n">inyectar</span> <span class="n">contexto</span> <span class="n">adicional</span> <span class="n">en</span> <span class="n">las</span> <span class="n">plantillas</span> <span class="n">o</span> <span class="n">vistas</span><span class="o">.</span> <span class="n">Enriquecen</span> <span class="n">el</span> <span class="n">contexto</span> <span class="n">de</span> <span class="n">tiempo</span> <span class="n">de</span> <span class="n">ejecución</span> <span class="n">pasando</span> <span class="n">datos</span> <span class="n">comunes</span> <span class="p">(</span><span class="n">como</span> <span class="n">información</span> <span class="k">del</span> <span class="n">usuario</span> <span class="n">o</span> <span class="n">configuraciones</span><span class="p">)</span> <span class="n">a</span> <span class="n">las</span> <span class="n">plantillas</span><span class="o">.</span>
+
+    <span class="n">Si</span> <span class="n">un</span> <span class="n">procesador</span> <span class="n">de</span> <span class="n">contexto</span> <span class="n">devuelve</span> <span class="n">un</span> <span class="n">diccionario</span><span class="p">,</span> <span class="n">las</span> <span class="n">claves</span> <span class="n">y</span> <span class="n">los</span> <span class="n">valores</span> <span class="n">se</span> <span class="n">añadirán</span> <span class="n">al</span> <span class="n">contexto</span> <span class="n">para</span> <span class="n">todas</span> <span class="n">las</span> <span class="n">plantillas</span><span class="o">.</span> <span class="n">Esto</span> <span class="n">te</span> <span class="n">permite</span> <span class="n">compartir</span> <span class="n">datos</span> <span class="n">entre</span> <span class="n">múltiples</span> <span class="n">vistas</span> <span class="n">o</span> <span class="n">plantillas</span><span class="o">.</span>
+
+    <span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span><span class="o">**</span>
+
+    <span class="err">```</span><span class="n">python</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">context_processor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Procesador de contexto: inyectando datos de contexto...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Devolver un diccionario que contenga datos de contexto para las plantillas/vistas</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;current_user&quot;</span><span class="p">:</span> <span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;app_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;feature_flags&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;new_ui&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+        <span class="p">}</span>
+    <span class="err">```</span>
+
+<span class="n">Este</span> <span class="n">diseño</span> <span class="n">de</span> <span class="n">ganchos</span> <span class="n">de</span> <span class="n">ciclo</span> <span class="n">de</span> <span class="n">vida</span> <span class="n">proporciona</span> <span class="n">un</span> <span class="n">enfoque</span> <span class="n">modular</span> <span class="n">y</span> <span class="n">sistemático</span> <span class="n">para</span> <span class="n">gestionar</span> <span class="n">diversos</span> <span class="n">aspectos</span> <span class="k">del</span> <span class="n">ciclo</span> <span class="n">de</span> <span class="n">vida</span> <span class="n">de</span> <span class="n">una</span> <span class="n">solicitud</span><span class="p">:</span>
+
+<span class="o">-</span> <span class="o">**</span><span class="n">Modularidad</span><span class="p">:</span><span class="o">**</span> <span class="n">Cada</span> <span class="n">gancho</span> <span class="n">es</span> <span class="n">responsable</span> <span class="n">de</span> <span class="n">una</span> <span class="n">fase</span> <span class="n">distinta</span><span class="p">,</span> <span class="n">asegurando</span> <span class="n">que</span> <span class="n">las</span> <span class="n">responsabilidades</span> <span class="n">estén</span> <span class="n">separadas</span><span class="o">.</span>
+<span class="o">-</span> <span class="o">**</span><span class="n">Mantenibilidad</span><span class="p">:</span><span class="o">**</span> <span class="n">Los</span> <span class="n">desarrolladores</span> <span class="n">pueden</span> <span class="n">añadir</span><span class="p">,</span> <span class="n">modificar</span> <span class="n">o</span> <span class="n">eliminar</span> <span class="n">fácilmente</span> <span class="n">implementaciones</span> <span class="n">de</span> <span class="n">ganchos</span> <span class="n">sin</span> <span class="n">afectar</span> <span class="n">otras</span> <span class="n">partes</span> <span class="k">del</span> <span class="n">ciclo</span> <span class="n">de</span> <span class="n">vida</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span><span class="o">.</span>
+<span class="o">-</span> <span class="o">**</span><span class="n">Extensibilidad</span><span class="p">:</span><span class="o">**</span> <span class="n">El</span> <span class="n">marco</span> <span class="n">es</span> <span class="n">flexible</span><span class="p">,</span> <span class="n">lo</span> <span class="n">que</span> <span class="n">permite</span> <span class="n">añadir</span> <span class="n">ganchos</span> <span class="n">adicionales</span> <span class="n">o</span> <span class="n">mejoras</span> <span class="n">a</span> <span class="n">medida</span> <span class="n">que</span> <span class="n">evolucionan</span> <span class="n">los</span> <span class="n">requisitos</span> <span class="n">de</span> <span class="n">la</span> <span class="n">aplicación</span><span class="o">.</span>
+
+<span class="n">Al</span> <span class="n">definir</span> <span class="n">claramente</span> <span class="n">las</span> <span class="n">responsabilidades</span> <span class="n">de</span> <span class="n">cada</span> <span class="n">gancho</span> <span class="n">y</span> <span class="n">sus</span> <span class="n">prefijos</span> <span class="n">de</span> <span class="n">registro</span> <span class="n">asociados</span><span class="p">,</span> <span class="n">el</span> <span class="n">sistema</span> <span class="n">asegura</span> <span class="n">que</span> <span class="n">cada</span> <span class="n">etapa</span> <span class="k">del</span> <span class="n">procesamiento</span> <span class="n">de</span> <span class="n">la</span> <span class="n">solicitud</span> <span class="n">sea</span> <span class="n">transparente</span> <span class="n">y</span> <span class="n">manejable</span><span class="o">.</span>
+
+<span class="c1">### Blueprints</span>
+
+<span class="n">En</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">los</span> <span class="o">**</span><span class="n">blueprints</span><span class="o">**</span> <span class="n">sirven</span> <span class="n">como</span> <span class="n">una</span> <span class="n">forma</span> <span class="n">modular</span> <span class="n">de</span> <span class="n">organizar</span> <span class="n">componentes</span> <span class="n">relacionados</span> <span class="err">—</span><span class="n">como</span> <span class="n">vistas</span><span class="p">,</span> <span class="n">plantillas</span> <span class="n">y</span> <span class="n">archivos</span> <span class="n">estáticos</span><span class="err">—</span> <span class="n">dentro</span> <span class="n">de</span> <span class="n">tu</span> <span class="n">aplicación</span><span class="o">.</span> <span class="n">Te</span> <span class="n">permiten</span> <span class="n">agrupar</span> <span class="n">la</span> <span class="n">funcionalidad</span> <span class="n">de</span> <span class="n">manera</span> <span class="n">lógica</span> <span class="n">y</span> <span class="n">se</span> <span class="n">pueden</span> <span class="n">usar</span> <span class="n">para</span> <span class="n">crear</span> <span class="n">nuevas</span> <span class="n">secciones</span> <span class="n">de</span> <span class="n">tu</span> <span class="n">aplicación</span> <span class="n">o</span> <span class="n">sobrescribir</span> <span class="n">las</span> <span class="n">existentes</span><span class="o">.</span>
+
+<span class="c1">#### Crear un Blueprint</span>
+
+<span class="n">Para</span> <span class="n">definir</span> <span class="n">un</span> <span class="n">blueprint</span><span class="p">,</span> <span class="n">creas</span> <span class="n">una</span> <span class="n">instancia</span> <span class="n">de</span> <span class="n">la</span> <span class="n">clase</span> <span class="err">`</span><span class="n">Blueprint</span><span class="err">`</span><span class="p">,</span> <span class="n">especificando</span> <span class="n">su</span> <span class="n">nombre</span> <span class="n">y</span> <span class="n">la</span> <span class="n">ruta</span> <span class="n">de</span> <span class="n">importación</span><span class="o">.</span> <span class="n">Luego</span><span class="p">,</span> <span class="n">defines</span> <span class="n">las</span> <span class="n">rutas</span> <span class="n">y</span> <span class="n">vistas</span> <span class="n">asociadas</span> <span class="n">a</span> <span class="n">este</span> <span class="n">blueprint</span><span class="o">.</span>
+
+<span class="o">**</span><span class="n">Ejemplo</span><span class="p">:</span> <span class="n">Definir</span> <span class="n">un</span> <span class="n">nuevo</span> <span class="n">Blueprint</span><span class="o">**</span>
+
+<span class="err">```</span><span class="n">python</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">render_template</span>
+
+<span class="c1"># Definir el blueprint</span>
+<span class="n">mi_blueprint</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;mi_blueprint&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/templates&#39;</span><span class="p">)</span> <span class="c1"># La carpeta de plantillas se establece para evitar conflictos con el blueprint original</span>
+
+<span class="c1"># Definir una ruta dentro del blueprint</span>
+<span class="nd">@mi_blueprint</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/mi_blueprint&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mi_pagina_blueprint</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;mi_blueprint.html&#39;</span><span class="p">)</span>
+</code></pre></div></p>
+<p>En este ejemplo, se crea un blueprint llamado <code>mi_blueprint</code> y se define una ruta <code>/mi_blueprint</code> dentro de él.</p>
+<h4 id="sobrescribir-un-blueprint-existente">Sobrescribir un Blueprint existente</h4>
+<p>Los blueprints también pueden sobrescribir los existentes para modificar o ampliar la funcionalidad. Para hacer esto, asegúrate de que el nuevo blueprint tenga el mismo nombre que el que estás sobrescribiendo y regístralo después del original.</p>
+<p><strong>Ejemplo: Sobrescribir un Blueprint existente</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">Blueprint</span>
+
+<span class="c1"># Blueprint original</span>
+<span class="n">instances</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;instances&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/templates&#39;</span><span class="p">)</span> <span class="c1"># La carpeta de plantillas se establece para evitar conflictos con el blueprint original</span>
+
+<span class="nd">@instances</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/instances&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">override_instances</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;Mi nueva página de instancias&quot;</span>
+</code></pre></div>
+<p>En este escenario, al acceder a la URL <code>/instances</code> se mostrará "Mi nueva página de instancias" porque el blueprint <code>instances</code>, registrado en último lugar, sobrescribe el blueprint <code>instances</code> original.</p>
+<div class="admonition warning">
+<p class="admonition-title">Sobre la sobrescritura</p>
+<p>Ten cuidado al sobrescribir los blueprints existentes, ya que puede afectar el comportamiento de la aplicación. Asegúrate de que los cambios se alineen con los requisitos de la aplicación y no introduzcan efectos secundarios inesperados.</p>
+<p>Todas las rutas existentes se eliminarán del blueprint original, por lo que necesitarás volver a implementarlas si es necesario.</p>
+</div>
+<h4 id="convenciones-de-nomenclatura">Convenciones de nomenclatura</h4>
+<div class="admonition danger">
+<p class="admonition-title">Importante</p>
+<p>Asegúrate de que el nombre del blueprint coincida con el nombre de la variable del blueprint, de lo contrario no se considerará un blueprint válido y no se registrará.</p>
+</div>
+<p>Para la coherencia y la claridad, es aconsejable seguir estas convenciones de nomenclatura:</p>
+<ul>
+<li>
+<p><strong>Nombres de Blueprint</strong>: Usa nombres cortos, todo en minúsculas. Se pueden usar guiones bajos para mejorar la legibilidad, por ejemplo, <code>user_auth</code>.</p>
+</li>
+<li>
+<p><strong>Nombres de archivo</strong>: Haz que el nombre del archivo coincida con el nombre del blueprint, asegurándote de que esté todo en minúsculas con guiones bajos según sea necesario, por ejemplo, <code>user_auth.py</code>.</p>
+</li>
+</ul>
+<p>Esta práctica se alinea con las convenciones de nomenclatura de módulos de Python y ayuda a mantener una estructura de proyecto clara.</p>
+<p><strong>Ejemplo: Nomenclatura de Blueprint y archivo</strong></p>
+<div class="highlight"><pre><span></span><code>plugin /
+    ui / blueprints / user_auth.py
+                      templates / user_auth.html
+</code></pre></div>
+<p>En esta estructura, <code>user_auth.py</code> contiene el blueprint <code>user_auth</code>, y <code>user_auth.html</code> es la plantilla asociada, cumpliendo con las convenciones de nomenclatura recomendadas.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.com/invite/fTf46FmtyD" target="_blank" rel="noopener" title="discord.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/bunkerity" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/bunkerity/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.reddit.com/r/BunkerWeb/" target="_blank" rel="noopener" title="www.reddit.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M0 256C0 114.6 114.6 0 256 0s256 114.6 256 256-114.6 256-256 256H37.1c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256m349.6-102.4c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34-34.5 3.7-61.4 33-61.4 68.4v.2c-37.5 1.6-71.8 12.3-99 29.1-10.1-7.8-22.8-12.5-36.5-12.5-33 0-59.8 26.8-59.8 59.8 0 24 14.1 44.6 34.4 54.1 2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54 0-33-26.8-59.8-59.8-59.8-13.7 0-26.3 4.6-36.4 12.4-27.4-17-62.1-27.7-100-29.1v-.2c0-25.4 18.9-46.5 43.4-49.9 4.4 18.8 21.3 32.8 41.5 32.8zm-172.5 93.3c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6-31.4-8.8-30.4-30.5S160.3 247 177 247zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6 11.8-39.3 28.5-39.3 31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9.8-6.2 3.9-6.5 18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1.3 5.1 3.6 3.9 6.5"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.instagram.com/bunkerweb/" target="_blank" rel="noopener" title="www.instagram.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224.3 141a115 115 0 1 0-.6 230 115 115 0 1 0 .6-230m-.6 40.4a74.6 74.6 0 1 1 .6 149.2 74.6 74.6 0 1 1-.6-149.2m93.4-45.1a26.8 26.8 0 1 1 53.6 0 26.8 26.8 0 1 1-53.6 0m129.7 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8M399 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/bunkerity" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../assets/extra.js"></script>
+      
+        <script src="https://chatbot.bunkerweb.io/static/js/chatbot.js"></script>
+      
+        <script src="../../assets/preserve-version-on-language-switch.js"></script>
+      
+        <script src="../../assets/toc-dropdown.js"></script>
+      
+    
+  </body>
+</html>
