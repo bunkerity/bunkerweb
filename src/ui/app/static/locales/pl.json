@@ -421,10 +421,10 @@
             "ram": {
                 "critical_high": "Krytyczne: Systemowi kończy się pamięć!",
                 "good_high": "Doskonała pamięć dla środowisk produkcyjnych",
-                "info_medium": "Rozważ aktualizację do 16 GB+ do użytku produkcyjnego.",
+                "info_medium": "Rozważ aktualizację do 16 GB+ do użytku produkcyjnego",
                 "title": "System RAM",
                 "usage": "{{percent}}% wykorzystane",
-                "warning_low": "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność."
+                "warning_low": "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność"
             },
             "services": {
                 "status": "aktywne {{online}}/szkice {{draft}}",
@@ -512,8 +512,8 @@
         "processing": "Przetwarzanie...",
         "search": "Wyszukiwanie:",
         "select_rows_bans_0": "Brak wybranych blokad",
-        "select_rows_bans_1": "",
-        "select_rows_bans_2": "Wybrano 1 Ban",
+        "select_rows_bans_1": "Wybrano 1 blokady",
+        "select_rows_bans_2": "Wybrano 1 blokadę",
         "select_rows_bans_plural": "Wybrano %d blokad",
         "select_rows_cache_0": "Nie wybrano żadnych plików pamięci podręcznej",
         "select_rows_cache_1": "",
@@ -531,7 +531,7 @@
         "select_rows_items_1": "",
         "select_rows_items_2": "Wybrano 1 element",
         "select_rows_items_plural": "Wybrano %d elementów",
-        "select_rows_jobs_0": "Brak wybranych ofert pracy",
+        "select_rows_jobs_0": "Brak wybranych zadań",
         "select_rows_jobs_1": "",
         "select_rows_jobs_2": "Wybrano 1 zadanie",
         "select_rows_jobs_plural": "Wybrano %d zadań",
@@ -541,7 +541,7 @@
         "select_rows_plugins_plural": "Wybrane %d wtyczki",
         "select_rows_reports_0": "Brak wybranych raportów",
         "select_rows_reports_1": "",
-        "select_rows_reports_2": "Wybrano 1 raport",
+        "select_rows_reports_2": "Wybrano 1 raport/y",
         "select_rows_reports_plural": "Wybrane %d raporty",
         "select_rows_services_0": "Nie wybrano żadnych usług",
         "select_rows_services_1": "",
@@ -841,7 +841,7 @@
     },
     "navigation": {
         "about": "O",
-        "bans": "Zakazy",
+        "bans": "Blokady",
         "cache": "Pamięć podręczna",
         "configs": "Konfiguracje",
         "extra_pages": "Dodatkowe strony",
@@ -1498,7 +1498,7 @@
                 "ip_address": "Zablokowany adres IP",
                 "reason": "Powód blokady",
                 "scope": "Zakres zakazu (globalny lub specyficzny dla usługi)",
-                "select_all": "Wybierz wszystkie zakazy",
+                "select_all": "Wybierz wszystkie blokady",
                 "service": "Usługa, w której powstał zakaz (jeśli zakres jest specyficzny dla usługi)",
                 "time_left": "Czas pozostały do wygaśnięcia blokady"
             },
