@@ -4,7 +4,7 @@
         "gnu_license": "GNU Affero General Public License v3.0",
         "license_title": "Licencja",
         "socials": "Media społecznościowe",
-        "tagline": "Potężna ochrona, uproszczona",
+        "tagline": "Potężna ochrona, łatwe w użyciu",
         "version": "Wersja: {{version}}"
     },
     "alert": {
@@ -405,7 +405,7 @@
                 "title": "Zablokowane unikalne adresy IP"
             },
             "instances": {
-                "status": "{{up}} aktywne /{{down}} nieaktywne / {{loading}} wczytywanie",
+                "status": "aktywne {{up}} /nieaktywne {{down}} /wczytywanie {{loading}}",
                 "title": "Instancje"
             },
             "news": {
@@ -415,7 +415,7 @@
                 "title": "Plan"
             },
             "plugins": {
-                "status": "{{core}} podstawowe / {{pro}} PRO / {{external}} zewnętrzne",
+                "status": "podstawowe {{core}} /PRO {{pro}}/zewnętrzne {{external}}",
                 "title": "Wtyczki"
             },
             "ram": {
@@ -427,7 +427,7 @@
                 "warning_low": "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność."
             },
             "services": {
-                "status": "{{online}} aktywne / {{draft}} szkice",
+                "status": "aktywne {{online}}/szkice {{draft}}",
                 "title": "Usługi"
             },
             "total_requests": {
@@ -937,7 +937,7 @@
             "free_version": "Wersja BEZPŁATNA",
             "overlapped": "OVERLAPPED",
             "pro_version": "Wersja PRO",
-            "services_count": "{{online_services}} Usługi online / Usługi PRO {{pro_services}}",
+            "services_count": "Usługi online {{online_services}} /Usługi PRO {{pro_services}}",
             "suspended": "ZAWIESZONE",
             "title": "Status"
         }
@@ -1585,7 +1585,7 @@
                 "name": "Nazwa usługi",
                 "select_all": "Wybierz wszystkie usługi",
                 "template": "Szablon używany przez Usługę",
-                "type": "Typ usługi (online/wersja robocza)"
+                "type": "Typ usługi (Aktywne/Szkic)"
             }
         },
         "ui_host": "Nazwa hosta lub adres IP, który będzie obsługiwał interfejs użytkownika BunkerWeb za pośrednictwem odwrotnego serwera proxy.",
