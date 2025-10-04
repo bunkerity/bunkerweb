@@ -4,7 +4,7 @@
         "gnu_license": "GNU Affero General Public License v3.0",
         "license_title": "Licencja",
         "socials": "Media społecznościowe",
-        "tagline": "Potężna ochrona, uproszczona",
+        "tagline": "Potężna ochrona, łatwe w użyciu",
         "version": "Wersja: {{version}}"
     },
     "alert": {
@@ -38,14 +38,14 @@
     },
     "breadcrumb": {
         "about": "O",
-        "bans": "Zakazy",
+        "bans": "Blokady",
         "cache": "Pamięć podręczna",
         "configs": "Konfiguracje",
         "extra_pages": "Dodatkowe strony",
         "global_config": "Konfiguracja globalna",
         "home": "Strona główna",
         "instances": "Instancje",
-        "jobs": "Oferty pracy",
+        "jobs": "Zadania",
         "logs": "Logi",
         "misc": "Różne",
         "mode_selection": "Wybór trybu",
@@ -109,7 +109,7 @@
         "news": "Aktualności",
         "notifications": "Powiadomienia",
         "open_support_ticket": "Otwórz zgłoszenie do pomocy technicznej",
-        "order_support": "Obsługa zamówień",
+        "order_support": "Zamów wsparcie",
         "ping": "Ping",
         "plugin_page": "Strona wtyczki",
         "proceed": "Kontynuuj",
@@ -134,7 +134,7 @@
         "stop": "Stop",
         "submit": "Prześlij",
         "subscribe": "Subskrybuj",
-        "unban": "Unban",
+        "unban": "Odblokuj",
         "update_duration": "Aktualizacja czasu trwania blokady",
         "update_key": "Klucz aktualizacji",
         "upload_photo": "Prześlij nowe zdjęcie",
@@ -405,7 +405,7 @@
                 "title": "Zablokowane unikalne adresy IP"
             },
             "instances": {
-                "status": "{{up}} {{down}} {{loading}} loading",
+                "status": "aktywne {{up}} /nieaktywne {{down}} /wczytywanie {{loading}}",
                 "title": "Instancje"
             },
             "news": {
@@ -415,19 +415,19 @@
                 "title": "Plan"
             },
             "plugins": {
-                "status": "{{core}} core / {{pro}} PRO / {{external}} external",
+                "status": "podstawowe {{core}} /PRO {{pro}}/zewnętrzne {{external}}",
                 "title": "Wtyczki"
             },
             "ram": {
                 "critical_high": "Krytyczne: Systemowi kończy się pamięć!",
                 "good_high": "Doskonała pamięć dla środowisk produkcyjnych",
-                "info_medium": "Rozważ aktualizację do 16 GB+ do użytku produkcyjnego.",
+                "info_medium": "Rozważ aktualizację do 16 GB+ do użytku produkcyjnego",
                 "title": "System RAM",
                 "usage": "{{percent}}% wykorzystane",
-                "warning_low": "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność."
+                "warning_low": "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność"
             },
             "services": {
-                "status": "{{online}} online / {{draft}} draft",
+                "status": "aktywne {{online}}/szkice {{draft}}",
                 "title": "Usługi"
             },
             "total_requests": {
@@ -490,7 +490,7 @@
         "info_jobs": "Wyświetlanie {{start}} do {{end}} z {{total}} Praca",
         "info_plugins": "Wyświetlanie {{start}} do {{end}} z {{total}} Wtyczki",
         "info_reports": "Wyświetlanie {{start}} do {{end}} z {{total}} Raporty",
-        "info_services": "Showing {{start}} to {{end}} of {{total}} Services",
+        "info_services": "Wyswietlanie od {{start}} do {{end}} z {{total}} usług",
         "info_templates": "Wyświetlanie {{start}} do {{end}} z {{total}} Szablony",
         "length_all": "Wszystkie",
         "length_menu_bans": "Wyświetl _MENU_ Bans",
@@ -512,12 +512,12 @@
         "processing": "Przetwarzanie...",
         "search": "Wyszukiwanie:",
         "select_rows_bans_0": "Brak wybranych blokad",
-        "select_rows_bans_1": "",
-        "select_rows_bans_2": "Wybrano 1 Ban",
+        "select_rows_bans_1": "Wybrano 1 blokadę",
+        "select_rows_bans_2": "Wybrano 1 blokadę",
         "select_rows_bans_plural": "Wybrano %d blokad",
         "select_rows_cache_0": "Nie wybrano żadnych plików pamięci podręcznej",
-        "select_rows_cache_1": "",
-        "select_rows_cache_2": "Wybrano 1 plik pamięci podręcznej",
+        "select_rows_cache_1": "Wybrano 1 plik pamięci podręcznej",
+        "select_rows_cache_2": "Wybrano 1 pliki/ów pamięci podręcznej",
         "select_rows_cache_plural": "Wybrano %d plików pamięci podręcznej",
         "select_rows_configs_0": "Nie wybrano żadnych niestandardowych konfiguracji.",
         "select_rows_configs_1": "",
@@ -531,7 +531,7 @@
         "select_rows_items_1": "",
         "select_rows_items_2": "Wybrano 1 element",
         "select_rows_items_plural": "Wybrano %d elementów",
-        "select_rows_jobs_0": "Brak wybranych ofert pracy",
+        "select_rows_jobs_0": "Brak wybranych zadań",
         "select_rows_jobs_1": "",
         "select_rows_jobs_2": "Wybrano 1 zadanie",
         "select_rows_jobs_plural": "Wybrano %d zadań",
@@ -541,7 +541,7 @@
         "select_rows_plugins_plural": "Wybrane %d wtyczki",
         "select_rows_reports_0": "Brak wybranych raportów",
         "select_rows_reports_1": "",
-        "select_rows_reports_2": "Wybrano 1 raport",
+        "select_rows_reports_2": "Wybrano 1 raport/y",
         "select_rows_reports_plural": "Wybrane %d raporty",
         "select_rows_services_0": "Nie wybrano żadnych usług",
         "select_rows_services_1": "",
@@ -647,7 +647,7 @@
             "custom_ssl_certificate_data": "Dane niestandardowego certyfikatu SSL (Base64/PEM)",
             "custom_ssl_key": "Niestandardowy klucz SSL",
             "custom_ssl_key_data": "Dane klucza SSL niestandardowego (Base64/PEM)",
-            "dns_credential_items": "Let's Encrypt DNS Credential Items",
+            "dns_credential_items": "Poświadczenia DNS Let's Encrypt",
             "dns_propagation": "Opóźnienie propagacji DNS",
             "dns_provider": "Dostawca DNS",
             "email": "E-mail",
@@ -656,10 +656,10 @@
             "hostname": "Nazwa hosta",
             "ip_address": "Adres IP",
             "keywords": "Słowa kluczowe",
-            "lets_encrypt_custom_profile": "Let's Encrypt Custom Profile",
+            "lets_encrypt_custom_profile": "Własny profil Let's Encrypt",
             "lets_encrypt_disable_public_suffixes": "Wyłącz publiczne sufiksy (czarna lista PSL)",
-            "lets_encrypt_dns_credential_items": "Let's Encrypt DNS Credential Items",
-            "lets_encrypt_profile": "Let's Encrypt Profile",
+            "lets_encrypt_dns_credential_items": "Poświadczenia DNS Let's Encrypt",
+            "lets_encrypt_profile": "Profil Let's Encrypt",
             "license_key": "Klucz licencyjny",
             "make_permanent": "Ustaw jako stałe",
             "name": "Nazwa",
@@ -721,7 +721,7 @@
     "interval": {
         "day": "Codziennie",
         "hour": "Co godzinę",
-        "once": "Once",
+        "once": "Jednorazowo",
         "week": "Co tydzień"
     },
     "job": {
@@ -841,14 +841,14 @@
     },
     "navigation": {
         "about": "O",
-        "bans": "Zakazy",
+        "bans": "Blokady",
         "cache": "Pamięć podręczna",
         "configs": "Konfiguracje",
         "extra_pages": "Dodatkowe strony",
         "global_config": "Konfiguracja globalna",
         "home": "Strona główna",
         "instances": "Instancje",
-        "jobs": "Oferty pracy",
+        "jobs": "Zadania",
         "logs": "Logi",
         "misc": "Różne",
         "mode_selection": "Wybór trybu",
@@ -877,7 +877,7 @@
         "page": "Strona"
     },
     "plan": {
-        "free": "BEZPŁATNE",
+        "free": "DARMOWY",
         "pro": "PRO"
     },
     "plugin": {
@@ -937,7 +937,7 @@
             "free_version": "Wersja BEZPŁATNA",
             "overlapped": "OVERLAPPED",
             "pro_version": "Wersja PRO",
-            "services_count": "{{online_services}} Usługi online / Usługi PRO {{pro_services}}",
+            "services_count": "Usługi online {{online_services}} /Usługi PRO {{pro_services}}",
             "suspended": "ZAWIESZONE",
             "title": "Status"
         }
@@ -1339,7 +1339,7 @@
     },
     "theme": {
         "dark": "Ciemny",
-        "light": "Light"
+        "light": "Jasny"
     },
     "toast": {
         "autoconf_disclaimer_bold": "Jeśli usługa zostanie usunięta lub ponownie uruchomiona, konfiguracja interfejsu użytkownika zostanie utracona.",
@@ -1371,14 +1371,14 @@
             "delete_plugin": "Usuń wtyczkę {{name}}",
             "delete_service": "Usuń usługę {{name}}",
             "delete_template": "Usuń szablon {{name}}",
-            "ping_instance": "Ping Instance {{hostname}}",
+            "ping_instance": "Pinguj instancję {{hostname}}",
             "reload_instance": "Przeładuj instancję {{hostname}}",
             "reset_default": "Resetuj do wartości domyślnej",
             "reset_global": "Resetuj wartość globalną",
             "value_from_global": "Wartość z globalnej konfiguracji",
             "run_job": "Uruchom zadanie {{job}}",
             "stop_instance": "Zatrzymaj instancję {{hostname}}",
-            "unban_ip": "Unban {{ip}}",
+            "unban_ip": "Odblokuj {{ip}}",
             "ban_ip": "Zablokuj ten adres IP",
             "force_check": "Planuje sprawdzenie; pobiera tylko wtedy, gdy istnieją aktualizacje.",
             "force_update": "Pomija sprawdzanie i wymusza pobranie wtyczki PRO; zachowuje aktualny stan w przypadku niepowodzenia."
@@ -1498,7 +1498,7 @@
                 "ip_address": "Zablokowany adres IP",
                 "reason": "Powód blokady",
                 "scope": "Zakres zakazu (globalny lub specyficzny dla usługi)",
-                "select_all": "Wybierz wszystkie zakazy",
+                "select_all": "Wybierz wszystkie blokady",
                 "service": "Usługa, w której powstał zakaz (jeśli zakres jest specyficzny dla usługi)",
                 "time_left": "Czas pozostały do wygaśnięcia blokady"
             },
@@ -1544,7 +1544,7 @@
                 "name": "Nazwa zadania",
                 "plugin": "Wtyczka powiązana z zadaniem",
                 "reload": "Wskazuje, czy zadanie powoduje ponowne załadowanie BunkerWeb.",
-                "select_all": "Wybierz wszystkie oferty pracy"
+                "select_all": "Wybierz wszystkie zadania"
             },
             "plugins": {
                 "actions": "Dostępne działania dla tej wtyczki",
@@ -1585,7 +1585,7 @@
                 "name": "Nazwa usługi",
                 "select_all": "Wybierz wszystkie usługi",
                 "template": "Szablon używany przez Usługę",
-                "type": "Typ usługi (online/wersja robocza)"
+                "type": "Typ usługi (Aktywne/Szkic)"
             }
         },
         "ui_host": "Nazwa hosta lub adres IP, który będzie obsługiwał interfejs użytkownika BunkerWeb za pośrednictwem odwrotnego serwera proxy.",
