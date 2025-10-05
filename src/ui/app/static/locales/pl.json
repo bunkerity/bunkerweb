@@ -427,7 +427,7 @@
                 "warning_low": "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność"
             },
             "services": {
-                "status": "aktywne {{online}}/szkice {{draft}}",
+                "status": "online {{draft}} {{online}}/szkice {{draft}}",
                 "title": "Usługi"
             },
             "total_requests": {
@@ -813,7 +813,7 @@
             "full_url": "Pełny adres URL",
             "job_history": "Ostatnie 10 wykonanych zadań",
             "edit_template": "Edytuj szablon: {{name}}",
-            "job_history_count": "Ostatnie {{count}} wykonanie zadania",
+            "job_history_count": "Ostatnie {{count}} wykonań zadania",
             "recovery_codes": "Kody odzyskiwania",
             "reset_template_config": "Resetować konfigurację szablonu?",
             "fetch_global_config": "Zastosować ustawienia globalne?",
@@ -824,7 +824,7 @@
     },
     "mode": {
         "advanced": "Zaawansowane",
-        "easy": "Łatwe",
+        "easy": "Łatwy",
         "raw": "Ręczny"
     },
     "navbar": {
@@ -840,7 +840,7 @@
         "version": "Wersja"
     },
     "navigation": {
-        "about": "O",
+        "about": "O Nas",
         "bans": "Blokady",
         "cache": "Pamięć podręczna",
         "configs": "Konfiguracje",
@@ -899,7 +899,7 @@
     "pro": {
         "alert": {
             "overlapped_1": "Masz więcej aktywnych usług niż pozwala na to Twoja licencja!",
-            "overlapped_2": "Usuń lub przekonwertuj niektóre usługi do trybu Draft, aby osiągnąć limit usług {{pro_services}}."
+            "overlapped_2": "Usuń lub przekonwertuj niektóre usługi do trybu Szkicu, aby osiągnąć limit usług {{pro_services}}."
         },
         "button": {
             "all_features_available": "Wszystkie dostępne funkcje",
@@ -909,12 +909,12 @@
             "upgrade_to_pro": "Przejdź na wersję PRO"
         },
         "expiration_date": {
-            "expires_in": "Wygasają za",
+            "expires_in": "Wygasa za",
             "title": "Data wygaśnięcia Pro",
             "unknown": "Nieznana data wygaśnięcia"
         },
         "force_check": {
-            "title": "Wymuszaj sprawdzanie",
+            "title": "Wymuś sprawdzanie",
             "description": "Wymuś nowe sprawdzenie wtyczek PRO. Spowoduje to ponowne pobranie wtyczek, jeśli dostępne są nowe wersje."
         },
         "force_update": {
@@ -932,10 +932,10 @@
             "upgrade_required": "Aby uzyskać dostęp do tej funkcji, należy wykupić wersję Pro."
         },
         "status": {
-            "draft_services_count": "{{draft_services}} Usługi projektowe",
+            "draft_services_count": "{{draft_services}} Szkice usług",
             "expired": "WYGAŚNIĘTE",
             "free_version": "Wersja BEZPŁATNA",
-            "overlapped": "OVERLAPPED",
+            "overlapped": "NAKŁADAJĄCE SIĘ",
             "pro_version": "Wersja PRO",
             "services_count": "Usługi online {{online_services}} /Usługi PRO {{pro_services}}",
             "suspended": "ZAWIESZONE",
@@ -994,10 +994,11 @@
     },
     "searchpane": {
         "active": "Aktywne",
-        "async": "Async",
+        "async": "Asymetryczne",
         "clear": "Wyczyść wszystko",
-        "collapse": "Okienka wyszukiwania",
-        "collapse_plural": "Okienka wyszukiwania (%d)",
+        "collapse_0": "Okienka wyszukiwania",
+        "collapse_1": "Okienka wyszukiwania (%d)",
+        "collapse_2": "",
         "collapse_message": "Zwiń wszystko",
         "count": "{total}",
         "countFiltered": "{shown} ({total})",
@@ -1042,11 +1043,12 @@
         "one_or_more": "Jeden lub więcej",
         "title_0": "Brak aktywnych filtrów",
         "title_1": "",
-        "title_2": "Aktywny filtr – 1",
-        "title_plural": "Aktywne filtry – %d",
+        "title_2": "1 - Aktywnych filtrów",
+        "title_plural": "%d - Aktywne filtry",
         "type": "Typ",
         "url": "URL",
-        "version": "Wersja"
+        "version": "Wersja",
+        "collapse_plural": "Okienka wyszukiwania (%d)"
     },
     "settings": {
         "custom_config": {
@@ -1108,8 +1110,8 @@
         "admin_user_exists": "🧑‍🚀 Użytkownik administracyjny już istnieje. Przejdź do następnego kroku.",
         "blog_connection_fail": "Nie można połączyć się z blogiem w celu uzyskania aktualnych wiadomości.",
         "default_server": "Domyślny serwer",
-        "down": "Down",
-        "draft": "Projekt",
+        "down": "Niedostępny",
+        "draft": "Szkic",
         "error_loading_bans": "Wystąpił błąd podczas ładowania blokad. Spróbuj odświeżyć stronę.",
         "failed": "Nie powiodło się",
         "loading": "Ładowanie...",
@@ -1156,7 +1158,7 @@
         "template_in_use": "Usługa ta korzysta obecnie z szablonu „{{template}} ”, który jest zarządzany za pośrednictwem „{{method}} ”.",
         "template_in_use_description": "Zmiany poza bieżącym szablonem są niedozwolone. Proszę wprowadzać zmiany przy użyciu bieżącego szablonu lub przełączyć się do trybu zaawansowanego/ręcznego.",
         "unique_server_name": "Unikalna nazwa serwera",
-        "up": "Up",
+        "up": "Aktywny",
         "yes": "Tak"
     },
     "step": {
@@ -1183,9 +1185,9 @@
     },
     "table": {
         "header": {
-            "actions": "Działania",
+            "actions": "Akcje",
             "active": "Aktywne",
-            "async": "Async",
+            "async": "Asymetryczne",
             "checksum": "Suma kontrolna",
             "country": "Kraj",
             "created": "Utworzono",
@@ -1212,14 +1214,14 @@
             "steps": "Kroki",
             "reason": "Powód",
             "reload": "Odśwież",
-            "request_id": "Identyfikator żądania",
+            "request_id": "ID żądania",
             "scope": "Zakres",
             "security_mode": "Tryb bezpieczeństwa",
             "server_name": "Nazwa serwera",
             "service": "Usługa",
             "service_name": "Nazwa usługi",
             "status_code": "Kod statusu",
-            "stream": "Stream",
+            "stream": "Strumień",
             "template": "Szablon",
             "templates": "Szablony",
             "time_left": "Pozostały czas",
@@ -1254,7 +1256,7 @@
             "heading_edit": "Edytuj szablon {{id}}",
             "label_config_data": "Data",
             "label_config_name": "Nazwa",
-            "label_config_order": "Zamówienie",
+            "label_config_order": "Kolejność",
             "label_config_type": "Typ",
             "label_setting_key": "Klucz ustawień",
             "label_setting_value": "Wartość domyślna",
@@ -1271,7 +1273,7 @@
             "placeholder_setting_value": "Wartość domyślna",
             "placeholder_step_subtitle": "Podtytuł kroku",
             "placeholder_step_title": "Tytuł kroku",
-            "placeholder_template_id": "template-id",
+            "placeholder_template_id": "szablon-id",
             "placeholder_template_name": "Mój szablon",
             "readonly_db": "Baza danych jest obecnie tylko do odczytu. Szablony nie mogą być zmieniane.",
             "readonly_method": "Ten szablon został utworzony w ramach procesu {{method}} i nie można go edytować z poziomu interfejsu użytkownika.",
@@ -1300,10 +1302,10 @@
             "setting_selector_filter_plugin_all": "Wszystkie wtyczki",
             "setting_selector_filter_type": "Typ",
             "setting_selector_filter_type_all": "Wszystkie typy",
-            "setting_selector_helper": "Dostępne są tylko ustawienia wielostronne. Użyj filtrów, aby zawęzić listę.",
+            "setting_selector_helper": "Dostępne są tylko ustawienia wielu witryn. Użyj filtrów, aby zawęzić listę.",
             "setting_selector_multiple": "Wiele",
             "setting_selector_pattern": "Wzór",
-            "setting_selector_search_label": "Znajdź ustawienie wielostroniczne",
+            "setting_selector_search_label": "Znajdź ustawienie wielu witryn",
             "setting_selector_search_placeholder": "Wyszukiwanie według etykiety, klucza lub wtyczki",
             "step_configs_empty": "Do tego kroku nie dodano jeszcze żadnych konfiguracji.",
             "step_configs_selection_title": "Wybierz istniejące konfiguracje",
@@ -1329,7 +1331,7 @@
             "summary_metadata_unknown": "Niedostępne",
             "summary_metadata_updated": "Ostatnia aktualizacja",
             "validation_config_name_required": "Nazwa konfiguracji jest wymagana, gdy definiowana jest konfiguracja.",
-            "validation_config_type_multisite": "Typ konfiguracji musi być jednym z typów zgodnych z wielostronnością.",
+            "validation_config_type_multisite": "Typ konfiguracji musi być jednym z typów zgodnych z wieloma witrynami.",
             "validation_config_type_required": "Typ konfiguracji jest wymagany, gdy definiowana jest konfiguracja.",
             "validation_configs_unique": "Każda nazwa konfiguracji musi być unikalna.",
             "validation_id_required": "Wymagany jest identyfikator szablonu.",
@@ -1343,7 +1345,7 @@
     },
     "toast": {
         "autoconf_disclaimer_bold": "Jeśli usługa zostanie usunięta lub ponownie uruchomiona, konfiguracja interfejsu użytkownika zostanie utracona.",
-        "autoconf_disclaimer_detail": "Wynika to z faktu, że metoda działania usługi to „autoconf”, która ma na celu zapobieganie konfliktom konfiguracyjnym.",
+        "autoconf_disclaimer_detail": "Wynika to z faktu, że metoda działania usługi to 'autoconf', która ma na celu zapobieganie konfliktom konfiguracyjnym.",
         "ban_updated": "Okres blokady został pomyślnie zaktualizowany!",
         "body": {
             "ping_succeed": "Przykłady: {{instances}}"
@@ -1351,10 +1353,10 @@
         "copied": "Skopiowano!",
         "disclaimer_title": "Zastrzeżenie",
         "header": {
-            "ping_failed": "Ping nie powiodło się",
+            "ping_failed": "Ping nie powiodł się",
             "ping_succeed": "Ping zakończony powodzeniem"
         },
-        "ip_unbanned": "Adres IP został pomyślnie odblokowany!",
+        "ip_unbanned": "IP został pomyślnie odblokowany!",
         "global_settings_applied_title": "Zastosowano ustawienia globalne.",
         "global_settings_applied_body": "Ustawienia globalne zostały pomyślnie pobrane i zastosowane do bieżącego formularza.",
         "global_settings_failed_title": "Nie udało się pobrać ustawień globalnych",
@@ -1363,8 +1365,8 @@
     "tooltip": {
         "auto_lets_encrypt": "Czy automatycznie żądać certyfikatu Let's Encrypt.",
         "button": {
-            "convert_service_to_draft": "Konwertuj usługę {{name}} na wersję roboczą",
-            "convert_service_to_online": "Konwertuj usługę „ {{name}} ” na usługę online",
+            "convert_service_to_draft": "Konwertuj usługę {{name}} na wersję Szkicu",
+            "convert_service_to_online": "Konwertuj usługę {{name}} na usługę online",
             "delete_config": "Usuń konfigurację niestandardową {{name}}",
             "delete_file": "Usuń plik pamięci podręcznej: {{filename}}",
             "delete_instance": "Usuń instancję {{hostname}}",
@@ -1390,7 +1392,7 @@
         "config_type": {
             "crs_plugins_after": "Konfiguracje stosowane po załadowaniu wtyczek OWASP Core Rule Set.",
             "crs_plugins_before": "Konfiguracje stosowane przed załadowaniem wtyczek OWASP Core Rule Set.",
-            "default_server_http": "Konfiguracje na poziomie serwera Nginx, w szczególności dla bloku „default server”, używane, gdy żądanie klienta nie pasuje do żadnej skonfigurowanej nazwy serwera.",
+            "default_server_http": "Konfiguracje na poziomie serwera Nginx, w szczególności dla bloku 'default server', używane, gdy żądanie klienta nie pasuje do żadnej skonfigurowanej nazwy serwera.",
             "http": "Konfiguracje stosowane globalnie na poziomie HTTP Nginx.",
             "modsec": "Konfiguracje ModSecurity stosowane po załadowaniu zestawu reguł OWASP Core Rule Set lub używane, jeśli zestaw reguł Core Rule Set nie jest załadowany.",
             "modsec_crs": "Konfiguracje ModSecurity stosowane przed załadowaniem zestawu reguł OWASP Core Rule Set.",
@@ -1406,26 +1408,26 @@
         "custom_ssl_key_data": "Dane niestandardowego klucza prywatnego SSL (format PEM lub kodowanie Base64).",
         "custom_ssl_key_path": "Ścieżka do pliku z niestandardowym kluczem prywatnym SSL.",
         "different_from_template": "Wartość różni się od domyślnej wartości szablonu.",
-        "disabled_by_method": "Wyłączone: Zarządzane za pomocą metody „{{method}} ”.",
+        "disabled_by_method": "Wyłączone: Zarządzane za pomocą metody '{{method}} '.",
         "disabled_db_readonly": "Wyłączone: Baza danych jest w trybie tylko do odczytu.",
-        "disabled_draft": "Wyłączone: Usługa jest w trybie roboczym.",
+        "disabled_draft": "Wyłączone: Usługa jest w trybie Szkicu.",
         "disabled_readonly": "Wyłączone: Tryb tylko do odczytu jest aktywny.",
-        "dns_check_url": "Jeśli strona wyświetla „ok”, nazwa serwera jest prawdopodobnie dostępna.",
-        "dns_credential_items": "Dane uwierzytelniające dostawcy DNS, używane do wyzwań DNS (np. „cloudflare_api_token=123456”). Wymagany format zależy od dostawcy.",
+        "dns_check_url": "Jeśli strona wyświetla 'ok', nazwa serwera jest prawdopodobnie dostępna.",
+        "dns_credential_items": "Dane uwierzytelniające dostawcy DNS, używane do wyzwań DNS (np. 'cloudflare_api_token=123456'). Wymagany format zależy od dostawcy.",
         "dns_credentials_dns_only": "Poświadczenia mają zastosowanie wyłącznie w przypadku wyzwań DNS.",
         "dns_propagation": "Czas (w sekundach) oczekiwania na propagację zmian DNS podczas wyzwań DNS.",
         "dns_propagation_dns_only": "Opóźnienie propagacji DNS ma zastosowanie wyłącznie w przypadku wyzwań DNS.",
         "dns_provider": "Dostawca DNS, z którego należy korzystać w przypadku wyzwań DNS Let's Encrypt.",
         "dns_provider_dns_only": "Wybór dostawcy DNS ma zastosowanie wyłącznie w przypadku wyzwań DNS.",
         "download_file": "Pobierz plik",
-        "draft_toggle_disabled": "Tryb roboczy można włączyć tylko dla usług utworzonych za pośrednictwem interfejsu użytkownika.",
+        "draft_toggle_disabled": "Tryb szkicu można włączyć tylko dla usług utworzonych za pośrednictwem interfejsu użytkownika.",
         "email_lets_encrypt": "Adres e-mail do rejestracji w Let's Encrypt w celu zarządzania certyfikatami i powiadomieniami.",
         "email_length": "Adres e-mail musi zawierać od 1 do 256 znaków.",
         "follow_latest_page_only": "Tryb śledzenia jest dostępny tylko na najnowszej stronie.",
         "fetch_global_settings": "Pobierz ustawienia globalne i zastosuj je do bieżącego szablonu.",
         "global_config_source": "Wartość dziedziczona z konfiguracji globalnej.",
         "instance_not_up": "Instancja {{hostname}} obecnie nie odpowiada ('up').",
-        "lets_encrypt_custom_profile": "Profil niestandardowy do użycia w Let's Encrypt (np. „my_custom_profile”).",
+        "lets_encrypt_custom_profile": "Profil niestandardowy do użycia w Let's Encrypt (np. 'my_custom_profile').",
         "lets_encrypt_disable_public_suffixes": "Wyłącz żądania certyfikatów dla domen pasujących do listy Public Suffix List (zalecane).",
         "lets_encrypt_profile": "Profil do użycia dla Let's Encrypt (klasyczny, tlsserver, krótkotrwały).",
         "latest_version_installed": "Korzystasz z najnowszej wersji.",
@@ -1451,7 +1453,7 @@
                 "full_url": "Pełny adres URL"
             }
         },
-        "multisite_setting": "Jest to ustawienie wielostroniczne, które ma wpływ na wiele usług, jeśli zostanie zdefiniowane globalnie.",
+        "multisite_setting": "Jest to ustawienie wielu witryn, które ma wpływ na wiele usług, jeśli zostanie zdefiniowane globalnie.",
         "new_version_available": "Nowa wersja jest już dostępna!",
         "no_cache": "Nie znaleziono plików pamięci podręcznej dla tego zadania.",
         "no_history": "Nie znaleziono historii wykonania dla tego zadania.",
@@ -1460,19 +1462,19 @@
         "password_requirements": "Hasło musi mieć co najmniej 8 znaków i zawierać 1 wielką literę, 1 cyfrę i 1 znak specjalny.",
         "pro_feature": "Jest to funkcja PRO.",
         "readonly_db_action_disabled": "Wyłączone: Baza danych jest w trybie tylko do odczytu.",
-        "readonly_user_action_disabled": "Wyłączone: Twoje konto jest tylko do odczytu, akcja „{{action}} ” jest wyłączona.",
+        "readonly_user_action_disabled": "Wyłączone: Twoje konto jest tylko do odczytu, akcja '{{action}}' jest wyłączona.",
         "real_ip_from": "Lista zaufanych adresów IP / sieci, oddzielonych spacjami, z których pochodzą żądania proxy.",
         "real_ip_from_urls": "Lista adresów URL zawierających zaufane adresy IP / sieci, oddzielonych spacjami, z których pochodzą żądania proxy. Obsługuje również adresy URL file:// oraz uwierzytelnianie podstawowe przy użyciu schematu http://user:pass@url.",
         "real_ip_header": "Nagłówek HTTP zawierający rzeczywisty adres IP lub specjalną wartość proxy_protocol dla protokołu PROXY.",
-        "real_ip_recursive": "Przeprowadź rekurencyjne wyszukiwanie w adresie IP kontenera nagłówka.",
-        "remove_ban_entry": "Usuń ten wpis z listy.",
+        "real_ip_recursive": "Przeszukaj rekurencyjnie nagłówki w poszukiwaniu adresu IP.",
+        "remove_ban_entry": "Usuń ten wpis blokady z listy.",
         "reset_template_settings": "Zresetuj wszystkie ustawienia w bieżącym widoku szablonu do wartości domyślnych.",
         "select_file_to_follow": "Wybierz plik, aby włączyć tryb śledzenia",
         "server_name": "Główna nazwa domeny lub nazwa serwera dla tej usługi.",
         "stream_support": {
-            "no": "Nie obsługuje trybu STREAM.",
-            "partial": "Częściowo obsługuje tryb STREAM.",
-            "yes": "Obsługuje tryb STREAM."
+            "no": "Nie obsługuje trybu STRUMIENIA.",
+            "partial": "Częściowo obsługuje tryb STRUMIENIA.",
+            "yes": "Obsługuje tryb STRUMIENIA."
         },
         "table": {
             "templates": {
@@ -1490,16 +1492,16 @@
                 "last_update": "Data ostatniej aktualizacji szablonu"
             },
             "bans": {
-                "actions": "Dostępne działania dla tego zakazu",
+                "actions": "Dostępne działania dla tej blokady",
                 "country": "Kraj zablokowanego adresu IP",
                 "date": "Data i godzina utworzenia blokady",
                 "details": "Pokaż szczegóły blokady",
                 "end_date": "Data i godzina wygaśnięcia blokady",
                 "ip_address": "Zablokowany adres IP",
                 "reason": "Powód blokady",
-                "scope": "Zakres zakazu (globalny lub specyficzny dla usługi)",
+                "scope": "Zakres blokady (globalny lub specyficzny dla usługi)",
                 "select_all": "Wybierz wszystkie blokady",
-                "service": "Usługa, w której powstał zakaz (jeśli zakres jest specyficzny dla usługi)",
+                "service": "Usługa, w której powstała blokada (jeśli zakres jest specyficzny dla usługi)",
                 "time_left": "Czas pozostały do wygaśnięcia blokady"
             },
             "cache": {
@@ -1554,7 +1556,7 @@
                 "method": "Metoda tworzenia wtyczki (np. ui, core)",
                 "name": "Nazwa wtyczki",
                 "select_all": "Wybierz wszystkie wtyczki",
-                "stream": "Wskazuje, czy wtyczka obsługuje tryb strumieniowy.",
+                "stream": "Wskazuje, czy wtyczka obsługuje tryb strumienia.",
                 "type": "Typ wtyczki (Core, External, Pro, UI)",
                 "version": "Wersja wtyczki"
             },
@@ -1585,7 +1587,7 @@
                 "name": "Nazwa usługi",
                 "select_all": "Wybierz wszystkie usługi",
                 "template": "Szablon używany przez Usługę",
-                "type": "Typ usługi (Aktywne/Szkic)"
+                "type": "Typ usługi (Online/Szkic)"
             }
         },
         "ui_host": "Nazwa hosta lub adres IP, który będzie obsługiwał interfejs użytkownika BunkerWeb za pośrednictwem odwrotnego serwera proxy.",
