@@ -18,7 +18,7 @@
     "aria": {
         "label": {
             "close": "Zamknij",
-            "raw_configuration": "Surowa konfiguracja"
+            "raw_configuration": "Konfiguracja ręczna"
         }
     },
     "badge": {
@@ -29,7 +29,7 @@
         "unread_news": "Nieprzeczytane wiadomości"
     },
     "banner": {
-        "community": "Dołącz do społeczności Bunker, klikając <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">czacie Discord</a> i śledząc nas na <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",
+        "community": "Dołącz do społeczności Bunker, klikając <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">czat Discord</a> i śledząc nas na <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",
         "link": {
             "here": "tutaj"
         },
@@ -37,7 +37,7 @@
         "support": "Potrzebujesz wsparcia premium lub dostosowanego doradztwa dla BunkerWeb? Sprawdź nasze <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://panel.bunkerweb.io/?utm_campaign=self&utm_source=banner#services\">profesjonalne usługi</a>."
     },
     "breadcrumb": {
-        "about": "O",
+        "about": "O Nas",
         "bans": "Blokady",
         "cache": "Pamięć podręczna",
         "configs": "Konfiguracje",
@@ -63,22 +63,22 @@
     "button": {
         "actions": "Działania",
         "activate_key": "Aktywuj klucz",
-        "add": "INSERT",
+        "add": "DODAJ",
         "add_ban_plural": "Dodaj blokadę (blokady)",
         "add_plugin_plural": "Dodaj wtyczkę (wtyczki)",
         "add_plugins": "Dodaj wtyczki",
         "auto_refresh": "Automatyczne odświeżanie",
-        "ban": "Ban",
+        "ban": "Blokada",
         "ban_selected": "Zablokuj wybrane",
         "cache": "Pamięć podręczna",
         "cancel": "Anuluj",
-        "clear": "CLEAR",
+        "clear": "WYCZYŚĆ",
         "close": "Zamknij",
         "columns": "Kolumny",
-        "convert_services": "Usługi konwersji",
+        "convert_services": "Konwersja usług",
         "copy": "Kopiuj",
         "copy_codes": "Skopiuj kody",
-        "copy_raw": "Kopiuj surowe dane",
+        "copy_raw": "Kopiuj ręczne dane",
         "copy_visible": "Kopiuj widoczne",
         "create_config": "Utwórz niestandardową konfigurację",
         "create_instance": "Utwórz instancję",
@@ -94,7 +94,7 @@
         "fetch_global": "Pobierz globalną konfigurację",
         "filters_suffix": " Filtry",
         "follow": "Śledź",
-        "force_check": "Wymuszaj sprawdzanie",
+        "force_check": "Wymuś sprawdzanie",
         "force_update": "Wymuś aktualizację",
         "github_stars": "Gwiazdy",
         "go_back": "Wróć",
@@ -112,12 +112,12 @@
         "order_support": "Zamów wsparcie",
         "ping": "Ping",
         "plugin_page": "Strona wtyczki",
-        "proceed": "Kontynuuj",
+        "proceed": "Proceduj",
         "refresh_recovery_codes": "Odśwież kody odzyskiwania",
         "reload": "Odśwież",
         "reset": "Reset",
         "reset_columns": "Resetuj kolumny",
-        "return_to_safety": "Powrót do bezpieczeństwa",
+        "return_to_safety": "Bezpieczny powrót",
         "run": "Uruchom",
         "run_selected_jobs": "Uruchom wybrane zadania",
         "save": "Zapisz",
@@ -136,10 +136,10 @@
         "subscribe": "Subskrybuj",
         "unban": "Odblokuj",
         "update_duration": "Aktualizacja czasu trwania blokady",
-        "update_key": "Klucz aktualizacji",
+        "update_key": "Aktualizuj klucz",
         "upload_photo": "Prześlij nowe zdjęcie",
         "view_details": "Zobacz szczegóły",
-        "view_raw_data": "Wyświetl surowe dane",
+        "view_raw_data": "Wyświetl ręczne dane",
         "wipe_other_sessions": "Wyczyść inne sesje"
     },
     "country": {
@@ -402,7 +402,7 @@
                 "title": "Zablokowane żądania"
             },
             "blocked_unique_ips": {
-                "title": "Zablokowane unikalne adresy IP"
+                "title": "Zablokowane unikalne IP"
             },
             "instances": {
                 "status": "aktywne {{up}} /nieaktywne {{down}} /wczytywanie {{loading}}",
@@ -421,7 +421,7 @@
             "ram": {
                 "critical_high": "Krytyczne: Systemowi kończy się pamięć!",
                 "good_high": "Doskonała pamięć dla środowisk produkcyjnych",
-                "info_medium": "Rozważ aktualizację do 16 GB+ do użytku produkcyjnego",
+                "info_medium": "Rozważ aktualizację powyżej 16 GB do użytku produkcyjnego",
                 "title": "System RAM",
                 "usage": "{{percent}}% wykorzystane",
                 "warning_low": "Ostrzeżenie: Niski poziom pamięci może wpływać na wydajność"
@@ -439,8 +439,8 @@
                 "title": "Zablokowane żądania według kraju"
             },
             "blocking_status": {
-                "title": "Stan blokowania w czasie",
-                "subtitle": "Zablokowane żądania w czasie",
+                "title": "Stan blokowania według czasu",
+                "subtitle": "Zablokowane żądania według czasu",
                 "blocked_requests": "Zablokowane żądania",
                 "time": "Czas",
                 "count": "Liczba"
@@ -450,8 +450,8 @@
                 "blocked": "Zablokowane żądania"
             },
             "top_blocked_ips": {
-                "title": "10 najczęściej blokowanych adresów IP",
-                "most_blocked": "Najczęściej blokowane adresy IP"
+                "title": "10 najczęściej blokowanych IP",
+                "most_blocked": "Najczęściej blokowane IP"
             }
         },
         "map": {
@@ -462,15 +462,15 @@
         }
     },
     "datatable": {
-        "info_bans": "Wyświetlanie {{start}} do {{end}} z {{total}} Bans",
-        "info_cache": "Wyświetlanie {{start}} do {{end}} z {{total}} Pliki pamięci podręcznej",
-        "info_configs": "Pokazywanie {{start}} do {{end}} z {{total}} Konfiguracje niestandardowe",
-        "info_empty_bans": "Brak dostępnych banów",
+        "info_bans": "Wyświetlanie {{start}} do {{end}} z {{total}} Blokad",
+        "info_cache": "Wyświetlanie {{start}} do {{end}} z {{total}} Plików pamięci podręcznej",
+        "info_configs": "Pokazywanie {{start}} do {{end}} z {{total}} Konfiguracji niestandardowych",
+        "info_empty_bans": "Brak dostępnych blokad",
         "info_empty_cache": "Brak dostępnych plików pamięci podręcznej",
         "info_empty_configs": "Brak dostępnych konfiguracji niestandardowych",
         "info_empty_instances": "Brak dostępnych instancji",
         "info_empty_items": "Brak dostępnych elementów",
-        "info_empty_jobs": "Brak dostępnych ofert pracy",
+        "info_empty_jobs": "Brak dostępnych zadań",
         "info_empty_plugins": "Brak dostępnych wtyczek",
         "info_empty_reports": "Brak dostępnych raportów",
         "info_empty_services": "Brak dostępnych usług",
@@ -485,19 +485,19 @@
         "info_filtered_reports": "(filtrowane z _MAX_ całkowitej liczby raportów)",
         "info_filtered_services": "(filtrowane z _MAX_ całkowitej liczby usług)",
         "info_filtered_templates": "(filtrowane z _MAX_ całkowitej liczby szablonów)",
-        "info_instances": "Wyświetlanie {{start}} do {{end}} z {{total}} Instancje",
+        "info_instances": "Wyświetlanie {{start}} do {{end}} z {{total}} Instancji",
         "info_items": "Wyświetlanie {{start}} do {{end}} z {{total}} elementów",
-        "info_jobs": "Wyświetlanie {{start}} do {{end}} z {{total}} Praca",
-        "info_plugins": "Wyświetlanie {{start}} do {{end}} z {{total}} Wtyczki",
-        "info_reports": "Wyświetlanie {{start}} do {{end}} z {{total}} Raporty",
-        "info_services": "Wyswietlanie od {{start}} do {{end}} z {{total}} usług",
-        "info_templates": "Wyświetlanie {{start}} do {{end}} z {{total}} Szablony",
+        "info_jobs": "Wyświetlanie {{start}} do {{end}} z {{total}} Zadań",
+        "info_plugins": "Wyświetlanie {{start}} do {{end}} z {{total}} Wtyczek",
+        "info_reports": "Wyświetlanie {{start}} do {{end}} z {{total}} Raportów",
+        "info_services": "Wyswietlanie od {{start}} do {{end}} z {{total}} Usług",
+        "info_templates": "Wyświetlanie {{start}} do {{end}} z {{total}} Szablonów",
         "length_all": "Wszystkie",
-        "length_menu_bans": "Wyświetl _MENU_ Bans",
+        "length_menu_bans": "Wyświetl _MENU_ Blokady",
         "length_menu_cache": "Wyświetl _MENU_ Pliki pamięci podręcznej",
         "length_menu_configs": "Wyświetl _MENU_ Konfiguracje niestandardowe",
-        "length_menu_instances": "Wyświetlanie instancji _MENU_",
-        "length_menu_items": "Wyświetl elementy _MENU_",
+        "length_menu_instances": "Wyświetlanie _MENU_Instancje",
+        "length_menu_items": "Wyświetl _MENU_Elementu",
         "length_menu_jobs": "Wyświetl _MENU_ Zadania",
         "length_menu_plugins": "Wyświetl _MENU_ Wtyczki",
         "length_menu_reports": "Wyświetl _MENU_ Raporty",
@@ -512,51 +512,51 @@
         "processing": "Przetwarzanie...",
         "search": "Wyszukiwanie:",
         "select_rows_bans_0": "Brak wybranych blokad",
-        "select_rows_bans_1": "Wybrano 1 blokadę",
-        "select_rows_bans_2": "Wybrano 1 blokadę",
-        "select_rows_bans_plural": "Wybrano %d blokad",
+        "select_rows_bans_1": "",
+        "select_rows_bans_2": "Wybrano 1 blokad",
+        "select_rows_bans_plural": "Wybrano %d blokady",
         "select_rows_cache_0": "Nie wybrano żadnych plików pamięci podręcznej",
-        "select_rows_cache_1": "Wybrano 1 plik pamięci podręcznej",
-        "select_rows_cache_2": "Wybrano 1 pliki/ów pamięci podręcznej",
-        "select_rows_cache_plural": "Wybrano %d plików pamięci podręcznej",
+        "select_rows_cache_1": "",
+        "select_rows_cache_2": "Wybrano 1 plików pamięci podręcznej",
+        "select_rows_cache_plural": "Wybrano %d pliki pamięci podręcznej",
         "select_rows_configs_0": "Nie wybrano żadnych niestandardowych konfiguracji.",
         "select_rows_configs_1": "",
-        "select_rows_configs_2": "Wybrano 1 konfigurację niestandardową",
+        "select_rows_configs_2": "Wybrano 1 konfiguracji niestandardowych",
         "select_rows_configs_plural": "Wybrane %d konfiguracje niestandardowe",
         "select_rows_instances_0": "Nie wybrano żadnych instancji",
         "select_rows_instances_1": "",
-        "select_rows_instances_2": "Wybrano 1 instancję",
-        "select_rows_instances_plural": "Wybrano %d instancji",
+        "select_rows_instances_2": "Wybrano 1 instancji",
+        "select_rows_instances_plural": "Wybrano %d instancje",
         "select_rows_items_0": "Brak wybranych elementów",
         "select_rows_items_1": "",
-        "select_rows_items_2": "Wybrano 1 element",
-        "select_rows_items_plural": "Wybrano %d elementów",
+        "select_rows_items_2": "Wybrano 1 elementów",
+        "select_rows_items_plural": "Wybrano %d elementy",
         "select_rows_jobs_0": "Brak wybranych zadań",
         "select_rows_jobs_1": "",
-        "select_rows_jobs_2": "Wybrano 1 zadanie",
-        "select_rows_jobs_plural": "Wybrano %d zadań",
+        "select_rows_jobs_2": "Wybrano 1 zadań",
+        "select_rows_jobs_plural": "Wybrano %d zadania",
         "select_rows_plugins_0": "Nie wybrano żadnych wtyczek",
         "select_rows_plugins_1": "",
-        "select_rows_plugins_2": "Wybrano 1 wtyczkę",
+        "select_rows_plugins_2": "Wybrano 1 wtyczek",
         "select_rows_plugins_plural": "Wybrane %d wtyczki",
         "select_rows_reports_0": "Brak wybranych raportów",
         "select_rows_reports_1": "",
-        "select_rows_reports_2": "Wybrano 1 raport/y",
+        "select_rows_reports_2": "Wybrano 1 raportów",
         "select_rows_reports_plural": "Wybrane %d raporty",
         "select_rows_services_0": "Nie wybrano żadnych usług",
         "select_rows_services_1": "",
-        "select_rows_services_2": "Wybrano 1 usługę",
+        "select_rows_services_2": "Wybrano 1 usług",
         "select_rows_services_plural": "Wybrane %d usługi",
         "select_rows_templates_0": "Brak wybranych szablonów",
         "select_rows_templates_1": "",
-        "select_rows_templates_2": "Wybrano 1 szablon",
-        "select_rows_templates_plural": "Wybrano %d szablonów",
-        "zero_records_bans": "Nie znaleziono pasujących zakazów",
+        "select_rows_templates_2": "Wybrano 1 szablonów",
+        "select_rows_templates_plural": "Wybrano %d szablony",
+        "zero_records_bans": "Nie znaleziono pasujących blokad",
         "zero_records_cache": "Nie znaleziono pasujących plików pamięci podręcznej.",
         "zero_records_configs": "Nie znaleziono pasujących konfiguracji niestandardowych.",
         "zero_records_instances": "Nie znaleziono pasujących instancji.",
         "zero_records_items": "Nie znaleziono pasujących elementów.",
-        "zero_records_jobs": "Nie znaleziono pasujących ofert pracy",
+        "zero_records_jobs": "Nie znaleziono pasujących zadań",
         "zero_records_plugins": "Nie znaleziono pasujących wtyczek.",
         "zero_records_reports": "Nie znaleziono pasujących raportów.",
         "zero_records_services": "Nie znaleziono pasujących usług",
@@ -597,7 +597,7 @@
         },
         "ban_update_failed": "Nie udało się zaktualizować czasu trwania blokady. Spróbuj ponownie.",
         "reports_load_error": "Błąd podczas ładowania raportów. Spróbuj odświeżyć stronę.",
-        "unban_failed": "Nie udało się odblokować adresu IP. Spróbuj ponownie."
+        "unban_failed": "Nie udało się odblokować IP. Spróbuj ponownie."
     },
     "flash": {
         "easter_egg": "Jeśli to czytasz, oznacza to, że jesteś ciekawy 👀",
@@ -621,11 +621,11 @@
             "remember_me": "Zapamiętaj mnie"
         },
         "help": {
-            "ban_specific_service": "Zakaz będzie dotyczył wyłącznie tej konkretnej usługi.",
+            "ban_specific_service": "Blokada będzie dotyczył wyłącznie tej konkretnej usługi.",
             "hostname_length_limit": "Nazwa hosta jest ograniczona do 256 znaków.",
             "hostname_special_chars": "W specyfikacji protokołu/portu dozwolone są tylko znaki `/` i `:`.",
             "multivalue_separator": "Wartości są oddzielone znakiem:",
-            "permanent_ban": "Jeśli opcja jest zaznaczona, blokada nigdy nie wygaśnie, dopóki nie zostanie ręcznie usunięta.",
+            "permanent_ban": "Jeśli opcja jest zaznaczona, blokada nigdy nie wygaśnie, dopóki nie zostanie ręcznie usunięta",
             "photo_extensions": "Dopuszczalne formaty: JPG, GIF lub PNG. Maksymalny rozmiar: 800 KB."
         },
         "label": {
@@ -667,26 +667,26 @@
             "new_password": "Nowe hasło",
             "optional": "(Opcjonalnie)",
             "password": "Hasło",
-            "permanent_ban": "Stałe zablokowanie",
-            "raw_configuration": "Surowa konfiguracja",
+            "permanent_ban": "Permanentna blokada",
+            "raw_configuration": "Konfiguracja ręczna",
             "real_ip_from": "Prawdziwy adres IP z",
             "real_ip_from_urls": "Prawdziwy adres IP z (adresów URL)",
-            "real_ip_header": "Nagłówek Real IP",
-            "real_ip_recursive": "Real IP rekurencyjny",
+            "real_ip_header": "Prawdziwe IP nagłówka",
+            "real_ip_recursive": "Prawdziwe IP rekurencyjne",
             "reason": "Powód",
             "secret_token": "Tajemniczy token",
             "server_name": "Nazwa serwera",
             "service_name": "Nazwa usługi",
             "theme": "Motyw",
-            "template_id": "Identyfikator szablonu",
+            "template_id": "ID szablonu",
             "plugin_id": "Wtyczka",
             "type": "Typ",
-            "ui_host": "UI Host",
+            "ui_host": "UI Hosta",
             "ui_url": "UI URL",
             "use_custom_ssl": "Użyj niestandardowego SSL",
             "use_lets_encrypt_staging": "Użyj Let's Encrypt Staging",
             "use_proxy_protocol": "Użyj protokołu PROXY",
-            "use_real_ip": "Użyj prawdziwego adresu IP",
+            "use_real_ip": "Użyj prawdziwego IP",
             "username": "Nazwa użytkownika",
             "wildcard_certificates": "Certyfikaty Wildcard"
         },
@@ -701,7 +701,7 @@
             "search": "Wyszukaj...",
             "secret_token": "Tajemniczy token",
             "select_service": "Wybierz usługę",
-            "username_example": "johndoe"
+            "username_example": "Jan Kowalski"
         },
         "validation": {
             "confirm_password_match": "Hasła nie pasują.",
@@ -825,7 +825,7 @@
     "mode": {
         "advanced": "Zaawansowane",
         "easy": "Łatwe",
-        "raw": "Surowy"
+        "raw": "Ręczny"
     },
     "navbar": {
         "button": {
@@ -1154,7 +1154,7 @@
         "setting_up_bunkerweb": "Konfiguracja BunkerWeb, proszę czekać...",
         "success": "Sukces",
         "template_in_use": "Usługa ta korzysta obecnie z szablonu „{{template}} ”, który jest zarządzany za pośrednictwem „{{method}} ”.",
-        "template_in_use_description": "Zmiany poza bieżącym szablonem są niedozwolone. Proszę wprowadzać zmiany przy użyciu bieżącego szablonu lub przełączyć się do trybu zaawansowanego/surowego.",
+        "template_in_use_description": "Zmiany poza bieżącym szablonem są niedozwolone. Proszę wprowadzać zmiany przy użyciu bieżącego szablonu lub przełączyć się do trybu zaawansowanego/ręcznego.",
         "unique_server_name": "Unikalna nazwa serwera",
         "up": "Up",
         "yes": "Tak"
