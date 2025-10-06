@@ -84,7 +84,6 @@ jobs:
           - release: latest
             cache: false
             push: false
-            cache_suffix: arm
           - image: bunkerweb
             dockerfile: src/bw/Dockerfile
           - image: scheduler
@@ -97,6 +96,10 @@ jobs:
             dockerfile: src/api/Dockerfile
           - image: all-in-one
             dockerfile: src/all-in-one/Dockerfile
+          - arch: linux/arm64
+            cache_suffix: arm64
+          - arch: linux/arm/v7
+            cache_suffix: armv7
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ${{ matrix.release }}
