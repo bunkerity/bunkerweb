@@ -28,16 +28,16 @@ Führen Sie die folgenden Schritte aus, um die PHP-Funktion zu konfigurieren und
 | `LOCAL_PHP_PATH`  |          | multisite | nein     | **Lokaler Pfad:** Stammordner mit Dateien in der lokalen PHP-FPM-Instanz.                                           |
 
 !!! tip "Lokales vs. entferntes PHP-FPM"
-Wählen Sie das Setup, das am besten zu Ihrer Infrastruktur passt:
+    Wählen Sie das Setup, das am besten zu Ihrer Infrastruktur passt:
 
     - **Lokales PHP-FPM** bietet aufgrund der Socket-basierten Kommunikation eine bessere Leistung und ist ideal, wenn PHP auf derselben Maschine wie BunkerWeb läuft.
     - **Entferntes PHP-FPM** bietet mehr Flexibilität und Skalierbarkeit, indem die PHP-Verarbeitung auf separaten Servern erfolgen kann.
 
 !!! warning "Pfadkonfiguration"
-Der `REMOTE_PHP_PATH` oder `LOCAL_PHP_PATH` muss mit dem tatsächlichen Dateisystempfad übereinstimmen, in dem Ihre PHP-Dateien gespeichert sind; andernfalls tritt ein "Datei nicht gefunden"-Fehler auf.
+    Der `REMOTE_PHP_PATH` oder `LOCAL_PHP_PATH` muss mit dem tatsächlichen Dateisystempfad übereinstimmen, in dem Ihre PHP-Dateien gespeichert sind; andernfalls tritt ein "Datei nicht gefunden"-Fehler auf.
 
 !!! info "URL-Umschreibung"
-Das PHP-Plugin konfiguriert automatisch die URL-Umschreibung, um moderne PHP-Anwendungen zu unterstützen. Anfragen für nicht existierende Dateien werden an `index.php` weitergeleitet, wobei die ursprüngliche Anfrage-URI als Abfrageparameter verfügbar ist.
+    Das PHP-Plugin konfiguriert automatisch die URL-Umschreibung, um moderne PHP-Anwendungen zu unterstützen. Anfragen für nicht existierende Dateien werden an `index.php` weitergeleitet, wobei die ursprüngliche Anfrage-URI als Abfrageparameter verfügbar ist.
 
 ### Beispielkonfigurationen
 

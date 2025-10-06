@@ -32,7 +32,7 @@ Siga estos pasos para configurar y usar la función de Sesiones:
 | `SESSIONS_CHECK_USER_AGENT` | `yes`             | global   | no       | **Comprobar User-Agent:** Cuando se establece en `yes`, destruye la sesión si el User-Agent del cliente cambia.                                     |
 
 !!! warning "Consideraciones de Seguridad"
-El ajuste `SESSIONS_SECRET` es fundamental para la seguridad. En entornos de producción:
+    El ajuste `SESSIONS_SECRET` es fundamental para la seguridad. En entornos de producción:
 
     1. Use un valor fuerte y aleatorio (al menos 32 caracteres)
     2. Mantenga este valor confidencial
@@ -40,7 +40,7 @@ El ajuste `SESSIONS_SECRET` es fundamental para la seguridad. En entornos de pro
     4. Considere usar variables de entorno o gestión de secretos para evitar almacenar esto en texto plano
 
 !!! tip "Entornos en Clúster"
-Si está ejecutando múltiples instancias de BunkerWeb detrás de un balanceador de carga:
+    Si está ejecutando múltiples instancias de BunkerWeb detrás de un balanceador de carga:
 
     1. Establezca `USE_REDIS` en `yes` y configure su conexión Redis
     2. Asegúrese de que todas las instancias usen exactamente el mismo `SESSIONS_SECRET` y `SESSIONS_NAME`

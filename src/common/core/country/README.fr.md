@@ -23,13 +23,13 @@ Comment ça marche :
 | `BLACKLIST_COUNTRY` |        | multisite | non      | Liste noire : codes pays ISO 3166‑1 alpha‑2 séparés par des espaces. Ces pays sont bloqués.           |
 
 !!! tip "Liste blanche vs noire"
-Liste blanche : accès restreint à quelques pays. Liste noire : bloquer des régions problématiques et autoriser le reste.
+    Liste blanche : accès restreint à quelques pays. Liste noire : bloquer des régions problématiques et autoriser le reste.
 
 !!! warning "Priorité"
-Si une liste blanche et une liste noire sont définies, la liste blanche a priorité : si le pays n’y figure pas, l’accès est refusé.
+    Si une liste blanche et une liste noire sont définies, la liste blanche a priorité : si le pays n’y figure pas, l’accès est refusé.
 
 !!! info "Détection du pays"
-BunkerWeb utilise la base mmdb [db‑ip lite](https://db-ip.com/db/download/ip-to-country-lite).
+    BunkerWeb utilise la base mmdb [db‑ip lite](https://db-ip.com/db/download/ip-to-country-lite).
 
 ### Exemples
 

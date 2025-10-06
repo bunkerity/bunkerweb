@@ -9,7 +9,7 @@ So funktioniert's:
 5.  Sie behalten die volle Kontrolle über den Lebenszyklus der Zertifikate.
 
 !!! info "Automatische Überwachung"
-Mit `USE_CUSTOM_SSL: yes` überwacht BunkerWeb das Zertifikat `CUSTOM_SSL_CERT`, erkennt Änderungen und lädt NGINX bei Bedarf neu.
+    Mit `USE_CUSTOM_SSL: yes` überwacht BunkerWeb das Zertifikat `CUSTOM_SSL_CERT`, erkennt Änderungen und lädt NGINX bei Bedarf neu.
 
 ### Verwendung
 
@@ -19,7 +19,7 @@ Mit `USE_CUSTOM_SSL: yes` überwacht BunkerWeb das Zertifikat `CUSTOM_SSL_CERT`,
 4.  Daten: Geben Sie die base64- oder Klartext-PEM-Strings an.
 
 !!! tip "Stream-Modus"
-Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL` für den SSL/TLS-Port.
+    Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL` für den SSL/TLS-Port.
 
 ### Parameter
 
@@ -33,13 +33,13 @@ Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL` für den SSL/TLS-Port
 | `CUSTOM_SSL_KEY_DATA`      |          | multisite | nein     | Daten des privaten Schlüssels (base64 oder Klartext-PEM).       |
 
 !!! warning "Sicherheit"
-Schützen Sie den privaten Schlüssel (angemessene Berechtigungen, nur vom BunkerWeb-Scheduler lesbar).
+    Schützen Sie den privaten Schlüssel (angemessene Berechtigungen, nur vom BunkerWeb-Scheduler lesbar).
 
 !!! tip "Format"
-Zertifikate müssen im PEM-Format vorliegen. Konvertieren Sie bei Bedarf.
+    Zertifikate müssen im PEM-Format vorliegen. Konvertieren Sie bei Bedarf.
 
 !!! info "Zertifikatsketten"
-Wenn eine Zwischenkette erforderlich ist, stellen Sie das vollständige Bundle in der richtigen Reihenfolge bereit (Zertifikat, dann Zwischenzertifikate).
+    Wenn eine Zwischenkette erforderlich ist, stellen Sie das vollständige Bundle in der richtigen Reihenfolge bereit (Zertifikat, dann Zwischenzertifikate).
 
 ### Beispiele
 

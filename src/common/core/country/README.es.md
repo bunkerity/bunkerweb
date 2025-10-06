@@ -25,16 +25,16 @@ Siga estos pasos para configurar y utilizar la función de País:
 | `BLACKLIST_COUNTRY` |                   | multisite | no       | **Lista Negra de Países:** Lista de códigos de país (formato ISO 3166-1 alfa-2) separados por espacios. Estos países están bloqueados.  |
 
 !!! tip "Lista Blanca vs. Lista Negra"
-Elija el enfoque que mejor se adapte a sus necesidades:
+    Elija el enfoque que mejor se adapte a sus necesidades:
 
     -   Use la lista blanca cuando quiera restringir el acceso a un pequeño número de países.
     -   Use la lista negra cuando quiera bloquear el acceso desde regiones problemáticas específicas mientras permite a todos los demás.
 
 !!! warning "Regla de Precedencia"
-Si se configuran tanto la lista blanca como la lista negra, la lista blanca tiene prioridad. Esto significa que el sistema primero comprueba si un país está en la lista blanca; si no, se deniega el acceso independientemente de la configuración de la lista negra.
+    Si se configuran tanto la lista blanca como la lista negra, la lista blanca tiene prioridad. Esto significa que el sistema primero comprueba si un país está en la lista blanca; si no, se deniega el acceso independientemente de la configuración de la lista negra.
 
 !!! info "Detección de País"
-BunkerWeb utiliza la [base de datos mmdb lite de db-ip](https://db-ip.com/db/download/ip-to-country-lite) para determinar el país de origen basándose en las direcciones IP.
+    BunkerWeb utiliza la [base de datos mmdb lite de db-ip](https://db-ip.com/db/download/ip-to-country-lite) para determinar el país de origen basándose en las direcciones IP.
 
 ### Configuraciones de Ejemplo
 

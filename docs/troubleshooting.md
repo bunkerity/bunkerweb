@@ -288,7 +288,7 @@ If you see the following error `could not build server_names_hash, you should in
 
 When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
-## Web UI
+## Web UI {#web-ui}
 
 In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
 

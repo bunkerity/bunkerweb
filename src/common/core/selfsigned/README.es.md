@@ -8,7 +8,7 @@ El complemento de Certificado Autofirmado genera y gestiona automáticamente cer
 4.  El certificado se renueva automáticamente antes de su vencimiento, lo que garantiza la disponibilidad continua de HTTPS.
 
 !!! warning "Advertencias de Seguridad del Navegador"
-Los navegadores mostrarán advertencias de seguridad cuando los usuarios visiten sitios que utilizan certificados autofirmados, ya que estos certificados no están validados por una autoridad de certificación de confianza. Para entornos de producción, considere usar [Let's Encrypt](#lets-encrypt) en su lugar.
+    Los navegadores mostrarán advertencias de seguridad cuando los usuarios visiten sitios que utilizan certificados autofirmados, ya que estos certificados no están validados por una autoridad de certificación de confianza. Para entornos de producción, considere usar [Let's Encrypt](#lets-encrypt) en su lugar.
 
 ### Cómo usar
 
@@ -21,7 +21,7 @@ Siga estos pasos para configurar y usar la función de Certificado Autofirmado:
 5.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, los certificados se generan y aplican automáticamente a sus dominios.
 
 !!! tip "Configuración en Modo Stream"
-Para el modo stream, configure el ajuste `LISTEN_STREAM_PORT_SSL` para especificar el puerto de escucha SSL/TLS. Este paso es esencial para el correcto funcionamiento en modo stream.
+    Para el modo stream, configure el ajuste `LISTEN_STREAM_PORT_SSL` para especificar el puerto de escucha SSL/TLS. Este paso es esencial para el correcto funcionamiento en modo stream.
 
 ### Ajustes de Configuración
 
@@ -33,10 +33,10 @@ Para el modo stream, configure el ajuste `LISTEN_STREAM_PORT_SSL` para especific
 | `SELF_SIGNED_SSL_SUBJ`      | `/CN=www.example.com/` | multisite | no       | **Sujeto del certificado:** Campo de sujeto para el certificado que identifica el dominio.                                                       |
 
 !!! tip "Entornos de Desarrollo"
-Los certificados autofirmados son ideales para entornos de desarrollo y prueba donde se necesita HTTPS pero no se requieren certificados de confianza para los navegadores públicos.
+    Los certificados autofirmados son ideales para entornos de desarrollo y prueba donde se necesita HTTPS pero no se requieren certificados de confianza para los navegadores públicos.
 
 !!! info "Información del Certificado"
-Los certificados autofirmados generados utilizan el algoritmo especificado (por defecto, criptografía de curva elíptica con la curva prime256v1) e incluyen el sujeto configurado, lo que garantiza la funcionalidad adecuada para sus dominios.
+    Los certificados autofirmados generados utilizan el algoritmo especificado (por defecto, criptografía de curva elíptica con la curva prime256v1) e incluyen el sujeto configurado, lo que garantiza la funcionalidad adecuada para sus dominios.
 
 ### Configuraciones de Ejemplo
 

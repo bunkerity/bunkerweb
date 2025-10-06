@@ -67,7 +67,7 @@ USE_BROTLI=no
 
     包含描述和可能值的可用设置的完整列表可在文档的[功能部分](features.md)中找到。
 
-## 多站点模式
+## 多站点模式 {#multisite-mode}
 
 在使用 BunkerWeb 时，理解多站点模式至关重要。由于我们的主要重点是保护 Web 应用程序，我们的解决方案与“虚拟主机”或“vhosts”的概念紧密相连（更多信息请参见[此处](https://en.wikipedia.org/wiki/Virtual_hosting)）。这些虚拟主机使得可以从单个实例或集群中提供多个 Web 应用程序。
 
@@ -107,7 +107,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
     您将在文档的[高级用法](advanced.md)和仓库的 [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) 目录中找到多站点模式的具体示例。
 
-## 自定义配置
+## 自定义配置 {#custom-configurations}
 
 为了应对独特的挑战并满足特定的用例，BunkerWeb 提供了自定义配置的灵活性。虽然提供的设置和[外部插件](plugins.md)涵盖了广泛的场景，但可能存在需要额外定制的情况。
 
@@ -163,7 +163,7 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
   <figcaption>数据库模式</figcaption>
 </figure>
 
-## 调度器
+## 调度器 {#scheduler}
 
 为了实现无缝协调和自动化，BunkerWeb 采用了一个名为调度器的专门服务。调度器通过执行以下任务，在确保平稳运行方面发挥着至关重要的作用：
 
@@ -194,7 +194,7 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
 
 健康检查间隔由 `HEALTHCHECK_INTERVAL` 环境变量设置，默认值为 `30`，这意味着调度器将每 30 秒检查一次实例的健康状况。
 
-## 模板
+## 模板 {#templates}
 
 BunkerWeb 利用模板的强大功能来简化配置过程并增强灵活性。模板提供了一种结构化和标准化的方法来定义设置和自定义配置，确保了一致性和易用性。
 

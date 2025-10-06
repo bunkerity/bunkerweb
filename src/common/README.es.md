@@ -32,7 +32,7 @@ Algunos ajustes en BunkerWeb admiten múltiples configuraciones para la misma ca
 
 Este patrón te permite gestionar múltiples configuraciones para características como proxies inversos, puertos u otros ajustes que requieren valores distintos para diferentes casos de uso.
 
-### Modos de Seguridad
+### Modos de Seguridad {#security-modes}
 
 El ajuste `SECURITY_MODE` determina cómo BunkerWeb maneja las amenazas detectadas. Esta característica flexible te permite elegir entre monitorizar o bloquear activamente la actividad sospechosa, dependiendo de tus necesidades específicas:
 

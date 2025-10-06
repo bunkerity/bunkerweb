@@ -27,6 +27,7 @@
 .bashrc
 .boto
 .cache/notify-osd.log
+.cargo/
 .config/
 .cshrc
 .cups/
@@ -66,7 +67,10 @@
 .lhistory
 .lighttpdpassword
 .lldb-history
-.local/share/mc/
+.local/bin/
+.local/lib/
+.local/share/
+.local/state/
 .lynx_cookies
 .minikube/
 .my.cnf
@@ -94,6 +98,7 @@
 .rediscli_history
 .rhistory
 .rhosts
+.rustup/
 .selected_editor
 .sh_history
 .sqlite_history
@@ -116,6 +121,7 @@
 .vimrc
 .vscode
 .vmware/
+.wget-hsts
 .www_acl
 .wwwacl
 .xauthority

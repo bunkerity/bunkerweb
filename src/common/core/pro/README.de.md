@@ -32,13 +32,13 @@ Führen Sie die folgenden Schritte aus, um die Pro-Funktionen zu konfigurieren u
 | `PRO_LICENSE_KEY` |          | global  | nein     | **Pro-Lizenzschlüssel:** Ihr BunkerWeb Pro-Lizenzschlüssel zur Authentifizierung. |
 
 !!! tip "Lizenzverwaltung"
-Ihre Pro-Lizenz ist an Ihre spezifische Bereitstellungsumgebung gebunden. Wenn Sie Ihre Lizenz übertragen müssen oder Fragen zu Ihrem Abonnement haben, wenden Sie sich bitte über das [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) an den Support.
+    Ihre Pro-Lizenz ist an Ihre spezifische Bereitstellungsumgebung gebunden. Wenn Sie Ihre Lizenz übertragen müssen oder Fragen zu Ihrem Abonnement haben, wenden Sie sich bitte über das [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) an den Support.
 
 !!! info "Pro-Funktionen"
-Die spezifischen verfügbaren Pro-Funktionen können sich im Laufe der Zeit weiterentwickeln, wenn neue Funktionen hinzugefügt werden. Das Pro-Plugin übernimmt automatisch die Installation und Konfiguration aller verfügbaren Funktionen.
+    Die spezifischen verfügbaren Pro-Funktionen können sich im Laufe der Zeit weiterentwickeln, wenn neue Funktionen hinzugefügt werden. Das Pro-Plugin übernimmt automatisch die Installation und Konfiguration aller verfügbaren Funktionen.
 
 !!! warning "Netzwerkanforderungen"
-Das Pro-Plugin benötigt ausgehenden Internetzugang, um sich zur Lizenzüberprüfung mit der BunkerWeb-API zu verbinden und Premium-Plugins herunterzuladen. Stellen Sie sicher, dass Ihre Firewall Verbindungen zu `api.bunkerweb.io` auf Port 443 (HTTPS) zulässt.
+    Das Pro-Plugin benötigt ausgehenden Internetzugang, um sich zur Lizenzüberprüfung mit der BunkerWeb-API zu verbinden und Premium-Plugins herunterzuladen. Stellen Sie sicher, dass Ihre Firewall Verbindungen zu `api.bunkerweb.io` auf Port 443 (HTTPS) zulässt.
 
 ### Häufig gestellte Fragen
 

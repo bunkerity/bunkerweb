@@ -463,7 +463,7 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
         attachable: true
     ```
 
-## Completa el asistente de configuración
+## Completa el asistente de configuración {#complete-the-setup-wizard}
 
 !!! tip "Accediendo al asistente de configuración"
 

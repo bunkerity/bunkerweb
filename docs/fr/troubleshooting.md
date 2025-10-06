@@ -288,7 +288,7 @@ Si vous voyez l'erreur suivante `could not build server_names_hash, you should i
 
 Lors de l'utilisation d'intégrations basées sur des conteneurs, le fuseau horaire du conteneur peut ne pas correspondre à celui de la machine hôte. Pour résoudre ce problème, vous pouvez définir la `TZ` variable d'environnement sur le fuseau horaire de votre choix sur vos conteneurs (par exemple, `TZ=Europe/Paris`). Vous trouverez la liste des identifiants de fuseau horaire [ici](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
-## Interface utilisateur Web
+## Interface utilisateur Web {#web-ui}
 
 Si vous avez oublié vos informations d'identification de l'interface utilisateur ou si vous rencontrez des problèmes de 2FA, vous pouvez vous connecter à la base de données pour retrouver l'accès.
 

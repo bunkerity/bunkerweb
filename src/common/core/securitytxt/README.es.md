@@ -34,13 +34,13 @@ Siga estos pasos para configurar y usar la función Security.txt:
 | `SECURITYTXT_CSAF`             |                             | multisite | sí       | **CSAF:** Enlace al `provider-metadata.json` de su proveedor de Common Security Advisory Framework.                                |
 
 !!! warning "Se requiere fecha de vencimiento"
-Según la RFC 9116, el campo `Expires` es obligatorio. Si no proporciona un valor para `SECURITYTXT_EXPIRES`, BunkerWeb establece automáticamente la fecha de vencimiento en un año a partir de la fecha actual.
+    Según la RFC 9116, el campo `Expires` es obligatorio. Si no proporciona un valor para `SECURITYTXT_EXPIRES`, BunkerWeb establece automáticamente la fecha de vencimiento en un año a partir de la fecha actual.
 
 !!! info "La información de contacto es esencial"
-El campo `Contact` es la parte más importante del archivo security.txt. Debe proporcionar al menos una forma para que los investigadores de seguridad se pongan en contacto con usted. Puede ser una dirección de correo electrónico, un formulario web, un número de teléfono o cualquier otro método que funcione para su organización.
+    El campo `Contact` es la parte más importante del archivo security.txt. Debe proporcionar al menos una forma para que los investigadores de seguridad se pongan en contacto con usted. Puede ser una dirección de correo electrónico, un formulario web, un número de teléfono o cualquier otro método que funcione para su organización.
 
 !!! warning "Las URL deben usar HTTPS"
-Según la RFC 9116, todas las URL del archivo security.txt (excepto los enlaces `mailto:` y `tel:`) DEBEN usar HTTPS. BunkerWeb convertirá automáticamente las URL que no sean HTTPS a HTTPS para garantizar el cumplimiento de la norma.
+    Según la RFC 9116, todas las URL del archivo security.txt (excepto los enlaces `mailto:` y `tel:`) DEBEN usar HTTPS. BunkerWeb convertirá automáticamente las URL que no sean HTTPS a HTTPS para garantizar el cumplimiento de la norma.
 
 ### Configuraciones de Ejemplo
 

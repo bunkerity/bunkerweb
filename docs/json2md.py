@@ -31,6 +31,17 @@ I18N = {
         "no": "no",
         # Badge
         "pro_badge": " (PRO)",
+        # PRO plugins links
+        "pro_yt_links": {
+            "user_manager": {
+                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
+                "title": "User Manager",
+            },
+            "loadbalancer": {
+                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
+                "title": "Load Balancer",
+            },
+        },
     },
     "fr": {
         "features_title": "# Fonctionnalités",
@@ -48,6 +59,17 @@ I18N = {
         "no": "non",
         # Badge
         "pro_badge": " (PRO)",
+        # PRO plugins links
+        "pro_yt_links": {
+            "user_manager": {
+                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
+                "title": "Gestionnaire d'utilisateurs",
+            },
+            "loadbalancer": {
+                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
+                "title": "Équilibreur de charge",
+            },
+        },
     },
     "de": {
         "features_title": "# Funktionen",
@@ -62,6 +84,17 @@ I18N = {
         "yes": "ja",
         "no": "nein",
         "pro_badge": " (PRO)",
+        # PRO plugins links
+        "pro_yt_links": {
+            "user_manager": {
+                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
+                "title": "Benutzer-Manager",
+            },
+            "loadbalancer": {
+                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
+                "title": "Load Balancer",
+            },
+        },
     },
     "es": {
         "features_title": "# Características",
@@ -76,6 +109,17 @@ I18N = {
         "yes": "sí",
         "no": "no",
         "pro_badge": " (PRO)",
+        # PRO plugins links
+        "pro_yt_links": {
+            "user_manager": {
+                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
+                "title": "Página del Administrador de usuarios",
+            },
+            "loadbalancer": {
+                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
+                "title": "Balanceador de carga",
+            },
+        },
     },
     "zh": {
         "features_title": "# 功能",
@@ -90,6 +134,17 @@ I18N = {
         "yes": "是",
         "no": "否",
         "pro_badge": " (PRO)",
+        # PRO plugins links
+        "pro_yt_links": {
+            "user_manager": {
+                "url": "https://www.youtube-nocookie.com/embed/EIohiUf9Fg4",
+                "title": "用户管理器页面",
+            },
+            "loadbalancer": {
+                "url": "https://www.youtube-nocookie.com/embed/cOVp0rAt5nw",
+                "title": "负载均衡器",
+            },
+        },
     },
 }
 
@@ -176,6 +231,14 @@ def generate_docs_for_lang(lang: str):
                 + "\n"
             )
         print(f"## {data['name']}{pro_crown}\n", file=doc)
+
+        if "is_pro" in data and data["id"] in tr_lang("pro_yt_links"):
+            yt_info = tr_lang("pro_yt_links")[data["id"]]
+            print(
+                f"<p align='center'><iframe style='display: block;' width='560' height='315' data-src='{yt_info['url']}' title='{yt_info['title']}' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>\n",
+                file=doc,
+            )
+
         print(f"{stream_support(data['stream'])}\n", file=doc)
 
         # Check if README.md exists and use its content instead

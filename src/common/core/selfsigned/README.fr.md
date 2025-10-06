@@ -8,7 +8,7 @@ Comment ça marche :
 4. Le renouvellement est automatique avant expiration.
 
 !!! warning "Avertissements navigateurs"
-Les navigateurs afficheront des alertes de sécurité car un certificat auto‑signé n’est pas émis par une AC de confiance. En production, préférez [Let’s Encrypt](#lets-encrypt).
+    Les navigateurs afficheront des alertes de sécurité car un certificat auto‑signé n’est pas émis par une AC de confiance. En production, préférez [Let’s Encrypt](#lets-encrypt).
 
 ### Comment l’utiliser
 
@@ -18,7 +18,7 @@ Les navigateurs afficheront des alertes de sécurité car un certificat auto‑s
 4. Sujet : champ subject via `SELF_SIGNED_SSL_SUBJ`.
 
 !!! tip "Mode stream"
-En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour définir le port d’écoute SSL/TLS.
+    En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour définir le port d’écoute SSL/TLS.
 
 ### Paramètres
 

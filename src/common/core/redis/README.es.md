@@ -39,10 +39,10 @@ Siga estos pasos para configurar y usar el complemento de Redis:
 | `REDIS_KEEPALIVE_POOL`    | `3`               | global   | no       | **Grupo de keepalive:** Número máximo de conexiones de Redis/Valkey mantenidas en el grupo.                             |
 
 !!! tip "Alta Disponibilidad con Redis Sentinel"
-Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
+    Para entornos de producción que requieren alta disponibilidad, configure los ajustes de Redis Sentinel. Esto proporciona capacidades de conmutación por error automática si el servidor Redis principal deja de estar disponible.
 
 !!! warning "Consideraciones de Seguridad"
-Cuando utilice Redis en producción:
+    Cuando utilice Redis en producción:
 
     -   Establezca siempre contraseñas seguras tanto para la autenticación de Redis como de Sentinel
     -   Considere habilitar el cifrado SSL/TLS para las conexiones de Redis
@@ -50,7 +50,7 @@ Cuando utilice Redis en producción:
     -   Restrinja el acceso al puerto de Redis mediante cortafuegos o segmentación de red
 
 !!! info "Requisitos del Clúster"
-Al implementar BunkerWeb en un clúster:
+    Al implementar BunkerWeb en un clúster:
 
     -   Todas las instancias de BunkerWeb deben conectarse al mismo servidor Redis o Valkey o al clúster de Sentinel
     -   Configure el mismo número de base de datos en todas las instancias

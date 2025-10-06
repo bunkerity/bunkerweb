@@ -67,7 +67,7 @@ Vous pouvez également utiliser la barre de recherche et spécifier directement 
 
     La liste complète des paramètres disponibles, avec leurs descriptions et valeurs possibles, est disponible dans la section [Fonctionnalités](features.md) de la documentation.
 
-## Mode multisite
+## Mode multisite {#multisite-mode}
 
 Comprendre le mode multisite est essentiel lors de l'utilisation de BunkerWeb. Comme notre objectif principal est la protection des applications web, notre solution est intimement liée au concept d'« hôtes virtuels » ou « vhosts » (plus d'informations [ici](https://en.wikipedia.org/wiki/Virtual_hosting)). Ces hôtes virtuels permettent de diffuser plusieurs applications Web à partir d'une seule instance ou d'un seul cluster.
 
@@ -107,7 +107,7 @@ Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'in
 
     Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) du dépôt.
 
-## Configurations personnalisées
+## Configurations personnalisées {#custom-configurations}
 
 Pour relever des défis uniques et répondre à des cas d'utilisation spécifiques, BunkerWeb offre la flexibilité de configurations personnalisées. Bien que les paramètres fournis et les [plug-ins externes](plugins.md) couvrent un large éventail de scénarios, il peut y avoir des situations qui nécessitent une personnalisation supplémentaire.
 
@@ -163,7 +163,7 @@ En spécifiant l'URI de base de données appropriée dans la configuration, vous
   <figcaption>Schéma de base de données</figcaption>
 </figure>
 
-## Programmateur
+## Programmateur {#scheduler}
 
 Pour une coordination et une automatisation sans faille, BunkerWeb utilise un service spécialisé connu sous le nom de planificateur. Le planificateur joue un rôle essentiel dans le bon fonctionnement en effectuant les tâches suivantes:
 
@@ -194,7 +194,7 @@ Depuis la version 1.6.0, le planificateur dispose d'un système de vérification
 
 L'intervalle de vérification de l'état est défini par la `HEALTHCHECK_INTERVAL` variable d'environnement, avec une valeur par défaut de `30`, ce qui signifie que le planificateur vérifiera l'état des instances toutes les 30 secondes.
 
-## Modèles
+## Modèles {#templates}
 
 BunkerWeb exploite la puissance des modèles pour simplifier le processus de configuration et améliorer la flexibilité. Les modèles offrent une approche structurée et standardisée de la définition des paramètres et des configurations personnalisées, garantissant ainsi la cohérence et la facilité d'utilisation.
 

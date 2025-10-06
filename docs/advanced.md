@@ -568,7 +568,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         name: bw-dns
     ```
 
-### Custom configurations
+### Custom configurations {#custom-configurations}
 
 To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](features.md#custom-configurations).
 
@@ -924,7 +924,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
 
-### Running many services in production
+### Running many services in production {#running-many-services-in-production}
 
 #### Global CRS
 
@@ -954,7 +954,7 @@ If you encounter errors like this, especially on the scheduler:
 
 You will need to increase the `max_allowed_packet` on your database server.
 
-### Persistence of bans and reports
+### Persistence of bans and reports {#persistence-of-bans-and-reports}
 
 By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote [Redis](https://redis.io/) or [Valkey](https://valkey.io/) server.
 
@@ -2116,7 +2116,7 @@ sudo systemctl restart docker
 
 This global configuration will be inherited by all containers. However, any logging configuration defined on a per-service basis in a `docker-compose.yml` file will override the global settings in `daemon.json`.
 
-## Security tuning
+## Security tuning {#security-tuning}
 
 BunkerWeb offers many security features that you can configure with [features](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
@@ -2566,6 +2566,10 @@ Customize the plugin behavior using the following settings:
 - **Monitoring:** Analyze logs and metrics periodically to fine-tune settings and improve overall protection.
 
 ## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
 
 The User Management Plugin offers a robust interface for administering user accounts within your system.
 

@@ -18,14 +18,14 @@ Essayez notre [offre BunkerWeb Cloud](https://panel.bunkerweb.io/contact.php?lan
 
 Si vous êtes intéressé par l'offre BunkerWeb Cloud, n'hésitez pas à [nous contacter](https://panel.bunkerweb.io/contact.php?language=french&utm_campaign=self&utm_source=doc) afin que nous puissions discuter de vos besoins.
 
-## Image tout-en-un (AIO)
+## Image tout-en-un (AIO) {#all-in-one-aio-image}
 
 <figure markdown>
   ![Architecture AIO Graph Placeholder](assets/img/aio-graph-placeholder.png){ align=center, width="600" }
   <figcaption>Architecture tout-en-un (AIO) BunkerWeb</figcaption>
 </figure>
 
-### Déploiement
+### Déploiement {#deployment}
 
 Pour déployer le conteneur tout-en-un, il vous suffit d'exécuter la commande suivante :
 
@@ -63,14 +63,14 @@ Par défaut, l'assistant d'installation est lancé automatiquement lorsque vous 
 
 > Suivez les étapes suivantes du guide de [démarrage rapide](quickstart-guide.md#complete-the-setup-wizard) pour configurer l'interface utilisateur Web.
 
-### Intégration Redis
+### Intégration Redis {#redis-integration}
 
 L'image **BunkerWeb All-In-One** inclut Redis prêt à l'emploi pour la [persistance des bannissements et des rapports](advanced.md#persistence-of-bans-and-reports). Pour gérer Redis :
 
 - Pour désactiver Redis, définissez `USE_REDIS=no` ou pointez `REDIS_HOST` vers un hôte externe.
 - Les journaux Redis apparaissent `[REDIS]` avec le préfixe dans les journaux Docker et `/var/log/bunkerweb/redis.log`.
 
-### Intégration CrowdSec
+### Intégration CrowdSec {#crowdsec-integration}
 
 L'image Docker tout-en-un** de BunkerWeb ** est livrée avec CrowdSec entièrement intégré, sans conteneurs supplémentaires ni configuration manuelle requise. Suivez les étapes ci-dessous pour activer, configurer et étendre CrowdSec dans votre déploiement.
 
@@ -692,7 +692,7 @@ sudo ./install-bunkerweb.sh --dry-run
     - Le mode interactif (par défaut) vous demandera les valeurs requises manquantes
     - Le mode non interactif (`--yes`) nécessite que toutes les options nécessaires soient fournies via la ligne de commande
 
-#### Intégration de CrowdSec avec le script
+#### Intégration de CrowdSec avec le script {#crowdsec-integration-with-the-script}
 
 Si vous choisissez d'installer CrowdSec lors de la configuration interactive, le script automatise entièrement son intégration avec BunkerWeb :
 
@@ -1137,7 +1137,7 @@ networks:
     name: bw-services
 ```
 
-### Espaces de noms
+### Espaces de noms {#namespaces}
 
 À partir de la version `1.6.0`, les piles Autoconf de BunkerWeb supportent désormais les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs «* clusters *» d'instances et de services BunkerWeb sur le même hôte Docker. Pour tirer parti des espaces de noms, il vous suffit de définir l' `NAMESPACE` étiquette sur vos services. Voici un exemple :
 
@@ -1273,7 +1273,7 @@ spec:
 ...
 ```
 
-### Espaces de noms
+### Espaces de noms {#namespaces_1}
 
 À partir de la version `1.6.0`, les piles autoconf de BunkerWeb prennent désormais en charge les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs clusters d'instances et de services BunkerWeb sur le même cluster Kubernetes. Pour tirer parti des espaces de noms, il suffit de définir le `namespace` champ de métadonnées sur vos instances et services BunkerWeb. Voici un exemple :
 
@@ -1780,7 +1780,7 @@ networks:
     name: bw-services
 ```
 
-### Espaces de noms
+### Espaces de noms {#namespaces_2}
 
 À partir de la version `1.6.0`, les piles Autoconf de BunkerWeb supportent désormais les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs «* clusters *» d'instances et de services BunkerWeb sur le même hôte Docker. Pour tirer parti des espaces de noms, il vous suffit de définir l' `NAMESPACE` étiquette sur vos services. Voici un exemple :
 

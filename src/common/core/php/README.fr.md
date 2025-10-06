@@ -25,13 +25,13 @@ Comment ça marche :
 | `LOCAL_PHP_PATH`  |        | multisite | non      | Chemin racine des fichiers côté PHP‑FPM local.                                 |
 
 !!! tip "Local vs distant"
-Local : meilleures perfs (socket). Distant : flexibilité et scalabilité.
+    Local : meilleures perfs (socket). Distant : flexibilité et scalabilité.
 
 !!! warning "Chemins"
-`REMOTE_PHP_PATH`/`LOCAL_PHP_PATH` doivent correspondre au chemin réel des fichiers sous peine d’erreurs « File not found ».
+    `REMOTE_PHP_PATH`/`LOCAL_PHP_PATH` doivent correspondre au chemin réel des fichiers sous peine d’erreurs « File not found ».
 
 !!! info "Réécriture d’URL"
-Le plugin configure automatiquement la réécriture pour diriger les requêtes vers `index.php` si le fichier demandé n’existe pas.
+    Le plugin configure automatiquement la réécriture pour diriger les requêtes vers `index.php` si le fichier demandé n’existe pas.
 
 ### Exemples
 

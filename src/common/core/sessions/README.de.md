@@ -32,7 +32,7 @@ Führen Sie die folgenden Schritte aus, um die Sessions-Funktion zu konfiguriere
 | `SESSIONS_CHECK_USER_AGENT` | `yes`    | global  | nein     | **User-Agent prüfen:** Wenn auf `yes` gesetzt, wird die Sitzung zerstört, wenn sich der User-Agent des Clients ändert.                                                     |
 
 !!! warning "Sicherheitshinweise"
-Die Einstellung `SESSIONS_SECRET` ist für die Sicherheit von entscheidender Bedeutung. In Produktionsumgebungen:
+    Die Einstellung `SESSIONS_SECRET` ist für die Sicherheit von entscheidender Bedeutung. In Produktionsumgebungen:
 
     1. Verwenden Sie einen starken, zufälligen Wert (mindestens 32 Zeichen)
     2. Halten Sie diesen Wert vertraulich
@@ -40,7 +40,7 @@ Die Einstellung `SESSIONS_SECRET` ist für die Sicherheit von entscheidender Bed
     4. Erwägen Sie die Verwendung von Umgebungsvariablen oder Geheimnisverwaltung, um die Speicherung im Klartext zu vermeiden
 
 !!! tip "Cluster-Umgebungen"
-Wenn Sie mehrere BunkerWeb-Instanzen hinter einem Load Balancer betreiben:
+    Wenn Sie mehrere BunkerWeb-Instanzen hinter einem Load Balancer betreiben:
 
     1. Setzen Sie `USE_REDIS` auf `yes` und konfigurieren Sie Ihre Redis-Verbindung
     2. Stellen Sie sicher, dass alle Instanzen genau denselben `SESSIONS_SECRET` und `SESSIONS_NAME` verwenden

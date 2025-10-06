@@ -23,10 +23,10 @@ Comment ça marche :
 | `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | non      | Délai max par port en millisecondes.        |
 
 !!! warning "Performance"
-Scanner de nombreux ports ajoute de la latence. Limitez la liste et adaptez le timeout.
+    Scanner de nombreux ports ajoute de la latence. Limitez la liste et adaptez le timeout.
 
 !!! info "Ports de proxy courants"
-La configuration par défaut inclut 80, 443, 8080, 3128 et SSH (22). Adaptez selon votre modèle de menace.
+    La configuration par défaut inclut 80, 443, 8080, 3128 et SSH (22). Adaptez selon votre modèle de menace.
 
 ### Exemples
 

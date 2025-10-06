@@ -51,7 +51,7 @@ El complemento de Límite en BunkerWeb proporciona capacidades robustas para apl
     El uso de ambos métodos proporciona una protección completa contra varios tipos de abuso.
 
 !!! warning "Estableciendo Límites Apropiados"
-Establecer límites demasiado restrictivos puede afectar a los usuarios legítimos, especialmente para HTTP/2 y HTTP/3, donde los navegadores a menudo usan múltiples flujos. Los valores predeterminados están equilibrados para la mayoría de los casos de uso, pero considere ajustarlos según las necesidades de su aplicación y el comportamiento del usuario.
+    Establecer límites demasiado restrictivos puede afectar a los usuarios legítimos, especialmente para HTTP/2 y HTTP/3, donde los navegadores a menudo usan múltiples flujos. Los valores predeterminados están equilibrados para la mayoría de los casos de uso, pero considere ajustarlos según las necesidades de su aplicación y el comportamiento del usuario.
 
 ### Configuraciones de Ejemplo
 

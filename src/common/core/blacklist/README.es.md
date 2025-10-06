@@ -19,7 +19,7 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
 5.  **Supervise la eficacia:** Consulte la [interfaz de usuario web](web-ui.md) para ver las estadísticas de las solicitudes bloqueadas.
 
 !!! info "modo stream"
-Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS y ASN.
+    Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS y ASN.
 
 ### Ajustes de configuración
 
@@ -31,7 +31,7 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | multisite | no       | **Listas Negras de la Comunidad:** Seleccione listas negras preconfiguradas mantenidas por la comunidad para incluirlas en el bloqueo. |
 
 === "Listas Negras de la Comunidad"
-**Qué hace esto:** Le permite añadir rápidamente listas negras bien mantenidas y de origen comunitario sin tener que configurar manualmente las URL.
+    **Qué hace esto:** Le permite añadir rápidamente listas negras bien mantenidas y de origen comunitario sin tener que configurar manualmente las URL.
 
     El ajuste `BLACKLIST_COMMUNITY_LISTS` le permite seleccionar de fuentes de listas negras curadas. Las opciones disponibles incluyen:
 
@@ -51,7 +51,7 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
         Las listas negras de la comunidad proporcionan una forma conveniente de empezar con fuentes de listas negras probadas. Puede usarlas junto con configuraciones de URL manuales para una máxima flexibilidad.
 
 === "Dirección IP"
-**Qué hace esto:** Bloquea a los visitantes según su dirección IP o red.
+    **Qué hace esto:** Bloquea a los visitantes según su dirección IP o red.
 
     | Ajuste                     | Valor por defecto                     | Contexto  | Múltiple | Descripción                                                                                                              |
     | -------------------------- | ------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -63,7 +63,7 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
     El ajuste por defecto de `BLACKLIST_IP_URLS` incluye una URL que proporciona una **lista de nodos de salida de Tor conocidos**. Esta es una fuente común de tráfico malicioso y es un buen punto de partida para muchos sitios.
 
 === "DNS Inverso"
-**Qué hace esto:** Bloquea a los visitantes según su nombre de dominio inverso. Esto es útil para bloquear escáneres y rastreadores conocidos basados en los dominios de su organización.
+    **Qué hace esto:** Bloquea a los visitantes según su nombre de dominio inverso. Esto es útil para bloquear escáneres y rastreadores conocidos basados en los dominios de su organización.
 
     | Ajuste                       | Valor por defecto       | Contexto  | Múltiple | Descripción                                                                                                                  |
     | ---------------------------- | ----------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +76,7 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
     El ajuste por defecto de `BLACKLIST_RDNS` incluye dominios de escáneres comunes como **Shodan** y **Censys**. Estos son a menudo utilizados por investigadores de seguridad y escáneres para identificar sitios vulnerables.
 
 === "ASN"
-**Qué hace esto:** Bloquea a los visitantes de proveedores de red específicos. Los ASN son como los códigos postales de Internet: identifican a qué proveedor u organización pertenece una IP.
+    **Qué hace esto:** Bloquea a los visitantes de proveedores de red específicos. Los ASN son como los códigos postales de Internet: identifican a qué proveedor u organización pertenece una IP.
 
     | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                             |
     | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------- |
@@ -86,7 +86,7 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
     | `BLACKLIST_IGNORE_ASN_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de ASN:** Lista de URL que contienen ASN a omitir.                         |
 
 === "Agente de Usuario"
-**Qué hace esto:** Bloquea a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo contra los bots que se identifican honestamente (como "ScannerBot" o "WebHarvestTool").
+    **Qué hace esto:** Bloquea a los visitantes según el navegador o la herramienta que dicen estar usando. Esto es efectivo contra los bots que se identifican honestamente (como "ScannerBot" o "WebHarvestTool").
 
     | Ajuste                             | Valor por defecto                                                                                                              | Contexto  | Múltiple | Descripción                                                                                                                              |
     | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -98,7 +98,7 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
     El ajuste por defecto de `BLACKLIST_USER_AGENT_URLS` incluye una URL que proporciona una **lista de agentes de usuario maliciosos conocidos**. Estos son a menudo utilizados por bots y escáneres maliciosos para identificar sitios vulnerables.
 
 === "URI"
-**Qué hace esto:** Bloquea las solicitudes a URL específicas en su sitio. Esto es útil para bloquear intentos de acceso a páginas de administración, formularios de inicio de sesión u otras áreas sensibles que podrían ser objetivo de ataques.
+    **Qué hace esto:** Bloquea las solicitudes a URL específicas en su sitio. Esto es útil para bloquear intentos de acceso a páginas de administración, formularios de inicio de sesión u otras áreas sensibles que podrían ser objetivo de ataques.
 
     | Ajuste                      | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                         |
     | --------------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -108,10 +108,10 @@ Cuando se utiliza el modo stream, solo se realizarán comprobaciones de IP, rDNS
     | `BLACKLIST_IGNORE_URI_URLS` |                   | multisite | no       | **URL de la Lista de Omisión de URI:** Lista de URL que contienen patrones de URI a omitir.                         |
 
 !!! info "Soporte de Formato de URL"
-Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
+    Todos los ajustes `*_URLS` admiten URL HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-Las listas negras de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada contra las últimas amenazas.
+    Las listas negras de las URL se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada contra las últimas amenazas.
 
 ### Configuraciones de Ejemplo
 

@@ -19,7 +19,7 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 5.  **Effektivität überwachen:** Konsultieren Sie die [Web-Oberfläche](web-ui.md), um Statistiken über blockierte Anfragen anzuzeigen.
 
 !!! info "Stream-Modus"
-Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
+    Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
 
 ### Konfigurationsparameter[9][10][11][12][13][14][15][16][17]
 
@@ -31,7 +31,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
 | `BLACKLIST_COMMUNITY_LISTS` | `ip:danmeuk-tor-exit ua:mitchellkrogza-bad-user-agents` | Multisite | Nein     | **Community-Blacklists:** Wählen Sie vorkonfigurierte und von der Community gepflegte Blacklists aus, die in die Blockierung einbezogen werden sollen. |
 
 === "Community-Blacklists"
-**Was es bewirkt:** Ermöglicht Ihnen, schnell gut gepflegte und von der Community stammende Blacklists hinzuzufügen, ohne die URLs manuell konfigurieren zu müssen.
+    **Was es bewirkt:** Ermöglicht Ihnen, schnell gut gepflegte und von der Community stammende Blacklists hinzuzufügen, ohne die URLs manuell konfigurieren zu müssen.
 
     Der Parameter `BLACKLIST_COMMUNITY_LISTS` ermöglicht Ihnen die Auswahl aus ausgewählten Blacklist-Quellen. Die verfügbaren Optionen umfassen:
 
@@ -50,7 +50,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
         Community-Blacklists bieten eine bequeme Möglichkeit, mit bewährten Blacklist-Quellen zu beginnen. Sie können diese parallel zu manuellen URL-Konfigurationen für maximale Flexibilität verwenden.
 
 === "IP-Adresse"[18][19][20][21][22]
-**Was es bewirkt:** Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.
+    **Was es bewirkt:** Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.
 
     | Parameter                  | Standard                                | Kontext   | Mehrfach | Beschreibung                                                                                                                     |
     | :------------------------- | :-------------------------------------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------------------- |
@@ -62,7 +62,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     Der Standardparameter `BLACKLIST_IP_URLS` enthält eine URL, die eine **Liste bekannter Tor-Exit-Nodes** bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.
 
 === "Reverse DNS"[23][24][25][26][27]
-**Was es bewirkt:** Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.
+    **Was es bewirkt:** Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.
 
     | Parameter                    | Standard                | Kontext   | Mehrfach | Beschreibung                                                                                                                    |
     | :--------------------------- | :---------------------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------------------ |
@@ -75,7 +75,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
 
 === "ASN"
-**Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
+    **Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
     | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                 |
     | :-------------------------- | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------- |
@@ -85,7 +85,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     | `BLACKLIST_IGNORE_ASN_URLS` |          | Multisite | Nein     | **ASN-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende ASNs enthalten.                              |
 
 === "User-Agent"[28][29][30][31][32]
-**Was es bewirkt:** Blockiert Besucher basierend auf dem Browser oder Tool, das sie angeblich verwenden. Dies ist effektiv gegen Bots, die sich ehrlich identifizieren (wie "ScannerBot" oder "WebHarvestTool").
+    **Was es bewirkt:** Blockiert Besucher basierend auf dem Browser oder Tool, das sie angeblich verwenden. Dies ist effektiv gegen Bots, die sich ehrlich identifizieren (wie "ScannerBot" oder "WebHarvestTool").
 
     | Parameter                          | Standard                                                                                                                         | Kontext   | Mehrfach | Beschreibung                                                                                                                                   |
     | :--------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :-------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -97,7 +97,7 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **Liste bekannter bösartiger User-Agents** bereitstellt. Diese werden oft von bösartigen Bots und Scannern verwendet, um anfällige Websites zu identifizieren.
 
 === "URI"[33][34][35][36][37]
-**Was es bewirkt:** Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.
+    **Was es bewirkt:** Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.
 
     | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                           |
     | :-------------------------- | :------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------- |
@@ -107,10 +107,10 @@ Im Stream-Modus werden nur Überprüfungen nach IP, rDNS und ASN durchgeführt.
     | `BLACKLIST_IGNORE_URI_URLS` |          | Multisite | Nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende URI-Muster enthalten.                               |
 
 !!! info "Unterstützung von URL-Formaten"
-Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
+    Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Updates"[4][5][6][7][8]
-Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.
+    Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.
 
 ### Konfigurationsbeispiele[38]
 

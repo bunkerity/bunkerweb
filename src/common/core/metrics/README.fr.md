@@ -19,13 +19,13 @@ Comment ça marche :
 | `METRICS_SAVE_TO_REDIS`              | `yes`    | global    | non      | Sauvegarder compteurs/tableaux dans Redis pour agrégation cluster. |
 
 !!! tip "Dimensionnement mémoire"
-Ajustez `METRICS_MEMORY_SIZE` selon le trafic et le nombre d’instances.
+    Ajustez `METRICS_MEMORY_SIZE` selon le trafic et le nombre d’instances.
 
 !!! info "Intégration Redis"
-Avec [Redis](#redis), les requêtes bloquées sont synchronisées pour une vue centralisée multi‑nœuds.
+    Avec [Redis](#redis), les requêtes bloquées sont synchronisées pour une vue centralisée multi‑nœuds.
 
 !!! warning "Performance"
-Des valeurs trop élevées augmentent l’usage mémoire. Surveillez et ajustez.
+    Des valeurs trop élevées augmentent l’usage mémoire. Surveillez et ajustez.
 
 ### Exemples
 

@@ -21,7 +21,7 @@ Siga estos pasos para configurar y usar la función de IP Real:
 6.  **Protocolo PROXY:** Para la comunicación directa con el proxy, habilítelo con `USE_PROXY_PROTOCOL` si su upstream lo admite.
 
 !!! danger "Advertencia sobre el Protocolo PROXY"
-Habilitar `USE_PROXY_PROTOCOL` sin configurar correctamente su proxy upstream para enviar los encabezados del protocolo PROXY **romperá su aplicación**. Solo habilite este ajuste si está seguro de que su proxy upstream está configurado correctamente para enviar la información del protocolo PROXY. Si su proxy no está enviando los encabezados del protocolo PROXY, todas las conexiones a BunkerWeb fallarán con errores de protocolo.
+    Habilitar `USE_PROXY_PROTOCOL` sin configurar correctamente su proxy upstream para enviar los encabezados del protocolo PROXY **romperá su aplicación**. Solo habilite este ajuste si está seguro de que su proxy upstream está configurado correctamente para enviar la información del protocolo PROXY. Si su proxy no está enviando los encabezados del protocolo PROXY, todas las conexiones a BunkerWeb fallarán con errores de protocolo.
 
 ### Ajustes de Configuración
 
@@ -35,13 +35,13 @@ Habilitar `USE_PROXY_PROTOCOL` sin configurar correctamente su proxy upstream pa
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | no       | **Protocolo PROXY:** Establezca en `yes` para habilitar el soporte del protocolo PROXY para la comunicación directa de proxy a BunkerWeb.                   |
 
 !!! tip "Redes de Proveedores de la Nube"
-Si está utilizando un proveedor de la nube como AWS, GCP o Azure, considere agregar los rangos de IP de sus balanceadores de carga a su ajuste `REAL_IP_FROM` para garantizar la correcta identificación de la IP del cliente.
+    Si está utilizando un proveedor de la nube como AWS, GCP o Azure, considere agregar los rangos de IP de sus balanceadores de carga a su ajuste `REAL_IP_FROM` para garantizar la correcta identificación de la IP del cliente.
 
 !!! danger "Consideraciones de Seguridad"
-Solo incluya las IP de los proxies de confianza en su configuración. Agregar fuentes no confiables podría permitir ataques de suplantación de IP, donde los actores maliciosos podrían falsificar la IP del cliente manipulando los encabezados.
+    Solo incluya las IP de los proxies de confianza en su configuración. Agregar fuentes no confiables podría permitir ataques de suplantación de IP, donde los actores maliciosos podrían falsificar la IP del cliente manipulando los encabezados.
 
 !!! info "Múltiples Direcciones IP"
-Cuando `REAL_IP_RECURSIVE` está habilitado y un encabezado contiene múltiples IP (p. ej., `X-Forwarded-For: cliente, proxy1, proxy2`), BunkerWeb identificará como la IP del cliente la IP más a la izquierda que no esté en su lista de proxies de confianza.
+    Cuando `REAL_IP_RECURSIVE` está habilitado y un encabezado contiene múltiples IP (p. ej., `X-Forwarded-For: cliente, proxy1, proxy2`), BunkerWeb identificará como la IP del cliente la IP más a la izquierda que no esté en su lista de proxies de confianza.
 
 ### Configuraciones de Ejemplo
 

@@ -463,7 +463,7 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples)
         attachable: true
     ```
 
-## Den Einrichtungsassistenten abschließen
+## Den Einrichtungsassistenten abschließen {#complete-the-setup-wizard}
 
 !!! tip "Zugriff auf den Einrichtungsassistenten"
 

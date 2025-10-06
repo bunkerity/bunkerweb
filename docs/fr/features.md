@@ -41,7 +41,7 @@ Certains paramètres de BunkerWeb supportent plusieurs configurations pour une m
 
 Ce modèle permet de gérer plusieurs configurations pour des fonctionnalités comme les reverse proxies, les ports, ou d’autres paramètres nécessitant des valeurs distinctes selon les cas d’usage.
 
-### Modes de sécurité
+### Modes de sécurité {#security-modes}
 
 Le paramètre `SECURITY_MODE` détermine la façon dont BunkerWeb gère les menaces détectées. Ce mécanisme flexible vous permet de choisir entre la surveillance et le blocage actif des activités suspectes, selon vos besoins :
 
@@ -1422,7 +1422,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1439,7 +1439,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -2667,6 +2667,8 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
 ## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Équilibreur de charge' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 Prise en charge STREAM :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
@@ -3126,7 +3128,7 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :
 
 - **`3`** : Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`** : Stable [v4.18.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0) (**par défaut**).
+- **`4`** : Stable [v4.19.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0) (**par défaut**).
 - **`nightly`** : [Version de nuit](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offrant les dernières mises à jour de règles.
 
 !!! example "Version de nuit (Nightly Build)"
@@ -3142,7 +3144,7 @@ Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécu
 
     Vous pouvez définir le niveau de paranoïa en ajoutant un fichier de configuration personnalisé dans `/etc/bunkerweb/configs/modsec-crs/`.
 
-### Configurations personnalisées
+### Configurations personnalisées {#custom-configurations}
 
 L'ajustement de ModSecurity et du Jeu de Règles de Base OWASP (CRS) peut être réalisé grâce à des configurations personnalisées. Celles-ci vous permettent de personnaliser le comportement à des étapes spécifiques du traitement des règles de sécurité :
 
@@ -4528,6 +4530,8 @@ Integrate easily the BunkerWeb UI.
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='Gestionnaire d'utilisateurs' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 Prise en charge STREAM :x:
 

@@ -17,10 +17,10 @@ Siga estos pasos para habilitar y configurar la función Antibot:
 4.  **Importante:** Asegúrese de que el `ANTIBOT_URI` sea una URL única en su sitio que no esté en uso.
 
 !!! important "Acerca de la configuración `ANTIBOT_URI`"
-Asegúrese de que el `ANTIBOT_URI` sea una URL única en su sitio que no esté en uso.
+    Asegúrese de que el `ANTIBOT_URI` sea una URL única en su sitio que no esté en uso.
 
 !!! warning "Configuración de sesión en entornos de clúster"
-La función antibot utiliza cookies para rastrear si un usuario ha completado el desafío. Si está ejecutando BunkerWeb en un entorno de clúster (múltiples instancias de BunkerWeb), **debe** configurar la gestión de sesiones correctamente. Esto implica establecer las configuraciones `SESSIONS_SECRET` y `SESSIONS_NAME` con los **mismos valores** en todas las instancias de BunkerWeb. Si no lo hace, es posible que a los usuarios se les pida repetidamente que completen el desafío antibot. Puede encontrar más información sobre la configuración de sesiones [aquí](#sessions).
+    La función antibot utiliza cookies para rastrear si un usuario ha completado el desafío. Si está ejecutando BunkerWeb en un entorno de clúster (múltiples instancias de BunkerWeb), **debe** configurar la gestión de sesiones correctamente. Esto implica establecer las configuraciones `SESSIONS_SECRET` y `SESSIONS_NAME` con los **mismos valores** en todas las instancias de BunkerWeb. Si no lo hace, es posible que a los usuarios se les pida repetidamente que completen el desafío antibot. Puede encontrar más información sobre la configuración de sesiones [aquí](#sessions).
 
 ### Configuraciones comunes
 

@@ -19,13 +19,13 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
 4.  **Supervise el acceso:** Revise la [interfaz de usuario web](web-ui.md) para ver qué visitantes están siendo permitidos o denegados.
 
 !!! tip "Comportamiento del Control de Acceso"
-Cuando la función de lista gris está habilitada con el ajuste `USE_GREYLIST` establecido en `yes`:
+    Cuando la función de lista gris está habilitada con el ajuste `USE_GREYLIST` establecido en `yes`:
 
     1.  **Visitantes en la lista gris:** Se les permite el acceso pero siguen estando sujetos a todos los controles de seguridad.
     2.  **Visitantes no incluidos en la lista gris:** Se les deniega completamente el acceso.
 
 !!! info "modo stream"
-Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
+    Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS inverso y ASN.
 
 ### Ajustes de Configuración
 
@@ -36,7 +36,7 @@ Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS
 | `USE_GREYLIST` | `no`              | multisite | no       | **Habilitar Lista Gris:** Establezca en `yes` para habilitar la lista gris. |
 
 === "Dirección IP"
-**Qué hace esto:** Incluye en la lista gris a los visitantes según su dirección IP o red. Estos visitantes obtienen acceso pero siguen estando sujetos a los controles de seguridad.
+    **Qué hace esto:** Incluye en la lista gris a los visitantes según su dirección IP o red. Estos visitantes obtienen acceso pero siguen estando sujetos a los controles de seguridad.
 
     | Ajuste             | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                             |
     | ------------------ | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -44,7 +44,7 @@ Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS
     | `GREYLIST_IP_URLS` |                   | multisite | no       | **URLs de Lista Gris de IP:** Lista de URLs que contienen direcciones IP o redes para incluir en la lista gris, separadas por espacios. |
 
 === "DNS Inverso"
-**Qué hace esto:** Incluye en la lista gris a los visitantes según su nombre de dominio (en inverso). Útil para permitir el acceso condicional a visitantes de organizaciones o redes específicas.
+    **Qué hace esto:** Incluye en la lista gris a los visitantes según su nombre de dominio (en inverso). Útil para permitir el acceso condicional a visitantes de organizaciones o redes específicas.
 
     | Ajuste                 | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                               |
     | ---------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -53,7 +53,7 @@ Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS
     | `GREYLIST_RDNS_URLS`   |                   | multisite | no       | **URLs de Lista Gris de rDNS:** Lista de URLs que contienen sufijos de DNS inverso para incluir en la lista gris, separadas por espacios. |
 
 === "ASN"
-**Qué hace esto:** Incluye en la lista gris a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
+    **Qué hace esto:** Incluye en la lista gris a los visitantes de proveedores de red específicos utilizando Números de Sistema Autónomo. Los ASN identifican a qué proveedor u organización pertenece una IP.
 
     | Ajuste              | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                            |
     | ------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -61,7 +61,7 @@ Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS
     | `GREYLIST_ASN_URLS` |                   | multisite | no       | **URLs de Lista Gris de ASN:** Lista de URLs que contienen ASNs para incluir en la lista gris, separadas por espacios. |
 
 === "User Agent"
-**Qué hace esto:** Incluye en la lista gris a los visitantes según el navegador o la herramienta que dicen estar usando. Esto permite el acceso controlado para herramientas específicas mientras se mantienen los controles de seguridad.
+    **Qué hace esto:** Incluye en la lista gris a los visitantes según el navegador o la herramienta que dicen estar usando. Esto permite el acceso controlado para herramientas específicas mientras se mantienen los controles de seguridad.
 
     | Ajuste                     | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                   |
     | -------------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -69,7 +69,7 @@ Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS
     | `GREYLIST_USER_AGENT_URLS` |                   | multisite | no       | **URLs de Lista Gris de User-Agent:** Lista de URLs que contienen patrones de User-Agent para incluir en la lista gris.                       |
 
 === "URI"
-**Qué hace esto:** Incluye en la lista gris las solicitudes a URLs específicas de su sitio. Esto permite el acceso condicional a ciertos puntos finales mientras se mantienen los controles de seguridad.
+    **Qué hace esto:** Incluye en la lista gris las solicitudes a URLs específicas de su sitio. Esto permite el acceso condicional a ciertos puntos finales mientras se mantienen los controles de seguridad.
 
     | Ajuste              | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                       |
     | ------------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -77,10 +77,10 @@ Cuando se utiliza el modo stream, solo se realizan las comprobaciones de IP, DNS
     | `GREYLIST_URI_URLS` |                   | multisite | no       | **URLs de Lista Gris de URI:** Lista de URLs que contienen patrones de URI para incluir en la lista gris, separadas por espacios. |
 
 !!! info "Soporte de Formato de URL"
-Todos los ajustes `*_URLS` admiten URLs HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
+    Todos los ajustes `*_URLS` admiten URLs HTTP/HTTPS así como rutas de archivos locales usando el prefijo `file:///`. Se admite la autenticación básica usando el formato `http://usuario:contraseña@url`.
 
 !!! tip "Actualizaciones Regulares"
-Las listas grises de las URLs se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada con las últimas fuentes de confianza.
+    Las listas grises de las URLs se descargan y actualizan automáticamente cada hora para asegurar que su protección se mantenga actualizada con las últimas fuentes de confianza.
 
 ### Configuraciones de Ejemplo
 

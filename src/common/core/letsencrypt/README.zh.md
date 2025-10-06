@@ -10,7 +10,7 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 6.  整个过程完全自动化，初次设置后几乎无需干预。
 
 !!! info "先决条件"
-要使用此功能，请确保为每个域名配置了正确的 DNS **A 记录**，指向 BunkerWeb 可访问的公共 IP 地址。没有正确的 DNS 配置，域名验证过程将失败。
+    要使用此功能，请确保为每个域名配置了正确的 DNS **A 记录**，指向 BunkerWeb 可访问的公共 IP 地址。没有正确的 DNS 配置，域名验证过程将失败。
 
 ### 如何使用
 
@@ -24,10 +24,10 @@ Let's Encrypt 插件通过自动化创建、续订和配置来自 Let's Encrypt 
 6.  **让 BunkerWeb 处理其余部分：** 配置完成后，证书将根据需要自动颁发、安装和续订。
 
 !!! tip "证书配置文件"
-Let's Encrypt 为不同的用例提供了不同的证书配置文件：- **classic**：通用证书，有效期为 90 天（默认）- **tlsserver**：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小 - **shortlived**：增强安全性，有效期为 7 天，适用于自动化环境 - **custom**：如果您的 ACME 服务器支持不同的配置文件，请使用 `LETS_ENCRYPT_CUSTOM_PROFILE` 进行设置。
+    Let's Encrypt 为不同的用例提供了不同的证书配置文件：- **classic**：通用证书，有效期为 90 天（默认）- **tlsserver**：针对 TLS 服务器身份验证进行了优化，有效期为 90 天，有效负载更小 - **shortlived**：增强安全性，有效期为 7 天，适用于自动化环境 - **custom**：如果您的 ACME 服务器支持不同的配置文件，请使用 `LETS_ENCRYPT_CUSTOM_PROFILE` 进行设置。
 
 !!! info "配置文件可用性"
-请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。
+    请注意，`tlsserver` 和 `shortlived` 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。`classic` 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 `classic` 配置文件。
 
 ### 配置设置
 
@@ -50,7 +50,7 @@ Let's Encrypt 为不同的用例提供了不同的证书配置文件：- **class
 !!! info "信息和行为" - `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` 设置是一个多选设置，可用于为 DNS 提供商设置多个项目。这些项目将保存为缓存文件，Certbot 将从中读取凭据。- 如果未提供 `LETS_ENCRYPT_DNS_PROPAGATION` 设置，则使用提供商的默认传播时间。- 只要您从外部打开 `80/tcp` 端口，使用 `http` 验证的完全 Let's Encrypt 自动化就可以在流模式下工作。使用 `LISTEN_STREAM_PORT_SSL` 设置来选择您的侦听 SSL/TLS 端口。- 如果 `LETS_ENCRYPT_PASSTHROUGH` 设置为 `yes`，BunkerWeb 将不会自行处理 ACME 验证请求，而是将它们传递给后端 Web 服务器。这在 BunkerWeb 作为反向代理位于已配置为处理 Let's Encrypt 验证的另一台服务器前面的场景中很有用。
 
 !!! tip "HTTP 与 DNS 验证"
-**HTTP 验证** 更容易设置，并且适用于大多数网站：
+    **HTTP 验证** 更容易设置，并且适用于大多数网站：
 
     - 要求您的网站在端口 80 上可公开访问
     - 由 BunkerWeb 自动配置
@@ -64,10 +64,10 @@ Let's Encrypt 为不同的用例提供了不同的证书配置文件：- **class
     - 在端口 80 被阻止或不可用时很有用
 
 !!! warning "通配符证书"
-通配符证书仅适用于 DNS 验证。如果要使用它们，必须将 `USE_LETS_ENCRYPT_WILDCARD` 设置为 `yes` 并正确配置您的 DNS 提供商凭据。
+    通配符证书仅适用于 DNS 验证。如果要使用它们，必须将 `USE_LETS_ENCRYPT_WILDCARD` 设置为 `yes` 并正确配置您的 DNS 提供商凭据。
 
 !!! warning "速率限制"
-Let's Encrypt 对证书颁发施加速率限制。在测试配置时，通过将 `USE_LETS_ENCRYPT_STAGING` 设置为 `yes` 来使用测试环境，以避免达到生产环境的速率限制。测试证书不受浏览器信任，但对于验证您的设置很有用。
+    Let's Encrypt 对证书颁发施加速率限制。在测试配置时，通过将 `USE_LETS_ENCRYPT_STAGING` 设置为 `yes` 来使用测试环境，以避免达到生产环境的速率限制。测试证书不受浏览器信任，但对于验证您的设置很有用。
 
 ### 支持的 DNS 提供商
 

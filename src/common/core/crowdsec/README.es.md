@@ -24,7 +24,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
 ### Configuración
 
 === "Docker"
-**Archivo de adquisición**
+    **Archivo de adquisición**
 
     Necesitará ejecutar una instancia de CrowdSec y configurarla para analizar los registros de BunkerWeb. Dado que BunkerWeb se basa en NGINX, puede usar el valor `nginx` para el parámetro `type` en su archivo de adquisición (suponiendo que los registros de BunkerWeb se almacenan tal cual sin datos adicionales):
 
@@ -81,7 +81,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -98,7 +98,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto

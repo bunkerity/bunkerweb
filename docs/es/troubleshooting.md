@@ -288,7 +288,7 @@ Si ves el siguiente error `could not build server_names_hash, you should increas
 
 Cuando se utilizan integraciones basadas en contenedores, la zona horaria del contenedor puede no coincidir con la de la máquina anfitriona. Para resolver esto, puedes establecer la variable de entorno `TZ` a la zona horaria de tu elección en tus contenedores (p. ej., `TZ=Europe/Paris`). Encontrarás la lista de identificadores de zona horaria [aquí](https://es.wikipedia.org/wiki/Anexo:Lista_de_zonas_horarias_de_la_base_de_datos_IANA#Lista).
 
-## Interfaz de usuario web
+## Interfaz de usuario web {#web-ui}
 
 En caso de que hayas olvidado tus credenciales de la interfaz de usuario o estés experimentando problemas con la 2FA, puedes conectarte a la base de datos para recuperar el acceso.
 

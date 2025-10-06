@@ -26,7 +26,7 @@ sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*.md
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*/*.md
 # README
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" README.md
-sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/*/README.md
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/*/README*.md
 # tests
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" tests/ui/docker-compose.yml
 shopt -s globstar

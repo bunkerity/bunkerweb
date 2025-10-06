@@ -30,10 +30,10 @@ Siga estos pasos para configurar y utilizar la función de compresión Brotli:
 | `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | no       | **Nivel de compresión:** Nivel de compresión de 0 (sin compresión) a 11 (compresión máxima). Los valores más altos consumen más CPU. |
 
 !!! tip "Optimización del nivel de compresión"
-El nivel de compresión por defecto (6) ofrece un buen equilibrio entre la tasa de compresión y el uso de la CPU. Para contenido estático o cuando los recursos de la CPU del servidor son abundantes, considere aumentarlo a 9-11 para una compresión máxima. Para contenido dinámico o cuando los recursos de la CPU son limitados, es posible que desee utilizar 4-5 para una compresión más rápida con una reducción de tamaño razonable.
+    El nivel de compresión por defecto (6) ofrece un buen equilibrio entre la tasa de compresión y el uso de la CPU. Para contenido estático o cuando los recursos de la CPU del servidor son abundantes, considere aumentarlo a 9-11 para una compresión máxima. Para contenido dinámico o cuando los recursos de la CPU son limitados, es posible que desee utilizar 4-5 para una compresión más rápida con una reducción de tamaño razonable.
 
 !!! info "Soporte de navegadores"
-Brotli es compatible con todos los navegadores modernos, incluidos Chrome, Firefox, Edge, Safari y Opera. Los navegadores más antiguos recibirán automáticamente el contenido sin comprimir, lo que garantiza la compatibilidad.
+    Brotli es compatible con todos los navegadores modernos, incluidos Chrome, Firefox, Edge, Safari y Opera. Los navegadores más antiguos recibirán automáticamente el contenido sin comprimir, lo que garantiza la compatibilidad.
 
 ### Configuraciones de ejemplo
 

@@ -19,7 +19,7 @@ Comment ça marche :
 6. PROXY protocol : activez `USE_PROXY_PROTOCOL` si l’amont le supporte.
 
 !!! danger "Avertissement PROXY protocol"
-Activer `USE_PROXY_PROTOCOL` sans un amont correctement configuré pour l’émettre cassera votre application. Assurez‑vous de l’avoir configuré avant activation.
+    Activer `USE_PROXY_PROTOCOL` sans un amont correctement configuré pour l’émettre cassera votre application. Assurez‑vous de l’avoir configuré avant activation.
 
 ### Paramètres
 
@@ -33,13 +33,13 @@ Activer `USE_PROXY_PROTOCOL` sans un amont correctement configuré pour l’éme
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | non      | Activer le support PROXY protocol pour la communication directe proxy→BunkerWeb. |
 
 !!! tip "Fournisseurs cloud"
-Ajoutez les IP de vos load balancers (AWS/GCP/Azure…) à `REAL_IP_FROM` pour une identification correcte.
+    Ajoutez les IP de vos load balancers (AWS/GCP/Azure…) à `REAL_IP_FROM` pour une identification correcte.
 
 !!! danger "Considérations sécurité"
-N’ajoutez que des sources de confiance, sinon risque d’usurpation d’IP via en‑têtes manipulés.
+    N’ajoutez que des sources de confiance, sinon risque d’usurpation d’IP via en‑têtes manipulés.
 
 !!! info "Multiples adresses"
-Avec `REAL_IP_RECURSIVE`, si l’en‑tête contient plusieurs IPs, la première non listée comme proxy de confiance est retenue comme IP client.
+    Avec `REAL_IP_RECURSIVE`, si l’en‑tête contient plusieurs IPs, la première non listée comme proxy de confiance est retenue comme IP client.
 
 ### Exemples
 

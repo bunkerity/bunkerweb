@@ -117,6 +117,7 @@
 .viminfo
 .vimrc
 .vscode
+.wget-hsts
 .ws_ftp.ini
 .www_acl
 .wwwacl

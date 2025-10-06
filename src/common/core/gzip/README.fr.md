@@ -26,7 +26,7 @@ Le plugin GZIP compresse les réponses HTTP avec l’algorithme gzip pour rédui
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | multisite | non      | Précise quels contenus proxifiés doivent être compressés selon les en‑têtes de réponse. |
 
 !!! tip "Niveau de compression"
-`5` est un bon compromis. Statique/CPU dispo : 7–9. Dynamique/CPU limité : 1–3.
+    `5` est un bon compromis. Statique/CPU dispo : 7–9. Dynamique/CPU limité : 1–3.
 
 ### Exemples
 

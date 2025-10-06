@@ -272,7 +272,6 @@ Double timezone specification
 Duplicate field name "
 During class fetch
 EOF before image was complete
-Empty string
 Empty string as an extension
 Encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE
 Encoding: '*' may only be first arraySize value in list
@@ -345,7 +344,6 @@ Found unconstructed ResourceBundle
 Found unconstructed Spoofchecker
 Found unconstructed transliterator
 Found unexpected data
-Freeing memory
 GC buffer overflow (GC disabled)\n
 Generated salt too short
 Generator already closed
@@ -356,18 +354,12 @@ Glob support is not available
 Got chunk
 HTTP request failed!
 HTTP wrapper does not support writeable connections
-HY000
-HY093
-HY105
 Handler name must be a string
-Header "
 Header may not contain
 Header may not contain NUL bytes
-Header name "
 Header name cannot be numeric,
 Header to delete may not contain colon.
 Hour cannot be higher than 12
-IM001
 ISO Week must be between 1 and 53
 Ignoring session_start() because a session has already been started
 Illegal member variable name
@@ -460,7 +452,6 @@ Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative
 Negative width in bit-field "
 No PostgreSQL connection opened yet
 No URL resource specified
-No active class
 No active op array!
 No active symbol table!
 No execution context
@@ -535,7 +526,6 @@ Only variables should be assigned by reference
 Only variables should be passed by reference
 # Option "
 Options should have the form [\
-Out of memory
 Overflow in enumeration values "
 PDO object is not initialized, constructor was not called
 PDO object is uninitialized
@@ -545,7 +535,6 @@ PDO::ATTR_STATEMENT_CLASS value must be an array with the format
 PDO::FETCH_INTO and PDO::FETCH_CLASS cannot be set as the default fetch mode
 PNG support is not available
 POST Content-Length of
-Pair level
 Paletter image not supported by webp
 Parser must not be called recursively
 Parsing Schema: <restriction> or <extension> expected in complexContent
@@ -591,7 +580,6 @@ Parsing WSDL: No binding associated with <port>
 Parsing WSDL: No location associated with <port>
 Parsing WSDL: Unspecified encodingStyle
 Password hashing failed for unknown reason
-Password is too long
 Path cannot be empty
 Path to document must not contain any null bytes
 PostgreSQL connection has already been closed
@@ -610,7 +598,6 @@ Putting int...
 Putting word...
 Read Error: truncated data
 Read-only segment cannot be written
-Reading file
 Reading gd2 header info
 Recursion detected
 Redeclaration of "
@@ -620,7 +607,6 @@ Registered tick function cannot be unregistered while it is being executed
 Remote file already exists and overwrite context option not specified
 ResourceBundle does not support writable iterators
 ResourceBundle object is already constructed
-Restarting!
 Returning by reference from a void function is deprecated
 SNMP output print format must be an SNMP_OID_OUTPUT_* constant
 SNMP retrieval method must be a bitmask of SNMP_VALUE_LIBRARY, SNMP_VALUE_PLAIN, and SNMP_VALUE_OBJECT
@@ -680,7 +666,6 @@ Security protocol must be one of "
 Seeking...
 Server doesn't support FTPS.
 Session id must be a string
-Session is not active
 Set autocommit
 SetConnectOption
 SetStmtOption
@@ -695,7 +680,6 @@ Spoofchecker class not defined
 String offset cast occurred
 String size overflow
 TCP/IP option is not available for error logging
-Telling...
 # The
 # The "
 The (unset) cast is no longer supported
@@ -760,7 +744,6 @@ Unknown SOAP version
 Unknown and uncaught modification type.
 Unknown file open mode
 Unknown format specifier "
-Unknown reason
 Unmatched [ in format string
 Unsupported "
 Unsupported argument type
@@ -864,10 +847,8 @@ could not obtain parameters for parsing
 declare(encoding=...) ignored because
 define(): Argument #3 ($case_insensitive) is ignored since declaration of case-insensitive constants is no longer supported
 deflate_init(): "
-empty password
 error converting input string
 error copying from pipe to temp file
-error reading
 error seeking
 error while writing to temp file
 failed setting compression level
@@ -906,7 +887,6 @@ input LOB is no longer a stream
 invalid capture index
 invalid format (repeated flags)
 invalid format (width or precision too long)
-invalid option
 invalid order function for sorting
 invalid pattern capture
 is an invalid DocumentType object

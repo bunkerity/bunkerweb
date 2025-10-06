@@ -37,7 +37,7 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 | `REDIS_KEEPALIVE_POOL`    | `3`        | global  | nein     | Maximale Anzahl der im Pool gehaltenen Verbindungen.          |
 
 !!! tip "Hochverfügbarkeit"
-Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
+    Konfigurieren Sie Redis Sentinel für ein automatisches Failover in der Produktion.
 
 !!! warning "Sicherheit"
 

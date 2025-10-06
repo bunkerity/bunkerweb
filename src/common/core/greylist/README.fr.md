@@ -17,7 +17,7 @@ Comment ça marche :
 !!! tip "Comportement d’accès" - Visiteurs greylist : accès autorisé mais contrôles appliqués. - Autres visiteurs : accès refusé.
 
 !!! info "Mode stream"
-En mode stream, seuls IP, rDNS et ASN sont pris en compte.
+    En mode stream, seuls IP, rDNS et ASN sont pris en compte.
 
 ### Paramètres
 
@@ -64,7 +64,7 @@ Général
     | `GREYLIST_URI_URLS` |        | multisite | non      | URLs contenant des motifs d’URI à greylist. |
 
 !!! info "Format d’URL"
-Les paramètres `*_URLS` supportent HTTP/HTTPS et `file:///`. Auth basique possible avec `http://user:pass@url`.
+    Les paramètres `*_URLS` supportent HTTP/HTTPS et `file:///`. Auth basique possible avec `http://user:pass@url`.
 
 !!! tip "Mises à jour"
-Les listes récupérées par URL sont mises à jour automatiquement toutes les heures.
+    Les listes récupérées par URL sont mises à jour automatiquement toutes les heures.

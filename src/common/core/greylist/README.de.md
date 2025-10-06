@@ -19,13 +19,13 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
 4.  **Zugriff überwachen:** Überprüfen Sie die [Web-Benutzeroberfläche](web-ui.md), um zu sehen, welchen Besuchern der Zugriff gewährt oder verweigert wird.
 
 !!! tip "Verhalten der Zugriffskontrolle"
-Wenn die Greylist-Funktion aktiviert ist, indem die Einstellung `USE_GREYLIST` auf `yes` gesetzt wird:
+    Wenn die Greylist-Funktion aktiviert ist, indem die Einstellung `USE_GREYLIST` auf `yes` gesetzt wird:
 
     1. **Greylist-Besucher:** Erhalten Zugriff, unterliegen aber weiterhin allen Sicherheitsprüfungen.
     2. **Nicht-Greylist-Besucher:** Wird der Zugriff vollständig verweigert.
 
 !!! info "Stream-Modus"
-Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
+    Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
 
 ### Konfigurationseinstellungen
 
@@ -36,7 +36,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
 | `USE_GREYLIST` | `no`     | multisite | nein     | **Greylist aktivieren:** Auf `yes` setzen, um Greylisting zu aktivieren. |
 
 === "IP-Adresse"
-**Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Greylist. Diese Besucher erhalten Zugriff, unterliegen aber weiterhin den Sicherheitsprüfungen.
+    **Was dies bewirkt:** Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Greylist. Diese Besucher erhalten Zugriff, unterliegen aber weiterhin den Sicherheitsprüfungen.
 
     | Einstellung        | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                            |
     | ------------------ | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -44,7 +44,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_IP_URLS` |          | multisite | nein     | **IP-Greylist-URLs:** Liste von URLs, die IP-Adressen oder Netzwerke enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
 === "Reverse DNS"
-**Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Greylist. Nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken bedingten Zugriff zu gewähren.
+    **Was dies bewirkt:** Setzt Besucher basierend auf ihrem Domainnamen (in umgekehrter Reihenfolge) auf die Greylist. Nützlich, um Besuchern von bestimmten Organisationen oder Netzwerken bedingten Zugriff zu gewähren.
 
     | Einstellung            | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                       |
     | ---------------------- | -------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -53,7 +53,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_RDNS_URLS`   |          | multisite | nein     | **rDNS-Greylist-URLs:** Liste von URLs, die Reverse-DNS-Suffixe enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
 === "ASN"
-**Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
+    **Was dies bewirkt:** Setzt Besucher von bestimmten Netzwerkanbietern mithilfe von Autonomen Systemnummern auf die Greylist. ASNs identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
     | Einstellung         | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                       |
     | ------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -61,7 +61,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_ASN_URLS` |          | multisite | nein     | **ASN-Greylist-URLs:** Liste von URLs, die ASNs enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
 === "User-Agent"
-**Was dies bewirkt:** Setzt Besucher basierend auf dem Browser oder Tool, das sie angeben zu verwenden, auf die Greylist. Dies ermöglicht kontrollierten Zugriff für bestimmte Tools, während die Sicherheitsprüfungen aufrechterhalten werden.
+    **Was dies bewirkt:** Setzt Besucher basierend auf dem Browser oder Tool, das sie angeben zu verwenden, auf die Greylist. Dies ermöglicht kontrollierten Zugriff für bestimmte Tools, während die Sicherheitsprüfungen aufrechterhalten werden.
 
     | Einstellung                | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                |
     | -------------------------- | -------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -69,7 +69,7 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_USER_AGENT_URLS` |          | multisite | nein     | **User-Agent-Greylist-URLs:** Liste von URLs, die User-Agent-Muster enthalten, die auf die Greylist gesetzt werden sollen.                  |
 
 === "URI"
-**Was dies bewirkt:** Setzt Anfragen an bestimmte URLs auf Ihrer Website auf die Greylist. Dies ermöglicht bedingten Zugriff auf bestimmte Endpunkte, während die Sicherheitsprüfungen aufrechterhalten werden.
+    **Was dies bewirkt:** Setzt Anfragen an bestimmte URLs auf Ihrer Website auf die Greylist. Dies ermöglicht bedingten Zugriff auf bestimmte Endpunkte, während die Sicherheitsprüfungen aufrechterhalten werden.
 
     | Einstellung         | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                             |
     | ------------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -77,10 +77,10 @@ Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.
     | `GREYLIST_URI_URLS` |          | multisite | nein     | **URI-Greylist-URLs:** Liste von URLs, die URI-Muster enthalten, die auf die Greylist gesetzt werden sollen, getrennt durch Leerzeichen. |
 
 !!! info "Unterstützung von URL-Formaten"
-Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
+    Alle `*_URLS`-Einstellungen unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade mit dem Präfix `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
 
 !!! tip "Regelmäßige Aktualisierungen"
-Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
+    Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.
 
 ### Beispielkonfigurationen
 

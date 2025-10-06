@@ -26,7 +26,7 @@ Siga estos pasos para configurar y usar la función de Errores:
 | `INTERCEPTED_ERROR_CODES` | `400 401 403 404 405 413 429 500 501 502 503 504` | multisite | no       | **Errores Interceptados:** Lista de códigos de error HTTP que BunkerWeb debe manejar con su página de error predeterminada cuando no se especifica una página personalizada. |
 
 !!! tip "Diseño de la Página de Error"
-Las páginas de error predeterminadas de BunkerWeb están diseñadas para ser informativas, amigables y de apariencia profesional. Incluyen:
+    Las páginas de error predeterminadas de BunkerWeb están diseñadas para ser informativas, amigables y de apariencia profesional. Incluyen:
 
     -   Descripciones claras del error
     -   Información sobre qué pudo haber causado el error
@@ -34,7 +34,7 @@ Las páginas de error predeterminadas de BunkerWeb están diseñadas para ser in
     -   Indicadores visuales que ayudan a los usuarios a comprender si el problema está del lado del cliente o del servidor
 
 !!! info "Tipos de Error"
-Los códigos de error se clasifican por tipo:
+    Los códigos de error se clasifican por tipo:
 
     -   **Errores 4xx (del lado del cliente):** Indican problemas con la solicitud del cliente, como intentar acceder a páginas inexistentes o carecer de la autenticación adecuada.
     -   **Errores 5xx (del lado del servidor):** Indican problemas con la capacidad del servidor para cumplir una solicitud válida, como errores internos del servidor o indisponibilidad temporal.
