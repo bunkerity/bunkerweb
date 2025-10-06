@@ -918,7 +918,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       自定义配置
     </span>
@@ -927,7 +927,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#running-many-services-in-production" class="md-nav__link">
     <span class="md-ellipsis">
       在生产环境中运行大量服务
     </span>
@@ -960,7 +960,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#persistence-of-bans-and-reports" class="md-nav__link">
     <span class="md-ellipsis">
       封禁和报告的持久化
     </span>
@@ -1010,7 +1010,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#security-tuning" class="md-nav__link">
     <span class="md-ellipsis">
       安全性调整
     </span>
@@ -1028,7 +1028,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       监控和报告
     </span>
@@ -1065,7 +1065,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       备份和恢复
     </span>
@@ -1085,7 +1085,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       手动备份
     </span>
@@ -1094,7 +1094,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       手动恢复
     </span>
@@ -1123,7 +1123,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       创建迁移文件
     </span>
@@ -1132,7 +1132,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       初始化迁移
     </span>
@@ -1161,7 +1161,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       功能
     </span>
@@ -1170,7 +1170,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       配置
     </span>
@@ -1179,7 +1179,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       最佳实践
     </span>
@@ -1203,7 +1203,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       功能
     </span>
@@ -1227,7 +1227,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       功能
     </span>
@@ -1915,7 +1915,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h3 id="_4">自定义配置</h3>
+<h3 id="custom-configurations">自定义配置</h3>
 <p>要自定义并向 BunkerWeb 添加自定义配置，您可以利用其 NGINX 基础。自定义 NGINX 配置可以添加到不同的 NGINX 上下文中，包括 ModSecurity Web 应用程序防火墙 (WAF) 的配置，这是 BunkerWeb 的核心组件。有关 ModSecurity 配置的更多详细信息，请参见<a href="../features/#custom-configurations">此处</a>。</p>
 <p>以下是可用的自定义配置类型：</p>
 <ul>
@@ -2188,7 +2188,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </div>
 </div>
 </div>
-<h3 id="_5">在生产环境中运行大量服务</h3>
+<h3 id="running-many-services-in-production">在生产环境中运行大量服务</h3>
 <h4 id="crs">全局 CRS</h4>
 <div class="admonition warning">
 <p class="admonition-title">CRS 插件</p>
@@ -2206,7 +2206,7 @@ SecRule REQUEST_HEADERS:Host &quot;@rx ^app1\.example\.com$&quot; &quot;nolog&qu
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: &#39;db&#39; user: &#39;bunkerweb&#39; host: &#39;172.20.0.4&#39; (Got a packet bigger than &#39;max_allowed_packet&#39; bytes)
 </code></pre></div>
 <p>您需要在您的数据库服务器上增加 <code>max_allowed_packet</code> 的值。</p>
-<h3 id="_6">封禁和报告的持久化</h3>
+<h3 id="persistence-of-bans-and-reports">封禁和报告的持久化</h3>
 <p>默认情况下，BunkerWeb 将封禁和报告存储在本地的 Lua 数据存储中。虽然这种设置简单高效，但意味着当实例重启时数据会丢失。为了确保封禁和报告在重启后仍然存在，您可以将 BunkerWeb 配置为使用远程的 <a href="https://redis.io/">Redis</a> 或 <a href="https://valkey.io/">Valkey</a> 服务器。</p>
 <p><strong>为什么使用 Redis/Valkey？</strong></p>
 <p>Redis 和 Valkey 是功能强大的内存数据存储，通常用作数据库、缓存和消息代理。它们具有高度可扩展性，并支持多种数据结构，包括：</p>
@@ -3219,7 +3219,7 @@ USE_IPV6=yes
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
 <p>此全局配置将由所有容器继承。但是，在 <code>docker-compose.yml</code> 文件中按服务定义的任何日志记录配置都将覆盖 <code>daemon.json</code> 中的全局设置。</p>
-<h2 id="_7">安全性调整</h2>
+<h2 id="security-tuning">安全性调整</h2>
 <p>BunkerWeb 提供了许多安全功能，您可以通过<a href="../features/">功能</a>进行配置。尽管设置的默认值确保了最低限度的“默认安全”，我们强烈建议您对它们进行调整。这样做，您不仅能够确保您所选择的安全级别，还能管理误报。</p>
 <div class="admonition tip">
 <p class="admonition-title">其他功能</p>
@@ -3239,7 +3239,7 @@ USE_IPV6=yes
   </p>
 <figcaption>在上下文列中显示的 BunkerWeb 数据</figcaption>
 </figure>
-<h2 id="_8">监控和报告</h2>
+<h2 id="_4">监控和报告</h2>
 <h4 id="pro">监控 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>监控插件让您可以收集和检索关于 BunkerWeb 的指标。启用它后，您的实例将开始收集与攻击、请求和性能相关的各种数据。然后，您可以通过定期调用 <code>/monitoring</code> API 端点或使用其他插件（如 Prometheus 导出器）来检索它们。</p>
@@ -3449,7 +3449,7 @@ USE_IPV6=yes
 <li>如果作业失败，插件将在下一次执行中重试发送报告。</li>
 </ul>
 </div>
-<h3 id="_9">备份和恢复</h3>
+<h3 id="_5">备份和恢复</h3>
 <h4 id="s3-pro">S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>S3 备份工具可以无缝地自动化数据保护，类似于社区备份插件。然而，它的突出之处在于将备份直接安全地存储在 S3 存储桶中。</p>
@@ -3575,7 +3575,7 @@ USE_IPV6=yes
 </tr>
 </tbody>
 </table>
-<h5 id="_10">手动备份</h5>
+<h5 id="_6">手动备份</h5>
 <p>要手动启动备份，请执行以下命令：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Linux</label><label for="__tabbed_13_2">Docker</label></div>
 <div class="tabbed-content">
@@ -3631,7 +3631,7 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
-<h5 id="_11">手动恢复</h5>
+<h5 id="_7">手动恢复</h5>
 <p>要手动启动恢复，请执行以下命令：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Linux</label><label for="__tabbed_16_2">Docker</label></div>
 <div class="tabbed-content">
@@ -3690,7 +3690,7 @@ USE_IPV6=yes
 <p><strong>跨数据库兼容性：</strong> 在各种数据库平台之间实现无缝迁移，包括 SQLite、MySQL、MariaDB 和 PostgreSQL，确保与您首选的数据库环境兼容。</p>
 </li>
 </ul>
-<h4 id="_12">创建迁移文件</h4>
+<h4 id="_8">创建迁移文件</h4>
 <p>要手动创建迁移文件，请执行以下命令：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Linux</label><label for="__tabbed_19_2">Docker</label></div>
 <div class="tabbed-content">
@@ -3743,7 +3743,7 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
-<h4 id="_13">初始化迁移</h4>
+<h4 id="_9">初始化迁移</h4>
 <p>要手动初始化迁移，请执行以下命令：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Linux</label><label for="__tabbed_21_2">Docker</label><label for="__tabbed_21_3">All-in-one</label></div>
 <div class="tabbed-content">
@@ -3786,7 +3786,7 @@ USE_IPV6=yes
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>Anti DDoS</strong> 插件通过实时监控、分析和过滤可疑流量，提供针对分布式拒绝服务 (DDoS) 攻击的高级保护。</p>
 <p>通过采用<strong>滑动窗口机制</strong>，该插件在内存中维护一个请求时间戳字典，以检测来自单个 IP 地址的异常流量峰值。根据配置的安全模式，它可以阻止违规连接或记录可疑活动以供进一步审查。</p>
-<h4 id="_14">功能</h4>
+<h4 id="_10">功能</h4>
 <ul>
 <li><strong>实时流量分析：</strong> 持续监控传入请求以检测潜在的 DDoS 攻击。</li>
 <li><strong>滑动窗口机制：</strong> 在可配置的时间窗口内跟踪最近的请求活动。</li>
@@ -3796,7 +3796,7 @@ USE_IPV6=yes
 <li><strong>优化的内存数据存储：</strong> 确保高速查找和高效的指标跟踪。</li>
 <li><strong>自动清理：</strong> 定期清除过时数据以保持最佳性能。</li>
 </ul>
-<h4 id="_15">配置</h4>
+<h4 id="_11">配置</h4>
 <p>使用以下设置自定义插件行为：</p>
 <table>
 <thead>
@@ -3853,16 +3853,20 @@ USE_IPV6=yes
 </tr>
 </tbody>
 </table>
-<h4 id="_16">最佳实践</h4>
+<h4 id="_12">最佳实践</h4>
 <ul>
 <li><strong>阈值调整：</strong> 根据您的典型流量模式调整 <code>ANTIDDOS_THRESHOLD</code> 和 <code>ANTIDDOS_WINDOW_TIME</code>。</li>
 <li><strong>状态码审查：</strong> 定期更新 <code>ANTIDDOS_STATUS_CODES</code> 以捕获新的或不断演变的可疑行为。</li>
 <li><strong>监控：</strong> 定期分析日志和指标以微调设置并提高整体保护。</li>
 </ul>
 <h2 id="pro_3">用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="用户管理器页面" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <p>用户管理插件提供了一个强大的界面，用于管理系统内的用户帐户。</p>
 <p>借助此插件，管理员可以轻松创建、更新和禁用用户帐户，管理用户角色，切换双因素身份验证 (2FA)，并查看详细的用户信息，例如上次登录时间戳和帐户状态（活动或非活动）。该插件在设计时考虑了安全性和易用性，简化了常规的用户管理任务，同时确保了合规性和可审计性。</p>
-<h4 id="_17">功能</h4>
+<h4 id="_13">功能</h4>
 <ul>
 <li><strong>用户帐户操作：</strong> 支持以 CSV/XSLX 格式导入，轻松创建、编辑和删除用户帐户。</li>
 <li><strong>基于角色的访问控制：</strong> 分配和修改用户角色以管理权限和访问级别。</li>
@@ -3870,10 +3874,6 @@ USE_IPV6=yes
 <li><strong>全面的用户洞察：</strong> 监控关键用户数据，包括上次登录时间、帐户创建日期以及活动/非活动状态。</li>
 <li><strong>审计日志记录：</strong> 维护所有用户管理操作的审计跟踪，以增强安全性和合规性。</li>
 </ul>
-<p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="用户管理器页面" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
-
 <figure>
 <p><img align="center" alt="概述" src="../../assets/img/user-manager.png" />
   </p>
@@ -3891,7 +3891,7 @@ USE_IPV6=yes
 </figure>
 <h2 id="pro_4">轻松解决 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
 <p>轻松解决插件让您可以直接从报告页面快速修复误报和重复出现的问题。它将引导式的“解决”操作转化为安全、范围受限的配置更新——无需手动编辑。</p>
-<h4 id="_18">功能</h4>
+<h4 id="_14">功能</h4>
 <ul>
 <li>从报告和报告详情中一键操作。</li>
 <li>针对 ModSecurity、黑名单和 DNSBL 的上下文感知建议。</li>

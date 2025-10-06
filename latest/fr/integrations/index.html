@@ -797,7 +797,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#image-tout-en-un-aio" class="md-nav__link">
+  <a href="#all-in-one-aio-image" class="md-nav__link">
     <span class="md-ellipsis">
       Image tout-en-un (AIO)
     </span>
@@ -807,7 +807,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#deploiement" class="md-nav__link">
+  <a href="#deployment" class="md-nav__link">
     <span class="md-ellipsis">
       Déploiement
     </span>
@@ -825,7 +825,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#integration-redis" class="md-nav__link">
+  <a href="#redis-integration" class="md-nav__link">
     <span class="md-ellipsis">
       Intégration Redis
     </span>
@@ -834,7 +834,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#integration-crowdsec" class="md-nav__link">
+  <a href="#crowdsec-integration" class="md-nav__link">
     <span class="md-ellipsis">
       Intégration CrowdSec
     </span>
@@ -1024,7 +1024,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#integration-de-crowdsec-avec-le-script" class="md-nav__link">
+  <a href="#crowdsec-integration-with-the-script" class="md-nav__link">
     <span class="md-ellipsis">
       Intégration de CrowdSec avec le script
     </span>
@@ -1140,7 +1140,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#espaces-de-noms" class="md-nav__link">
+  <a href="#namespaces" class="md-nav__link">
     <span class="md-ellipsis">
       Espaces de noms
     </span>
@@ -1206,7 +1206,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#espaces-de-noms_1" class="md-nav__link">
+  <a href="#namespaces_1" class="md-nav__link">
     <span class="md-ellipsis">
       Espaces de noms
     </span>
@@ -1281,7 +1281,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#espaces-de-noms_2" class="md-nav__link">
+  <a href="#namespaces_2" class="md-nav__link">
     <span class="md-ellipsis">
       Espaces de noms
     </span>
@@ -1566,13 +1566,13 @@
 <li>Support technique pour vous aider dans la configuration</li>
 </ul>
 <p>Si vous êtes intéressé par l'offre BunkerWeb Cloud, n'hésitez pas à <a href="https://panel.bunkerweb.io/contact.php?language=french&amp;utm_campaign=self&amp;utm_source=doc">nous contacter</a> afin que nous puissions discuter de vos besoins.</p>
-<h2 id="image-tout-en-un-aio">Image tout-en-un (AIO)</h2>
+<h2 id="all-in-one-aio-image">Image tout-en-un (AIO)</h2>
 <figure>
 <p><img align="center," alt="Architecture AIO Graph Placeholder" src="../../assets/img/aio-graph-placeholder.png" width="600" />
   </p>
 <figcaption>Architecture tout-en-un (AIO) BunkerWeb</figcaption>
 </figure>
-<h3 id="deploiement">Déploiement</h3>
+<h3 id="deployment">Déploiement</h3>
 <p>Pour déployer le conteneur tout-en-un, il vous suffit d'exécuter la commande suivante :</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -1606,13 +1606,13 @@
 <blockquote>
 <p>Suivez les étapes suivantes du guide de <a href="../quickstart-guide/#complete-the-setup-wizard">démarrage rapide</a> pour configurer l'interface utilisateur Web.</p>
 </blockquote>
-<h3 id="integration-redis">Intégration Redis</h3>
+<h3 id="redis-integration">Intégration Redis</h3>
 <p>L'image <strong>BunkerWeb All-In-One</strong> inclut Redis prêt à l'emploi pour la <a href="../advanced/#persistence-of-bans-and-reports">persistance des bannissements et des rapports</a>. Pour gérer Redis :</p>
 <ul>
 <li>Pour désactiver Redis, définissez <code>USE_REDIS=no</code> ou pointez <code>REDIS_HOST</code> vers un hôte externe.</li>
 <li>Les journaux Redis apparaissent <code>[REDIS]</code> avec le préfixe dans les journaux Docker et <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
-<h3 id="integration-crowdsec">Intégration CrowdSec</h3>
+<h3 id="crowdsec-integration">Intégration CrowdSec</h3>
 <p>L'image Docker tout-en-un** de BunkerWeb ** est livrée avec CrowdSec entièrement intégré, sans conteneurs supplémentaires ni configuration manuelle requise. Suivez les étapes ci-dessous pour activer, configurer et étendre CrowdSec dans votre déploiement.</p>
 <p>Par défaut, CrowdSec est <strong>désactivé</strong>. Pour l'activer, il suffit d'ajouter la <code>USE_CROWDSEC</code> variable d'environnement :</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
@@ -2243,7 +2243,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dry-
 - Le mode interactif (par défaut) vous demandera les valeurs requises manquantes
 - Le mode non interactif (<code>--yes</code>) nécessite que toutes les options nécessaires soient fournies via la ligne de commande</p>
 </div>
-<h4 id="integration-de-crowdsec-avec-le-script">Intégration de CrowdSec avec le script</h4>
+<h4 id="crowdsec-integration-with-the-script">Intégration de CrowdSec avec le script</h4>
 <p>Si vous choisissez d'installer CrowdSec lors de la configuration interactive, le script automatise entièrement son intégration avec BunkerWeb :</p>
 <ul>
 <li>Il ajoute le dépôt officiel CrowdSec et installe l'agent.</li>
@@ -2597,7 +2597,7 @@ MY_SETTING_2=value2
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="espaces-de-noms">Espaces de noms</h3>
+<h3 id="namespaces">Espaces de noms</h3>
 <p>À partir de la version <code>1.6.0</code>, les piles Autoconf de BunkerWeb supportent désormais les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs «<em> clusters </em>» d'instances et de services BunkerWeb sur le même hôte Docker. Pour tirer parti des espaces de noms, il vous suffit de définir l' <code>NAMESPACE</code> étiquette sur vos services. Voici un exemple :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -2705,7 +2705,7 @@ MY_SETTING_2=value2
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 <span class="nn">...</span>
 </code></pre></div>
-<h3 id="espaces-de-noms_1">Espaces de noms</h3>
+<h3 id="namespaces_1">Espaces de noms</h3>
 <p>À partir de la version <code>1.6.0</code>, les piles autoconf de BunkerWeb prennent désormais en charge les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs clusters d'instances et de services BunkerWeb sur le même cluster Kubernetes. Pour tirer parti des espaces de noms, il suffit de définir le <code>namespace</code> champ de métadonnées sur vos instances et services BunkerWeb. Voici un exemple :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
@@ -3149,7 +3149,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="espaces-de-noms_2">Espaces de noms</h3>
+<h3 id="namespaces_2">Espaces de noms</h3>
 <p>À partir de la version <code>1.6.0</code>, les piles Autoconf de BunkerWeb supportent désormais les espaces de noms. Cette fonctionnalité vous permet de gérer plusieurs «<em> clusters </em>» d'instances et de services BunkerWeb sur le même hôte Docker. Pour tirer parti des espaces de noms, il vous suffit de définir l' <code>NAMESPACE</code> étiquette sur vos services. Voici un exemple :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>

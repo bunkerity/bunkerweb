@@ -793,7 +793,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mode-multisite" class="md-nav__link">
+  <a href="#multisite-mode" class="md-nav__link">
     <span class="md-ellipsis">
       Mode multisite
     </span>
@@ -802,7 +802,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configurations-personnalisees" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Configurations personnalisées
     </span>
@@ -820,7 +820,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#programmateur" class="md-nav__link">
+  <a href="#scheduler" class="md-nav__link">
     <span class="md-ellipsis">
       Programmateur
     </span>
@@ -829,7 +829,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#modeles" class="md-nav__link">
+  <a href="#templates" class="md-nav__link">
     <span class="md-ellipsis">
       Modèles
     </span>
@@ -1160,7 +1160,7 @@ USE_BROTLI=no
 <p class="admonition-title">Aller plus loin</p>
 <p>La liste complète des paramètres disponibles, avec leurs descriptions et valeurs possibles, est disponible dans la section <a href="../features/">Fonctionnalités</a> de la documentation.</p>
 </div>
-<h2 id="mode-multisite">Mode multisite</h2>
+<h2 id="multisite-mode">Mode multisite</h2>
 <p>Comprendre le mode multisite est essentiel lors de l'utilisation de BunkerWeb. Comme notre objectif principal est la protection des applications web, notre solution est intimement liée au concept d'« hôtes virtuels » ou « vhosts » (plus d'informations <a href="https://en.wikipedia.org/wiki/Virtual_hosting">ici</a>). Ces hôtes virtuels permettent de diffuser plusieurs applications Web à partir d'une seule instance ou d'un seul cluster.</p>
 <p>Par défaut, le mode multisite est désactivé sur BunkerWeb. Cela signifie qu'une seule application web sera servie et que tous les paramètres lui seront appliqués. Cette configuration est idéale lorsque vous avez une seule application à protéger, car vous n'avez pas besoin de vous soucier des configurations multisites.</p>
 <p>Cependant, lorsque le mode multisite est activé, BunkerWeb devient capable de servir et de protéger plusieurs applications Web. Chaque application Web est identifiée par un nom de serveur unique et possède son propre ensemble de paramètres. Ce mode s'avère avantageux lorsque vous avez plusieurs applications à sécuriser et que vous préférez utiliser une seule instance (ou un cluster) de BunkerWeb.</p>
@@ -1189,7 +1189,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Aller plus loin</p>
 <p>Vous trouverez des exemples concrets du mode multisite dans la section <a href="../advanced/">Utilisations avancées</a> de la documentation et dans le répertoire <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples">examples</a> du dépôt.</p>
 </div>
-<h2 id="configurations-personnalisees">Configurations personnalisées</h2>
+<h2 id="custom-configurations">Configurations personnalisées</h2>
 <p>Pour relever des défis uniques et répondre à des cas d'utilisation spécifiques, BunkerWeb offre la flexibilité de configurations personnalisées. Bien que les paramètres fournis et les <a href="../plugins/">plug-ins externes</a> couvrent un large éventail de scénarios, il peut y avoir des situations qui nécessitent une personnalisation supplémentaire.</p>
 <p>BunkerWeb est construit sur le célèbre serveur Web NGINX, qui fournit un système de configuration puissant. Cela signifie que vous pouvez tirer parti des capacités de configuration de NGINX pour répondre à vos besoins spécifiques. Des configurations NGINX personnalisées peuvent être incluses dans divers <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">contextes</a> tels que HTTP ou serveur, ce qui vous permet d'affiner le comportement de BunkerWeb en fonction de vos besoins. Que vous ayez besoin de personnaliser les paramètres globaux ou d'appliquer des configurations à des blocs de serveur spécifiques, BunkerWeb vous permet d'optimiser son comportement pour s'aligner parfaitement sur votre cas d'utilisation.</p>
 <p>Un autre composant intégral de BunkerWeb est le pare-feu d'application Web ModSecurity. Avec les configurations personnalisées, vous avez la possibilité de traiter les faux positifs ou d'ajouter des règles personnalisées pour améliorer encore la protection fournie par ModSecurity. Ces configurations personnalisées vous permettent d'affiner le comportement du pare-feu et de vous assurer qu'il s'aligne sur les exigences spécifiques de vos applications Web.</p>
@@ -1242,7 +1242,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Schéma de base de données</figcaption>
 </figure>
-<h2 id="programmateur">Programmateur</h2>
+<h2 id="scheduler">Programmateur</h2>
 <p>Pour une coordination et une automatisation sans faille, BunkerWeb utilise un service spécialisé connu sous le nom de planificateur. Le planificateur joue un rôle essentiel dans le bon fonctionnement en effectuant les tâches suivantes:</p>
 <ul>
 <li>
@@ -1270,7 +1270,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p><strong>Vérification de l'état des instances</strong></p>
 <p>Depuis la version 1.6.0, le planificateur dispose d'un système de vérification de l'état intégré qui surveille l'état des instances. Si une instance devient défectueuse, le planificateur cessera de lui envoyer la configuration. Si l'instance redevient saine, le planificateur reprend l'envoi de la configuration.</p>
 <p>L'intervalle de vérification de l'état est défini par la <code>HEALTHCHECK_INTERVAL</code> variable d'environnement, avec une valeur par défaut de <code>30</code>, ce qui signifie que le planificateur vérifiera l'état des instances toutes les 30 secondes.</p>
-<h2 id="modeles">Modèles</h2>
+<h2 id="templates">Modèles</h2>
 <p>BunkerWeb exploite la puissance des modèles pour simplifier le processus de configuration et améliorer la flexibilité. Les modèles offrent une approche structurée et standardisée de la définition des paramètres et des configurations personnalisées, garantissant ainsi la cohérence et la facilité d'utilisation.</p>
 <ul>
 <li>

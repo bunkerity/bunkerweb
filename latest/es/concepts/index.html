@@ -801,7 +801,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#modo-multisitio" class="md-nav__link">
+  <a href="#multisite-mode" class="md-nav__link">
     <span class="md-ellipsis">
       Modo multisitio
     </span>
@@ -810,7 +810,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuraciones-personalizadas" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Configuraciones personalizadas
     </span>
@@ -828,7 +828,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#programador" class="md-nav__link">
+  <a href="#scheduler" class="md-nav__link">
     <span class="md-ellipsis">
       Programador
     </span>
@@ -852,7 +852,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#plantillas" class="md-nav__link">
+  <a href="#templates" class="md-nav__link">
     <span class="md-ellipsis">
       Plantillas
     </span>
@@ -1183,7 +1183,7 @@ USE_BROTLI=no
 <p class="admonition-title">Para saber más</p>
 <p>La lista completa de configuraciones disponibles con descripciones y posibles valores está disponible en la <a href="../features/">sección de características</a> de la documentación.</p>
 </div>
-<h2 id="modo-multisitio">Modo multisitio</h2>
+<h2 id="multisite-mode">Modo multisitio</h2>
 <p>Comprender el modo multisitio es esencial al utilizar BunkerWeb. Como nuestro enfoque principal es proteger las aplicaciones web, nuestra solución está intrínsecamente vinculada al concepto de "hosts virtuales" o "vhosts" (más información <a href="https://es.wikipedia.org/wiki/Alojamiento_virtual">aquí</a>). Estos hosts virtuales permiten servir múltiples aplicaciones web desde una única instancia o clúster.</p>
 <p>Por defecto, BunkerWeb tiene el modo multisitio deshabilitado. Esto significa que solo se servirá una aplicación web, y todas las configuraciones se aplicarán a ella. Esta configuración es ideal cuando tienes una sola aplicación que proteger, ya que no necesitas preocuparte por las configuraciones multisitio.</p>
 <p>Sin embargo, cuando el modo multisitio está habilitado, BunkerWeb se vuelve capaz de servir y proteger múltiples aplicaciones web. Cada aplicación web se identifica por un nombre de servidor único y tiene su propio conjunto de configuraciones. Este modo resulta beneficioso cuando tienes múltiples aplicaciones que asegurar y prefieres utilizar una única instancia (o un clúster) de BunkerWeb.</p>
@@ -1212,7 +1212,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Para saber más</p>
 <p>Encontrarás ejemplos concretos del modo multisitio en los <a href="../advanced/">usos avanzados</a> de la documentación y en el directorio de <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples">ejemplos</a> del repositorio.</p>
 </div>
-<h2 id="configuraciones-personalizadas">Configuraciones personalizadas</h2>
+<h2 id="custom-configurations">Configuraciones personalizadas</h2>
 <p>Para abordar desafíos únicos y satisfacer casos de uso específicos, BunkerWeb ofrece la flexibilidad de las configuraciones personalizadas. Si bien las configuraciones proporcionadas y los <a href="../plugins/">plugins externos</a> cubren una amplia gama de escenarios, puede haber situaciones que requieran una personalización adicional.</p>
 <p>BunkerWeb está construido sobre el reconocido servidor web NGINX, que proporciona un potente sistema de configuración. Esto significa que puedes aprovechar las capacidades de configuración de NGINX para satisfacer tus necesidades específicas. Las configuraciones personalizadas de NGINX se pueden incluir en varios <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">contextos</a> como HTTP o servidor, lo que te permite ajustar el comportamiento de BunkerWeb según tus requisitos. Ya sea que necesites personalizar configuraciones globales o aplicar configuraciones a bloques de servidor específicos, BunkerWeb te permite optimizar su comportamiento para alinearse perfectamente con tu caso de uso.</p>
 <p>Otro componente integral de BunkerWeb es el Firewall de Aplicaciones Web ModSecurity. Con configuraciones personalizadas, tienes la flexibilidad de abordar falsos positivos o agregar reglas personalizadas para mejorar aún más la protección proporcionada por ModSecurity. Estas configuraciones personalizadas te permiten ajustar el comportamiento del firewall y asegurar que se alinee con los requisitos específicos de tus aplicaciones web.</p>
@@ -1265,7 +1265,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>Esquema de la base de datos</figcaption>
 </figure>
-<h2 id="programador">Programador</h2>
+<h2 id="scheduler">Programador</h2>
 <p>Para una coordinación y automatización fluidas, BunkerWeb emplea un servicio especializado conocido como el programador. El programador desempeña un papel vital para garantizar un funcionamiento sin problemas al realizar las siguientes tareas:</p>
 <ul>
 <li>
@@ -1293,7 +1293,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <h3 id="comprobacion-del-estado-de-las-instancias">Comprobación del estado de las instancias</h3>
 <p>Desde la versión 1.6.0, el programador posee un sistema de comprobación de estado incorporado que monitorea la salud de las instancias. Si una instancia deja de estar saludable, el programador dejará de enviarle la configuración. Si la instancia vuelve a estar saludable, el programador reanudará el envío de la configuración.</p>
 <p>El intervalo de comprobación de estado se establece mediante la variable de entorno <code>HEALTHCHECK_INTERVAL</code>, con un valor predeterminado de <code>30</code>, lo que significa que el programador comprobará la salud de las instancias cada 30 segundos.</p>
-<h2 id="plantillas">Plantillas</h2>
+<h2 id="templates">Plantillas</h2>
 <p>BunkerWeb aprovecha el poder de las plantillas para simplificar el proceso de configuración y mejorar la flexibilidad. Las plantillas proporcionan un enfoque estructurado y estandarizado para definir configuraciones y configuraciones personalizadas, garantizando la coherencia y la facilidad de uso.</p>
 <ul>
 <li>

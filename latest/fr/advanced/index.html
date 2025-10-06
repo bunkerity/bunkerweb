@@ -906,7 +906,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#configurations-personnalisees" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Configurations personnalisées
     </span>
@@ -915,7 +915,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#execution-de-nombreux-services-en-production" class="md-nav__link">
+  <a href="#running-many-services-in-production" class="md-nav__link">
     <span class="md-ellipsis">
       Exécution de nombreux services en production
     </span>
@@ -948,7 +948,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#persistance-des-interdictions-et-des-signalements" class="md-nav__link">
+  <a href="#persistence-of-bans-and-reports" class="md-nav__link">
     <span class="md-ellipsis">
       Persistance des interdictions et des signalements
     </span>
@@ -998,7 +998,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reglage-de-la-securite" class="md-nav__link">
+  <a href="#security-tuning" class="md-nav__link">
     <span class="md-ellipsis">
       Réglage de la sécurité
     </span>
@@ -1903,7 +1903,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h3 id="configurations-personnalisees">Configurations personnalisées</h3>
+<h3 id="custom-configurations">Configurations personnalisées</h3>
 <p>Pour personnaliser et ajouter des configurations personnalisées à BunkerWeb, vous pouvez profiter de sa base NGINX. Des configurations NGINX personnalisées peuvent être ajoutées dans différents contextes NGINX, y compris des configurations pour le pare-feu d'applications Web (WAF) ModSecurity, qui est un composant central de BunkerWeb. Vous trouverez plus de détails sur les configurations de ModSecurity <a href="../features/#custom-configurations">ici</a>.</p>
 <p>Voici les types de configurations personnalisées disponibles :</p>
 <ul>
@@ -2176,7 +2176,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </div>
 </div>
 </div>
-<h3 id="execution-de-nombreux-services-en-production">Exécution de nombreux services en production</h3>
+<h3 id="running-many-services-in-production">Exécution de nombreux services en production</h3>
 <h4 id="crs-mondial">CRS mondial</h4>
 <div class="admonition warning">
 <p class="admonition-title">Plugins CRS</p>
@@ -2194,7 +2194,7 @@ SecRule REQUEST_HEADERS:Host &quot;@rx ^app1\.example\.com$&quot; &quot;nolog&qu
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: &#39;db&#39; user: &#39;bunkerweb&#39; host: &#39;172.20.0.4&#39; (Got a packet bigger than &#39;max_allowed_packet&#39; bytes)
 </code></pre></div>
 <p>Vous devrez augmenter le <code>max_allowed_packet</code> sur votre serveur de base de données.</p>
-<h3 id="persistance-des-interdictions-et-des-signalements">Persistance des interdictions et des signalements</h3>
+<h3 id="persistence-of-bans-and-reports">Persistance des interdictions et des signalements</h3>
 <p>Par défaut, BunkerWeb stocke les bannissements et les rapports dans un magasin de données Lua local. Bien que simple et efficace, cette configuration signifie que des données sont perdues lors du redémarrage de l'instance. Pour vous assurer que les bannissements et les rapports persistent lors des redémarrages, vous pouvez configurer BunkerWeb pour utiliser un <a href="https://redis.io/"> serveur Redis</a> ou <a href="https://valkey.io/">Valkey</a> distant  .</p>
 <p><strong>Pourquoi utiliser Redis/Valkey ?</strong></p>
 <p>Redis et Valkey sont de puissants magasins de données en mémoire couramment utilisés comme bases de données, caches et courtiers de messages. Ils sont hautement évolutifs et prennent en charge une variété de structures de données, notamment :</p>
@@ -3207,7 +3207,7 @@ USE_IPV6=yes
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
 <p>Cette configuration globale sera héritée par tous les conteneurs. Cependant, toute configuration de journalisation définie par service dans un fichier <code>docker-compose.yml</code> remplacera les paramètres globaux dans <code>daemon.json</code>.</p>
-<h2 id="reglage-de-la-securite">Réglage de la sécurité</h2>
+<h2 id="security-tuning">Réglage de la sécurité</h2>
 <p>BunkerWeb offre de nombreuses fonctionnalités de sécurité que vous pouvez configurer avec les <a href="../features/">fonctionnalités</a>. Même si les valeurs par défaut des paramètres assurent une "sécurité par défaut" minimale, nous vous recommandons vivement de les régler. Ce faisant, vous serez en mesure de vous assurer du niveau de sécurité de votre choix, mais aussi de gérer les faux positifs.</p>
 <div class="admonition tip">
 <p class="admonition-title">Autres fonctionnalités</p>
@@ -3844,6 +3844,10 @@ USE_IPV6=yes
 <li><strong>Surveillance :</strong> analysez régulièrement les journaux et les métriques pour affiner les paramètres et améliorer la protection globale.</li>
 </ul>
 <h2 id="gestionnaire-dutilisateurs-pro">Gestionnaire d'utilisateurs <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Gestionnaire d'utilisateurs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <p>Le plug-in de gestion des utilisateurs offre une interface robuste pour l'administration des comptes d'utilisateurs au sein de votre système.</p>
 <p>Avec ce plugin, les administrateurs peuvent sans effort créer, mettre à jour et désactiver des comptes utilisateurs, gérer les rôles des utilisateurs, basculer l'authentification à deux facteurs (2FA) et afficher des informations détaillées sur les utilisateurs telles que les horodatages de la dernière connexion et les statuts des comptes (actif ou inactif). Conçu dans un souci de sécurité et de facilité d'utilisation, ce plug-in simplifie les tâches de gestion des utilisateurs tout en garantissant la conformité et l'auditabilité.</p>
 <h4 id="fonctionnalites_1">Fonctionnalités</h4>
@@ -3854,10 +3858,6 @@ USE_IPV6=yes
 <li><strong>Informations complètes sur les utilisateurs :</strong> surveillez les données clés des utilisateurs, notamment les heures de dernière connexion, les dates de création de compte et le statut actif/inactif.</li>
 <li><strong>Journalisation des audits :</strong> conservez une piste d'audit pour toutes les actions de gestion des utilisateurs afin d'améliorer la sécurité et la conformité.</li>
 </ul>
-<p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Gestionnaire d'utilisateurs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
-
 <figure>
 <p><img align="center" alt="Vue d'ensemble" src="../../assets/img/user-manager.png" />
   </p>

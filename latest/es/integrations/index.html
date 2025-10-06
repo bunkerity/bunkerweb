@@ -805,7 +805,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#imagen-todo-en-uno-aio" class="md-nav__link">
+  <a href="#all-in-one-aio-image" class="md-nav__link">
     <span class="md-ellipsis">
       Imagen Todo en Uno (AIO)
     </span>
@@ -815,7 +815,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#despliegue" class="md-nav__link">
+  <a href="#deployment" class="md-nav__link">
     <span class="md-ellipsis">
       Despliegue
     </span>
@@ -842,7 +842,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#integracion-con-redis" class="md-nav__link">
+  <a href="#redis-integration" class="md-nav__link">
     <span class="md-ellipsis">
       Integración con Redis
     </span>
@@ -851,7 +851,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#integracion-con-crowdsec" class="md-nav__link">
+  <a href="#crowdsec-integration" class="md-nav__link">
     <span class="md-ellipsis">
       Integración con CrowdSec
     </span>
@@ -909,6 +909,21 @@
     </nav>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#variables-de-entorno" class="md-nav__link">
@@ -1017,7 +1032,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#integracion-de-crowdsec-con-el-script" class="md-nav__link">
+  <a href="#crowdsec-integration-with-the-script" class="md-nav__link">
     <span class="md-ellipsis">
       Integración de CrowdSec con el script
     </span>
@@ -1114,7 +1129,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#autoconfiguracion-de-docker" class="md-nav__link">
+  <a href="#docker-autoconf" class="md-nav__link">
     <span class="md-ellipsis">
       Autoconfiguración de Docker
     </span>
@@ -1133,7 +1148,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#espacios-de-nombres" class="md-nav__link">
+  <a href="#namespaces" class="md-nav__link">
     <span class="md-ellipsis">
       Espacios de nombres
     </span>
@@ -1199,7 +1214,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#espacios-de-nombres_1" class="md-nav__link">
+  <a href="#namespaces_1" class="md-nav__link">
     <span class="md-ellipsis">
       Espacios de nombres
     </span>
@@ -1274,7 +1289,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#espacios-de-nombres_2" class="md-nav__link">
+  <a href="#namespaces_2" class="md-nav__link">
     <span class="md-ellipsis">
       Espacios de nombres
     </span>
@@ -1559,13 +1574,13 @@
 <li>Soporte técnico para ayudarte con la configuración</li>
 </ul>
 <p>Si estás interesado en la oferta de BunkerWeb Cloud, no dudes en <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">contactarnos</a> para que podamos discutir tus necesidades.</p>
-<h2 id="imagen-todo-en-uno-aio">Imagen Todo en Uno (AIO)</h2>
+<h2 id="all-in-one-aio-image">Imagen Todo en Uno (AIO)</h2>
 <figure>
 <p><img align="center," alt="Marcador de posición del gráfico de arquitectura AIO" src="../../assets/img/aio-graph-placeholder.png" width="600" />
   </p>
 <figcaption>Arquitectura Todo en Uno de BunkerWeb (AIO)</figcaption>
 </figure>
-<h3 id="despliegue">Despliegue</h3>
+<h3 id="deployment">Despliegue</h3>
 <p>Para desplegar el contenedor todo en uno, todo lo que tienes que hacer es ejecutar el siguiente comando:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -1589,8 +1604,8 @@
 <li><code>SERVICE_SCHEDULER=yes</code> (predeterminado) - Habilita el servicio del Programador</li>
 <li><code>SERVICE_API=no</code> (predeterminado) - Habilita el servicio de la API (plano de control de FastAPI)</li>
 <li><code>AUTOCONF_MODE=no</code> (predeterminado) - Habilita el servicio de autoconfiguración</li>
-<li><code>USE_REDIS=yes</code> (predeterminado) - Habilita la instancia de <a href="#integracion-con-redis">Redis</a> integrada</li>
-<li><code>USE_CROWDSEC=no</code> (predeterminado) - La integración con <a href="#integracion-con-crowdsec">CrowdSec</a> está deshabilitada por defecto</li>
+<li><code>USE_REDIS=yes</code> (predeterminado) - Habilita la instancia de <a href="#redis-integration">Redis</a> integrada</li>
+<li><code>USE_CROWDSEC=no</code> (predeterminado) - La integración con <a href="#crowdsec-integration">CrowdSec</a> está deshabilitada por defecto</li>
 </ul>
 <h3 id="integracion-de-la-api">Integración de la API</h3>
 <p>La imagen Todo en Uno incorpora la API de BunkerWeb. Está deshabilitada por defecto y se puede habilitar estableciendo <code>SERVICE_API=yes</code>.</p>
@@ -1643,19 +1658,19 @@
 <h3 id="accediendo-al-asistente-de-configuracion">Accediendo al asistente de configuración</h3>
 <p>Por defecto, el asistente de configuración se inicia automáticamente cuando ejecutas el contenedor AIO por primera vez. Para acceder a él, sigue estos pasos:</p>
 <ol>
-<li><strong>Inicia el contenedor AIO</strong> como se indicó <a href="#despliegue">anteriormente</a>, asegurándote de que <code>SERVICE_UI=yes</code> (predeterminado).</li>
+<li><strong>Inicia el contenedor AIO</strong> como se indicó <a href="#deployment">anteriormente</a>, asegurándote de que <code>SERVICE_UI=yes</code> (predeterminado).</li>
 <li><strong>Accede a la UI</strong> a través de tu punto de acceso principal de BunkerWeb, p. ej., <code>https://tu-dominio</code>.</li>
 </ol>
 <blockquote>
 <p>Sigue los siguientes pasos en la <a href="../quickstart-guide/#complete-the-setup-wizard">Guía de inicio rápido</a> para configurar la Interfaz de Usuario Web.</p>
 </blockquote>
-<h3 id="integracion-con-redis">Integración con Redis</h3>
+<h3 id="redis-integration">Integración con Redis</h3>
 <p>La imagen <strong>Todo en Uno</strong> de BunkerWeb incluye Redis listo para usar para la <a href="../advanced/#persistence-of-bans-and-reports">persistencia de baneos e informes</a>. Para gestionar Redis:</p>
 <ul>
 <li>Para deshabilitar Redis, establece <code>USE_REDIS=no</code> o apunta <code>REDIS_HOST</code> a un host externo.</li>
 <li>Los registros de Redis aparecen con el prefijo <code>[REDIS]</code> en los registros de Docker y en <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
-<h3 id="integracion-con-crowdsec">Integración con CrowdSec</h3>
+<h3 id="crowdsec-integration">Integración con CrowdSec</h3>
 <p>La imagen Docker <strong>Todo en Uno</strong> de BunkerWeb viene con CrowdSec totalmente integrado, sin necesidad de contenedores adicionales ni configuración manual. Sigue los pasos a continuación para habilitar, configurar y ampliar CrowdSec en tu despliegue.</p>
 <p>Por defecto, CrowdSec está <strong>deshabilitado</strong>. Para activarlo, simplemente añade la variable de entorno <code>USE_CROWDSEC</code>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
@@ -1775,40 +1790,35 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5<span class="sb">```</span>
-
-*<span class="w">   </span>El<span class="w"> </span>**registro<span class="w"> </span>local**<span class="w"> </span>se<span class="w"> </span>omite<span class="w"> </span>cuando<span class="w"> </span><span class="sb">`</span>CROWDSEC_API<span class="sb">`</span><span class="w"> </span>no<span class="w"> </span>es<span class="w"> </span><span class="sb">`</span><span class="m">127</span>.0.0.1<span class="sb">`</span><span class="w"> </span>o<span class="w"> </span><span class="sb">`</span>localhost<span class="sb">`</span>.
-*<span class="w">   </span>**AppSec**<span class="w"> </span>se<span class="w"> </span>deshabilita<span class="w"> </span>por<span class="w"> </span>defecto<span class="w"> </span>cuando<span class="w"> </span>se<span class="w"> </span>usa<span class="w"> </span>una<span class="w"> </span>API<span class="w"> </span>externa.<span class="w"> </span>Para<span class="w"> </span>habilitarlo,<span class="w"> </span>establece<span class="w"> </span><span class="sb">`</span>CROWDSEC_APPSEC_URL<span class="sb">`</span><span class="w"> </span>en<span class="w"> </span>tu<span class="w"> </span>punto<span class="w"> </span>final<span class="w"> </span>deseado.
-*<span class="w">   </span>El<span class="w"> </span>registro<span class="w"> </span>del<span class="w"> </span>bouncer<span class="w"> </span>todavía<span class="w"> </span>se<span class="w"> </span>realiza<span class="w"> </span>contra<span class="w"> </span>la<span class="w"> </span>API<span class="w"> </span>remota.
-*<span class="w">   </span>Para<span class="w"> </span>reutilizar<span class="w"> </span>una<span class="w"> </span>clave<span class="w"> </span>de<span class="w"> </span>bouncer<span class="w"> </span>existente,<span class="w"> </span>proporciona<span class="w"> </span><span class="sb">`</span>CROWDSEC_API_KEY<span class="sb">`</span><span class="w"> </span>con<span class="w"> </span>tu<span class="w"> </span>token<span class="w"> </span>pregenerado.
-
----
-
-!!!<span class="w"> </span>tip<span class="w"> </span><span class="s2">&quot;Más opciones&quot;</span>
-<span class="w">    </span>Para<span class="w"> </span>una<span class="w"> </span>cobertura<span class="w"> </span>completa<span class="w"> </span>de<span class="w"> </span>todas<span class="w"> </span>las<span class="w"> </span>opciones<span class="w"> </span>de<span class="w"> </span>CrowdSec<span class="w"> </span><span class="o">(</span>escenarios<span class="w"> </span>personalizados,<span class="w"> </span>registros,<span class="w"> </span>solución<span class="w"> </span>de<span class="w"> </span>problemas<span class="w"> </span>y<span class="w"> </span>más<span class="o">)</span>,<span class="w"> </span>consulta<span class="w"> </span>la<span class="w"> </span><span class="o">[</span>documentación<span class="w"> </span>del<span class="w"> </span>plugin<span class="w"> </span>de<span class="w"> </span>BunkerWeb<span class="w"> </span>CrowdSec<span class="o">](</span>features.md#crowdsec<span class="o">)</span><span class="w"> </span>o<span class="w"> </span>visita<span class="w"> </span>el<span class="w"> </span><span class="o">[</span>sitio<span class="w"> </span>web<span class="w"> </span>oficial<span class="w"> </span>de<span class="w"> </span>CrowdSec<span class="o">](</span>https://www.crowdsec.net/?utm_source<span class="o">=</span>external-docs<span class="p">&amp;</span><span class="nv">utm_medium</span><span class="o">=</span>cta<span class="p">&amp;</span><span class="nv">utm_campaign</span><span class="o">=</span>bunker-web-docs<span class="o">)</span>.
-
-<span class="c1">## Docker</span>
-
-&lt;figure<span class="w"> </span>markdown&gt;
-<span class="w">  </span>!<span class="o">[</span>Descripción<span class="w"> </span>general<span class="o">](</span>assets/img/integration-docker.svg<span class="o">){</span><span class="w"> </span><span class="nv">align</span><span class="o">=</span>center,<span class="w"> </span><span class="nv">width</span><span class="o">=</span><span class="s2">&quot;600&quot;</span><span class="w"> </span><span class="o">}</span>
-<span class="w">  </span>&lt;figcaption&gt;Integración<span class="w"> </span>con<span class="w"> </span>Docker&lt;/figcaption&gt;
-&lt;/figure&gt;
-
-Usar<span class="w"> </span>BunkerWeb<span class="w"> </span>como<span class="w"> </span>un<span class="w"> </span>contenedor<span class="w"> </span>de<span class="w"> </span><span class="o">[</span>Docker<span class="o">](</span>https://www.docker.com/<span class="o">)</span><span class="w"> </span>ofrece<span class="w"> </span>un<span class="w"> </span>enfoque<span class="w"> </span>conveniente<span class="w"> </span>y<span class="w"> </span>sencillo<span class="w"> </span>para<span class="w"> </span>probar<span class="w"> </span>y<span class="w"> </span>utilizar<span class="w"> </span>la<span class="w"> </span>solución,<span class="w"> </span>especialmente<span class="w"> </span>si<span class="w"> </span>ya<span class="w"> </span>estás<span class="w"> </span>familiarizado<span class="w"> </span>con<span class="w"> </span>la<span class="w"> </span>tecnología<span class="w"> </span>Docker.
-
-Para<span class="w"> </span>facilitar<span class="w"> </span>tu<span class="w"> </span>despliegue<span class="w"> </span>en<span class="w"> </span>Docker,<span class="w"> </span>proporcionamos<span class="w"> </span>imágenes<span class="w"> </span>preconstruidas<span class="w"> </span>listas<span class="w"> </span>para<span class="w"> </span>usar<span class="w"> </span>en<span class="w"> </span><span class="o">[</span>Docker<span class="w"> </span>Hub<span class="o">](</span>https://hub.docker.com/r/bunkerity/bunkerweb<span class="o">)</span>,<span class="w"> </span>compatibles<span class="w"> </span>con<span class="w"> </span>múltiples<span class="w"> </span>arquitecturas.<span class="w"> </span>Estas<span class="w"> </span>imágenes<span class="w"> </span>preconstruidas<span class="w"> </span>están<span class="w"> </span>optimizadas<span class="w"> </span>y<span class="w"> </span>preparadas<span class="w"> </span>para<span class="w"> </span>su<span class="w"> </span>uso<span class="w"> </span>en<span class="w"> </span>las<span class="w"> </span>siguientes<span class="w"> </span>arquitecturas:
-
--<span class="w"> </span>x64<span class="w"> </span><span class="o">(</span><span class="m">64</span><span class="w"> </span>bits<span class="o">)</span>
--<span class="w"> </span>x86
--<span class="w"> </span>armv8<span class="w"> </span><span class="o">(</span>ARM<span class="w"> </span><span class="m">64</span><span class="w"> </span>bits<span class="o">)</span>
--<span class="w"> </span>armv7<span class="w"> </span><span class="o">(</span>ARM<span class="w"> </span><span class="m">32</span><span class="w"> </span>bits<span class="o">)</span>
-
-Al<span class="w"> </span>acceder<span class="w"> </span>a<span class="w"> </span>estas<span class="w"> </span>imágenes<span class="w"> </span>preconstruidas<span class="w"> </span>desde<span class="w"> </span>Docker<span class="w"> </span>Hub,<span class="w"> </span>puedes<span class="w"> </span>obtener<span class="w"> </span>y<span class="w"> </span>ejecutar<span class="w"> </span>rápidamente<span class="w"> </span>BunkerWeb<span class="w"> </span>dentro<span class="w"> </span>de<span class="w"> </span>tu<span class="w"> </span>entorno<span class="w"> </span>Docker,<span class="w"> </span>eliminando<span class="w"> </span>la<span class="w"> </span>necesidad<span class="w"> </span>de<span class="w"> </span>extensos<span class="w"> </span>procesos<span class="w"> </span>de<span class="w"> </span>configuración.<span class="w"> </span>Este<span class="w"> </span>enfoque<span class="w"> </span>simplificado<span class="w"> </span>te<span class="w"> </span>permite<span class="w"> </span>concentrarte<span class="w"> </span>en<span class="w"> </span>aprovechar<span class="w"> </span>las<span class="w"> </span>capacidades<span class="w"> </span>de<span class="w"> </span>BunkerWeb<span class="w"> </span>sin<span class="w"> </span>complejidades<span class="w"> </span>innecesarias.
-
-Ya<span class="w"> </span>sea<span class="w"> </span>que<span class="w"> </span>estés<span class="w"> </span>realizando<span class="w"> </span>pruebas,<span class="w"> </span>desarrollando<span class="w"> </span>aplicaciones<span class="w"> </span>o<span class="w"> </span>desplegando<span class="w"> </span>BunkerWeb<span class="w"> </span>en<span class="w"> </span>producción,<span class="w"> </span>la<span class="w"> </span>opción<span class="w"> </span>de<span class="w"> </span>contenedorización<span class="w"> </span>de<span class="w"> </span>Docker<span class="w"> </span>proporciona<span class="w"> </span>flexibilidad<span class="w"> </span>y<span class="w"> </span>facilidad<span class="w"> </span>de<span class="w"> </span>uso.<span class="w"> </span>Adoptar<span class="w"> </span>este<span class="w"> </span>método<span class="w"> </span>te<span class="w"> </span>permite<span class="w"> </span>aprovechar<span class="w"> </span>al<span class="w"> </span>máximo<span class="w"> </span>las<span class="w"> </span>características<span class="w"> </span>de<span class="w"> </span>BunkerWeb<span class="w"> </span>mientras<span class="w"> </span>te<span class="w"> </span>beneficias<span class="w"> </span>de<span class="w"> </span>las<span class="w"> </span>ventajas<span class="w"> </span>de<span class="w"> </span>la<span class="w"> </span>tecnología<span class="w"> </span>Docker.
-
-<span class="sb">```</span>shell
-docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb:1.6.5
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5
+</code></pre></div>
+<ul>
+<li>El <strong>registro local</strong> se omite cuando <code>CROWDSEC_API</code> no es <code>127.0.0.1</code> o <code>localhost</code>.</li>
+<li><strong>AppSec</strong> se deshabilita por defecto cuando se usa una API externa. Para habilitarlo, establece <code>CROWDSEC_APPSEC_URL</code> en tu punto final deseado.</li>
+<li>El registro del bouncer todavía se realiza contra la API remota.</li>
+<li>Para reutilizar una clave de bouncer existente, proporciona <code>CROWDSEC_API_KEY</code> con tu token pregenerado.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Más opciones</p>
+<p>Para una cobertura completa de todas las opciones de CrowdSec (escenarios personalizados, registros, solución de problemas y más), consulta la <a href="../features/#crowdsec">documentación del plugin de BunkerWeb CrowdSec</a> o visita el <a href="https://www.crowdsec.net/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">sitio web oficial de CrowdSec</a>.</p>
+</div>
+<h2 id="docker">Docker</h2>
+<figure>
+<p><img align="center," alt="Descripción general" src="../../assets/img/integration-docker.svg" width="600" />
+  </p>
+<figcaption>Integración con Docker</figcaption>
+</figure>
+<p>Usar BunkerWeb como un contenedor de <a href="https://www.docker.com/">Docker</a> ofrece un enfoque conveniente y sencillo para probar y utilizar la solución, especialmente si ya estás familiarizado con la tecnología Docker.</p>
+<p>Para facilitar tu despliegue en Docker, proporcionamos imágenes preconstruidas listas para usar en <a href="https://hub.docker.com/r/bunkerity/bunkerweb">Docker Hub</a>, compatibles con múltiples arquitecturas. Estas imágenes preconstruidas están optimizadas y preparadas para su uso en las siguientes arquitecturas:</p>
+<ul>
+<li>x64 (64 bits)</li>
+<li>x86</li>
+<li>armv8 (ARM 64 bits)</li>
+<li>armv7 (ARM 32 bits)</li>
+</ul>
+<p>Al acceder a estas imágenes preconstruidas desde Docker Hub, puedes obtener y ejecutar rápidamente BunkerWeb dentro de tu entorno Docker, eliminando la necesidad de extensos procesos de configuración. Este enfoque simplificado te permite concentrarte en aprovechar las capacidades de BunkerWeb sin complejidades innecesarias.</p>
+<p>Ya sea que estés realizando pruebas, desarrollando aplicaciones o desplegando BunkerWeb en producción, la opción de contenedorización de Docker proporciona flexibilidad y facilidad de uso. Adoptar este método te permite aprovechar al máximo las características de BunkerWeb mientras te beneficias de las ventajas de la tecnología Docker.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb:1.6.5
 </code></pre></div>
 <p>Las imágenes de Docker también están disponibles en <a href="https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb">GitHub packages</a> y se pueden descargar usando la dirección del repositorio <code>ghcr.io</code>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/bunkerity/bunkerweb:1.6.5
@@ -2108,7 +2118,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <ol>
 <li><strong>Análisis del sistema</strong>: Detecta tu sistema operativo y lo verifica contra la lista de distribuciones compatibles.</li>
 <li><strong>Personalización de la instalación</strong>: En modo interactivo, te pide que elijas un tipo de instalación (Todo en uno, Gestor, Trabajador, etc.) y decidas si habilitar el asistente de configuración basado en la web.</li>
-<li><strong>Integraciones opcionales</strong>: Ofrece instalar y configurar automáticamente el <a href="#integracion-de-crowdsec-con-el-script">Motor de Seguridad CrowdSec</a>.</li>
+<li><strong>Integraciones opcionales</strong>: Ofrece instalar y configurar automáticamente el <a href="#crowdsec-integration-with-the-script">Motor de Seguridad CrowdSec</a>.</li>
 <li><strong>Gestión de dependencias</strong>: Instala la versión correcta de NGINX requerida por BunkerWeb desde fuentes oficiales y bloquea la versión para evitar actualizaciones no deseadas.</li>
 <li><strong>Instalación de BunkerWeb</strong>: Añade el repositorio de paquetes de BunkerWeb, instala los paquetes necesarios y bloquea la versión.</li>
 <li><strong>Configuración del servicio</strong>: Configura y habilita los servicios <code>systemd</code> correspondientes a tu tipo de instalación elegido.</li>
@@ -2303,7 +2313,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 - El modo interactivo (predeterminado) pedirá los valores requeridos que falten
 - El modo no interactivo (<code>--yes</code>) requiere que todas las opciones necesarias se proporcionen a través de la línea de comandos</p>
 </div>
-<h4 id="integracion-de-crowdsec-con-el-script">Integración de CrowdSec con el script</h4>
+<h4 id="crowdsec-integration-with-the-script">Integración de CrowdSec con el script</h4>
 <p>Si optas por instalar CrowdSec durante la configuración interactiva, el script automatiza completamente su integración con BunkerWeb:</p>
 <ul>
 <li>Añade el repositorio oficial de CrowdSec e instala el agente.</li>
@@ -2514,7 +2524,7 @@ MY_SETTING_2=value2
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_SCHEDULER</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>yes
 </code></pre></div>
-<h2 id="autoconfiguracion-de-docker">Autoconfiguración de Docker</h2>
+<h2 id="docker-autoconf">Autoconfiguración de Docker</h2>
 <figure>
 <p><img align="center," alt="Descripción general" src="../../assets/img/integration-autoconf.svg" width="600" />
   </p>
@@ -2657,7 +2667,7 @@ MY_SETTING_2=value2
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="espacios-de-nombres">Espacios de nombres</h3>
+<h3 id="namespaces">Espacios de nombres</h3>
 <p>A partir de la versión <code>1.6.0</code>, las pilas de Autoconfiguración de BunkerWeb ahora admiten espacios de nombres. Esta característica te permite gestionar múltiples "<em>clústeres</em>" de instancias y servicios de BunkerWeb en el mismo host de Docker. Para aprovechar los espacios de nombres, simplemente establece la etiqueta <code>NAMESPACE</code> en tus servicios. Aquí tienes un ejemplo:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -2765,7 +2775,7 @@ MY_SETTING_2=value2
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 <span class="nn">...</span>
 </code></pre></div>
-<h3 id="espacios-de-nombres_1">Espacios de nombres</h3>
+<h3 id="namespaces_1">Espacios de nombres</h3>
 <p>A partir de la versión <code>1.6.0</code>, las pilas de autoconfiguración de BunkerWeb ahora admiten espacios de nombres. Esta característica te permite gestionar múltiples clústeres de instancias y servicios de BunkerWeb en el mismo clúster de Kubernetes. Para aprovechar los espacios de nombres, simplemente establece el campo de metadatos <code>namespace</code> en tus instancias y servicios de BunkerWeb. Aquí tienes un ejemplo:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
@@ -3212,7 +3222,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="espacios-de-nombres_2">Espacios de nombres</h3>
+<h3 id="namespaces_2">Espacios de nombres</h3>
 <p>A partir de la versión <code>1.6.0</code>, las pilas de Autoconfiguración de BunkerWeb ahora admiten espacios de nombres. Esta característica te permite gestionar múltiples "<em>clústeres</em>" de instancias y servicios de BunkerWeb en el mismo host de Docker. Para aprovechar los espacios de nombres, simplemente establece la etiqueta <code>NAMESPACE</code> en tus servicios. Aquí tienes un ejemplo:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>

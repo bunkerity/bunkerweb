@@ -910,7 +910,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#benutzerdefinierte-konfigurationen" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Benutzerdefinierte Konfigurationen
     </span>
@@ -919,7 +919,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#viele-dienste-in-der-produktion-betreiben" class="md-nav__link">
+  <a href="#running-many-services-in-production" class="md-nav__link">
     <span class="md-ellipsis">
       Viele Dienste in der Produktion betreiben
     </span>
@@ -952,7 +952,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#persistenz-von-sperren-und-berichten" class="md-nav__link">
+  <a href="#persistence-of-bans-and-reports" class="md-nav__link">
     <span class="md-ellipsis">
       Persistenz von Sperren und Berichten
     </span>
@@ -1002,7 +1002,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sicherheits-tuning" class="md-nav__link">
+  <a href="#security-tuning" class="md-nav__link">
     <span class="md-ellipsis">
       Sicherheits-Tuning
     </span>
@@ -1907,7 +1907,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h3 id="benutzerdefinierte-konfigurationen">Benutzerdefinierte Konfigurationen</h3>
+<h3 id="custom-configurations">Benutzerdefinierte Konfigurationen</h3>
 <p>Um benutzerdefinierte Konfigurationen zu BunkerWeb hinzuzufügen und anzupassen, können Sie die NGINX-Grundlage nutzen. Benutzerdefinierte NGINX-Konfigurationen können in verschiedenen NGINX-Kontexten hinzugefügt werden, einschließlich Konfigurationen für die ModSecurity Web Application Firewall (WAF), die eine Kernkomponente von BunkerWeb ist. Weitere Details zu ModSecurity-Konfigurationen finden Sie <a href="../features/#custom-configurations">hier</a>.</p>
 <p>Hier sind die verfügbaren Typen von benutzerdefinierten Konfigurationen:</p>
 <ul>
@@ -2180,7 +2180,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </div>
 </div>
 </div>
-<h3 id="viele-dienste-in-der-produktion-betreiben">Viele Dienste in der Produktion betreiben</h3>
+<h3 id="running-many-services-in-production">Viele Dienste in der Produktion betreiben</h3>
 <h4 id="globales-crs">Globales CRS</h4>
 <div class="admonition warning">
 <p class="admonition-title">CRS-Plugins</p>
@@ -2198,7 +2198,7 @@ SecRule REQUEST_HEADERS:Host &quot;@rx ^app1\.example\.com$&quot; &quot;nolog&qu
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: &#39;db&#39; user: &#39;bunkerweb&#39; host: &#39;172.20.0.4&#39; (Got a packet bigger than &#39;max_allowed_packet&#39; bytes)
 </code></pre></div>
 <p>Sie müssen den <code>max_allowed_packet</code> auf Ihrem Datenbankserver erhöhen.</p>
-<h3 id="persistenz-von-sperren-und-berichten">Persistenz von Sperren und Berichten</h3>
+<h3 id="persistence-of-bans-and-reports">Persistenz von Sperren und Berichten</h3>
 <p>Standardmäßig speichert BunkerWeb Sperren und Berichte in einem lokalen Lua-Datenspeicher. Obwohl dies einfach und effizient ist, bedeutet diese Einrichtung, dass Daten verloren gehen, wenn die Instanz neu gestartet wird. Um sicherzustellen, dass Sperren und Berichte über Neustarts hinweg bestehen bleiben, können Sie BunkerWeb so konfigurieren, dass ein entfernter <a href="https://redis.io/">Redis</a>- oder <a href="https://valkey.io/">Valkey</a>-Server verwendet wird.</p>
 <p><strong>Warum Redis/Valkey verwenden?</strong></p>
 <p>Redis und Valkey sind leistungsstarke In-Memory-Datenspeicher, die häufig als Datenbanken, Caches und Message Broker verwendet werden. Sie sind hoch skalierbar und unterstützen eine Vielzahl von Datenstrukturen, darunter:</p>
@@ -3211,7 +3211,7 @@ USE_IPV6=yes
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
 <p>Diese globale Konfiguration wird von allen Containern übernommen. Jede pro Dienst in einer <code>docker-compose.yml</code>-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in <code>daemon.json</code>.</p>
-<h2 id="sicherheits-tuning">Sicherheits-Tuning</h2>
+<h2 id="security-tuning">Sicherheits-Tuning</h2>
 <p>BunkerWeb bietet viele Sicherheitsfunktionen, die Sie mit <a href="../features/">Features</a> konfigurieren können. Auch wenn die Standardwerte der Einstellungen eine minimale "Sicherheit von Haus aus" gewährleisten, empfehlen wir dringend, sie anzupassen. Dadurch können Sie das Sicherheitsniveau Ihrer Wahl sicherstellen und auch Fehlalarme verwalten.</p>
 <div class="admonition tip">
 <p class="admonition-title">Andere Funktionen</p>
@@ -3852,6 +3852,10 @@ USE_IPV6=yes
 <li><strong>Überwachung:</strong> Analysieren Sie Protokolle und Metriken regelmäßig, um die Einstellungen zu optimieren und den Gesamtschutz zu verbessern.</li>
 </ul>
 <h2 id="benutzer-manager-pro">Benutzer-Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Benutzer-Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <p>Das Benutzerverwaltungs-Plugin bietet eine robuste Schnittstelle zur Verwaltung von Benutzerkonten in Ihrem System.</p>
 <p>Mit diesem Plugin können Administratoren mühelos Benutzerkonten erstellen, aktualisieren und deaktivieren, Benutzerrollen verwalten, die Zwei-Faktor-Authentifizierung (2FA) umschalten und detaillierte Benutzerinformationen wie letzte Anmeldezeitstempel und Kontostatus (aktiv oder inaktiv) anzeigen. Dieses Plugin wurde mit Blick auf Sicherheit und Benutzerfreundlichkeit entwickelt und vereinfacht routinemäßige Benutzerverwaltungsaufgaben, während es gleichzeitig die Einhaltung von Vorschriften und die Überprüfbarkeit gewährleistet.</p>
 <h4 id="funktionen_1">Funktionen</h4>
@@ -3862,10 +3866,6 @@ USE_IPV6=yes
 <li><strong>Umfassende Benutzereinblicke:</strong> Überwachen Sie wichtige Benutzerdaten, einschließlich letzter Anmeldezeiten, Kontoerstellungsdaten und Aktiv/Inaktiv-Status.</li>
 <li><strong>Audit-Protokollierung:</strong> Führen Sie eine Audit-Spur für alle Benutzerverwaltungsaktionen für verbesserte Sicherheit und Compliance.</li>
 </ul>
-<p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Benutzer-Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
-
 <figure>
 <p><img align="center" alt="Übersicht" src="../../assets/img/user-manager.png" />
   </p>

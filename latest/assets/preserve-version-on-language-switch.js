@@ -18,10 +18,10 @@
   var KNOWN_LANGS = ['en', 'fr', 'de', 'es', 'zh'];
   var VERSION_RE = /^(latest|next|\d[\w.\-]*)$/i;
 
-  // Add: Morphaius Polyglot credit configuration (update logoSrc as needed)
+  // Add: Morphaius Polyglot credit configuration
   var MORPHAIUS_CREDIT = {
     enabled: true,
-    logoSrc: '../assets/logo-morphaius.webp',
+    logoFilename: 'logo-morphaius.webp', // Just the filename, path computed dynamically
     logoAlt: 'Morphaius',
     text: 'Translations by Morphaius Polyglot',
     href: "https://morphaius.com/"
@@ -90,6 +90,18 @@
       var lists = Array.prototype.slice.call(document.querySelectorAll('.md-select__list'));
       if (!lists.length) return;
 
+      // Detect current language to compute correct relative path
+      var pathSegments = window.location.pathname.split('/').filter(Boolean);
+      if (pathSegments.length && VERSION_RE.test(pathSegments[0])) pathSegments.shift();
+      var currentLang = 'en';
+      if (pathSegments.length && KNOWN_LANGS.indexOf(pathSegments[0]) !== -1) {
+        currentLang = pathSegments[0];
+      }
+      // English is at /<version>/ so needs no "../", others are at /<version>/<lang>/ so need "../"
+      var logoPath = currentLang === 'en'
+        ? 'assets/' + MORPHAIUS_CREDIT.logoFilename
+        : '../assets/' + MORPHAIUS_CREDIT.logoFilename;
+
       lists.forEach(function (list) {
         if (!list.querySelector('a[hreflang]')) return;
         if (list.querySelector('[data-polyglot-credit="true"]')) return;
@@ -127,9 +139,9 @@
         node.setAttribute('aria-label', MORPHAIUS_CREDIT.text || 'Translations by Morphaius Polyglot');
         node.title = MORPHAIUS_CREDIT.text || 'Translations by Morphaius Polyglot';
 
-        if (MORPHAIUS_CREDIT.logoSrc) {
+        if (MORPHAIUS_CREDIT.logoFilename) {
           var img = document.createElement('img');
-          img.src = MORPHAIUS_CREDIT.logoSrc;
+          img.src = logoPath;
           img.alt = MORPHAIUS_CREDIT.logoAlt || 'Morphaius';
           // Keep aspect ratio for a 4797x1436 logo; scale via height only
           img.style.height = '1.25em';
@@ -179,12 +191,13 @@
           var targetLang = getTargetLangFromLink(a, { segs: pathSegments, langIndex: order.langIndex });
           if (!targetLang || KNOWN_LANGS.indexOf(targetLang) === -1) return;
 
-          // Enforce structure: /<version>/<lang>/<current_page>
-          var newSegs = [currentVersion, targetLang].concat(contentSegs);
+          // Default English lives at /<version>/<page>; other languages keep /<version>/<lang>/<page>
+          var newSegs = targetLang === 'en'
+            ? [currentVersion].concat(contentSegs)
+            : [currentVersion, targetLang].concat(contentSegs);
 
-          // Preserve link's original hash and query, but use current page trailing slash style
-          var hadHash = url.hash && url.hash !== '#';
-          if (!hadHash && window.location.hash) url.hash = window.location.hash;
+          // Preserve fragment: prefer current page hash so section anchors stay visible after switching
+          if (window.location.hash) url.hash = window.location.hash;
           url.pathname = '/' + newSegs.join('/') + (trailingSlashFromCurrent ? '/' : '');
           a.setAttribute('href', url.toString());
         } catch (e) {

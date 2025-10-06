@@ -1062,7 +1062,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#interface-utilisateur-web" class="md-nav__link">
+  <a href="#web-ui" class="md-nav__link">
     <span class="md-ellipsis">
       Interface utilisateur Web
     </span>
@@ -1440,7 +1440,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <p>Si vous voyez l'erreur suivante <code>could not build server_names_hash, you should increase server_names_hash_bucket_size</code> dans les journaux, vous devrez modifier le <code>SERVER_NAMES_HASH_BUCKET_SIZE</code> paramètre.</p>
 <h2 id="fuseau-horaire">Fuseau horaire</h2>
 <p>Lors de l'utilisation d'intégrations basées sur des conteneurs, le fuseau horaire du conteneur peut ne pas correspondre à celui de la machine hôte. Pour résoudre ce problème, vous pouvez définir la <code>TZ</code> variable d'environnement sur le fuseau horaire de votre choix sur vos conteneurs (par exemple, <code>TZ=Europe/Paris</code>). Vous trouverez la liste des identifiants de fuseau horaire <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">ici</a>.</p>
-<h2 id="interface-utilisateur-web">Interface utilisateur Web</h2>
+<h2 id="web-ui">Interface utilisateur Web</h2>
 <p>Si vous avez oublié vos informations d'identification de l'interface utilisateur ou si vous rencontrez des problèmes de 2FA, vous pouvez vous connecter à la base de données pour retrouver l'accès.</p>
 <h3 id="acceder-a-la-base-de-donnees">Accéder à la base de données</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">SQLite</label><label for="__tabbed_3_2">MariaDB / MySQL</label><label for="__tabbed_3_3">PostgreSQL</label></div>

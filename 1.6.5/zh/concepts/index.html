@@ -805,7 +805,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#multisite-mode" class="md-nav__link">
     <span class="md-ellipsis">
       多站点模式
     </span>
@@ -814,7 +814,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       自定义配置
     </span>
@@ -823,7 +823,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       数据库
     </span>
@@ -832,7 +832,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#scheduler" class="md-nav__link">
     <span class="md-ellipsis">
       调度器
     </span>
@@ -842,7 +842,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       实例健康检查
     </span>
@@ -856,7 +856,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#templates" class="md-nav__link">
     <span class="md-ellipsis">
       模板
     </span>
@@ -1187,7 +1187,7 @@ USE_BROTLI=no
 <p class="admonition-title">更进一步</p>
 <p>包含描述和可能值的可用设置的完整列表可在文档的<a href="../features/">功能部分</a>中找到。</p>
 </div>
-<h2 id="_5">多站点模式</h2>
+<h2 id="multisite-mode">多站点模式</h2>
 <p>在使用 BunkerWeb 时，理解多站点模式至关重要。由于我们的主要重点是保护 Web 应用程序，我们的解决方案与“虚拟主机”或“vhosts”的概念紧密相连（更多信息请参见<a href="https://en.wikipedia.org/wiki/Virtual_hosting">此处</a>）。这些虚拟主机使得可以从单个实例或集群中提供多个 Web 应用程序。</p>
 <p>默认情况下，BunkerWeb 禁用多站点模式。这意味着只提供一个 Web 应用程序，并且所有设置都将应用于它。当您只有一个应用程序需要保护时，这种设置是理想的，因为您不需要关心多站点配置。</p>
 <p>然而，当启用多站点模式时，BunkerWeb 能够提供和保护多个 Web 应用程序。每个 Web 应用程序由一个唯一的服务器名称标识，并有自己的一组设置。当您有多个应用程序需要保护，并且您更喜欢使用单个实例（或集群）的 BunkerWeb 时，此模式被证明是有益的。</p>
@@ -1216,7 +1216,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">更进一步</p>
 <p>您将在文档的<a href="../advanced/">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples">examples</a> 目录中找到多站点模式的具体示例。</p>
 </div>
-<h2 id="_6">自定义配置</h2>
+<h2 id="custom-configurations">自定义配置</h2>
 <p>为了应对独特的挑战并满足特定的用例，BunkerWeb 提供了自定义配置的灵活性。虽然提供的设置和<a href="../plugins/">外部插件</a>涵盖了广泛的场景，但可能存在需要额外定制的情况。</p>
 <p>BunkerWeb 基于著名的 NGINX Web 服务器构建，该服务器提供了一个强大的配置系统。这意味着您可以利用 NGINX 的配置功能来满足您的特定需求。自定义 NGINX 配置可以包含在各种<a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">上下文</a>中，例如 HTTP 或服务器，从而允许您根据您的要求微调 BunkerWeb 的行为。无论您需要自定义全局设置还是将配置应用于特定的服务器块，BunkerWeb 都能让您优化其行为，使其与您的用例完美对齐。</p>
 <p>BunkerWeb 的另一个不可或缺的组件是 ModSecurity Web 应用程序防火墙。通过自定义配置，您可以灵活地处理误报或添加自定义规则，以进一步增强 ModSecurity 提供的保护。这些自定义配置允许您微调防火墙的行为，并确保其与您的 Web 应用程序的特定要求保持一致。</p>
@@ -1231,7 +1231,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">更进一步</p>
 <p>您将在文档的<a href="../advanced/#custom-configurations">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples">examples</a> 目录中找到自定义配置的具体示例。</p>
 </div>
-<h2 id="_7">数据库</h2>
+<h2 id="_5">数据库</h2>
 <p>BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库包含平稳运行所需的基本数据。数据库中存储了以下信息：</p>
 <ul>
 <li>
@@ -1269,7 +1269,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>数据库模式</figcaption>
 </figure>
-<h2 id="_8">调度器</h2>
+<h2 id="scheduler">调度器</h2>
 <p>为了实现无缝协调和自动化，BunkerWeb 采用了一个名为调度器的专门服务。调度器通过执行以下任务，在确保平稳运行方面发挥着至关重要的作用：</p>
 <ul>
 <li>
@@ -1294,10 +1294,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>从 Web UI 管理作业</figcaption>
 </figure>
-<h3 id="_9">实例健康检查</h3>
+<h3 id="_6">实例健康检查</h3>
 <p>自 1.6.0 版本起，调度器内置了一个健康检查系统，用于监控实例的健康状况。如果一个实例变得不健康，调度器将停止向其发送配置。如果该实例恢复健康，调度器将恢复发送配置。</p>
 <p>健康检查间隔由 <code>HEALTHCHECK_INTERVAL</code> 环境变量设置，默认值为 <code>30</code>，这意味着调度器将每 30 秒检查一次实例的健康状况。</p>
-<h2 id="_10">模板</h2>
+<h2 id="templates">模板</h2>
 <p>BunkerWeb 利用模板的强大功能来简化配置过程并增强灵活性。模板提供了一种结构化和标准化的方法来定义设置和自定义配置，确保了一致性和易用性。</p>
 <ul>
 <li>

@@ -914,7 +914,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#configuraciones-personalizadas" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Configuraciones personalizadas
     </span>
@@ -923,7 +923,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#ejecutando-muchos-servicios-en-produccion" class="md-nav__link">
+  <a href="#running-many-services-in-production" class="md-nav__link">
     <span class="md-ellipsis">
       Ejecutando muchos servicios en producción
     </span>
@@ -956,7 +956,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#persistencia-de-bloqueos-e-informes" class="md-nav__link">
+  <a href="#persistence-of-bans-and-reports" class="md-nav__link">
     <span class="md-ellipsis">
       Persistencia de bloqueos e informes
     </span>
@@ -1006,7 +1006,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#ajuste-de-seguridad" class="md-nav__link">
+  <a href="#security-tuning" class="md-nav__link">
     <span class="md-ellipsis">
       Ajuste de seguridad
     </span>
@@ -1911,7 +1911,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h3 id="configuraciones-personalizadas">Configuraciones personalizadas</h3>
+<h3 id="custom-configurations">Configuraciones personalizadas</h3>
 <p>Para personalizar y añadir configuraciones personalizadas a BunkerWeb, puedes aprovechar su base NGINX. Las configuraciones personalizadas de NGINX se pueden añadir en diferentes contextos de NGINX, incluidas las configuraciones para el Firewall de Aplicaciones Web (WAF) ModSecurity, que es un componente central de BunkerWeb. Se pueden encontrar más detalles sobre las configuraciones de ModSecurity <a href="../features/#custom-configurations">aquí</a>.</p>
 <p>Estos son los tipos de configuraciones personalizadas disponibles:</p>
 <ul>
@@ -2184,7 +2184,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </div>
 </div>
 </div>
-<h3 id="ejecutando-muchos-servicios-en-produccion">Ejecutando muchos servicios en producción</h3>
+<h3 id="running-many-services-in-production">Ejecutando muchos servicios en producción</h3>
 <h4 id="crs-global">CRS Global</h4>
 <div class="admonition warning">
 <p class="admonition-title">Plugins CRS</p>
@@ -2202,7 +2202,7 @@ SecRule REQUEST_HEADERS:Host &quot;@rx ^app1\.example\.com$&quot; &quot;nolog&qu
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: &#39;db&#39; user: &#39;bunkerweb&#39; host: &#39;172.20.0.4&#39; (Got a packet bigger than &#39;max_allowed_packet&#39; bytes)
 </code></pre></div>
 <p>Necesitarás aumentar el <code>max_allowed_packet</code> en tu servidor de base de datos.</p>
-<h3 id="persistencia-de-bloqueos-e-informes">Persistencia de bloqueos e informes</h3>
+<h3 id="persistence-of-bans-and-reports">Persistencia de bloqueos e informes</h3>
 <p>Por defecto, BunkerWeb almacena los bloqueos e informes en un almacén de datos Lua local. Aunque es simple y eficiente, esta configuración significa que los datos se pierden cuando se reinicia la instancia. Para asegurar que los bloqueos e informes persistan a través de los reinicios, puedes configurar BunkerWeb para que utilice un servidor remoto <a href="https://redis.io/">Redis</a> o <a href="https://valkey.io/">Valkey</a>.</p>
 <p><strong>¿Por qué usar Redis/Valkey?</strong></p>
 <p>Redis y Valkey son potentes almacenes de datos en memoria comúnmente utilizados como bases de datos, cachés y agentes de mensajes. Son altamente escalables y soportan una variedad de estructuras de datos, incluyendo:</p>
@@ -3215,7 +3215,7 @@ USE_IPV6=yes
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
 <p>Esta configuración global será heredada por todos los contenedores. Sin embargo, cualquier configuración de registro definida por servicio en un archivo <code>docker-compose.yml</code> anulará la configuración global en <code>daemon.json</code>.</p>
-<h2 id="ajuste-de-seguridad">Ajuste de seguridad</h2>
+<h2 id="security-tuning">Ajuste de seguridad</h2>
 <p>BunkerWeb ofrece muchas características de seguridad que puedes configurar con <a href="../features/">características</a>. Aunque los valores predeterminados de las configuraciones aseguran una "seguridad por defecto" mínima, te recomendamos encarecidamente que los ajustes. Al hacerlo, podrás asegurar el nivel de seguridad de tu elección y también gestionar los falsos positivos.</p>
 <div class="admonition tip">
 <p class="admonition-title">Otras características</p>
@@ -3856,6 +3856,10 @@ USE_IPV6=yes
 <li><strong>Monitoreo:</strong> Analiza los registros y las métricas periódicamente para ajustar la configuración y mejorar la protección general.</li>
 </ul>
 <h2 id="administrador-de-usuarios-pro">Administrador de usuarios <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Página del Administrador de usuarios" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <p>El Plugin de gestión de usuarios ofrece una interfaz robusta para administrar cuentas de usuario dentro de tu sistema.</p>
 <p>Con este plugin, los administradores pueden crear, actualizar y deshabilitar cuentas de usuario sin esfuerzo, gestionar roles de usuario, activar o desactivar la autenticación de dos factores (2FA) y ver información detallada del usuario, como las marcas de tiempo del último inicio de sesión y los estados de la cuenta (activa o inactiva). Diseñado teniendo en cuenta la seguridad y la facilidad de uso, este plugin simplifica las tareas rutinarias de gestión de usuarios al tiempo que garantiza el cumplimiento y la auditabilidad.</p>
 <h4 id="caracteristicas_1">Características</h4>
@@ -3866,10 +3870,6 @@ USE_IPV6=yes
 <li><strong>Información completa del usuario:</strong> Supervisa los datos clave del usuario, incluidas las últimas horas de inicio de sesión, las fechas de creación de la cuenta y el estado activo/inactivo.</li>
 <li><strong>Registro de auditoría:</strong> Mantiene un registro de auditoría de todas las acciones de gestión de usuarios para mejorar la seguridad y el cumplimiento.</li>
 </ul>
-<p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Página del Administrador de usuarios" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
-
 <figure>
 <p><img align="center" alt="Descripción general" src="../../assets/img/user-manager.png" />
   </p>

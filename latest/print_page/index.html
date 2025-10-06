@@ -1166,7 +1166,7 @@ USE_BROTLI=no
 <p class="admonition-title">更进一步</p>
 <p>包含描述和可能值的可用设置的完整列表可在文档的<a href="#zh-features">功能部分</a>中找到。</p>
 </div>
-<h2 id="zh-concepts-_5">多站点模式</h2>
+<h2 id="zh-concepts-multisite-mode">多站点模式</h2>
 <p>在使用 BunkerWeb 时，理解多站点模式至关重要。由于我们的主要重点是保护 Web 应用程序，我们的解决方案与“虚拟主机”或“vhosts”的概念紧密相连（更多信息请参见<a href="https://en.wikipedia.org/wiki/Virtual_hosting">此处</a>）。这些虚拟主机使得可以从单个实例或集群中提供多个 Web 应用程序。</p>
 <p>默认情况下，BunkerWeb 禁用多站点模式。这意味着只提供一个 Web 应用程序，并且所有设置都将应用于它。当您只有一个应用程序需要保护时，这种设置是理想的，因为您不需要关心多站点配置。</p>
 <p>然而，当启用多站点模式时，BunkerWeb 能够提供和保护多个 Web 应用程序。每个 Web 应用程序由一个唯一的服务器名称标识，并有自己的一组设置。当您有多个应用程序需要保护，并且您更喜欢使用单个实例（或集群）的 BunkerWeb 时，此模式被证明是有益的。</p>
@@ -1195,7 +1195,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">更进一步</p>
 <p>您将在文档的<a href="#zh-advanced">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples">examples</a> 目录中找到多站点模式的具体示例。</p>
 </div>
-<h2 id="zh-concepts-_6">自定义配置</h2>
+<h2 id="zh-concepts-custom-configurations">自定义配置</h2>
 <p>为了应对独特的挑战并满足特定的用例，BunkerWeb 提供了自定义配置的灵活性。虽然提供的设置和<a href="#zh-plugins">外部插件</a>涵盖了广泛的场景，但可能存在需要额外定制的情况。</p>
 <p>BunkerWeb 基于著名的 NGINX Web 服务器构建，该服务器提供了一个强大的配置系统。这意味着您可以利用 NGINX 的配置功能来满足您的特定需求。自定义 NGINX 配置可以包含在各种<a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">上下文</a>中，例如 HTTP 或服务器，从而允许您根据您的要求微调 BunkerWeb 的行为。无论您需要自定义全局设置还是将配置应用于特定的服务器块，BunkerWeb 都能让您优化其行为，使其与您的用例完美对齐。</p>
 <p>BunkerWeb 的另一个不可或缺的组件是 ModSecurity Web 应用程序防火墙。通过自定义配置，您可以灵活地处理误报或添加自定义规则，以进一步增强 ModSecurity 提供的保护。这些自定义配置允许您微调防火墙的行为，并确保其与您的 Web 应用程序的特定要求保持一致。</p>
@@ -1210,7 +1210,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">更进一步</p>
 <p>您将在文档的<a href="#zh-advanced-custom-configurations">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples">examples</a> 目录中找到自定义配置的具体示例。</p>
 </div>
-<h2 id="zh-concepts-_7">数据库</h2>
+<h2 id="zh-concepts-_5">数据库</h2>
 <p>BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库包含平稳运行所需的基本数据。数据库中存储了以下信息：</p>
 <ul>
 <li>
@@ -1248,7 +1248,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>数据库模式</figcaption>
 </figure>
-<h2 id="zh-concepts-_8">调度器</h2>
+<h2 id="zh-concepts-scheduler">调度器</h2>
 <p>为了实现无缝协调和自动化，BunkerWeb 采用了一个名为调度器的专门服务。调度器通过执行以下任务，在确保平稳运行方面发挥着至关重要的作用：</p>
 <ul>
 <li>
@@ -1273,10 +1273,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
   </p>
 <figcaption>从 Web UI 管理作业</figcaption>
 </figure>
-<h3 id="zh-concepts-_9">实例健康检查</h3>
+<h3 id="zh-concepts-_6">实例健康检查</h3>
 <p>自 1.6.0 版本起，调度器内置了一个健康检查系统，用于监控实例的健康状况。如果一个实例变得不健康，调度器将停止向其发送配置。如果该实例恢复健康，调度器将恢复发送配置。</p>
 <p>健康检查间隔由 <code>HEALTHCHECK_INTERVAL</code> 环境变量设置，默认值为 <code>30</code>，这意味着调度器将每 30 秒检查一次实例的健康状况。</p>
-<h2 id="zh-concepts-_10">模板</h2>
+<h2 id="zh-concepts-templates">模板</h2>
 <p>BunkerWeb 利用模板的强大功能来简化配置过程并增强灵活性。模板提供了一种结构化和标准化的方法来定义设置和自定义配置，确保了一致性和易用性。</p>
 <ul>
 <li>
@@ -1387,13 +1387,13 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <li>协助您进行配置的技术支持</li>
 </ul>
 <p>如果您对 BunkerWeb Cloud 服务感兴趣，请随时<a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">联系我们</a>，以便我们讨论您的需求。</p>
-<h2 id="zh-integrations-aio">一体化 (AIO) 镜像</h2>
+<h2 id="zh-integrations-all-in-one-aio-image">一体化 (AIO) 镜像</h2>
 <figure>
 <p><img align="center," alt="AIO 架构图占位符" src="../assets/img/aio-graph-placeholder.png" width="600" />
   </p>
 <figcaption>BunkerWeb 一体化架构 (AIO)</figcaption>
 </figure>
-<h3 id="zh-integrations-_2">部署</h3>
+<h3 id="zh-integrations-deployment">部署</h3>
 <p>要部署一体化容器，您只需运行以下命令：</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -1401,7 +1401,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5
 </code></pre></div>
 <p>默认情况下，容器暴露：</p>
 <ul>
@@ -1417,8 +1417,8 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <li><code>SERVICE_SCHEDULER=yes</code> (默认) - 启用调度器服务</li>
 <li><code>SERVICE_API=no</code> (默认) - 启用 API 服务 (FastAPI 控制平面)</li>
 <li><code>AUTOCONF_MODE=no</code> (默认) - 启用自动配置服务</li>
-<li><code>USE_REDIS=yes</code> (默认) - 启用内置的 <a href="#zh-integrations-redis-集成">Redis</a> 实例</li>
-<li><code>USE_CROWDSEC=no</code> (默认) - <a href="#zh-integrations-crowdsec-集成">CrowdSec</a> 集成默认禁用</li>
+<li><code>USE_REDIS=yes</code> (默认) - 启用内置的 <a href="#zh-integrations-redis-integration">Redis</a> 实例</li>
+<li><code>USE_CROWDSEC=no</code> (默认) - <a href="#zh-integrations-crowdsec-integration">CrowdSec</a> 集成默认禁用</li>
 </ul>
 <h3 id="zh-integrations-api">API 集成</h3>
 <p>一体化镜像内嵌了 BunkerWeb API。它默认是禁用的，可以通过设置 <code>SERVICE_API=yes</code> 来启用。</p>
@@ -1435,12 +1435,12 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">API_TOKEN</span><span class="o">=</span><span class="s2">&quot;changeme&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">8888</span>:8888/tcp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5
 </code></pre></div>
 <p>推荐（在 BunkerWeb 之后）— 不要发布 <code>8888</code>；而是反向代理它：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1454,7 +1454,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <span class="w">      </span><span class="nt">REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bunkerweb-aio:8888&quot;</span>
 
 <span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">SERVICE_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">API_WHITELIST_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
@@ -1468,7 +1468,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 </code></pre></div>
 <p>有关身份验证、权限 (ACL)、速率限制、TLS 和配置选项的详细信息，请参阅 <a href="#zh-api">API 文档</a>。</p>
-<h3 id="zh-integrations-_3">访问设置向导</h3>
+<h3 id="zh-integrations-_2">访问设置向导</h3>
 <p>默认情况下，当您首次运行 AIO 容器时，设置向导会自动启动。要访问它，请按照以下步骤操作：</p>
 <ol>
 <li><strong>启动 AIO 容器</strong>，如<a href="#zh-integrations-deployment">上文</a>所述，确保 <code>SERVICE_UI=yes</code> (默认)。</li>
@@ -1477,13 +1477,13 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <blockquote>
 <p>请按照<a href="#zh-quickstart-guide-complete-the-setup-wizard">快速入门指南</a>中的后续步骤设置 Web UI。</p>
 </blockquote>
-<h3 id="zh-integrations-redis">Redis 集成</h3>
+<h3 id="zh-integrations-redis-integration">Redis 集成</h3>
 <p>BunkerWeb <strong>一体化</strong>镜像开箱即用地包含了 Redis，用于<a href="#zh-advanced-persistence-of-bans-and-reports">持久化封禁和报告</a>。要管理 Redis：</p>
 <ul>
 <li>要禁用 Redis，请设置 <code>USE_REDIS=no</code> 或将 <code>REDIS_HOST</code> 指向一个外部主机。</li>
 <li>Redis 日志在 Docker 日志和 <code>/var/log/bunkerweb/redis.log</code> 中以 <code>[REDIS]</code> 前缀出现。</li>
 </ul>
-<h3 id="zh-integrations-crowdsec">CrowdSec 集成</h3>
+<h3 id="zh-integrations-crowdsec-integration">CrowdSec 集成</h3>
 <p>BunkerWeb <strong>一体化</strong> Docker 镜像完全集成了 CrowdSec——无需额外的容器或手动设置。请按照以下步骤在您的部署中启用、配置和扩展 CrowdSec。</p>
 <p>默认情况下，CrowdSec 是<strong>禁用</strong>的。要开启它，只需添加 <code>USE_CROWDSEC</code> 环境变量：</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
@@ -1493,7 +1493,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5
 </code></pre></div>
 <ul>
 <li>
@@ -1506,7 +1506,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </li>
 </ul>
 <hr />
-<h4 id="zh-integrations-_4">默认集合和解析器</h4>
+<h4 id="zh-integrations-_3">默认集合和解析器</h4>
 <p>在首次启动时（或升级后），这些资产会自动安装并保持最新：</p>
 <table>
 <thead>
@@ -1553,7 +1553,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 </details>
 
 <hr />
-<h4 id="zh-integrations-_5">添加额外的集合</h4>
+<h4 id="zh-integrations-_4">添加额外的集合</h4>
 <p>需要更多的覆盖范围？使用一个以空格分隔的 Hub 集合列表来定义 <code>CROWDSEC_EXTRA_COLLECTIONS</code>：</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -1563,14 +1563,14 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">内部工作原理</p>
 <p>脚本会遍历每个名称并根据需要进行安装或升级——无需手动步骤。</p>
 </div>
 <hr />
-<h4 id="zh-integrations-_6">禁用特定解析器</h4>
+<h4 id="zh-integrations-_5">禁用特定解析器</h4>
 <p>如果您想保留默认设置但明确禁用一个或多个解析器，请通过 <code>CROWDSEC_DISABLED_PARSERS</code> 提供一个以空格分隔的列表：</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -1580,7 +1580,7 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5
 </code></pre></div>
 <p>注意：
 - 该列表在安装/更新所需项目后应用；只有您列出的解析器会被移除。
@@ -1603,43 +1603,39 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5-rc3<span class="sb">```</span>
-
-*<span class="w">   </span>当<span class="w"> </span><span class="sb">`</span>CROWDSEC_API<span class="sb">`</span><span class="w"> </span>不是<span class="w"> </span><span class="sb">`</span><span class="m">127</span>.0.0.1<span class="sb">`</span><span class="w"> </span>或<span class="w"> </span><span class="sb">`</span>localhost<span class="sb">`</span><span class="w"> </span>时，将跳过**本地注册**。
-*<span class="w">   </span>使用外部<span class="w"> </span>API<span class="w"> </span>时，**AppSec**<span class="w"> </span>默认是禁用的。要启用它，请将<span class="w"> </span><span class="sb">`</span>CROWDSEC_APPSEC_URL<span class="sb">`</span><span class="w"> </span>设置为您期望的端点。
-*<span class="w">   </span>拦截器注册仍然会针对远程<span class="w"> </span>API<span class="w"> </span>进行。
-*<span class="w">   </span>要重用现有的拦截器密钥，请提供<span class="w"> </span><span class="sb">`</span>CROWDSEC_API_KEY<span class="sb">`</span><span class="w"> </span>并附上您预先生成的令牌。
-
----
-
-!!!<span class="w"> </span>tip<span class="w"> </span><span class="s2">&quot;更多选项&quot;</span>
-<span class="w">    </span>有关所有<span class="w"> </span>CrowdSec<span class="w"> </span>选项的全面介绍（自定义场景、日志、故障排除等），请参阅<span class="w"> </span><span class="o">[</span>BunkerWeb<span class="w"> </span>CrowdSec<span class="w"> </span>插件文档<span class="o">](</span>features.md#crowdsec<span class="o">)</span>或访问<span class="o">[</span>官方<span class="w"> </span>CrowdSec<span class="w"> </span>网站<span class="o">](</span>https://www.crowdsec.net/?utm_source<span class="o">=</span>external-docs<span class="p">&amp;</span><span class="nv">utm_medium</span><span class="o">=</span>cta<span class="p">&amp;</span><span class="nv">utm_campaign</span><span class="o">=</span>bunker-web-docs<span class="o">)</span>。
-
-<span class="c1">## Docker</span>
-
-&lt;figure<span class="w"> </span>markdown&gt;
-<span class="w">  </span>!<span class="o">[</span>概述<span class="o">](</span>assets/img/integration-docker.svg<span class="o">){</span><span class="w"> </span><span class="nv">align</span><span class="o">=</span>center,<span class="w"> </span><span class="nv">width</span><span class="o">=</span><span class="s2">&quot;600&quot;</span><span class="w"> </span><span class="o">}</span>
-<span class="w">  </span>&lt;figcaption&gt;Docker<span class="w"> </span>集成&lt;/figcaption&gt;
-&lt;/figure&gt;
-
-使用<span class="w"> </span>BunkerWeb<span class="w"> </span>作为<span class="w"> </span><span class="o">[</span>Docker<span class="o">](</span>https://www.docker.com/<span class="o">)</span><span class="w"> </span>容器提供了一种方便直接的方法来测试和使用该解决方案，特别是如果您已经熟悉<span class="w"> </span>Docker<span class="w"> </span>技术。
-
-为了方便您的<span class="w"> </span>Docker<span class="w"> </span>部署，我们在<span class="w"> </span><span class="o">[</span>Docker<span class="w"> </span>Hub<span class="o">](</span>https://hub.docker.com/r/bunkerity/bunkerweb<span class="o">)</span><span class="w"> </span>上提供了支持多种架构的预构建镜像。这些预构建镜像经过优化，可用于以下架构：
-
--<span class="w"> </span>x64<span class="w"> </span><span class="o">(</span>64位<span class="o">)</span>
--<span class="w"> </span>x86
--<span class="w"> </span>armv8<span class="w"> </span><span class="o">(</span>ARM<span class="w"> </span>64位<span class="o">)</span>
--<span class="w"> </span>armv7<span class="w"> </span><span class="o">(</span>ARM<span class="w"> </span>32位<span class="o">)</span>
-
-通过从<span class="w"> </span>Docker<span class="w"> </span>Hub<span class="w"> </span>获取这些预构建镜像，您可以快速在您的<span class="w"> </span>Docker<span class="w"> </span>环境中拉取并运行<span class="w"> </span>BunkerWeb，无需进行广泛的配置或设置过程。这种简化的方法让您能够专注于利用<span class="w"> </span>BunkerWeb<span class="w"> </span>的功能，而无需不必要的复杂性。
-
-无论您是进行测试、开发应用程序还是在生产中部署<span class="w"> </span>BunkerWeb，Docker<span class="w"> </span>容器化选项都提供了灵活性和易用性。采用这种方法使您能够充分利用<span class="w"> </span>BunkerWeb<span class="w"> </span>的功能，同时利用<span class="w"> </span>Docker<span class="w"> </span>技术的优势。
-
-<span class="sb">```</span>shell
-docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb:1.6.5-rc3
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.5
+</code></pre></div>
+<ul>
+<li>当 <code>CROWDSEC_API</code> 不是 <code>127.0.0.1</code> 或 <code>localhost</code> 时，将跳过<strong>本地注册</strong>。</li>
+<li>使用外部 API 时，<strong>AppSec</strong> 默认是禁用的。要启用它，请将 <code>CROWDSEC_APPSEC_URL</code> 设置为您期望的端点。</li>
+<li>拦截器注册仍然会针对远程 API 进行。</li>
+<li>要重用现有的拦截器密钥，请提供 <code>CROWDSEC_API_KEY</code> 并附上您预先生成的令牌。</li>
+</ul>
+<hr />
+<div class="admonition tip">
+<p class="admonition-title">更多选项</p>
+<p>有关所有 CrowdSec 选项的全面介绍（自定义场景、日志、故障排除等），请参阅 <a href="#zh-features-crowdsec">BunkerWeb CrowdSec 插件文档</a>或访问<a href="https://www.crowdsec.net/?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">官方 CrowdSec 网站</a>。</p>
+</div>
+<h2 id="zh-integrations-docker">Docker</h2>
+<figure>
+<p><img align="center," alt="概述" src="../assets/img/integration-docker.svg" width="600" />
+  </p>
+<figcaption>Docker 集成</figcaption>
+</figure>
+<p>使用 BunkerWeb 作为 <a href="https://www.docker.com/">Docker</a> 容器提供了一种方便直接的方法来测试和使用该解决方案，特别是如果您已经熟悉 Docker 技术。</p>
+<p>为了方便您的 Docker 部署，我们在 <a href="https://hub.docker.com/r/bunkerity/bunkerweb">Docker Hub</a> 上提供了支持多种架构的预构建镜像。这些预构建镜像经过优化，可用于以下架构：</p>
+<ul>
+<li>x64 (64位)</li>
+<li>x86</li>
+<li>armv8 (ARM 64位)</li>
+<li>armv7 (ARM 32位)</li>
+</ul>
+<p>通过从 Docker Hub 获取这些预构建镜像，您可以快速在您的 Docker 环境中拉取并运行 BunkerWeb，无需进行广泛的配置或设置过程。这种简化的方法让您能够专注于利用 BunkerWeb 的功能，而无需不必要的复杂性。</p>
+<p>无论您是进行测试、开发应用程序还是在生产中部署 BunkerWeb，Docker 容器化选项都提供了灵活性和易用性。采用这种方法使您能够充分利用 BunkerWeb 的功能，同时利用 Docker 技术的优势。</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb:1.6.5
 </code></pre></div>
 <p>Docker 镜像也可在 <a href="https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb">GitHub packages</a> 上找到，可以使用 <code>ghcr.io</code> 仓库地址下载：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/bunkerity/bunkerweb:1.6.5-rc3<span class="sb">```</span>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/bunkerity/bunkerweb:1.6.5<span class="sb">```</span>
 
 Docker<span class="w"> </span>集成的关键概念包括：
 
@@ -1648,7 +1644,7 @@ Docker<span class="w"> </span>集成的关键概念包括：
 -<span class="w"> </span>**网络**：Docker<span class="w"> </span>网络在<span class="w"> </span>BunkerWeb<span class="w"> </span>的集成中扮演着至关重要的角色。这些网络有两个主要目的：向客户端公开端口以及连接到上游<span class="w"> </span>Web<span class="w"> </span>服务。通过公开端口，BunkerWeb<span class="w"> </span>可以接受来自客户端的传入请求，允许他们访问受保护的<span class="w"> </span>Web<span class="w"> </span>服务。此外，通过连接到上游<span class="w"> </span>Web<span class="w"> </span>服务，BunkerWeb<span class="w"> </span>可以高效地路由和管理流量，提供增强的安全性和性能。
 
 !!!<span class="w"> </span>info<span class="w"> </span><span class="s2">&quot;数据库后端&quot;</span>
-<span class="w">    </span>请注意，我们的说明假设您正在使用<span class="w"> </span>SQLite<span class="w"> </span>作为默认的数据库后端，这是由<span class="w"> </span><span class="sb">`</span>DATABASE_URI<span class="sb">`</span><span class="w"> </span>设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的<span class="w"> </span><span class="o">[</span>misc/integrations<span class="w"> </span>文件夹<span class="o">](</span>https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations<span class="o">)</span>中的<span class="w"> </span>docker-compose<span class="w"> </span>文件。
+<span class="w">    </span>请注意，我们的说明假设您正在使用<span class="w"> </span>SQLite<span class="w"> </span>作为默认的数据库后端，这是由<span class="w"> </span><span class="sb">`</span>DATABASE_URI<span class="sb">`</span><span class="w"> </span>设置配置的。但是，也支持其他数据库后端。有关更多信息，请参阅仓库的<span class="w"> </span><span class="o">[</span>misc/integrations<span class="w"> </span>文件夹<span class="o">](</span>https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations<span class="o">)</span>中的<span class="w"> </span>docker-compose<span class="w"> </span>文件。
 
 <span class="c1">### 环境变量</span>
 
@@ -1658,7 +1654,7 @@ Docker<span class="w"> </span>集成的关键概念包括：
 ...
 services:
 <span class="w">  </span>bw-scheduler:
-<span class="w">    </span>image:<span class="w"> </span>bunkerity/bunkerweb-scheduler:1.6.5-rc3
+<span class="w">    </span>image:<span class="w"> </span>bunkerity/bunkerweb-scheduler:1.6.5
 <span class="w">    </span>environment:
 <span class="w">      </span>-<span class="w"> </span><span class="nv">MY_SETTING</span><span class="o">=</span>value
 <span class="w">      </span>-<span class="w"> </span><span class="nv">ANOTHER_SETTING</span><span class="o">=</span>another<span class="w"> </span>value
@@ -1687,9 +1683,9 @@ services:
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div></p>
 <p>这确保了敏感设置不会出现在环境和日志中。</p>
-<h3 id="zh-integrations-_7">调度器</h3>
+<h3 id="zh-integrations-_6">调度器</h3>
 <p><a href="#zh-concepts-scheduler">调度器</a> 在其自己的容器中运行，该容器也可在 Docker Hub 上找到：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-scheduler:1.6.5-rc3
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>bunkerity/bunkerweb-scheduler:1.6.5
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">BunkerWeb 设置</p>
@@ -1706,7 +1702,7 @@ services:
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># 这将为 BunkerWeb 容器设置 API</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
@@ -1715,7 +1711,7 @@ services:
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># 这将为调度器容器设置 API</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
@@ -1731,7 +1727,7 @@ services:
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
 <span class="nn">...</span>
@@ -1764,7 +1760,7 @@ chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>b
 sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
 </div>
-<h3 id="zh-integrations-_8">网络</h3>
+<h3 id="zh-integrations-_7">网络</h3>
 <p>默认情况下，BunkerWeb 容器在（容器内部）<strong>8080/tcp</strong> 端口上监听 <strong>HTTP</strong>，在 <strong>8443/tcp</strong> 端口上监听 <strong>HTTPS</strong>，在 <strong>8443/udp</strong> 端口上监听 <strong>QUIC</strong>。</p>
 <div class="admonition warning">
 <p class="admonition-title">在无根模式或使用 Podman 时的特权端口</p>
@@ -1796,7 +1792,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1809,7 +1805,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 <span class="nn">...</span>
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-api-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># 这个设置是强制性的，用来指定 BunkerWeb 实例</span>
@@ -1839,7 +1835,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -1852,7 +1848,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
@@ -1878,7 +1874,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="zh-integrations-_9">从源代码构建</h3>
+<h3 id="zh-integrations-_8">从源代码构建</h3>
 <p>或者，如果您更喜欢亲自动手，您可以选择直接从<a href="https://github.com/bunkerity/bunkerweb">源代码</a>构建 Docker 镜像。从源代码构建镜像可以让您对部署过程有更大的控制和定制。但是，请注意，这种方法可能需要一些时间才能完成，具体取决于您的硬件配置（如果需要，您可以去喝杯咖啡 ☕）。</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb.git<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="nb">cd</span><span class="w"> </span>bunkerweb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -1902,13 +1898,13 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>Fedora 41 和 42</li>
 <li>Red Hat Enterprise Linux (RHEL) 8, 9 和 10</li>
 </ul>
-<h3 id="zh-integrations-_10">简易安装脚本</h3>
+<h3 id="zh-integrations-_9">简易安装脚本</h3>
 <p>为了简化安装体验，BunkerWeb 提供了一个简易安装脚本，可以自动处理整个设置过程，包括 NGINX 安装、仓库配置和服务设置。</p>
-<h4 id="zh-integrations-_11">快速开始</h4>
+<h4 id="zh-integrations-_10">快速开始</h4>
 <p>要开始使用，请下载安装脚本及其校验和，然后在运行前验证脚本的完整性。</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 下载脚本及其校验和</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc3/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5-rc3/install-bunkerweb.sh.sha256
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5/install-bunkerweb.sh
+wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/v1.6.5/install-bunkerweb.sh.sha256
 
 <span class="c1"># 验证校验和</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1923,18 +1919,18 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p>下载校验和文件，并使用像 <code>sha256sum</code> 这样的工具来确认脚本没有被更改或篡改。</p>
 <p>如果校验和验证失败，<strong>请不要执行该脚本</strong>——它可能不安全。</p>
 </div>
-<h4 id="zh-integrations-_12">工作原理</h4>
+<h4 id="zh-integrations-_11">工作原理</h4>
 <p>简易安装脚本是一个强大的工具，旨在简化在全新的 Linux 系统上设置 BunkerWeb 的过程。它会自动执行以下关键步骤：</p>
 <ol>
 <li><strong>系统分析</strong>：检测您的操作系统并对照支持的发行版列表进行验证。</li>
 <li><strong>安装定制</strong>：在交互模式下，它会提示您选择安装类型（一体化、管理器、工作节点等），并决定是否启用基于 Web 的设置向导。</li>
-<li><strong>可选集成</strong>：提供自动安装和配置 <a href="#zh-integrations-crowdsec-与脚本的集成">CrowdSec 安全引擎</a>的选项。</li>
+<li><strong>可选集成</strong>：提供自动安装和配置 <a href="#zh-integrations-crowdsec-integration-with-the-script">CrowdSec 安全引擎</a>的选项。</li>
 <li><strong>依赖管理</strong>：从官方源安装 BunkerWeb 所需的正确版本的 NGINX，并锁定版本以防止意外升级。</li>
 <li><strong>BunkerWeb 安装</strong>：添加 BunkerWeb 软件包仓库，安装必要的软件包，并锁定版本。</li>
 <li><strong>服务配置</strong>：根据您选择的安装类型设置并启用 <code>systemd</code> 服务。</li>
 <li><strong>安装后指导</strong>：提供清晰的后续步骤，帮助您开始使用新的 BunkerWeb 实例。</li>
 </ol>
-<h4 id="zh-integrations-_13">交互式安装</h4>
+<h4 id="zh-integrations-_12">交互式安装</h4>
 <p>当不带任何选项运行时，脚本会进入一个交互模式，引导您完成设置过程。您将被要求做出以下选择：</p>
 <ol>
 <li><strong>安装类型</strong>：选择您想要安装的组件。<ul>
@@ -1954,7 +1950,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">管理器和调度器安装</p>
 <p>如果您选择<strong>管理器</strong>或<strong>仅调度器</strong>安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。</p>
 </div>
-<h4 id="zh-integrations-_14">命令行选项</h4>
+<h4 id="zh-integrations-_13">命令行选项</h4>
 <p>对于非交互式或自动化设置，可以使用命令行标志来控制脚本：</p>
 <p><strong>通用选项：</strong></p>
 <table>
@@ -1967,7 +1963,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <tbody>
 <tr>
 <td><code>-v, --version VERSION</code></td>
-<td>指定要安装的 BunkerWeb 版本（例如 <code>1.6.5-rc3</code>）。</td>
+<td>指定要安装的 BunkerWeb 版本（例如 <code>1.6.5</code>）。</td>
 </tr>
 <tr>
 <td><code>-w, --enable-wizard</code></td>
@@ -2087,7 +2083,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--worker<span class="w"> </span>--no-wizard
 
 <span class="c1"># 安装一个特定版本</span>
-sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.5-rc3
+sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.6.5
 
 <span class="c1"># 带有远程工作实例的管理器设置（需要 instances）</span>
 sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--manager<span class="w"> </span>--instances<span class="w"> </span><span class="s2">&quot;192.168.1.10 192.168.1.11&quot;</span>
@@ -2123,7 +2119,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 - 交互模式（默认）将提示输入缺失的必需值
 - 非交互模式（<code>--yes</code>）要求通过命令行提供所有必要的选项</p>
 </div>
-<h4 id="zh-integrations-crowdsec_1">CrowdSec 与脚本的集成</h4>
+<h4 id="zh-integrations-crowdsec-integration-with-the-script">CrowdSec 与脚本的集成</h4>
 <p>如果您选择在交互式设置过程中安装 CrowdSec，脚本会完全自动化其与 BunkerWeb 的集成：</p>
 <ul>
 <li>它会添加官方的 CrowdSec 仓库并安装代理。</li>
@@ -2148,7 +2144,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 </code></pre></div>
 <p>这是 BunkerWeb 调度器连接到您的外部数据库所必需的。</p>
 </div>
-<h4 id="zh-integrations-_15">安装后</h4>
+<h4 id="zh-integrations-_14">安装后</h4>
 <p>根据您在安装过程中的选择：</p>
 <p><strong>启用设置向导：</strong></p>
 <ol>
@@ -2162,7 +2158,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <li>添加您的服务器设置和受保护的服务</li>
 <li>重启调度器：<code>sudo systemctl restart bunkerweb-scheduler</code></li>
 </ol>
-<h3 id="zh-integrations-_16">使用包管理器安装</h3>
+<h3 id="zh-integrations-_15">使用包管理器安装</h3>
 <p>请确保在安装 BunkerWeb 之前<strong>已经安装了 NGINX 1.28.0</strong>。对于除 Fedora 之外的所有发行版，强制要求使用来自<a href="https://nginx.org/en/linux_packages.html">官方 NGINX 仓库</a>的预构建包。从源代码编译 NGINX 或使用来自不同仓库的包将无法与 BunkerWeb 的官方预构建包一起工作。但是，您可以选择从源代码构建 BunkerWeb。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="zh-integrations-__tabbed_1_1" name="zh-integrations-__tabbed_1" type="radio" /><input id="zh-integrations-__tabbed_1_2" name="zh-integrations-__tabbed_1" type="radio" /><input id="zh-integrations-__tabbed_1_3" name="zh-integrations-__tabbed_1" type="radio" /><input id="zh-integrations-__tabbed_1_4" name="zh-integrations-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="zh-integrations-__tabbed_1_1">Debian Bookworm/Trixie</label><label for="zh-integrations-__tabbed_1_2">Ubuntu</label><label for="zh-integrations-__tabbed_1_3">Fedora</label><label for="zh-integrations-__tabbed_1_4">RedHat</label></div>
 <div class="tabbed-content">
@@ -2191,10 +2187,10 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>最后安装 BunkerWeb 1.6.5-rc3：</p>
+<p>最后安装 BunkerWeb 1.6.5：</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.5-rc3
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.5
 </code></pre></div>
 <p>要防止在执行 <code>apt upgrade</code> 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -2225,10 +2221,10 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>最后安装 BunkerWeb 1.6.5-rc3：</p>
+<p>最后安装 BunkerWeb 1.6.5：</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.deb.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.5-rc3
+sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="nv">bunkerweb</span><span class="o">=</span><span class="m">1</span>.6.5
 </code></pre></div>
 <p>要防止在执行 <code>apt upgrade</code> 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>nginx<span class="w"> </span>bunkerweb
@@ -2250,10 +2246,10 @@ sudo<span class="w"> </span>-E<span class="w"> </span>apt<span class="w"> </span
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>最后安装 BunkerWeb 1.6.5-rc3：</p>
+<p>最后安装 BunkerWeb 1.6.5：</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>makecache<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.5-rc3
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.5
 </code></pre></div>
 <p>要防止在执行 <code>dnf upgrade</code> 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2287,10 +2283,10 @@ module_hotfixes=true
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
 </code></pre></div>
 </div>
-<p>最后安装 BunkerWeb 1.6.5-rc3：</p>
+<p>最后安装 BunkerWeb 1.6.5：</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://repo.bunkerweb.io/install/script.rpm.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 sudo<span class="w"> </span>dnf<span class="w"> </span>check-update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
-sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.5-rc3
+sudo<span class="w"> </span>-E<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--allowerasing<span class="w"> </span>bunkerweb-1.6.5
 </code></pre></div>
 <p>要防止在执行 <code>dnf upgrade</code> 时升级 NGINX 和/或 BunkerWeb 包，您可以使用以下命令：</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w"> </span>add<span class="w"> </span>nginx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
@@ -2299,7 +2295,7 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>versionlock<span class="w
 </div>
 </div>
 </div>
-<h3 id="zh-integrations-_17">配置和服务</h3>
+<h3 id="zh-integrations-_16">配置和服务</h3>
 <p>BunkerWeb 的手动配置是通过编辑 <code>/etc/bunkerweb/variables.env</code> 文件来完成的：</p>
 <div class="highlight"><pre><span></span><code>MY_SETTING_1=value1
 MY_SETTING_2=value2
@@ -2307,9 +2303,9 @@ MY_SETTING_2=value2
 </code></pre></div>
 <p>安装后，BunkerWeb 带有三个服务 <code>bunkerweb</code>、<code>bunkerweb-scheduler</code> 和 <code>bunkerweb-ui</code>，您可以使用 <code>systemctl</code> 来管理它们。</p>
 <p>如果您手动编辑了 BunkerWeb 的配置（使用 <code>/etc/bunkerweb/variables.env</code>），重启 <code>bunkerweb-scheduler</code> 服务就足以生成并重新加载配置，而不会有任何停机时间。但在某些情况下（例如更改监听端口），您可能需要重启 <code>bunkerweb</code> 服务。</p>
-<h3 id="zh-integrations-_18">高可用性</h3>
+<h3 id="zh-integrations-_17">高可用性</h3>
 <p>调度器可以与 BunkerWeb 实例分离，以提供高可用性。在这种情况下，调度器将安装在一台独立的服务器上，并能够管理多个 BunkerWeb 实例。</p>
-<h4 id="zh-integrations-_19">管理器</h4>
+<h4 id="zh-integrations-_18">管理器</h4>
 <p>要仅在服务器上安装调度器，您可以在执行 BunkerWeb 安装之前导出以下变量：</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">MANAGER_MODE</span><span class="o">=</span>yes
 <span class="nb">export</span><span class="w"> </span><span class="nv">UI_WIZARD</span><span class="o">=</span>no
@@ -2319,7 +2315,7 @@ MY_SETTING_2=value2
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_BUNKERWEB</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>no
 </code></pre></div>
-<h4 id="zh-integrations-_20">工作节点</h4>
+<h4 id="zh-integrations-_19">工作节点</h4>
 <p>在另一台服务器上，要仅安装 BunkerWeb，您可以在执行 BunkerWeb 安装之前导出以下变量：</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">WORKER_MODE</span><span class="o">=</span>yes
 </code></pre></div>
@@ -2334,7 +2330,7 @@ MY_SETTING_2=value2
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_SCHEDULER</span><span class="o">=</span>no
 <span class="nb">export</span><span class="w"> </span><span class="nv">SERVICE_UI</span><span class="o">=</span>yes
 </code></pre></div>
-<h2 id="zh-integrations-docker">Docker 自动配置</h2>
+<h2 id="zh-integrations-docker-autoconf">Docker 自动配置</h2>
 <figure>
 <p><img align="center," alt="概述" src="../assets/img/integration-autoconf.svg" width="600" />
   </p>
@@ -2354,7 +2350,7 @@ MY_SETTING_2=value2
 </div>
 <div class="admonition info">
 <p class="admonition-title">数据库后端</p>
-<p>请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 <code>DATABASE_URI</code> 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations">misc/integrations 文件夹</a>中的 docker-compose 文件。</p>
+<p>请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 <code>DATABASE_URI</code> 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations">misc/integrations 文件夹</a>中的 docker-compose 文件。</p>
 </div>
 <p>要启用自动配置更新，请在堆栈中包含一个名为 <code>bw-autoconf</code> 的额外容器。此容器承载自动配置服务，该服务管理 BunkerWeb 的动态配置更改。</p>
 <p>为了支持此功能，请使用一个专用的“真实”数据库后端（例如，MariaDB、MySQL 或 PostgreSQL）进行同步配置存储。通过集成 <code>bw-autoconf</code> 和合适的数据库后端，您为 BunkerWeb 中无缝的自动配置管理建立了基础设施。</p>
@@ -2365,7 +2361,7 @@ MY_SETTING_2=value2
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -2380,7 +2376,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># 我们不需要在这里指定 BunkerWeb 实例，因为它们由自动配置服务自动检测</span>
@@ -2395,7 +2391,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
@@ -2461,7 +2457,7 @@ MY_SETTING_2=value2
 <p class="admonition-title">在无根模式下使用 Docker</p>
 <p>如果您正在使用<a href="https://docs.docker.com/engine/security/rootless">无根模式的 Docker</a>，您需要将 docker 套接字的挂载替换为以下值：<code>$XDG_RUNTIME_DIR/docker.sock:/var/run/docker.sock:ro</code>。</p>
 </div>
-<h3 id="zh-integrations-_21">自动配置服务</h3>
+<h3 id="zh-integrations-_20">自动配置服务</h3>
 <p>一旦堆栈设置好，您将能够创建 Web 应用程序容器，并使用“bunkerweb.”前缀将设置添加为标签，以便自动设置 BunkerWeb：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -2477,7 +2473,7 @@ MY_SETTING_2=value2
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="zh-integrations-_22">命名空间</h3>
+<h3 id="zh-integrations-namespaces">命名空间</h3>
 <p>从 <code>1.6.0</code> 版本开始，BunkerWeb 的自动配置堆栈现在支持命名空间。此功能使您能够在同一个 Docker 主机上管理多个 BunkerWeb 实例和服务的“<em>集群</em>”。要利用命名空间，只需在您的服务上设置 <code>NAMESPACE</code> 标签。这是一个示例：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -2500,13 +2496,13 @@ MY_SETTING_2=value2
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.NAMESPACE=my-namespace&quot;</span><span class="w"> </span><span class="c1"># 为 BunkerWeb 实例设置命名空间，以便自动配置服务可以检测到它</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">NAMESPACES</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;my-namespace</span><span class="nv"> </span><span class="s">my-other-namespace&quot;</span><span class="w"> </span><span class="c1"># 只监听这些命名空间</span>
@@ -2530,7 +2526,7 @@ MY_SETTING_2=value2
 <p>鉴于存在多个 BunkerWeb 实例，有必要建立一个共享数据存储，实现为一个 <a href="https://redis.io/">Redis</a> 或 <a href="https://valkey.io/">Valkey</a> 服务。这些实例将利用该服务来缓存和共享彼此之间的数据。有关 Redis/Valkey 设置的更多信息，请参见<a href="#zh-features-redis">此处</a>。</p>
 <div class="admonition info">
 <p class="admonition-title">数据库后端</p>
-<p>请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 <code>DATABASE_URI</code> 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations">misc/integrations 文件夹</a>中的 docker-compose 文件。</p>
+<p>请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 <code>DATABASE_URI</code> 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations">misc/integrations 文件夹</a>中的 docker-compose 文件。</p>
 <p>集群数据库后端的设置超出了本文档的范围。</p>
 </div>
 <p>请确保自动配置服务有权访问 Kubernetes API。建议为此目的利用 <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">RBAC 授权</a>。</p>
@@ -2539,7 +2535,7 @@ MY_SETTING_2=value2
 <p>如果您为您的 Kubernetes API 使用自定义 CA，您可以在 ingress 控制器上挂载一个包含您的中间证书和根证书的捆绑文件，并将 <code>KUBERNETES_SSL_CA_CERT</code> 环境变量的值设置为容器内捆绑文件的路径。或者，即使不推荐，您也可以通过将 ingress 控制器的 <code>KUBERNETES_SSL_VERIFY</code> 环境变量设置为 <code>no</code>（默认为 <code>yes</code>）来禁用证书验证。</p>
 </div>
 <p>此外，<strong>在使用 Kubernetes 集成时，将 <code>KUBERNETES_MODE</code> 环境变量设置为 <code>yes</code> 至关重要</strong>。此变量是正常运行所必需的。</p>
-<h3 id="zh-integrations-_23">安装方法</h3>
+<h3 id="zh-integrations-_21">安装方法</h3>
 <h4 id="zh-integrations-helm-chart">使用 helm chart（推荐）</h4>
 <p>安装 Kubernetes 的推荐方法是使用位于 <code>https://repo.bunkerweb.io/charts</code> 的 Helm chart：</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span>https://repo.bunkerweb.io/charts
@@ -2549,7 +2545,7 @@ MY_SETTING_2=value2
 </code></pre></div>
 <p>值的完整列表在 <a href="https://github.com/bunkerity/bunkerweb-helm">bunkerity/bunkerweb-helm 仓库</a> 的 <a href="https://github.com/bunkerity/bunkerweb-helm/blob/main/charts/bunkerweb/values.yaml">charts/bunkerweb/values.yaml 文件</a> 中列出。</p>
 <h4 id="zh-integrations-yaml">完整的 YAML 文件</h4>
-<p>除了使用 helm chart，您还可以使用 GitHub 仓库中 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations">misc/integrations 文件夹</a>内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。</p>
+<p>除了使用 helm chart，您还可以使用 GitHub 仓库中 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations">misc/integrations 文件夹</a>内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。</p>
 <h3 id="zh-integrations-ingress">Ingress 资源</h3>
 <p>一旦 BunkerWeb Kubernetes 堆栈成功设置并运行（有关详细信息，请参阅自动配置日志），您就可以继续在集群内部署 Web 应用程序并声明您的 Ingress 资源。</p>
 <p>需要注意的是，BunkerWeb 设置需要作为 Ingress 资源的注解来指定。对于域部分，请使用特殊值 <strong><code>bunkerweb.io</code></strong>。通过包含适当的注解，您可以相应地为 Ingress 资源配置 BunkerWeb。</p>
@@ -2585,7 +2581,7 @@ MY_SETTING_2=value2
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 <span class="nn">...</span>
 </code></pre></div>
-<h3 id="zh-integrations-_24">命名空间</h3>
+<h3 id="zh-integrations-namespaces_1">命名空间</h3>
 <p>从 <code>1.6.0</code> 版本开始，BunkerWeb 的自动配置堆栈现在支持命名空间。此功能使您能够在同一个 Kubernetes 集群上管理多个 BunkerWeb 实例和服务的集群。要利用命名空间，只需在您的 BunkerWeb 实例和服务上设置 <code>namespace</code> 元数据字段。这是一个示例：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DaemonSet</span>
@@ -2618,7 +2614,7 @@ MY_SETTING_2=value2
 <span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-controller</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc3</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5</span>
 <span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
 <span class="w">          </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NAMESPACES</span>
@@ -2664,7 +2660,7 @@ MY_SETTING_2=value2
 <span class="w">                </span><span class="nt">port</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
 </code></pre></div>
-<h3 id="zh-integrations-_25">自定义域名</h3>
+<h3 id="zh-integrations-_22">自定义域名</h3>
 <p>如果您为您的 Kubernetes 集群使用不同于默认 <code>kubernetes.local</code> 的自定义域名，您可以在调度器容器上使用 <code>KUBERNETES_DOMAIN_NAME</code> 环境变量来设置该值。</p>
 <h3 id="zh-integrations-ingress_2">与现有 ingress 控制器一起使用</h3>
 <div class="admonition info">
@@ -2731,11 +2727,11 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="c1"># BunkerWeb 设置</span>
 <span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.5-rc3</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.5</span>
 
 <span class="c1"># 调度器设置</span>
 <span class="nt">scheduler</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.5-rc3</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.5</span>
 <span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># 启用 real IP 模块以获取客户端的真实 IP</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">USE_REAL_IP</span>
@@ -2743,11 +2739,11 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="c1"># 控制器设置</span>
 <span class="nt">controller</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.5-rc3</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.5</span>
 
 <span class="c1"># UI 设置</span>
 <span class="nt">ui</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.5-rc3</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6.5</span>
 </code></pre></div>
 <p>使用自定义值安装 BunkerWeb：</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>--namespace<span class="w"> </span>bunkerweb<span class="w"> </span>--create-namespace<span class="w"> </span>-f<span class="w"> </span>values.yaml<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerweb/bunkerweb
@@ -2856,7 +2852,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <p>至于数据库卷，文档并未指定具体的方法。为数据库卷选择共享文件夹或特定驱动程序取决于您的独特用例，留给读者自行决定。</p>
 <div class="admonition info">
 <p class="admonition-title">数据库后端</p>
-<p>请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 <code>DATABASE_URI</code> 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations">misc/integrations 文件夹</a>中的 docker-compose 文件。</p>
+<p>请注意，我们的说明假设您正在使用 MariaDB 作为默认的数据库后端，这是由 <code>DATABASE_URI</code> 设置配置的。但是，我们理解您可能更喜欢为您的 Docker 集成使用其他后端。如果是这样，请放心，其他数据库后端仍然是可行的。有关更多信息，请参阅仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations">misc/integrations 文件夹</a>中的 docker-compose 文件。</p>
 <p>集群数据库后端的设置超出了本文档的范围。</p>
 </div>
 <p>这是您可以使用 <code>docker stack deploy</code> 部署的堆栈样板：</p>
@@ -2867,7 +2863,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">published</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
@@ -2896,7 +2892,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span><span class="w"> </span><span class="c1"># autoconf 服务识别 BunkerWeb 实例的强制性标签</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="c1"># 我们不需要在这里指定 BunkerWeb 实例，因为它们由 autoconf 服务自动检测</span>
@@ -2917,7 +2913,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">worker&quot;</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">SWARM_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># 记得为数据库设置一个更强的密码</span>
@@ -3029,7 +3025,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">    </span><span class="nt">external</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
 </code></pre></div>
-<h3 id="zh-integrations-_26">命名空间</h3>
+<h3 id="zh-integrations-namespaces_2">命名空间</h3>
 <p>从 <code>1.6.0</code> 版本开始，BunkerWeb 的自动配置堆栈现在支持命名空间。此功能使您能够在同一个 Docker 主机上管理多个 BunkerWeb 实例和服务的“<em>集群</em>”。要利用命名空间，只需在您的服务上设置 <code>NAMESPACE</code> 标签。这是一个示例：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">myapp</span><span class="p">:</span>
@@ -3056,7 +3052,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">    </span><span class="nt">deploy</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span>
@@ -3068,7 +3064,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.NAMESPACE=my-namespace&quot;</span><span class="w"> </span><span class="c1"># 为 BunkerWeb 实例设置命名空间</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">NAMESPACES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my-namespace</span><span class="nv"> </span><span class="s">my-other-namespace&quot;</span><span class="w"> </span><span class="c1"># 只监听这些命名空间</span>
 <span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -3564,12 +3560,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 </div>
 </div>
 </div>
-<h2 id="zh-quickstart-guide-_3">完成设置向导</h2>
+<h2 id="zh-quickstart-guide-complete-the-setup-wizard">完成设置向导</h2>
 <div class="admonition tip">
 <p class="admonition-title">访问设置向导</p>
 <p>您可以通过浏览服务器的 <code>https://your-fqdn-or-ip-addresss/setup</code> URI 来访问设置向导。</p>
 </div>
-<h3 id="zh-quickstart-guide-_4">创建一个管理员帐户</h3>
+<h3 id="zh-quickstart-guide-_3">创建一个管理员帐户</h3>
 <p>您应该会看到一个像这样的设置页面：</p>
 <figure>
 <p><img align="center" alt="设置向导登录页面" src="../assets/img/ui-wizard-step1.png" />
@@ -3611,7 +3607,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
   </p>
 <figcaption>设置向导 PRO 步骤</figcaption>
 </figure>
-<h3 id="zh-quickstart-guide-_5">您的设置概览</h3>
+<h3 id="zh-quickstart-guide-_4">您的设置概览</h3>
 <p>最后一步将为您提供您所输入设置的概览。您可以点击“设置”按钮来完成设置。</p>
 <figure>
 <p><img align="center" alt="设置向导最后一步" src="../assets/img/ui-wizard-step4.png" />
@@ -3631,7 +3627,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
   </p>
 <figcaption>Web 界面主页</figcaption>
 </figure>
-<h2 id="zh-quickstart-guide-_6">创建一个新服务</h2>
+<h2 id="zh-quickstart-guide-_5">创建一个新服务</h2>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="zh-quickstart-guide-__tabbed_3_1" name="zh-quickstart-guide-__tabbed_3" type="radio" /><input id="zh-quickstart-guide-__tabbed_3_2" name="zh-quickstart-guide-__tabbed_3" type="radio" /><input id="zh-quickstart-guide-__tabbed_3_3" name="zh-quickstart-guide-__tabbed_3" type="radio" /><input id="zh-quickstart-guide-__tabbed_3_4" name="zh-quickstart-guide-__tabbed_3" type="radio" /><input id="zh-quickstart-guide-__tabbed_3_5" name="zh-quickstart-guide-__tabbed_3" type="radio" /><input id="zh-quickstart-guide-__tabbed_3_6" name="zh-quickstart-guide-__tabbed_3" type="radio" /><input id="zh-quickstart-guide-__tabbed_3_7" name="zh-quickstart-guide-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="zh-quickstart-guide-__tabbed_3_1">Web UI</label><label for="zh-quickstart-guide-__tabbed_3_2">一体化</label><label for="zh-quickstart-guide-__tabbed_3_3">Linux variables.env 文件</label><label for="zh-quickstart-guide-__tabbed_3_4">Docker</label><label for="zh-quickstart-guide-__tabbed_3_5">Docker autoconf 标签</label><label for="zh-quickstart-guide-__tabbed_3_6">Kubernetes 注解</label><label for="zh-quickstart-guide-__tabbed_3_7">Swarm 标签</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3893,7 +3889,7 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 </div>
 </div>
 </div>
-<h2 id="zh-quickstart-guide-_7">更进一步</h2>
+<h2 id="zh-quickstart-guide-_6">更进一步</h2>
 <p>恭喜！您刚刚安装了 BunkerWeb 并保护了您的第一个 Web 服务。请注意，BunkerWeb 在安全性和与其他系统和解决方案的集成方面提供了更多功能。以下是一些资源和行动，可以帮助您继续加深对该解决方案的了解：</p>
 <ul>
 <li>加入 Bunker 社区：<a href="https://discord.com/invite/fTf46FmtyD">Discord</a>、<a href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>、<a href="https://github.com/bunkerity">GitHub</a>、<a href="https://x.com/bunkerity">X (Formerly Twitter)</a></li>
@@ -3935,14 +3931,14 @@ www.example.com_REVERSE_PROXY_HOST<span class="o">=</span>http://myapp:8080
 <li><code>REVERSE_PROXY_URL_2=/anotherdir</code> 和 <code>REVERSE_PROXY_HOST_2=http://myhost2</code> 配置第二个反向代理。</li>
 </ul>
 <p>这种模式允许您为需要不同用例的不同值的功能（如反向代理、端口或其他设置）管理多个配置。</p>
-<h3 id="zh-features-_5">安全模式</h3>
+<h3 id="zh-features-security-modes">安全模式</h3>
 <p><code>SECURITY_MODE</code> 设置决定了 BunkerWeb 如何处理检测到的威胁。这个灵活的功能允许您根据具体需求在监控或主动阻止可疑活动之间进行选择：</p>
 <ul>
 <li><strong><code>detect</code></strong>：记录潜在威胁而不阻止访问。此模式对于以安全、无干扰的方式识别和分析误报非常有用。</li>
 <li><strong><code>block</code></strong>（默认）：主动阻止检测到的威胁，同时记录事件以防止未经授权的访问并保护您的应用程序。</li>
 </ul>
 <p>切换到 <code>detect</code> 模式可以帮助您识别和解决潜在的误报，而不会干扰合法客户端。一旦这些问题得到解决，您就可以自信地切换回 <code>block</code> 模式以获得全面保护。</p>
-<h3 id="zh-features-_6">配置设置</h3>
+<h3 id="zh-features-_5">配置设置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:9"><input checked="checked" id="zh-features-__tabbed_1_1" name="zh-features-__tabbed_1" type="radio" /><input id="zh-features-__tabbed_1_2" name="zh-features-__tabbed_1" type="radio" /><input id="zh-features-__tabbed_1_3" name="zh-features-__tabbed_1" type="radio" /><input id="zh-features-__tabbed_1_4" name="zh-features-__tabbed_1" type="radio" /><input id="zh-features-__tabbed_1_5" name="zh-features-__tabbed_1" type="radio" /><input id="zh-features-__tabbed_1_6" name="zh-features-__tabbed_1" type="radio" /><input id="zh-features-__tabbed_1_7" name="zh-features-__tabbed_1" type="radio" /><input id="zh-features-__tabbed_1_8" name="zh-features-__tabbed_1" type="radio" /><input id="zh-features-__tabbed_1_9" name="zh-features-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_1_1">核心设置</label><label for="zh-features-__tabbed_1_2">API 设置</label><label for="zh-features-__tabbed_1_3">网络和端口设置</label><label for="zh-features-__tabbed_1_4">流服务器设置</label><label for="zh-features-__tabbed_1_5">工作进程设置</label><label for="zh-features-__tabbed_1_6">内存设置</label><label for="zh-features-__tabbed_1_7">日志设置</label><label for="zh-features-__tabbed_1_8">集成设置</label><label for="zh-features-__tabbed_1_9">Nginx 设置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4387,7 +4383,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </div>
 </div>
 </div>
-<h3 id="zh-features-_7">示例配置</h3>
+<h3 id="zh-features-_6">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="zh-features-__tabbed_2_1" name="zh-features-__tabbed_2" type="radio" /><input id="zh-features-__tabbed_2_2" name="zh-features-__tabbed_2" type="radio" /><input id="zh-features-__tabbed_2_3" name="zh-features-__tabbed_2" type="radio" /><input id="zh-features-__tabbed_2_4" name="zh-features-__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_2_1">基本生产设置</label><label for="zh-features-__tabbed_2_2">开发模式</label><label for="zh-features-__tabbed_2_3">多站点配置</label><label for="zh-features-__tabbed_2_4">流服务器配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4497,7 +4493,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>用户必须完成挑战（例如，解决一个 CAPTCHA，运行 JavaScript）。</li>
 <li>如果挑战成功，用户将被重定向回他们最初试图访问的页面，并可以正常浏览您的网站。</li>
 </ol>
-<h3 id="zh-features-_8">如何使用</h3>
+<h3 id="zh-features-_7">如何使用</h3>
 <p>请按照以下步骤启用和配置 Antibot 功能：</p>
 <ol>
 <li><strong>选择一个挑战类型：</strong> 决定使用哪种类型的 antibot 挑战（例如，<a href="#zh-features-__tabbed_3_3">captcha</a>、<a href="#zh-features-__tabbed_3_5">hcaptcha</a>、<a href="#zh-features-__tabbed_3_2">javascript</a>）。</li>
@@ -4513,7 +4509,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <p class="admonition-title">集群环境中的会话配置</p>
 <p>antibot 功能使用 cookie 来跟踪用户是否已完成挑战。如果您在集群环境中运行 BunkerWeb（多个 BunkerWeb 实例），您<strong>必须</strong>正确配置会话管理。这涉及在所有 BunkerWeb 实例中将 <code>SESSIONS_SECRET</code> 和 <code>SESSIONS_NAME</code> 设置设置为<strong>相同的值</strong>。如果您不这样做，用户可能会被反复提示完成 antibot 挑战。您可以在<a href="#zh-features-sessions">此处</a>找到有关会话配置的更多信息。</p>
 </div>
-<h3 id="zh-features-_9">通用设置</h3>
+<h3 id="zh-features-_8">通用设置</h3>
 <p>以下设置在所有挑战机制中共享：</p>
 <table>
 <thead>
@@ -4549,7 +4545,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<h3 id="zh-features-_10">从挑战中排除流量</h3>
+<h3 id="zh-features-_9">从挑战中排除流量</h3>
 <p>BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑战。这对于将受信任的服务、内部网络或应始终无需挑战即可访问的特定页面列入白名单非常有用：</p>
 <table>
 <thead>
@@ -4629,7 +4625,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
   这将从 antibot 挑战中排除用户代理与指定正则表达式模式匹配的请求。</p>
 </li>
 </ul>
-<h3 id="zh-features-_11">支持的挑战机制</h3>
+<h3 id="zh-features-_10">支持的挑战机制</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="zh-features-__tabbed_3_1" name="zh-features-__tabbed_3" type="radio" /><input id="zh-features-__tabbed_3_2" name="zh-features-__tabbed_3" type="radio" /><input id="zh-features-__tabbed_3_3" name="zh-features-__tabbed_3" type="radio" /><input id="zh-features-__tabbed_3_4" name="zh-features-__tabbed_3" type="radio" /><input id="zh-features-__tabbed_3_5" name="zh-features-__tabbed_3" type="radio" /><input id="zh-features-__tabbed_3_6" name="zh-features-__tabbed_3" type="radio" /><input id="zh-features-__tabbed_3_7" name="zh-features-__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_3_1">Cookie</label><label for="zh-features-__tabbed_3_2">JavaScript</label><label for="zh-features-__tabbed_3_3">Captcha</label><label for="zh-features-__tabbed_3_4">reCAPTCHA</label><label for="zh-features-__tabbed_3_5">hCaptcha</label><label for="zh-features-__tabbed_3_6">Turnstile</label><label for="zh-features-__tabbed_3_7">mCaptcha</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4661,7 +4657,6 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<p>有关其他配置选项，请参阅<a href="#zh-features-common-settings">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>JavaScript 挑战要求客户端使用 JavaScript 解决一个计算任务。这种机制确保客户端启用了 JavaScript 并且可以执行所需的代码，这通常超出了大多数机器人的能力。</p>
@@ -4697,7 +4692,6 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<p>有关其他配置选项，请参阅<a href="#zh-features-common-settings">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>Captcha 挑战是一种自制的机制，它可以在您的 BunkerWeb 环境中完全托管生成基于图像的挑战。它测试用户识别和解释随机字符的能力，确保在不依赖外部服务的情况下有效阻止自动化机器人。</p>
@@ -4749,7 +4743,6 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<p>有关其他配置选项，请参阅<a href="#zh-features-common-settings">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>启用后，reCAPTCHA 会在后台运行 (v3)，根据用户行为分配一个分数。低于配置阈值的分数将提示进一步验证或阻止请求。对于可见的挑战 (v2)，用户必须与 reCAPTCHA 小部件交互才能继续。</p>
@@ -4835,7 +4828,6 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<p>有关其他配置选项，请参阅<a href="#zh-features-common-settings">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>启用后，hCaptcha 提供了一个有效的 reCAPTCHA 替代方案，它通过验证用户交互而无需依赖评分机制。它用一个简单的交互式测试来挑战用户，以确认他们的合法性。</p>
@@ -4875,7 +4867,6 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<p>有关其他配置选项，请参阅<a href="#zh-features-common-settings">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>Turnstile 是一种现代、注重隐私的挑战机制，它利用 Cloudflare 的技术来检测和阻止自动化流量。它以一种无缝、后台的方式验证用户交互，为合法用户减少了摩擦，同时有效地阻止了机器人。</p>
@@ -4915,7 +4906,6 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<p>有关其他配置选项，请参阅<a href="#zh-features-common-settings">通用设置</a>。</p>
 </div>
 <div class="tabbed-block">
 <p>mCaptcha 是一种替代的 CAPTCHA 挑战机制，它通过呈现一个与其他 antibot 解决方案类似的交互式测试来验证用户的合法性。启用后，它会用 mCaptcha 提供的 CAPTCHA 来挑战用户，确保只有真正的用户才能绕过自动安全检查。</p>
@@ -4963,11 +4953,10 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<p>有关其他配置选项，请参阅<a href="#zh-features-common-settings">通用设置</a>。</p>
 </div>
 </div>
 </div>
-<h3 id="zh-features-_12">示例配置</h3>
+<h3 id="zh-features-_11">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:8"><input checked="checked" id="zh-features-__tabbed_4_1" name="zh-features-__tabbed_4" type="radio" /><input id="zh-features-__tabbed_4_2" name="zh-features-__tabbed_4" type="radio" /><input id="zh-features-__tabbed_4_3" name="zh-features-__tabbed_4" type="radio" /><input id="zh-features-__tabbed_4_4" name="zh-features-__tabbed_4" type="radio" /><input id="zh-features-__tabbed_4_5" name="zh-features-__tabbed_4" type="radio" /><input id="zh-features-__tabbed_4_6" name="zh-features-__tabbed_4" type="radio" /><input id="zh-features-__tabbed_4_7" name="zh-features-__tabbed_4" type="radio" /><input id="zh-features-__tabbed_4_8" name="zh-features-__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_4_1">Cookie 挑战</label><label for="zh-features-__tabbed_4_2">JavaScript 挑战</label><label for="zh-features-__tabbed_4_3">Captcha 挑战</label><label for="zh-features-__tabbed_4_4">reCAPTCHA 经典版</label><label for="zh-features-__tabbed_4_5">reCAPTCHA (新)</label><label for="zh-features-__tabbed_4_6">hCaptcha 挑战</label><label for="zh-features-__tabbed_4_7">Turnstile 挑战</label><label for="zh-features-__tabbed_4_8">mCaptcha 挑战</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5068,7 +5057,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>如果凭据有效，用户将被授予访问所请求内容的权限。</li>
 <li>如果凭据无效，将向用户提供一个错误消息，状态码为 401 Unauthorized。</li>
 </ol>
-<h3 id="zh-features-_13">如何使用</h3>
+<h3 id="zh-features-_12">如何使用</h3>
 <p>请按照以下步骤启用和配置 Auth Basic 身份验证：</p>
 <ol>
 <li><strong>启用该功能：</strong> 在您的 BunkerWeb 配置中将 <code>USE_AUTH_BASIC</code> 设置为 <code>yes</code>。</li>
@@ -5076,7 +5065,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li><strong>定义凭据：</strong> 使用 <code>AUTH_BASIC_USER</code> 和 <code>AUTH_BASIC_PASSWORD</code> 设置至少设置一对用户名和密码。</li>
 <li><strong>自定义消息：</strong> 可选地更改 <code>AUTH_BASIC_TEXT</code> 以在登录提示中显示自定义消息。</li>
 </ol>
-<h3 id="zh-features-_14">配置设置</h3>
+<h3 id="zh-features-_13">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -5133,7 +5122,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <p class="admonition-title">使用多个凭据</p>
 <p>您可以为访问配置多个用户名/密码对。每个 <code>AUTH_BASIC_USER</code> 设置都应有一个对应的 <code>AUTH_BASIC_PASSWORD</code> 设置。</p>
 </div>
-<h3 id="zh-features-_15">示例配置</h3>
+<h3 id="zh-features-_14">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="zh-features-__tabbed_5_1" name="zh-features-__tabbed_5" type="radio" /><input id="zh-features-__tabbed_5_2" name="zh-features-__tabbed_5" type="radio" /><input id="zh-features-__tabbed_5_3" name="zh-features-__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_5_1">全站保护</label><label for="zh-features-__tabbed_5_2">保护特定区域</label><label for="zh-features-__tabbed_5_3">多个用户</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5186,7 +5175,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>您可以随时手动创建备份、列出现有备份或从备份中恢复。</li>
 <li>在任何恢复操作之前，当前状态都会自动备份作为安全措施。</li>
 </ol>
-<h3 id="zh-features-_16">如何使用</h3>
+<h3 id="zh-features-_15">如何使用</h3>
 <p>请按照以下步骤配置和使用备份功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 备份功能默认启用。如果需要，您可以使用 <code>USE_BACKUP</code> 设置来控制此功能。</li>
@@ -5195,7 +5184,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li><strong>定义存储位置：</strong> 使用 <code>BACKUP_DIRECTORY</code> 设置选择备份的存储位置。</li>
 <li><strong>使用 CLI 命令：</strong> 需要时，使用 <code>bwcli plugin backup</code> 命令手动管理备份。</li>
 </ol>
-<h3 id="zh-features-_17">配置设置</h3>
+<h3 id="zh-features-_16">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -5237,7 +5226,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<h3 id="zh-features-_18">命令行界面</h3>
+<h3 id="zh-features-_17">命令行界面</h3>
 <p>备份插件提供了几个 CLI 命令来管理您的备份：</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 列出所有可用的备份</span>
 bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"> </span>list
@@ -5262,7 +5251,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">数据库兼容性</p>
 <p>备份插件支持 SQLite、MySQL/MariaDB 和 PostgreSQL 数据库。目前不支持 Oracle 数据库的备份和恢复操作。</p>
 </div>
-<h3 id="zh-features-_19">示例配置</h3>
+<h3 id="zh-features-_18">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="zh-features-__tabbed_6_1" name="zh-features-__tabbed_6" type="radio" /><input id="zh-features-__tabbed_6_2" name="zh-features-__tabbed_6" type="radio" /><input id="zh-features-__tabbed_6_3" name="zh-features-__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_6_1">每日备份，保留 7 天</label><label for="zh-features-__tabbed_6_2">每周备份，延长保留期</label><label for="zh-features-__tabbed_6_3">每月备份到自定义位置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5399,7 +5388,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>封禁持续时间控制：</strong> 设置临时封禁，在配置的持续时间后自动过期，或设置永久封禁，直到手动移除。</li>
 </ol>
 </div>
-<h3 id="zh-features-_20">如何使用</h3>
+<h3 id="zh-features-_19">如何使用</h3>
 <p>请按照以下步骤配置和使用“不良行为”功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> “不良行为”功能默认启用。如果需要，您可以使用 <code>USE_BAD_BEHAVIOR</code> 设置来控制此功能。</li>
@@ -5412,7 +5401,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">流模式</p>
 <p>在<strong>流模式</strong>下，只有 <code>444</code> 状态码被视为“不良”并会触发此行为。</p>
 </div>
-<h3 id="zh-features-_21">配置设置</h3>
+<h3 id="zh-features-_20">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -5476,7 +5465,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">调整您的配置</p>
 <p>从保守的设置开始（更高的阈值，更短的封禁时间），并根据您的具体需求和流量模式进行调整。监控您的日志以确保合法用户不会被错误地封禁。</p>
 </div>
-<h3 id="zh-features-_22">示例配置</h3>
+<h3 id="zh-features-_21">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:4"><input checked="checked" id="zh-features-__tabbed_7_1" name="zh-features-__tabbed_7" type="radio" /><input id="zh-features-__tabbed_7_2" name="zh-features-__tabbed_7" type="radio" /><input id="zh-features-__tabbed_7_3" name="zh-features-__tabbed_7" type="radio" /><input id="zh-features-__tabbed_7_4" name="zh-features-__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_7_1">默认配置</label><label for="zh-features-__tabbed_7_2">严格配置</label><label for="zh-features-__tabbed_7_3">宽松配置</label><label for="zh-features-__tabbed_7_4">永久封禁配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5532,7 +5521,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li>黑名单会根据配置的 URL 定期自动更新。</li>
 <li>您可以根据您的特定安全需求自定义要检查和忽略的确切标准。</li>
 </ol>
-<h3 id="zh-features-_23">如何使用</h3>
+<h3 id="zh-features-_22">如何使用</h3>
 <p>请按照以下步骤配置和使用黑名单功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 黑名单功能默认启用。如果需要，您可以使用 <code>USE_BLACKLIST</code> 设置来控制此功能。</li>
@@ -5545,7 +5534,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">流模式</p>
 <p>当使用流模式时，只会执行 IP、rDNS 和 ASN 检查。</p>
 </div>
-<h3 id="zh-features-_24">配置设置</h3>
+<h3 id="zh-features-_23">配置设置</h3>
 <p><strong>通用</strong></p>
 <table>
 <thead>
@@ -5858,7 +5847,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">定期更新</p>
 <p>来自 URL 的黑名单会每小时自动下载和更新，以确保您的保护措施始终能应对最新的威胁。</p>
 </div>
-<h3 id="zh-features-_25">示例配置</h3>
+<h3 id="zh-features-_24">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="zh-features-__tabbed_9_1" name="zh-features-__tabbed_9" type="radio" /><input id="zh-features-__tabbed_9_2" name="zh-features-__tabbed_9" type="radio" /><input id="zh-features-__tabbed_9_3" name="zh-features-__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_9_1">基本的 IP 和用户代理保护</label><label for="zh-features-__tabbed_9_2">带有自定义规则的高级保护</label><label for="zh-features-__tabbed_9_3">使用本地文件</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5915,7 +5904,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li>客户端的浏览器在向用户呈现内容之前会对其进行解压缩。</li>
 <li>带宽使用量和页面加载时间都得到了减少，从而改善了整体用户体验。</li>
 </ol>
-<h3 id="zh-features-_26">如何使用</h3>
+<h3 id="zh-features-_25">如何使用</h3>
 <p>请按照以下步骤配置和使用 Brotli 压缩功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> Brotli 功能默认禁用。通过将 <code>USE_BROTLI</code> 设置为 <code>yes</code> 来启用它。</li>
@@ -5924,7 +5913,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>选择压缩级别：</strong> 使用 <code>BROTLI_COMP_LEVEL</code> 选择您偏好的速度与压缩率之间的平衡。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 配置完成后，压缩会自动对符合条件的响应进行。</li>
 </ol>
-<h3 id="zh-features-_27">配置设置</h3>
+<h3 id="zh-features-_26">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -5974,7 +5963,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">浏览器支持</p>
 <p>所有现代浏览器，包括 Chrome、Firefox、Edge、Safari 和 Opera，都支持 Brotli。旧版浏览器会自动接收未压缩的内容，以确保兼容性。</p>
 </div>
-<h3 id="zh-features-_28">示例配置</h3>
+<h3 id="zh-features-_27">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="zh-features-__tabbed_10_1" name="zh-features-__tabbed_10" type="radio" /><input id="zh-features-__tabbed_10_2" name="zh-features-__tabbed_10" type="radio" /><input id="zh-features-__tabbed_10_3" name="zh-features-__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_10_1">基本配置</label><label for="zh-features-__tabbed_10_2">最大压缩</label><label for="zh-features-__tabbed_10_3">平衡性能</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -6024,7 +6013,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>注重隐私：</strong> 只分享必要的威胁信息，不损害您或您用户的隐私。</li>
 </ol>
 </div>
-<h3 id="zh-features-_29">如何使用</h3>
+<h3 id="zh-features-_28">如何使用</h3>
 <p>请按照以下步骤配置和使用 BunkerNet 功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> BunkerNet 功能默认启用。如果需要，您可以使用 <code>USE_BUNKERNET</code> 设置来控制此功能。</li>
@@ -6033,7 +6022,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>自动报告：</strong> 当您的实例阻止了一个恶意 IP 地址时，它会自动将此数据贡献给社区。</li>
 <li><strong>监控保护：</strong> 查看 <a href="#zh-web-ui">web UI</a> 以查看由 BunkerNet 情报阻止的威胁统计信息。</li>
 </ol>
-<h3 id="zh-features-_30">配置设置</h3>
+<h3 id="zh-features-_29">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -6069,7 +6058,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">匿名报告</p>
 <p>在向 BunkerNet 报告威胁信息时，您的实例只分享识别威胁所需的数据：IP 地址、阻止原因和最少的上下文数据。不会分享有关您的用户的个人信息或有关您网站的敏感详细信息。</p>
 </div>
-<h3 id="zh-features-_31">示例配置</h3>
+<h3 id="zh-features-_30">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="zh-features-__tabbed_11_1" name="zh-features-__tabbed_11" type="radio" /><input id="zh-features-__tabbed_11_2" name="zh-features-__tabbed_11" type="radio" /><input id="zh-features-__tabbed_11_3" name="zh-features-__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_11_1">默认配置（推荐）</label><label for="zh-features-__tabbed_11_2">禁用配置</label><label for="zh-features-__tabbed_11_3">自定义服务器配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -6143,7 +6132,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li>对于不允许的源，请求可以被完全拒绝，也可以不带 CORS 标头地提供服务。</li>
 <li>可以配置其他跨源策略，例如 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy">COEP</a>、<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">COOP</a> 和 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">CORP</a>，以进一步增强安全性。</li>
 </ol>
-<h3 id="zh-features-_32">如何使用</h3>
+<h3 id="zh-features-_31">如何使用</h3>
 <p>请按照以下步骤配置和使用 CORS 功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> CORS 功能默认禁用。将 <code>USE_CORS</code> 设置为 <code>yes</code> 以启用它。</li>
@@ -6152,7 +6141,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>配置允许的标头：</strong> 使用 <code>CORS_ALLOW_HEADERS</code> 指定可以在请求中使用的标头。</li>
 <li><strong>控制凭据：</strong> 使用 <code>CORS_ALLOW_CREDENTIALS</code> 决定跨源请求是否可以包含凭据。</li>
 </ol>
-<h3 id="zh-features-_33">配置设置</h3>
+<h3 id="zh-features-_32">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -6251,7 +6240,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">安全注意事项</p>
 <p>在将 <code>CORS_ALLOW_ORIGIN</code> 设置为 <code>*</code>（所有来源）或将 <code>CORS_ALLOW_CREDENTIALS</code> 设置为 <code>yes</code> 时要小心，因为如果管理不当，这些配置可能会引入安全风险。通常更安全的做法是明确列出受信任的来源，并限制允许的方法和标头。</p>
 </div>
-<h3 id="zh-features-_34">示例配置</h3>
+<h3 id="zh-features-_33">示例配置</h3>
 <p>以下是 <code>CORS_ALLOW_ORIGIN</code> 设置的可能值及其行为的示例：</p>
 <ul>
 <li><strong><code>*</code></strong>：允许来自所有来源的请求。</li>
@@ -6331,7 +6320,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li>可选的 ETag 支持提供了一个额外的验证机制，以确定缓存的内容是否仍然是新鲜的。</li>
 <li>当访问者返回您的网站时，他们的浏览器可以使用本地缓存的文件，而不是再次下载它们，从而缩短了页面加载时间。</li>
 </ol>
-<h3 id="zh-features-_35">如何使用</h3>
+<h3 id="zh-features-_34">如何使用</h3>
 <p>请按照以下步骤配置和使用客户端缓存功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 客户端缓存功能默认禁用；将 <code>USE_CLIENT_CACHE</code> 设置为 <code>yes</code> 以启用它。</li>
@@ -6340,7 +6329,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>配置 ETag 支持：</strong> 使用 <code>CLIENT_CACHE_ETAG</code> 设置决定是否启用 ETag 来验证缓存新鲜度。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 配置完成后，缓存标头会自动应用于符合条件的响应。</li>
 </ol>
-<h3 id="zh-features-_36">配置设置</h3>
+<h3 id="zh-features-_35">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -6390,7 +6379,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">浏览器行为</p>
 <p>不同的浏览器对缓存的实现略有不同，但所有现代浏览器都遵循标准的 Cache-Control 指令。ETags 提供了一个额外的验证机制，可以帮助浏览器确定缓存的内容是否仍然有效。</p>
 </div>
-<h3 id="zh-features-_37">示例配置</h3>
+<h3 id="zh-features-_36">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="zh-features-__tabbed_13_1" name="zh-features-__tabbed_13" type="radio" /><input id="zh-features-__tabbed_13_2" name="zh-features-__tabbed_13" type="radio" /><input id="zh-features-__tabbed_13_3" name="zh-features-__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_13_1">基本配置</label><label for="zh-features-__tabbed_13_2">积极缓存</label><label for="zh-features-__tabbed_13_3">混合内容策略</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -6430,7 +6419,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li>如果您设置了黑名单，来自该列表中国家/地区的访问者将被拒绝访问。</li>
 <li>结果会被缓存，以提高来自同一 IP 地址的重复访问者的性能。</li>
 </ol>
-<h3 id="zh-features-_38">如何使用</h3>
+<h3 id="zh-features-_37">如何使用</h3>
 <p>请按照以下步骤配置和使用国家/地区功能：</p>
 <ol>
 <li><strong>定义您的策略：</strong> 决定您是想使用白名单方法（仅允许特定国家/地区）还是黑名单方法（阻止特定国家/地区）。</li>
@@ -6438,7 +6427,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>应用设置：</strong> 配置完成后，基于国家/地区的限制将适用于您网站的所有访问者。</li>
 <li><strong>监控有效性：</strong> 查看 <a href="#zh-web-ui">web UI</a> 以查看按国家/地区阻止的请求统计信息。</li>
 </ol>
-<h3 id="zh-features-_39">配置设置</h3>
+<h3 id="zh-features-_38">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -6482,7 +6471,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p class="admonition-title">国家/地区检测</p>
 <p>BunkerWeb 使用 <a href="https://db-ip.com/db/download/ip-to-country-lite">lite db-ip mmdb 数据库</a>根据 IP 地址确定来源国家/地区。</p>
 </div>
-<h3 id="zh-features-_40">示例配置</h3>
+<h3 id="zh-features-_39">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="14:4"><input checked="checked" id="zh-features-__tabbed_14_1" name="zh-features-__tabbed_14" type="radio" /><input id="zh-features-__tabbed_14_2" name="zh-features-__tabbed_14" type="radio" /><input id="zh-features-__tabbed_14_3" name="zh-features-__tabbed_14" type="radio" /><input id="zh-features-__tabbed_14_4" name="zh-features-__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_14_1">仅白名单</label><label for="zh-features-__tabbed_14_2">仅黑名单</label><label for="zh-features-__tabbed_14_3">仅限欧盟访问</label><label for="zh-features-__tabbed_14_4">高风险国家/地区被阻止</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -6531,7 +6520,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <li><strong>多层次保护：</strong> 结合边界防御（IP 阻止）和应用程序安全，实现深度保护。</li>
 </ol>
 </div>
-<h3 id="zh-features-_41">设置</h3>
+<h3 id="zh-features-_40">设置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="zh-features-__tabbed_15_1" name="zh-features-__tabbed_15" type="radio" /><input id="zh-features-__tabbed_15_2" name="zh-features-__tabbed_15" type="radio" /><input id="zh-features-__tabbed_15_3" name="zh-features-__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_15_1">Docker</label><label for="zh-features-__tabbed_15_2">Linux</label><label for="zh-features-__tabbed_15_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -6583,7 +6572,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># 这是将用于在调度器中识别实例的名称</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.5</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -6600,7 +6589,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># syslog 服务的 IP 地址</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5-rc4</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.5</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># 确保设置正确的实例名称</span>
@@ -6736,7 +6725,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h3 id="zh-features-_42">配置设置</h3>
+<h3 id="zh-features-_41">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -6813,7 +6802,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<h4 id="zh-features-_43">应用程序安全组件设置</h4>
+<h4 id="zh-features-_42">应用程序安全组件设置</h4>
 <table>
 <thead>
 <tr>
@@ -6877,7 +6866,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tbody>
 </table>
 <p>!!! info "关于操作模式" - <strong>实时模式</strong>会为每个传入的请求查询 CrowdSec API，提供实时的保护，但会增加延迟。- <strong>流模式</strong>会定期从 CrowdSec API 下载所有决策并将其本地缓存，从而减少延迟，但应用新决策会略有延迟。</p>
-<h3 id="zh-features-_44">示例配置</h3>
+<h3 id="zh-features-_43">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="zh-features-__tabbed_16_1" name="zh-features-__tabbed_16" type="radio" /><input id="zh-features-__tabbed_16_2" name="zh-features-__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_16_1">基本配置</label><label for="zh-features-__tabbed_16_2">带有 AppSec 的高级配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -6921,7 +6910,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">自动证书监控</p>
 <p>当您通过将 <code>USE_CUSTOM_SSL</code> 设置为 <code>yes</code> 来启用自定义 SSL/TLS 时，BunkerWeb 会自动监控 <code>CUSTOM_SSL_CERT</code> 中指定的自定义证书。它会每天检查更改，并在检测到任何修改时重新加载 NGINX，确保始终使用最新的证书。</p>
 </div>
-<h3 id="zh-features-_45">如何使用</h3>
+<h3 id="zh-features-_44">如何使用</h3>
 <p>请按照以下步骤配置和使用自定义 SSL 证书功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>USE_CUSTOM_SSL</code> 设置为 <code>yes</code> 以启用自定义证书支持。</li>
@@ -6934,7 +6923,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">流模式配置</p>
 <p>对于流模式，您必须配置 <code>LISTEN_STREAM_PORT_SSL</code> 设置以指定 SSL/TLS 监听端口。此步骤对于在流模式下正常运行至关重要。</p>
 </div>
-<h3 id="zh-features-_46">配置设置</h3>
+<h3 id="zh-features-_45">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -7002,7 +6991,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">证书链</p>
 <p>如果您的证书包含一个链（中间证书），您应该按正确的顺序提供完整的证书链，首先是您的证书，然后是任何中间证书。</p>
 </div>
-<h3 id="zh-features-_47">示例配置</h3>
+<h3 id="zh-features-_46">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="17:4"><input checked="checked" id="zh-features-__tabbed_17_1" name="zh-features-__tabbed_17" type="radio" /><input id="zh-features-__tabbed_17_2" name="zh-features-__tabbed_17" type="radio" /><input id="zh-features-__tabbed_17_3" name="zh-features-__tabbed_17" type="radio" /><input id="zh-features-__tabbed_17_4" name="zh-features-__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_17_1">使用文件路径</label><label for="zh-features-__tabbed_17_2">使用 Base64 数据</label><label for="zh-features-__tabbed_17_3">使用纯文本 PEM 数据</label><label for="zh-features-__tabbed_17_4">回退配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -7058,7 +7047,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>结果会被缓存，以提高来自同一 IP 地址的重复访问者的性能。</li>
 <li>使用异步查询高效地执行查找，以最大限度地减少对页面加载时间的影响。</li>
 </ol>
-<h3 id="zh-features-_48">如何使用</h3>
+<h3 id="zh-features-_47">如何使用</h3>
 <p>请按照以下步骤配置和使用 DNSBL 功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> DNSBL 功能默认禁用。将 <code>USE_DNSBL</code> 设置为 <code>yes</code> 以启用它。</li>
@@ -7066,7 +7055,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>应用设置：</strong> 配置完成后，BunkerWeb 将自动对照指定的 DNSBL 服务器检查传入的连接。</li>
 <li><strong>监控有效性：</strong> 查看 <a href="#zh-web-ui">web UI</a> 以查看因 DNSBL 检查而被阻止的请求的统计信息。</li>
 </ol>
-<h3 id="zh-features-_49">配置设置</h3>
+<h3 id="zh-features-_48">配置设置</h3>
 <p><strong>通用</strong></p>
 <table>
 <thead>
@@ -7140,7 +7129,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">性能考虑</p>
 <p>虽然 BunkerWeb 优化了 DNSBL 查找的性能，但添加大量 DNSBL 服务器可能会影响响应时间。从几个信誉良好的 DNSBL 服务器开始，并在添加更多服务器之前监控性能。</p>
 </div>
-<h3 id="zh-features-_50">示例配置</h3>
+<h3 id="zh-features-_49">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="18:5"><input checked="checked" id="zh-features-__tabbed_18_1" name="zh-features-__tabbed_18" type="radio" /><input id="zh-features-__tabbed_18_2" name="zh-features-__tabbed_18" type="radio" /><input id="zh-features-__tabbed_18_3" name="zh-features-__tabbed_18" type="radio" /><input id="zh-features-__tabbed_18_4" name="zh-features-__tabbed_18" type="radio" /><input id="zh-features-__tabbed_18_5" name="zh-features-__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_18_1">基本配置</label><label for="zh-features-__tabbed_18_2">最小配置</label><label for="zh-features-__tabbed_18_3">排除受信任的 IP</label><label for="zh-features-__tabbed_18_4">使用远程 URL</label><label for="zh-features-__tabbed_18_5">使用本地文件</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -7203,14 +7192,14 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>对于高可用性场景，您可以配置一个只读数据库 URI，它既可以作为故障转移，也可以作为分流读取操作的方法。</li>
 <li>数据库操作会根据您指定的日志级别进行记录，为数据库交互提供适当的可见性。</li>
 </ol>
-<h3 id="zh-features-_51">如何使用</h3>
+<h3 id="zh-features-_50">如何使用</h3>
 <p>请按照以下步骤配置和使用数据库功能：</p>
 <ol>
 <li><strong>选择一个数据库引擎：</strong> 根据您的需求，从 SQLite（默认）、PostgreSQL、MySQL/MariaDB 或 Oracle 中选择。</li>
 <li><strong>配置数据库 URI：</strong> 使用 SQLAlchemy 格式设置 <code>DATABASE_URI</code> 以连接到您的主数据库。</li>
 <li><strong>可选的只读数据库：</strong> 对于高可用性设置，配置一个 <code>DATABASE_URI_READONLY</code> 作为后备或用于读取操作。</li>
 </ol>
-<h3 id="zh-features-_52">配置设置</h3>
+<h3 id="zh-features-_51">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -7296,7 +7285,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </li>
 <li>默认的错误页面提供了清晰的解释，帮助用户了解出了什么问题以及他们接下来可以做什么。</li>
 </ol>
-<h3 id="zh-features-_53">如何使用</h3>
+<h3 id="zh-features-_52">如何使用</h3>
 <p>请按照以下步骤配置和使用错误功能：</p>
 <ol>
 <li><strong>定义自定义错误页面：</strong> 使用 <code>ERRORS</code> 设置指定哪些 HTTP 错误代码应使用自定义错误页面。自定义错误页面文件必须位于为该站点指定的 <code>ROOT_FOLDER</code> 设置的文件夹中。在多站点模式下，这意味着每个站点/服务器都可以有自己的自定义错误页面文件夹。</li>
@@ -7304,7 +7293,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>设置拦截的错误代码：</strong> 使用 <code>INTERCEPTED_ERROR_CODES</code> 设置选择哪些错误代码应始终由 BunkerWeb 处理。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 配置完成后，错误处理会自动对所有指定的错误代码进行。</li>
 </ol>
-<h3 id="zh-features-_54">配置设置</h3>
+<h3 id="zh-features-_53">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -7350,7 +7339,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>5xx 错误（服务器端）：</strong> 这些表示服务器无法满足有效请求，例如内部服务器错误或暂时不可用。</li>
 </ul>
 </div>
-<h3 id="zh-features-_55">示例配置</h3>
+<h3 id="zh-features-_54">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="zh-features-__tabbed_19_1" name="zh-features-__tabbed_19" type="radio" /><input id="zh-features-__tabbed_19_2" name="zh-features-__tabbed_19" type="radio" /><input id="zh-features-__tabbed_19_3" name="zh-features-__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_19_1">默认错误处理</label><label for="zh-features-__tabbed_19_2">自定义错误页面</label><label for="zh-features-__tabbed_19_3">选择性错误处理</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -7382,7 +7371,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>如果访问者不匹配任何灰名单标准，他们的访问将被拒绝。</li>
 <li>灰名单数据可以定期从外部来源自动更新。</li>
 </ol>
-<h3 id="zh-features-_56">如何使用</h3>
+<h3 id="zh-features-_55">如何使用</h3>
 <p>请按照以下步骤配置和使用灰名单功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 灰名单功能默认禁用。将 <code>USE_GREYLIST</code> 设置为 <code>yes</code> 以启用它。</li>
@@ -7402,7 +7391,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">流模式</p>
 <p>当使用流模式时，只会执行 IP、rDNS 和 ASN 检查。</p>
 </div>
-<h3 id="zh-features-_57">配置设置</h3>
+<h3 id="zh-features-_56">配置设置</h3>
 <p><strong>通用</strong></p>
 <table>
 <thead>
@@ -7593,7 +7582,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">定期更新</p>
 <p>来自 URL 的灰名单会每小时自动下载和更新，以确保您的保护始终与最新的受信任来源保持同步。</p>
 </div>
-<h3 id="zh-features-_58">示例配置</h3>
+<h3 id="zh-features-_57">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="zh-features-__tabbed_21_1" name="zh-features-__tabbed_21" type="radio" /><input id="zh-features-__tabbed_21_2" name="zh-features-__tabbed_21" type="radio" /><input id="zh-features-__tabbed_21_3" name="zh-features-__tabbed_21" type="radio" /><input id="zh-features-__tabbed_21_4" name="zh-features-__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_21_1">基本配置</label><label for="zh-features-__tabbed_21_2">高级配置</label><label for="zh-features-__tabbed_21_3">使用本地文件</label><label for="zh-features-__tabbed_21_4">选择性 API 访问</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -7641,7 +7630,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <h2 id="zh-features-gzip">Gzip</h2>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>GZIP 插件通过使用 GZIP 算法压缩 HTTP 响应来增强网站性能。此功能通过在将 Web 内容发送到客户端浏览器之前对其进行压缩，减少了带宽使用并缩短了页面加载时间，从而实现了更快的交付和更好的用户体验。</p>
-<h3 id="zh-features-_59">工作原理</h3>
+<h3 id="zh-features-_58">工作原理</h3>
 <ol>
 <li>当客户端从您的网站请求内容时，BunkerWeb 会检查客户端是否支持 GZIP 压缩。</li>
 <li>如果支持，BunkerWeb 会在您配置的压缩级别下使用 GZIP 算法对响应进行压缩。</li>
@@ -7649,7 +7638,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>客户端的浏览器在呈现内容之前会对其进行解压缩。</li>
 <li>带宽使用量和页面加载时间都得到了减少，从而增强了网站的整体性能和用户体验。</li>
 </ol>
-<h3 id="zh-features-_60">如何使用</h3>
+<h3 id="zh-features-_59">如何使用</h3>
 <p>请按照以下步骤配置和使用 GZIP 压缩功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> GZIP 功能默认禁用。通过将 <code>USE_GZIP</code> 设置为 <code>yes</code> 来启用它。</li>
@@ -7658,7 +7647,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>选择一个压缩级别：</strong> 使用 <code>GZIP_COMP_LEVEL</code> 设置在速度和压缩率之间选择您偏好的平衡。</li>
 <li><strong>配置代理请求：</strong> 使用 <code>GZIP_PROXIED</code> 设置指定应压缩哪些代理请求。</li>
 </ol>
-<h3 id="zh-features-_61">配置设置</h3>
+<h3 id="zh-features-_60">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -7719,7 +7708,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">压缩与 CPU 使用率</p>
 <p>虽然 GZIP 压缩减少了带宽并缩短了加载时间，但更高的压缩级别会消耗更多的 CPU 资源。对于高流量的网站，请在压缩效率和服务器性能之间找到适当的平衡。</p>
 </div>
-<h3 id="zh-features-_62">示例配置</h3>
+<h3 id="zh-features-_61">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="22:4"><input checked="checked" id="zh-features-__tabbed_22_1" name="zh-features-__tabbed_22" type="radio" /><input id="zh-features-__tabbed_22_2" name="zh-features-__tabbed_22" type="radio" /><input id="zh-features-__tabbed_22_3" name="zh-features-__tabbed_22" type="radio" /><input id="zh-features-__tabbed_22_4" name="zh-features-__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_22_1">基本配置</label><label for="zh-features-__tabbed_22_2">最大压缩</label><label for="zh-features-__tabbed_22_3">平衡性能</label><label for="zh-features-__tabbed_22_4">代理内容焦点</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -7770,7 +7759,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>此插入操作会自动应用于您网站提供的所有 HTML 页面。</li>
 <li>这使您无需修改应用程序代码即可添加脚本、样式或其他元素。</li>
 </ol>
-<h3 id="zh-features-_63">如何使用</h3>
+<h3 id="zh-features-_62">如何使用</h3>
 <p>请按照以下步骤配置和使用 HTML 注入功能：</p>
 <ol>
 <li><strong>准备您的自定义 HTML：</strong> 决定要注入到页面中的 HTML 代码。</li>
@@ -7778,7 +7767,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>配置设置：</strong> 将您的自定义 HTML 添加到适当的设置中 (<code>INJECT_HEAD</code> 和/或 <code>INJECT_BODY</code>)。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 配置完成后，HTML 将自动注入到所有提供的 HTML 页面中。</li>
 </ol>
-<h3 id="zh-features-_64">配置设置</h3>
+<h3 id="zh-features-_63">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -7808,7 +7797,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <p>!!! tip "最佳实践" - 出于性能考虑，请将 JavaScript 文件放在 body 的末尾，以防止渲染阻塞。- 将 CSS 和关键的 JavaScript 放在 head 部分，以避免出现无样式内容的闪烁。- 请谨慎处理可能破坏您网站功能的注入内容。</p>
 <p>!!! info "常见用例" - 添加分析脚本（如 Google Analytics, Matomo）- 集成聊天小部件或客户支持工具 - 为营销活动添加跟踪像素 - 添加自定义 CSS 样式或 JavaScript 功能 - 无需修改应用程序代码即可引入第三方库</p>
-<h3 id="zh-features-_65">配置示例</h3>
+<h3 id="zh-features-_64">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="zh-features-__tabbed_23_1" name="zh-features-__tabbed_23" type="radio" /><input id="zh-features-__tabbed_23_2" name="zh-features-__tabbed_23" type="radio" /><input id="zh-features-__tabbed_23_3" name="zh-features-__tabbed_23" type="radio" /><input id="zh-features-__tabbed_23_4" name="zh-features-__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_23_1">谷歌分析</label><label for="zh-features-__tabbed_23_2">自定义样式</label><label for="zh-features-__tabbed_23_3">多个集成</label><label for="zh-features-__tabbed_23_4">Cookie 同意横幅</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -7849,7 +7838,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>Cookie 会根据您的设置被修改以包含适当的安全标志。</li>
 <li>需要时，可以选择性地保留来自上游服务器的头。</li>
 </ol>
-<h3 id="zh-features-_66">如何使用</h3>
+<h3 id="zh-features-_65">如何使用</h3>
 <p>请按照以下步骤配置和使用请求头功能：</p>
 <ol>
 <li><strong>配置安全头：</strong> 为常见的请求头设置值。</li>
@@ -7859,7 +7848,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>保留上游头：</strong> 使用 <code>KEEP_UPSTREAM_HEADERS</code> 指定要保留的上游请求头。</li>
 <li><strong>利用条件性头应用：</strong> 如果您希望在不中断的情况下测试策略，请通过 <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code> 启用 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only">CSP 仅报告</a>模式。</li>
 </ol>
-<h3 id="zh-features-_67">配置指南</h3>
+<h3 id="zh-features-_66">配置指南</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="zh-features-__tabbed_24_1" name="zh-features-__tabbed_24" type="radio" /><input id="zh-features-__tabbed_24_2" name="zh-features-__tabbed_24" type="radio" /><input id="zh-features-__tabbed_24_3" name="zh-features-__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_24_1">安全头</label><label for="zh-features-__tabbed_24_2">Cookie 设置</label><label for="zh-features-__tabbed_24_3">自定义头</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -8060,7 +8049,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h3 id="zh-features-_68">示例配置</h3>
+<h3 id="zh-features-_67">示例配置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="25:4"><input checked="checked" id="zh-features-__tabbed_25_1" name="zh-features-__tabbed_25" type="radio" /><input id="zh-features-__tabbed_25_2" name="zh-features-__tabbed_25" type="radio" /><input id="zh-features-__tabbed_25_3" name="zh-features-__tabbed_25" type="radio" /><input id="zh-features-__tabbed_25_4" name="zh-features-__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_25_1">基本安全头</label><label for="zh-features-__tabbed_25_2">增强的 Cookie 安全性</label><label for="zh-features-__tabbed_25_3">API 的自定义头</label><label for="zh-features-__tabbed_25_4">内容安全策略 - 报告模式</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -8113,7 +8102,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">先决条件</p>
 <p>要使用此功能，请确保为每个域名配置了正确的 DNS <strong>A 记录</strong>，指向 BunkerWeb 可访问的公共 IP 地址。没有正确的 DNS 配置，域名验证过程将失败。</p>
 </div>
-<h3 id="zh-features-_69">如何使用</h3>
+<h3 id="zh-features-_68">如何使用</h3>
 <p>请按照以下步骤配置和使用 Let's Encrypt 功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>AUTO_LETS_ENCRYPT</code> 设置为 <code>yes</code> 以启用自动证书颁发和续订。</li>
@@ -8131,7 +8120,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">配置文件可用性</p>
 <p>请注意，<code>tlsserver</code> 和 <code>shortlived</code> 配置文件目前可能并非在所有环境或所有 ACME 客户端中都可用。<code>classic</code> 配置文件具有最广泛的兼容性，推荐给大多数用户。如果所选的配置文件不可用，系统将自动回退到 <code>classic</code> 配置文件。</p>
 </div>
-<h3 id="zh-features-_70">配置设置</h3>
+<h3 id="zh-features-_69">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -8423,7 +8412,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<h3 id="zh-features-_71">配置示例</h3>
+<h3 id="zh-features-_70">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="26:6"><input checked="checked" id="zh-features-__tabbed_26_1" name="zh-features-__tabbed_26" type="radio" /><input id="zh-features-__tabbed_26_2" name="zh-features-__tabbed_26" type="radio" /><input id="zh-features-__tabbed_26_3" name="zh-features-__tabbed_26" type="radio" /><input id="zh-features-__tabbed_26_4" name="zh-features-__tabbed_26" type="radio" /><input id="zh-features-__tabbed_26_5" name="zh-features-__tabbed_26" type="radio" /><input id="zh-features-__tabbed_26_6" name="zh-features-__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_26_1">基本 HTTP 验证</label><label for="zh-features-__tabbed_26_2">使用通配符的 Cloudflare DNS</label><label for="zh-features-__tabbed_26_3">AWS Route53 配置</label><label for="zh-features-__tabbed_26_4">使用测试环境和重试进行测试</label><label for="zh-features-__tabbed_26_5">具有自定义传播时间的 DigitalOcean</label><label for="zh-features-__tabbed_26_6">Google Cloud DNS</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -8495,20 +8484,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>每个 IP 地址的连接数</strong> (流支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" />)</li>
 <li><strong>在特定时间段内每个 IP 地址和 URL 的请求数</strong> (流支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" />)</li>
 </ul>
-<h3 id="zh-features-_72">工作原理</h3>
+<h3 id="zh-features-_71">工作原理</h3>
 <ol>
 <li><strong>速率限制：</strong> 跟踪来自每个客户端 IP 地址到特定 URL 的请求数。如果客户端超过配置的速率限制，后续请求将被暂时拒绝。</li>
 <li><strong>连接限制：</strong> 监控并限制来自每个客户端 IP 地址的并发连接数。可以根据使用的协议（HTTP/1、HTTP/2、HTTP/3 或流）应用不同的连接限制。</li>
 <li>在这两种情况下，超过定义限制的客户端都会收到一个 HTTP 状态码 <strong>“429 - 请求过多”</strong>，这有助于防止服务器过载。</li>
 </ol>
-<h3 id="zh-features-_73">使用步骤</h3>
+<h3 id="zh-features-_72">使用步骤</h3>
 <ol>
 <li><strong>启用请求速率限制：</strong> 使用 <code>USE_LIMIT_REQ</code> 启用请求速率限制，并定义 URL 模式及其相应的速率限制。</li>
 <li><strong>启用连接限制：</strong> 使用 <code>USE_LIMIT_CONN</code> 启用连接限制，并为不同协议设置最大并发连接数。</li>
 <li><strong>应用精细控制：</strong> 为不同的 URL 创建多个速率限制规则，以便在您的网站上提供不同级别的保护。</li>
 <li><strong>监控有效性：</strong> 使用<a href="#zh-web-ui">Web UI</a>查看有关受限请求和连接的统计信息。</li>
 </ol>
-<h3 id="zh-features-_74">配置设置</h3>
+<h3 id="zh-features-_73">配置设置</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="zh-features-__tabbed_27_1" name="zh-features-__tabbed_27" type="radio" /><input id="zh-features-__tabbed_27_2" name="zh-features-__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_27_1">请求速率限制</label><label for="zh-features-__tabbed_27_2">连接限制</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -8617,7 +8606,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">设置适当的限制</p>
 <p>设置过于严格的限制可能会影响合法用户，特别是对于 HTTP/2 和 HTTP/3，浏览器通常会使用多个流。默认值在大多数用例中是平衡的，但请考虑根据您的应用程序需求和用户行为进行调整。</p>
 </div>
-<h3 id="zh-features-_75">配置示例</h3>
+<h3 id="zh-features-_74">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="28:4"><input checked="checked" id="zh-features-__tabbed_28_1" name="zh-features-__tabbed_28" type="radio" /><input id="zh-features-__tabbed_28_2" name="zh-features-__tabbed_28" type="radio" /><input id="zh-features-__tabbed_28_3" name="zh-features-__tabbed_28" type="radio" /><input id="zh-features-__tabbed_28_4" name="zh-features-__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_28_1">基本保护</label><label for="zh-features-__tabbed_28_2">保护特定端点</label><label for="zh-features-__tabbed_28_3">高流量网站配置</label><label for="zh-features-__tabbed_28_4">API 服务器配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -8701,6 +8690,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h2 id="zh-features-load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='负载均衡器' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
 <table>
@@ -8861,7 +8852,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>收集到的指标可以通过 API 访问或在<a href="#zh-web-ui">Web UI</a>中可视化。</li>
 <li>此信息可帮助您识别安全威胁、解决问题并优化您的配置。</li>
 </ol>
-<h3 id="zh-features-_76">技术实现</h3>
+<h3 id="zh-features-_75">技术实现</h3>
 <p>指标插件的工作方式如下：</p>
 <ul>
 <li>在 NGINX 中使用共享字典，其中 <code>metrics_datastore</code> 用于 HTTP，<code>metrics_datastore_stream</code> 用于 TCP/UDP 流量</li>
@@ -8871,7 +8862,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li>通过通用的指标收集接口支持插件特定的指标</li>
 <li>提供用于查询收集到的指标的 API 端点</li>
 </ul>
-<h3 id="zh-features-_77">如何使用</h3>
+<h3 id="zh-features-_76">如何使用</h3>
 <p>请按照以下步骤配置和使用指标功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 指标收集默认启用。您可以使用 <code>USE_METRICS</code> 设置来控制此功能。</li>
@@ -8880,7 +8871,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>访问数据：</strong> 通过<a href="#zh-web-ui">Web UI</a>或 API 端点查看收集到的指标。</li>
 <li><strong>分析信息：</strong> 使用收集到的数据来识别模式、检测安全问题并优化您的配置。</li>
 </ol>
-<h3 id="zh-features-_78">收集的指标</h3>
+<h3 id="zh-features-_77">收集的指标</h3>
 <p>指标插件收集以下信息：</p>
 <ol>
 <li>
@@ -8932,7 +8923,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>如果您已将 <code>API_SERVER_NAME</code> 自定义为默认 <code>bwapi</code> 以外的值，请在 Host 标头中使用该值。</p>
 <p>对于安全的生产环境，请将 API 访问限制为受信任的 IP，并启用 <code>API_TOKEN</code>。</p>
 </div>
-<h3 id="zh-features-_79">配置设置</h3>
+<h3 id="zh-features-_78">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -8997,7 +8988,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">工作进程特定存储</p>
 <p>每个 NGINX 工作进程都在内存中维护自己的指标。通过 API 访问指标时，会自动聚合所有工作进程的数据以提供完整的视图。</p>
 </div>
-<h3 id="zh-features-_80">配置示例</h3>
+<h3 id="zh-features-_79">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="29:4"><input checked="checked" id="zh-features-__tabbed_29_1" name="zh-features-__tabbed_29" type="radio" /><input id="zh-features-__tabbed_29_2" name="zh-features-__tabbed_29" type="radio" /><input id="zh-features-__tabbed_29_3" name="zh-features-__tabbed_29" type="radio" /><input id="zh-features-__tabbed_29_4" name="zh-features-__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_29_1">基本配置</label><label for="zh-features-__tabbed_29_2">低资源环境</label><label for="zh-features-__tabbed_29_3">高流量环境</label><label for="zh-features-__tabbed_29_4">禁用指标</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -9048,7 +9039,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>系统配置</strong> - 扩展功能并提高安全性</li>
 </ul>
 <p>无论您是需要限制 HTTP 方法、管理请求大小、优化文件缓存，还是控制服务器如何响应各种请求，此插件都为您提供了<strong>微调 Web 服务行为</strong>的工具，同时优化了性能和安全性。</p>
-<h3 id="zh-features-_81">主要功能</h3>
+<h3 id="zh-features-_80">主要功能</h3>
 <table>
 <thead>
 <tr>
@@ -9095,7 +9086,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 </tbody>
 </table>
-<h3 id="zh-features-_82">配置指南</h3>
+<h3 id="zh-features-_81">配置指南</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="30:8"><input checked="checked" id="zh-features-__tabbed_30_1" name="zh-features-__tabbed_30" type="radio" /><input id="zh-features-__tabbed_30_2" name="zh-features-__tabbed_30" type="radio" /><input id="zh-features-__tabbed_30_3" name="zh-features-__tabbed_30" type="radio" /><input id="zh-features-__tabbed_30_4" name="zh-features-__tabbed_30" type="radio" /><input id="zh-features-__tabbed_30_5" name="zh-features-__tabbed_30" type="radio" /><input id="zh-features-__tabbed_30_6" name="zh-features-__tabbed_30" type="radio" /><input id="zh-features-__tabbed_30_7" name="zh-features-__tabbed_30" type="radio" /><input id="zh-features-__tabbed_30_8" name="zh-features-__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_30_1">默认服务器安全</label><label for="zh-features-__tabbed_30_2">拒绝 HTTP 状态</label><label for="zh-features-__tabbed_30_3">HTTP 方法</label><label for="zh-features-__tabbed_30_4">请求大小限制</label><label for="zh-features-__tabbed_30_5">协议支持</label><label for="zh-features-__tabbed_30_6">静态文件服务</label><label for="zh-features-__tabbed_30_7">系统设置</label><label for="zh-features-__tabbed_30_8">文件缓存</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -9494,7 +9485,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h3 id="zh-features-_83">配置示例</h3>
+<h3 id="zh-features-_82">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="31:7"><input checked="checked" id="zh-features-__tabbed_31_1" name="zh-features-__tabbed_31" type="radio" /><input id="zh-features-__tabbed_31_2" name="zh-features-__tabbed_31" type="radio" /><input id="zh-features-__tabbed_31_3" name="zh-features-__tabbed_31" type="radio" /><input id="zh-features-__tabbed_31_4" name="zh-features-__tabbed_31" type="radio" /><input id="zh-features-__tabbed_31_5" name="zh-features-__tabbed_31" type="radio" /><input id="zh-features-__tabbed_31_6" name="zh-features-__tabbed_31" type="radio" /><input id="zh-features-__tabbed_31_7" name="zh-features-__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_31_1">默认服务器安全</label><label for="zh-features-__tabbed_31_2">拒绝 HTTP 状态</label><label for="zh-features-__tabbed_31_3">HTTP 方法</label><label for="zh-features-__tabbed_31_4">请求大小限制</label><label for="zh-features-__tabbed_31_5">协议支持</label><label for="zh-features-__tabbed_31_6">静态文件服务</label><label for="zh-features-__tabbed_31_7">文件缓存</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -9563,7 +9554,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>插件支持：</strong> 通过为您的应用程序量身定制的可选 CRS 插件来扩展保护。</li>
 </ol>
 </div>
-<h3 id="zh-features-_84">如何使用</h3>
+<h3 id="zh-features-_83">如何使用</h3>
 <p>请按照以下步骤配置和使用 ModSecurity：</p>
 <ol>
 <li><strong>启用该功能：</strong> ModSecurity 默认启用。可以使用 <code>USE_MODSECURITY</code> 设置进行控制。</li>
@@ -9571,7 +9562,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>添加插件：</strong> 可选择激活 CRS 插件以增强规则覆盖范围。</li>
 <li><strong>监控和调整：</strong> 使用日志和 <a href="#zh-web-ui">Web UI</a> 识别误报并调整设置。</li>
 </ol>
-<h3 id="zh-features-_85">配置设置</h3>
+<h3 id="zh-features-_84">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -9682,7 +9673,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </ul>
 <p>您可以通过在 <code>/etc/bunkerweb/configs/modsec-crs/</code> 中添加自定义配置文件来设置偏执级别。</p>
 </div>
-<h3 id="zh-features-_86">自定义配置</h3>
+<h3 id="zh-features-custom-configurations">自定义配置</h3>
 <p>可以通过自定义配置来调整 ModSecurity 和 OWASP 核心规则集 (CRS)。这些配置允许您在安全规则处理的特定阶段自定义行为：</p>
 <ul>
 <li><strong><code>modsec-crs</code></strong>：在加载 OWASP 核心规则集<strong>之前</strong>应用。</li>
@@ -9756,7 +9747,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">误报</p>
 <p>较高的安全设置可能会阻止合法流量。请从默认设置开始，并在提高安全级别之前监控日志。请准备好为您的特定应用程序需求添加排除规则。</p>
 </div>
-<h3 id="zh-features-_87">配置示例</h3>
+<h3 id="zh-features-_85">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="32:6"><input checked="checked" id="zh-features-__tabbed_32_1" name="zh-features-__tabbed_32" type="radio" /><input id="zh-features-__tabbed_32_2" name="zh-features-__tabbed_32" type="radio" /><input id="zh-features-__tabbed_32_3" name="zh-features-__tabbed_32" type="radio" /><input id="zh-features-__tabbed_32_4" name="zh-features-__tabbed_32" type="radio" /><input id="zh-features-__tabbed_32_5" name="zh-features-__tabbed_32" type="radio" /><input id="zh-features-__tabbed_32_6" name="zh-features-__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_32_1">基本配置</label><label for="zh-features-__tabbed_32_2">仅检测模式</label><label for="zh-features-__tabbed_32_3">带插件的高级配置</label><label for="zh-features-__tabbed_32_4">旧版配置</label><label for="zh-features-__tabbed_32_5">全局 ModSecurity</label><label for="zh-features-__tabbed_32_6">带自定义插件的每日构建版</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -9867,7 +9858,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>PHP-FPM 处理脚本并返回生成的内容给 BunkerWeb，然后由 BunkerWeb 将其交付给客户端。</li>
 <li>URL 重写会自动配置，以支持使用“美观 URL”的常见 PHP 框架和应用程序。</li>
 </ol>
-<h3 id="zh-features-_88">如何使用</h3>
+<h3 id="zh-features-_86">如何使用</h3>
 <p>请按照以下步骤配置和使用 PHP 功能：</p>
 <ol>
 <li><strong>选择您的 PHP-FPM 设置：</strong> 决定您将使用本地还是远程 PHP-FPM 实例。</li>
@@ -9875,7 +9866,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>设置文档根目录：</strong> 使用适当的路径设置，配置包含您的 PHP 文件的根文件夹。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 配置完成后，BunkerWeb 会自动将 PHP 请求路由到您的 PHP-FPM 实例。</li>
 </ol>
-<h3 id="zh-features-_89">配置设置</h3>
+<h3 id="zh-features-_87">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -9940,7 +9931,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">URL 重写</p>
 <p>PHP 插件会自动配置 URL 重写以支持现代 PHP 应用程序。对不存在的文件的请求将被定向到 <code>index.php</code>，原始请求 URI 将作为查询参数提供。</p>
 </div>
-<h3 id="zh-features-_90">配置示例</h3>
+<h3 id="zh-features-_88">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="33:4"><input checked="checked" id="zh-features-__tabbed_33_1" name="zh-features-__tabbed_33" type="radio" /><input id="zh-features-__tabbed_33_2" name="zh-features-__tabbed_33" type="radio" /><input id="zh-features-__tabbed_33_3" name="zh-features-__tabbed_33" type="radio" /><input id="zh-features-__tabbed_33_4" name="zh-features-__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_33_1">本地 PHP-FPM 配置</label><label for="zh-features-__tabbed_33_2">远程 PHP-FPM 配置</label><label for="zh-features-__tabbed_33_3">自定义端口配置</label><label for="zh-features-__tabbed_33_4">WordPress 配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -9992,7 +9983,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>自动更新：</strong> 高级插件会自动下载并保持最新状态。</li>
 </ol>
 </div>
-<h3 id="zh-features-_91">如何使用</h3>
+<h3 id="zh-features-_89">如何使用</h3>
 <p>请按照以下步骤配置和使用 Pro 功能：</p>
 <ol>
 <li><strong>获取许可证密钥：</strong> 从 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a> 购买 Pro 许可证。</li>
@@ -10000,7 +9991,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 一旦配置了有效的许可证，Pro 插件将自动下载并激活。</li>
 <li><strong>监控您的 Pro 状态：</strong> 在 <a href="#zh-web-ui">Web UI</a> 中检查健康指示器，以确认您的 Pro 订阅状态。</li>
 </ol>
-<h3 id="zh-features-_92">配置设置</h3>
+<h3 id="zh-features-_90">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -10033,7 +10024,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">网络要求</p>
 <p>Pro 插件需要出站互联网访问权限，以连接到 BunkerWeb API 进行许可证验证和下载高级插件。请确保您的防火墙允许连接到 <code>api.bunkerweb.io</code> 的 443 端口 (HTTPS)。</p>
 </div>
-<h3 id="zh-features-_93">常见问题解答</h3>
+<h3 id="zh-features-_91">常见问题解答</h3>
 <p><strong>问：如果我的 Pro 许可证到期会怎样？</strong></p>
 <p>答：如果您的 Pro 许可证到期，对高级功能和插件的访问将被禁用。但是，您的 BunkerWeb 安装将继续使用所有社区版功能正常运行。要重新获得对 Pro 功能的访问权限，只需续订您的许可证即可。</p>
 <p><strong>问：Pro 功能会干扰我现有的配置吗？</strong></p>
@@ -10108,7 +10099,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>此外，可以启用 <a href="https://netnut.io/what-is-proxy-protocol-and-how-does-it-work/">PROXY 协议</a> 支持，以直接从兼容的代理（如 <a href="https://www.haproxy.org/">HAProxy</a>）接收客户端 IP。</li>
 <li>受信任的代理 IP 列表可以通过 URL 从外部源自动下载和更新。</li>
 </ol>
-<h3 id="zh-features-_94">如何使用</h3>
+<h3 id="zh-features-_92">如何使用</h3>
 <p>请按照以下步骤配置和使用 Real IP 功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>USE_REAL_IP</code> 设置为 <code>yes</code> 以启用真实 IP 检测。</li>
@@ -10122,7 +10113,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">PROXY 协议警告</p>
 <p>在未正确配置您的上游代理以发送 PROXY 协议标头的情况下启用 <code>USE_PROXY_PROTOCOL</code> 将<strong>破坏您的应用程序</strong>。仅当您确定您的上游代理已正确配置为发送 PROXY 协议信息时，才启用此设置。如果您的代理未发送 PROXY 协议标头，所有到 BunkerWeb 的连接都将因协议错误而失败。</p>
 </div>
-<h3 id="zh-features-_95">配置设置</h3>
+<h3 id="zh-features-_93">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -10190,7 +10181,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">多个 IP 地址</p>
 <p>当 <code>REAL_IP_RECURSIVE</code> 启用并且标头包含多个 IP（例如，<code>X-Forwarded-For: client, proxy1, proxy2</code>）时，BunkerWeb 会将不在您受信任代理列表中的最左侧 IP 识别为客户端 IP。</p>
 </div>
-<h3 id="zh-features-_96">配置示例</h3>
+<h3 id="zh-features-_94">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="34:6"><input checked="checked" id="zh-features-__tabbed_34_1" name="zh-features-__tabbed_34" type="radio" /><input id="zh-features-__tabbed_34_2" name="zh-features-__tabbed_34" type="radio" /><input id="zh-features-__tabbed_34_3" name="zh-features-__tabbed_34" type="radio" /><input id="zh-features-__tabbed_34_4" name="zh-features-__tabbed_34" type="radio" /><input id="zh-features-__tabbed_34_5" name="zh-features-__tabbed_34" type="radio" /><input id="zh-features-__tabbed_34_6" name="zh-features-__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_34_1">基本配置</label><label for="zh-features-__tabbed_34_2">云负载均衡器</label><label for="zh-features-__tabbed_34_3">PROXY 协议</label><label for="zh-features-__tabbed_34_4">带有 URL 的多个代理源</label><label for="zh-features-__tabbed_34_5">CDN 配置</label><label for="zh-features-__tabbed_34_6">位于 Cloudflare 后面</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -10257,7 +10248,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>用于重定向的 HTTP 状态码可以在永久（301）和临时（302）重定向之间进行自定义。</li>
 <li>此功能非常适用于域名迁移、建立规范域名或重定向已弃用的 URL。</li>
 </ol>
-<h3 id="zh-features-_97">如何使用</h3>
+<h3 id="zh-features-_95">如何使用</h3>
 <p>请按照以下步骤配置和使用重定向功能：</p>
 <ol>
 <li><strong>设置源路径：</strong> 使用 <code>REDIRECT_FROM</code> 设置配置要重定向的路径（例如 <code>/</code>、<code>/old-page</code>）。</li>
@@ -10266,7 +10257,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>选择状态码：</strong> 使用 <code>REDIRECT_TO_STATUS_CODE</code> 设置设置适当的 HTTP 状态码，以指示是永久重定向还是临时重定向。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 配置完成后，所有对该站点的请求都将根据您的设置自动重定向。</li>
 </ol>
-<h3 id="zh-features-_98">配置设置</h3>
+<h3 id="zh-features-_96">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -10313,7 +10304,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">路径保留</p>
 <p>当 <code>REDIRECT_TO_REQUEST_URI</code> 设置为 <code>yes</code> 时，BunkerWeb 会保留原始请求路径。例如，如果用户访问 <code>https://old-domain.com/blog/post-1</code>，并且您已设置为重定向到 <code>https://new-domain.com</code>，他们将被重定向到 <code>https://new-domain.com/blog/post-1</code>。</p>
 </div>
-<h3 id="zh-features-_99">配置示例</h3>
+<h3 id="zh-features-_97">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="35:5"><input checked="checked" id="zh-features-__tabbed_35_1" name="zh-features-__tabbed_35" type="radio" /><input id="zh-features-__tabbed_35_2" name="zh-features-__tabbed_35" type="radio" /><input id="zh-features-__tabbed_35_3" name="zh-features-__tabbed_35" type="radio" /><input id="zh-features-__tabbed_35_4" name="zh-features-__tabbed_35" type="radio" /><input id="zh-features-__tabbed_35_5" name="zh-features-__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_35_1">多路径重定向</label><label for="zh-features-__tabbed_35_2">简单域名重定向</label><label for="zh-features-__tabbed_35_3">保留路径的重定向</label><label for="zh-features-__tabbed_35_4">临时重定向</label><label for="zh-features-__tabbed_35_5">子域名整合</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -10378,7 +10369,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>该插件支持各种 Redis/Valkey 部署选项，包括独立服务器、密码验证、SSL/TLS 加密和用于高可用性的 Redis Sentinel。</li>
 <li>自动重新连接和可配置的超时可确保在生产环境中的稳健性。</li>
 </ol>
-<h3 id="zh-features-_100">如何使用</h3>
+<h3 id="zh-features-_98">如何使用</h3>
 <p>请按照以下步骤配置和使用 Redis 插件：</p>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>USE_REDIS</code> 设置为 <code>yes</code> 以启用 Redis/Valkey 集成。</li>
@@ -10387,7 +10378,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>配置高级选项：</strong> 根据需要设置数据库选择、SSL 选项和超时。</li>
 <li><strong>对于高可用性，</strong>如果您正在使用 Redis Sentinel，请配置 Sentinel 设置。</li>
 </ol>
-<h3 id="zh-features-_101">配置设置</h3>
+<h3 id="zh-features-_99">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -10529,7 +10520,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>确保所有 BunkerWeb 实例与 Redis/Valkey 服务器之间的网络连接</li>
 </ul>
 </div>
-<h3 id="zh-features-_102">配置示例</h3>
+<h3 id="zh-features-_100">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="36:4"><input checked="checked" id="zh-features-__tabbed_36_1" name="zh-features-__tabbed_36" type="radio" /><input id="zh-features-__tabbed_36_2" name="zh-features-__tabbed_36" type="radio" /><input id="zh-features-__tabbed_36_3" name="zh-features-__tabbed_36" type="radio" /><input id="zh-features-__tabbed_36_4" name="zh-features-__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_36_1">基本配置</label><label for="zh-features-__tabbed_36_2">安全配置</label><label for="zh-features-__tabbed_36_3">Redis Sentinel 配置</label><label for="zh-features-__tabbed_36_4">高级调优</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -10574,26 +10565,26 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <h3 id="zh-features-redis_1">Redis 最佳实践</h3>
 <p>在使用 Redis 或 Valkey 与 BunkerWeb 时，请考虑以下最佳实践以确保最佳性能、安全性和可靠性：</p>
-<h4 id="zh-features-_103">内存管理</h4>
+<h4 id="zh-features-_101">内存管理</h4>
 <ul>
 <li><strong>监控内存使用情况：</strong> 使用适当的 <code>maxmemory</code> 设置配置 Redis，以防止内存不足错误</li>
 <li><strong>设置淘汰策略：</strong> 使用适合您用例的 <code>maxmemory-policy</code>（例如 <code>volatile-lru</code> 或 <code>allkeys-lru</code>）</li>
 <li><strong>避免大键：</strong> 确保将单个 Redis 键保持在合理的大小，以防止性能下降</li>
 </ul>
-<h4 id="zh-features-_104">数据持久性</h4>
+<h4 id="zh-features-_102">数据持久性</h4>
 <ul>
 <li><strong>启用 RDB 快照：</strong> 配置定期快照以实现数据持久性，而不会对性能产生重大影响</li>
 <li><strong>考虑 AOF：</strong> 对于关键数据，启用具有适当 fsync 策略的 AOF（仅追加文件）持久性</li>
 <li><strong>备份策略：</strong> 将定期 Redis 备份作为灾难恢复计划的一部分</li>
 </ul>
-<h4 id="zh-features-_105">性能优化</h4>
+<h4 id="zh-features-_103">性能优化</h4>
 <ul>
 <li><strong>连接池：</strong> BunkerWeb 已经实现了这一点，但请确保其他应用程序遵循此实践</li>
 <li><strong>管道：</strong> 如果可能，请使用管道进行批量操作以减少网络开销</li>
 <li><strong>避免昂贵的操作：</strong> 在生产环境中谨慎使用像 KEYS 这样的命令</li>
 <li><strong>对您的工作负载进行基准测试：</strong> 使用 redis-benchmark 测试您的特定工作负载模式</li>
 </ul>
-<h3 id="zh-features-_106">更多资源</h3>
+<h3 id="zh-features-_104">更多资源</h3>
 <ul>
 <li><a href="https://redis.io/documentation">Redis 文档</a></li>
 <li><a href="https://redis.io/topics/security">Redis 安全指南</a></li>
@@ -10711,7 +10702,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>BunkerWeb 在将响应发送回客户端之前，会对响应应用额外的安全措施。</li>
 <li>该插件支持 HTTP 和 TCP/UDP 流代理，从而支持包括 WebSockets 和其他非 HTTP 协议在内的广泛应用。</li>
 </ol>
-<h3 id="zh-features-_107">如何使用</h3>
+<h3 id="zh-features-_105">如何使用</h3>
 <p>请按照以下步骤配置和使用反向代理功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>USE_REVERSE_PROXY</code> 设置为 <code>yes</code> 以启用反向代理功能。</li>
@@ -10720,7 +10711,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>配置特定于协议的选项：</strong> 对于 WebSockets 或特殊的 HTTP 要求，请调整相应的设置。</li>
 <li><strong>设置缓存（可选）：</strong> 启用和配置代理缓存，以提高频繁访问内容的性能。</li>
 </ol>
-<h3 id="zh-features-_108">配置指南</h3>
+<h3 id="zh-features-_106">配置指南</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="37:8"><input checked="checked" id="zh-features-__tabbed_37_1" name="zh-features-__tabbed_37" type="radio" /><input id="zh-features-__tabbed_37_2" name="zh-features-__tabbed_37" type="radio" /><input id="zh-features-__tabbed_37_3" name="zh-features-__tabbed_37" type="radio" /><input id="zh-features-__tabbed_37_4" name="zh-features-__tabbed_37" type="radio" /><input id="zh-features-__tabbed_37_5" name="zh-features-__tabbed_37" type="radio" /><input id="zh-features-__tabbed_37_6" name="zh-features-__tabbed_37" type="radio" /><input id="zh-features-__tabbed_37_7" name="zh-features-__tabbed_37" type="radio" /><input id="zh-features-__tabbed_37_8" name="zh-features-__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_37_1">基本配置</label><label for="zh-features-__tabbed_37_2">连接设置</label><label for="zh-features-__tabbed_37_3">SSL/TLS 配置</label><label for="zh-features-__tabbed_37_4">协议支持</label><label for="zh-features-__tabbed_37_5">标头管理</label><label for="zh-features-__tabbed_37_6">认证</label><label for="zh-features-__tabbed_37_7">高级配置</label><label for="zh-features-__tabbed_37_8">缓存配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11242,7 +11233,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>当在 Docker Compose 中使用 NGINX 变量进行配置时，您必须通过使用双美元符号 (<code>$$</code>) 来转义美元符号 (<code>$</code>)。这适用于所有包含 NGINX 变量的设置，如 <code>$remote_addr</code>、<code>$proxy_add_x_forwarded_for</code> 等。</p>
 <p>如果不进行此转义，Docker Compose 将尝试用环境变量替换这些变量，而这些环境变量通常不存在，导致您的 NGINX 配置中出现空值。</p>
 </div>
-<h3 id="zh-features-_109">配置示例</h3>
+<h3 id="zh-features-_107">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="38:6"><input checked="checked" id="zh-features-__tabbed_38_1" name="zh-features-__tabbed_38" type="radio" /><input id="zh-features-__tabbed_38_2" name="zh-features-__tabbed_38" type="radio" /><input id="zh-features-__tabbed_38_3" name="zh-features-__tabbed_38" type="radio" /><input id="zh-features-__tabbed_38_4" name="zh-features-__tabbed_38" type="radio" /><input id="zh-features-__tabbed_38_5" name="zh-features-__tabbed_38" type="radio" /><input id="zh-features-__tabbed_38_6" name="zh-features-__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_38_1">基本 HTTP 代理</label><label for="zh-features-__tabbed_38_2">WebSocket 应用</label><label for="zh-features-__tabbed_38_3">多个位置</label><label for="zh-features-__tabbed_38_4">缓存配置</label><label for="zh-features-__tabbed_38_5">高级标头管理</label><label for="zh-features-__tabbed_38_6">认证集成</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11345,7 +11336,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>无缝集成：</strong> 与您现有的安全层透明地协同工作。</li>
 </ol>
 </div>
-<h3 id="zh-features-_110">如何使用</h3>
+<h3 id="zh-features-_108">如何使用</h3>
 <p>请按照以下步骤配置和使用反向扫描功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>USE_REVERSE_SCAN</code> 设置为 <code>yes</code> 以启用客户端端口扫描。</li>
@@ -11353,7 +11344,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>设置扫描超时：</strong> 调整 <code>REVERSE_SCAN_TIMEOUT</code> 以在彻底扫描和性能之间取得平衡。</li>
 <li><strong>监控扫描活动：</strong> 检查日志和 <a href="#zh-web-ui">Web UI</a> 以审查扫描结果和潜在的安全事件。</li>
 </ol>
-<h3 id="zh-features-_111">配置设置</h3>
+<h3 id="zh-features-_109">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -11396,7 +11387,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">常见代理端口</p>
 <p>默认配置包括代理服务器（80、443、8080、3128）和 SSH（22）使用的常见端口。您可能需要根据您的威胁模型自定义此列表。</p>
 </div>
-<h3 id="zh-features-_112">配置示例</h3>
+<h3 id="zh-features-_110">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="39:4"><input checked="checked" id="zh-features-__tabbed_39_1" name="zh-features-__tabbed_39" type="radio" /><input id="zh-features-__tabbed_39_2" name="zh-features-__tabbed_39" type="radio" /><input id="zh-features-__tabbed_39_3" name="zh-features-__tabbed_39" type="radio" /><input id="zh-features-__tabbed_39_4" name="zh-features-__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_39_1">基本配置</label><label for="zh-features-__tabbed_39_2">全面扫描</label><label for="zh-features-__tabbed_39_3">性能优化配置</label><label for="zh-features-__tabbed_39_4">高安全性配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11444,7 +11435,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <h3 id="zh-features-darkvisitors-api">使用 DarkVisitors API 动态规避机器人</h3>
 <p><a href="https://darkvisitors.com/">DarkVisitors</a> 是一项提供动态 <code>robots.txt</code> 文件的服务，以帮助阻止已知的恶意机器人和 AI 爬虫。通过与 DarkVisitors 集成，BunkerWeb 可以自动获取并提供最新的 <code>robots.txt</code>，帮助保护您的网站免受不必要的自动化流量。</p>
 <p>要启用此功能，您需要在 <a href="https://darkvisitors.com/docs/robots-txt">darkvisitors.com</a> 注册并获取一个 bearer 令牌。</p>
-<h3 id="zh-features-_113">如何使用</h3>
+<h3 id="zh-features-_111">如何使用</h3>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>USE_ROBOTSTXT</code> 设置为 <code>yes</code>。</li>
 <li><strong>配置规则：</strong> 选择一种或多种方法来定义您的 <code>robots.txt</code> 规则：<ul>
@@ -11458,7 +11449,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>添加站点地图（可选）：</strong> 使用 <code>ROBOTSTXT_SITEMAP_N</code> 定义站点地图 URL。</li>
 <li><strong>获取生成的 robots.txt 文件：</strong> 在 BunkerWeb 使用上述设置运行后，您可以通过向 <code>http(s)://your-domain.com/robots.txt</code> 发出 HTTP GET 请求来访问动态生成的 <code>robots.txt</code> 文件。</li>
 </ol>
-<h3 id="zh-features-_114">配置设置</h3>
+<h3 id="zh-features-_112">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -11549,7 +11540,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<h3 id="zh-features-_115">配置示例</h3>
+<h3 id="zh-features-_113">配置示例</h3>
 <p><strong>基本手动规则</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">USE_ROBOTSTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">ROBOTSTXT_RULE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;User-agent:</span><span class="nv"> </span><span class="s">*&quot;</span>
@@ -11596,14 +11587,14 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>证书的呈现根据最佳实践进行配置，以确保兼容性和安全性。</li>
 </ol>
 <p>!!! success "安全优势" - <strong>数据保护：</strong> 加密传输中的数据，防止窃听和中间人攻击 - <strong>身份验证：</strong> 向客户端验证您服务器的身份 - <strong>完整性：</strong> 确保数据在传输过程中未被篡改 - <strong>现代标准：</strong> 配置符合行业最佳实践和安全标准</p>
-<h3 id="zh-features-_116">如何使用</h3>
+<h3 id="zh-features-_114">如何使用</h3>
 <p>请按照以下步骤配置和使用 SSL 功能：</p>
 <ol>
 <li><strong>配置协议：</strong> 使用 <code>SSL_PROTOCOLS</code> 设置选择要支持的 SSL/TLS 协议版本。</li>
 <li><strong>选择密码套件：</strong> 使用 <code>SSL_CIPHERS_LEVEL</code> 设置指定加密强度，或使用 <code>SSL_CIPHERS_CUSTOM</code> 提供自定义密码。</li>
 <li><strong>配置 HTTP 到 HTTPS 重定向：</strong> 使用 <code>AUTO_REDIRECT_HTTP_TO_HTTPS</code> 或 <code>REDIRECT_HTTP_TO_HTTPS</code> 设置来设置自动重定向。</li>
 </ol>
-<h3 id="zh-features-_117">配置设置</h3>
+<h3 id="zh-features-_115">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -11660,7 +11651,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">协议选择</p>
 <p>由于已知的漏洞，默认情况下有意禁用了对 SSLv3、TLSv1.0 和 TLSv1.1 等旧协议的支持。只有在您绝对需要支持旧版客户端并了解这样做的安全隐患时，才启用这些协议。</p>
 </div>
-<h3 id="zh-features-_118">配置示例</h3>
+<h3 id="zh-features-_116">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="40:4"><input checked="checked" id="zh-features-__tabbed_40_1" name="zh-features-__tabbed_40" type="radio" /><input id="zh-features-__tabbed_40_2" name="zh-features-__tabbed_40" type="radio" /><input id="zh-features-__tabbed_40_3" name="zh-features-__tabbed_40" type="radio" /><input id="zh-features-__tabbed_40_4" name="zh-features-__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_40_1">现代安全（默认）</label><label for="zh-features-__tabbed_40_2">最高安全</label><label for="zh-features-__tabbed_40_3">旧版兼容性</label><label for="zh-features-__tabbed_40_4">自定义密码</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11710,7 +11701,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>内容使用简单的设置进行配置，允许您指定联系信息、加密密钥、策略和致谢。</li>
 <li>BunkerWeb 会自动根据 RFC 9116 格式化该文件。</li>
 </ol>
-<h3 id="zh-features-_119">如何使用</h3>
+<h3 id="zh-features-_117">如何使用</h3>
 <p>请按照以下步骤配置和使用 Security.txt 功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>USE_SECURITYTXT</code> 设置为 <code>yes</code> 以启用 security.txt 文件。</li>
@@ -11718,7 +11709,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>设置附加信息：</strong> 配置可选字段，如到期日期、加密、致谢和策略 URL。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 配置完成后，BunkerWeb 将自动在标准位置创建并提供 security.txt 文件。</li>
 </ol>
-<h3 id="zh-features-_120">配置设置</h3>
+<h3 id="zh-features-_118">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -11821,7 +11812,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">URL 必须使用 HTTPS</p>
 <p>根据 RFC 9116，security.txt 文件中的所有 URL（<code>mailto:</code> 和 <code>tel:</code> 链接除外）都必须使用 HTTPS。非 HTTPS URL 将被 BunkerWeb 自动转换为 HTTPS，以确保符合标准。</p>
 </div>
-<h3 id="zh-features-_121">配置示例</h3>
+<h3 id="zh-features-_119">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="41:3"><input checked="checked" id="zh-features-__tabbed_41_1" name="zh-features-__tabbed_41" type="radio" /><input id="zh-features-__tabbed_41_2" name="zh-features-__tabbed_41" type="radio" /><input id="zh-features-__tabbed_41_3" name="zh-features-__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_41_1">基本配置</label><label for="zh-features-__tabbed_41_2">综合配置</label><label for="zh-features-__tabbed_41_3">多联系人配置</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11872,7 +11863,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">浏览器安全警告</p>
 <p>当用户访问使用自签名证书的网站时，浏览器会显示安全警告，因为这些证书未经受信任的证书颁发机构验证。对于生产环境，请考虑改用 <a href="#zh-features-lets-encrypt">Let's Encrypt</a>。</p>
 </div>
-<h3 id="zh-features-_122">如何使用</h3>
+<h3 id="zh-features-_120">如何使用</h3>
 <p>请按照以下步骤配置和使用自签名证书功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 将 <code>GENERATE_SELF_SIGNED_SSL</code> 设置为 <code>yes</code> 以启用自签名证书生成。</li>
@@ -11885,7 +11876,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">流模式配置</p>
 <p>对于流模式，请配置 <code>LISTEN_STREAM_PORT_SSL</code> 设置以指定 SSL/TLS 监听端口。此步骤对于在流模式下正常运行至关重要。</p>
 </div>
-<h3 id="zh-features-_123">配置设置</h3>
+<h3 id="zh-features-_121">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -11935,7 +11926,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">证书信息</p>
 <p>生成的自签名证书使用指定的算法（默认为使用 prime256v1 曲线的椭圆曲线加密），并包含配置的主题，确保您的域名功能正常。</p>
 </div>
-<h3 id="zh-features-_124">配置示例</h3>
+<h3 id="zh-features-_122">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="42:3"><input checked="checked" id="zh-features-__tabbed_42_1" name="zh-features-__tabbed_42" type="radio" /><input id="zh-features-__tabbed_42_2" name="zh-features-__tabbed_42" type="radio" /><input id="zh-features-__tabbed_42_3" name="zh-features-__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_42_1">基本配置</label><label for="zh-features-__tabbed_42_2">短期证书</label><label for="zh-features-__tabbed_42_3">使用 RSA 证书进行测试</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -11977,7 +11968,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>会话通过可配置的超时进行自动管理，在保持可用性的同时确保安全性。</li>
 <li>会话的加密安全性通过用于签署会话 Cookie 的密钥来保证。</li>
 </ol>
-<h3 id="zh-features-_125">如何使用</h3>
+<h3 id="zh-features-_123">如何使用</h3>
 <p>请按照以下步骤配置和使用会话功能：</p>
 <ol>
 <li><strong>配置会话安全性：</strong> 设置一个强大的、唯一的 <code>SESSIONS_SECRET</code>，以确保会话 Cookie 无法被伪造。（默认值为“random”，这会触发 BunkerWeb 生成一个随机的密钥。）</li>
@@ -11986,7 +11977,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>配置 Redis 集成：</strong> 对于分布式环境，将 <code>USE_REDIS</code> 设置为“yes”，并配置您的 <a href="#zh-features-redis">Redis 连接</a> 以在多个 BunkerWeb 节点之间共享会话数据。</li>
 <li><strong>让 BunkerWeb 处理其余部分：</strong> 配置完成后，您的网站会自动进行会话管理。</li>
 </ol>
-<h3 id="zh-features-_126">配置设置</h3>
+<h3 id="zh-features-_124">配置设置</h3>
 <table>
 <thead>
 <tr>
@@ -12068,7 +12059,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>这确保了无论哪个 BunkerWeb 实例处理用户的请求，他们都能保持其会话</li>
 </ol>
 </div>
-<h3 id="zh-features-_127">配置示例</h3>
+<h3 id="zh-features-_125">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="43:4"><input checked="checked" id="zh-features-__tabbed_43_1" name="zh-features-__tabbed_43" type="radio" /><input id="zh-features-__tabbed_43_2" name="zh-features-__tabbed_43" type="radio" /><input id="zh-features-__tabbed_43_3" name="zh-features-__tabbed_43" type="radio" /><input id="zh-features-__tabbed_43_4" name="zh-features-__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_43_1">基本配置</label><label for="zh-features-__tabbed_43_2">增强安全性</label><label for="zh-features-__tabbed_43_3">带 Redis 的集群环境</label><label for="zh-features-__tabbed_43_4">长效会话</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -12144,6 +12135,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="zh-features-user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='用户管理器页面' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>
@@ -12179,7 +12172,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>如果访问者不符合任何白名单标准，他们将照常通过所有正常的安全检查。</li>
 <li>白名单可以按计划从外部来源自动更新。</li>
 </ol>
-<h3 id="zh-features-_128">如何使用</h3>
+<h3 id="zh-features-_126">如何使用</h3>
 <p>请按照以下步骤配置和使用白名单功能：</p>
 <ol>
 <li><strong>启用该功能：</strong> 白名单功能默认被禁用。将 <code>USE_WHITELIST</code> 设置为 <code>yes</code> 以启用它。</li>
@@ -12192,7 +12185,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">流模式</p>
 <p>当使用流模式时，仅执行 IP、反向 DNS 和 ASN 检查。</p>
 </div>
-<h3 id="zh-features-_129">配置设置</h3>
+<h3 id="zh-features-_127">配置设置</h3>
 <p><strong>通用</strong></p>
 <table>
 <thead>
@@ -12457,7 +12450,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p class="admonition-title">安全绕过</p>
 <p>被列入白名单的访问者将完全<strong>绕过 BunkerWeb 中的所有其他安全检查</strong>，包括 WAF 规则、速率限制、恶意机器人检测以及任何其他安全机制。仅对您绝对信任的来源使用白名单。</p>
 </div>
-<h3 id="zh-features-_130">配置示例</h3>
+<h3 id="zh-features-_128">配置示例</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="45:5"><input checked="checked" id="zh-features-__tabbed_45_1" name="zh-features-__tabbed_45" type="radio" /><input id="zh-features-__tabbed_45_2" name="zh-features-__tabbed_45" type="radio" /><input id="zh-features-__tabbed_45_3" name="zh-features-__tabbed_45" type="radio" /><input id="zh-features-__tabbed_45_4" name="zh-features-__tabbed_45" type="radio" /><input id="zh-features-__tabbed_45_5" name="zh-features-__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="zh-features-__tabbed_45_1">基本组织访问</label><label for="zh-features-__tabbed_45_2">高级配置</label><label for="zh-features-__tabbed_45_3">使用本地文件</label><label for="zh-features-__tabbed_45_4">API 访问模式</label><label for="zh-features-__tabbed_45_5">知名爬虫</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -13003,7 +12996,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h3 id="zh-advanced-_4">自定义配置</h3>
+<h3 id="zh-advanced-custom-configurations">自定义配置</h3>
 <p>要自定义并向 BunkerWeb 添加自定义配置，您可以利用其 NGINX 基础。自定义 NGINX 配置可以添加到不同的 NGINX 上下文中，包括 ModSecurity Web 应用程序防火墙 (WAF) 的配置，这是 BunkerWeb 的核心组件。有关 ModSecurity 配置的更多详细信息，请参见<a href="#zh-features-custom-configurations">此处</a>。</p>
 <p>以下是可用的自定义配置类型：</p>
 <ul>
@@ -13276,7 +13269,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </div>
 </div>
 </div>
-<h3 id="zh-advanced-_5">在生产环境中运行大量服务</h3>
+<h3 id="zh-advanced-running-many-services-in-production">在生产环境中运行大量服务</h3>
 <h4 id="zh-advanced-crs">全局 CRS</h4>
 <div class="admonition warning">
 <p class="admonition-title">CRS 插件</p>
@@ -13294,7 +13287,7 @@ SecRule REQUEST_HEADERS:Host &quot;@rx ^app1\.example\.com$&quot; &quot;nolog&qu
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: &#39;db&#39; user: &#39;bunkerweb&#39; host: &#39;172.20.0.4&#39; (Got a packet bigger than &#39;max_allowed_packet&#39; bytes)
 </code></pre></div>
 <p>您需要在您的数据库服务器上增加 <code>max_allowed_packet</code> 的值。</p>
-<h3 id="zh-advanced-_6">封禁和报告的持久化</h3>
+<h3 id="zh-advanced-persistence-of-bans-and-reports">封禁和报告的持久化</h3>
 <p>默认情况下，BunkerWeb 将封禁和报告存储在本地的 Lua 数据存储中。虽然这种设置简单高效，但意味着当实例重启时数据会丢失。为了确保封禁和报告在重启后仍然存在，您可以将 BunkerWeb 配置为使用远程的 <a href="https://redis.io/">Redis</a> 或 <a href="https://valkey.io/">Valkey</a> 服务器。</p>
 <p><strong>为什么使用 Redis/Valkey？</strong></p>
 <p>Redis 和 Valkey 是功能强大的内存数据存储，通常用作数据库、缓存和消息代理。它们具有高度可扩展性，并支持多种数据结构，包括：</p>
@@ -14307,7 +14300,7 @@ USE_IPV6=yes
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
 <p>此全局配置将由所有容器继承。但是，在 <code>docker-compose.yml</code> 文件中按服务定义的任何日志记录配置都将覆盖 <code>daemon.json</code> 中的全局设置。</p>
-<h2 id="zh-advanced-_7">安全性调整</h2>
+<h2 id="zh-advanced-security-tuning">安全性调整</h2>
 <p>BunkerWeb 提供了许多安全功能，您可以通过<a href="#zh-features">功能</a>进行配置。尽管设置的默认值确保了最低限度的“默认安全”，我们强烈建议您对它们进行调整。这样做，您不仅能够确保您所选择的安全级别，还能管理误报。</p>
 <div class="admonition tip">
 <p class="admonition-title">其他功能</p>
@@ -14327,7 +14320,7 @@ USE_IPV6=yes
   </p>
 <figcaption>在上下文列中显示的 BunkerWeb 数据</figcaption>
 </figure>
-<h2 id="zh-advanced-_8">监控和报告</h2>
+<h2 id="zh-advanced-_4">监控和报告</h2>
 <h4 id="zh-advanced-pro">监控 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>监控插件让您可以收集和检索关于 BunkerWeb 的指标。启用它后，您的实例将开始收集与攻击、请求和性能相关的各种数据。然后，您可以通过定期调用 <code>/monitoring</code> API 端点或使用其他插件（如 Prometheus 导出器）来检索它们。</p>
@@ -14537,7 +14530,7 @@ USE_IPV6=yes
 <li>如果作业失败，插件将在下一次执行中重试发送报告。</li>
 </ul>
 </div>
-<h3 id="zh-advanced-_9">备份和恢复</h3>
+<h3 id="zh-advanced-_5">备份和恢复</h3>
 <h4 id="zh-advanced-s3-pro">S3 备份 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h4>
 <p>STREAM 支持 <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>S3 备份工具可以无缝地自动化数据保护，类似于社区备份插件。然而，它的突出之处在于将备份直接安全地存储在 S3 存储桶中。</p>
@@ -14663,7 +14656,7 @@ USE_IPV6=yes
 </tr>
 </tbody>
 </table>
-<h5 id="zh-advanced-_10">手动备份</h5>
+<h5 id="zh-advanced-_6">手动备份</h5>
 <p>要手动启动备份，请执行以下命令：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="zh-advanced-__tabbed_13_1" name="zh-advanced-__tabbed_13" type="radio" /><input id="zh-advanced-__tabbed_13_2" name="zh-advanced-__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="zh-advanced-__tabbed_13_1">Linux</label><label for="zh-advanced-__tabbed_13_2">Docker</label></div>
 <div class="tabbed-content">
@@ -14719,7 +14712,7 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
-<h5 id="zh-advanced-_11">手动恢复</h5>
+<h5 id="zh-advanced-_7">手动恢复</h5>
 <p>要手动启动恢复，请执行以下命令：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="zh-advanced-__tabbed_16_1" name="zh-advanced-__tabbed_16" type="radio" /><input id="zh-advanced-__tabbed_16_2" name="zh-advanced-__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="zh-advanced-__tabbed_16_1">Linux</label><label for="zh-advanced-__tabbed_16_2">Docker</label></div>
 <div class="tabbed-content">
@@ -14778,7 +14771,7 @@ USE_IPV6=yes
 <p><strong>跨数据库兼容性：</strong> 在各种数据库平台之间实现无缝迁移，包括 SQLite、MySQL、MariaDB 和 PostgreSQL，确保与您首选的数据库环境兼容。</p>
 </li>
 </ul>
-<h4 id="zh-advanced-_12">创建迁移文件</h4>
+<h4 id="zh-advanced-_8">创建迁移文件</h4>
 <p>要手动创建迁移文件，请执行以下命令：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="zh-advanced-__tabbed_19_1" name="zh-advanced-__tabbed_19" type="radio" /><input id="zh-advanced-__tabbed_19_2" name="zh-advanced-__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="zh-advanced-__tabbed_19_1">Linux</label><label for="zh-advanced-__tabbed_19_2">Docker</label></div>
 <div class="tabbed-content">
@@ -14831,7 +14824,7 @@ USE_IPV6=yes
 </div>
 </div>
 </div>
-<h4 id="zh-advanced-_13">初始化迁移</h4>
+<h4 id="zh-advanced-_9">初始化迁移</h4>
 <p>要手动初始化迁移，请执行以下命令：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="zh-advanced-__tabbed_21_1" name="zh-advanced-__tabbed_21" type="radio" /><input id="zh-advanced-__tabbed_21_2" name="zh-advanced-__tabbed_21" type="radio" /><input id="zh-advanced-__tabbed_21_3" name="zh-advanced-__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="zh-advanced-__tabbed_21_1">Linux</label><label for="zh-advanced-__tabbed_21_2">Docker</label><label for="zh-advanced-__tabbed_21_3">All-in-one</label></div>
 <div class="tabbed-content">
@@ -14874,7 +14867,7 @@ USE_IPV6=yes
 <p>STREAM 支持 <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p><strong>Anti DDoS</strong> 插件通过实时监控、分析和过滤可疑流量，提供针对分布式拒绝服务 (DDoS) 攻击的高级保护。</p>
 <p>通过采用<strong>滑动窗口机制</strong>，该插件在内存中维护一个请求时间戳字典，以检测来自单个 IP 地址的异常流量峰值。根据配置的安全模式，它可以阻止违规连接或记录可疑活动以供进一步审查。</p>
-<h4 id="zh-advanced-_14">功能</h4>
+<h4 id="zh-advanced-_10">功能</h4>
 <ul>
 <li><strong>实时流量分析：</strong> 持续监控传入请求以检测潜在的 DDoS 攻击。</li>
 <li><strong>滑动窗口机制：</strong> 在可配置的时间窗口内跟踪最近的请求活动。</li>
@@ -14884,7 +14877,7 @@ USE_IPV6=yes
 <li><strong>优化的内存数据存储：</strong> 确保高速查找和高效的指标跟踪。</li>
 <li><strong>自动清理：</strong> 定期清除过时数据以保持最佳性能。</li>
 </ul>
-<h4 id="zh-advanced-_15">配置</h4>
+<h4 id="zh-advanced-_11">配置</h4>
 <p>使用以下设置自定义插件行为：</p>
 <table>
 <thead>
@@ -14941,16 +14934,20 @@ USE_IPV6=yes
 </tr>
 </tbody>
 </table>
-<h4 id="zh-advanced-_16">最佳实践</h4>
+<h4 id="zh-advanced-_12">最佳实践</h4>
 <ul>
 <li><strong>阈值调整：</strong> 根据您的典型流量模式调整 <code>ANTIDDOS_THRESHOLD</code> 和 <code>ANTIDDOS_WINDOW_TIME</code>。</li>
 <li><strong>状态码审查：</strong> 定期更新 <code>ANTIDDOS_STATUS_CODES</code> 以捕获新的或不断演变的可疑行为。</li>
 <li><strong>监控：</strong> 定期分析日志和指标以微调设置并提高整体保护。</li>
 </ul>
 <h2 id="zh-advanced-pro_3">用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="用户管理器页面" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <p>用户管理插件提供了一个强大的界面，用于管理系统内的用户帐户。</p>
 <p>借助此插件，管理员可以轻松创建、更新和禁用用户帐户，管理用户角色，切换双因素身份验证 (2FA)，并查看详细的用户信息，例如上次登录时间戳和帐户状态（活动或非活动）。该插件在设计时考虑了安全性和易用性，简化了常规的用户管理任务，同时确保了合规性和可审计性。</p>
-<h4 id="zh-advanced-_17">功能</h4>
+<h4 id="zh-advanced-_13">功能</h4>
 <ul>
 <li><strong>用户帐户操作：</strong> 支持以 CSV/XSLX 格式导入，轻松创建、编辑和删除用户帐户。</li>
 <li><strong>基于角色的访问控制：</strong> 分配和修改用户角色以管理权限和访问级别。</li>
@@ -14958,10 +14955,6 @@ USE_IPV6=yes
 <li><strong>全面的用户洞察：</strong> 监控关键用户数据，包括上次登录时间、帐户创建日期以及活动/非活动状态。</li>
 <li><strong>审计日志记录：</strong> 维护所有用户管理操作的审计跟踪，以增强安全性和合规性。</li>
 </ul>
-<p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="用户管理器页面" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
-
 <figure>
 <p><img align="center" alt="概述" src="../assets/img/user-manager.png" />
   </p>
@@ -14979,7 +14972,7 @@ USE_IPV6=yes
 </figure>
 <h2 id="zh-advanced-pro_4">轻松解决 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
 <p>轻松解决插件让您可以直接从报告页面快速修复误报和重复出现的问题。它将引导式的“解决”操作转化为安全、范围受限的配置更新——无需手动编辑。</p>
-<h4 id="zh-advanced-_18">功能</h4>
+<h4 id="zh-advanced-_14">功能</h4>
 <ul>
 <li>从报告和报告详情中一键操作。</li>
 <li>针对 ModSecurity、黑名单和 DNSBL 的上下文感知建议。</li>
@@ -15048,7 +15041,7 @@ USE_IPV6=yes
 <li>监控作业执行并根据需要重新启动它们</li>
 <li>查看日志并搜索模式</li>
 </ul>
-<h2 id="zh-web-ui-_2">先决条件</h2>
+<h2 id="zh-web-ui-prerequisites">先决条件</h2>
 <p>由于 Web UI 是一个 Web 应用程序，推荐的架构是在其前面运行 BunkerWeb 作为反向代理。推荐的安装过程是使用设置向导，它将按照<a href="#zh-quickstart-guide">快速入门指南</a>中的描述一步一步地指导您。</p>
 <div class="admonition warning">
 <p class="admonition-title">安全注意事项</p>
@@ -15061,7 +15054,7 @@ USE_IPV6=yes
 <li>根据您的用例，应用文档的<a href="#zh-advanced-security-tuning">高级用法部分</a>中列出的最佳实践</li>
 </ul>
 </div>
-<h2 id="zh-web-ui-pro">升级到 PRO</h2>
+<h2 id="zh-web-ui-upgrade-to-pro">升级到 PRO</h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO 免费试用</p>
 <p>想要快速试用 BunkerWeb PRO 一个月吗？在 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>下单时使用代码 <code>freetrial</code>，或者点击<a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">这里</a>直接应用促销代码（将在结账时生效）。</p>
@@ -15082,7 +15075,7 @@ USE_IPV6=yes
   </p>
 <figcaption>PRO 许可证信息</figcaption>
 </figure>
-<h2 id="zh-web-ui-_3">访问日志</h2>
+<h2 id="zh-web-ui-_2">访问日志</h2>
 <p>从 <code>1.6</code> 版本开始，访问日志的方法发生了变化。此更新特别影响基于容器的集成：Web UI 现在将从 <code>/var/log/bunkerweb</code> 目录读取日志文件。</p>
 <p>为了使日志可以从 Web UI 访问，我们建议您使用一个 syslog 服务器，例如 <code>syslog-ng</code>，来读取日志并在 <code>/var/log/bunkerweb</code> 目录中创建相应的文件。</p>
 <div class="admonition warning">
@@ -15432,14 +15425,14 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h2 id="zh-web-ui-_4">帐户管理</h2>
+<h2 id="zh-web-ui-_3">帐户管理</h2>
 <p>您可以通过点击右上角的个人资料图片来访问帐户管理页面：</p>
 <figure>
 <p><img align="center," alt="概述" src="../assets/img/manage-account.png" width="400" />
   </p>
 <figcaption>从右上角访问帐户页面</figcaption>
 </figure>
-<h3 id="zh-web-ui-_5">用户名/密码</h3>
+<h3 id="zh-web-ui-_4">用户名/密码</h3>
 <div class="admonition warning">
 <p class="admonition-title">忘记密码/用户名</p>
 <p>如果您忘记了 UI 凭据，您可以按照<a href="#zh-troubleshooting-web-ui">故障排除部分中描述的步骤</a>从 CLI 重置它们。</p>
@@ -15451,7 +15444,7 @@ log {
   </p>
 <figcaption>用户名/密码表单</figcaption>
 </figure>
-<h3 id="zh-web-ui-_6">双因素认证</h3>
+<h3 id="zh-web-ui-_5">双因素认证</h3>
 <div class="admonition tip">
 <p class="admonition-title">强制性加密密钥</p>
 <p>当启用 2FA 时，您必须提供至少一个加密密钥。此密钥将用于加密您的 TOTP 密钥。</p>
@@ -15498,14 +15491,14 @@ log {
   </p>
 <figcaption>登录页面上的 2FA</figcaption>
 </figure>
-<h3 id="zh-web-ui-_7">当前会话</h3>
+<h3 id="zh-web-ui-_6">当前会话</h3>
 <p>在<strong>会话</strong>选项卡中，您将能够列出和撤销当前会话：</p>
 <figure>
 <p><img align="center" alt="概述" src="../assets/img/sessions.png" />
   </p>
 <figcaption>管理会话</figcaption>
 </figure>
-<h2 id="zh-web-ui-_8">高级安装</h2>
+<h2 id="zh-web-ui-_7">高级安装</h2>
 <p>Web UI 可以不通过设置向导过程进行部署和配置：配置是通过环境变量完成的，这些变量可以直接添加到容器中，或者在 Linux 集成的情况下添加到 <code>/etc/bunkerweb/ui.env</code> 文件中。</p>
 <div class="admonition tip">
 <p class="admonition-title">Web UI 特定环境变量</p>
@@ -15984,7 +15977,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 </div>
 </div>
 </div>
-<h2 id="zh-web-ui-_9">语言支持与本地化</h2>
+<h2 id="zh-web-ui-_8">语言支持与本地化</h2>
 <p>BunkerWeb UI 支持多种语言。翻译文件在 <code>src/ui/app/static/locales</code> 目录中管理。目前支持以下语言：</p>
 <ul>
 <li>英语 (en)</li>
@@ -16001,7 +15994,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>意大利语 (it)</li>
 </ul>
 <p>有关翻译来源和审核状态的详细信息，请参阅 <a href="https://github.com/bunkerity/bunkerweb/raw/v1.6.5/src/ui/app/static/locales/README.md">locales/README.md</a>。</p>
-<h3 id="zh-web-ui-_10">贡献翻译</h3>
+<h3 id="zh-web-ui-_9">贡献翻译</h3>
 <p>我们欢迎您为改进或添加新的语言文件做出贡献！</p>
 <p><strong>如何贡献翻译：</strong></p>
 <ol>
@@ -18317,7 +18310,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </div>
 </div>
 <h2 id="zh-plugins-_6">编写插件</h2>
-<h3 id="zh-plugins-_7">结构</h3>
+<h3 id="zh-plugins-structure">结构</h3>
 <div class="admonition tip">
 <p class="admonition-title">现有插件</p>
 <p>如果文档不够，您可以查看<a href="https://github.com/bunkerity/bunkerweb-plugins">官方插件</a>和<a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/common/core">核心插件</a>的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。</p>
@@ -18366,12 +18359,12 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p><strong>plugin.json</strong>：您的插件的元数据、设置和作业定义。</p>
 </li>
 </ul>
-<h3 id="zh-plugins-_8">开始</h3>
+<h3 id="zh-plugins-_7">开始</h3>
 <p>第一步是创建一个将包含插件的文件夹：</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>myplugin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
 <span class="nb">cd</span><span class="w"> </span>myplugin
 </code></pre></div>
-<h3 id="zh-plugins-_9">元数据</h3>
+<h3 id="zh-plugins-_8">元数据</h3>
 <p>一个名为 <strong>plugin.json</strong> 的文件，写在插件文件夹的根目录下，必须包含有关插件的元数据。这是一个示例：</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span>
@@ -18572,7 +18565,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="p">}</span>
 </code></pre></div>
 <p>一旦安装了插件，调度程序就会自动公开声明的命令。核心插件（例如 <code>src/common/core/backup</code> 中的 <code>backup</code>）也遵循相同的模式。</p>
-<h3 id="zh-plugins-_10">配置</h3>
+<h3 id="zh-plugins-_9">配置</h3>
 <p>您可以通过添加一个名为 <strong>confs</strong> 的文件夹来添加自定义 NGINX 配置，其内容类似于<a href="#zh-advanced-custom-configurations">自定义配置</a>。<strong>confs</strong> 内的每个子文件夹将包含 <a href="https://jinja.palletsprojects.com">jinja2</a> 模板，这些模板将在相应的上下文（<code>http</code>、<code>server-http</code>、<code>default-server-http</code>、<code>stream</code>、<code>server-stream</code>、<code>modsec</code>、<code>modsec-crs</code>、<code>crs-plugins-before</code> 和 <code>crs-plugins-after</code>）下生成和加载。</p>
 <p>这是一个名为 <strong>example.conf</strong> 的 <strong>confs/server-http</strong> 文件夹内的配置模板文件示例：</p>
 <div class="highlight"><pre><span></span><code><span class="k">location</span><span class="w"> </span><span class="s">/setting</span><span class="w"> </span><span class="p">{</span>
@@ -18583,10 +18576,10 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <span class="err">}</span>
 </code></pre></div>
 <p><code>{{ DUMMY_SETTING }}</code> 将被插件用户选择的 <code>DUMMY_SETTING</code> 的值替换。</p>
-<h3 id="zh-plugins-_11">模板</h3>
+<h3 id="zh-plugins-_10">模板</h3>
 <p>有关更多信息，请查看<a href="#zh-concepts-templates">模板文档</a>。</p>
 <h3 id="zh-plugins-lua">LUA</h3>
-<h4 id="zh-plugins-_12">主脚本</h4>
+<h4 id="zh-plugins-_11">主脚本</h4>
 <p>在底层，BunkerWeb 使用 <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA 模块</a>在 NGINX 内部执行代码。需要执行代码的插件必须在插件文件夹的根目录下提供一个 lua 文件，使用 <strong>plugin.json</strong> 的 <code>id</code> 值作为其名称。这是一个名为 <strong>myplugin.lua</strong> 的示例：</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">class</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;middleclass&quot;</span>
 <span class="kd">local</span><span class="w"> </span><span class="nv">plugin</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.plugin&quot;</span>
@@ -18693,7 +18686,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 </tr>
 </tbody>
 </table>
-<h4 id="zh-plugins-_13">库</h4>
+<h4 id="zh-plugins-_12">库</h4>
 <p><a href="https://github.com/openresty/lua-nginx-module">NGINX LUA 模块</a>和 <a href="https://github.com/openresty/stream-lua-nginx-module">NGINX stream LUA 模块</a>的所有指令都可用。此外，您可以使用 BunkerWeb 中包含的 LUA 库：有关完整列表，请参见<a href="https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh">此脚本</a>。</p>
 <p>如果您需要其他库，可以将它们放在插件的根文件夹中，并通过在它们前面加上您的插件 ID 来访问它们。这是一个名为 <strong>mylibrary.lua</strong> 的示例文件：</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">_M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{}</span>
@@ -18713,7 +18706,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 
 <span class="p">...</span>
 </code></pre></div>
-<h4 id="zh-plugins-_14">助手</h4>
+<h4 id="zh-plugins-_13">助手</h4>
 <p>一些助手模块提供了常见的有用助手：</p>
 <ul>
 <li><code>self.variables</code>：允许访问和存储插件的属性</li>
@@ -18757,11 +18750,11 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p class="admonition-title">更多示例</p>
 <p>如果您想查看可用函数的完整列表，可以查看仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/bw/lua/bunkerweb">lua 目录</a>中存在的文件。</p>
 </div>
-<h3 id="zh-plugins-_15">作业</h3>
+<h3 id="zh-plugins-_14">作业</h3>
 <p>BunkerWeb 使用内部作业调度器来执行定期任务，例如使用 certbot 续订证书、下载黑名单、下载 MMDB 文件等。您可以通过将任务放入名为 <strong>jobs</strong> 的子文件夹中，并在 <strong>plugin.json</strong> 元数据文件中列出它们来添加您选择的任务。不要忘记为每个人添加执行权限，以避免用户克隆和安装您的插件时出现任何问题。</p>
-<h3 id="zh-plugins-_16">插件页面</h3>
+<h3 id="zh-plugins-_15">插件页面</h3>
 <p>与 Web UI 相关的所有内容都位于 <strong>ui</strong> 子文件夹中，正如我们在<a href="#zh-plugins-structure">之前的结构部分</a>中看到的那样。</p>
-<h4 id="zh-plugins-_17">先决条件</h4>
+<h4 id="zh-plugins-_16">先决条件</h4>
 <p>当您想要创建一个插件页面时，您需要两个文件：</p>
 <ul>
 <li>
@@ -18771,7 +18764,7 @@ chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w
 <p><strong>actions.py</strong>，您可以在其中添加一些脚本和逻辑，通过 <strong>POST /plugins/&lt;<em>plugin_id</em>&gt;</strong> 访问。请注意，此文件<strong>需要一个与插件同名的函数</strong>才能工作。即使该函数为空，也需要此文件。</p>
 </li>
 </ul>
-<h4 id="zh-plugins-_18">基本示例</h4>
+<h4 id="zh-plugins-_17">基本示例</h4>
 <div class="admonition info">
 <p class="admonition-title">Jinja 2 模板</p>
 <p><strong>template.html</strong> 文件是一个 Jinja2 模板，如果需要，请参阅 <a href="https://jinja.palletsprojects.com">Jinja2 文档</a>。</p>
@@ -18953,9 +18946,9 @@ def pre_render(**kwargs)
 <li><strong>可扩展性：</strong> 该框架是灵活的，允许随着应用程序需求的发展添加额外的钩子或增强功能。</li>
 </ul>
 <p>通过明确定义每个钩子的职责及其相关的日志记录前缀，系统确保了请求处理的每个阶段都是透明和可管理的。</p>
-<h3 id="zh-plugins-_19">蓝图</h3>
+<h3 id="zh-plugins-_18">蓝图</h3>
 <p>在 Flask 中，<strong>蓝图</strong>是一种模块化的方式，用于组织应用程序中的相关组件——例如视图、模板和静态文件。它们允许您逻辑地对功能进行分组，并可用于创建应用程序的新部分或覆盖现有部分。</p>
-<h4 id="zh-plugins-_20">创建一个蓝图</h4>
+<h4 id="zh-plugins-_19">创建一个蓝图</h4>
 <p>要定义一个蓝图，您需要创建一个 <code>Blueprint</code> 类的实例，并指定其名称和导入路径。然后，您可以定义与此蓝图关联的路由和视图。</p>
 <p><strong>示例：定义一个新的蓝图</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
@@ -18970,7 +18963,7 @@ def pre_render(**kwargs)
     <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;my_blueprint.html&#39;</span><span class="p">)</span>
 </code></pre></div>
 <p>在此示例中，创建了一个名为 <code>my_blueprint</code> 的蓝图，并在其中定义了一个路由 <code>/my_blueprint</code>。</p>
-<h4 id="zh-plugins-_21">覆盖现有蓝图</h4>
+<h4 id="zh-plugins-_20">覆盖现有蓝图</h4>
 <p>蓝图也可以覆盖现有的蓝图以修改或扩展功能。为此，请确保新蓝图的名称与您要覆盖的蓝图相同，并在原始蓝图之后注册它。</p>
 <p><strong>示例：覆盖现有蓝图</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
@@ -18989,7 +18982,7 @@ def pre_render(**kwargs)
 <p>在覆盖现有蓝图时要小心，因为它可能会影响应用程序的行为。确保更改与应用程序的要求一致，并且不会引入意外的副作用。</p>
 <p>所有现有的路由都将从原始蓝图中移除，因此如果需要，您需要重新实现它们。</p>
 </div>
-<h4 id="zh-plugins-_22">命名约定</h4>
+<h4 id="zh-plugins-_21">命名约定</h4>
 <div class="admonition danger">
 <p class="admonition-title">重要</p>
 <p>确保蓝图的名称与蓝图变量名称匹配，否则它将不被视为有效的蓝图，也不会被注册。</p>
