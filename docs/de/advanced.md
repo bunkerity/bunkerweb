@@ -568,7 +568,7 @@ Um systemd-resolved als Ihren DNS-Resolver in BunkerWeb zu aktivieren, setzen Si
         name: bw-dns
     ```
 
-### Benutzerdefinierte Konfigurationen
+### Benutzerdefinierte Konfigurationen {#custom-configurations}
 
 Um benutzerdefinierte Konfigurationen zu BunkerWeb hinzuzufügen und anzupassen, können Sie die NGINX-Grundlage nutzen. Benutzerdefinierte NGINX-Konfigurationen können in verschiedenen NGINX-Kontexten hinzugefügt werden, einschließlich Konfigurationen für die ModSecurity Web Application Firewall (WAF), die eine Kernkomponente von BunkerWeb ist. Weitere Details zu ModSecurity-Konfigurationen finden Sie [hier](features.md#custom-configurations).
 
@@ -924,7 +924,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     Es gibt keinen Aktualisierungsmechanismus: Die Alternative besteht darin, eine vorhandene Konfiguration mit `docker config rm` zu entfernen und sie dann neu zu erstellen.
 
-### Viele Dienste in der Produktion betreiben
+### Viele Dienste in der Produktion betreiben {#running-many-services-in-production}
 
 #### Globales CRS
 
@@ -954,7 +954,7 @@ Wenn Sie Fehler wie diesen feststellen, insbesondere auf dem Scheduler:
 
 Sie müssen den `max_allowed_packet` auf Ihrem Datenbankserver erhöhen.
 
-### Persistenz von Sperren und Berichten
+### Persistenz von Sperren und Berichten {#persistence-of-bans-and-reports}
 
 Standardmäßig speichert BunkerWeb Sperren und Berichte in einem lokalen Lua-Datenspeicher. Obwohl dies einfach und effizient ist, bedeutet diese Einrichtung, dass Daten verloren gehen, wenn die Instanz neu gestartet wird. Um sicherzustellen, dass Sperren und Berichte über Neustarts hinweg bestehen bleiben, können Sie BunkerWeb so konfigurieren, dass ein entfernter [Redis](https://redis.io/)- oder [Valkey](https://valkey.io/)-Server verwendet wird.
 
@@ -2116,7 +2116,7 @@ sudo systemctl restart docker
 
 Diese globale Konfiguration wird von allen Containern übernommen. Jede pro Dienst in einer `docker-compose.yml`-Datei definierte Protokollierungskonfiguration überschreibt jedoch die globalen Einstellungen in `daemon.json`.
 
-## Sicherheits-Tuning
+## Sicherheits-Tuning {#security-tuning}
 
 BunkerWeb bietet viele Sicherheitsfunktionen, die Sie mit [Features](features.md) konfigurieren können. Auch wenn die Standardwerte der Einstellungen eine minimale "Sicherheit von Haus aus" gewährleisten, empfehlen wir dringend, sie anzupassen. Dadurch können Sie das Sicherheitsniveau Ihrer Wahl sicherstellen und auch Fehlalarme verwalten.
 

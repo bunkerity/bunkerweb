@@ -19,7 +19,7 @@
 -   监控作业执行并根据需要重新启动它们
 -   查看日志并搜索模式
 
-## 先决条件
+## 先决条件 {#prerequisites}
 
 由于 Web UI 是一个 Web 应用程序，推荐的架构是在其前面运行 BunkerWeb 作为反向代理。推荐的安装过程是使用设置向导，它将按照[快速入门指南](quickstart-guide.md)中的描述一步一步地指导您。
 
@@ -33,7 +33,7 @@
     *   不要在没有额外限制的情况下将 Web UI 暴露在互联网上
     *   根据您的用例，应用文档的[高级用法部分](advanced.md#security-tuning)中列出的最佳实践
 
-## 升级到 PRO
+## 升级到 PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO 免费试用"
     想要快速试用 BunkerWeb PRO 一个月吗？在 [BunkerWeb 面板](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc)下单时使用代码 `freetrial`，或者点击[这里](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc)直接应用促销代码（将在结账时生效）。

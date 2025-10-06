@@ -66,7 +66,7 @@ Select a CRS version to best match your security needs:
 
     You can set the paranoia level by adding a custom configuration file in `/etc/bunkerweb/configs/modsec-crs/`.
 
-### Custom Configurations
+### Custom Configurations {#custom-configurations}
 
 Tuning ModSecurity and the OWASP Core Rule Set (CRS) can be achieved through custom configurations. These configurations allow you to customize behavior at specific stages of the security rules processing:
 

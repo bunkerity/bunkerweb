@@ -32,7 +32,7 @@ Certains paramètres de BunkerWeb supportent plusieurs configurations pour une m
 
 Ce modèle permet de gérer plusieurs configurations pour des fonctionnalités comme les reverse proxies, les ports, ou d’autres paramètres nécessitant des valeurs distinctes selon les cas d’usage.
 
-### Modes de sécurité
+### Modes de sécurité {#security-modes}
 
 Le paramètre `SECURITY_MODE` détermine la façon dont BunkerWeb gère les menaces détectées. Ce mécanisme flexible vous permet de choisir entre la surveillance et le blocage actif des activités suspectes, selon vos besoins :
 

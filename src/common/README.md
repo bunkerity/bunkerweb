@@ -32,7 +32,7 @@ Some settings in BunkerWeb support multiple configurations for the same feature.
 
 This pattern allows you to manage multiple configurations for features like reverse proxies, ports, or other settings that require distinct values for different use cases.
 
-### Security Modes
+### Security Modes {#security-modes}
 
 The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on your specific needs:
 

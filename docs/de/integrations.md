@@ -18,14 +18,14 @@ Probieren Sie unser [BunkerWeb Cloud-Angebot](https://panel.bunkerweb.io/contact
 
 Wenn Sie am BunkerWeb Cloud-Angebot interessiert sind, zögern Sie nicht, uns zu [kontaktieren](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc), damit wir Ihre Bedürfnisse besprechen können.
 
-## All-In-One (AIO) Image
+## All-In-One (AIO) Image {#all-in-one-aio-image}
 
 <figure markdown>
   ![AIO Architekturdiagramm Platzhalter](assets/img/aio-graph-placeholder.png){ align=center, width="600" }
   <figcaption>BunkerWeb All-In-One Architektur (AIO)</figcaption>
 </figure>
 
-### Bereitstellung
+### Bereitstellung {#deployment}
 
 Um den All-in-One-Container bereitzustellen, müssen Sie nur den folgenden Befehl ausführen:
 
@@ -121,14 +121,14 @@ Standardmäßig wird der Einrichtungsassistent automatisch gestartet, wenn Sie d
 
 > Folgen Sie den nächsten Schritten im [Schnellstart-Leitfaden](quickstart-guide.md#complete-the-setup-wizard), um die Web-UI einzurichten.
 
-### Redis-Integration
+### Redis-Integration {#redis-integration}
 
 Das BunkerWeb **All-In-One**-Image enthält standardmäßig Redis für die [Persistenz von Sperren und Berichten](advanced.md#persistence-of-bans-and-reports). Um Redis zu verwalten:
 
 - Um Redis zu deaktivieren, setzen Sie `USE_REDIS=no` oder verweisen Sie `REDIS_HOST` auf einen externen Host.
 - Redis-Protokolle werden mit dem Präfix `[REDIS]` in den Docker-Protokollen und in `/var/log/bunkerweb/redis.log` angezeigt.
 
-### CrowdSec-Integration
+### CrowdSec-Integration {#crowdsec-integration}
 
 Das BunkerWeb **All-In-One**-Docker-Image wird mit vollständig integriertem CrowdSec geliefert – keine zusätzlichen Container oder manuelle Einrichtung erforderlich. Befolgen Sie die nachstehenden Schritte, um CrowdSec in Ihrer Bereitstellung zu aktivieren, zu konfigurieren und zu erweitern.
 
@@ -751,7 +751,7 @@ sudo ./install-bunkerweb.sh --yes --api
     - Der interaktive Modus (Standard) fordert zur Eingabe fehlender erforderlicher Werte auf
     - Der nicht-interaktive Modus (`--yes`) erfordert, dass alle erforderlichen Optionen über die Befehlszeile bereitgestellt werden
 
-#### CrowdSec-Integration mit dem Skript
+#### CrowdSec-Integration mit dem Skript {#crowdsec-integration-with-the-script}
 
 Wenn Sie sich für die Installation von CrowdSec während der interaktiven Einrichtung entscheiden, automatisiert das Skript die Integration mit BunkerWeb vollständig:
 
@@ -1195,7 +1195,7 @@ networks:
     name: bw-services
 ```
 
-### Namespaces
+### Namespaces {#namespaces}
 
 Ab Version `1.6.0` unterstützen die Autoconf-Stacks von BunkerWeb Namespaces. Mit dieser Funktion können Sie mehrere "*Cluster*" von BunkerWeb-Instanzen und -Diensten auf demselben Docker-Host verwalten. Um Namespaces zu nutzen, setzen Sie einfach das `NAMESPACE`-Label auf Ihre Dienste. Hier ist ein Beispiel:
 
@@ -1331,7 +1331,7 @@ spec:
 ...
 ```
 
-### Namespaces
+### Namespaces {#namespaces_1}
 
 Ab Version `1.6.0` unterstützen die Autoconf-Stacks von BunkerWeb Namespaces. Mit dieser Funktion können Sie mehrere Cluster von BunkerWeb-Instanzen und -Diensten auf demselben Kubernetes-Cluster verwalten. Um Namespaces zu nutzen, setzen Sie einfach das Metadatenfeld `namespace` auf Ihre BunkerWeb-Instanzen und -Dienste. Hier ist ein Beispiel:
 
@@ -1838,7 +1838,7 @@ networks:
     name: bw-services
 ```
 
-### Namespaces
+### Namespaces {#namespaces_2}
 
 Ab Version `1.6.0` unterstützen die Autoconf-Stacks von BunkerWeb Namespaces. Mit dieser Funktion können Sie mehrere "*Cluster*" von BunkerWeb-Instanzen und -Diensten auf demselben Docker-Host verwalten. Um Namespaces zu nutzen, setzen Sie einfach das `NAMESPACE`-Label auf Ihre Dienste. Hier ist ein Beispiel:
 

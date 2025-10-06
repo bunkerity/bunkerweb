@@ -66,7 +66,7 @@ Das OWASP Core Rule Set verwendet "Paranoia-Stufen" (PL), um die Strenge der Reg
 
     Sie können die Paranoia-Stufe festlegen, indem Sie eine benutzerdefinierte Konfigurationsdatei in `/etc/bunkerweb/configs/modsec-crs/` hinzufügen.
 
-### Benutzerdefinierte Konfigurationen
+### Benutzerdefinierte Konfigurationen {#custom-configurations}
 
 Die Feinabstimmung von ModSecurity und dem OWASP Core Rule Set (CRS) kann durch benutzerdefinierte Konfigurationen erreicht werden. Diese Konfigurationen ermöglichen es Ihnen, das Verhalten in bestimmten Phasen der Verarbeitung von Sicherheitsregeln anzupassen:
 

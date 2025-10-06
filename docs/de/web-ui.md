@@ -19,7 +19,7 @@ Hier ist eine Liste der von der Web-UI angebotenen Funktionen:
 -   Die Ausführung von Jobs überwachen und bei Bedarf neu starten
 -   Protokolle anzeigen und nach Mustern suchen
 
-## Voraussetzungen
+## Voraussetzungen {#prerequisites}
 
 Da die Web-UI eine Webanwendung ist, besteht die empfohlene Architektur darin, BunkerWeb als Reverse-Proxy davor zu betreiben. Das empfohlene Installationsverfahren ist die Verwendung des Einrichtungsassistenten, der Sie Schritt für Schritt führt, wie im [Schnellstart-Leitfaden](quickstart-guide.md) beschrieben.
 
@@ -33,7 +33,7 @@ Da die Web-UI eine Webanwendung ist, besteht die empfohlene Architektur darin, B
     * Stellen Sie die Web-UI nicht ohne zusätzliche Einschränkungen im Internet zur Verfügung
     * Wenden Sie die im Abschnitt [Erweiterte Nutzungen](advanced.md#security-tuning) der Dokumentation aufgeführten Best Practices je nach Ihrem Anwendungsfall an
 
-## Upgrade auf PRO
+## Upgrade auf PRO {#upgrade-to-pro}
 
 !!! tip "Kostenlose Testversion von BunkerWeb PRO"
     Möchten Sie BunkerWeb PRO einen Monat lang schnell testen? Verwenden Sie den Code `freetrial` bei Ihrer Bestellung im [BunkerWeb-Panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) oder klicken Sie [hier](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc), um den Promo-Code direkt anzuwenden (wird an der Kasse wirksam).

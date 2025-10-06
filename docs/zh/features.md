@@ -43,7 +43,7 @@ BunkerWeb 中的某些设置支持同一功能的多个配置。要定义多组�
 
 这种模式允许您为需要不同用例的不同值的功能（如反向代理、端口或其他设置）管理多个配置。
 
-### 安全模式
+### 安全模式 {#security-modes}
 
 `SECURITY_MODE` 设置决定了 BunkerWeb 如何处理检测到的威胁。这个灵活的功能允许您根据具体需求在监控或主动阻止可疑活动之间进行选择：
 
@@ -312,8 +312,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | ------------- | ------ | --------- | ---- | ------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | no   | **启用 Antibot：** 设置为 `cookie` 以启用 Cookie 挑战。 |
 
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
-
 === "JavaScript"
 
     JavaScript 挑战要求客户端使用 JavaScript 解决一个计算任务。这种机制确保客户端启用了 JavaScript 并且可以执行所需的代码，这通常超出了大多数机器人的能力。
@@ -334,8 +332,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | 设置          | 默认值 | 上下文    | 多个 | 描述                                                            |
     | ------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | no   | **启用 Antibot：** 设置为 `javascript` 以启用 JavaScript 挑战。 |
-
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
 
 === "Captcha"
 
@@ -370,8 +366,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `USE_ANTIBOT`              | `no`                                                   | multisite | no   | **启用 Antibot：** 设置为 `captcha` 以启用 Captcha 挑战。                                                                                                            |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no   | **Captcha 字母表：** 用于生成 CAPTCHA 的字符字符串。支持的字符：所有字母 (a-z, A-Z)、数字 2-9（不包括 0 和 1）以及特殊字符：```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
-
 === "reCAPTCHA"
 
     启用后，reCAPTCHA 会在后台运行 (v3)，根据用户行为分配一个分数。低于配置阈值的分数将提示进一步验证或阻止请求。对于可见的挑战 (v2)，用户必须与 reCAPTCHA 小部件交互才能继续。
@@ -397,8 +391,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_RECAPTCHA_JA4`        |        | multisite | no   | 可选的 JA4 TLS 指纹，包含在企业评估中。                                  |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`  | multisite | no   | 通过所需的最低分数（适用于经典 v3 和新版本）。                           |
 
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
-
 === "hCaptcha"
 
     启用后，hCaptcha 提供了一个有效的 reCAPTCHA 替代方案，它通过验证用户交互而无需依赖评分机制。它用一个简单的交互式测试来挑战用户，以确认他们的合法性。
@@ -413,8 +405,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_HCAPTCHA_SITEKEY` |        | multisite | no   | **hCaptcha 站点密钥：** 您的 hCaptcha 站点密钥（从 hCaptcha 获取）。 |
     | `ANTIBOT_HCAPTCHA_SECRET`  |        | multisite | no   | **hCaptcha 密钥：** 您的 hCaptcha 密钥（从 hCaptcha 获取）。         |
 
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
-
 === "Turnstile"
 
     Turnstile 是一种现代、注重隐私的挑战机制，它利用 Cloudflare 的技术来检测和阻止自动化流量。它以一种无缝、后台的方式验证用户交互，为合法用户减少了摩擦，同时有效地阻止了机器人。
@@ -428,8 +418,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `USE_ANTIBOT`               | `no`   | multisite | no   | **启用 Antibot：** 设置为 `turnstile` 以启用 Turnstile 挑战。            |
     | `ANTIBOT_TURNSTILE_SITEKEY` |        | multisite | no   | **Turnstile 站点密钥：** 您的 Turnstile 站点密钥（从 Cloudflare 获取）。 |
     | `ANTIBOT_TURNSTILE_SECRET`  |        | multisite | no   | **Turnstile 密钥：** 您的 Turnstile 密钥（从 Cloudflare 获取）。         |
-
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
 
 === "mCaptcha"
 
@@ -447,8 +435,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no   | **mCaptcha 站点密钥：** 您的 mCaptcha 站点密钥（从 mCaptcha 获取）。 |
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no   | **mCaptcha 密钥：** 您的 mCaptcha 密钥（从 mCaptcha 获取）。         |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no   | **mCaptcha 域：** 用于 mCaptcha 挑战的域。                           |
-
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
 
 ### 示例配置
 
@@ -1626,7 +1612,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.5-rc4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1643,7 +1629,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -3567,7 +3553,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 
     您可以通过在 `/etc/bunkerweb/configs/modsec-crs/` 中添加自定义配置文件来设置偏执级别。
 
-### 自定义配置
+### 自定义配置 {#custom-configurations}
 
 可以通过自定义配置来调整 ModSecurity 和 OWASP 核心规则集 (CRS)。这些配置允许您在安全规则处理的特定阶段自定义行为：
 

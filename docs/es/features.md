@@ -41,7 +41,7 @@ Algunos ajustes en BunkerWeb admiten múltiples configuraciones para la misma ca
 
 Este patrón te permite gestionar múltiples configuraciones para características como proxies inversos, puertos u otros ajustes que requieren valores distintos para diferentes casos de uso.
 
-### Modos de Seguridad
+### Modos de Seguridad {#security-modes}
 
 El ajuste `SECURITY_MODE` determina cómo BunkerWeb maneja las amenazas detectadas. Esta característica flexible te permite elegir entre monitorizar o bloquear activamente la actividad sospechosa, dependiendo de tus necesidades específicas:
 
@@ -1614,7 +1614,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
     services:
       bunkerweb:
         # Este es el nombre que se utilizará para identificar la instancia en el Planificador
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1631,7 +1631,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
             syslog-address: "udp://10.20.30.254:514" # La dirección IP del servicio syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrese de establecer el nombre de instancia correcto
@@ -3561,7 +3561,7 @@ Seleccione una versión de CRS que se ajuste mejor a sus necesidades de segurida
 
     Puede establecer el nivel de paranoia agregando un archivo de configuración personalizado en `/etc/bunkerweb/configs/modsec-crs/`.
 
-### Configuraciones Personalizadas
+### Configuraciones Personalizadas {#custom-configurations}
 
 El ajuste de ModSecurity y el OWASP Core Rule Set (CRS) se puede lograr a través de configuraciones personalizadas. Estas configuraciones le permiten personalizar el comportamiento en etapas específicas del procesamiento de las reglas de seguridad:
 

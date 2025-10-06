@@ -66,7 +66,7 @@ Le Jeu de Règles de Base OWASP utilise des "niveaux de paranoïa" (PL) pour con
 
     Vous pouvez définir le niveau de paranoïa en ajoutant un fichier de configuration personnalisé dans `/etc/bunkerweb/configs/modsec-crs/`.
 
-### Configurations personnalisées
+### Configurations personnalisées {#custom-configurations}
 
 L'ajustement de ModSecurity et du Jeu de Règles de Base OWASP (CRS) peut être réalisé grâce à des configurations personnalisées. Celles-ci vous permettent de personnaliser le comportement à des étapes spécifiques du traitement des règles de sécurité :
 

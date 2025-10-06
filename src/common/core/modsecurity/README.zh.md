@@ -66,7 +66,7 @@ OWASP 核心规则集使用“偏执级别”(PL) 来控制规则的严格性：
 
     您可以通过在 `/etc/bunkerweb/configs/modsec-crs/` 中添加自定义配置文件来设置偏执级别。
 
-### 自定义配置
+### 自定义配置 {#custom-configurations}
 
 可以通过自定义配置来调整 ModSecurity 和 OWASP 核心规则集 (CRS)。这些配置允许您在安全规则处理的特定阶段自定义行为：
 

@@ -66,7 +66,7 @@ El OWASP Core Rule Set utiliza "niveles de paranoia" (PL) para controlar la rigu
 
     Puede establecer el nivel de paranoia agregando un archivo de configuración personalizado en `/etc/bunkerweb/configs/modsec-crs/`.
 
-### Configuraciones Personalizadas
+### Configuraciones Personalizadas {#custom-configurations}
 
 El ajuste de ModSecurity y el OWASP Core Rule Set (CRS) se puede lograr a través de configuraciones personalizadas. Estas configuraciones le permiten personalizar el comportamiento en etapas específicas del procesamiento de las reglas de seguridad:
 

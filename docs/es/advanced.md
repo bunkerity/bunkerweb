@@ -568,7 +568,7 @@ Para habilitar systemd-resolved como tu resolutor de DNS en BunkerWeb, establece
         name: bw-dns
     ```
 
-### Configuraciones personalizadas
+### Configuraciones personalizadas {#custom-configurations}
 
 Para personalizar y añadir configuraciones personalizadas a BunkerWeb, puedes aprovechar su base NGINX. Las configuraciones personalizadas de NGINX se pueden añadir en diferentes contextos de NGINX, incluidas las configuraciones para el Firewall de Aplicaciones Web (WAF) ModSecurity, que es un componente central de BunkerWeb. Se pueden encontrar más detalles sobre las configuraciones de ModSecurity [aquí](features.md#custom-configurations).
 
@@ -924,7 +924,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
 
     No hay mecanismo de actualización: la alternativa es eliminar una configuración existente usando `docker config rm` y luego recrearla.
 
-### Ejecutando muchos servicios en producción
+### Ejecutando muchos servicios en producción {#running-many-services-in-production}
 
 #### CRS Global
 
@@ -954,7 +954,7 @@ Si encuentras errores como este, especialmente en el programador:
 
 Necesitarás aumentar el `max_allowed_packet` en tu servidor de base de datos.
 
-### Persistencia de bloqueos e informes
+### Persistencia de bloqueos e informes {#persistence-of-bans-and-reports}
 
 Por defecto, BunkerWeb almacena los bloqueos e informes en un almacén de datos Lua local. Aunque es simple y eficiente, esta configuración significa que los datos se pierden cuando se reinicia la instancia. Para asegurar que los bloqueos e informes persistan a través de los reinicios, puedes configurar BunkerWeb para que utilice un servidor remoto [Redis](https://redis.io/) o [Valkey](https://valkey.io/).
 
@@ -2116,7 +2116,7 @@ sudo systemctl restart docker
 
 Esta configuración global será heredada por todos los contenedores. Sin embargo, cualquier configuración de registro definida por servicio en un archivo `docker-compose.yml` anulará la configuración global en `daemon.json`.
 
-## Ajuste de seguridad
+## Ajuste de seguridad {#security-tuning}
 
 BunkerWeb ofrece muchas características de seguridad que puedes configurar con [características](features.md). Aunque los valores predeterminados de las configuraciones aseguran una "seguridad por defecto" mínima, te recomendamos encarecidamente que los ajustes. Al hacerlo, podrás asegurar el nivel de seguridad de tu elección y también gestionar los falsos positivos.
 

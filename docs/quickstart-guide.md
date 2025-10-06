@@ -463,7 +463,7 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/exa
         attachable: true
     ```
 
-## Complete the setup wizard
+## Complete the setup wizard {#complete-the-setup-wizard}
 
 !!! tip "Accessing the setup wizard"
 

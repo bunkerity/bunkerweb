@@ -288,7 +288,7 @@ BunkerWeb 中 ModSecurity 的默认配置是以异常评分模式加载核心规
 
 当使用基于容器的集成时，容器的时区可能与主机的时区不匹配。要解决此问题，您可以在您的容器上将 `TZ` 环境变量设置为您选择的时区（例如 `TZ=Europe/Paris`）。您可以在[此处](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)找到时区标识符的列表。
 
-## Web UI
+## Web UI {#web-ui}
 
 如果您忘记了 UI 凭据或遇到 2FA 问题，您可以连接到数据库以重新获得访问权限。
 
