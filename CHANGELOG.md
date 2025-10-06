@@ -20,6 +20,7 @@
 - [DEPS] Updated luajit2 version to v2.1-20250826
 - [DEPS] Update coreruleset-v4 version to v4.19.0
 - [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the `Let's Encrypt` plugin.
+- [CONTRIBUTION] Thank you [tomkolp](https://github.com/tomkolp) for your contribution regarding the `Polish` translation of the web UI.
 
 ## v1.6.5-rc3 - 2025/09/16
 
