@@ -57,6 +57,14 @@ jobs:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Check ARM SSH connectivity
+        run: |
+          for i in {1..5}; do
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP echo ok && break
+            sleep 10
+          done
+        env:
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
       - name: Setup Buildx (ARM)
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         with:
