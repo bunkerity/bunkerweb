@@ -179,12 +179,13 @@
           var targetLang = getTargetLangFromLink(a, { segs: pathSegments, langIndex: order.langIndex });
           if (!targetLang || KNOWN_LANGS.indexOf(targetLang) === -1) return;
 
-          // Enforce structure: /<version>/<lang>/<current_page>
-          var newSegs = [currentVersion, targetLang].concat(contentSegs);
+          // Default English lives at /<version>/<page>; other languages keep /<version>/<lang>/<page>
+          var newSegs = targetLang === 'en'
+            ? [currentVersion].concat(contentSegs)
+            : [currentVersion, targetLang].concat(contentSegs);
 
-          // Preserve link's original hash and query, but use current page trailing slash style
-          var hadHash = url.hash && url.hash !== '#';
-          if (!hadHash && window.location.hash) url.hash = window.location.hash;
+          // Preserve fragment: prefer current page hash so section anchors stay visible after switching
+          if (window.location.hash) url.hash = window.location.hash;
           url.pathname = '/' + newSegs.join('/') + (trailingSlashFromCurrent ? '/' : '');
           a.setAttribute('href', url.toString());
         } catch (e) {
