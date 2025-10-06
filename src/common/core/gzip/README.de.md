@@ -26,7 +26,7 @@ Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Band
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | Multisite | nein     | Gibt an, welche proxied-Inhalte basierend auf den Antwort-Headern komprimiert werden sollen. |
 
 !!! tip "Kompressionsstufe"
-`5` ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.
+    `5` ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.
 
 ### Beispiele
 

@@ -67,7 +67,7 @@ También puedes usar la barra de búsqueda y especificar directamente el nombre 
 
     La lista completa de configuraciones disponibles con descripciones y posibles valores está disponible en la [sección de características](features.md) de la documentación.
 
-## Modo multisitio
+## Modo multisitio {#multisite-mode}
 
 Comprender el modo multisitio es esencial al utilizar BunkerWeb. Como nuestro enfoque principal es proteger las aplicaciones web, nuestra solución está intrínsecamente vinculada al concepto de "hosts virtuales" o "vhosts" (más información [aquí](https://es.wikipedia.org/wiki/Alojamiento_virtual)). Estos hosts virtuales permiten servir múltiples aplicaciones web desde una única instancia o clúster.
 
@@ -107,7 +107,7 @@ Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz
 
     Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) del repositorio.
 
-## Configuraciones personalizadas
+## Configuraciones personalizadas {#custom-configurations}
 
 Para abordar desafíos únicos y satisfacer casos de uso específicos, BunkerWeb ofrece la flexibilidad de las configuraciones personalizadas. Si bien las configuraciones proporcionadas y los [plugins externos](plugins.md) cubren una amplia gama de escenarios, puede haber situaciones que requieran una personalización adicional.
 
@@ -163,7 +163,7 @@ Al especificar el URI de la base de datos apropiado en la configuración, puedes
   <figcaption>Esquema de la base de datos</figcaption>
 </figure>
 
-## Programador
+## Programador {#scheduler}
 
 Para una coordinación y automatización fluidas, BunkerWeb emplea un servicio especializado conocido como el programador. El programador desempeña un papel vital para garantizar un funcionamiento sin problemas al realizar las siguientes tareas:
 
@@ -194,7 +194,7 @@ Desde la versión 1.6.0, el programador posee un sistema de comprobación de est
 
 El intervalo de comprobación de estado se establece mediante la variable de entorno `HEALTHCHECK_INTERVAL`, con un valor predeterminado de `30`, lo que significa que el programador comprobará la salud de las instancias cada 30 segundos.
 
-## Plantillas
+## Plantillas {#templates}
 
 BunkerWeb aprovecha el poder de las plantillas para simplificar el proceso de configuración y mejorar la flexibilidad. Las plantillas proporcionan un enfoque estructurado y estandarizado para definir configuraciones y configuraciones personalizadas, garantizando la coherencia y la facilidad de uso.
 

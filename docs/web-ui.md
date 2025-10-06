@@ -19,7 +19,7 @@ Here is a list of features offered by the web UI:
 - Monitor job execution and restart them as needed
 - View logs and search for patterns
 
-## Prerequisites
+## Prerequisites {#prerequisites}
 
 Since the web UI is a web application, the recommended architecture is to run BunkerWeb in front of it as a reverse proxy. The recommended installation procedure is to use the setup wizard, which will guide you step by step as described in the [quickstart guide](quickstart-guide.md).
 
@@ -33,7 +33,7 @@ Since the web UI is a web application, the recommended architecture is to run Bu
     * Do not expose the web UI on the Internet without additional restrictions
     * Apply best practices listed in the [advanced usages section](advanced.md#security-tuning) of the documentation depending on your use case
 
-## Upgrade to PRO
+## Upgrade to PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO free trial"
     Want to quickly test BunkerWeb PRO for one month? Use the code `freetrial` when placing your order on the [BunkerWeb panel](https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc) or by clicking [here](https://panel.bunkerweb.io/cart.php?a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) to directly to apply the promo code (will be effective at checkout).

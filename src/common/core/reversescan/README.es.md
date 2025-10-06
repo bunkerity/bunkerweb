@@ -33,10 +33,10 @@ Siga estos pasos para configurar y usar la función de Escaneo Inverso:
 | `REVERSE_SCAN_TIMEOUT` | `500`                      | multisite | no       | **Tiempo de Espera del Escaneo:** Tiempo máximo en milisegundos permitido para escanear un puerto.           |
 
 !!! warning "Consideraciones de Rendimiento"
-Escanear múltiples puertos puede agregar latencia a las conexiones de los clientes. Use un valor de tiempo de espera apropiado y limite el número de puertos escaneados para mantener un buen rendimiento.
+    Escanear múltiples puertos puede agregar latencia a las conexiones de los clientes. Use un valor de tiempo de espera apropiado y limite el número de puertos escaneados para mantener un buen rendimiento.
 
 !!! info "Puertos de Proxy Comunes"
-La configuración predeterminada incluye puertos comunes utilizados por los servidores proxy (80, 443, 8080, 3128) y SSH (22). Es posible que desee personalizar esta lista según su modelo de amenaza.
+    La configuración predeterminada incluye puertos comunes utilizados por los servidores proxy (80, 443, 8080, 3128) y SSH (22). Es posible que desee personalizar esta lista según su modelo de amenaza.
 
 ### Configuraciones de Ejemplo
 

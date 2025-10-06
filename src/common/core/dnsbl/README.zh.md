@@ -34,17 +34,17 @@ DNSBL（域名系统黑名单）插件通过对照外部 DNSBL 服务器检查�
 | `DNSBL_IGNORE_IP_URLS` | ``     | multisite | 是   | 以空格分隔的 URL，提供要跳过的 IP/CIDR。支持 `http(s)://` 和 `file://` 方案。 |
 
 !!! tip "选择 DNSBL 服务器"
-选择信誉良好的 DNSBL 提供商以最大限度地减少误报。默认列表包括适合大多数网站的成熟服务：
+    选择信誉良好的 DNSBL 提供商以最大限度地减少误报。默认列表包括适合大多数网站的成熟服务：
 
     -   **bl.blocklist.de：** 列出被检测到攻击其他服务器的 IP。
     -   **sbl.spamhaus.org：** 专注于垃圾邮件源和其他恶意活动。
     -   **xbl.spamhaus.org：** 针对受感染的系统，例如被入侵的机器或开放代理。
 
 !!! info "DNSBL 的工作原理"
-DNSBL 服务器通过响应特殊格式的 DNS 查询来工作。当 BunkerWeb 检查一个 IP 地址时，它会反转该 IP 并附加 DNSBL 域名。如果生成的 DNS 查询返回“成功”响应，则该 IP 被视为已列入黑名单。
+    DNSBL 服务器通过响应特殊格式的 DNS 查询来工作。当 BunkerWeb 检查一个 IP 地址时，它会反转该 IP 并附加 DNSBL 域名。如果生成的 DNS 查询返回“成功”响应，则该 IP 被视为已列入黑名单。
 
 !!! warning "性能考虑"
-虽然 BunkerWeb 优化了 DNSBL 查找的性能，但添加大量 DNSBL 服务器可能会影响响应时间。从几个信誉良好的 DNSBL 服务器开始，并在添加更多服务器之前监控性能。
+    虽然 BunkerWeb 优化了 DNSBL 查找的性能，但添加大量 DNSBL 服务器可能会影响响应时间。从几个信誉良好的 DNSBL 服务器开始，并在添加更多服务器之前监控性能。
 
 ### 示例配置
 

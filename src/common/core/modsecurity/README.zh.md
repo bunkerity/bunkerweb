@@ -41,7 +41,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 | `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | 否   | **全局 CRS：** 启用后，在 HTTP 级别而不是每个服务器上全局应用 CRS 规则。                                                                    |
 
 !!! warning "ModSecurity 和 OWASP 核心规则集"
-**我们强烈建议同时启用 ModSecurity 和 OWASP 核心规则集 (CRS)**，以提供针对常见 Web 漏洞的强大保护。虽然偶尔可能会出现误报，但可以通过微调规则或使用预定义的排除项来解决。
+    **我们强烈建议同时启用 ModSecurity 和 OWASP 核心规则集 (CRS)**，以提供针对常见 Web 漏洞的强大保护。虽然偶尔可能会出现误报，但可以通过微调规则或使用预定义的排除项来解决。
 
     CRS 团队积极维护着针对 WordPress、Nextcloud、Drupal 和 Cpanel 等流行应用程序的排除项列表，从而更容易在不影响功能的情况下进行集成。其安全优势远远超过了解决误报所需的最低配置工作量。
 
@@ -54,10 +54,10 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 - **`nightly`**：[每日构建版](https://github.com/coreruleset/coreruleset/releases/tag/nightly)，提供最新的规则更新。
 
 !!! example "每日构建版"
-**每日构建版**包含最新的规则，提供针对新兴威胁的最新保护。然而，由于它每天更新，并且可能包含实验性或未经测试的更改，建议在将其部署到生产环境之前，首先在**预演环境**中使用每日构建版。
+    **每日构建版**包含最新的规则，提供针对新兴威胁的最新保护。然而，由于它每天更新，并且可能包含实验性或未经测试的更改，建议在将其部署到生产环境之前，首先在**预演环境**中使用每日构建版。
 
 !!! tip "偏执级别"
-OWASP 核心规则集使用“偏执级别”(PL) 来控制规则的严格性：
+    OWASP 核心规则集使用“偏执级别”(PL) 来控制规则的严格性：
 
     -   **PL1 (默认):** 基本保护，误报最少
     -   **PL2:** 更严格的安全性，具有更严格的模式匹配
@@ -66,7 +66,7 @@ OWASP 核心规则集使用“偏执级别”(PL) 来控制规则的严格性：
 
     您可以通过在 `/etc/bunkerweb/configs/modsec-crs/` 中添加自定义配置文件来设置偏执级别。
 
-### 自定义配置
+### 自定义配置 {#custom-configurations}
 
 可以通过自定义配置来调整 ModSecurity 和 OWASP 核心规则集 (CRS)。这些配置允许您在安全规则处理的特定阶段自定义行为：
 
@@ -113,7 +113,7 @@ SecRule REQUEST_FILENAME "^/wp-json/yoast" "id:3,ctl:ruleRemoveById=930120"
 - **规则 3**：为匹配 `/wp-json/yoast` 的请求删除特定规则（ID `930120`）。
 
 !!! info "执行顺序"
-BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰和逻辑性：
+    BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰和逻辑性：
 
     1.  **OWASP CRS 配置**：OWASP 核心规则集的基础配置。
     2.  **自定义插件配置 (`crs-plugins-before`)**：特定于插件的设置，在任何 CRS 规则之前应用。
@@ -137,7 +137,7 @@ BunkerWeb 中 ModSecurity 的执行顺序如下，确保了规则应用的清晰
 OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提高与特定应用程序或环境的兼容性。这些插件可以帮助微调 CRS，以用于 WordPress、Nextcloud 和 Drupal 等流行平台，甚至是自定义设置。有关更多信息和可用插件列表，请参阅 [OWASP CRS 插件注册表](https://github.com/coreruleset/plugin-registry)。
 
 !!! tip "插件下载"
-`MODSECURITY_CRS_PLUGINS` 设置允许您下载和安装插件，以扩展 OWASP 核心规则集 (CRS) 的功能。此设置接受带有可选标签或 URL 的插件名称列表，从而可以轻松集成根据您的特定需求量身定制的其他安全功能。
+    `MODSECURITY_CRS_PLUGINS` 设置允许您下载和安装插件，以扩展 OWASP 核心规则集 (CRS) 的功能。此设置接受带有可选标签或 URL 的插件名称列表，从而可以轻松集成根据您的特定需求量身定制的其他安全功能。
 
     以下是 `MODSECURITY_CRS_PLUGINS` 设置接受的值的非详尽列表：
 
@@ -146,7 +146,7 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
     *   `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` - 直接从 URL 下载插件。
 
 !!! warning "误报"
-较高的安全设置可能会阻止合法流量。请从默认设置开始，并在提高安全级别之前监控日志。请准备好为您的特定应用程序需求添加排除规则。
+    较高的安全设置可能会阻止合法流量。请从默认设置开始，并在提高安全级别之前监控日志。请准备好为您的特定应用程序需求添加排除规则。
 
 ### 配置示例
 
@@ -223,4 +223,4 @@ OWASP 核心规则集还支持一系列**插件**，旨在扩展其功能并提�
     ```
 
 !!! note "人类可读的大小值"
-对于像 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 这样的 大小设置，支持 `k`、`m` 和 `g`（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：`256k` = 262144，`1m` = 1048576，`2g` = 2147483648。
+    对于像 `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` 这样的 大小设置，支持 `k`、`m` 和 `g`（不区分大小写）后缀，分别代表 kibibytes、mebibytes 和 gibibytes（1024 的倍数）。例如：`256k` = 262144，`1m` = 1048576，`2g` = 2147483648。

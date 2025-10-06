@@ -41,7 +41,7 @@ Einige Einstellungen in BunkerWeb unterstützen mehrere Konfigurationen für die
 
 Dieses Muster ermöglicht es Ihnen, mehrere Konfigurationen für Funktionen wie Reverse-Proxys, Ports oder andere Einstellungen zu verwalten, die für unterschiedliche Anwendungsfälle unterschiedliche Werte erfordern.
 
-### Sicherheitsmodi
+### Sicherheitsmodi {#security-modes}
 
 Die Einstellung `SECURITY_MODE` bestimmt, wie BunkerWeb erkannte Bedrohungen behandelt. Diese flexible Funktion ermöglicht es Ihnen, je nach Ihren spezifischen Bedürfnissen zwischen der Überwachung oder dem aktiven Blockieren verdächtiger Aktivitäten zu wählen:
 
@@ -54,109 +54,109 @@ Das Umschalten in den `detect`-Modus kann Ihnen helfen, potenzielle Falsch-Posit
 
 === "Kerneinstellungen"
 
-| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                  |
-| --------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `SERVER_NAME`         | `www.example.com` | multisite | Nein     | **Primäre Domain:** Der Hauptdomainname für diese Website. Im Multisite-Modus erforderlich.                                   |
-| `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Nein     | **BunkerWeb-Instanzen:** Liste der BunkerWeb-Instanzen, durch Leerzeichen getrennt.                                           |
-| `MULTISITE`           | `no`              | global    | Nein     | **Mehrere Websites:** Auf `yes` setzen, um das Hosten mehrerer Websites mit unterschiedlichen Konfigurationen zu ermöglichen. |
-| `SECURITY_MODE`       | `block`           | multisite | Nein     | **Sicherheitsstufe:** Steuert die Stufe der Sicherheitsdurchsetzung. Optionen: `detect` oder `block`.                         |
-| `SERVER_TYPE`         | `http`            | multisite | Nein     | **Servertyp:** Definiert, ob der Server vom Typ `http` oder `stream` ist.                                                     |
+    | Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                  |
+    | --------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+    | `SERVER_NAME`         | `www.example.com` | multisite | Nein     | **Primäre Domain:** Der Hauptdomainname für diese Website. Im Multisite-Modus erforderlich.                                   |
+    | `BUNKERWEB_INSTANCES` | `127.0.0.1`       | global    | Nein     | **BunkerWeb-Instanzen:** Liste der BunkerWeb-Instanzen, durch Leerzeichen getrennt.                                           |
+    | `MULTISITE`           | `no`              | global    | Nein     | **Mehrere Websites:** Auf `yes` setzen, um das Hosten mehrerer Websites mit unterschiedlichen Konfigurationen zu ermöglichen. |
+    | `SECURITY_MODE`       | `block`           | multisite | Nein     | **Sicherheitsstufe:** Steuert die Stufe der Sicherheitsdurchsetzung. Optionen: `detect` oder `block`.                         |
+    | `SERVER_TYPE`         | `http`            | multisite | Nein     | **Servertyp:** Definiert, ob der Server vom Typ `http` oder `stream` ist.                                                     |
 
 === "API-Einstellungen"
 
-| Einstellung        | Standard      | Kontext | Mehrfach | Beschreibung                                                                                                        |
-| ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `USE_API`          | `yes`         | global  | Nein     | **API aktivieren:** Aktivieren Sie die API, um BunkerWeb zu steuern.                                                |
-| `API_HTTP_PORT`    | `5000`        | global  | Nein     | **API-Port:** Lauschportnummer für die API.                                                                         |
-| `API_HTTPS_PORT`   | `5443`        | global  | Nein     | **API-HTTPS-Port:** Lauschportnummer (TLS) für die API.                                                             |
-| `API_LISTEN_HTTP`  | `yes`         | global  | Nein     | **API-HTTP-Lauschen:** HTTP-Listener für die API aktivieren.                                                        |
-| `API_LISTEN_HTTPS` | `no`          | global  | Nein     | **API-HTTPS-Lauschen:** HTTPS (TLS)-Listener für die API aktivieren.                                                |
-| `API_LISTEN_IP`    | `0.0.0.0`     | global  | Nein     | **API-Lausch-IP:** Lausch-IP-Adresse für die API.                                                                   |
-| `API_SERVER_NAME`  | `bwapi`       | global  | Nein     | **API-Servername:** Servername (virtueller Host) für die API.                                                       |
-| `API_WHITELIST_IP` | `127.0.0.0/8` | global  | Nein     | **API-Whitelist-IP:** Liste der IP/Netzwerke, die die API kontaktieren dürfen.                                      |
-| `API_TOKEN`        |               | global  | Nein     | **API-Zugriffstoken (optional):** Wenn gesetzt, müssen alle API-Anfragen `Authorization: Bearer <token>` enthalten. |
+    | Einstellung        | Standard      | Kontext | Mehrfach | Beschreibung                                                                                                        |
+    | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+    | `USE_API`          | `yes`         | global  | Nein     | **API aktivieren:** Aktivieren Sie die API, um BunkerWeb zu steuern.                                                |
+    | `API_HTTP_PORT`    | `5000`        | global  | Nein     | **API-Port:** Lauschportnummer für die API.                                                                         |
+    | `API_HTTPS_PORT`   | `5443`        | global  | Nein     | **API-HTTPS-Port:** Lauschportnummer (TLS) für die API.                                                             |
+    | `API_LISTEN_HTTP`  | `yes`         | global  | Nein     | **API-HTTP-Lauschen:** HTTP-Listener für die API aktivieren.                                                        |
+    | `API_LISTEN_HTTPS` | `no`          | global  | Nein     | **API-HTTPS-Lauschen:** HTTPS (TLS)-Listener für die API aktivieren.                                                |
+    | `API_LISTEN_IP`    | `0.0.0.0`     | global  | Nein     | **API-Lausch-IP:** Lausch-IP-Adresse für die API.                                                                   |
+    | `API_SERVER_NAME`  | `bwapi`       | global  | Nein     | **API-Servername:** Servername (virtueller Host) für die API.                                                       |
+    | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | Nein     | **API-Whitelist-IP:** Liste der IP/Netzwerke, die die API kontaktieren dürfen.                                      |
+    | `API_TOKEN`        |               | global  | Nein     | **API-Zugriffstoken (optional):** Wenn gesetzt, müssen alle API-Anfragen `Authorization: Bearer <token>` enthalten. |
 
-Hinweis: Aus Bootstrap-Gründen müssen Sie, wenn Sie `API_TOKEN` aktivieren, es in der Umgebung SOWOHL der BunkerWeb-Instanz als auch des Schedulers setzen. Der Scheduler fügt den `Authorization`-Header automatisch hinzu, wenn `API_TOKEN` in seiner Umgebung vorhanden ist. Wenn es nicht gesetzt ist, wird kein Header gesendet und BunkerWeb erzwingt keine Token-Authentifizierung. Sie können die API über HTTPS bereitstellen, indem Sie `API_LISTEN_HTTPS=yes` setzen (Port: `API_HTTPS_PORT`, Standard `5443`).
+    Hinweis: Aus Bootstrap-Gründen müssen Sie, wenn Sie `API_TOKEN` aktivieren, es in der Umgebung SOWOHL der BunkerWeb-Instanz als auch des Schedulers setzen. Der Scheduler fügt den `Authorization`-Header automatisch hinzu, wenn `API_TOKEN` in seiner Umgebung vorhanden ist. Wenn es nicht gesetzt ist, wird kein Header gesendet und BunkerWeb erzwingt keine Token-Authentifizierung. Sie können die API über HTTPS bereitstellen, indem Sie `API_LISTEN_HTTPS=yes` setzen (Port: `API_HTTPS_PORT`, Standard `5443`).
 
-Beispieltest mit curl (Token und Host ersetzen):
+    Beispieltest mit curl (Token und Host ersetzen):
 
-```bash
-curl -H "Host: bwapi" \
+    ```bash
+    curl -H "Host: bwapi" \
      -H "Authorization: Bearer $API_TOKEN" \
      http://<bunkerweb-host>:5000/ping
 
-curl -H "Host: bwapi" \
+    curl -H "Host: bwapi" \
      -H "Authorization: Bearer $API_TOKEN" \
      --insecure \
      https://<bunkerweb-host>:5443/ping
-```
+    ```
 
 === "Netzwerk- & Port-Einstellungen"
 
-| Einstellung     | Standard     | Kontext | Mehrfach | Beschreibung                                                 |
-| --------------- | ------------ | ------- | -------- | ------------------------------------------------------------ |
-| `HTTP_PORT`     | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr.                  |
-| `HTTPS_PORT`    | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr.                |
-| `USE_IPV6`      | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.       |
-| `DNS_RESOLVERS` | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver. |
+    | Einstellung     | Standard     | Kontext | Mehrfach | Beschreibung                                                 |
+    | --------------- | ------------ | ------- | -------- | ------------------------------------------------------------ |
+    | `HTTP_PORT`     | `8080`       | global  | Ja       | **HTTP-Port:** Portnummer für HTTP-Verkehr.                  |
+    | `HTTPS_PORT`    | `8443`       | global  | Ja       | **HTTPS-Port:** Portnummer für HTTPS-Verkehr.                |
+    | `USE_IPV6`      | `no`         | global  | Nein     | **IPv6-Unterstützung:** IPv6-Konnektivität aktivieren.       |
+    | `DNS_RESOLVERS` | `127.0.0.11` | global  | Nein     | **DNS-Resolver:** DNS-Adressen der zu verwendenden Resolver. |
 
 === "Stream-Server-Einstellungen"
 
-| Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                          |
-| ------------------------ | -------- | --------- | -------- | --------------------------------------------------------------------- |
-| `LISTEN_STREAM`          | `yes`    | multisite | Nein     | **Stream lauschen:** Lauschen für Nicht-SSL (Passthrough) aktivieren. |
-| `LISTEN_STREAM_PORT`     | `1337`   | multisite | Ja       | **Stream-Port:** Lauschport für Nicht-SSL (Passthrough).              |
-| `LISTEN_STREAM_PORT_SSL` | `4242`   | multisite | Ja       | **Stream-SSL-Port:** Lauschport für SSL (Passthrough).                |
-| `USE_TCP`                | `yes`    | multisite | Nein     | **TCP lauschen:** TCP-Lauschen (Stream) aktivieren.                   |
-| `USE_UDP`                | `no`     | multisite | Nein     | **UDP lauschen:** UDP-Lauschen (Stream) aktivieren.                   |
+    | Einstellung              | Standard | Kontext   | Mehrfach | Beschreibung                                                          |
+    | ------------------------ | -------- | --------- | -------- | --------------------------------------------------------------------- |
+    | `LISTEN_STREAM`          | `yes`    | multisite | Nein     | **Stream lauschen:** Lauschen für Nicht-SSL (Passthrough) aktivieren. |
+    | `LISTEN_STREAM_PORT`     | `1337`   | multisite | Ja       | **Stream-Port:** Lauschport für Nicht-SSL (Passthrough).              |
+    | `LISTEN_STREAM_PORT_SSL` | `4242`   | multisite | Ja       | **Stream-SSL-Port:** Lauschport für SSL (Passthrough).                |
+    | `USE_TCP`                | `yes`    | multisite | Nein     | **TCP lauschen:** TCP-Lauschen (Stream) aktivieren.                   |
+    | `USE_UDP`                | `no`     | multisite | Nein     | **UDP lauschen:** UDP-Lauschen (Stream) aktivieren.                   |
 
 === "Worker-Einstellungen"
 
-| Einstellung            | Standard | Kontext | Mehrfach | Beschreibung                                                                                          |
-| ---------------------- | -------- | ------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `WORKER_PROCESSES`     | `auto`   | global  | Nein     | **Worker-Prozesse:** Anzahl der Worker-Prozesse. Auf `auto` setzen, um verfügbare Kerne zu verwenden. |
-| `WORKER_CONNECTIONS`   | `1024`   | global  | Nein     | **Worker-Verbindungen:** Maximale Anzahl von Verbindungen pro Worker.                                 |
-| `WORKER_RLIMIT_NOFILE` | `2048`   | global  | Nein     | **Dateideskriptor-Limit:** Maximale Anzahl offener Dateien pro Worker.                                |
+    | Einstellung            | Standard | Kontext | Mehrfach | Beschreibung                                                                                          |
+    | ---------------------- | -------- | ------- | -------- | ----------------------------------------------------------------------------------------------------- |
+    | `WORKER_PROCESSES`     | `auto`   | global  | Nein     | **Worker-Prozesse:** Anzahl der Worker-Prozesse. Auf `auto` setzen, um verfügbare Kerne zu verwenden. |
+    | `WORKER_CONNECTIONS`   | `1024`   | global  | Nein     | **Worker-Verbindungen:** Maximale Anzahl von Verbindungen pro Worker.                                 |
+    | `WORKER_RLIMIT_NOFILE` | `2048`   | global  | Nein     | **Dateideskriptor-Limit:** Maximale Anzahl offener Dateien pro Worker.                                |
 
 === "Speichereinstellungen"
 
-| Einstellung                    | Standard | Kontext | Mehrfach | Beschreibung                                                                         |
-| ------------------------------ | -------- | ------- | -------- | ------------------------------------------------------------------------------------ |
-| `WORKERLOCK_MEMORY_SIZE`       | `48k`    | global  | Nein     | **Workerlock-Speichergröße:** Größe des lua_shared_dict für Initialisierungs-Worker. |
-| `DATASTORE_MEMORY_SIZE`        | `64m`    | global  | Nein     | **Datastore-Speichergröße:** Größe des internen Datastores.                          |
-| `CACHESTORE_MEMORY_SIZE`       | `64m`    | global  | Nein     | **Cachestore-Speichergröße:** Größe des internen Cachestores.                        |
-| `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`    | global  | Nein     | **Cachestore-IPC-Speichergröße:** Größe des internen Cachestores (ipc).              |
-| `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`    | global  | Nein     | **Cachestore-Miss-Speichergröße:** Größe des internen Cachestores (miss).            |
-| `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`    | global  | Nein     | **Cachestore-Locks-Speichergröße:** Größe des internen Cachestores (locks).          |
+    | Einstellung                    | Standard | Kontext | Mehrfach | Beschreibung                                                                         |
+    | ------------------------------ | -------- | ------- | -------- | ------------------------------------------------------------------------------------ |
+    | `WORKERLOCK_MEMORY_SIZE`       | `48k`    | global  | Nein     | **Workerlock-Speichergröße:** Größe des lua_shared_dict für Initialisierungs-Worker. |
+    | `DATASTORE_MEMORY_SIZE`        | `64m`    | global  | Nein     | **Datastore-Speichergröße:** Größe des internen Datastores.                          |
+    | `CACHESTORE_MEMORY_SIZE`       | `64m`    | global  | Nein     | **Cachestore-Speichergröße:** Größe des internen Cachestores.                        |
+    | `CACHESTORE_IPC_MEMORY_SIZE`   | `16m`    | global  | Nein     | **Cachestore-IPC-Speichergröße:** Größe des internen Cachestores (ipc).              |
+    | `CACHESTORE_MISS_MEMORY_SIZE`  | `16m`    | global  | Nein     | **Cachestore-Miss-Speichergröße:** Größe des internen Cachestores (miss).            |
+    | `CACHESTORE_LOCKS_MEMORY_SIZE` | `16m`    | global  | Nein     | **Cachestore-Locks-Speichergröße:** Größe des internen Cachestores (locks).          |
 
 === "Protokollierungseinstellungen"
 
-| Einstellung        | Standard                                                                                                                                   | Kontext | Mehrfach | Beschreibung                                                                                                                                    |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | Nein     | **Protokollformat:** Das Format, das für Zugriffsprotokolle verwendet werden soll.                                                              |
-| `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | Nein     | **Protokollstufe:** Ausführlichkeitsstufe für Fehlerprotokolle. Optionen: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-| `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | Nein     | **Timer-Protokollstufe:** Protokollstufe für Timer. Optionen: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.               |
+    | Einstellung        | Standard                                                                                                                                   | Kontext | Mehrfach | Beschreibung                                                                                                                                    |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | Nein     | **Protokollformat:** Das Format, das für Zugriffsprotokolle verwendet werden soll.                                                              |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | Nein     | **Protokollstufe:** Ausführlichkeitsstufe für Fehlerprotokolle. Optionen: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | Nein     | **Timer-Protokollstufe:** Protokollstufe für Timer. Optionen: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.               |
 
-!!! tip "Bewährte Praktiken bei der Protokollierung"
+    !!! tip "Bewährte Praktiken bei der Protokollierung"
 
-- Verwenden Sie für Produktionsumgebungen die Protokollstufen `notice`, `warn` oder `error`, um das Protokollvolumen zu minimieren.
-- Setzen Sie zur Fehlersuche vorübergehend die Protokollstufe auf `debug`, um detailliertere Informationen zu erhalten.
+    - Verwenden Sie für Produktionsumgebungen die Protokollstufen `notice`, `warn` oder `error`, um das Protokollvolumen zu minimieren.
+    - Setzen Sie zur Fehlersuche vorübergehend die Protokollstufe auf `debug`, um detailliertere Informationen zu erhalten.
 
 === "Integrationseinstellungen"
 
-| Einstellung       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                               |
-| ----------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `AUTOCONF_MODE`   | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                |
-| `SWARM_MODE`      | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                      |
-| `KUBERNETES_MODE` | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                   |
-| `USE_TEMPLATE`    |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt. |
+    | Einstellung       | Standard | Kontext   | Mehrfach | Beschreibung                                                                                               |
+    | ----------------- | -------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+    | `AUTOCONF_MODE`   | `no`     | global    | Nein     | **Autoconf-Modus:** Autoconf-Docker-Integration aktivieren.                                                |
+    | `SWARM_MODE`      | `no`     | global    | Nein     | **Swarm-Modus:** Docker-Swarm-Integration aktivieren.                                                      |
+    | `KUBERNETES_MODE` | `no`     | global    | Nein     | **Kubernetes-Modus:** Kubernetes-Integration aktivieren.                                                   |
+    | `USE_TEMPLATE`    |          | multisite | Nein     | **Vorlage verwenden:** Konfigurationsvorlage, die die Standardwerte bestimmter Einstellungen überschreibt. |
 
 === "Nginx-Einstellungen"
 
-| Einstellung                     | Standard      | Kontext | Mehrfach | Beschreibung                                                                                |
-| ------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------- |
-| `NGINX_PREFIX`                  | `/etc/nginx/` | global  | Nein     | **Nginx-Präfix:** Wo Nginx nach Konfigurationen suchen wird.                                |
-| `SERVER_NAMES_HASH_BUCKET_SIZE` |               | global  | Nein     | **Server-Namen-Hash-Bucket-Größe:** Wert für die `server_names_hash_bucket_size`-Direktive. |
+    | Einstellung                     | Standard      | Kontext | Mehrfach | Beschreibung                                                                                |
+    | ------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------- |
+    | `NGINX_PREFIX`                  | `/etc/nginx/` | global  | Nein     | **Nginx-Präfix:** Wo Nginx nach Konfigurationen suchen wird.                                |
+    | `SERVER_NAMES_HASH_BUCKET_SIZE` |               | global  | Nein     | **Server-Namen-Hash-Bucket-Größe:** Wert für die `server_names_hash_bucket_size`-Direktive. |
 
 ### Beispielkonfigurationen
 
@@ -1575,7 +1575,7 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
     services:
       bunkerweb:
         # Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1592,7 +1592,7 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
             syslog-address: "udp://10.20.30.254:514" # Die IP-Adresse des syslog-Dienstes
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen
@@ -2916,6 +2916,8 @@ Das Limit-Plugin in BunkerWeb bietet robuste Funktionen zur Durchsetzung von Beg
 ## Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 STREAM-Unterstützung :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
@@ -3480,7 +3482,7 @@ Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entsp
 
     Sie können die Paranoia-Stufe festlegen, indem Sie eine benutzerdefinierte Konfigurationsdatei in `/etc/bunkerweb/configs/modsec-crs/` hinzufügen.
 
-### Benutzerdefinierte Konfigurationen
+### Benutzerdefinierte Konfigurationen {#custom-configurations}
 
 Die Feinabstimmung von ModSecurity und dem OWASP Core Rule Set (CRS) kann durch benutzerdefinierte Konfigurationen erreicht werden. Diese Konfigurationen ermöglichen es Ihnen, das Verhalten in bestimmten Phasen der Verarbeitung von Sicherheitsregeln anzupassen:
 
@@ -4963,6 +4965,8 @@ Integrate easily the BunkerWeb UI.
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='Benutzer-Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 STREAM-Unterstützung :x:
 

@@ -41,7 +41,7 @@ Some settings in BunkerWeb support multiple configurations for the same feature.
 
 This pattern allows you to manage multiple configurations for features like reverse proxies, ports, or other settings that require distinct values for different use cases.
 
-### Security Modes
+### Security Modes {#security-modes}
 
 The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on your specific needs:
 
@@ -3028,6 +3028,8 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 ## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 STREAM support :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
@@ -3591,7 +3593,7 @@ Select a CRS version to best match your security needs:
 
     You can set the paranoia level by adding a custom configuration file in `/etc/bunkerweb/configs/modsec-crs/`.
 
-### Custom Configurations
+### Custom Configurations {#custom-configurations}
 
 Tuning ModSecurity and the OWASP Core Rule Set (CRS) can be achieved through custom configurations. These configurations allow you to customize behavior at specific stages of the security rules processing:
 
@@ -5213,6 +5215,8 @@ Integrate easily the BunkerWeb UI.
 
 ## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 STREAM support :x:
 

@@ -28,10 +28,10 @@ SSL 插件为您的 BunkerWeb 保护的网站提供强大的 SSL/TLS 加密功�
 | `SSL_CIPHERS_CUSTOM`          |                   | multisite | 否   | **自定义 SSL 密码：** 用于 SSL/TLS 连接的密码套件的冒号分隔列表（覆盖级别）。                      |
 
 !!! tip "SSL Labs 测试"
-配置 SSL 设置后，请使用 [Qualys SSL Labs 服务器测试](https://www.ssllabs.com/ssltest/) 来验证您的配置并检查潜在的安全问题。一个正确的 BunkerWeb SSL 配置应该能获得 A+ 评级。
+    配置 SSL 设置后，请使用 [Qualys SSL Labs 服务器测试](https://www.ssllabs.com/ssltest/) 来验证您的配置并检查潜在的安全问题。一个正确的 BunkerWeb SSL 配置应该能获得 A+ 评级。
 
 !!! warning "协议选择"
-由于已知的漏洞，默认情况下有意禁用了对 SSLv3、TLSv1.0 和 TLSv1.1 等旧协议的支持。只有在您绝对需要支持旧版客户端并了解这样做的安全隐患时，才启用这些协议。
+    由于已知的漏洞，默认情况下有意禁用了对 SSLv3、TLSv1.0 和 TLSv1.1 等旧协议的支持。只有在您绝对需要支持旧版客户端并了解这样做的安全隐患时，才启用这些协议。
 
 ### 配置示例
 

@@ -18,7 +18,7 @@ from __future__ import annotations
 import difflib
 from pathlib import Path
 
-CORE_DIR = Path(__file__).resolve().parent.parent / "src" / "common" / "core"
+CORE_DIR = Path(__file__).resolve().parent.parent / "src" / "common"
 
 
 def needs_processing(path: Path) -> bool:
@@ -106,7 +106,7 @@ def process_file(path: Path) -> bool:
 def main() -> None:
     if not CORE_DIR.exists():
         raise SystemExit(f"Core directory not found: {CORE_DIR}")
-    readmes = sorted(CORE_DIR.glob("*/README*.md"))
+    readmes = sorted(CORE_DIR.glob("**/README*.md"))
     changed = 0
     for readme in readmes:
         if not needs_processing(readme):

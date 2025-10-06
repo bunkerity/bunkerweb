@@ -36,10 +36,10 @@ bwcli plugin backup restore /chemin/backup-sqlite-YYYY-MM-DD_HH-MM-SS.zip   # Re
 ```
 
 !!! tip "Sécurité"
-Avant toute restauration, un backup de l’état courant est créé automatiquement dans un emplacement temporaire.
+    Avant toute restauration, un backup de l’état courant est créé automatiquement dans un emplacement temporaire.
 
 !!! warning "Compatibilité bases"
-Supporte SQLite, MySQL/MariaDB, PostgreSQL. Oracle non pris en charge pour sauvegarde/restauration.
+    Supporte SQLite, MySQL/MariaDB, PostgreSQL. Oracle non pris en charge pour sauvegarde/restauration.
 
 ### Exemples
 

@@ -28,10 +28,10 @@ Auth Basic 插件提供 HTTP 基本认证来保护您的网站或特定资源。
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | 否   | **提示文本：** 显示给用户的身份验证提示中的消息。                                                       |
 
 !!! warning "安全注意事项"
-HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。
+    HTTP 基本认证以 Base64 编码（非加密）传输凭据。虽然在通过 HTTPS 使用时这是可以接受的，但在普通 HTTP 上不应被认为是安全的。使用基本身份验证时，请务必启用 SSL/TLS。
 
 !!! tip "使用多个凭据"
-您可以为访问配置多个用户名/密码对。每个 `AUTH_BASIC_USER` 设置都应有一个对应的 `AUTH_BASIC_PASSWORD` 设置。
+    您可以为访问配置多个用户名/密码对。每个 `AUTH_BASIC_USER` 设置都应有一个对应的 `AUTH_BASIC_PASSWORD` 设置。
 
 ### 示例配置
 

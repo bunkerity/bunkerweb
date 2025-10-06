@@ -41,7 +41,7 @@ Führen Sie die folgenden Schritte aus, um ModSecurity zu konfigurieren und zu v
 | `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | nein     | **Globales CRS:** Wenn aktiviert, werden CRS-Regeln global auf HTTP-Ebene anstatt pro Server angewendet.                                                                        |
 
 !!! warning "ModSecurity und das OWASP Core Rule Set"
-**Wir empfehlen dringend, sowohl ModSecurity als auch das OWASP Core Rule Set (CRS) aktiviert zu lassen**, um einen robusten Schutz gegen gängige Web-Schwachstellen zu bieten. Obwohl gelegentlich Falsch-Positive auftreten können, können diese mit etwas Aufwand durch Feinabstimmung von Regeln oder die Verwendung vordefinierter Ausschlüsse behoben werden.
+    **Wir empfehlen dringend, sowohl ModSecurity als auch das OWASP Core Rule Set (CRS) aktiviert zu lassen**, um einen robusten Schutz gegen gängige Web-Schwachstellen zu bieten. Obwohl gelegentlich Falsch-Positive auftreten können, können diese mit etwas Aufwand durch Feinabstimmung von Regeln oder die Verwendung vordefinierter Ausschlüsse behoben werden.
 
     Das CRS-Team pflegt aktiv eine Liste von Ausschlüssen für beliebte Anwendungen wie WordPress, Nextcloud, Drupal und Cpanel, was die Integration erleichtert, ohne die Funktionalität zu beeinträchtigen. Die Sicherheitsvorteile überwiegen bei weitem den minimalen Konfigurationsaufwand, der zur Behebung von Falsch-Positiven erforderlich ist.
 
@@ -54,10 +54,10 @@ Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entsp
 - **`nightly`**: [Nightly-Build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) mit den neuesten Regel-Updates.
 
 !!! example "Nightly-Build"
-Der **Nightly-Build** enthält die aktuellsten Regeln und bietet den neuesten Schutz gegen aufkommende Bedrohungen. Da er jedoch täglich aktualisiert wird und experimentelle oder ungetestete Änderungen enthalten kann, wird empfohlen, den Nightly-Build zunächst in einer **Staging-Umgebung** zu verwenden, bevor er in der Produktion eingesetzt wird.
+    Der **Nightly-Build** enthält die aktuellsten Regeln und bietet den neuesten Schutz gegen aufkommende Bedrohungen. Da er jedoch täglich aktualisiert wird und experimentelle oder ungetestete Änderungen enthalten kann, wird empfohlen, den Nightly-Build zunächst in einer **Staging-Umgebung** zu verwenden, bevor er in der Produktion eingesetzt wird.
 
 !!! tip "Paranoia-Stufen"
-Das OWASP Core Rule Set verwendet "Paranoia-Stufen" (PL), um die Strenge der Regeln zu steuern:
+    Das OWASP Core Rule Set verwendet "Paranoia-Stufen" (PL), um die Strenge der Regeln zu steuern:
 
     - **PL1 (Standard):** Grundlegender Schutz mit minimalen Falsch-Positiven
     - **PL2:** Strengere Sicherheit mit strengerem Musterabgleich
@@ -66,7 +66,7 @@ Das OWASP Core Rule Set verwendet "Paranoia-Stufen" (PL), um die Strenge der Reg
 
     Sie können die Paranoia-Stufe festlegen, indem Sie eine benutzerdefinierte Konfigurationsdatei in `/etc/bunkerweb/configs/modsec-crs/` hinzufügen.
 
-### Benutzerdefinierte Konfigurationen
+### Benutzerdefinierte Konfigurationen {#custom-configurations}
 
 Die Feinabstimmung von ModSecurity und dem OWASP Core Rule Set (CRS) kann durch benutzerdefinierte Konfigurationen erreicht werden. Diese Konfigurationen ermöglichen es Ihnen, das Verhalten in bestimmten Phasen der Verarbeitung von Sicherheitsregeln anzupassen:
 
@@ -113,7 +113,7 @@ In diesem Beispiel:
 - **Regel 3**: Entfernt eine bestimmte Regel (ID `930120`) für Anfragen, die auf `/wp-json/yoast` passen.
 
 !!! info "Reihenfolge der Ausführung"
-Die Ausführungsreihenfolge für ModSecurity in BunkerWeb ist wie folgt, um eine klare und logische Abfolge der Regelanwendung zu gewährleisten:
+    Die Ausführungsreihenfolge für ModSecurity in BunkerWeb ist wie folgt, um eine klare und logische Abfolge der Regelanwendung zu gewährleisten:
 
     1.  **OWASP CRS-Konfiguration**: Basiskonfiguration für das OWASP Core Rule Set.
     2.  **Konfiguration benutzerdefinierter Plugins (`crs-plugins-before`)**: Einstellungen, die für Plugins spezifisch sind und vor allen CRS-Regeln angewendet werden.
@@ -137,7 +137,7 @@ Die Ausführungsreihenfolge für ModSecurity in BunkerWeb ist wie folgt, um eine
 Das OWASP Core Rule Set unterstützt auch eine Reihe von **Plugins**, die entwickelt wurden, um seine Funktionalität zu erweitern und die Kompatibilität mit bestimmten Anwendungen oder Umgebungen zu verbessern. Diese Plugins können dabei helfen, das CRS für die Verwendung mit beliebten Plattformen wie WordPress, Nextcloud und Drupal oder sogar benutzerdefinierten Setups zu optimieren. Weitere Informationen und eine Liste der verfügbaren Plugins finden Sie im [OWASP CRS Plugin-Verzeichnis](https://github.com/coreruleset/plugin-registry).
 
 !!! tip "Plugin-Download"
-Die Einstellung `MODSECURITY_CRS_PLUGINS` ermöglicht es Ihnen, Plugins herunterzuladen und zu installieren, um die Funktionalität des OWASP Core Rule Set (CRS) zu erweitern. Diese Einstellung akzeptiert eine Liste von Plugin-Namen mit optionalen Tags oder URLs, was es einfach macht, zusätzliche Sicherheitsfunktionen zu integrieren, die auf Ihre spezifischen Bedürfnisse zugeschnitten sind.
+    Die Einstellung `MODSECURITY_CRS_PLUGINS` ermöglicht es Ihnen, Plugins herunterzuladen und zu installieren, um die Funktionalität des OWASP Core Rule Set (CRS) zu erweitern. Diese Einstellung akzeptiert eine Liste von Plugin-Namen mit optionalen Tags oder URLs, was es einfach macht, zusätzliche Sicherheitsfunktionen zu integrieren, die auf Ihre spezifischen Bedürfnisse zugeschnitten sind.
 
     Hier ist eine nicht erschöpfende Liste der akzeptierten Werte für die Einstellung `MODSECURITY_CRS_PLUGINS`:
 
@@ -146,7 +146,7 @@ Die Einstellung `MODSECURITY_CRS_PLUGINS` ermöglicht es Ihnen, Plugins herunter
     *   `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` - Lädt das Plugin direkt von der URL herunter.
 
 !!! warning "Falsch-Positive"
-Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen Sie mit den Standardeinstellungen und überwachen Sie die Protokolle, bevor Sie die Sicherheitsstufen erhöhen. Seien Sie bereit, Ausnahmeregeln für die spezifischen Anforderungen Ihrer Anwendung hinzuzufügen.
+    Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen Sie mit den Standardeinstellungen und überwachen Sie die Protokolle, bevor Sie die Sicherheitsstufen erhöhen. Seien Sie bereit, Ausnahmeregeln für die spezifischen Anforderungen Ihrer Anwendung hinzuzufügen.
 
 ### Beispielkonfigurationen
 
@@ -223,4 +223,4 @@ Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen 
     ```
 
 !!! note "Menschenlesbare Größenwerte"
-Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+    Für Größeneinstellungen wie `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` werden die Suffixe `k`, `m` und `g` (Groß- und Kleinschreibung wird nicht beachtet) unterstützt und stehen für Kibibyte, Mebibyte und Gibibyte (Vielfache von 1024). Beispiele: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.

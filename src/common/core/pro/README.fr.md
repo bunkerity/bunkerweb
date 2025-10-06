@@ -30,13 +30,13 @@ Comment ça marche :
 | `PRO_LICENSE_KEY` |        | global   | non      | Clé de licence BunkerWeb Pro (authentification). |
 
 !!! tip "Gestion de licence"
-La licence est liée à votre environnement de déploiement. Pour un transfert ou une question d’abonnement, contactez le support via le [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
+    La licence est liée à votre environnement de déploiement. Pour un transfert ou une question d’abonnement, contactez le support via le [BunkerWeb Panel](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
 
 !!! info "Fonctionnalités Pro"
-Le périmètre des fonctionnalités peut évoluer. Le plugin Pro gère automatiquement l’installation et la configuration des capacités disponibles.
+    Le périmètre des fonctionnalités peut évoluer. Le plugin Pro gère automatiquement l’installation et la configuration des capacités disponibles.
 
 !!! warning "Accès réseau"
-Le plugin Pro requiert un accès Internet sortant pour contacter l’API BunkerWeb (vérification de licence) et télécharger les plugins premium. Autorisez les connexions HTTPS vers `api.bunkerweb.io:443`.
+    Le plugin Pro requiert un accès Internet sortant pour contacter l’API BunkerWeb (vérification de licence) et télécharger les plugins premium. Autorisez les connexions HTTPS vers `api.bunkerweb.io:443`.
 
 ### FAQ
 

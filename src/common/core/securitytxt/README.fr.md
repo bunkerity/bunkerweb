@@ -31,13 +31,13 @@ Comment ça marche :
 | `SECURITYTXT_CSAF`             |                             | multisite | oui      | Lien vers le provider-metadata.json du fournisseur CSAF.    |
 
 !!! warning "Expiration requise"
-Le champ `Expires` est obligatoire. Si absent, BunkerWeb définit par défaut une expiration à un an.
+    Le champ `Expires` est obligatoire. Si absent, BunkerWeb définit par défaut une expiration à un an.
 
 !!! info "Contacts essentiels"
-Fournissez au moins un moyen de contact : email, formulaire, téléphone, etc.
+    Fournissez au moins un moyen de contact : email, formulaire, téléphone, etc.
 
 !!! warning "HTTPS obligatoire"
-Toutes les URLs (sauf `mailto:` et `tel:`) DOIVENT utiliser HTTPS. BunkerWeb convertit les URL non‑HTTPS pour la conformité.
+    Toutes les URLs (sauf `mailto:` et `tel:`) DOIVENT utiliser HTTPS. BunkerWeb convertit les URL non‑HTTPS pour la conformité.
 
 ### Exemples
 

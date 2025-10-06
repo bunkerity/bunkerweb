@@ -4,6 +4,9 @@ repo_url: https://github.com/bunkerity/bunkerweb
 site_description: Documentation of BunkerWeb, the open source and next generation WAF.
 copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
 
+exclude_docs: |
+  node_modules/**
+
 nav: # language-agnostic structure (same file names in each locale folder)
   - Introduction: "index.md"
   - Concepts: "concepts.md"

@@ -19,6 +19,15 @@ html {
   --md-text-font: "Roboto";
 }
 
+.md-header__inner {
+  max-width: none;
+  width: 100%;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
 .md-footer {
   background-color: #125678;
 }
@@ -43,6 +52,51 @@ article label > a {
 /* lighter base tab color */
 nav.md-tabs ul li a {
   opacity: 0.9;
+}
+
+/* Make top navigation span full width with centered content */
+nav.md-tabs {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+nav.md-tabs .md-tabs__inner {
+  max-width: none;
+  width: 100%;
+  justify-content: center;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+nav.md-tabs .md-tabs__list {
+  width: 100%;
+  max-width: 95%;
+  margin: 0 auto;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+}
+
+nav.md-tabs .md-tabs__item {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav.md-tabs .md-tabs__item a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0;
+}
+
+nav.md-tabs .md-grid {
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 /* active desktop tabs nav */

@@ -17,10 +17,10 @@
 4.  **重要提示：** 确保 `ANTIBOT_URI` 是您网站上一个未被使用的唯一 URL。
 
 !!! important "关于 `ANTIBOT_URI` 设置"
-确保 `ANTIBOT_URI` 是您网站上一个未被使用的唯一 URL。
+    确保 `ANTIBOT_URI` 是您网站上一个未被使用的唯一 URL。
 
 !!! warning "集群环境中的会话配置"
-antibot 功能使用 cookie 来跟踪用户是否已完成挑战。如果您在集群环境中运行 BunkerWeb（多个 BunkerWeb 实例），您**必须**正确配置会话管理。这涉及在所有 BunkerWeb 实例中将 `SESSIONS_SECRET` 和 `SESSIONS_NAME` 设置设置为**相同的值**。如果您不这样做，用户可能会被反复提示完成 antibot 挑战。您可以在[此处](#sessions)找到有关会话配置的更多信息。
+    antibot 功能使用 cookie 来跟踪用户是否已完成挑战。如果您在集群环境中运行 BunkerWeb（多个 BunkerWeb 实例），您**必须**正确配置会话管理。这涉及在所有 BunkerWeb 实例中将 `SESSIONS_SECRET` 和 `SESSIONS_NAME` 设置设置为**相同的值**。如果您不这样做，用户可能会被反复提示完成 antibot 挑战。您可以在[此处](#sessions)找到有关会话配置的更多信息。
 
 ### 通用设置
 
@@ -80,8 +80,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | ------------- | ------ | --------- | ---- | ------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | no   | **启用 Antibot：** 设置为 `cookie` 以启用 Cookie 挑战。 |
 
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
-
 === "JavaScript"
 
     JavaScript 挑战要求客户端使用 JavaScript 解决一个计算任务。这种机制确保客户端启用了 JavaScript 并且可以执行所需的代码，这通常超出了大多数机器人的能力。
@@ -102,8 +100,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | 设置          | 默认值 | 上下文    | 多个 | 描述                                                            |
     | ------------- | ------ | --------- | ---- | --------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`   | multisite | no   | **启用 Antibot：** 设置为 `javascript` 以启用 JavaScript 挑战。 |
-
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
 
 === "Captcha"
 
@@ -138,8 +134,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `USE_ANTIBOT`              | `no`                                                   | multisite | no   | **启用 Antibot：** 设置为 `captcha` 以启用 Captcha 挑战。                                                                                                            |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | multisite | no   | **Captcha 字母表：** 用于生成 CAPTCHA 的字符字符串。支持的字符：所有字母 (a-z, A-Z)、数字 2-9（不包括 0 和 1）以及特殊字符：```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
-
 === "reCAPTCHA"
 
     启用后，reCAPTCHA 会在后台运行 (v3)，根据用户行为分配一个分数。低于配置阈值的分数将提示进一步验证或阻止请求。对于可见的挑战 (v2)，用户必须与 reCAPTCHA 小部件交互才能继续。
@@ -165,8 +159,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_RECAPTCHA_JA4`        |        | multisite | no   | 可选的 JA4 TLS 指纹，包含在企业评估中。                                  |
     | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`  | multisite | no   | 通过所需的最低分数（适用于经典 v3 和新版本）。                           |
 
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
-
 === "hCaptcha"
 
     启用后，hCaptcha 提供了一个有效的 reCAPTCHA 替代方案，它通过验证用户交互而无需依赖评分机制。它用一个简单的交互式测试来挑战用户，以确认他们的合法性。
@@ -181,8 +173,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_HCAPTCHA_SITEKEY` |        | multisite | no   | **hCaptcha 站点密钥：** 您的 hCaptcha 站点密钥（从 hCaptcha 获取）。 |
     | `ANTIBOT_HCAPTCHA_SECRET`  |        | multisite | no   | **hCaptcha 密钥：** 您的 hCaptcha 密钥（从 hCaptcha 获取）。         |
 
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
-
 === "Turnstile"
 
     Turnstile 是一种现代、注重隐私的挑战机制，它利用 Cloudflare 的技术来检测和阻止自动化流量。它以一种无缝、后台的方式验证用户交互，为合法用户减少了摩擦，同时有效地阻止了机器人。
@@ -196,8 +186,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `USE_ANTIBOT`               | `no`   | multisite | no   | **启用 Antibot：** 设置为 `turnstile` 以启用 Turnstile 挑战。            |
     | `ANTIBOT_TURNSTILE_SITEKEY` |        | multisite | no   | **Turnstile 站点密钥：** 您的 Turnstile 站点密钥（从 Cloudflare 获取）。 |
     | `ANTIBOT_TURNSTILE_SECRET`  |        | multisite | no   | **Turnstile 密钥：** 您的 Turnstile 密钥（从 Cloudflare 获取）。         |
-
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
 
 === "mCaptcha"
 
@@ -215,8 +203,6 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
     | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | multisite | no   | **mCaptcha 站点密钥：** 您的 mCaptcha 站点密钥（从 mCaptcha 获取）。 |
     | `ANTIBOT_MCAPTCHA_SECRET`  |                             | multisite | no   | **mCaptcha 密钥：** 您的 mCaptcha 密钥（从 mCaptcha 获取）。         |
     | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | multisite | no   | **mCaptcha 域：** 用于 mCaptcha 挑战的域。                           |
-
-    有关其他配置选项，请参阅[通用设置](#common-settings)。
 
 ### 示例配置
 

@@ -35,10 +35,10 @@ Führen Sie die folgenden Schritte aus, um die CORS-Funktion zu konfigurieren un
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | nein     | **Nicht autorisierte Ursprünge ablehnen:** Wenn `yes`, werden Anfragen von nicht autorisierten Ursprüngen mit einem Fehlercode abgelehnt. |
 
 !!! tip "Optimierung von Preflight-Anfragen"
-Die Einstellung `CORS_MAX_AGE` bestimmt, wie lange Browser die Ergebnisse einer Preflight-Anfrage zwischenspeichern. Ein höherer Wert (wie der Standardwert von 86400 Sekunden/24 Stunden) reduziert die Anzahl der Preflight-Anfragen und verbessert die Leistung für häufig aufgerufene Ressourcen.
+    Die Einstellung `CORS_MAX_AGE` bestimmt, wie lange Browser die Ergebnisse einer Preflight-Anfrage zwischenspeichern. Ein höherer Wert (wie der Standardwert von 86400 Sekunden/24 Stunden) reduziert die Anzahl der Preflight-Anfragen und verbessert die Leistung für häufig aufgerufene Ressourcen.
 
 !!! warning "Sicherheitshinweise"
-Seien Sie vorsichtig, wenn Sie `CORS_ALLOW_ORIGIN` auf `*` (alle Ursprünge) oder `CORS_ALLOW_CREDENTIALS` auf `yes` setzen, da diese Konfigurationen bei unsachgemäßer Verwaltung Sicherheitsrisiken mit sich bringen können. Es ist im Allgemeinen sicherer, vertrauenswürdige Ursprünge explizit aufzulisten und die erlaubten Methoden und Header zu beschränken.
+    Seien Sie vorsichtig, wenn Sie `CORS_ALLOW_ORIGIN` auf `*` (alle Ursprünge) oder `CORS_ALLOW_CREDENTIALS` auf `yes` setzen, da diese Konfigurationen bei unsachgemäßer Verwaltung Sicherheitsrisiken mit sich bringen können. Es ist im Allgemeinen sicherer, vertrauenswürdige Ursprünge explizit aufzulisten und die erlaubten Methoden und Header zu beschränken.
 
 ### Beispielkonfigurationen
 

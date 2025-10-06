@@ -67,7 +67,7 @@ Sie können auch die Suchleiste verwenden und direkt einen Einstellungsnamen ang
 
     Die vollständige Liste der verfügbaren Einstellungen mit Beschreibungen und möglichen Werten ist im [Feature-Abschnitt](features.md) der Dokumentation verfügbar.
 
-## Multisite-Modus
+## Multisite-Modus {#multisite-mode}
 
 Das Verständnis des Multisite-Modus ist bei der Nutzung von BunkerWeb unerlässlich. Da unser Hauptaugenmerk auf dem Schutz von Webanwendungen liegt, ist unsere Lösung eng mit dem Konzept der "virtuellen Hosts" oder "vhosts" verbunden (weitere Informationen [hier](https://en.wikipedia.org/wiki/Virtual_hosting)). Diese virtuellen Hosts ermöglichen die Bereitstellung mehrerer Webanwendungen von einer einzigen Instanz oder einem Cluster aus.
 
@@ -107,7 +107,7 @@ Bitte beachten Sie, dass der Multisite-Modus bei Verwendung der Web-Benutzerober
 
     Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples)-Verzeichnis des Repositorys.
 
-## Benutzerdefinierte Konfigurationen
+## Benutzerdefinierte Konfigurationen {#custom-configurations}
 
 Um einzigartige Herausforderungen zu bewältigen und spezifische Anwendungsfälle zu bedienen, bietet BunkerWeb die Flexibilität von benutzerdefinierten Konfigurationen. Während die bereitgestellten Einstellungen und [externen Plugins](plugins.md) eine breite Palette von Szenarien abdecken, kann es Situationen geben, die zusätzliche Anpassungen erfordern.
 
@@ -163,7 +163,7 @@ Durch Angabe des entsprechenden Datenbank-URI in der Konfiguration können Sie B
   <figcaption>Datenbankschema</figcaption>
 </figure>
 
-## Scheduler
+## Scheduler {#scheduler}
 
 Für eine nahtlose Koordination und Automatisierung verwendet BunkerWeb einen spezialisierten Dienst, der als Scheduler bekannt ist. Der Scheduler spielt eine entscheidende Rolle bei der Gewährleistung eines reibungslosen Betriebs, indem er die folgenden Aufgaben ausführt:
 
@@ -194,7 +194,7 @@ Seit Version 1.6.0 verfügt der Scheduler über ein integriertes System zur Zust
 
 Das Intervall für die Zustandsprüfung wird durch die Umgebungsvariable `HEALTHCHECK_INTERVAL` festgelegt, mit einem Standardwert von `30`, was bedeutet, dass der Scheduler den Zustand der Instanzen alle 30 Sekunden überprüft.
 
-## Vorlagen
+## Vorlagen {#templates}
 
 BunkerWeb nutzt die Leistungsfähigkeit von Vorlagen, um den Konfigurationsprozess zu vereinfachen und die Flexibilität zu erhöhen. Vorlagen bieten einen strukturierten und standardisierten Ansatz zur Definition von Einstellungen und benutzerdefinierten Konfigurationen, der Konsistenz und Benutzerfreundlichkeit gewährleistet.
 

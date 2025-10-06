@@ -29,7 +29,7 @@ Führen Sie die folgenden Schritte aus, um die Bad Behavior-Funktion zu konfigur
 5.  **Sperrbereich wählen:** Entscheiden Sie mit der Einstellung `BAD_BEHAVIOR_BAN_SCOPE`, ob die Sperren nur für den aktuellen Dienst oder global für alle Dienste gelten sollen.
 
 !!! tip "Stream-Modus"
-Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen und löst dieses Verhalten aus.
+    Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen und löst dieses Verhalten aus.
 
 ### Konfigurationseinstellungen
 
@@ -43,10 +43,10 @@ Im **Stream-Modus** wird nur der Statuscode `444` als „schlecht“ angesehen u
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | nein     | **Sperrbereich:** Legt fest, ob Sperren nur für den aktuellen Dienst (`service`) oder für alle Dienste (`global`) gelten.                                                    |
 
 !!! warning "Falsch-Positive"
-Seien Sie vorsichtig bei der Einstellung des Schwellenwerts und der Zählzeit. Zu niedrige Werte können versehentlich legitime Benutzer sperren, die beim Surfen auf Ihrer Website auf Fehler stoßen.
+    Seien Sie vorsichtig bei der Einstellung des Schwellenwerts und der Zählzeit. Zu niedrige Werte können versehentlich legitime Benutzer sperren, die beim Surfen auf Ihrer Website auf Fehler stoßen.
 
 !!! tip "Anpassen Ihrer Konfiguration"
-Beginnen Sie mit konservativen Einstellungen (höherer Schwellenwert, kürzere Sperrzeit) und passen Sie diese je nach Ihren spezifischen Bedürfnissen und Verkehrsmustern an. Überwachen Sie Ihre Protokolle, um sicherzustellen, dass legitime Benutzer nicht fälschlicherweise gesperrt werden.
+    Beginnen Sie mit konservativen Einstellungen (höherer Schwellenwert, kürzere Sperrzeit) und passen Sie diese je nach Ihren spezifischen Bedürfnissen und Verkehrsmustern an. Überwachen Sie Ihre Protokolle, um sicherzustellen, dass legitime Benutzer nicht fälschlicherweise gesperrt werden.
 
 ### Beispielkonfigurationen
 

@@ -25,10 +25,10 @@ Comment ça marche :
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l’invite d’authentification.          |
 
 !!! warning "Sécurité"
-Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
+    Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
 
 !!! tip "Plusieurs comptes"
-Définissez des paires `AUTH_BASIC_USER[_n]`/`AUTH_BASIC_PASSWORD[_n]` pour gérer plusieurs utilisateurs.
+    Définissez des paires `AUTH_BASIC_USER[_n]`/`AUTH_BASIC_PASSWORD[_n]` pour gérer plusieurs utilisateurs.
 
 ### Exemples
 

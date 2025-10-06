@@ -35,10 +35,10 @@ Siga estos pasos para configurar y usar la función CORS:
 | `CORS_DENY_REQUEST`            | `yes`                                                                                | multisite | no       | **Denegar Orígenes No Autorizados:** Cuando es `yes`, las solicitudes de orígenes no autorizados se deniegan con un código de error.                       |
 
 !!! tip "Optimizando las Solicitudes de Preflight"
-El ajuste `CORS_MAX_AGE` determina cuánto tiempo los navegadores almacenarán en caché los resultados de una solicitud de preflight. Establecer esto en un valor más alto (como el predeterminado de 86400 segundos/24 horas) reduce el número de solicitudes de preflight, mejorando el rendimiento para los recursos a los que se accede con frecuencia.
+    El ajuste `CORS_MAX_AGE` determina cuánto tiempo los navegadores almacenarán en caché los resultados de una solicitud de preflight. Establecer esto en un valor más alto (como el predeterminado de 86400 segundos/24 horas) reduce el número de solicitudes de preflight, mejorando el rendimiento para los recursos a los que se accede con frecuencia.
 
 !!! warning "Consideraciones de Seguridad"
-Tenga cuidado al establecer `CORS_ALLOW_ORIGIN` en `*` (todos los orígenes) o `CORS_ALLOW_CREDENTIALS` en `yes` porque estas configuraciones pueden introducir riesgos de seguridad si no se gestionan adecuadamente. Generalmente es más seguro enumerar explícitamente los orígenes de confianza y limitar los métodos y encabezados permitidos.
+    Tenga cuidado al establecer `CORS_ALLOW_ORIGIN` en `*` (todos los orígenes) o `CORS_ALLOW_CREDENTIALS` en `yes` porque estas configuraciones pueden introducir riesgos de seguridad si no se gestionan adecuadamente. Generalmente es más seguro enumerar explícitamente los orígenes de confianza y limitar los métodos y encabezados permitidos.
 
 ### Configuraciones de Ejemplo
 

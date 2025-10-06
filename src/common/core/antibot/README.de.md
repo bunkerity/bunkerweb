@@ -17,10 +17,10 @@ Befolgen Sie diese Schritte, um Antibot zu aktivieren und zu konfigurieren:
 4. Wichtig: Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
 
 !!! important "Über den Parameter `ANTIBOT_URI`"
-Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
+    Stellen Sie sicher, dass `ANTIBOT_URI` eine eindeutige URL Ihrer Website ist und nirgendwo anders verwendet wird.
 
 !!! warning "Sitzungen in Cluster-Umgebungen"
-Die Antibot-Funktion verwendet Cookies, um zu verfolgen, ob ein Benutzer die Herausforderung abgeschlossen hat. Wenn Sie BunkerWeb in einem Cluster (mehrere Instanzen) betreiben, müssen Sie die Sitzungsverwaltung korrekt konfigurieren: Setzen Sie `SESSIONS_SECRET` und `SESSIONS_NAME` auf allen BunkerWeb-Instanzen auf dieselben Werte. Andernfalls könnten Benutzer aufgefordert werden, die Herausforderung zu wiederholen. Weitere Informationen zur Sitzungskonfiguration finden Sie [hier](#sessions).
+    Die Antibot-Funktion verwendet Cookies, um zu verfolgen, ob ein Benutzer die Herausforderung abgeschlossen hat. Wenn Sie BunkerWeb in einem Cluster (mehrere Instanzen) betreiben, müssen Sie die Sitzungsverwaltung korrekt konfigurieren: Setzen Sie `SESSIONS_SECRET` und `SESSIONS_NAME` auf allen BunkerWeb-Instanzen auf dieselben Werte. Andernfalls könnten Benutzer aufgefordert werden, die Herausforderung zu wiederholen. Weitere Informationen zur Sitzungskonfiguration finden Sie [hier](#sessions).
 
 ### Allgemeine Parameter
 

@@ -10,7 +10,7 @@ El complemento de Let's Encrypt simplifica la gestión de certificados SSL/TLS a
 6.  Todo el proceso está totalmente automatizado, requiriendo una intervención mínima después de la configuración inicial.
 
 !!! info "Requisitos previos"
-Para utilizar esta función, asegúrese de que los **registros A** de DNS adecuados estén configurados para cada dominio, apuntando a la(s) IP(s) pública(s) donde BunkerWeb es accesible. Sin una configuración de DNS correcta, el proceso de verificación del dominio fallará.
+    Para utilizar esta función, asegúrese de que los **registros A** de DNS adecuados estén configurados para cada dominio, apuntando a la(s) IP(s) pública(s) donde BunkerWeb es accesible. Sin una configuración de DNS correcta, el proceso de verificación del dominio fallará.
 
 ### Cómo usar
 
@@ -24,10 +24,10 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 6.  **Deje que BunkerWeb se encargue del resto:** Una vez configurado, los certificados se emiten, instalan y renuevan automáticamente según sea necesario.
 
 !!! tip "Perfiles de Certificado"
-Let's Encrypt proporciona diferentes perfiles de certificado para diferentes casos de uso: - **classic**: Certificados de propósito general con una validez de 90 días (predeterminado) - **tlsserver**: Optimizado para la autenticación de servidores TLS con una validez de 90 días y una carga útil más pequeña - **shortlived**: Seguridad mejorada con una validez de 7 días para entornos automatizados - **custom**: Si su servidor ACME admite un perfil diferente, configúrelo usando `LETS_ENCRYPT_CUSTOM_PROFILE`.
+    Let's Encrypt proporciona diferentes perfiles de certificado para diferentes casos de uso: - **classic**: Certificados de propósito general con una validez de 90 días (predeterminado) - **tlsserver**: Optimizado para la autenticación de servidores TLS con una validez de 90 días y una carga útil más pequeña - **shortlived**: Seguridad mejorada con una validez de 7 días para entornos automatizados - **custom**: Si su servidor ACME admite un perfil diferente, configúrelo usando `LETS_ENCRYPT_CUSTOM_PROFILE`.
 
 !!! info "Disponibilidad del Perfil"
-Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disponibles en todos los entornos o con todos los clientes ACME en este momento. El perfil `classic` tiene la compatibilidad más amplia y se recomienda para la mayoría de los usuarios. Si un perfil seleccionado no está disponible, el sistema volverá automáticamente al perfil `classic`.
+    Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disponibles en todos los entornos o con todos los clientes ACME en este momento. El perfil `classic` tiene la compatibilidad más amplia y se recomienda para la mayoría de los usuarios. Si un perfil seleccionado no está disponible, el sistema volverá automáticamente al perfil `classic`.
 
 ### Ajustes de Configuración
 
@@ -50,7 +50,7 @@ Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disp
 !!! info "Información y comportamiento" - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él. - Si no se proporciona ningún ajuste `LETS_ENCRYPT_DNS_PROPAGATION`, se utiliza el tiempo de propagación predeterminado del proveedor. - La automatización completa de Let's Encrypt utilizando el desafío `http` funciona en modo de flujo (stream) siempre que abra el puerto `80/tcp` desde el exterior. Utilice el ajuste `LISTEN_STREAM_PORT_SSL` para elegir su puerto de escucha SSL/TLS. - Si `LETS_ENCRYPT_PASSTHROUGH` se establece en `yes`, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt.
 
 !!! tip "Desafíos HTTP vs. DNS"
-**Los desafíos HTTP** son más fáciles de configurar y funcionan bien para la mayoría de los sitios web:
+    **Los desafíos HTTP** son más fáciles de configurar y funcionan bien para la mayoría de los sitios web:
 
     - Requiere que su sitio web sea accesible públicamente en el puerto 80
     - Configurado automáticamente por BunkerWeb
@@ -64,10 +64,10 @@ Tenga en cuenta que los perfiles `tlsserver` y `shortlived` pueden no estar disp
     - Útil cuando el puerto 80 está bloqueado o no está disponible
 
 !!! warning "Certificados comodín"
-Los certificados comodín solo están disponibles con desafíos DNS. Si desea utilizarlos, debe establecer el ajuste `USE_LETS_ENCRYPT_WILDCARD` en `yes` y configurar correctamente las credenciales de su proveedor de DNS.
+    Los certificados comodín solo están disponibles con desafíos DNS. Si desea utilizarlos, debe establecer el ajuste `USE_LETS_ENCRYPT_WILDCARD` en `yes` y configurar correctamente las credenciales de su proveedor de DNS.
 
 !!! warning "Límites de velocidad"
-Let's Encrypt impone límites de velocidad en la emisión de certificados. Al probar las configuraciones, utilice el entorno de prueba estableciendo `USE_LETS_ENCRYPT_STAGING` en `yes` para evitar alcanzar los límites de velocidad de producción. Los certificados de prueba no son de confianza para los navegadores, pero son útiles para validar su configuración.
+    Let's Encrypt impone límites de velocidad en la emisión de certificados. Al probar las configuraciones, utilice el entorno de prueba estableciendo `USE_LETS_ENCRYPT_STAGING` en `yes` para evitar alcanzar los límites de velocidad de producción. Los certificados de prueba no son de confianza para los navegadores, pero son útiles para validar su configuración.
 
 ### Proveedores de DNS compatibles
 

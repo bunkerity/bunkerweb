@@ -18,14 +18,14 @@ Order your [BunkerWeb Cloud instance](https://panel.bunkerweb.io/store/bunkerweb
 
 If you are interested in the BunkerWeb Cloud offering, don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) so we can discuss your needs.
 
-## All-In-One (AIO) Image
+## All-In-One (AIO) Image {#all-in-one-aio-image}
 
 <figure markdown>
   ![AIO Architecture Graph Placeholder](assets/img/aio-graph-placeholder.png){ align=center, width="600" }
   <figcaption>BunkerWeb All-In-One Architecture (AIO)</figcaption>
 </figure>
 
-### Deployment
+### Deployment {#deployment}
 
 To deploy the all-in-one container, all you have to do is run the following command:
 
@@ -121,14 +121,14 @@ By default, the setup wizard is automagically launched when you run the AIO cont
 
 > Follow the next steps in the [Quickstart guide](quickstart-guide.md#complete-the-setup-wizard) to set up the Web UI.
 
-### Redis Integration
+### Redis Integration {#redis-integration}
 
 The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](advanced.md#persistence-of-bans-and-reports). To manage Redis:
 
 - To disable Redis, set `USE_REDIS=no` or point `REDIS_HOST` to an external host.
 - Redis logs appear with `[REDIS]` prefix in Docker logs and `/var/log/bunkerweb/redis.log`.
 
-### CrowdSec Integration
+### CrowdSec Integration {#crowdsec-integration}
 
 The BunkerWeb **All-In-One** Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.
 
@@ -754,7 +754,7 @@ sudo ./install-bunkerweb.sh --yes --api
     - Interactive mode (default) will prompt for missing required values
     - Non-interactive mode (`--yes`) requires all necessary options to be provided via command line
 
-#### CrowdSec Integration with the Script
+#### CrowdSec Integration with the Script {#crowdsec-integration-with-the-script}
 
 If you opt to install CrowdSec during the interactive setup, the script fully automates its integration with BunkerWeb:
 
@@ -1199,7 +1199,7 @@ networks:
     name: bw-services
 ```
 
-### Namespaces
+### Namespaces {#namespaces}
 
 Starting from version `1.6.0`, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "*clusters*" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the `NAMESPACE` label on your services. Here's an example:
 
@@ -1335,7 +1335,7 @@ spec:
 ...
 ```
 
-### Namespaces
+### Namespaces {#namespaces_1}
 
 Starting from version `1.6.0`, BunkerWeb's autoconf stacks now support namespaces. This feature enables you to manage multiple clusters of BunkerWeb instances and services on the same Kubernetes cluster. To take advantage of namespaces, simply set the `namespace` metadata field on your BunkerWeb instances and services. Here's an example:
 
@@ -1842,7 +1842,7 @@ networks:
     name: bw-services
 ```
 
-### Namespaces
+### Namespaces {#namespaces_2}
 
 Starting from version `1.6.0`, BunkerWeb's Autoconf stacks now support namespaces. This feature enables you to manage multiple "*clusters*" of BunkerWeb instances and services on the same Docker host. To take advantage of namespaces, simply set the `NAMESPACE` label on your services. Here's an example:
 

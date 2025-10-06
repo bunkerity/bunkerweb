@@ -34,10 +34,10 @@ Siga estos pasos para configurar y usar la función BunkerNet:
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | no       | **Servidor BunkerNet:** La dirección del servidor de la API de BunkerNet para compartir inteligencia sobre amenazas.    |
 
 !!! tip "Protección de Red"
-Cuando BunkerNet detecta que una dirección IP ha estado involucrada en actividades maliciosas en múltiples instancias de BunkerWeb, añade esa IP a una lista negra colectiva. Esto proporciona una capa de defensa proactiva, protegiendo su sitio de amenazas antes de que puedan atacarlo directamente.
+    Cuando BunkerNet detecta que una dirección IP ha estado involucrada en actividades maliciosas en múltiples instancias de BunkerWeb, añade esa IP a una lista negra colectiva. Esto proporciona una capa de defensa proactiva, protegiendo su sitio de amenazas antes de que puedan atacarlo directamente.
 
 !!! info "Informes Anónimos"
-Al informar sobre amenazas a BunkerNet, su instancia solo comparte los datos necesarios para identificar la amenaza: la dirección IP, el motivo del bloqueo y datos contextuales mínimos. No se comparte información personal sobre sus usuarios ni detalles sensibles sobre su sitio.
+    Al informar sobre amenazas a BunkerNet, su instancia solo comparte los datos necesarios para identificar la amenaza: la dirección IP, el motivo del bloqueo y datos contextuales mínimos. No se comparte información personal sobre sus usuarios ni detalles sensibles sobre su sitio.
 
 ### Configuraciones de Ejemplo
 

@@ -18,14 +18,14 @@ Prueba nuestra [oferta de BunkerWeb Cloud](https://panel.bunkerweb.io/contact.ph
 
 Si estás interesado en la oferta de BunkerWeb Cloud, no dudes en [contactarnos](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) para que podamos discutir tus necesidades.
 
-## Imagen Todo en Uno (AIO)
+## Imagen Todo en Uno (AIO) {#all-in-one-aio-image}
 
 <figure markdown>
   ![Marcador de posición del gráfico de arquitectura AIO](assets/img/aio-graph-placeholder.png){ align=center, width="600" }
   <figcaption>Arquitectura Todo en Uno de BunkerWeb (AIO)</figcaption>
 </figure>
 
-### Despliegue
+### Despliegue {#deployment}
 
 Para desplegar el contenedor todo en uno, todo lo que tienes que hacer es ejecutar el siguiente comando:
 
@@ -53,8 +53,8 @@ La imagen Todo en Uno viene con varios servicios integrados, que se pueden contr
 - `SERVICE_SCHEDULER=yes` (predeterminado) - Habilita el servicio del Programador
 - `SERVICE_API=no` (predeterminado) - Habilita el servicio de la API (plano de control de FastAPI)
 - `AUTOCONF_MODE=no` (predeterminado) - Habilita el servicio de autoconfiguración
-- `USE_REDIS=yes` (predeterminado) - Habilita la instancia de [Redis](#integracion-con-redis) integrada
-- `USE_CROWDSEC=no` (predeterminado) - La integración con [CrowdSec](#integracion-con-crowdsec) está deshabilitada por defecto
+- `USE_REDIS=yes` (predeterminado) - Habilita la instancia de [Redis](#redis-integration) integrada
+- `USE_CROWDSEC=no` (predeterminado) - La integración con [CrowdSec](#crowdsec-integration) está deshabilitada por defecto
 
 ### Integración de la API
 
@@ -116,19 +116,19 @@ Los detalles sobre la autenticación, los permisos (ACL), la limitación de velo
 
 Por defecto, el asistente de configuración se inicia automáticamente cuando ejecutas el contenedor AIO por primera vez. Para acceder a él, sigue estos pasos:
 
-1.  **Inicia el contenedor AIO** como se indicó [anteriormente](#despliegue), asegurándote de que `SERVICE_UI=yes` (predeterminado).
+1.  **Inicia el contenedor AIO** como se indicó [anteriormente](#deployment), asegurándote de que `SERVICE_UI=yes` (predeterminado).
 2.  **Accede a la UI** a través de tu punto de acceso principal de BunkerWeb, p. ej., `https://tu-dominio`.
 
 > Sigue los siguientes pasos en la [Guía de inicio rápido](quickstart-guide.md#complete-the-setup-wizard) para configurar la Interfaz de Usuario Web.
 
-### Integración con Redis
+### Integración con Redis {#redis-integration}
 
 La imagen **Todo en Uno** de BunkerWeb incluye Redis listo para usar para la [persistencia de baneos e informes](advanced.md#persistence-of-bans-and-reports). Para gestionar Redis:
 
 - Para deshabilitar Redis, establece `USE_REDIS=no` o apunta `REDIS_HOST` a un host externo.
 - Los registros de Redis aparecen con el prefijo `[REDIS]` en los registros de Docker y en `/var/log/bunkerweb/redis.log`.
 
-### Integración con CrowdSec
+### Integración con CrowdSec {#crowdsec-integration}
 
 La imagen Docker **Todo en Uno** de BunkerWeb viene con CrowdSec totalmente integrado, sin necesidad de contenedores adicionales ni configuración manual. Sigue los pasos a continuación para habilitar, configurar y ampliar CrowdSec en tu despliegue.
 
@@ -251,19 +251,18 @@ docker run -d \
   -p 80:8080/tcp \
   -p 443:8443/tcp \
   -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5```
+  bunkerity/bunkerweb-all-in-one:1.6.5
+```
 
 *   El **registro local** se omite cuando `CROWDSEC_API` no es `127.0.0.1` o `localhost`.
 *   **AppSec** se deshabilita por defecto cuando se usa una API externa. Para habilitarlo, establece `CROWDSEC_APPSEC_URL` en tu punto final deseado.
 *   El registro del bouncer todavía se realiza contra la API remota.
 *   Para reutilizar una clave de bouncer existente, proporciona `CROWDSEC_API_KEY` con tu token pregenerado.
 
----
-
 !!! tip "Más opciones"
     Para una cobertura completa de todas las opciones de CrowdSec (escenarios personalizados, registros, solución de problemas y más), consulta la [documentación del plugin de BunkerWeb CrowdSec](features.md#crowdsec) o visita el [sitio web oficial de CrowdSec](https://www.crowdsec.net/?utm_source=external-docs&utm_medium=cta&utm_campaign=bunker-web-docs).
 
-## Docker
+## Docker {#docker}
 
 <figure markdown>
   ![Descripción general](assets/img/integration-docker.svg){ align=center, width="600" }
@@ -631,7 +630,7 @@ El script de instalación fácil es una herramienta poderosa diseñada para simp
 
 1.  **Análisis del sistema**: Detecta tu sistema operativo y lo verifica contra la lista de distribuciones compatibles.
 2.  **Personalización de la instalación**: En modo interactivo, te pide que elijas un tipo de instalación (Todo en uno, Gestor, Trabajador, etc.) y decidas si habilitar el asistente de configuración basado en la web.
-3.  **Integraciones opcionales**: Ofrece instalar y configurar automáticamente el [Motor de Seguridad CrowdSec](#integracion-de-crowdsec-con-el-script).
+3.  **Integraciones opcionales**: Ofrece instalar y configurar automáticamente el [Motor de Seguridad CrowdSec](#crowdsec-integration-with-the-script).
 4.  **Gestión de dependencias**: Instala la versión correcta de NGINX requerida por BunkerWeb desde fuentes oficiales y bloquea la versión para evitar actualizaciones no deseadas.
 5.  **Instalación de BunkerWeb**: Añade el repositorio de paquetes de BunkerWeb, instala los paquetes necesarios y bloquea la versión.
 6.  **Configuración del servicio**: Configura y habilita los servicios `systemd` correspondientes a tu tipo de instalación elegido.
@@ -663,7 +662,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 
 | Opción                  | Descripción                                                                                       |
 | :---------------------- | :------------------------------------------------------------------------------------------------ |
-| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.5`).                              |
+| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.5`).                                  |
 | `-w, --enable-wizard`   | Habilita el asistente de configuración.                                                           |
 | `-n, --no-wizard`       | Deshabilita el asistente de configuración.                                                        |
 | `-y, --yes`             | Se ejecuta en modo no interactivo usando las respuestas predeterminadas para todas las preguntas. |
@@ -750,7 +749,7 @@ sudo ./install-bunkerweb.sh --yes --api
     - El modo interactivo (predeterminado) pedirá los valores requeridos que falten
     - El modo no interactivo (`--yes`) requiere que todas las opciones necesarias se proporcionen a través de la línea de comandos
 
-#### Integración de CrowdSec con el script
+#### Integración de CrowdSec con el script {#crowdsec-integration-with-the-script}
 
 Si optas por instalar CrowdSec durante la configuración interactiva, el script automatiza completamente su integración con BunkerWeb:
 
@@ -1044,7 +1043,7 @@ export SERVICE_SCHEDULER=no
 export SERVICE_UI=yes
 ```
 
-## Autoconfiguración de Docker
+## Autoconfiguración de Docker {#docker-autoconf}
 
 <figure markdown>
   ![Descripción general](assets/img/integration-autoconf.svg){ align=center, width="600" }
@@ -1195,7 +1194,7 @@ networks:
     name: bw-services
 ```
 
-### Espacios de nombres
+### Espacios de nombres {#namespaces}
 
 A partir de la versión `1.6.0`, las pilas de Autoconfiguración de BunkerWeb ahora admiten espacios de nombres. Esta característica te permite gestionar múltiples "*clústeres*" de instancias y servicios de BunkerWeb en el mismo host de Docker. Para aprovechar los espacios de nombres, simplemente establece la etiqueta `NAMESPACE` en tus servicios. Aquí tienes un ejemplo:
 
@@ -1331,7 +1330,7 @@ spec:
 ...
 ```
 
-### Espacios de nombres
+### Espacios de nombres {#namespaces_1}
 
 A partir de la versión `1.6.0`, las pilas de autoconfiguración de BunkerWeb ahora admiten espacios de nombres. Esta característica te permite gestionar múltiples clústeres de instancias y servicios de BunkerWeb en el mismo clúster de Kubernetes. Para aprovechar los espacios de nombres, simplemente establece el campo de metadatos `namespace` en tus instancias y servicios de BunkerWeb. Aquí tienes un ejemplo:
 
@@ -1837,7 +1836,7 @@ networks:
     name: bw-services
 ```
 
-### Espacios de nombres
+### Espacios de nombres {#namespaces_2}
 
 A partir de la versión `1.6.0`, las pilas de Autoconfiguración de BunkerWeb ahora admiten espacios de nombres. Esta característica te permite gestionar múltiples "*clústeres*" de instancias y servicios de BunkerWeb en el mismo host de Docker. Para aprovechar los espacios de nombres, simplemente establece la etiqueta `NAMESPACE` en tus servicios. Aquí tienes un ejemplo:
 

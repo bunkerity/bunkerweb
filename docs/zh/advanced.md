@@ -568,7 +568,7 @@ systemctl status systemd-resolved
         name: bw-dns
     ```
 
-### 自定义配置
+### 自定义配置 {#custom-configurations}
 
 要自定义并向 BunkerWeb 添加自定义配置，您可以利用其 NGINX 基础。自定义 NGINX 配置可以添加到不同的 NGINX 上下文中，包括 ModSecurity Web 应用程序防火墙 (WAF) 的配置，这是 BunkerWeb 的核心组件。有关 ModSecurity 配置的更多详细信息，请参见[此处](features.md#custom-configurations)。
 
@@ -924,7 +924,7 @@ systemctl status systemd-resolved
 
     没有更新机制：替代方法是使用 `docker config rm` 删除现有配置，然后重新创建它。
 
-### 在生产环境中运行大量服务
+### 在生产环境中运行大量服务 {#running-many-services-in-production}
 
 #### 全局 CRS
 
@@ -954,7 +954,7 @@ SecRule REQUEST_HEADERS:Host "@rx ^app1\.example\.com$" "nolog"
 
 您需要在您的数据库服务器上增加 `max_allowed_packet` 的值。
 
-### 封禁和报告的持久化
+### 封禁和报告的持久化 {#persistence-of-bans-and-reports}
 
 默认情况下，BunkerWeb 将封禁和报告存储在本地的 Lua 数据存储中。虽然这种设置简单高效，但意味着当实例重启时数据会丢失。为了确保封禁和报告在重启后仍然存在，您可以将 BunkerWeb 配置为使用远程的 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 服务器。
 
@@ -2116,7 +2116,7 @@ sudo systemctl restart docker
 
 此全局配置将由所有容器继承。但是，在 `docker-compose.yml` 文件中按服务定义的任何日志记录配置都将覆盖 `daemon.json` 中的全局设置。
 
-## 安全性调整
+## 安全性调整 {#security-tuning}
 
 BunkerWeb 提供了许多安全功能，您可以通过[功能](features.md)进行配置。尽管设置的默认值确保了最低限度的“默认安全”，我们强烈建议您对它们进行调整。这样做，您不仅能够确保您所选择的安全级别，还能管理误报。
 
@@ -2567,6 +2567,10 @@ STREAM 支持 :x:
 
 ## 用户管理器 <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="用户管理器页面" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 用户管理插件提供了一个强大的界面，用于管理系统内的用户帐户。
 
 借助此插件，管理员可以轻松创建、更新和禁用用户帐户，管理用户角色，切换双因素身份验证 (2FA)，并查看详细的用户信息，例如上次登录时间戳和帐户状态（活动或非活动）。该插件在设计时考虑了安全性和易用性，简化了常规的用户管理任务，同时确保了合规性和可审计性。
@@ -2578,10 +2582,6 @@ STREAM 支持 :x:
 - **2FA 管理：** 根据管理决策禁用双因素身份验证。
 - **全面的用户洞察：** 监控关键用户数据，包括上次登录时间、帐户创建日期以及活动/非活动状态。
 - **审计日志记录：** 维护所有用户管理操作的审计跟踪，以增强安全性和合规性。
-
-<p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="用户管理器页面" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
 
 <figure markdown>
   ![概述](assets/img/user-manager.png){ align=center }

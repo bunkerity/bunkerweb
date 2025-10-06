@@ -19,7 +19,7 @@ Voici une liste des fonctionnalités offertes par l'interface utilisateur web :
 - Surveillez l'exécution des tâches et redémarrez-les si nécessaire
 - Afficher les journaux et rechercher des modèles
 
-## Conditions préalables
+## Conditions préalables {#prerequisites}
 
 Étant donné que l'interface utilisateur Web est une application Web, l'architecture recommandée consiste à exécuter BunkerWeb devant elle en tant que proxy inverse. La procédure d'installation recommandée consiste à utiliser l'assistant de configuration, qui vous guidera étape par étape, comme décrit dans le guide de [démarrage rapide](quickstart-guide.md).
 
@@ -33,7 +33,7 @@ Voici une liste des fonctionnalités offertes par l'interface utilisateur web :
     * N'exposez pas l'interface utilisateur Web sur Internet sans restrictions supplémentaires
     * Appliquez les bonnes pratiques répertoriées dans la [section Utilisations avancées](advanced.md#security-tuning) de la documentation en fonction de votre cas d'utilisation
 
-## Mise à niveau vers PRO
+## Mise à niveau vers PRO {#upgrade-to-pro}
 
 !!! tip "BunkerWeb PRO essai gratuit"
     Vous souhaitez tester rapidement BunkerWeb PRO pendant un mois ? Utilisez le code `freetrial` lors de votre commande sur le [Panel BunkerWeb](https://panel.bunkerweb.io/store/bunkerweb-pro?language=french&utm_campaign=self&utm_source=doc) ou en cliquant [ici](https://panel.bunkerweb.io/cart.php?language=french&a=add&pid=19&promocode=freetrial&utm_campaign=self&utm_source=doc) pour appliquer directement le code promo (sera effectif à la caisse).

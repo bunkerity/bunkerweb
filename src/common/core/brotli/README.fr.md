@@ -27,7 +27,7 @@ Comment ça marche :
 | `BROTLI_COMP_LEVEL` | `6`                                                                                                                                                                                                                                                                                                                                                                                                                              | multisite | non      | Niveau 0–11 : plus haut = meilleure compression mais plus de CPU. |
 
 !!! tip "Niveau de compression"
-`6` offre un bon compromis. Pour du statique et CPU disponible : 9–11. Pour du dynamique ou CPU contraint : 4–5.
+    `6` offre un bon compromis. Pour du statique et CPU disponible : 9–11. Pour du dynamique ou CPU contraint : 4–5.
 
 ### Exemples
 

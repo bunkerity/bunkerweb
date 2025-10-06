@@ -463,7 +463,7 @@
         attachable: true
     ```
 
-## 完成设置向导
+## 完成设置向导 {#complete-the-setup-wizard}
 
 !!! tip "访问设置向导"
 

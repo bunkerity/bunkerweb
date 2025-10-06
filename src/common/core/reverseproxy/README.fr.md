@@ -220,7 +220,7 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Reverse Proxy 
         - Surveillez les taux de réussite du cache et ajustez les paramètres en conséquence
 
 !!! danger "Utilisateurs de Docker Compose - Variables NGINX"
-Lorsque vous utilisez Docker Compose avec des variables NGINX dans vos configurations, vous devez échapper le signe dollar (`$`) en utilisant des doubles signes dollar (`$$`). Cela s'applique à tous les paramètres contenant des variables NGINX comme `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
+    Lorsque vous utilisez Docker Compose avec des variables NGINX dans vos configurations, vous devez échapper le signe dollar (`$`) en utilisant des doubles signes dollar (`$$`). Cela s'applique à tous les paramètres contenant des variables NGINX comme `$remote_addr`, `$proxy_add_x_forwarded_for`, etc.
 
     Sans cet échappement, Docker Compose essaiera de substituer ces variables par des variables d'environnement, qui n'existent généralement pas, ce qui entraînera des valeurs vides dans votre configuration NGINX.
 

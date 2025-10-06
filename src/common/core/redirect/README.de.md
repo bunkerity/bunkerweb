@@ -33,7 +33,7 @@ Führen Sie die folgenden Schritte aus, um die Umleitungsfunktion zu konfigurier
 - Verwenden Sie `302` (Found/Temporary Redirect), wenn die Umleitung vorübergehend ist oder wenn Sie die ursprüngliche URL in Zukunft möglicherweise wiederverwenden möchten.
 
 !!! info "Beibehaltung des Pfades"
-Wenn `REDIRECT_TO_REQUEST_URI` auf `yes` gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise `https://old-domain.com/blog/post-1` besucht und Sie eine Umleitung zu `https://new-domain.com` eingerichtet haben, wird er zu `https://new-domain.com/blog/post-1` umgeleitet.
+    Wenn `REDIRECT_TO_REQUEST_URI` auf `yes` gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise `https://old-domain.com/blog/post-1` besucht und Sie eine Umleitung zu `https://new-domain.com` eingerichtet haben, wird er zu `https://new-domain.com/blog/post-1` umgeleitet.
 
 ### Beispielkonfigurationen
 

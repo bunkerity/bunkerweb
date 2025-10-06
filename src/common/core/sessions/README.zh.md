@@ -32,7 +32,7 @@
 | `SESSIONS_CHECK_USER_AGENT` | `yes`    | global | 否   | **检查 User-Agent：** 设置为 `yes` 时，如果客户端 User-Agent 发生变化，则销毁会话。               |
 
 !!! warning "安全注意事项"
-`SESSIONS_SECRET` 设置对安全至关重要。在生产环境中：
+    `SESSIONS_SECRET` 设置对安全至关重要。在生产环境中：
 
     1. 使用一个强大的、随机的值（至少 32 个字符）
     2. 对此值保密
@@ -40,7 +40,7 @@
     4. 考虑使用环境变量或密钥管理，以避免以纯文本形式存储此值
 
 !!! tip "集群环境"
-如果您在负载均衡器后面运行多个 BunkerWeb 实例：
+    如果您在负载均衡器后面运行多个 BunkerWeb 实例：
 
     1. 将 `USE_REDIS` 设置为 `yes` 并配置您的 Redis 连接
     2. 确保所有实例使用完全相同的 `SESSIONS_SECRET` 和 `SESSIONS_NAME`

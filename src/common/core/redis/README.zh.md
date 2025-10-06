@@ -39,10 +39,10 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 | `REDIS_KEEPALIVE_POOL`    | `3`        | global | 否   | **Keepalive 池：** 池中保留的最大 Redis/Valkey 连接数。                          |
 
 !!! tip "使用 Redis Sentinel 实现高可用性"
-对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。
+    对于需要高可用性的生产环境，请配置 Redis Sentinel 设置。如果主 Redis 服务器不可用，这将提供自动故障转移功能。
 
 !!! warning "安全注意事项"
-在生产环境中使用 Redis 时：
+    在生产环境中使用 Redis 时：
 
     -   始终为 Redis 和 Sentinel 身份验证设置强密码
     -   考虑为 Redis 连接启用 SSL/TLS 加密
@@ -50,7 +50,7 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
     -   使用防火墙或网络分段限制对 Redis 端口的访问
 
 !!! info "集群要求"
-在集群中部署 BunkerWeb 时：
+    在集群中部署 BunkerWeb 时：
 
     -   所有 BunkerWeb 实例都应连接到相同的 Redis 或 Valkey 服务器或 Sentinel 集群
     -   在所有实例中配置相同的数据库编号

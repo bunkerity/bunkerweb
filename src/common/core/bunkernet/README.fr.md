@@ -24,7 +24,7 @@ Comment ça marche :
 | `BUNKERNET_SERVER` | `https://api.bunkerweb.io` | global    | non      | URL de l’API BunkerNet.             |
 
 !!! info "Confidentialité"
-Seules les données nécessaires à l’identification de la menace sont partagées (IP, raison du blocage, contexte minimal).
+    Seules les données nécessaires à l’identification de la menace sont partagées (IP, raison du blocage, contexte minimal).
 
 ### Intégration CrowdSec Console
 

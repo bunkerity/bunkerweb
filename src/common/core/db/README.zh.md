@@ -31,7 +31,7 @@
 !!! tip "数据库选择" - **SQLite**（默认）：由于其简单和基于文件的特性，非常适合单节点部署或测试环境。- **PostgreSQL**：由于其健壮性和并发支持，推荐用于具有多个 BunkerWeb 实例的生产环境。- **MySQL/MariaDB**：是 PostgreSQL 的一个很好的替代品，具有类似的生产级功能。- **Oracle**：适用于 Oracle 已经是标准数据库平台的企业环境。
 
 !!! info "SQLAlchemy URI 格式"
-数据库 URI 遵循 SQLAlchemy 格式：
+    数据库 URI 遵循 SQLAlchemy 格式：
 
     -   SQLite: `sqlite:////path/to/database.sqlite3`
     -   PostgreSQL: `postgresql://username:password@hostname:port/database`
@@ -39,7 +39,7 @@
     -   Oracle: `oracle://username:password@hostname:port/database`
 
 !!! warning "数据库维护"
-该插件会自动运行每日维护作业：
+    该插件会自动运行每日维护作业：
 
 - **清理多余的作业运行记录：** 根据 `DATABASE_MAX_JOBS_RUNS` 限制清除超出的历史。
 - **清理过期的 UI 会话：** 删除超过 `DATABASE_MAX_SESSION_AGE_DAYS` 的 UI 用户会话。
