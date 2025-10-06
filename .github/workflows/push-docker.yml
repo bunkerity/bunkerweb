@@ -59,10 +59,19 @@ jobs:
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Check ARM SSH connectivity
         run: |
+          echo "Testing SSH connectivity to ARM node..."
           for i in {1..5}; do
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP echo ok && break
+            if ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Connection test $i successful' && docker info > /dev/null 2>&1 && echo 'Docker is running'"; then
+              echo "✓ SSH connection and Docker verified"
+              break
+            fi
+            echo "Retry $i/5 failed, waiting 10 seconds..."
             sleep 10
           done
+          echo "Waiting for connection to stabilize..."
+          sleep 5
+          echo "Final connectivity check..."
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Final check OK' && uptime"
         env:
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
       - name: Setup Buildx (ARM)
