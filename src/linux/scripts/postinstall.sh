@@ -73,6 +73,7 @@ function migrate_file() {
 migrate_file "/var/tmp/variables.env" "/etc/bunkerweb/variables.env"
 migrate_file "/var/tmp/scheduler.env" "/etc/bunkerweb/scheduler.env"
 migrate_file "/var/tmp/ui.env" "/etc/bunkerweb/ui.env"
+migrate_file "/var/tmp/api.env" "/etc/bunkerweb/api.env"
 migrate_file "/var/tmp/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3"
 
 # Create /var/www/html if needed

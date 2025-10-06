@@ -154,6 +154,7 @@ case "$1" in
         remove_path "/var/tmp/variables.env" "temporary environment variables"
         remove_path "/var/tmp/ui.env" "UI environment variables"
         remove_path "/var/tmp/scheduler.env" "Scheduler environment variables"
+        remove_path "/var/tmp/api.env" "API environment variables"
         remove_path "/var/tmp/db.sqlite3" "database"
         if [ -f /etc/bunkerweb/variables.env ]; then
             do_and_check_cmd cp -f /etc/bunkerweb/variables.env /var/tmp/variables.env
@@ -163,6 +164,9 @@ case "$1" in
         fi
         if [ -f /etc/bunkerweb/scheduler.env ]; then
             do_and_check_cmd cp -f /etc/bunkerweb/scheduler.env /var/tmp/scheduler.env
+        fi
+        if [ -f /etc/bunkerweb/api.env ]; then
+            do_and_check_cmd cp -f /etc/bunkerweb/api.env /var/tmp/api.env
         fi
         if [ -f /var/lib/bunkerweb/db.sqlite3 ]; then
             do_and_check_cmd cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
