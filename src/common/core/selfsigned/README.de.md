@@ -8,7 +8,7 @@ So funktioniert's:
 4.  Die Verlängerung erfolgt automatisch vor dem Ablaufdatum.
 
 !!! warning "Browser-Warnungen"
-Browser zeigen Sicherheitswarnungen an, da ein selbstsigniertes Zertifikat nicht von einer vertrauenswürdigen CA ausgestellt wurde. Verwenden Sie in der Produktion vorzugsweise [Let's Encrypt](#lets-encrypt).
+    Browser zeigen Sicherheitswarnungen an, da ein selbstsigniertes Zertifikat nicht von einer vertrauenswürdigen CA ausgestellt wurde. Verwenden Sie in der Produktion vorzugsweise [Let's Encrypt](#lets-encrypt).
 
 ### Verwendung
 
@@ -18,7 +18,7 @@ Browser zeigen Sicherheitswarnungen an, da ein selbstsigniertes Zertifikat nicht
 4.  Betreff: Betrefffeld über `SELF_SIGNED_SSL_SUBJ`.
 
 !!! tip "Stream-Modus"
-Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL`, um den SSL/TLS-Listening-Port zu definieren.
+    Im Stream-Modus konfigurieren Sie `LISTEN_STREAM_PORT_SSL`, um den SSL/TLS-Listening-Port zu definieren.
 
 ### Parameter
 

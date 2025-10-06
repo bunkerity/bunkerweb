@@ -21,7 +21,7 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
 6.  **PROXY 协议：** 对于直接的代理通信，如果您的上游支持，请使用 `USE_PROXY_PROTOCOL` 启用。
 
 !!! danger "PROXY 协议警告"
-在未正确配置您的上游代理以发送 PROXY 协议标头的情况下启用 `USE_PROXY_PROTOCOL` 将**破坏您的应用程序**。仅当您确定您的上游代理已正确配置为发送 PROXY 协议信息时，才启用此设置。如果您的代理未发送 PROXY 协议标头，所有到 BunkerWeb 的连接都将因协议错误而失败。
+    在未正确配置您的上游代理以发送 PROXY 协议标头的情况下启用 `USE_PROXY_PROTOCOL` 将**破坏您的应用程序**。仅当您确定您的上游代理已正确配置为发送 PROXY 协议信息时，才启用此设置。如果您的代理未发送 PROXY 协议标头，所有到 BunkerWeb 的连接都将因协议错误而失败。
 
 ### 配置设置
 
@@ -35,13 +35,13 @@ Real IP 插件可确保 BunkerWeb 即使在代理后面也能正确识别客户�
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | 否   | **PROXY 协议：** 设置为 `yes` 以启用 PROXY 协议支持，用于直接的代理到 BunkerWeb 的通信。 |
 
 !!! tip "云提供商网络"
-如果您正在使用像 AWS、GCP 或 Azure 这样的云提供商，请考虑将其负载均衡器的 IP 范围添加到您的 `REAL_IP_FROM` 设置中，以确保正确的客户端 IP 识别。
+    如果您正在使用像 AWS、GCP 或 Azure 这样的云提供商，请考虑将其负载均衡器的 IP 范围添加到您的 `REAL_IP_FROM` 设置中，以确保正确的客户端 IP 识别。
 
 !!! danger "安全注意事项"
-仅在您的配置中包含受信任的代理 IP。添加不受信任的源可能会允许 IP 欺骗攻击，恶意行为者可以通过操纵标头来伪造客户端 IP。
+    仅在您的配置中包含受信任的代理 IP。添加不受信任的源可能会允许 IP 欺骗攻击，恶意行为者可以通过操纵标头来伪造客户端 IP。
 
 !!! info "多个 IP 地址"
-当 `REAL_IP_RECURSIVE` 启用并且标头包含多个 IP（例如，`X-Forwarded-For: client, proxy1, proxy2`）时，BunkerWeb 会将不在您受信任代理列表中的最左侧 IP 识别为客户端 IP。
+    当 `REAL_IP_RECURSIVE` 启用并且标头包含多个 IP（例如，`X-Forwarded-For: client, proxy1, proxy2`）时，BunkerWeb 会将不在您受信任代理列表中的最左侧 IP 识别为客户端 IP。
 
 ### 配置示例
 

@@ -29,13 +29,13 @@ Siga estos pasos para configurar y utilizar la función de compresión GZIP:
 | `GZIP_PROXIED`    | `no-cache no-store private expired auth`                                                                                                                                                                                                                                                                                                                                                                                         | multisite | no       | **Solicitudes Proxy:** Especifica qué solicitudes proxy deben comprimirse según las cabeceras de respuesta.                            |
 
 !!! tip "Optimizando el Nivel de Compresión"
-El nivel de compresión por defecto (5) ofrece un buen equilibrio entre la tasa de compresión y el uso de la CPU. Para contenido estático o cuando los recursos de la CPU del servidor son abundantes, considere aumentarlo a 7-9 para una compresión máxima. Para contenido dinámico o cuando los recursos de la CPU son limitados, es posible que desee utilizar 1-3 para una compresión más rápida con una reducción de tamaño razonable.
+    El nivel de compresión por defecto (5) ofrece un buen equilibrio entre la tasa de compresión y el uso de la CPU. Para contenido estático o cuando los recursos de la CPU del servidor son abundantes, considere aumentarlo a 7-9 para una compresión máxima. Para contenido dinámico o cuando los recursos de la CPU son limitados, es posible que desee utilizar 1-3 para una compresión más rápida con una reducción de tamaño razonable.
 
 !!! info "Soporte de Navegadores"
-GZIP es compatible con todos los navegadores modernos y ha sido el método de compresión estándar para las respuestas HTTP durante muchos años, lo que garantiza una excelente compatibilidad en todos los dispositivos y navegadores.
+    GZIP es compatible con todos los navegadores modernos y ha sido el método de compresión estándar para las respuestas HTTP durante muchos años, lo que garantiza una excelente compatibilidad en todos los dispositivos y navegadores.
 
 !!! warning "Compresión vs. Uso de CPU"
-Aunque la compresión GZIP reduce el ancho de banda y mejora los tiempos de carga, los niveles de compresión más altos consumen más recursos de la CPU. Para sitios de alto tráfico, encuentre el equilibrio adecuado entre la eficiencia de la compresión y el rendimiento del servidor.
+    Aunque la compresión GZIP reduce el ancho de banda y mejora los tiempos de carga, los niveles de compresión más altos consumen más recursos de la CPU. Para sitios de alto tráfico, encuentre el equilibrio adecuado entre la eficiencia de la compresión y el rendimiento del servidor.
 
 ### Configuraciones de Ejemplo
 

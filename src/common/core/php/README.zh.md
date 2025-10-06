@@ -28,16 +28,16 @@ PHP 插件为 BunkerWeb 提供了与 PHP-FPM 的无缝集成，从而为您的�
 | `LOCAL_PHP_PATH`  |        | multisite | 否   | **本地路径：** 本地 PHP-FPM 实例中包含文件的根文件夹。                        |
 
 !!! tip "本地与远程 PHP-FPM"
-选择最适合您基础架构的设置：
+    选择最适合您基础架构的设置：
 
     -   **本地 PHP-FPM** 由于基于套接字的通信而提供更好的性能，并且在 PHP 与 BunkerWeb 在同一台机器上运行时是理想选择。
     -   **远程 PHP-FPM** 通过允许在单独的服务器上进行 PHP 处理，提供了更大的灵活性和可伸缩性。
 
 !!! warning "路径配置"
-`REMOTE_PHP_PATH` 或 `LOCAL_PHP_PATH` 必须与存储 PHP 文件的实际文件系统路径匹配；否则，将发生“文件未找到”错误。
+    `REMOTE_PHP_PATH` 或 `LOCAL_PHP_PATH` 必须与存储 PHP 文件的实际文件系统路径匹配；否则，将发生“文件未找到”错误。
 
 !!! info "URL 重写"
-PHP 插件会自动配置 URL 重写以支持现代 PHP 应用程序。对不存在的文件的请求将被定向到 `index.php`，原始请求 URI 将作为查询参数提供。
+    PHP 插件会自动配置 URL 重写以支持现代 PHP 应用程序。对不存在的文件的请求将被定向到 `index.php`，原始请求 URI 将作为查询参数提供。
 
 ### 配置示例
 

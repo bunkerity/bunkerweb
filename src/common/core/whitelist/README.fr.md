@@ -8,7 +8,7 @@ Comment ça marche :
 4. Les listes peuvent être mises à jour automatiquement depuis des sources externes.
 
 !!! info "Mode stream"
-En stream, uniquement IP, rDNS et ASN sont évalués.
+    En stream, uniquement IP, rDNS et ASN sont évalués.
 
 ### Paramètres
 

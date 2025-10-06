@@ -28,16 +28,16 @@ Siga estos pasos para configurar y usar la función PHP:
 | `LOCAL_PHP_PATH`  |                   | multisite | no       | **Ruta Local:** Carpeta raíz que contiene los archivos en la instancia local de PHP-FPM.                              |
 
 !!! tip "PHP-FPM Local vs. Remoto"
-Elija la configuración que mejor se adapte a su infraestructura:
+    Elija la configuración que mejor se adapte a su infraestructura:
 
     -   **PHP-FPM local** ofrece un mejor rendimiento debido a la comunicación basada en sockets y es ideal cuando PHP se ejecuta en la misma máquina que BunkerWeb.
     -   **PHP-FPM remoto** proporciona más flexibilidad y escalabilidad al permitir que el procesamiento de PHP se realice en servidores separados.
 
 !!! warning "Configuración de la Ruta"
-La `REMOTE_PHP_PATH` o `LOCAL_PHP_PATH` debe coincidir con la ruta real del sistema de archivos donde se almacenan sus archivos PHP; de lo contrario, se producirá un error de "Archivo no encontrado".
+    La `REMOTE_PHP_PATH` o `LOCAL_PHP_PATH` debe coincidir con la ruta real del sistema de archivos donde se almacenan sus archivos PHP; de lo contrario, se producirá un error de "Archivo no encontrado".
 
 !!! info "Reescritura de URL"
-El complemento PHP configura automáticamente la reescritura de URL para admitir aplicaciones PHP modernas. Las solicitudes de archivos inexistentes se dirigirán a `index.php` con el URI de la solicitud original disponible como parámetro de consulta.
+    El complemento PHP configura automáticamente la reescritura de URL para admitir aplicaciones PHP modernas. Las solicitudes de archivos inexistentes se dirigirán a `index.php` con el URI de la solicitud original disponible como parámetro de consulta.
 
 ### Configuraciones de Ejemplo
 

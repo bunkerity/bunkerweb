@@ -19,7 +19,7 @@ Comment ça marche :
 5. Portée : `BAD_BEHAVIOR_BAN_SCOPE` (`service` ou `global`).
 
 !!! tip "Mode stream"
-En mode stream, seul `444` est considéré comme « mauvais ».
+    En mode stream, seul `444` est considéré comme « mauvais ».
 
 ### Paramètres
 
@@ -33,7 +33,7 @@ En mode stream, seul `444` est considéré comme « mauvais ».
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | non      | Portée du ban : site courant (`service`) ou global (`global`). |
 
 !!! warning "Faux positifs"
-Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.
+    Un seuil/fenêtre trop bas peut bannir des utilisateurs légitimes. Démarrez conservateur et ajustez.
 
 ### Exemples
 

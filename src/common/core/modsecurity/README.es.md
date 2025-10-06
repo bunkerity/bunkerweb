@@ -41,7 +41,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 | `USE_MODSECURITY_GLOBAL_CRS`          | `no`              | global    | no       | **CRS Global:** Cuando está habilitado, aplica las reglas de CRS globalmente a nivel HTTP en lugar de por servidor.                                                                                                                            |
 
 !!! warning "ModSecurity y el OWASP Core Rule Set"
-**Recomendamos encarecidamente mantener habilitados tanto ModSecurity como el OWASP Core Rule Set (CRS)** para proporcionar una protección robusta contra las vulnerabilidades web comunes. Aunque pueden ocurrir falsos positivos ocasionales, se pueden resolver con un poco de esfuerzo ajustando las reglas o utilizando exclusiones predefinidas.
+    **Recomendamos encarecidamente mantener habilitados tanto ModSecurity como el OWASP Core Rule Set (CRS)** para proporcionar una protección robusta contra las vulnerabilidades web comunes. Aunque pueden ocurrir falsos positivos ocasionales, se pueden resolver con un poco de esfuerzo ajustando las reglas o utilizando exclusiones predefinidas.
 
     El equipo de CRS mantiene activamente una lista de exclusiones para aplicaciones populares como WordPress, Nextcloud, Drupal y Cpanel, lo que facilita la integración sin afectar la funcionalidad. Los beneficios de seguridad superan con creces el mínimo esfuerzo de configuración necesario para solucionar los falsos positivos.
 
@@ -54,10 +54,10 @@ Seleccione una versión de CRS que se ajuste mejor a sus necesidades de segurida
 - **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
 
 !!! example "Compilación Nocturna"
-La **compilación nocturna** contiene las reglas más actualizadas, ofreciendo las últimas protecciones contra amenazas emergentes. Sin embargo, dado que se actualiza diariamente y puede incluir cambios experimentales o no probados, se recomienda utilizar primero la compilación nocturna en un **entorno de preproducción** antes de implementarla en producción.
+    La **compilación nocturna** contiene las reglas más actualizadas, ofreciendo las últimas protecciones contra amenazas emergentes. Sin embargo, dado que se actualiza diariamente y puede incluir cambios experimentales o no probados, se recomienda utilizar primero la compilación nocturna en un **entorno de preproducción** antes de implementarla en producción.
 
 !!! tip "Niveles de Paranoia"
-El OWASP Core Rule Set utiliza "niveles de paranoia" (PL) para controlar la rigurosidad de las reglas:
+    El OWASP Core Rule Set utiliza "niveles de paranoia" (PL) para controlar la rigurosidad de las reglas:
 
     -   **PL1 (predeterminado):** Protección básica con mínimos falsos positivos
     -   **PL2:** Seguridad más estricta con una coincidencia de patrones más rigurosa
@@ -113,7 +113,7 @@ En este ejemplo:
 - **Regla 3**: Elimina una regla específica (ID `930120`) para las solicitudes que coinciden con `/wp-json/yoast`.
 
 !!! info "Orden de ejecución"
-El orden de ejecución de ModSecurity en BunkerWeb es el siguiente, asegurando una progresión clara y lógica de la aplicación de reglas:
+    El orden de ejecución de ModSecurity en BunkerWeb es el siguiente, asegurando una progresión clara y lógica de la aplicación de reglas:
 
     1.  **Configuración de OWASP CRS**: Configuración base para el OWASP Core Rule Set.
     2.  **Configuración de Complementos Personalizados (`crs-plugins-before`)**: Ajustes específicos de los complementos, aplicados antes de cualquier regla de CRS.
@@ -137,7 +137,7 @@ El orden de ejecución de ModSecurity en BunkerWeb es el siguiente, asegurando u
 El OWASP Core Rule Set también admite una gama de **complementos** diseñados para ampliar su funcionalidad y mejorar la compatibilidad con aplicaciones o entornos específicos. Estos complementos pueden ayudar a ajustar el CRS para su uso con plataformas populares como WordPress, Nextcloud y Drupal, o incluso con configuraciones personalizadas. Para obtener más información y una lista de los complementos disponibles, consulte el [registro de complementos de OWASP CRS](https://github.com/coreruleset/plugin-registry).
 
 !!! tip "Descarga de complementos"
-El ajuste `MODSECURITY_CRS_PLUGINS` le permite descargar e instalar complementos para ampliar la funcionalidad del OWASP Core Rule Set (CRS). Este ajuste acepta una lista de nombres de complementos con etiquetas o URL opcionales, lo que facilita la integración de funciones de seguridad adicionales adaptadas a sus necesidades específicas.
+    El ajuste `MODSECURITY_CRS_PLUGINS` le permite descargar e instalar complementos para ampliar la funcionalidad del OWASP Core Rule Set (CRS). Este ajuste acepta una lista de nombres de complementos con etiquetas o URL opcionales, lo que facilita la integración de funciones de seguridad adicionales adaptadas a sus necesidades específicas.
 
     Aquí hay una lista no exhaustiva de valores aceptados para el ajuste `MODSECURITY_CRS_PLUGINS`:
 
@@ -146,7 +146,7 @@ El ajuste `MODSECURITY_CRS_PLUGINS` le permite descargar e instalar complementos
     *   `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` - Descargar el complemento directamente desde la URL.
 
 !!! warning "Falsos Positivos"
-Una configuración de seguridad más alta puede bloquear el tráfico legítimo. Comience con la configuración predeterminada y supervise los registros antes de aumentar los niveles de seguridad. Esté preparado para agregar reglas de exclusión para las necesidades específicas de su aplicación.
+    Una configuración de seguridad más alta puede bloquear el tráfico legítimo. Comience con la configuración predeterminada y supervise los registros antes de aumentar los niveles de seguridad. Esté preparado para agregar reglas de exclusión para las necesidades específicas de su aplicación.
 
 ### Configuraciones de Ejemplo
 
@@ -223,4 +223,4 @@ Una configuración de seguridad más alta puede bloquear el tráfico legítimo. 
     ```
 
 !!! note "Valores de tamaño legibles por humanos"
-Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+    Para los ajustes de tamaño como `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, se admiten los sufijos `k`, `m` y `g` (sin distinción entre mayúsculas y minúsculas) y representan kibibytes, mebibytes y gibibytes (múltiplos de 1024). Ejemplos: `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.

@@ -24,7 +24,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
 ### Configuración
 
 === "Docker"
-**Archivo de adquisición**
+    **Archivo de adquisición**
 
     Necesitará ejecutar una instancia de CrowdSec y configurarla para analizar los registros de BunkerWeb. Dado que BunkerWeb se basa en NGINX, puede usar el valor `nginx` para el parámetro `type` en su archivo de adquisición (suponiendo que los registros de BunkerWeb se almacenan tal cual sin datos adicionales):
 

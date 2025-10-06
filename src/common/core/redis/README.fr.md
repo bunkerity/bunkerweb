@@ -37,7 +37,7 @@ Comment ça marche :
 | `REDIS_KEEPALIVE_POOL`    | `3`        | global   | non      | Nb max de connexions conservées dans le pool.                  |
 
 !!! tip "Haute disponibilité"
-Configurez Redis Sentinel pour un failover automatique en production.
+    Configurez Redis Sentinel pour un failover automatique en production.
 
 !!! warning "Sécurité" - Mots de passe forts pour Redis et Sentinel - Envisagez SSL/TLS - Ne pas exposer Redis sur Internet - Restreignez l’accès au port Redis (pare‑feu, segmentation)
 

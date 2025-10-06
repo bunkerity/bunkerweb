@@ -27,7 +27,7 @@ Le plugin Limit permet d’appliquer des politiques de limitation pour garantir 
     | `LIMIT_REQ_RATE` | `2r/s` | multisite | oui      | **Limite de débit :** Taux de requêtes maximal au format `Nr/t`, où N est le nombre de requêtes et t est l'unité de temps : s (seconde), m (minute), h (heure), ou d (jour). |
 
 !!! tip "Format de la limitation de débit"
-Le format de la limite de débit est spécifié comme `Nr/t` où :
+    Le format de la limite de débit est spécifié comme `Nr/t` où :
 
     - `N` est le nombre de requêtes autorisées
     - `r` est la lettre littérale 'r' (pour 'requêtes')
@@ -51,7 +51,7 @@ Le format de la limite de débit est spécifié comme `Nr/t` où :
     L'utilisation des deux méthodes offre une protection complète contre divers types d'abus.
 
 !!! warning "Réglages adaptés"
-Des limites trop strictes peuvent impacter des clients légitimes, notamment pour HTTP/2 et HTTP/3 où les navigateurs utilisent souvent plusieurs flux. Les valeurs par défaut sont équilibrées pour la plupart des cas d'utilisation, mais envisagez de les ajuster en fonction des besoins de votre application et du comportement des utilisateurs.
+    Des limites trop strictes peuvent impacter des clients légitimes, notamment pour HTTP/2 et HTTP/3 où les navigateurs utilisent souvent plusieurs flux. Les valeurs par défaut sont équilibrées pour la plupart des cas d'utilisation, mais envisagez de les ajuster en fonction des besoins de votre application et du comportement des utilisateurs.
 
 ### Exemples de configuration
 

@@ -24,7 +24,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 ### 设置
 
 === "Docker"
-**采集文件**
+    **采集文件**
 
     您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。由于 BunkerWeb 基于 NGINX，您可以在采集文件中为 `type` 参数使用 `nginx` 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：
 

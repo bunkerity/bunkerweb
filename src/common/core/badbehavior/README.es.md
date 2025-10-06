@@ -29,7 +29,7 @@ Siga estos pasos para configurar y utilizar la función de Mal Comportamiento:
 5.  **Elija el ámbito del bloqueo:** Decida si los bloqueos deben aplicarse solo al servicio actual o globalmente a todos los servicios utilizando la configuración `BAD_BEHAVIOR_BAN_SCOPE`.
 
 !!! tip "Modo Stream"
-En **modo stream**, solo el código de estado `444` se considera "malo" y activará este comportamiento.
+    En **modo stream**, solo el código de estado `444` se considera "malo" y activará este comportamiento.
 
 ### Ajustes de configuración
 
@@ -43,10 +43,10 @@ En **modo stream**, solo el código de estado `444` se considera "malo" y activa
 | `BAD_BEHAVIOR_BAN_SCOPE`    | `service`                     | global    | no       | **Ámbito del bloqueo:** Determina si los bloqueos se aplican solo al servicio actual (`service`) o a todos los servicios (`global`).                                                                                                  |
 
 !!! warning "Falsos positivos"
-Tenga cuidado al establecer el umbral y el tiempo de conteo. Establecer estos valores demasiado bajos puede bloquear inadvertidamente a usuarios legítimos que encuentren errores mientras navegan por su sitio.
+    Tenga cuidado al establecer el umbral y el tiempo de conteo. Establecer estos valores demasiado bajos puede bloquear inadvertidamente a usuarios legítimos que encuentren errores mientras navegan por su sitio.
 
 !!! tip "Ajuste de su configuración"
-Comience con configuraciones conservadoras (umbral más alto, tiempo de bloqueo más corto) y ajústelas según sus necesidades específicas y patrones de tráfico. Supervise sus registros para asegurarse de que los usuarios legítimos no sean bloqueados por error.
+    Comience con configuraciones conservadoras (umbral más alto, tiempo de bloqueo más corto) y ajústelas según sus necesidades específicas y patrones de tráfico. Supervise sus registros para asegurarse de que los usuarios legítimos no sean bloqueados por error.
 
 ### Configuraciones de ejemplo
 

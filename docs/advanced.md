@@ -2567,6 +2567,10 @@ Customize the plugin behavior using the following settings:
 
 ## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
 
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 The User Management Plugin offers a robust interface for administering user accounts within your system.
 
 With this plugin, administrators can effortlessly create, update, and disable user accounts, manage user roles, toggle two-factor authentication (2FA), and view detailed user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.
@@ -2578,10 +2582,6 @@ With this plugin, administrators can effortlessly create, update, and disable us
 - **2FA Management:** Disable two-factor authentication based on administrative decisions.
 - **Comprehensive User Insights:** Monitor key user data including last login times, account creation dates, and active/inactive status.
 - **Audit Logging:** Maintain an audit trail for all user management actions for enhanced security and compliance.
-
-<p align="center">
-    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
 
 <figure markdown>
   ![Overview](assets/img/user-manager.png){ align=center }

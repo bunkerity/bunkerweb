@@ -32,13 +32,13 @@ Siga estos pasos para configurar y usar las características Pro:
 | `PRO_LICENSE_KEY` |                   | global   | no       | **Clave de Licencia Pro:** Su clave de licencia de BunkerWeb Pro para la autenticación. |
 
 !!! tip "Gestión de Licencias"
-Su licencia Pro está vinculada a su entorno de implementación específico. Si necesita transferir su licencia o tiene preguntas sobre su suscripción, póngase en contacto con el soporte a través del [Panel de BunkerWeb](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
+    Su licencia Pro está vinculada a su entorno de implementación específico. Si necesita transferir su licencia o tiene preguntas sobre su suscripción, póngase en contacto con el soporte a través del [Panel de BunkerWeb](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc).
 
 !!! info "Características Pro"
-Las características Pro específicas disponibles pueden evolucionar con el tiempo a medida que se agregan nuevas capacidades. El complemento Pro se encarga automáticamente de la instalación y configuración de todas las características disponibles.
+    Las características Pro específicas disponibles pueden evolucionar con el tiempo a medida que se agregan nuevas capacidades. El complemento Pro se encarga automáticamente de la instalación y configuración de todas las características disponibles.
 
 !!! warning "Requisitos de Red"
-El complemento Pro requiere acceso a Internet de salida para conectarse a la API de BunkerWeb para la verificación de la licencia y para descargar los complementos premium. Asegúrese de que su firewall permita conexiones a `api.bunkerweb.io` en el puerto 443 (HTTPS).
+    El complemento Pro requiere acceso a Internet de salida para conectarse a la API de BunkerWeb para la verificación de la licencia y para descargar los complementos premium. Asegúrese de que su firewall permita conexiones a `api.bunkerweb.io` en el puerto 443 (HTTPS).
 
 ### Preguntas Frecuentes
 

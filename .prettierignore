@@ -9,7 +9,7 @@ CHANGELOG.md
 CONTRIBUTING.md
 CODE_OF_CONDUCT.md
 LICENSE.md
-README.md
+README*.md
 SECURITY.md
 src/ui/app/templates/*
 src/common/core/*/ui/*

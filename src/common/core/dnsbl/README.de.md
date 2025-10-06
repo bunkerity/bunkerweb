@@ -34,17 +34,17 @@ Führen Sie die folgenden Schritte aus, um die DNSBL-Funktion zu konfigurieren u
 | `DNSBL_IGNORE_IP_URLS` | ``       | multisite | ja       | Durch Leerzeichen getrennte URLs, die IPs/CIDRs zum Überspringen bereitstellen. Unterstützt `http(s)://` und `file://`. |
 
 !!! tip "Auswahl von DNSBL-Servern"
-Wählen Sie seriöse DNSBL-Anbieter, um Falschmeldungen zu minimieren. Die Standardliste enthält etablierte Dienste, die für die meisten Websites geeignet sind:
+    Wählen Sie seriöse DNSBL-Anbieter, um Falschmeldungen zu minimieren. Die Standardliste enthält etablierte Dienste, die für die meisten Websites geeignet sind:
 
     - **bl.blocklist.de:** Listet IPs, die bei Angriffen auf andere Server erkannt wurden.
     - **sbl.spamhaus.org:** Konzentriert sich auf Spam-Quellen und andere bösartige Aktivitäten.
     - **xbl.spamhaus.org:** Zielt auf infizierte Systeme ab, wie z. B. kompromittierte Maschinen oder offene Proxys.
 
 !!! info "Wie DNSBL funktioniert"
-DNSBL-Server funktionieren, indem sie auf speziell formatierte DNS-Anfragen antworten. Wenn BunkerWeb eine IP-Adresse überprüft, kehrt es die IP um und hängt den DNSBL-Domainnamen an. Wenn die resultierende DNS-Anfrage eine „Erfolgs“-Antwort zurückgibt, wird die IP als auf der schwarzen Liste stehend betrachtet.
+    DNSBL-Server funktionieren, indem sie auf speziell formatierte DNS-Anfragen antworten. Wenn BunkerWeb eine IP-Adresse überprüft, kehrt es die IP um und hängt den DNSBL-Domainnamen an. Wenn die resultierende DNS-Anfrage eine „Erfolgs“-Antwort zurückgibt, wird die IP als auf der schwarzen Liste stehend betrachtet.
 
 !!! warning "Leistungsüberlegungen"
-Obwohl BunkerWeb DNSBL-Abfragen auf Leistung optimiert, könnte das Hinzufügen einer großen Anzahl von DNSBL-Servern potenziell die Antwortzeiten beeinträchtigen. Beginnen Sie mit einigen seriösen DNSBL-Servern und überwachen Sie die Leistung, bevor Sie weitere hinzufügen.
+    Obwohl BunkerWeb DNSBL-Abfragen auf Leistung optimiert, könnte das Hinzufügen einer großen Anzahl von DNSBL-Servern potenziell die Antwortzeiten beeinträchtigen. Beginnen Sie mit einigen seriösen DNSBL-Servern und überwachen Sie die Leistung, bevor Sie weitere hinzufügen.
 
 ### Beispielkonfigurationen
 

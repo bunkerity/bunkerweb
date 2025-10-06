@@ -32,13 +32,13 @@ Pro 插件为 BunkerWeb 的企业部署捆绑了高级功能和增强功能。�
 | `PRO_LICENSE_KEY` |        | global | 否   | **Pro 许可证密钥：** 用于身份验证的 BunkerWeb Pro 许可证密钥。 |
 
 !!! tip "许可证管理"
-您的 Pro 许可证与您的特定部署环境相关联。如果您需要转移许可证或对您的订阅有疑问，请通过 [BunkerWeb 面板](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) 联系支持。
+    您的 Pro 许可证与您的特定部署环境相关联。如果您需要转移许可证或对您的订阅有疑问，请通过 [BunkerWeb 面板](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) 联系支持。
 
 !!! info "Pro 功能"
-随着新功能的增加，可用的具体 Pro 功能可能会随时间演变。Pro 插件会自动处理所有可用功能的安装和配置。
+    随着新功能的增加，可用的具体 Pro 功能可能会随时间演变。Pro 插件会自动处理所有可用功能的安装和配置。
 
 !!! warning "网络要求"
-Pro 插件需要出站互联网访问权限，以连接到 BunkerWeb API 进行许可证验证和下载高级插件。请确保您的防火墙允许连接到 `api.bunkerweb.io` 的 443 端口 (HTTPS)。
+    Pro 插件需要出站互联网访问权限，以连接到 BunkerWeb API 进行许可证验证和下载高级插件。请确保您的防火墙允许连接到 `api.bunkerweb.io` 的 443 端口 (HTTPS)。
 
 ### 常见问题解答
 

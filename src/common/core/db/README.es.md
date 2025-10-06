@@ -31,7 +31,7 @@ Siga estos pasos para configurar y utilizar la función de Base de Datos:
 !!! tip "Selección de Base de Datos" - **SQLite** (predeterminado): Ideal para implementaciones de un solo nodo o entornos de prueba debido a su simplicidad y naturaleza basada en archivos. - **PostgreSQL**: Recomendado para entornos de producción con múltiples instancias de BunkerWeb debido a su robustez y soporte de concurrencia. - **MySQL/MariaDB**: Una buena alternativa a PostgreSQL con capacidades similares de nivel de producción. - **Oracle**: Adecuado para entornos empresariales donde Oracle ya es la plataforma de base de datos estándar.
 
 !!! info "Formato de URI de SQLAlchemy"
-El URI de la base de datos sigue el formato de SQLAlchemy:
+    El URI de la base de datos sigue el formato de SQLAlchemy:
 
     -   SQLite: `sqlite:////ruta/a/database.sqlite3`
     -   PostgreSQL: `postgresql://usuario:contraseña@hostname:puerto/basededatos`
@@ -39,7 +39,7 @@ El URI de la base de datos sigue el formato de SQLAlchemy:
     -   Oracle: `oracle://usuario:contraseña@hostname:puerto/basededatos`
 
 !!! warning "Mantenimiento de la Base de Datos"
-El complemento ejecuta automáticamente trabajos de mantenimiento diarios:
+    El complemento ejecuta automáticamente trabajos de mantenimiento diarios:
 
 - **Limpiar Ejecuciones de Trabajos en Exceso:** Purga el historial que supera el límite `DATABASE_MAX_JOBS_RUNS`.
 - **Limpiar Sesiones de UI Caducadas:** Elimina las sesiones de usuarios de la UI que superan `DATABASE_MAX_SESSION_AGE_DAYS`.

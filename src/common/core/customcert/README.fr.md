@@ -9,7 +9,7 @@ Comment ça marche :
 5. Vous gardez le contrôle total sur le cycle de vie des certificats.
 
 !!! info "Surveillance automatique"
-Avec `USE_CUSTOM_SSL: yes`, BunkerWeb surveille le certificat `CUSTOM_SSL_CERT`, détecte les changements et recharge NGINX si nécessaire.
+    Avec `USE_CUSTOM_SSL: yes`, BunkerWeb surveille le certificat `CUSTOM_SSL_CERT`, détecte les changements et recharge NGINX si nécessaire.
 
 ### Comment l’utiliser
 
@@ -19,7 +19,7 @@ Avec `USE_CUSTOM_SSL: yes`, BunkerWeb surveille le certificat `CUSTOM_SSL_CERT`,
 4. Données : fournissez les chaînes base64 ou PEM en clair.
 
 !!! tip "Mode stream"
-En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour le port SSL/TLS.
+    En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour le port SSL/TLS.
 
 ### Paramètres
 
@@ -33,13 +33,13 @@ En mode stream, configurez `LISTEN_STREAM_PORT_SSL` pour le port SSL/TLS.
 | `CUSTOM_SSL_KEY_DATA`      |        | multisite | non      | Données de la clé privée (base64 ou PEM en clair).            |
 
 !!! warning "Sécurité"
-Protégez la clé privée (droits adaptés, lisible par le scheduler BunkerWeb uniquement).
+    Protégez la clé privée (droits adaptés, lisible par le scheduler BunkerWeb uniquement).
 
 !!! tip "Format"
-Les certificats doivent être au format PEM. Convertissez si nécessaire.
+    Les certificats doivent être au format PEM. Convertissez si nécessaire.
 
 !!! info "Chaînes de certification"
-Si une chaîne intermédiaire est nécessaire, fournissez le bundle complet dans l’ordre (certificat puis intermédiaires).
+    Si une chaîne intermédiaire est nécessaire, fournissez le bundle complet dans l’ordre (certificat puis intermédiaires).
 
 ### Exemples
 

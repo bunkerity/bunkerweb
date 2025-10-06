@@ -34,13 +34,13 @@ Security.txt 插件为您的网站实施 [Security.txt](https://securitytxt.org/
 | `SECURITYTXT_CSAF`             |                             | multisite | 是   | **CSAF：** 指向您的通用安全咨询框架提供商的 provider-metadata.json 的链接。      |
 
 !!! warning "需要到期日期"
-根据 RFC 9116，`Expires` 字段是必需的。如果您没有为 `SECURITYTXT_EXPIRES` 提供值，BunkerWeb 会自动将到期日期设置为从当前日期算起的一年。
+    根据 RFC 9116，`Expires` 字段是必需的。如果您没有为 `SECURITYTXT_EXPIRES` 提供值，BunkerWeb 会自动将到期日期设置为从当前日期算起的一年。
 
 !!! info "联系信息至关重要"
-`Contact` 字段是 security.txt 文件中最重要的部分。您应该至少提供一种方式让安全研究人员与您联系。这可以是电子邮件地址、Web 表单、电话号码或任何其他适合您组织的方式。
+    `Contact` 字段是 security.txt 文件中最重要的部分。您应该至少提供一种方式让安全研究人员与您联系。这可以是电子邮件地址、Web 表单、电话号码或任何其他适合您组织的方式。
 
 !!! warning "URL 必须使用 HTTPS"
-根据 RFC 9116，security.txt 文件中的所有 URL（`mailto:` 和 `tel:` 链接除外）都必须使用 HTTPS。非 HTTPS URL 将被 BunkerWeb 自动转换为 HTTPS，以确保符合标准。
+    根据 RFC 9116，security.txt 文件中的所有 URL（`mailto:` 和 `tel:` 链接除外）都必须使用 HTTPS。非 HTTPS URL 将被 BunkerWeb 自动转换为 HTTPS，以确保符合标准。
 
 ### 配置示例
 

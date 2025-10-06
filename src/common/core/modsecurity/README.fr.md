@@ -41,7 +41,7 @@ Suivez ces étapes pour configurer et utiliser ModSecurity :
 | `USE_MODSECURITY_GLOBAL_CRS`          | `no`           | global    | no       | **CRS Global :** Si activé, applique les règles CRS globalement au niveau HTTP plutôt que par serveur.                                                                                     |
 
 !!! warning "ModSecurity et le Jeu de Règles de Base OWASP"
-**Nous recommandons vivement de garder ModSecurity et le Jeu de Règles de Base OWASP (CRS) activés** pour fournir une protection robuste contre les vulnérabilités web courantes. Bien que des faux positifs occasionnels puissent se produire, ils peuvent être résolus avec un peu d'effort en affinant les règles ou en utilisant des exclusions prédéfinies.
+    **Nous recommandons vivement de garder ModSecurity et le Jeu de Règles de Base OWASP (CRS) activés** pour fournir une protection robuste contre les vulnérabilités web courantes. Bien que des faux positifs occasionnels puissent se produire, ils peuvent être résolus avec un peu d'effort en affinant les règles ou en utilisant des exclusions prédéfinies.
 
     L'équipe du CRS maintient activement une liste d'exclusions pour des applications populaires telles que WordPress, Nextcloud, Drupal et Cpanel, facilitant ainsi l'intégration sans impacter la fonctionnalité. Les avantages en matière de sécurité l'emportent de loin sur l'effort de configuration minimal requis pour traiter les faux positifs.
 
@@ -54,10 +54,10 @@ Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécu
 - **`nightly`** : [Version de nuit](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offrant les dernières mises à jour de règles.
 
 !!! example "Version de nuit (Nightly Build)"
-La **version de nuit** contient les règles les plus à jour, offrant les dernières protections contre les menaces émergentes. Cependant, comme elle est mise à jour quotidiennement et peut inclure des changements expérimentaux ou non testés, il est recommandé d'utiliser d'abord la version de nuit dans un **environnement de pré-production** avant de la déployer en production.
+    La **version de nuit** contient les règles les plus à jour, offrant les dernières protections contre les menaces émergentes. Cependant, comme elle est mise à jour quotidiennement et peut inclure des changements expérimentaux ou non testés, il est recommandé d'utiliser d'abord la version de nuit dans un **environnement de pré-production** avant de la déployer en production.
 
 !!! tip "Niveaux de paranoïa"
-Le Jeu de Règles de Base OWASP utilise des "niveaux de paranoïa" (PL) pour contrôler la rigueur des règles :
+    Le Jeu de Règles de Base OWASP utilise des "niveaux de paranoïa" (PL) pour contrôler la rigueur des règles :
 
     - **PL1 (défaut) :** Protection de base avec un minimum de faux positifs
     - **PL2 :** Sécurité renforcée avec une correspondance de motifs plus stricte
@@ -113,7 +113,7 @@ Dans cet exemple :
 - **Règle 3** : Supprime une règle spécifique (ID `930120`) pour les requêtes correspondant à `/wp-json/yoast`.
 
 !!! info "Ordre d'exécution"
-L'ordre d'exécution pour ModSecurity dans BunkerWeb est le suivant, assurant une progression claire et logique de l'application des règles :
+    L'ordre d'exécution pour ModSecurity dans BunkerWeb est le suivant, assurant une progression claire et logique de l'application des règles :
 
     1.  **Configuration OWASP CRS** : Configuration de base pour le Jeu de Règles de Base OWASP.
     2.  **Configuration des plugins personnalisés (`crs-plugins-before`)** : Paramètres spécifiques aux plugins, appliqués avant toute règle CRS.
@@ -136,7 +136,7 @@ L'ordre d'exécution pour ModSecurity dans BunkerWeb est le suivant, assurant un
 Le Jeu de Règles de Base OWASP prend également en charge une gamme de **plugins** conçus pour étendre ses fonctionnalités et améliorer la compatibilité avec des applications ou des environnements spécifiques. Ces plugins peuvent aider à affiner le CRS pour une utilisation avec des plateformes populaires telles que WordPress, Nextcloud et Drupal, ou même des configurations personnalisées. Pour plus d'informations et une liste des plugins disponibles, consultez le [registre des plugins OWASP CRS](https://github.com/coreruleset/plugin-registry).
 
 !!! tip "Téléchargement de plugins"
-Le paramètre `MODSECURITY_CRS_PLUGINS` vous permet de télécharger et d'installer des plugins pour étendre les fonctionnalités du Jeu de Règles de Base OWASP (CRS). Ce paramètre accepte une liste de noms de plugins avec des balises ou des URL optionnelles, facilitant l'intégration de fonctionnalités de sécurité supplémentaires adaptées à vos besoins spécifiques.
+    Le paramètre `MODSECURITY_CRS_PLUGINS` vous permet de télécharger et d'installer des plugins pour étendre les fonctionnalités du Jeu de Règles de Base OWASP (CRS). Ce paramètre accepte une liste de noms de plugins avec des balises ou des URL optionnelles, facilitant l'intégration de fonctionnalités de sécurité supplémentaires adaptées à vos besoins spécifiques.
 
     Voici une liste non exhaustive des valeurs acceptées pour le paramètre `MODSECURITY_CRS_PLUGINS` :
 
@@ -145,7 +145,7 @@ Le paramètre `MODSECURITY_CRS_PLUGINS` vous permet de télécharger et d'instal
     *   `https://github.com/coreruleset/dos-protection-plugin-modsecurity/archive/refs/heads/main.zip` - Télécharge le plugin directement depuis l'URL.
 
 !!! warning "Faux positifs"
-Des paramètres de sécurité plus élevés peuvent bloquer le trafic légitime. Commencez avec les paramètres par défaut et surveillez les journaux avant d'augmenter les niveaux de sécurité. Soyez prêt à ajouter des règles d'exclusion pour les besoins spécifiques de votre application.
+    Des paramètres de sécurité plus élevés peuvent bloquer le trafic légitime. Commencez avec les paramètres par défaut et surveillez les journaux avant d'augmenter les niveaux de sécurité. Soyez prêt à ajouter des règles d'exclusion pour les besoins spécifiques de votre application.
 
 ### Exemples de configuration
 
@@ -222,4 +222,4 @@ Des paramètres de sécurité plus élevés peuvent bloquer le trafic légitime.
     ```
 
 !!! note "Valeurs de taille lisibles"
-Pour les paramètres de taille comme `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, les suffixes `k`, `m`, et `g` (insensibles à la casse) sont pris en charge et représentent les kibioctets, mébioctets et gibioctets (multiples de 1024). Exemples : `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.
+    Pour les paramètres de taille comme `MODSECURITY_REQ_BODY_NO_FILES_LIMIT`, les suffixes `k`, `m`, et `g` (insensibles à la casse) sont pris en charge et représentent les kibioctets, mébioctets et gibioctets (multiples de 1024). Exemples : `256k` = 262144, `1m` = 1048576, `2g` = 2147483648.

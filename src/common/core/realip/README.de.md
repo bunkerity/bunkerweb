@@ -19,7 +19,7 @@ So funktioniert's:
 6.  PROXY-Protokoll: Aktivieren Sie `USE_PROXY_PROTOCOL`, wenn das Upstream-System es unterstützt.
 
 !!! danger "Warnung PROXY-Protokoll"
-Das Aktivieren von `USE_PROXY_PROTOCOL` ohne ein korrekt konfiguriertes Upstream-System, das es aussendet, führt dazu, dass Ihre Anwendung nicht funktioniert. Stellen Sie sicher, dass Sie es vor der Aktivierung konfiguriert haben.
+    Das Aktivieren von `USE_PROXY_PROTOCOL` ohne ein korrekt konfiguriertes Upstream-System, das es aussendet, führt dazu, dass Ihre Anwendung nicht funktioniert. Stellen Sie sicher, dass Sie es vor der Aktivierung konfiguriert haben.
 
 ### Parameter
 
@@ -33,13 +33,13 @@ Das Aktivieren von `USE_PROXY_PROTOCOL` ohne ein korrekt konfiguriertes Upstream
 | `USE_PROXY_PROTOCOL` | `no`                                      | global    | nein     | Aktiviert die PROXY-Protokoll-Unterstützung für die direkte Proxy→BunkerWeb-Kommunikation.   |
 
 !!! tip "Cloud-Anbieter"
-Fügen Sie die IPs Ihrer Load Balancer (AWS/GCP/Azure…) zu `REAL_IP_FROM` hinzu, um eine korrekte Identifizierung zu gewährleisten.
+    Fügen Sie die IPs Ihrer Load Balancer (AWS/GCP/Azure…) zu `REAL_IP_FROM` hinzu, um eine korrekte Identifizierung zu gewährleisten.
 
 !!! danger "Sicherheitsaspekte"
-Fügen Sie nur vertrauenswürdige Quellen hinzu, da sonst die Gefahr der IP-Spoofing über manipulierte Header besteht.
+    Fügen Sie nur vertrauenswürdige Quellen hinzu, da sonst die Gefahr der IP-Spoofing über manipulierte Header besteht.
 
 !!! info "Mehrere Adressen"
-Mit `REAL_IP_RECURSIVE` wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.
+    Mit `REAL_IP_RECURSIVE` wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.
 
 ### Beispiele
 

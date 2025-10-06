@@ -25,10 +25,10 @@ Comment ça marche :
 | `REDIRECT_TO_STATUS_CODE` | `301`  | multisite | oui      | Code de statut HTTP : `301` (permanent) ou `302` (temporaire).      |
 
 !!! tip "Choisir le bon code"
-`301` pour une redirection permanente (migrations, canonicals). `302` pour temporaire.
+    `301` pour une redirection permanente (migrations, canonicals). `302` pour temporaire.
 
 !!! info "Conservation du chemin"
-Avec `REDIRECT_TO_REQUEST_URI: yes`, `/blog/post-1` vers `https://new.com` devient `https://new.com/blog/post-1`.
+    Avec `REDIRECT_TO_REQUEST_URI: yes`, `/blog/post-1` vers `https://new.com` devient `https://new.com/blog/post-1`.
 
 ### Exemples
 
