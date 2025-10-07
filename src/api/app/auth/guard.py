@@ -28,8 +28,11 @@ class BiscuitWithAdminBearer:
 
     async def __call__(self, request: Request, credentials: HTTPBasicCredentials | None = Depends(security)) -> None:
         # Skip auth for health, login, and OpenAPI/docs endpoints
-        # Use scope["path"] to get the path without root_path prefix (handles proxy/gateway scenarios)
+        # Strip root_path prefix if configured (handles proxy/gateway scenarios)
         path = request.scope.get("path", request.url.path)
+        root_path = api_config.API_ROOT_PATH
+        if root_path and path.startswith(root_path):
+            path = path[len(root_path) :] or "/"  # noqa: E203
         self._logger.debug(f"Auth start: {request.method} {path} from {request.client.host if request.client else 'unknown'}")
         openapi_match = api_config.openapi_url and path == api_config.openapi_url
         docs_match = api_config.docs_url and path.startswith(api_config.docs_url)
