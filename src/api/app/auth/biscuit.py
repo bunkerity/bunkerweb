@@ -408,8 +408,9 @@ class BiscuitGuard:
 
     def __call__(self, request: Request) -> None:
         # Skip auth for health, login, and OpenAPI/docs endpoints
-        self._logger.debug(f"Biscuit start: {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}")
-        path = request.url.path
+        # Use scope["path"] to get the path without root_path prefix (handles proxy/gateway scenarios)
+        path = request.scope.get("path", request.url.path)
+        self._logger.debug(f"Biscuit start: {request.method} {path} from {request.client.host if request.client else 'unknown'}")
         openapi_match = api_config.openapi_url and path == api_config.openapi_url
         docs_match = api_config.docs_url and path.startswith(api_config.docs_url)
         redoc_match = api_config.redoc_url and path.startswith(api_config.redoc_url)
@@ -478,12 +479,12 @@ class BiscuitGuard:
             self._logger.debug(f"Biscuit phase2: operation={operation}")
 
             # Derive fine-grained context
-            rtype, req_perm = _resolve_resource_and_perm(request.url.path, request.method)
+            rtype, req_perm = _resolve_resource_and_perm(path, request.method)
             if rtype and req_perm:
-                az.add_fact(Fact(f'resource("{request.url.path}")'))
+                az.add_fact(Fact(f'resource("{path}")'))
                 az.add_fact(Fact(f'resource_type("{rtype}")'))
                 az.add_fact(Fact(f'required_perm("{req_perm}")'))
-                rid = _extract_resource_id(request.url.path, rtype)
+                rid = _extract_resource_id(path, rtype)
                 if rid is not None:
                     az.add_fact(Fact(f'resource_id("{rid}")'))
                 self._logger.debug(f"Biscuit phase2: rtype={rtype}, required_perm={req_perm}, resource_id={rid if rid is not None else '*none*'}")

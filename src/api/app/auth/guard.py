@@ -28,8 +28,9 @@ class BiscuitWithAdminBearer:
 
     async def __call__(self, request: Request, credentials: HTTPBasicCredentials | None = Depends(security)) -> None:
         # Skip auth for health, login, and OpenAPI/docs endpoints
-        self._logger.debug(f"Auth start: {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}")
-        path = request.url.path
+        # Use scope["path"] to get the path without root_path prefix (handles proxy/gateway scenarios)
+        path = request.scope.get("path", request.url.path)
+        self._logger.debug(f"Auth start: {request.method} {path} from {request.client.host if request.client else 'unknown'}")
         openapi_match = api_config.openapi_url and path == api_config.openapi_url
         docs_match = api_config.docs_url and path.startswith(api_config.docs_url)
         redoc_match = api_config.redoc_url and path.startswith(api_config.redoc_url)
@@ -73,12 +74,12 @@ class BiscuitWithAdminBearer:
 
             if not is_admin:
                 self._logger.warning(
-                    f"Auth failed (basic user not admin or not found): user={username} {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}"
+                    f"Auth failed (basic user not admin or not found): user={username} {request.method} {path} from {request.client.host if request.client else 'unknown'}"
                 )
                 raise HTTPException(status_code=401, detail="Unauthorized")
             if not pwd_hash or not check_password(password, pwd_hash):
                 self._logger.warning(
-                    f"Auth failed (basic password mismatch): user={username} {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}"
+                    f"Auth failed (basic password mismatch): user={username} {request.method} {path} from {request.client.host if request.client else 'unknown'}"
                 )
                 raise HTTPException(status_code=401, detail="Unauthorized")
             self._logger.debug(f"Auth success via Basic admin: user={username}")
@@ -100,7 +101,7 @@ class BiscuitWithAdminBearer:
             except HTTPException as e:
                 # Bubble up after logging
                 self._logger.warning(
-                    f"Auth failed (biscuit {e.status_code}): {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'} reason={getattr(e, 'detail', '')}"
+                    f"Auth failed (biscuit {e.status_code}): {request.method} {path} from {request.client.host if request.client else 'unknown'} reason={getattr(e, 'detail', '')}"
                 )
                 raise
 
@@ -112,7 +113,7 @@ class BiscuitWithAdminBearer:
         except HTTPException as e:
             # Log Biscuit authorization failures without exposing token
             self._logger.warning(
-                f"Auth failed (biscuit {e.status_code}): {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'} reason={getattr(e, 'detail', '')}"
+                f"Auth failed (biscuit {e.status_code}): {request.method} {path} from {request.client.host if request.client else 'unknown'} reason={getattr(e, 'detail', '')}"
             )
             raise
 

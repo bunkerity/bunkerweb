@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.5 - ????/??/??
+## v1.6.6-rc1 - ????/??/??
+
+- [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
+
+## v1.6.5 - 2025/10/03
 
 - [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
 - [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes
