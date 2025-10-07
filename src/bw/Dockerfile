@@ -52,8 +52,9 @@ RUN apk add --no-cache nodejs npm parallel && \
   npm ci --ignore-scripts
 
 # Minify HTML files
+ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_HTML=no
-RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
   parallel 'npx html-minifier-terser \
   --collapse-whitespace \

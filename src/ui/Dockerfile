@@ -45,8 +45,9 @@ RUN apk add --no-cache nodejs npm parallel && \
   npm ci --ignore-scripts
 
 # Minify JS files
+ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
-RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
   find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
   | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
   else \
@@ -55,7 +56,7 @@ RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
 
 # Minify CSS files
 ARG SKIP_MINIFY_CSS=no
-RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
   | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
   else \
