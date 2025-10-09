@@ -1,4 +1,4 @@
-FROM fedora:41@sha256:9b6125f8fee07f1b5e8db594eb05b1289e9cf7b45cceb0de80e53a5e5a87b003
+FROM fedora:41@sha256:8c3179a45cee0f35433984ff4e30bda4f7fe299a4877de36ac3cae5b52548778
 
 ENV container=docker
 ENV NGINX_VERSION=1.28.0
