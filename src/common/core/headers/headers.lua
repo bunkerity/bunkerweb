@@ -81,29 +81,37 @@ function headers:header()
 	local ngx_header = ngx.header
 	local ssl = self.ctx.bw.scheme == "https"
 	for variable, header in pairs(self.all_headers) do
-		if
-			ngx_header[header] == nil
-			or (
-				self.variables[variable] ~= ""
-				and self.variables["KEEP_UPSTREAM_HEADERS"] ~= "*"
-				and regex_match(self.variables["KEEP_UPSTREAM_HEADERS"], "(^| )" .. header .. "($| )") == nil
-			)
-		then
-			if header ~= "Strict-Transport-Security" or ssl then
-				if
-					header == "Content-Security-Policy"
-					and self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes"
-				then
-					ngx_header["Content-Security-Policy-Report-Only"] = self.variables[variable]
-				else
-					ngx_header[header] = self.variables[variable]
+		-- Check if upstream header exists and should be kept
+		local should_keep = self.variables["KEEP_UPSTREAM_HEADERS"] == "*"
+			or regex_match(self.variables["KEEP_UPSTREAM_HEADERS"], "(^| )" .. header .. "($| )") ~= nil
+
+		-- Only modify header if it shouldn't be kept or doesn't exist upstream
+		if not (ngx_header[header] ~= nil and should_keep) then
+			if self.variables[variable] == "" then
+				-- Remove header if value is empty
+				ngx_header[header] = nil
+			else
+				if header ~= "Strict-Transport-Security" or ssl then
+					if
+						header == "Content-Security-Policy"
+						and self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes"
+					then
+						ngx_header["Content-Security-Policy"] = nil
+						ngx_header["Content-Security-Policy-Report-Only"] = self.variables[variable]
+					else
+						ngx_header[header] = self.variables[variable]
+					end
 				end
 			end
 		end
 	end
 	-- Add custom headers
 	for header, value in pairs(self.custom_headers) do
-		ngx_header[header] = value
+		if value == "" then
+			ngx_header[header] = nil
+		else
+			ngx_header[header] = value
+		end
 	end
 	-- Remove headers
 	if self.variables["REMOVE_HEADERS"] ~= "" then
