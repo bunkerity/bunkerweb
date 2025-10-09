@@ -80,6 +80,7 @@ class Configurator:
                 "OLDPWD",
                 "SERVICE_SCHEDULER",
                 "SERVICE_UI",
+                "SERVICE_API",
                 "IGNORE_REGEX_CHECK",
                 "CROWDSEC_DISABLE_PARSERS",
                 "CROWDSEC_EXTRA_COLLECTIONS",
