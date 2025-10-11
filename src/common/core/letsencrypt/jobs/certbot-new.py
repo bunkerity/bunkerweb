@@ -181,7 +181,7 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
     credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
     credential_items = {}
 
-    # Collect all credential items
+    # Get credentials from environment variables (already set by JobScheduler)
     for env_key, env_value in environ.items():
         if not env_value or not env_key.startswith(credential_key):
             continue
@@ -223,22 +223,35 @@ def extract_provider(service: str, authenticator: str = "") -> Optional[Provider
         LOGGER.warning(f"[Service: {service}] DNS challenge selected but no DNS credentials are configured, skipping generation.")
         return None
 
+    # Log credential items for debugging (excluding sensitive values)
+    LOGGER.debug(f"[Service: {service}] Processing credential items for authenticator '{authenticator}': {list(credential_items.keys())}")
+
     try:
-        return PROVIDERS[authenticator](**credential_items)
+        provider = PROVIDERS[authenticator](**credential_items)
+        LOGGER.debug(f"[Service: {service}] Successfully validated credentials for DNS provider '{authenticator}'")
+        return provider
     except ValidationError as ve:
         LOGGER.debug(format_exc())
-        LOGGER.error(f"[Service: {service}] Error while validating credentials, skipping generation: {ve}")
+        LOGGER.error(f"[Service: {service}] Error while validating credentials for DNS provider '{authenticator}', skipping generation: {ve}")
+        return None
+    except Exception as e:
+        LOGGER.debug(format_exc())
+        LOGGER.error(f"[Service: {service}] Unexpected error while creating DNS provider '{authenticator}': {e}")
         return None
 
 
 def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
     def env(key: str, default: Optional[str] = None) -> str:
+        # Get environment variables (already set by JobScheduler)
         if IS_MULTISITE:
-            return getenv(f"{service}_{key}", default)
-        return getenv(key, default)
+            env_value = getenv(f"{service}_{key}", None)
+        else:
+            env_value = getenv(key, None)
+        
+        return env_value if env_value is not None else (default or "")
 
     authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
-    server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
+    server_names_val = env("SERVER_NAME", "www.example.com").strip()
     email_val = env("EMAIL_LETS_ENCRYPT", "") or f"contact@{service}"
     retries_val = env("LETS_ENCRYPT_RETRIES", "0")
     challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
@@ -394,6 +407,11 @@ def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
 
 def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_env: Dict[str, str] = None) -> int:
     # * Building the certbot command
+    # Ensure all necessary directories exist
+    DATA_PATH.mkdir(parents=True, exist_ok=True)
+    Path(WORK_DIR).mkdir(parents=True, exist_ok=True)
+    Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
+    
     command = [
         CERTBOT_BIN,
         "certonly",
@@ -433,8 +451,15 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
         credentials = config["provider"].get_formatted_credentials()
         credentials_file = f"credentials_{bytes_hash(credentials, algorithm='sha256')[:12]}.{config['provider'].get_file_type()}"
         credentials_path = CACHE_PATH.joinpath(credentials_file)
+        
+        # Ensure cache directory exists
+        CACHE_PATH.mkdir(parents=True, exist_ok=True)
+        
         if not credentials_path.is_file() or config["force_renew"]:
-            JOB.cache_file(credentials_file, credentials)
+            cached, err = JOB.cache_file(credentials_file, credentials)
+            if not cached:
+                LOGGER.error(f"[Service: {service}] Failed to cache credentials file: {err}")
+                return 2
         credentials_path.chmod(0o600)  # Set permissions to read/write for owner only
 
         # * Adding the credentials to the command
@@ -620,23 +645,23 @@ try:
                 continue
 
         if set(config["server_names"].split(",")) != set(existing_cert["server_names"].split(",")):
-            LOGGER.warning(f"[Service: {service}] Server names do not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Server names do not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["challenge"] != existing_cert["challenge"]:
-            LOGGER.warning(f"[Service: {service}] Challenge type does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Challenge type does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["authenticator"] != existing_cert["authenticator"]:
-            LOGGER.warning(f"[Service: {service}] DNS provider does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] DNS provider does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["staging"] != existing_cert["staging"]:
-            LOGGER.warning(f"[Service: {service}] Staging environment does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Staging environment does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
         elif config["profile"] != existing_cert["profile"]:
-            LOGGER.warning(f"[Service: {service}] Profile does not match existing certificate, forcing renewal.")
+            LOGGER.warning(f"[Service: {server_name}] Profile does not match existing certificate, forcing renewal.")
             config["force_renew"] = True
 
-        if config["challenge"] == "dns" and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
-            LOGGER.warning(f"[Service: {service}] DNS credentials have changed, forcing renewal.")
+        if config["challenge"] == "dns" and config.get("provider") and bytes_hash(config["provider"].get_formatted_credentials(), algorithm="sha256") != existing_cert["credentials_hash"]:
+            LOGGER.warning(f"[Service: {server_name}] DNS credentials have changed, forcing renewal.")
             config["force_renew"] = True
 
     # ? generate new certificates and renew existing ones if needed
