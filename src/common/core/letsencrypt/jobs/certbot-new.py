@@ -177,11 +177,11 @@ def check_psl_blacklist(domains: List[str], psl_rules: Dict, service_name: str) 
     return False
 
 
-def extract_provider(service: str, authenticator: str = "", db=None) -> Optional[Provider]:
+def extract_provider(service: str, authenticator: str = "") -> Optional[Provider]:
     credential_key = f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM" if IS_MULTISITE else "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM"
     credential_items = {}
 
-    # First, try to get credentials from environment variables
+    # Get credentials from environment variables (already set by JobScheduler)
     for env_key, env_value in environ.items():
         if not env_value or not env_key.startswith(credential_key):
             continue
@@ -192,34 +192,6 @@ def extract_provider(service: str, authenticator: str = "", db=None) -> Optional
 
         key, value = env_value.split(" ", 1)
         credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-
-    # If no credentials found in environment, try database configuration
-    if not credential_items and db:
-        try:
-            # Get database configuration for this service
-            db_config = db.get_config(service=service if IS_MULTISITE else None)
-            
-            if IS_MULTISITE:
-                # For multisite, check service-specific credential
-                db_credential_value = db_config.get(f"{service}_LETS_ENCRYPT_DNS_CREDENTIAL_ITEM", {}).get("value", "")
-            else:
-                # For single site, check global credential
-                db_credential_value = db_config.get("LETS_ENCRYPT_DNS_CREDENTIAL_ITEM", {}).get("value", "")
-            
-            if db_credential_value:
-                LOGGER.debug(f"[Service: {service}] Found DNS credentials in database configuration")
-                
-                if " " not in db_credential_value:
-                    credential_items["json_data"] = db_credential_value
-                else:
-                    key, value = db_credential_value.split(" ", 1)
-                    credential_items[key.lower()] = value.removeprefix("= ").replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").strip()
-            else:
-                LOGGER.debug(f"[Service: {service}] No DNS credentials found in database for key: {credential_key}")
-                
-        except Exception as e:
-            LOGGER.debug(f"[Service: {service}] Error accessing database configuration: {e}")
-            LOGGER.debug(format_exc())
 
     # Handle JSON data
     if "json_data" in credential_items:
@@ -268,35 +240,15 @@ def extract_provider(service: str, authenticator: str = "", db=None) -> Optional
         return None
 
 
-def build_service_config(service: str, db=None) -> Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
+def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, int, Dict[str, str]]]]:
     def env(key: str, default: Optional[str] = None) -> str:
-        # First try environment variables
+        # Get environment variables (already set by JobScheduler)
         if IS_MULTISITE:
             env_value = getenv(f"{service}_{key}", None)
         else:
             env_value = getenv(key, None)
         
-        if env_value is not None:
-            return env_value
-        
-        # If not found in environment, try database configuration
-        if db:
-            try:
-                db_config = db.get_config(service=service if IS_MULTISITE else None)
-                
-                if IS_MULTISITE:
-                    db_key = f"{service}_{key}"
-                else:
-                    db_key = key
-                    
-                db_value = db_config.get(db_key, {}).get("value", "")
-                if db_value:
-                    LOGGER.debug(f"[Service: {service}] Using database value for {db_key}")
-                    return db_value
-            except Exception as e:
-                LOGGER.debug(f"[Service: {service}] Error accessing database for key {key}: {e}")
-        
-        return default or ""
+        return env_value if env_value is not None else (default or "")
 
     authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
     server_names_val = env("SERVER_NAME", "www.example.com").strip()
@@ -371,7 +323,7 @@ def build_service_config(service: str, db=None) -> Tuple[str, Dict[str, Union[st
                 )
             activated = False
         else:
-            provider = extract_provider(service, authenticator, db)
+            provider = extract_provider(service, authenticator)
             if not provider:
                 activated = False
     else:
@@ -570,22 +522,12 @@ try:
         LOGGER.warning("No services found, exiting...")
         sys_exit(0)
 
-    # Initialize database for configuration retrieval
-    db = None
-    try:
-        from Database import Database  # type: ignore
-        db = Database(LOGGER, sqlalchemy_string=getenv("DATABASE_URI"))
-        LOGGER.debug("Database connection established for configuration retrieval")
-    except Exception as e:
-        LOGGER.debug(f"Could not establish database connection: {e}")
-        LOGGER.debug("Will rely on environment variables only")
-
     services = {}
     for service in server_names.split(" "):
         if not service.strip():
             continue
 
-        server_name, config = build_service_config(service, db)
+        server_name, config = build_service_config(service)
         if config["wildcard"] and server_name in services:
             continue
         services[server_name] = config
