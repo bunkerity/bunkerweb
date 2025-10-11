@@ -82,29 +82,32 @@ function letsencrypt:init()
 					)
 				then
 					local data
+					local server_names = multisite_vars["SERVER_NAME"]
+					local cert_identifier = server_names:match("%S+")
+
 					if
 						multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 						and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 					then
-						for part in server_name:gmatch("%S+") do
+						for part in server_names:gmatch("%S+") do
 							wildcard_servers[part] = true
 						end
 						local parts = {}
-						for part in server_name:gmatch("[^.]+") do
+						for part in cert_identifier:gmatch("[^.]+") do
 							table.insert(parts, part)
 						end
-						server_name = table.concat(parts, ".", 2)
-						data = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
+						cert_identifier = table.concat(parts, ".", 2)
+						data = self.datastore:get("plugin_letsencrypt_" .. cert_identifier, true)
 					else
-						for part in server_name:gmatch("%S+") do
+						for part in server_names:gmatch("%S+") do
 							wildcard_servers[part] = false
 						end
 					end
 					if not data then
 						-- Load certificate
 						local check
-						local cert_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem"
-						local key_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem"
+						local cert_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem"
+						local key_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem"
 						check, data = read_files({cert_path, key_path})
 						if not check then
 							self.logger:log(ERR, "error while reading certificate files for " .. server_name .. " : " .. data)
@@ -117,7 +120,7 @@ function letsencrypt:init()
 								multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 								and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 							then
-								check, err = self:load_data(data, server_name)
+								check, err = self:load_data(data, cert_identifier)
 							else
 								check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 							end
@@ -146,32 +149,35 @@ function letsencrypt:init()
 			if not challenge then
 				return self:ret(false, "can't get LETS_ENCRYPT_CHALLENGE variable : " .. err)
 			end
-			server_name = server_name:match("%S+")
-			if challenge == "dns" and use_wildcard == "yes" then
-				for part in server_name:gmatch("%S+") do
+			local server_names = server_name
+			local cert_identifier = server_names:match("%S+")
+			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
+			if use_wildcard_mode then
+				for part in server_names:gmatch("%S+") do
 					wildcard_servers[part] = true
 				end
 				local parts = {}
-				for part in server_name:gmatch("[^.]+") do
+				for part in cert_identifier:gmatch("[^.]+") do
 					table.insert(parts, part)
 				end
-				server_name = table.concat(parts, ".", 2)
+				cert_identifier = table.concat(parts, ".", 2)
 			else
-				for part in server_name:gmatch("%S+") do
-					wildcard_servers[part] = false
-				end
+				for part in server_names:gmatch("%S+") do
+				wildcard_servers[part] = false
 			end
-			local cert_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem"
-			local key_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem"
-			local check, data = read_files({cert_path, key_path})
-			if not check then
-				self.logger:log(ERR, "error while reading certificate files for " .. server_name .. " : " .. data)
-				self.logger:log(ERR, "expected certificate files at: " .. cert_path .. " and " .. key_path)
-				self.logger:log(ERR, "please ensure Let's Encrypt certificate generation completed successfully")
+		end
+		local cert_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem"
+		local key_path = "/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem"
+		local check, data = read_files({cert_path, key_path})
+		if not check then
+			self.logger:log(ERR, "error while reading certificate files for " .. server_name .. " : " .. data)
+			self.logger:log(ERR, "expected certificate files at: " .. cert_path .. " and " .. key_path)
+			self.logger:log(ERR, "please ensure Let's Encrypt certificate generation completed successfully")
 				ret_ok = false
 				ret_err = "error reading files"
 			else
-				check, err = self:load_data(data, server_name)
+				local load_key = use_wildcard_mode and cert_identifier or server_names
+				check, err = self:load_data(data, load_key)
 				if not check then
 					self.logger:log(ERR, "error while loading data : " .. err)
 					ret_ok = false

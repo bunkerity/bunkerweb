@@ -720,7 +720,7 @@ utils.is_banned = function(ip, server_name)
 	-- Get Redis config once
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		return nil, "can't get USE_REDIS variable: " .. err
+		return nil, "can't get USE_REDIS variable: " .. err, nil, nil
 	end
 	use_redis = use_redis == "yes"
 
@@ -729,19 +729,22 @@ utils.is_banned = function(ip, server_name)
 		clusterstore = require "bunkerweb.clusterstore":new()
 		local ok, connect_err = clusterstore:connect(true)
 		if not ok then
-			return nil, "can't connect to redis: " .. connect_err
+			return nil, "can't connect to redis: " .. connect_err, nil, nil
 		end
 	end
 
 	-- Helper function to check ban in datastore and Redis
 	local function check_ban(key)
 		-- Check local datastore first
-		local result
-		result, err = datastore:get(key)
-		if result and err ~= "not found" then
-			local ok, ban_data = pcall(decode, result)
-			if ok then
-				result = ban_data["reason"]
+		local value
+		value, err = datastore:get(key)
+		if value and err ~= "not found" then
+			local reason = value
+			local reason_data
+			local ok, ban_data = pcall(decode, value)
+			if ok and type(ban_data) == "table" then
+				reason = ban_data.reason or reason
+				reason_data = ban_data.reason_data
 			end
 
 			local ttl
@@ -759,14 +762,14 @@ utils.is_banned = function(ip, server_name)
 				ttl = 0
 			end
 
-			return true, result, ttl or 0
+			return true, reason, ttl or 0, reason_data
 		elseif err ~= "not found" then
-			return nil, "datastore:get() error: " .. tostring(result)
+			return nil, "datastore:get() error: " .. tostring(err), nil, nil
 		end
 
 		-- Check Redis if enabled
 		if not use_redis then
-			return false, "not banned"
+			return false, "not banned", nil, nil
 		end
 
 		-- Redis atomic script for GET+TTL
@@ -788,21 +791,23 @@ utils.is_banned = function(ip, server_name)
 		-- Execute Redis script
 		local data, script_err = clusterstore:call("eval", redis_script, 1, key)
 		if not data then
-			return nil, "redis call error: " .. script_err
+			return nil, "redis call error: " .. script_err, nil, nil
 		elseif data.err then
-			return nil, "redis script error: " .. data.err
+			return nil, "redis script error: " .. data.err, nil, nil
 		elseif data[1] ~= null then
-			-- Update local cache
-			local ok, cache_err = datastore:set(key, data[1], data[2])
-			if not ok then
+			-- Update local cache with the full JSON payload
+			local ok_cache, cache_err = datastore:set(key, data[1], data[2])
+			if not ok_cache then
 				logger:log(WARN, "datastore:set() error: " .. cache_err)
 			end
 
-			-- Parse ban data
-			local ban_data
-			ok, ban_data = pcall(decode, data[1])
-			if ok then
-				data[1] = ban_data["reason"]
+			-- Parse ban data to extract reason and optional reason_data
+			local reason = data[1]
+			local reason_data
+			local ok, ban_data = pcall(decode, data[1])
+			if ok and type(ban_data) == "table" then
+				reason = ban_data.reason or reason
+				reason_data = ban_data.reason_data
 			end
 
 			local ttl = data[2]
@@ -810,36 +815,36 @@ utils.is_banned = function(ip, server_name)
 			if ttl < 0 then
 				ttl = 0
 			end
-			return true, data[1], ttl
+			return true, reason, ttl, reason_data
 		end
 
-		return false, "not banned"
+		return false, "not banned", nil, nil
 	end
 
 	-- Check for service-specific ban first if server_name is provided
 	if server_name then
 		local service_key = "bans_service_" .. server_name .. "_ip_" .. ip
-		local banned, reason, ttl = check_ban(service_key)
+		local banned, reason, ttl, reason_data = check_ban(service_key)
 		if banned or banned == nil then
 			if clusterstore then
 				clusterstore:close()
 			end
-			return banned, reason, ttl
+			return banned, reason, ttl, reason_data
 		end
 	end
 
 	-- Always check for global ban regardless of scope
-	local banned, reason, ttl = check_ban("bans_ip_" .. ip)
+	local banned, reason, ttl, reason_data = check_ban("bans_ip_" .. ip)
 
 	-- Close Redis connection if opened
 	if clusterstore then
 		clusterstore:close()
 	end
 
-	return banned, reason, ttl
+	return banned, reason, ttl, reason_data
 end
 
-utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
+utils.add_ban = function(ip, reason, ttl, service, country, ban_scope, reason_data)
 	-- Determine ban key based on scope
 	local ban_key = "bans_ip_" .. ip
 	if ban_scope == "service" and service then
@@ -853,6 +858,7 @@ utils.add_ban = function(ip, reason, ttl, service, country, ban_scope)
 		date = os.time(),
 		country = country or "local",
 		ban_scope = ban_scope or "global",
+		reason_data = reason_data or {},
 		permanent = not ttl or ttl == 0,
 	})
 

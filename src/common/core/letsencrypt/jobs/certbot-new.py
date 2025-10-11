@@ -539,12 +539,13 @@ try:
     JOB = Job(LOGGER, __file__.replace("new", "renew"))
 
     # ? Fetch existing certificates
-    cmd_env = {
-        "PATH": getenv("PATH", ""),
-        "PYTHONPATH": getenv("PYTHONPATH", ""),
-        "RELOAD_MIN_TIMEOUT": getenv("RELOAD_MIN_TIMEOUT", "5"),
-        "DISABLE_CONFIGURATION_TESTING": getenv("DISABLE_CONFIGURATION_TESTING", "no").lower(),
-    }
+    cmd_env = environ.copy()
+
+    db_config = JOB.db.get_config()
+    for key in db_config:
+        if key in cmd_env:
+            del cmd_env[key]
+
     cmd_env["PYTHONPATH"] = cmd_env["PYTHONPATH"] + (f":{DEPS_PATH}" if DEPS_PATH not in cmd_env["PYTHONPATH"] else "")
     if getenv("DATABASE_URI", ""):
         cmd_env["DATABASE_URI"] = getenv("DATABASE_URI", "")

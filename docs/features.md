@@ -1,9 +1,5 @@
 # Features
 
-!!! info "Settings generator tool"
-
-    To help you tune BunkerWeb, we have made an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc).
-
 This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](concepts.md) section of the documentation. Please follow the instructions for your own [integration](integrations.md) on how to apply the settings.
 
 ## Global settings
@@ -45,7 +41,7 @@ Some settings in BunkerWeb support multiple configurations for the same feature.
 
 This pattern allows you to manage multiple configurations for features like reverse proxies, ports, or other settings that require distinct values for different use cases.
 
-### Security Modes
+### Security Modes {#security-modes}
 
 The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on your specific needs:
 
@@ -68,13 +64,32 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "API Settings"
 
-    | Setting            | Default       | Context | Multiple | Description                                                          |
-    | ------------------ | ------------- | ------- | -------- | -------------------------------------------------------------------- |
-    | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.             |
-    | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                        |
-    | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                    |
-    | `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.         |
-    | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API. |
+    | Setting            | Default       | Context | Multiple | Description                                                                                             |
+    | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------- |
+    | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.                                                |
+    | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                                                           |
+    | `API_HTTPS_PORT`   | `5443`        | global  | No       | **API HTTPS Port:** Listen port number (TLS) for the API.                                               |
+    | `API_LISTEN_HTTP`  | `yes`         | global  | No       | **API Listen HTTP:** Enable HTTP listener for the API.                                                  |
+    | `API_LISTEN_HTTPS` | `no`          | global  | No       | **API Listen HTTPS:** Enable HTTPS (TLS) listener for the API.                                          |
+    | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                                                       |
+    | `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.                                            |
+    | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API.                                    |
+    | `API_TOKEN`        |               | global  | No       | **API Access Token (optional):** If set, all API requests must include `Authorization: Bearer <token>`. |
+
+    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth. You can expose the API over HTTPS by setting `API_LISTEN_HTTPS=yes` (port: `API_HTTPS_PORT`, default `5443`).
+
+    Example test with curl (replace token and host):
+
+    ```bash
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         http://<bunkerweb-host>:5000/ping
+
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         --insecure \
+         https://<bunkerweb-host>:5443/ping
+    ```
 
 === "Network & Port Settings"
 
@@ -116,11 +131,11 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Logging Settings"
 
-    | Setting            | Default                                                                                                                        | Context | Multiple | Description                                                                                                                   |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
-    | `LOG_LEVEL`        | `notice`                                                                                                                       | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                        | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
+    | Setting            | Default                                                                                                                                    | Context | Multiple | Description                                                                                                                   |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
 
     !!! tip "Logging Best Practices"
         - For production environments, use the `notice`, `warn`, or `error` log levels to minimize log volume.
@@ -359,16 +374,26 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     When enabled, reCAPTCHA runs in the background (v3) to assign a score based on user behavior. A score lower than the configured threshold will prompt further verification or block the request. For visible challenges (v2), users must interact with the reCAPTCHA widget before continuing.
 
-    To use reCAPTCHA with BunkerWeb, you need to obtain your site and secret keys from the [Google reCAPTCHA admin console](https://www.google.com/recaptcha/admin). Once you have the keys, you can configure BunkerWeb to use reCAPTCHA as an antibot mechanism.
+    There are now two ways to integrate reCAPTCHA:
+    - The classic version (site/secret keys, v2/v3 verify endpoint)
+    - The new version using Google Cloud (Project ID + API key). The classic version remains available and can be toggled with `ANTIBOT_RECAPTCHA_CLASSIC`.
+
+    For the classic version, obtain your site and secret keys from the [Google reCAPTCHA admin console](https://www.google.com/recaptcha/admin).
+    For the new version, create a reCAPTCHA key in your Google Cloud project and use the Project ID and an API key (see the [Google Cloud reCAPTCHA console](https://console.cloud.google.com/security/recaptcha)). A site key is still required.
 
     **Configuration Settings:**
 
-    | Setting                     | Default | Context   | Multiple | Description                                                                                                   |
-    | --------------------------- | ------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`               | `no`    | multisite | no       | **Enable Antibot:** Set to `recaptcha` to enable the reCAPTCHA challenge.                                     |
-    | `ANTIBOT_RECAPTCHA_SITEKEY` |         | multisite | no       | **reCAPTCHA Site Key:** Your reCAPTCHA site key (get this from Google).                                       |
-    | `ANTIBOT_RECAPTCHA_SECRET`  |         | multisite | no       | **reCAPTCHA Secret Key:** Your reCAPTCHA secret key (get this from Google).                                   |
-    | `ANTIBOT_RECAPTCHA_SCORE`   | `0.7`   | multisite | no       | **reCAPTCHA Minimum Score:** The minimum score required for reCAPTCHA to pass a user (only for reCAPTCHA v3). |
+    | Setting                        | Default | Context   | Multiple | Description                                                                                        |
+    | ------------------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                  | `no`    | multisite | no       | Enable antibot; set to `recaptcha` to enable reCAPTCHA.                                            |
+    | `ANTIBOT_RECAPTCHA_CLASSIC`    | `yes`   | multisite | no       | Use classic reCAPTCHA. Set to `no` to use the new Google Cloud-based version.                      |
+    | `ANTIBOT_RECAPTCHA_SITEKEY`    |         | multisite | no       | reCAPTCHA site key. Required for both classic and new versions.                                    |
+    | `ANTIBOT_RECAPTCHA_SECRET`     |         | multisite | no       | reCAPTCHA secret key. Required for the classic version only.                                       |
+    | `ANTIBOT_RECAPTCHA_PROJECT_ID` |         | multisite | no       | Google Cloud Project ID. Required for the new version only.                                        |
+    | `ANTIBOT_RECAPTCHA_API_KEY`    |         | multisite | no       | Google Cloud API key used to call the reCAPTCHA Enterprise API. Required for the new version only. |
+    | `ANTIBOT_RECAPTCHA_JA3`        |         | multisite | no       | Optional JA3 TLS fingerprint to include in Enterprise assessments.                                 |
+    | `ANTIBOT_RECAPTCHA_JA4`        |         | multisite | no       | Optional JA4 TLS fingerprint to include in Enterprise assessments.                                 |
+    | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`   | multisite | no       | Minimum score required to pass (applies to both classic v3 and the new version).                   |
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
@@ -461,14 +486,34 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     Note: The example above uses numbers 2-9 and all letters, which are the most commonly used characters for CAPTCHA challenges. You can customize the alphabet to include special characters as needed.
 
-=== "reCAPTCHA Challenge"
+=== "reCAPTCHA Classic"
 
-    Example configuration for enabling the reCAPTCHA challenge:
+    Example configuration for the classic reCAPTCHA (site/secret keys):
 
     ```yaml
     USE_ANTIBOT: "recaptcha"
+    ANTIBOT_RECAPTCHA_CLASSIC: "yes"
     ANTIBOT_RECAPTCHA_SITEKEY: "your-site-key"
     ANTIBOT_RECAPTCHA_SECRET: "your-secret-key"
+    ANTIBOT_RECAPTCHA_SCORE: "0.7"
+    ANTIBOT_URI: "/challenge"
+    ANTIBOT_TIME_RESOLVE: "60"
+    ANTIBOT_TIME_VALID: "86400"
+    ```
+
+=== "reCAPTCHA (new)"
+
+    Example configuration for the new Google Cloud-based reCAPTCHA (Project ID + API key):
+
+    ```yaml
+    USE_ANTIBOT: "recaptcha"
+    ANTIBOT_RECAPTCHA_CLASSIC: "no"
+    ANTIBOT_RECAPTCHA_SITEKEY: "your-site-key"
+    ANTIBOT_RECAPTCHA_PROJECT_ID: "your-gcp-project-id"
+    ANTIBOT_RECAPTCHA_API_KEY: "your-gcp-api-key"
+    # Optional fingerprints to improve Enterprise assessments
+    # ANTIBOT_RECAPTCHA_JA3: "<ja3-fingerprint>"
+    # ANTIBOT_RECAPTCHA_JA4: "<ja4-fingerprint>"
     ANTIBOT_RECAPTCHA_SCORE: "0.7"
     ANTIBOT_URI: "/challenge"
     ANTIBOT_TIME_RESOLVE: "60"
@@ -1579,7 +1624,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.4
+        image: bunkerity/bunkerweb:1.6.5
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1596,7 +1641,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -1616,6 +1661,8 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
       bw-db:
         image: mariadb:11
+        # We set the max allowed packet size to avoid issues with large queries
+        command: --max-allowed-packet=67108864
         environment:
           MYSQL_RANDOM_ROOT_PASSWORD: "yes"
           MYSQL_DATABASE: "db"
@@ -1628,7 +1675,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.6.11 # Use the latest version but always pin the version for a better stability/security
+        image: crowdsecurity/crowdsec:v1.7.0 # Use the latest version but always pin the version for a better stability/security
         volumes:
           - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
           - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
@@ -1642,8 +1689,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - bw-universe
 
       syslog:
-        image: balabit/syslog-ng:4.8.0
-        # image: lscr.io/linuxserver/syslog-ng:4.8.1-r1-ls147 # For aarch64 architecture
+        image: balabit/syslog-ng:4.9.0
         cap_add:
           - NET_BIND_SERVICE  # Bind to low ports
           - NET_BROADCAST  # Send broadcasts
@@ -1949,10 +1995,19 @@ Follow these steps to configure and use the DNSBL feature:
 
 ### Configuration Settings
 
-| Setting      | Default                                             | Context   | Multiple | Description                                                                     |
-| ------------ | --------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | no       | **Enable DNSBL:** Set to `yes` to enable DNSBL checks for incoming connections. |
-| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | **DNSBL Servers:** List of DNSBL server domains to check, separated by spaces.  |
+**General**
+
+| Setting      | Default                                             | Context   | Multiple | Description                                                                 |
+| ------------ | --------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
+| `USE_DNSBL`  | `no`                                                | multisite | no       | Enable DNSBL: set to `yes` to enable DNSBL checks for incoming connections. |
+| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | DNSBL servers: list of DNSBL server domains to check, separated by spaces.  |
+
+**Ignore Lists**
+
+| Setting                | Default | Context   | Multiple | Description                                                                                    |
+| ---------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`      | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                |
+| `DNSBL_IGNORE_IP_URLS` | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes. |
 
 !!! tip "Choosing DNSBL Servers"
     Choose reputable DNSBL providers to minimize false positives. The default list includes well-established services that are suitable for most websites:
@@ -1991,6 +2046,43 @@ Follow these steps to configure and use the DNSBL feature:
 
     - **zen.spamhaus.org**: Spamhaus' combined list is often considered sufficient as a standalone solution due to its wide coverage and reputation for accuracy. It combines the SBL, XBL, and PBL lists in a single query, making it efficient and comprehensive.
 
+=== "Excluding Trusted IPs"
+
+    You can exclude specific clients from DNSBL checks using static values and/or remote files:
+
+    - `DNSBL_IGNORE_IP`: Add space-separated IPs and CIDR ranges. Example: `192.0.2.10 203.0.113.0/24 2001:db8::/32`.
+    - `DNSBL_IGNORE_IP_URLS`: Provide URLs whose contents list one IP/CIDR per line. Comments starting with `#` or `;` are ignored. Duplicate entries are de-duplicated.
+
+    When an incoming client IP matches the ignore list, BunkerWeb skips DNSBL lookups and caches the result as “ok” for faster subsequent requests.
+
+=== "Using Remote URLs"
+
+    The `dnsbl-download` job downloads and caches ignore IPs hourly:
+
+    - Protocols: `https://`, `http://`, and local `file://` paths.
+    - Per-URL cache with checksum prevents redundant downloads (1-hour grace).
+    - Per-service merged file: `/var/cache/bunkerweb/dnsbl/<service>/IGNORE_IP.list`.
+    - Loaded at startup and merged with `DNSBL_IGNORE_IP`.
+
+    Example combining static and URL sources:
+
+    ```yaml
+    USE_DNSBL: "yes"
+    DNSBL_LIST: "zen.spamhaus.org"
+    DNSBL_IGNORE_IP: "10.0.0.0/8 192.168.0.0/16 2001:db8::/32"
+    DNSBL_IGNORE_IP_URLS: "https://example.com/allow-cidrs.txt file:///etc/bunkerweb/dnsbl/ignore.txt"
+    ```
+
+=== "Using Local Files"
+
+    Load ignore IPs from local files using `file://` URLs:
+
+    ```yaml
+    USE_DNSBL: "yes"
+    DNSBL_LIST: "zen.spamhaus.org"
+    DNSBL_IGNORE_IP_URLS: "file:///etc/bunkerweb/dnsbl/ignore.txt file:///opt/data/allow-cidrs.txt"
+    ```
+
 ## Database
 
 STREAM support :white_check_mark:
@@ -2017,12 +2109,13 @@ Follow these steps to configure and use the Database feature:
 
 ### Configuration Settings
 
-| Setting                  | Default                                   | Context | Multiple | Description                                                                                                           |
-| ------------------------ | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
-| `DATABASE_URI_READONLY`  |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
+| Setting                         | Default                                   | Context | Multiple | Description                                                                                                           |
+| ------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
+| `DATABASE_URI_READONLY`         |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.           |
 
 !!! tip "Database Selection"
     - **SQLite** (default): Ideal for single-node deployments or testing environments due to its simplicity and file-based nature.
@@ -2039,7 +2132,19 @@ Follow these steps to configure and use the Database feature:
     - Oracle: `oracle://username:password@hostname:port/database`
 
 !!! warning "Database Maintenance"
-    The plugin automatically runs a daily job that cleans up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.
+    The plugin automatically runs daily maintenance jobs:
+
+    - **Cleanup Excess Job Runs:** Purges job execution history beyond the `DATABASE_MAX_JOBS_RUNS` limit.
+    - **Cleanup Expired UI Sessions:** Removes UI user sessions older than `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+    Together, these jobs prevent unbounded database growth while preserving useful operational history.
+
+## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Provides a simpler way to fix false positives in reports.
 
 ## Errors
 
@@ -2923,6 +3028,8 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 ## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 STREAM support :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
@@ -2933,7 +3040,9 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_UPSTREAM_NAME`              |               | global  | yes      | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
 | `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | yes      | List of servers/IPs in the server group.                           |
 | `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | yes      | Load balancing mode (round-robin or sticky).                       |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | yes      | Sticky session method (ip or cookie).                              |
 | `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | yes      | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | yes      | Number of keepalive connections to cache per worker.               |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | yes      | Keepalive timeout for upstream connections.                        |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | yes      | Keepalive time for upstream connections.                           |
 | `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global  | yes      | The healthcheck URL.                                               |
@@ -3017,15 +3126,26 @@ For example, `/metrics/requests` returns information about blocked requests.
     2. Your client IP is included in the `API_WHITELIST_IP` setting (default is `127.0.0.0/8`)
     3. You are accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
     4. You are using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
+    5. If `API_TOKEN` is configured, include `Authorization: Bearer <token>` in the request headers.
 
-    A typical API request would look like:
+    Typical requests:
+
+    Without token (when `API_TOKEN` is not set):
+    ```bash
+    curl -H "Host: bwapi" \
+         http://your-bunkerweb-instance:5000/metrics/requests
     ```
-    curl -H "Host: bwapi" http://your-bunkerweb-instance:5000/metrics/requests
+
+    With token (when `API_TOKEN` is set):
+    ```bash
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         http://your-bunkerweb-instance:5000/metrics/requests
     ```
 
     If you have customized the `API_SERVER_NAME` to something other than the default `bwapi`, use that value in the Host header instead.
 
-    For secure production environments, make sure to restrict API access to trusted IPs only.
+    For secure production environments, restrict API access to trusted IPs and enable `API_TOKEN`.
 
 ### Configuration Settings
 
@@ -3457,7 +3577,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.17.1](https://github.com/coreruleset/coreruleset/releases/tag/v4.17.1) (**default**).
+- **`4`**: Stable [v4.19.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"
@@ -3473,7 +3593,7 @@ Select a CRS version to best match your security needs:
 
     You can set the paranoia level by adding a custom configuration file in `/etc/bunkerweb/configs/modsec-crs/`.
 
-### Custom Configurations
+### Custom Configurations {#custom-configurations}
 
 Tuning ModSecurity and the OWASP Core Rule Set (CRS) can be achieved through custom configurations. These configurations allow you to customize behavior at specific stages of the security rules processing:
 
@@ -4628,7 +4748,7 @@ When enabled, BunkerWeb dynamically generates the `/robots.txt` file at the root
 3.  **Custom URLs:** Rules are fetched from user-provided URLs (specified by `ROBOTSTXT_URLS`).
 4.  **Manual Rules:** Rules defined directly via `ROBOTSTXT_RULE` environment variables are added.
 
-All rules from these sources are combined. After aggregation, `ROBOTSTXT_IGNORE_RULES` are applied to filter out any unwanted rules using PCRE regex patterns. Finally, if no rules remain after this entire process, a default `User-agent: *` and `Disallow: /` rule is automatically applied to ensure a basic level of protection. Optional sitemap URLs (specified by `ROBOTSTXT_SITEMAP`) are also included in the final `robots.txt` output.
+All rules from these sources are combined. After aggregation, `ROBOTSTXT_IGNORE_RULE` are applied to filter out any unwanted rules using PCRE regex patterns. Finally, if no rules remain after this entire process, a default `User-agent: *` and `Disallow: /` rule is automatically applied to ensure a basic level of protection. Optional sitemap URLs (specified by `ROBOTSTXT_SITEMAP`) are also included in the final `robots.txt` output.
 
 ### Dynamic Bot Circumvention with DarkVisitors API
 
@@ -4644,7 +4764,7 @@ To enable this, you need to sign up at [darkvisitors.com](https://darkvisitors.c
     -   **Community Lists:** Specify `ROBOTSTXT_COMMUNITY_LISTS` (space-separated IDs).
     -   **Custom URLs:** Provide `ROBOTSTXT_URLS` (space-separated URLs).
     -   **Manual Rules:** Use `ROBOTSTXT_RULE` for individual rules (multiple rules can be specified with `ROBOTSTXT_RULE_N`).
-3.  **Filter rules (optional):** Use `ROBOTSTXT_IGNORE_RULES_N` to exclude specific rules by regex pattern.
+3.  **Filter rules (optional):** Use `ROBOTSTXT_IGNORE_RULE_N` to exclude specific rules by regex pattern.
 4.  **Add sitemaps (optional):** Use `ROBOTSTXT_SITEMAP_N` for sitemap URLs.
 5.  **Obtain the generated robots.txt file:** Once BunkerWeb is running with the above settings, you can access the dynamically generated `robots.txt` file by making an HTTP GET request to `http(s)://your-domain.com/robots.txt`.
 
@@ -4661,7 +4781,7 @@ To enable this, you need to sign up at [darkvisitors.com](https://darkvisitors.c
 | `ROBOTSTXT_RULE`                     |         | multisite | Yes      | A single rule for `robots.txt`.                                                                                                       |
 | `ROBOTSTXT_HEADER`                   |         | multisite | Yes      | Header for `robots.txt` file (before rules). Can be Base64 encoded.                                                                   |
 | `ROBOTSTXT_FOOTER`                   |         | multisite | Yes      | Footer for `robots.txt` file (after rules). Can be Base64 encoded.                                                                    |
-| `ROBOTSTXT_IGNORE_RULES`             |         | multisite | Yes      | A single PCRE regex pattern to ignore rules.                                                                                          |
+| `ROBOTSTXT_IGNORE_RULE`              |         | multisite | Yes      | A single PCRE regex pattern to ignore rules.                                                                                          |
 | `ROBOTSTXT_SITEMAP`                  |         | multisite | Yes      | A single sitemap URL.                                                                                                                 |
 
 ### Example Configurations
@@ -4682,7 +4802,7 @@ USE_ROBOTSTXT: "yes"
 ROBOTSTXT_DARKVISITORS_TOKEN: "your-darkvisitors-token-here"
 ROBOTSTXT_DARKVISITORS_AGENT_TYPES: "AI Data Scraper"
 ROBOTSTXT_COMMUNITY_LISTS: "robots-disallowed"
-ROBOTSTXT_IGNORE_RULES: "User-agent: Googlebot-Image"
+ROBOTSTXT_IGNORE_RULE: "User-agent: Googlebot-Image"
 ```
 
 **Combined Configuration**
@@ -4694,7 +4814,7 @@ ROBOTSTXT_COMMUNITY_LISTS: "ai-robots-txt"
 ROBOTSTXT_URLS: "https://example.com/my-custom-rules.txt"
 ROBOTSTXT_RULE: "User-agent: MyOwnBot"
 ROBOTSTXT_RULE_1: "Disallow: /admin"
-ROBOTSTXT_IGNORE_RULES: "User-agent: Googlebot-Image"
+ROBOTSTXT_IGNORE_RULE: "User-agent: Googlebot-Image"
 ROBOTSTXT_SITEMAP: "https://example.com/sitemap.xml"
 ```
 
@@ -5095,6 +5215,8 @@ Integrate easily the BunkerWeb UI.
 
 ## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 STREAM support :x:
 

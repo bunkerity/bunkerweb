@@ -44,7 +44,7 @@ The first step is to install the plugin by placing its files inside the correspo
     cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
     ```
 
-    !!! warning "Using local folder for persistent data"
+    ??? warning "Using local folder for persistent data"
         The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
         But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
 
@@ -89,7 +89,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - ./bw-data:/data
     ...
@@ -125,7 +125,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - ./bw-data:/data
     ...
@@ -134,7 +134,7 @@ The first step is to install the plugin by placing its files inside the correspo
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_1_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
@@ -168,7 +168,7 @@ The first step is to install the plugin by placing its files inside the correspo
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.4
+        image: bunkerity/bunkerweb-scheduler:1.6.5
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -215,7 +215,7 @@ The first step is to install the plugin by placing its files inside the correspo
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.4
+              image: bunkerity/bunkerweb-scheduler:1.6.5
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -255,7 +255,7 @@ The first step is to install the plugin by placing its files inside the correspo
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 What a plugin structure looks like:
 ```
@@ -267,6 +267,7 @@ plugin /
          blueprints / <blueprint_file(s)>
               templates / <blueprint_template(s)>
     jobs / my-job.py
+    bwcli / my-command.py
     templates / my-template.json
           my-template / configs / conf_type / conf_name.conf
     plugin.lua
@@ -285,6 +286,8 @@ plugin /
   This folder is used to override existing Flask blueprints or create new ones. Inside, you can include blueprint files and an optional **templates** subfolder for blueprint-specific templates.
 
 - **jobs py file** : Custom Python files executed as jobs by the scheduler.
+
+- **bwcli folder** : Python (or executable) files that extend the `bwcli` CLI through custom commands.
 
 - **my-template.json** : Add [custom templates](concepts.md#templates) to override the default values of settings and apply custom configurations easily.
 
@@ -344,6 +347,7 @@ Here are the details of the fields :
 |   `stream`    |    yes    | string | Information about stream support : `no`, `yes` or `partial`.                                                              |
 |  `settings`   |    yes    |  dict  | List of the settings of your plugin.                                                                                      |
 |    `jobs`     |    no     |  list  | List of the jobs of your plugin.                                                                                          |
+|    `bwcli`    |    no     |  dict  | Map CLI command names to files stored in the plugin's `bwcli` directory to expose CLI plugins.                            |
 
 Each setting has the following fields (the key is the ID of the settings used in a configuration) :
 
@@ -367,15 +371,33 @@ Each job has the following fields :
 | `file`  |    yes    | string | Name of the file inside the jobs folder.                                                                                                |
 | `every` |    yes    | string | Job scheduling frequency : `minute`, `hour`, `day`, `week` or `once` (no frequency, only once before (re)generating the configuration). |
 
+### CLI commands
+
+Plugins can extend the `bwcli` tool with custom commands that run under `bwcli plugin <plugin_id> ...`:
+
+1. Add a `bwcli` directory in your plugin and drop one file per command (for example `bwcli/list.py`). The CLI adds the plugin path to `sys.path` before executing the file.
+2. Declare the commands in the optional `bwcli` section of `plugin.json`, mapping each command name to its executable file name.
+
+```json
+{
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py"
+  }
+}
+```
+
+The scheduler automatically exposes the declared commands once the plugin is installed. Core plugins, such as `backup` in `src/common/core/backup`, follow the same pattern.
+
 ### Configurations
 
 You can add custom NGINX configurations by adding a folder named **confs** with content similar to the [custom configurations](advanced.md#custom-configurations). Each subfolder inside the **confs** will contain [jinja2](https://jinja.palletsprojects.com) templates that will be generated and loaded at the corresponding context (`http`, `server-http`, `default-server-http`, `stream`, `server-stream`, `modsec`, `modsec-crs`, `crs-plugins-before` and `crs-plugins-after`).
 
 Here is an example for a configuration template file inside the **confs/server-http** folder named **example.conf** :
 
-```conf
+```nginx
 location /setting {
-	default_type 'text/plain';
+  default_type 'text/plain';
     content_by_lua_block {
         ngx.say('{{ DUMMY_SETTING }}')
     }
@@ -541,7 +563,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.4/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 
@@ -624,10 +646,38 @@ Here are the arguments that are passed and access on action.py functions:
 function(app=app, args=request.args.to_dict() or request.json or None)
 ```
 
-!!! info "Python libraries"
-    In addition, you can use Python libraries that are already available like :
-    `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
+!!! info "Available Python Libraries"
 
+    BunkerWeb's Web UI includes a set of pre-installed Python libraries that you can use in your plugin's `actions.py` or other UI-related scripts. These are available out-of-the-box without needing additional installations.
+
+    Here's the complete list of included libraries:
+
+    - **bcrypt** - Password hashing library
+    - **biscuit-python** - Biscuit authentication tokens
+    - **certbot** - ACME client for Let's Encrypt
+    - **Flask** - Web framework
+    - **Flask-Login** - User session management
+    - **Flask-Session[cachelib]** - Server-side session storage
+    - **Flask-WTF** - Form handling and CSRF protection
+    - **gunicorn[gthread]** - WSGI HTTP server
+    - **pillow** - Image processing
+    - **psutil** - System and process utilities
+    - **python_dateutil** - Date and time utilities
+    - **qrcode** - QR code generation
+    - **regex** - Advanced regular expressions
+    - **urllib3** - HTTP client
+    - **user_agents** - User agent parsing
+
+    !!! tip "Using Libraries in Your Plugin"
+        To import and use these libraries in your `actions.py` file, simply use the standard Python `import` statement. For example:
+
+        ```python
+        from flask import request
+        import bcrypt
+        ```
+
+    ??? warning "External Libraries"
+        If you need libraries not listed above, install them inside the `ui` folder of your plugin and import them using the classical `import` directive. Ensure compatibility with the existing environment to avoid conflicts.
 
 **Some examples**
 

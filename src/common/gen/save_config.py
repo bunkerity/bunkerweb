@@ -5,6 +5,7 @@ from os import R_OK, X_OK, access, environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from re import compile as re_compile
+from urllib.parse import urlsplit
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
@@ -21,7 +22,7 @@ from API import API  # type: ignore
 CUSTOM_CONF_RX = re_compile(
     r"^(?P<service>[0-9a-z\.-]*)_?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(?P<name>.+)$"
 )
-BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(http://)?(?P<hostname>(?<![:])\b[^:\s]+\b)(:(?P<port>\d+))?")
+BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(https?://)?(?P<hostname>(?<![:])\b[^:\s]+\b)(:(?P<port>\d+))?")
 
 LOGGER = setup_logger("Generator.save_config", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
@@ -102,6 +103,8 @@ if __name__ == "__main__":
         for k, v in environ.items():
             if CUSTOM_CONF_RX.match(k):
                 custom_conf = CUSTOM_CONF_RX.search(k)
+                if not custom_conf:
+                    continue
                 custom_confs.append(
                     {
                         "value": f"# CREATED BY ENV\n{v}",
@@ -160,7 +163,7 @@ if __name__ == "__main__":
 
         settings = config.get_config(db, first_run=args.first_run)
 
-        # Parse BunkerWeb instances from environment
+        # Parse BunkerWeb instances from environment using centralized endpoint builder
         apis = []
         hostnames = set()
         for bw_instance in settings.get("BUNKERWEB_INSTANCES", "").split(" "):
@@ -173,15 +176,17 @@ if __name__ == "__main__":
                     LOGGER.warning(f"Duplicate BunkerWeb instance hostname {match.group('hostname')}, skipping it")
 
                 hostnames.add(match.group("hostname"))
-                apis.append(
-                    API(
-                        f"http://{match.group('hostname')}:{match.group('port') or settings.get('API_HTTP_PORT', '5000')}",
-                        host=settings.get("API_SERVER_NAME", "bwapi"),
-                    )
+                # Use API builder to compute scheme and port from URL or parts
+                endpoint = API.build_endpoint(
+                    bw_instance,
+                    port=settings.get("API_HTTP_PORT"),
+                    listen_https=(settings.get("API_LISTEN_HTTPS", "no") or "no").lower() == "yes",
+                    https_port=settings.get("API_HTTPS_PORT"),
                 )
+                apis.append(API(endpoint, host=settings.get("API_SERVER_NAME", "bwapi")))
             else:
                 LOGGER.warning(
-                    f"Invalid BunkerWeb instance {bw_instance}, it should match the following regex: (http://)<hostname>(:<port>) ({BUNKERWEB_STATIC_INSTANCES_RX.pattern}), skipping it"
+                    f"Invalid BunkerWeb instance {bw_instance}, it should match the following regex: (http(s)://)<hostname>(:<port>) ({BUNKERWEB_STATIC_INSTANCES_RX.pattern}), skipping it"
                 )
 
         changes = []
@@ -210,13 +215,33 @@ if __name__ == "__main__":
         changes.append("instances")
 
         for api in apis:
-            endpoint_data = api.endpoint.replace("http://", "").split(":")
-            err = db.add_instance(endpoint_data[0], endpoint_data[1].replace("/", ""), api.host, method="manual", changed=False)
+            parsed = urlsplit(api.endpoint)
+            hostname = parsed.hostname or "127.0.0.1"
+            scheme = parsed.scheme
+            listen_https = scheme == "https"
+            http_port_default = settings.get("API_HTTP_PORT", getenv("API_HTTP_PORT", "5000"))
+            https_port_default = settings.get("API_HTTPS_PORT", getenv("API_HTTPS_PORT", "5443"))
+            if listen_https:
+                http_port_val = http_port_default
+                https_port_val = int(parsed.port or https_port_default)
+            else:
+                http_port_val = int(parsed.port or http_port_default)
+                https_port_val = https_port_default
+
+            err = db.add_instance(
+                hostname,
+                http_port_val,
+                api.host,
+                method="manual",
+                changed=False,
+                listen_https=listen_https,
+                https_port=https_port_val,
+            )
 
             if err:
                 LOGGER.warning(err)
             else:
-                LOGGER.info(f"Instance {endpoint_data[0]} successfully saved to database")
+                LOGGER.info(f"Instance {hostname} successfully saved to database")
 
         if not args.no_check_changes:
             # update changes in db

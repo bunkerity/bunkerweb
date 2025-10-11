@@ -27,6 +27,7 @@ local base64_encode = base64.encode
 local to_hex = str.to_hex
 local http_new = http.new
 local decode = cjson.decode
+local encode = cjson.encode
 local get_rdns = utils.get_rdns
 local get_asn = utils.get_asn
 local regex_match = utils.regex_match
@@ -110,6 +111,7 @@ function antibot:header()
 		csp_directives["script-src"] = csp_directives["script-src"]
 			.. "  https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/"
 		csp_directives["frame-src"] = "https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/"
+		csp_directives["frame-ancestors"] = "https://www.google.com/"
 		csp_directives["connect-src"] = "https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/"
 	elseif self.session_data.type == "hcaptcha" then
 		csp_directives["script-src"] = csp_directives["script-src"] .. "  https://hcaptcha.com https://*.hcaptcha.com"
@@ -403,6 +405,7 @@ function antibot:display_challenge()
 	-- reCAPTCHA case
 	if self.session_data.type == "recaptcha" then
 		template_vars.recaptcha_sitekey = self.variables["ANTIBOT_RECAPTCHA_SITEKEY"]
+		template_vars.recaptcha_classic = self.variables["ANTIBOT_RECAPTCHA_CLASSIC"] == "yes"
 	end
 
 	-- hCaptcha case
@@ -487,31 +490,83 @@ function antibot:check_challenge()
 		if not httpc then
 			return nil, err, nil, nil
 		end
-		local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
-			method = "POST",
-			body = "secret="
-				.. self.variables["ANTIBOT_RECAPTCHA_SECRET"]
-				.. "&response="
-				.. args["token"]
-				.. "&remoteip="
-				.. self.ctx.bw.remote_addr,
-			headers = {
-				["Content-Type"] = "application/x-www-form-urlencoded",
-			},
-		})
+		local res
+
+		if self.variables["ANTIBOT_RECAPTCHA_CLASSIC"] == "yes" then
+			local body_params = {
+				secret = self.variables["ANTIBOT_RECAPTCHA_SECRET"],
+				response = args["token"],
+				remoteip = self.ctx.bw.remote_addr,
+			}
+			local body_parts = {}
+			for k, v in pairs(body_params) do
+				table.insert(body_parts, k .. "=" .. ngx.escape_uri(v))
+			end
+			local body = table.concat(body_parts, "&")
+			res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
+				method = "POST",
+				body = body,
+				headers = {
+					["Content-Type"] = "application/x-www-form-urlencoded",
+				},
+			})
+		else
+			local body_params = {
+				event = {
+					token = args["token"],
+					expectedAction = "CAPTCHA",
+					siteKey = self.variables["ANTIBOT_RECAPTCHA_SITEKEY"],
+					userIpAddress = self.ctx.bw.remote_addr,
+				},
+			}
+			if (self.ctx.bw.http_user_agent or "") ~= "" then
+				body_params.event.userAgent = self.ctx.bw.http_user_agent
+			end
+			if self.variables["ANTIBOT_RECAPTCHA_JA3"] ~= "" then
+				body_params.event.ja3 = self.variables["ANTIBOT_RECAPTCHA_JA3"]
+			end
+			if self.variables["ANTIBOT_RECAPTCHA_JA4"] ~= "" then
+				body_params.event.ja4 = self.variables["ANTIBOT_RECAPTCHA_JA4"]
+			end
+			local body = encode(body_params)
+			res, err = httpc:request_uri(
+				"https://recaptchaenterprise.googleapis.com/v1/projects/"
+					.. self.variables["ANTIBOT_RECAPTCHA_PROJECT_ID"]
+					.. "/assessments?key="
+					.. self.variables["ANTIBOT_RECAPTCHA_API_KEY"],
+				{
+					method = "POST",
+					body = body,
+					headers = {
+						["Content-Type"] = "application/json; charset=utf-8",
+					},
+				}
+			)
+		end
 		httpc:close()
 		if not res then
-			return nil, "can't send request to reCAPTCHA API : " .. err, nil
+			return nil, "can't send request to reCAPTCHA API : " .. (err or "unknown error"), nil
 		end
 		local ok, rdata = pcall(decode, res.body)
 		if not ok then
 			return nil, "error while decoding JSON from reCAPTCHA API : " .. rdata, nil
 		end
-		if not rdata.success then
+		local success, score, reason
+		if self.session_data.recaptcha_classic then
+			success = rdata.success
+			score = rdata.score or 0
+		else
+			success = rdata.tokenProperties and rdata.tokenProperties.valid
+			score = rdata.riskAnalysis and rdata.riskAnalysis.score or 0
+			reason = rdata.riskAnalysis and rdata.riskAnalysis.invalidReason
+		end
+		if not success then
 			return false, "client failed challenge", nil
 		end
-		if rdata.score and rdata.score < tonumber(self.variables["ANTIBOT_RECAPTCHA_SCORE"]) then
-			return false, "client failed challenge with score " .. tostring(rdata.score), nil
+		if score < tonumber(self.variables["ANTIBOT_RECAPTCHA_SCORE"]) then
+			return false,
+				"client failed challenge with score " .. tostring(score) .. (reason and " : " .. reason or ""),
+				nil
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
@@ -615,7 +670,7 @@ function antibot:check_challenge()
 			key = self.variables["ANTIBOT_MCAPTCHA_SITEKEY"],
 			secret = self.variables["ANTIBOT_MCAPTCHA_SECRET"],
 		}
-		local json_payload = cjson.encode(payload)
+		local json_payload = encode(payload)
 		local res, err = httpc:request_uri(self.variables["ANTIBOT_MCAPTCHA_URL"] .. "/api/v1/pow/siteverify", {
 			method = "POST",
 			body = json_payload,

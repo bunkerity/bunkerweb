@@ -403,7 +403,7 @@ class Rfc2136Provider(Provider):
     dns_rfc2136_port: Optional[str] = None
     dns_rfc2136_name: str
     dns_rfc2136_secret: str
-    dns_rfc2136_algorithm: str = "HMAC-SHA512"
+    dns_rfc2136_algorithm: str = "HMAC-MD5"
     dns_rfc2136_sign_query: str = "false"
 
     _validate_aliases = alias_model_validator(

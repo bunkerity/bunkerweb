@@ -7,11 +7,15 @@
     "USE_GZIP": "yes",
     "USE_CORS": "yes",
     "CORS_ALLOW_ORIGIN": "self",
-    "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
+    "INTERCEPTED_ERROR_CODES": "404 405 413 429 500 501 502 503 504",
     "MAX_CLIENT_SIZE": "50m",
     "KEEP_UPSTREAM_HEADERS": "Content-Security-Policy Strict-Transport-Security X-Frame-Options X-Content-Type-Options Referrer-Policy",
     "REVERSE_PROXY_KEEPALIVE": "yes",
-    "USE_ROBOTSTXT": "yes"
+    "USE_ROBOTSTXT": "yes",
+    "LIMIT_REQ_RATE": "6r/s",
+    "LIMIT_CONN_MAX_HTTP1": "25",
+    "LIMIT_CONN_MAX_HTTP2": "200",
+    "LIMIT_CONN_MAX_HTTP3": "200"
   },
   "steps": [
     {
@@ -28,7 +32,11 @@
         "MAX_CLIENT_SIZE",
         "KEEP_UPSTREAM_HEADERS",
         "REVERSE_PROXY_KEEPALIVE",
-        "USE_ROBOTSTXT"
+        "USE_ROBOTSTXT",
+        "LIMIT_REQ_RATE",
+        "LIMIT_CONN_MAX_HTTP1",
+        "LIMIT_CONN_MAX_HTTP2",
+        "LIMIT_CONN_MAX_HTTP3"
       ]
     }
   ]

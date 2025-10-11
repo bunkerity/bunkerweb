@@ -1,7 +1,7 @@
 # Troubleshooting
 
 !!! info "BunkerWeb Panel"
-	If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
+    If you are unable to resolve your issue, you can [contact us directly via our panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc). This centralizes all requests related to the BunkerWeb solution.
 
 ## Logs
 
@@ -14,39 +14,39 @@ Here is how you can access the logs, depending on your integration :
 === "Docker"
 
     !!! tip "List containers"
-    	To list the running containers, you can use the following command :
-    	```shell
-    	docker ps
-    	```
+        To list the running containers, you can use the following command :
+        ```shell
+        docker ps
+        ```
 
-    You can use the `docker logs` command (replace `mybunker` with the name of your container) :
+    You can use the `docker logs` command (replace `bunkerweb` with the name of your container) :
     ```shell
-    docker logs mybunker
+    docker logs bunkerweb
     ```
 
-    Here is the docker-compose equivalent (replace `mybunker` with the name of the services declared in the docker-compose.yml file) :
+    Here is the docker-compose equivalent (replace `bunkerweb` with the name of the services declared in the docker-compose.yml file) :
     ```shell
-    docker-compose logs mybunker
+    docker-compose logs bunkerweb
     ```
 
 === "Docker autoconf"
 
     !!! tip "List containers"
-    	To list the running containers, you can use the following command :
-    	```shell
-    	docker ps
-    	```
+        To list the running containers, you can use the following command :
+        ```shell
+        docker ps
+        ```
 
-    You can use the `docker logs` command (replace `mybunker` and `myautoconf` with the name of your containers) :
+    You can use the `docker logs` command (replace `bunkerweb` and `bw-autoconf` with the name of your containers) :
     ```shell
-    docker logs mybunker
-    docker logs myautoconf
+    docker logs bunkerweb
+    docker logs bw-autoconf
     ```
 
-    Here is the docker-compose equivalent (replace `mybunker` and `myautoconf` with the name of the services declared in the docker-compose.yml file) :
+    Here is the docker-compose equivalent (replace `bunkerweb` and `bw-autoconf` with the name of the services declared in the docker-compose.yml file) :
     ```shell
-    docker-compose logs mybunker
-    docker-compose logs myautoconf
+    docker-compose logs bunkerweb
+    docker-compose logs bw-autoconf
     ```
 
 === "All-in-one"
@@ -62,33 +62,34 @@ Here is how you can access the logs, depending on your integration :
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_1_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
     !!! tip "List services"
-    	To list the services, you can use the following command :
-    	```shell
-    	docker service ls
-    	```
+        To list the services, you can use the following command :
+        ```shell
+        docker service ls
+        ```
 
-    You can use the `docker service logs` command (replace `mybunker` and `myautoconf` with the name of your services) :
+    You can use the `docker service logs` command (replace `bunkerweb` and `bw-autoconf` with the name of your services) :
     ```shell
-    docker service logs mybunker
-    docker service logs myautoconf
+    docker service logs bunkerweb
+    docker service logs bw-autoconf
     ```
 
 === "Kubernetes"
 
     !!! tip "List pods"
-    	To list the pods, you can use the following command :
-    	```shell
-    	kubectl get pods
-    	```
-    You can use the `kubectl logs` command (replace `mybunker` and `myautoconf` with the name of your pods) :
+        To list the pods, you can use the following command :
+        ```shell
+        kubectl get pods
+        ```
+
+    You can use the `kubectl logs` command (replace `bunkerweb` and `bunkerweb-controler` with the name of your pods) :
     ```shell
-    kubectl logs mybunker
-    kubectl logs myautoconf
+    kubectl logs bunkerweb
+    kubectl logs bunkerweb-controler
     ```
 
 === "Linux"
@@ -106,34 +107,22 @@ Here is how you can access the logs, depending on your integration :
 
 ## Permissions
 
-Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](advanced.md#custom-configurations)). You will need to set at least **RW** rights on files and **_RWX_** on folders.
+Don't forget that BunkerWeb runs as an unprivileged user for obvious security reasons. Double-check the permissions of files and folders used by BunkerWeb, especially if you use custom configurations (more info [here](advanced.md#custom-configurations)). You will need to set at least **_RW_** rights on files and **_RWX_** on folders.
 
 ## IP unban
 
 You can manually unban an IP, which is useful when performing tests so that you can contact the internal API of BunkerWeb (replace `1.2.3.4` with the IP address to unban) :
 
-=== "Docker"
+=== "Docker / Docker Autoconf"
 
-    You can use the `docker exec` command (replace `mybunker` with the name of your container) :
+    You can use the `docker exec` command (replace `bw-scheduler` with the name of your container) :
     ```shell
-    docker exec mybunker bwcli unban 1.2.3.4
+    docker exec bw-scheduler bwcli unban 1.2.3.4
     ```
 
-    Here is the docker-compose equivalent (replace `mybunker` with the name of the services declared in the docker-compose.yml file) :
+    Here is the docker-compose equivalent (replace `bw-scheduler` with the name of the services declared in the docker-compose.yml file) :
     ```shell
-    docker-compose exec mybunker bwcli unban 1.2.3.4
-    ```
-
-=== "Docker autoconf"
-
-    You can use the `docker exec` command (replace `myautoconf` with the name of your container) :
-    ```shell
-    docker exec myautoconf bwcli unban 1.2.3.4
-    ```
-
-    Here is the docker-compose equivalent (replace `myautoconf` with the name of the services declared in the docker-compose.yml file) :
-    ```shell
-    docker-compose exec myautoconf bwcli unban 1.2.3.4
+    docker-compose exec bw-scheduler bwcli unban 1.2.3.4
     ```
 
 === "All-in-one"
@@ -149,20 +138,20 @@ You can manually unban an IP, which is useful when performing tests so that you 
 === "Swarm"
 
     !!! warning "Deprecated"
-        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Docker autoconf integration](#__tabbed_2_2) instead.
+        The Swarm integration is deprecated and will be removed in a future release. Please consider using the [Kubernetes integration](integrations.md#kubernetes) instead.
 
         **More information can be found in the [Swarm integration documentation](integrations.md#swarm).**
 
-    You can use the `docker exec` command (replace `myautoconf` with the name of your service) :
+    You can use the `docker exec` command (replace `bw-scheduler` with the name of your service) :
     ```shell
-    docker exec $(docker ps -q -f name=myautoconf) bwcli unban 1.2.3.4
+    docker exec $(docker ps -q -f name=bw-scheduler) bwcli unban 1.2.3.4
     ```
 
 === "Kubernetes"
 
-    You can use the `kubectl exec` command (replace `myautoconf` with the name of your pod) :
+    You can use the `kubectl exec` command (replace `bunkerweb-scheduler` with the name of your pod) :
     ```shell
-    kubectl exec myautoconf bwcli unban 1.2.3.4
+    kubectl exec bunkerweb-scheduler bwcli unban 1.2.3.4
     ```
 
 === "Linux"
@@ -176,7 +165,7 @@ You can manually unban an IP, which is useful when performing tests so that you 
 
 ### Detect only mode
 
-For debugging/test purposes, you can set BunkerWeb in [detect only mode](http://localhost:8000/advanced/#security-mode) so it won't block request and will act as a classical reverse proxy.
+For debugging/test purposes, you can set BunkerWeb in [detect only mode](features.md#security-modes) so it won't block request and will act as a classical reverse proxy.
 
 ### ModSecurity
 
@@ -299,11 +288,11 @@ If you see the following error `could not build server_names_hash, you should in
 
 When using container-based integrations, the timezone of the container may not match that of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
-## Web UI
+## Web UI {#web-ui}
 
 In case you forgot your UI credentials or are experiencing 2FA issues, you can connect to the database to regain access.
 
-**Access database**
+### Access database
 
 === "SQLite"
 
@@ -412,22 +401,70 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
 
         The connection method would be similar to the "Linux" tab (if connecting from the host where AIO runs or another machine) or by running a MySQL client in a separate Docker container if preferred, targeting your external database's host and credentials.
 
-**Troubleshooting actions**
+=== "PostgreSQL"
+
+    !!! note "PostgreSQL only"
+        The following steps are only valid for PostgreSQL databases. If you are using another database, please refer to the documentation of your database.
+
+    !!! note "Credentials, host and database name"
+        You will need to use the same credentials (user/password), host and database name used in the `DATABASE_URI` setting.
+
+    === "Linux"
+
+        Access your local database:
+
+        ```bash
+        psql -U <user> -d <database>
+        ```
+
+        If your database is on another host, include the hostname/IP and port:
+
+        ```bash
+        psql -h <host> -p 5432 -U <user> -d <database>
+        ```
+
+        Then enter the database user’s password and you should be able to access your database.
+
+    === "Docker"
+
+        Access your database container:
+
+        !!! note "Docker arguments"
+            - the `-u 0` option is to run the command as root (mandatory)
+            - the `-it` options are to run the command interactively (mandatory)
+            - `<bunkerweb_db_container>` : the name or ID of your database container
+            - `<user>` : the database user
+            - `<database>` : the database name
+
+        ```shell
+        docker exec -u 0 -it <bunkerweb_db_container> psql -U <user> -d <database>
+        ```
+
+        If the database is hosted elsewhere, add the `-h <host>` and `-p 5432` options accordingly.
+
+    === "All-in-one"
+
+        The All-in-One image does not include a PostgreSQL server. If you have configured the AIO to use an external PostgreSQL database (by setting the `DATABASE_URI` environment variable), you should connect to that database directly using standard PostgreSQL client tools.
+
+        The connection method would be similar to the "Linux" tab (if connecting from the host where AIO runs or another machine) or by running a PostgreSQL client in a separate Docker container if preferred, targeting your external database's host and credentials.
+
+### Troubleshooting actions
 
 !!! info "Tables schema"
-    The schema of the `bw_ui_users` table is the following :
+    The schema of the `bw_ui_users` table is the following:
 
-    ```sql
-    username VARCHAR(256) PRIMARY KEY NOT NULL
-    email VARCHAR(256) UNIQUE DEFAULT NULL
-    password VARCHAR(60) NOT NULL
-    method ENUM('ui', 'scheduler', 'autoconf', 'manual', 'wizard') NOT NULL
-    admin BOOLEAN NOT NULL DEFAULT 0
-    theme ENUM('light', 'dark') NOT NULL DEFAULT 'light'
-    totp_secret VARCHAR(256) DEFAULT NULL
-    creation_date DATETIME NOT NULL
-    update_date DATETIME NOT NULL
-    ```
+    | Field         | Type                                                | Null | Key | Default | Extra |
+    | ------------- | --------------------------------------------------- | ---- | --- | ------- | ----- |
+    | username      | varchar(256)                                        | NO   | PRI | NULL    |       |
+    | email         | varchar(256)                                        | YES  | UNI | NULL    |       |
+    | password      | varchar(60)                                         | NO   |     | NULL    |       |
+    | method        | enum('ui','scheduler','autoconf','manual','wizard') | NO   |     | NULL    |       |
+    | admin         | tinyint(1)                                          | NO   |     | NULL    |       |
+    | theme         | enum('light','dark')                                | NO   |     | NULL    |       |
+    | language      | varchar(2)                                          | NO   |     | NULL    |       |
+    | totp_secret   | varchar(256)                                        | YES  |     | NULL    |       |
+    | creation_date | datetime                                            | NO   |     | NULL    |       |
+    | update_date   | datetime                                            | NO   |     | NULL    |       |
 
 === "Retrieve username"
 
@@ -442,7 +479,6 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
     | username | email | password | method | admin | theme | totp_secret | creation_date | update_date |
     | -------- | ----- | -------- | ------ | ----- | ----- | ----------- | ------------- | ----------- |
     | ***      | ***   | ***      | manual | 1     | light | ***         | ***           | ***         |
-
 
 === "Update admin user password"
 
@@ -506,7 +542,16 @@ In case you forgot your UI credentials or are experiencing 2FA issues, you can c
 
     The recovery codes can be refreshed in your **profile page** of the web UI under the `Security` tab.
 
-**Upload plugin**
+=== "Export configuration and anonymized logs"
+
+    Use the **Support page** in the Web UI to quickly gather configuration and logs for troubleshooting.
+
+    - Open the Web UI and go to the Support page.
+    - Choose the scope: export the Global configuration or select a specific Service.
+    - Click to download the configuration archive for the chosen scope.
+    - Optionally download logs: the exported logs are automatically anonymized (all IP addresses and domains are masked).
+
+### Upload plugin
 
 It may not be possible to upload a plugin from the UI in certain situations:
 

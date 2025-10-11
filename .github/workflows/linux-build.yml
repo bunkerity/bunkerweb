@@ -74,6 +74,24 @@ jobs:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Check ARM SSH connectivity
+        if: startsWith(env.ARCH, 'arm') == true
+        run: |
+          echo "Testing SSH connectivity to ARM node..."
+          for i in {1..5}; do
+            if ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Connection test $i successful' && docker info > /dev/null 2>&1 && echo 'Docker is running'"; then
+              echo "✓ SSH connection and Docker verified"
+              break
+            fi
+            echo "Retry $i/5 failed, waiting 10 seconds..."
+            sleep 10
+          done
+          echo "Waiting for connection to stabilize..."
+          sleep 5
+          echo "Final connectivity check..."
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Final check OK' && uptime"
+        env:
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
       - name: Setup Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         if: startsWith(env.ARCH, 'arm') == false
@@ -84,12 +102,12 @@ jobs:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7
       - name: Login to Docker Hub
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

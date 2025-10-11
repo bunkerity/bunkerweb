@@ -3,6 +3,7 @@ from re import compile as re_compile
 from threading import Thread
 from time import time
 from typing import Literal
+from urllib.parse import urlsplit
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 
@@ -46,24 +47,57 @@ def instances_new():
         next=True,
     )
 
-    db_config = BW_CONFIG.get_config(global_only=True, methods=False, filtered_settings=("API_HTTP_PORT", "API_SERVER_NAME"))
+    # Fetch API defaults, including new HTTPS-related settings
+    db_config = BW_CONFIG.get_config(
+        global_only=True,
+        methods=False,
+        filtered_settings=["API_HTTP_PORT", "API_SERVER_NAME", "API_LISTEN_HTTPS", "API_HTTPS_PORT"],
+    )
 
-    port = None
-    hostname = request.form["hostname"].replace("http://", "").replace("https://", "").lower().split(":", 1)
-    if len(hostname) == 2:
-        port = hostname[1]
-    hostname = hostname[0]
+    # Parse provided hostname, optional scheme and port (robustly)
+    raw_input = request.form["hostname"].strip()
+    # Allow parsing host[:port] by prefixing // when no scheme is provided
+    to_parse = raw_input if "://" in raw_input else f"//{raw_input}"
+    parts = urlsplit(to_parse)
+    explicit_scheme = bool(parts.scheme)
+    scheme_https = parts.scheme.lower() == "https"
+    hostname = (parts.hostname or "").lower()
+    provided_port = parts.port  # int | None
 
     domain_pattern = re_compile(r"^(?!.*\.\.)[^\s\/:]{1,256}$")
     if not domain_pattern.match(hostname):
         return handle_error(f"Invalid hostname: {hostname}. Please enter a valid domain.", "instances", True)
 
+    # Derive defaults
+    default_http_port = str(db_config.get("API_HTTP_PORT", "5000"))
+    default_listen_https = str(db_config.get("API_LISTEN_HTTPS", "no")).lower() == "yes"
+    default_https_port = str(db_config.get("API_HTTPS_PORT", "5443"))
+
+    # Apply explicit scheme rules when user provided it; otherwise use defaults
+    listen_https = scheme_https if explicit_scheme else default_listen_https
+
+    # Determine ports based on explicit scheme and provided port
+    if explicit_scheme and scheme_https:
+        # https://host[:port] -> use provided port for HTTPS
+        https_port = str(provided_port) if provided_port else default_https_port
+        http_port = default_http_port
+    elif explicit_scheme and not scheme_https:
+        # http://host[:port] -> use provided port for HTTP
+        https_port = default_https_port
+        http_port = str(provided_port) if provided_port else default_http_port
+    else:
+        # host[:port] with no scheme -> treat as HTTP port
+        https_port = default_https_port
+        http_port = str(provided_port) if provided_port else default_http_port
+
     instance = {
         "hostname": hostname,
         "name": request.form["name"],
-        "port": port or db_config.get("API_HTTP_PORT", "5000"),
+        "port": http_port,
         "server_name": db_config.get("API_SERVER_NAME", "bwapi"),
         "method": "ui",
+        "listen_https": listen_https,
+        "https_port": https_port,
     }
 
     for db_instance in BW_INSTANCES_UTILS.get_instances():
@@ -104,9 +138,12 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
             ret = Instance.from_hostname(instance, DB)
             if not ret:
                 return {"hostname": instance, "message": f"The instance {instance} does not exist."}
-            ret = ret.ping()
-            if ret[0].startswith("Can't"):
-                return {"hostname": instance, "message": ret[0]}
+            ret_tuple = ret.ping()
+            msg = ret_tuple[0] if isinstance(ret_tuple, tuple) else ret_tuple
+            if not isinstance(msg, str):
+                msg = str(msg)
+            if msg.startswith("Can't"):
+                return {"hostname": instance, "message": msg}
             return instance
 
         with ThreadPoolExecutor() as executor:
@@ -157,7 +194,7 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
                 return
 
             ret = method()
-            if ret.startswith("Can't"):
+            if str(ret).startswith("Can't"):
                 DATA["TO_FLASH"].append({"content": ret, "type": "error"})
                 return
             DATA["TO_FLASH"].append({"content": f"Instance {instance} {ACTIONS[action]['past']} successfully.", "type": "success"})

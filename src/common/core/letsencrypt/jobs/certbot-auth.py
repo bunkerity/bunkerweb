@@ -34,7 +34,7 @@ try:
 
         LOGGER.info(f"Sending challenge to {len(instances)} instances")
         for instance in instances:
-            api = API(f"http://{instance['hostname']}:{instance['port']}", host=instance["server_name"])
+            api = API.from_instance(instance)
             sent, err, status, resp = api.request("POST", "/lets-encrypt/challenge", data={"token": token, "validation": validation})
             if not sent:
                 status = 1

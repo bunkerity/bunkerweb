@@ -22,6 +22,7 @@ from common_utils import handle_docker_secrets  # type: ignore
 from logger import setup_logger  # type: ignore
 
 from app.models.ui_database import UIDatabase
+from app.dependencies import reload_plugins
 from app.utils import BISCUIT_PRIVATE_KEY_FILE, BISCUIT_PUBLIC_KEY_FILE, USER_PASSWORD_RX, check_password, gen_password_hash, get_latest_stable_release
 
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb")
@@ -49,9 +50,9 @@ BISCUIT_PRIVATE_KEY_HASH_FILE = BISCUIT_PRIVATE_KEY_FILE.with_suffix(".hash")  #
 
 MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
-LISTEN_ADDR = getenv("LISTEN_ADDR", "0.0.0.0")
-LISTEN_PORT = getenv("LISTEN_PORT", "7000")
-FORWARDED_ALLOW_IPS = getenv("FORWARDED_ALLOW_IPS", "*")
+LISTEN_ADDR = getenv("UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
+LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))
+FORWARDED_ALLOW_IPS = getenv("UI_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "*"))
 CAPTURE_OUTPUT = getenv("CAPTURE_OUTPUT", "no").lower() == "yes"
 
 wsgi_app = "main:app"
@@ -529,6 +530,8 @@ def on_starting(server):
                 exit(1)
             sleep(1)
         LOGGER.info("Temporary UI is stopped")
+
+    reload_plugins()
 
     LOGGER.info("UI is ready")
 

@@ -69,6 +69,7 @@
     "add_plugins": "Adicionar Plugins",
     "auto_refresh": "Atualização Automática",
     "ban": "Bloquear",
+    "ban_selected": "Bloquear selecionados",
     "cache": "Cache",
     "cancel": "Cancelar",
     "clear": "LIMPAR",
@@ -82,6 +83,7 @@
     "create_config": "Criar Configuração Personalizada",
     "create_instance": "Criar Instância",
     "create_service": "Criar novo Serviço",
+    "create_template": "Criar modelo",
     "delete": "Excluir",
     "delete_instance": "Excluir Instâncias",
     "disable_totp": "Desativar TOTP",
@@ -136,7 +138,9 @@
     "upload_photo": "Carregar Nova Foto",
     "view_details": "Ver Detalhes",
     "view_raw_data": "Ver Dados Brutos",
-    "wipe_other_sessions": "Limpar Outras Sessões"
+    "wipe_other_sessions": "Limpar Outras Sessões",
+    "force_update": "Forçar atualização",
+    "force_check": "Forçar verificação"
   },
   "country": {
     "AD": "Andorra",
@@ -538,7 +542,15 @@
     "zero_records_jobs": "Nenhuma Tarefa correspondente encontrada",
     "zero_records_plugins": "Nenhum Plugin correspondente encontrado",
     "zero_records_reports": "Nenhum Relatório correspondente encontrado",
-    "zero_records_services": "Nenhum Serviço correspondente encontrado"
+    "zero_records_services": "Nenhum Serviço correspondente encontrado",
+    "info_empty_templates": "Nenhum Modelo disponível",
+    "info_filtered_templates": "(filtrado de _MAX_ Modelos no total)",
+    "info_templates": "Mostrando {{start}} a {{end}} de {{total}} Modelos",
+    "length_menu_templates": "Mostrar _MENU_ Modelos",
+    "select_rows_templates_0": "Nenhum Modelo selecionado",
+    "select_rows_templates_1": "1 Modelo selecionado",
+    "select_rows_templates_plural": "%d Modelos selecionados",
+    "zero_records_templates": "Nenhum Modelo correspondente encontrado"
   },
   "dev_log": {
     "copy_failed": "Falha ao copiar texto:",
@@ -646,9 +658,10 @@
       "optional": "(Opcional)",
       "password": "Senha",
       "permanent_ban": "Banimento Permanente",
+      "plugin_id": "Plugin",
       "raw_configuration": "Configuração Bruta",
       "real_ip_from": "IP real de",
-      "real_ip_from_urls": "IP real de",
+      "real_ip_from_urls": "IP real de (URLs)",
       "real_ip_header": "Cabeçalho IP real",
       "real_ip_recursive": "IP real recursivo",
       "reason": "Motivo",
@@ -656,6 +669,7 @@
       "server_name": "Nome do Servidor",
       "service_name": "Nome do Serviço",
       "theme": "Tema",
+      "template_id": "ID do Modelo",
       "type": "Tipo",
       "ui_host": "Host UI",
       "ui_url": "URL UI",
@@ -737,10 +751,11 @@
       "confirm_next_step": "Tem certeza de que deseja continuar para o próximo passo?",
       "confirm_plugin_deletion": "Tem certeza de que deseja excluir o plugin selecionado?",
       "confirm_plugin_deletion_plural": "Tem certeza de que deseja excluir os plugins selecionados?",
+      "confirm_template_deletion": "Tem certeza de que deseja excluir o modelo {{name}}?",
       "confirmation_instance_deletion": "Tem certeza de que deseja excluir a instância selecionada?",
       "delete_confirmation_alert": "Tem certeza de que deseja excluir a instância selecionada?",
       "delete_confirmation_alert_plural": "Tem certeza de que deseja excluir as instâncias selecionadas?",
-      "instance_creation_alert": "Você não precisa fornecer a porta ou o nome do servidor; os valores de `API_HTTP_PORT` e `API_SERVER_NAME` serão usados para a configuração da instância.",
+      "instance_creation_alert": "Você não precisa fornecer a porta ou o nome do servidor; os valores de `API_HTTP_PORT`, `API_LISTEN_HTTPS`, `API_HTTPS_PORT` e `API_SERVER_NAME` serão usados para a configuração da instância.",
       "next_step_in_case_of_issue": "Se encontrar problemas, você pode aceitar manualmente o certificado não seguro:",
       "recovery_codes_save_alert": "Guarde estes códigos de recuperação em um local seguro (como um gerenciador de senhas ou cofre). Você pode usá-los para acessar sua conta se perder seu dispositivo de autenticação.",
       "recovery_codes_shown_once_alert": "Estes códigos de recuperação são mostrados apenas uma vez. Certifique-se de guardá-los em segurança.",
@@ -748,10 +763,18 @@
       "services_deletion_confirmation": "Tem certeza de que deseja excluir os serviços selecionados?",
       "unban_confirmation_alert": "Tem certeza de que deseja desbloquear o endereço IP selecionado?",
       "unban_confirmation_alert_plural": "Tem certeza de que deseja desbloquear os endereços IP selecionados?",
-      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:"
+      "update_duration_alert": "Selecione uma nova duração para os bloqueios selecionados:",
+      "fetch_global_config_bold": "Isso buscará a configuração global e a aplicará ao template atual.",
+      "fetch_global_config_point_1": "Somente as configurações presentes neste template são atualizadas.",
+      "fetch_global_config_point_2": "Valores idênticos aos padrões são ignorados.",
+      "fetch_global_config_point_3": "SERVER_NAME nunca é sobrescrito.",
+      "delete_step_confirmation": "Tem certeza de que deseja excluir este passo?",
+      "delete_step_name_label": "Passo",
+      "delete_step_content_label": "Conteúdo"
     },
     "button": {
-      "reset_template_confirm": "Redefinir Configuração do Modelo"
+      "reset_template_confirm": "Redefinir Configuração do Modelo",
+      "fetch_global_config_confirm": "Aplicar configurações globais"
     },
     "section": {
       "ban_details": "Detalhes do Bloqueio",
@@ -766,14 +789,19 @@
       "confirm_unban": "Confirmar Desbloqueio",
       "create_new_instance": "Criar Nova Instância",
       "delete_instance": "Excluir Instâncias",
+      "delete_template": "Excluir modelos",
       "from_plugin": "do Plugin",
       "full_url": "URL Completa",
       "job_history": "Últimas 10 Execuções de Tarefas",
       "job_history_count": "Últimas {{count}} execuções da Tarefa",
       "recovery_codes": "Códigos de Recuperação",
       "reset_template_config": "Redefinir Configuração do Modelo?",
+      "fetch_global_config": "Aplicar configurações globais?",
       "server_name_not_unique": "Nome do Servidor não é Único",
-      "update_duration": "Atualizar Duração do Bloqueio"
+      "update_duration": "Atualizar Duração do Bloqueio",
+      "delete_step": "Excluir passo",
+      "create_template": "Criar modelo",
+      "edit_template": "Editar modelo: {{name}}"
     }
   },
   "mode": {
@@ -866,6 +894,14 @@
       "expires_in": "Expira em",
       "title": "Data de Expiração Pro",
       "unknown": "Data de expiração desconhecida"
+    },
+    "force_check": {
+      "title": "Forçar verificação",
+      "description": "Força uma nova verificação dos plugins PRO. Isso faz o download novamente se houver versões novas disponíveis."
+    },
+    "force_update": {
+      "title": "Forçar atualização",
+      "description": "Ignora as verificações e força o download dos plugins PRO. Se não for possível forçar, o estado atual é mantido."
     },
     "key": {
       "title": {
@@ -989,7 +1025,10 @@
     "title_plural": "Filtros Ativos - %d",
     "type": "Tipo",
     "url": "URL",
-    "version": "Versão"
+    "version": "Versão",
+    "steps": "Etapas",
+    "one_or_more": "Um ou mais",
+    "zero": "Nenhum"
   },
   "settings": {
     "custom_config": {
@@ -1068,6 +1107,7 @@
     "loading_plugins": "Carregando plugins...",
     "loading_reports": "Carregando relatórios...",
     "loading_services": "Carregando serviços...",
+    "loading_templates": "Carregando modelos...",
     "news_connection_error": "Não foi possível conectar ao blog para notícias.",
     "no": "Não",
     "no_data": "Sem dados",
@@ -1094,7 +1134,12 @@
     "template_in_use_description": "Não são permitidas alterações fora do modelo atual. Por favor, faça as alterações utilizando o modelo atual ou mude para o modo Avançado/Bruto.",
     "unique_server_name": "Nome do Servidor Único",
     "up": "Ativo",
-    "yes": "Sim"
+    "yes": "Sim",
+    "error_deleting_template": "Erro ao excluir o modelo.",
+    "error_loading_template": "Não foi possível carregar os dados do modelo.",
+    "error_saving_template": "Ocorreu um erro ao salvar o modelo.",
+    "invalid_json_payload": "Payload JSON inválido.",
+    "missing_template_information": "Informações do modelo ausentes."
   },
   "step": {
     "next": "Próximo",
@@ -1124,6 +1169,7 @@
       "active": "Ativo",
       "async": "Assíncrono",
       "checksum": "Checksum",
+      "configs": "Configs",
       "country": "País",
       "created": "Criado",
       "current_time_left": "Tempo Restante Atual",
@@ -1152,18 +1198,126 @@
       "server_name": "Nome Servidor",
       "service": "Serviço",
       "service_name": "Nome Serviço",
+      "settings": "Configurações",
       "status_code": "Código Status",
+      "steps": "Passos",
       "stream": "Stream",
       "template": "Modelo",
       "time_left": "Tempo Restante",
       "type": "Tipo",
       "url": "URL",
       "user_agent": "User-Agent",
-      "version": "Versão"
+      "version": "Versão",
+      "templates": "Modelos"
     }
   },
   "template": {
-    "none": "Sem Modelo"
+    "none": "Nenhum modelo",
+    "editor": {
+      "button_add_config": "Adicionar configuração",
+      "button_add_setting": "Adicionar configuração",
+      "button_add_step": "Adicionar passo",
+      "button_move_down": "Mover para baixo",
+      "button_move_up": "Mover para cima",
+      "button_remove": "Remover",
+      "clone_badge": "Clonado de {{template}}",
+      "configs": "Configurações personalizadas",
+      "configs_help": "Anexe trechos de configuração personalizados opcionais a este modelo.",
+      "delete_step_confirm": "Tem certeza de que deseja excluir este passo?",
+      "details": "Detalhes do modelo",
+      "details_help": "Defina as informações básicas para este modelo.",
+      "drag_handle": "Arraste para reordenar",
+      "empty_configs": "Nenhuma configuração personalizada ainda.",
+      "empty_settings": "Nenhuma configuração ainda. Adicione sua primeira configuração.",
+      "empty_steps": "Nenhum passo ainda. Adicione seu primeiro passo.",
+      "error_generic": "Algo deu errado. Por favor, tente novamente.",
+      "error_missing_endpoint": "Não foi possível determinar o endpoint de envio.",
+      "heading_create": "Criar modelo",
+      "heading_edit": "Editar modelo {{id}}",
+      "label_config_data": "Dados",
+      "label_config_name": "Nome",
+      "label_config_order": "Ordem",
+      "label_config_type": "Tipo",
+      "label_setting_key": "Chave da configuração",
+      "label_setting_value": "Valor padrão",
+      "label_step_configs": "Configurações neste passo",
+      "label_step_settings": "Configurações neste passo",
+      "label_step_subtitle": "Subtítulo do passo",
+      "label_step_title": "Título do passo",
+      "panel_overview": "Visão geral",
+      "panel_overview_help": "Acompanhe informações importantes e navegue entre as seções.",
+      "placeholder_config_data": "Dados",
+      "placeholder_config_name": "Nome",
+      "placeholder_plugin_id": "core",
+      "placeholder_setting_key": "Chave",
+      "placeholder_setting_value": "Valor padrão",
+      "placeholder_step_subtitle": "Subtítulo do passo",
+      "placeholder_step_title": "Título do passo",
+      "placeholder_template_id": "id-do-modelo",
+      "placeholder_template_name": "Meu modelo",
+      "readonly_db": "O banco de dados está atualmente em modo somente leitura. Os modelos não podem ser alterados.",
+      "readonly_method": "Este modelo foi criado pelo processo {{method}} e não pode ser editado na interface do usuário.",
+      "readonly_title": "Somente leitura",
+      "readonly_user": "Você tem permissões de somente leitura. Entre em contato com um administrador para solicitar acesso de escrita.",
+      "select_config_placeholder": "Selecione uma configuração",
+      "select_config_type_placeholder": "Selecione um tipo",
+      "select_setting_placeholder": "Selecione uma configuração",
+      "settings": "Configurações",
+      "settings_help": "Defina as configurações expostas por este modelo e seus valores padrão.",
+      "setting_remove_confirm": "Tem certeza de que deseja remover esta configuração do modelo?",
+      "setting_remove_key": "Configuração",
+      "setting_remove_title": "Remover configuração",
+      "setting_selector_add_selected": "Adicionar selecionado",
+      "setting_selector_advanced": "Avançado",
+      "setting_selector_already_added": "Já adicionado",
+      "setting_selector_clear": "Limpar pesquisa",
+      "setting_selector_count_all_used": "Todas as configurações correspondentes já foram adicionadas.",
+      "setting_selector_count_empty": "Nenhuma configuração para exibir.",
+      "setting_selector_count_only_available": "{{count, plural, one {# configuração disponível} other {# configurações disponíveis}}}",
+      "setting_selector_count_with_used": "{{available}} disponíveis, {{used}} já adicionadas",
+      "setting_selector_default": "Padrão",
+      "setting_selector_docs": "Ver documentação",
+      "setting_selector_empty": "Nenhuma configuração corresponde aos filtros atuais.",
+      "setting_selector_filter_plugin": "Plugin",
+      "setting_selector_filter_plugin_all": "Todos os plugins",
+      "setting_selector_filter_type": "Tipo",
+      "setting_selector_filter_type_all": "Todos os tipos",
+      "setting_selector_helper": "Apenas configurações multisite estão disponíveis. Use os filtros para refinar a lista.",
+      "setting_selector_multiple": "Múltiplo",
+      "setting_selector_pattern": "Padrão",
+      "setting_selector_search_label": "Encontrar uma configuração multisite",
+      "setting_selector_search_placeholder": "Pesquisar por rótulo, chave ou plugin",
+      "step_configs_empty": "Nenhuma configuração adicionada a este passo ainda.",
+      "step_configs_selection_title": "Selecione configurações existentes",
+      "step_default_title": "Passo sem título",
+      "step_prefix": "Passo",
+      "step_settings_empty": "Nenhuma configuração adicionada a este passo ainda.",
+      "step_settings_selection_title": "Selecione configurações existentes",
+      "steps": "Passos",
+      "steps_help": "Organize as configurações em passos guiados. Selecione quais configurações ou configs pertencem a cada passo.",
+      "summary_clone_info": "Clonando atualmente de {{template}}.",
+      "summary_counts_configs": "Configurações",
+      "summary_counts_settings": "Configurações",
+      "summary_counts_steps": "Passos",
+      "summary_counts_title": "Conteúdo",
+      "summary_link_configs": "Configurações personalizadas",
+      "summary_link_details": "Detalhes do modelo",
+      "summary_link_settings": "Configurações",
+      "summary_link_steps": "Passos",
+      "summary_links_title": "Links rápidos",
+      "summary_metadata_created": "Criado",
+      "summary_metadata_method": "Método",
+      "summary_metadata_title": "Metadados",
+      "summary_metadata_unknown": "Não disponível",
+      "summary_metadata_updated": "Última atualização",
+      "validation_config_name_required": "O nome da configuração é obrigatório quando uma configuração é definida.",
+      "validation_config_type_multisite": "O tipo de configuração deve ser um dos tipos compatíveis com multisite.",
+      "validation_config_type_required": "O tipo de configuração é obrigatório quando uma configuração é definida.",
+      "validation_configs_unique": "Cada nome de configuração deve ser único.",
+      "validation_id_required": "O ID do modelo é obrigatório.",
+      "validation_setting_key": "Cada configuração deve ter uma chave.",
+      "validation_settings_unique": "Cada chave de configuração deve ser única."
+    }
   },
   "theme": {
     "dark": "Escuro",
@@ -1182,7 +1336,11 @@
       "ping_failed": "Ping falhou",
       "ping_succeed": "Ping bem-sucedido"
     },
-    "ip_unbanned": "Endereço IP desbloqueado com sucesso!"
+    "ip_unbanned": "Endereço IP desbloqueado com sucesso!",
+    "global_settings_applied_title": "Configurações globais aplicadas",
+    "global_settings_applied_body": "As configurações globais foram aplicadas ao formulário atual com sucesso.",
+    "global_settings_failed_title": "Falha ao buscar configurações globais",
+    "global_settings_failed_body": "Ocorreu um erro ao buscar as configurações globais."
   },
   "tooltip": {
     "auto_lets_encrypt": "Se deve solicitar automaticamente um certificado Let's Encrypt.",
@@ -1194,13 +1352,18 @@
       "delete_instance": "Excluir Instância {{hostname}}",
       "delete_plugin": "Excluir Plugin {{name}}",
       "delete_service": "Excluir Serviço {{name}}",
+      "delete_template": "Excluir Modelo {{name}}",
       "ping_instance": "Fazer Ping na Instância {{hostname}}",
       "reload_instance": "Recarregar Instância {{hostname}}",
       "reset_default": "Restabelecer valor padrão",
       "reset_global": "Restabelecer valor global",
+      "value_from_global": "Valor da configuração global",
       "run_job": "Executar Tarefa {{job}}",
       "stop_instance": "Parar Instância {{hostname}}",
-      "unban_ip": "Desbloquear {{ip}}"
+      "unban_ip": "Desbloquear {{ip}}",
+      "ban_ip": "Bloquear este endereço IP",
+      "force_check": "Agenda uma verificação; baixa apenas se houver atualizações.",
+      "force_update": "Ignora verificações e força o download dos plugins PRO; mantém o estado atual em caso de falha."
     },
     "cannot_delete_original_ban": "Não é possível excluir a entrada de bloqueio original.",
     "cannot_remove_disabled": "Não é possível remover porque uma ou mais configurações estão desabilitadas.",
@@ -1260,7 +1423,10 @@
       "export_service": "Exportar Configuração do Serviço {{name}}",
       "view_config": "Ver Configuração Personalizada {{name}}",
       "view_file": "Ver {{filename}}",
-      "view_service": "Ver Serviço {{name}}"
+      "view_service": "Ver Serviço {{service}}",
+      "edit_template": "Editar Modelo {{template}}",
+      "view_template": "Ver Modelo {{template}}",
+      "clone_template": "Clonar Modelo {{template}}"
     },
     "modal": {
       "title": {
@@ -1291,6 +1457,20 @@
       "yes": "Suporta modo STREAM."
     },
     "table": {
+      "templates": {
+        "actions": "Ações disponíveis para este Modelo",
+        "details": "Mostrar detalhes do Modelo",
+        "select_all": "Selecionar todos os Modelos",
+        "id": "O ID do Modelo",
+        "name": "O nome do Modelo definido pelo usuário ou gerado automaticamente",
+        "plugin": "O Plugin que contém o Modelo",
+        "steps": "Número de passos do Modelo",
+        "settings": "Número de configurações do Modelo",
+        "configs": "Número de configurações personalizadas do Modelo",
+        "method": "Método de criação do Modelo",
+        "created": "Data de criação do Modelo",
+        "last_update": "Data da última atualização do Modelo"
+      },
       "bans": {
         "actions": "Ações disponíveis para este Bloqueio",
         "country": "País do endereço IP bloqueado",
@@ -1361,6 +1541,7 @@
         "version": "Versão do Plugin"
       },
       "reports": {
+        "actions": "Ações disponíveis para este relatório",
         "country": "País associado ao endereço IP reportado",
         "data": "Dados adicionais relacionados ao relatório",
         "date": "Data e hora de geração do relatório",
@@ -1385,6 +1566,7 @@
         "method": "Método de criação do Serviço (ex. ui, file)",
         "name": "Nome do Serviço",
         "select_all": "Selecionar todos os Serviços",
+        "template": "O modelo usado pelo Serviço",
         "type": "Tipo de Serviço (Online/Rascunho)"
       }
     },

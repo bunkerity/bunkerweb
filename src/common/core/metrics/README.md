@@ -64,15 +64,26 @@ For example, `/metrics/requests` returns information about blocked requests.
     2. Your client IP is included in the `API_WHITELIST_IP` setting (default is `127.0.0.0/8`)
     3. You are accessing the API on the configured port (default is `5000` via the `API_HTTP_PORT` setting)
     4. You are using the correct `API_SERVER_NAME` value in the Host header (default is `bwapi`)
+    5. If `API_TOKEN` is configured, include `Authorization: Bearer <token>` in the request headers.
 
-    A typical API request would look like:
+    Typical requests:
+
+    Without token (when `API_TOKEN` is not set):
+    ```bash
+    curl -H "Host: bwapi" \
+         http://your-bunkerweb-instance:5000/metrics/requests
     ```
-    curl -H "Host: bwapi" http://your-bunkerweb-instance:5000/metrics/requests
+
+    With token (when `API_TOKEN` is set):
+    ```bash
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         http://your-bunkerweb-instance:5000/metrics/requests
     ```
 
     If you have customized the `API_SERVER_NAME` to something other than the default `bwapi`, use that value in the Host header instead.
 
-    For secure production environments, make sure to restrict API access to trusted IPs only.
+    For secure production environments, restrict API access to trusted IPs and enable `API_TOKEN`.
 
 ### Configuration Settings
 

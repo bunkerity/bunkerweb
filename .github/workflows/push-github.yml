@@ -18,7 +18,9 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       # Generate checksum for install script
       - name: Generate checksum for install script
-        run: sha256sum misc/install-bunkerweb.sh > install-bunkerweb.sh.sha256
+        run: |
+          cd misc
+          sha256sum install-bunkerweb.sh > install-bunkerweb.sh.sha256
       # Get PDF doc
       - name: Get documentation
         if: inputs.VERSION != 'testing'
@@ -53,7 +55,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION != 'testing'
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
           body: |
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
@@ -76,11 +78,11 @@ jobs:
           files: |
             BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
             misc/install-bunkerweb.sh
-            install-bunkerweb.sh.sha256
+            misc/install-bunkerweb.sh.sha256
       # Create release
       - name: Create release
         if: inputs.VERSION == 'testing'
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         with:
           body: |
             **The testing version of BunkerWeb should not be used in production, please use the latest stable version instead.**
@@ -102,4 +104,4 @@ jobs:
           tag_name: ${{ inputs.VERSION }}
           files: |
             misc/install-bunkerweb.sh
-            install-bunkerweb.sh.sha256
+            misc/install-bunkerweb.sh.sha256

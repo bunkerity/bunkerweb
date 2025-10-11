@@ -1,3 +1,4 @@
+from contextlib import suppress
 from datetime import datetime
 from typing import Dict, Generator, Tuple, Union
 from flask import Blueprint, Response, jsonify, redirect, render_template, request, stream_with_context, url_for, session
@@ -33,17 +34,31 @@ def get_last_sessions(page: int, per_page: int) -> Tuple[Generator[Dict[str, Uni
             additional_sessions.append(session)
 
         for db_session in additional_sessions + db_sessions[(page - 1) * per_page : page * per_page]:  # noqa: E203
-            ua_data = parse(db_session["user_agent"])
+            # Support both DB session dicts and the current Flask session object which may miss some keys
+            ua_raw = db_session.get("user_agent", "") if isinstance(db_session, dict) else str(db_session.get("user_agent", ""))
+            ua_data = parse(ua_raw or "")
+
+            def _fmt_dt(dt_val):
+                with suppress(Exception):
+                    if isinstance(dt_val, datetime):
+                        return dt_val.astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+                return datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+
+            creation_dt = db_session.get("creation_date") if isinstance(db_session, dict) else None
+            last_activity_dt = db_session.get("last_activity") if isinstance(db_session, dict) else None
+
             yield {
-                "current": db_session["id"] == session.get("session_id") if "session_id" in session else "id" not in db_session,
+                "current": (
+                    db_session.get("id") == session.get("session_id") if isinstance(db_session, dict) and "session_id" in session else "id" not in db_session
+                ),
                 "browser": ua_data.get_browser(),
                 "os": ua_data.get_os(),
                 "device": ua_data.get_device(),
-                "ip": db_session["ip"],
-                "creation_date": db_session["creation_date"].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"),
+                "ip": (db_session.get("ip") if isinstance(db_session, dict) else session.get("ip", "-")) or "-",
+                "creation_date": _fmt_dt(creation_dt),
                 "last_activity": (
-                    db_session["last_activity"].astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
-                    if "id" in db_session
+                    _fmt_dt(last_activity_dt)
+                    if isinstance(db_session, dict) and "id" in db_session
                     else datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
                 ),
             }

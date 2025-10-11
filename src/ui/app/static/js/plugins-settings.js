@@ -11,15 +11,32 @@ $(document).ready(() => {
   if (isReadOnly && window.location.pathname.endsWith("/new"))
     window.location.href = window.location.href.split("/new")[0];
 
+  const normalizeTemplateId = (value) => {
+    if (value === undefined || value === null) return "";
+    const raw = value.toString().trim();
+    if (!raw) return "";
+    const plusNormalized = raw.replace(/\+/g, " ");
+    try {
+      return decodeURIComponent(plusNormalized);
+    } catch (err) {
+      return plusNormalized;
+    }
+  };
+
   const $templateInput = $("#used-template");
   let usedTemplate = "low";
   if ($templateInput.length) {
-    usedTemplate = $templateInput.val().trim();
+    const normalizedUsedTemplate = normalizeTemplateId($templateInput.val());
+    usedTemplate = normalizedUsedTemplate !== "" ? normalizedUsedTemplate : "";
   }
 
-  let currentTemplate = $("#selected-template").val();
-  let currentMode = $("#selected-mode").val();
-  let currentType = $("#selected-type").val();
+  let currentTemplate = normalizeTemplateId($("#selected-template").val());
+  let currentMode = normalizeTemplateId($("#selected-mode").val());
+  let currentType = normalizeTemplateId($("#selected-type").val());
+
+  if (!currentTemplate) currentTemplate = usedTemplate;
+  if (!currentMode) currentMode = "easy";
+  if (!currentType) currentType = "all";
 
   const $serviceMethodInput = $("#service-method");
   const $pluginTypeSelect = $("#plugin-type-select");
@@ -29,6 +46,69 @@ $(document).ready(() => {
   const $templateSearch = $("#template-search");
   const $templateDropdownMenu = $("#templates-dropdown-menu");
   const $templateDropdownItems = $("#templates-dropdown-menu li.nav-item");
+
+  const templateDomIdMap = {};
+  const domIdToTemplateIdMap = {};
+  const assignedDomIds = new Set();
+
+  const sanitizeDomId = (value) => {
+    const normalizedValue = normalizeTemplateId(value);
+    const sanitized = normalizedValue
+      .replace(/[^0-9A-Za-z_-]+/g, "-")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "");
+    return sanitized || "template";
+  };
+
+  const registerDomId = (templateId, preferredDomId) => {
+    const key = normalizeTemplateId(templateId);
+    if (!key) return;
+
+    let baseDomId = sanitizeDomId(preferredDomId || key);
+    let domId = baseDomId;
+    let suffix = 2;
+    while (assignedDomIds.has(domId)) {
+      domId = `${baseDomId}-${suffix}`;
+      suffix += 1;
+    }
+    templateDomIdMap[key] = domId;
+    domIdToTemplateIdMap[domId] = key;
+    assignedDomIds.add(domId);
+  };
+
+  $("#templates-dropdown-menu button[data-template-id]").each(function () {
+    const $button = $(this);
+    const templateId = normalizeTemplateId($button.data("template-id"));
+    const domId = normalizeTemplateId($button.data("template-dom-id"));
+    registerDomId(templateId, domId);
+  });
+
+  const getTemplateDomId = (templateId) => {
+    const key = normalizeTemplateId(templateId);
+    if (!key) return "";
+    if (!templateDomIdMap[key]) {
+      registerDomId(key);
+    }
+    return templateDomIdMap[key];
+  };
+
+  const getTemplateContainer = (templateId) => {
+    const key = normalizeTemplateId(templateId);
+    if (!key) return $();
+    return $(`.tab-pane[data-template-id="${key}"]`);
+  };
+
+  const getStepId = (templateId, step) =>
+    `navs-steps-${getTemplateDomId(templateId)}-${step}`;
+
+  const getStepContainer = (templateId, step) =>
+    $(`#${getStepId(templateId, step)}`);
+
+  const getTemplateTabButton = (templateId) => {
+    const key = normalizeTemplateId(templateId);
+    if (!key) return $();
+    return $(`#templates-dropdown-menu button[data-template-id="${key}"]`);
+  };
 
   const updateUrlParams = (params, removeHash = false) => {
     const newUrl = new URL(window.location.href);
@@ -42,13 +122,55 @@ $(document).ready(() => {
       }
     });
 
-    newUrl.search = searchParams.toString();
+    const serializedSearch = searchParams.toString().replace(/\+/g, "%20");
+    newUrl.search = serializedSearch ? `?${serializedSearch}` : "";
     if (removeHash) {
       newUrl.hash = "";
     }
 
     history.pushState(params, document.title, newUrl.toString());
   };
+
+  const updateTemplateUrl = (templateId, { clearType = false } = {}) => {
+    const params = {};
+    if (clearType) params.type = null;
+
+    const normalizedTemplate = normalizeTemplateId(templateId);
+    if (
+      currentMode === "easy" &&
+      normalizedTemplate &&
+      normalizedTemplate !== "low"
+    ) {
+      params.template = normalizedTemplate;
+    } else {
+      params.template = null;
+    }
+
+    updateUrlParams(params);
+  };
+
+  const showTemplateTab = (templateId) => {
+    const $button = getTemplateTabButton(templateId);
+    if ($button.length) {
+      $button.tab("show");
+    }
+  };
+
+  const setCurrentTemplate = (templateId, { clearType = false } = {}) => {
+    const normalized = normalizeTemplateId(templateId);
+    if (!normalized) return;
+    currentTemplate = normalized;
+    // Ensure we have a DOM id mapping for this template
+    getTemplateDomId(currentTemplate);
+
+    const $selectedTemplateField = $("#selected-template");
+    if ($selectedTemplateField.length)
+      $selectedTemplateField.val(currentTemplate);
+
+    updateTemplateUrl(currentTemplate, { clearType });
+  };
+
+  setCurrentTemplate(currentTemplate);
 
   const handleModeChange = (targetClass) => {
     currentMode = targetClass.substring(1).replace("navs-modes-", "");
@@ -83,8 +205,15 @@ $(document).ready(() => {
     }
   };
 
-  const resetTemplateConfig = () => {
-    const templateContainer = $(`#navs-templates-${currentTemplate}`);
+  const resetTemplateConfig = (templateId = currentTemplate) => {
+    const normalizedTemplate = normalizeTemplateId(templateId);
+    if (!normalizedTemplate) return;
+
+    const templateContainer = getTemplateContainer(normalizedTemplate);
+    // Hide any override badges shown after fetching global config
+    templateContainer
+      .find(".global-override-badge")
+      .addClass("visually-hidden");
     templateContainer.find("input, select").each(function () {
       const type = $(this).attr("type");
       const isNewEndpoint = window.location.pathname.endsWith("/new");
@@ -121,14 +250,14 @@ $(document).ready(() => {
     setTimeout(() => {
       // Force select the first step
       const firstStep = $(
-        `.step-navigation-item[data-step="1"][data-template="${currentTemplate}"]`,
+        `.step-navigation-item[data-step="1"][data-template="${normalizedTemplate}"]`,
       );
       if (firstStep.length) {
         // Set currentStep to ensure proper navigation
         currentStep = 1;
 
         // Update UI state - properly managing show/active classes
-        $(`.step-navigation-item[data-template="${currentTemplate}"]`).each(
+        $(`.step-navigation-item[data-template="${normalizedTemplate}"]`).each(
           function () {
             const $item = $(this);
             const step = parseInt($item.data("step"));
@@ -142,8 +271,8 @@ $(document).ready(() => {
         // Show the first step content with proper fade transition
         const stepId = firstStep.data("step-id");
         // Find all active panes and remove show first
-        const $activePanes = $(
-          `#navs-templates-${currentTemplate} .template-steps-content .tab-pane.active`,
+        const $activePanes = templateContainer.find(
+          ".template-steps-content .tab-pane.active",
         );
         $activePanes.removeClass("show");
 
@@ -160,29 +289,44 @@ $(document).ready(() => {
         }, 150);
 
         // Update button states
-        $(`#navs-templates-${currentTemplate} .previous-step`).addClass(
-          "disabled",
+        const $previousButton = templateContainer.find(".previous-step");
+        if (!$previousButton.hasClass("visually-hidden")) {
+          $previousButton.addClass("visually-hidden");
+        }
+
+        const $stepItems = $(
+          `.step-navigation-item[data-template="${normalizedTemplate}"]`,
         );
-        $(`#navs-templates-${currentTemplate} .next-step`).removeClass(
-          "disabled",
-        );
+        const $nextButton = templateContainer.find(".next-step");
+        if ($stepItems.length > 1) {
+          $nextButton.removeClass("visually-hidden");
+        } else if (!$nextButton.hasClass("visually-hidden")) {
+          $nextButton.addClass("visually-hidden");
+        }
       }
     }, 100);
   };
 
   // Enhanced handleTabChange function with validation check
-  const handleTabChange = (targetClass) => {
+  const handleTabChange = (targetClass, options = {}) => {
+    const { templateId: explicitTemplateId } = options;
     // If we're changing templates in easy mode, validate current step first
     if (
       targetClass.includes("navs-templates-") &&
       currentMode === "easy" &&
       !isInit
     ) {
-      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(
+        currentTemplate,
+        currentStep,
+      );
 
       // Only proceed if validation passes
-      if (!validateCurrentStepInputs(currentStepContainer)) {
+      if (
+        !validateCurrentStepInputs(currentStepContainer, {
+          skipRequiredNames: ["SERVER_NAME"],
+        })
+      ) {
         // If validation fails, prevent the tab change
         return false;
       }
@@ -196,7 +340,6 @@ $(document).ready(() => {
 
     if (targetClass.includes("navs-plugins-")) {
       currentPlugin = targetClass.substring(1).replace("navs-plugins-", "");
-      params.template = null; // Remove the template parameter
 
       // If "general" is selected and a hash exists, remove the hash but keep the parameters
       if (currentPlugin === "general" && window.location.hash) {
@@ -210,24 +353,25 @@ $(document).ready(() => {
         updateUrlParams(params);
       }
     } else if (targetClass.includes("navs-templates-")) {
-      if (!isInit) resetTemplateConfig();
-      setTimeout(() => {
-        currentTemplate = targetClass
-          .substring(1)
-          .replace("navs-templates-", "");
+      const previousTemplate = currentTemplate;
+      const targetDomId = targetClass
+        .substring(1)
+        .replace("navs-templates-", "");
 
-        params.type = null; // Remove the type parameter
+      let nextTemplateId =
+        explicitTemplateId || domIdToTemplateIdMap[targetDomId] || "";
 
-        // If "low"  is selected, remove the "template" parameter
-        if (currentTemplate === "low") {
-          params.template = null; // Set template to null to remove it from the URL
-          updateUrlParams(params); // Call the function without the hash (keep it intact)
-        } else {
-          // If another template is selected, update the "template" parameter
-          params.template = currentTemplate;
-          updateUrlParams(params); // Keep the template in the URL
+      if (!nextTemplateId) {
+        const $targetPane = $(targetClass);
+        if ($targetPane.length) {
+          nextTemplateId = $targetPane.data("template-id") || "";
         }
-      }, 200);
+      }
+
+      if (nextTemplateId)
+        setCurrentTemplate(nextTemplateId, { clearType: true });
+
+      if (!isInit) resetTemplateConfig(previousTemplate);
     }
 
     return true; // Tab change is allowed
@@ -274,13 +418,22 @@ $(document).ready(() => {
 
   // Enhanced validation function with support for validation without UI focus
   const validateCurrentStepInputs = (currentStepContainer, options = {}) => {
-    const { focusOnError = true, markStepInvalid = true } = options;
+    const {
+      focusOnError = true,
+      markStepInvalid = true,
+      skipRequiredNames = [],
+    } = options;
+    const skippedRequired = new Set(
+      skipRequiredNames.map((name) => name.toUpperCase()),
+    );
     let isStepValid = true;
     let firstInvalidInput = null;
 
     // Get step number and template from container
     const stepNumber = currentStepContainer.data("step");
-    const template = currentStepContainer.attr("id").split("-")[2]; // Extract template name
+    const template =
+      normalizeTemplateId(currentStepContainer.data("templateId")) ||
+      currentTemplate;
 
     // Find the nav item for this step
     const $navItem = $(
@@ -297,6 +450,8 @@ $(document).ready(() => {
       const pattern = $input.attr("pattern");
       let $label = $(`label[for="${$input.attr("id")}"]`);
       let fieldName = $input.attr("name") || t("validation.default_field_name");
+      const inputName = ($input.attr("name") || "").toUpperCase();
+      const skipRequiredCheck = skippedRequired.has(inputName);
 
       // Handle multiselect hidden inputs
       if (
@@ -333,7 +488,7 @@ $(document).ready(() => {
       let isValid = true;
 
       // Check if the field is required and not empty
-      if (isRequired && value === "") {
+      if (isRequired && !skipRequiredCheck && value === "") {
         errorMessage = requiredMessage;
         isValid = false;
       }
@@ -476,7 +631,7 @@ $(document).ready(() => {
     if (currentMode === "easy") {
       appendHiddenInput(form, "USE_TEMPLATE", currentTemplate);
 
-      const templateContainer = $(`#navs-templates-${currentTemplate}`);
+      const templateContainer = getTemplateContainer(currentTemplate);
       addChildrenToForm(form, templateContainer, true);
 
       templateContainer.find(".ace-editor").each(function () {
@@ -628,10 +783,16 @@ $(document).ready(() => {
       if (currentMode !== "easy") return;
 
       // In easy mode, ensure there are no validation errors in the current template
-      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(
+        currentTemplate,
+        currentStep,
+      );
 
-      if (!validateCurrentStepInputs(currentStepContainer)) {
+      if (
+        !validateCurrentStepInputs(currentStepContainer, {
+          skipRequiredNames: ["SERVER_NAME"],
+        })
+      ) {
         e.preventDefault(); // Prevent tab change
         e.stopPropagation(); // Stop event bubbling
         return false;
@@ -653,10 +814,16 @@ $(document).ready(() => {
       if (isInit || currentMode !== "easy") return;
 
       // Validate current step before allowing template change
-      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(
+        currentTemplate,
+        currentStep,
+      );
 
-      if (!validateCurrentStepInputs(currentStepContainer)) {
+      if (
+        !validateCurrentStepInputs(currentStepContainer, {
+          skipRequiredNames: ["SERVER_NAME"],
+        })
+      ) {
         e.preventDefault(); // Prevent tab change
         e.stopPropagation(); // Stop event bubbling
         return false;
@@ -667,11 +834,12 @@ $(document).ready(() => {
   $('#templates-dropdown-menu button[data-bs-toggle="tab"]').on(
     "shown.bs.tab",
     (e) => {
-      if (!handleTabChange($(e.target).data("bs-target"))) {
+      const $target = $(e.target);
+      const templateId = normalizeTemplateId($target.data("template-id"));
+      if (!handleTabChange($(e.target).data("bs-target"), { templateId })) {
         // If handleTabChange returns false, revert to the previous tab
-        $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
-          "show",
-        );
+        showTemplateTab(currentTemplate);
+        return;
       }
     },
   );
@@ -698,8 +866,10 @@ $(document).ready(() => {
 
       // If switching from easy mode, validate current step first
       if (currentMode === "easy" && targetMode !== "easy") {
-        const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-        const currentStepContainer = $(`#${currentStepId}`);
+        const currentStepContainer = getStepContainer(
+          currentTemplate,
+          currentStep,
+        );
 
         if (!validateCurrentStepInputs(currentStepContainer)) {
           e.preventDefault(); // Prevent tab change
@@ -770,79 +940,107 @@ $(document).ready(() => {
     }
   };
 
-  const performSettingsSearch = () => {
-    const keyword = $pluginKeywordSearchTop.val().toLowerCase().trim();
+  // Helpers near your other utils
+  const safeLower = (v) => (v == null ? "" : String(v)).toLowerCase();
+  const scoreMatch = (text, kw) => {
+    text = safeLower(text);
+    if (!kw || !text) return 0;
+    if (text === kw) return 100;
+    if (text.startsWith(kw)) return 60;
+    if (text.includes(kw)) return 30;
+    return 0;
+  };
 
-    // Clear highlights from all tabs
+  const performSettingsSearch = () => {
+    const keyword = safeLower($pluginKeywordSearchTop.val()).trim();
+
+    // Clear any previous highlight
     $(".tab-content .tab-pane .setting-highlight").removeClass(
       "setting-highlight setting-highlight-fade",
     );
 
-    if (keyword === "") {
-      return;
-    }
+    if (!keyword) return;
 
-    let bestMatch = null;
+    const activePlugin = currentPlugin; // kept up to date in handleTabChange
+    let best = null;
 
-    // Find all plugins with matching settings or metadata
     $("div[id^='navs-plugins-']").each(function () {
       const $pluginContainer = $(this);
       const pluginId = $pluginContainer.attr("id").replace("navs-plugins-", "");
 
-      // Search plugin metadata
+      // --- Plugin meta (left nav item) ---
       const $navItem = $(`#plugin-nav-${pluginId}`);
-      const pluginName = $navItem.find(".fw-bold").text().toLowerCase();
-      const pluginDesc = $navItem
-        .find("small.text-muted.d-block")
-        .data("description")
-        .toLowerCase();
-      const pluginMetaMatch =
-        pluginId.toLowerCase().includes(keyword) ||
-        pluginName.includes(keyword) ||
-        pluginDesc.includes(keyword);
+      const pluginName = safeLower($navItem.find(".fw-bold").text());
+      const pluginDesc = safeLower(
+        $navItem.find("small.text-muted.d-block").data("description"),
+      );
+      const metaScore =
+        scoreMatch(pluginId, keyword) +
+        scoreMatch(pluginName, keyword) +
+        scoreMatch(pluginDesc, keyword);
 
-      // Search settings within the plugin
-      const $settingLabels = $pluginContainer.find("label.form-label");
-      const matchedSettings = $settingLabels.filter(function () {
-        const $label = $(this);
-        const labelText = $label.text().toLowerCase();
-        const $settingContainer = $label.closest("[class*='col-12']");
-        const helpText = (
-          $settingContainer
-            .find(".badge[data-bs-original-title]")
-            .attr("data-bs-original-title") || ""
-        ).toLowerCase();
-        return labelText.includes(keyword) || helpText.includes(keyword);
-      });
+      // --- Settings in this plugin ---
+      // We look at: friendly header label, the floating setting key label, and the *help* badge tooltip.
+      const settings = [];
+      $pluginContainer
+        .find("[class*='col-12']") // each setting block container
+        .each(function () {
+          const $block = $(this);
 
-      if (matchedSettings.length > 0 || pluginMetaMatch) {
-        if (!bestMatch) {
-          bestMatch = {
-            pluginId: pluginId,
-            settings: matchedSettings.map(function () {
-              return $(this).closest("[class*='col-12']")[0];
-            }),
-          };
-        }
+          // Friendly label (header)
+          const headerLabel = safeLower(
+            $block.find("label.form-label").first().text(),
+          );
+
+          // Setting key (floating label inside control)
+          const settingKey = safeLower(
+            $block.find("label.text-truncate").first().text(),
+          );
+
+          // Help tooltip (only the help badge with question mark icon)
+          const helpBadge = $block.find(".bx-question-mark").closest(".badge");
+          const helpText = safeLower(helpBadge.attr("data-bs-original-title"));
+
+          // Compute the best score for this block
+          const s = Math.max(
+            scoreMatch(headerLabel, keyword),
+            scoreMatch(settingKey, keyword),
+            Math.floor(scoreMatch(helpText, keyword) / 2), // help less weighted
+          );
+
+          if (s > 0) {
+            settings.push({ node: $block[0], score: s });
+          }
+        });
+
+      // Total score with strong bias for the active plugin
+      const bias = pluginId === activePlugin ? 1000 : 0;
+      const settingsTotal = settings.reduce((sum, x) => sum + x.score, 0);
+      const total = bias + metaScore + settingsTotal;
+
+      // Sort settings by their own score (best first)
+      settings.sort((a, b) => b.score - a.score);
+
+      if (!best || total > best.total) {
+        best = { pluginId, total, settings };
       }
     });
 
-    if (bestMatch) {
-      const bestMatchNavItem = $(`#plugin-nav-${bestMatch.pluginId}`);
+    if (!best) return;
 
-      const doHighlight = () => {
-        if (bestMatch.settings.length > 0) {
-          highlightSettings($(bestMatch.settings));
-        }
-      };
-
-      if (bestMatchNavItem.hasClass("active")) {
-        doHighlight();
-      } else {
-        bestMatchNavItem.one("shown.bs.tab", doHighlight);
-        const tab = bootstrap.Tab.getOrCreateInstance(bestMatchNavItem[0]);
-        tab.show();
+    const $bestNav = $(`#plugin-nav-${best.pluginId}`);
+    const doHighlight = () => {
+      if (best.settings.length) {
+        // Convert to DOM nodes array for jQuery
+        highlightSettings($(best.settings.map((s) => s.node)));
       }
+    };
+
+    if ($bestNav.hasClass("active")) {
+      doHighlight();
+    } else {
+      $bestNav.one("shown.bs.tab", doHighlight);
+      bootstrap.Tab.getOrCreateInstance($bestNav[0]).show();
     }
   };
 
@@ -1097,8 +1295,7 @@ $(document).ready(() => {
 
     // Validate each step
     for (let step = 1; step <= totalSteps; step++) {
-      const stepId = `navs-steps-${template}-${step}`;
-      const stepContainer = $(`#${stepId}`);
+      const stepContainer = getStepContainer(template, step);
 
       // Validate without focusing (we'll handle focus separately)
       const isStepValid = validateCurrentStepInputs(stepContainer, {
@@ -1116,8 +1313,7 @@ $(document).ready(() => {
 
     // If there are invalid steps, navigate to the first one
     if (!allValid && firstInvalidStep) {
-      const targetStepId = `navs-steps-${template}-${firstInvalidStep}`;
-      const targetStepContainer = $(`#${targetStepId}`);
+      const targetStepContainer = getStepContainer(template, firstInvalidStep);
 
       // Navigate to the invalid step
       navigateToStep(template, firstInvalidStep);
@@ -1151,8 +1347,10 @@ $(document).ready(() => {
       ).length;
 
       // First validate the current step
-      const currentStepId = `navs-steps-${currentTemplate}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(
+        currentTemplate,
+        currentStep,
+      );
       if (!validateCurrentStepInputs(currentStepContainer)) {
         return; // Don't proceed if current step is invalid
       }
@@ -1163,8 +1361,7 @@ $(document).ready(() => {
       for (let step = 1; step <= totalSteps; step++) {
         if (step === currentStep) continue; // Skip current step as it was already validated
 
-        const stepToValidateId = `navs-steps-${currentTemplate}-${step}`;
-        const stepToValidateContainer = $(`#${stepToValidateId}`);
+        const stepToValidateContainer = getStepContainer(currentTemplate, step);
 
         if (!validateCurrentStepInputs(stepToValidateContainer)) {
           // Navigate to the invalid step
@@ -1363,139 +1560,6 @@ $(document).ready(() => {
       });
   });
 
-  $(document).on("click", ".next-step, .previous-step", function () {
-    const isNext = $(this).hasClass("next-step");
-    const template = $(this).data("template");
-
-    // Determine the new step
-    const newStep = isNext ? currentStep + 1 : currentStep - 1;
-
-    // Validate current step if going forward
-    if (isNext) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent proceeding to the next step
-        return;
-      }
-    }
-
-    // Trigger click on the target step navigation item
-    $(
-      `.step-navigation-item[data-step="${newStep}"][data-template="${template}"]`,
-    ).trigger("click");
-  });
-
-  // Update the step navigation item click handler to manage button states
-  $(document).on("click", ".step-navigation-item", function () {
-    const targetStep = parseInt($(this).data("step"));
-    const template = $(this).data("template");
-    const stepId = $(this).data("step-id");
-
-    // Don't proceed if already on this step
-    if (targetStep === currentStep) return;
-
-    // If trying to navigate to a future step, validate current step first
-    if (targetStep > currentStep) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent navigation if validation fails
-        return;
-      }
-
-      // Validate all steps between current and target
-      for (let step = currentStep + 1; step < targetStep; step++) {
-        const stepToValidateId = `navs-steps-${template}-${step}`;
-        const stepToValidateContainer = $(`#${stepToValidateId}`);
-        if (!validateCurrentStepInputs(stepToValidateContainer)) {
-          // Show the invalid step instead of the requested one
-          $(
-            `.step-navigation-item[data-step="${step}"][data-template="${template}"]`,
-          ).trigger("click");
-          return;
-        }
-      }
-    }
-
-    // Update active state in step navigation
-    $(`.step-navigation-item[data-template="${template}"]`).removeClass(
-      "active",
-    );
-    $(`.step-navigation-item[data-template="${template}"] .step-number`)
-      .addClass("disabled btn-outline-primary")
-      .removeClass("btn-primary");
-    $(`.step-navigation-item[data-template="${template}"] .fw-bold`)
-      .removeClass("text-primary")
-      .addClass("text-muted");
-
-    $(this).addClass("active");
-    $(this).find(".step-number").removeClass("disabled");
-    $(this).find(".fw-bold").removeClass("text-muted").addClass("text-primary");
-
-    // Update currentStep
-    currentStep = targetStep;
-
-    // Handle tab pane display - properly using Bootstrap's fade functionality
-    // First hide all step panes
-    $(
-      `#navs-templates-${template} .template-steps-content .tab-pane`,
-    ).removeClass("show active");
-
-    // Then show the target step pane
-    $(`#${stepId}`).addClass("show active");
-
-    // Update previous/next button states
-    const totalSteps = $(
-      `.step-navigation-item[data-template="${template}"]`,
-    ).length;
-    const $previousBtn = $(`#navs-templates-${template}`).find(
-      ".previous-step",
-    );
-    const $nextBtn = $(`#navs-templates-${template}`).find(".next-step");
-
-    $previousBtn.toggleClass("disabled", currentStep === 1);
-    $nextBtn.toggleClass("disabled", currentStep === totalSteps);
-
-    // Scroll the step content into view
-    $(`#${stepId}`)[0].scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  // Simplify the next/previous step handlers - they should just trigger the appropriate step navigation item
-  $(document).on("click", ".next-step, .previous-step", function () {
-    if ($(this).hasClass("disabled")) return; // Don't do anything if button is disabled
-
-    const isNext = $(this).hasClass("next-step");
-    const template = $(this).data("template");
-
-    // Determine the new step
-    const newStep = isNext ? currentStep + 1 : currentStep - 1;
-
-    // Validate current step if going forward
-    if (isNext) {
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
-      const isStepValid = validateCurrentStepInputs(currentStepContainer);
-
-      if (!isStepValid) {
-        // Prevent proceeding to the next step
-        return;
-      }
-    }
-
-    // Find and trigger click on the target step navigation item
-    const $targetStepItem = $(
-      `.step-navigation-item[data-step="${newStep}"][data-template="${template}"]`,
-    );
-    if ($targetStepItem.length) {
-      $targetStepItem.trigger("click");
-    }
-  });
-
   $("#reset-template-config").on("click", function () {
     const reset_modal = $("#modal-reset-template-config");
     reset_modal.modal("show");
@@ -1510,7 +1574,12 @@ $(document).ready(() => {
       alert(t("alert.readonly_mode"));
       return;
     }
+    const fetchModal = $("#modal-fetch-global-config");
+    // Ensure modal is attached to body to avoid z-index/overflow issues
+    fetchModal.appendTo("body").modal("show");
+  });
 
+  $("#confirm-fetch-global-config").on("click", function () {
     $.ajax({
       url: `${window.location.pathname
         .split("/")
@@ -1518,7 +1587,7 @@ $(document).ready(() => {
         .join("/")}/global-config?as_json=true`,
       type: "GET",
       success: function (globalConfig) {
-        const templateContainer = $(`#navs-templates-${currentTemplate}`);
+        const templateContainer = getTemplateContainer(currentTemplate);
 
         const settingsInTemplate = new Set();
         templateContainer.find(".plugin-setting").each(function () {
@@ -1568,9 +1637,7 @@ $(document).ready(() => {
                   <div class="input-group mb-2 multivalue-input-group">
                     <input type="text"
                            class="form-control multivalue-input"
-                           value="${value.trim()}"
-                           placeholder="Enter value..."
-                           data-i18n="form.placeholder.multivalue_enter_value">
+                           value="${value.trim()}">
                     <button type="button"
                             class="btn btn-outline-success add-multivalue-item">
                       <i class="bx bx-plus"></i>
@@ -1607,6 +1674,9 @@ $(document).ready(() => {
               const selectedCount = selectedValues.filter((v) => v).length;
               const $label = $dropdown.find(".multiselect-toggle label");
               $label.text(`(${selectedCount} selected)`);
+            } else {
+              // Handle simple text-like inputs and textareas
+              $input.val(settingValue).trigger("input");
             }
           }
         }
@@ -1661,15 +1731,15 @@ $(document).ready(() => {
   ) {
     $('button[data-bs-target="#navs-modes-advanced"]').tab("show");
   } else if (usedTemplate !== "low" && currentMode === "easy") {
-    $(`button[data-bs-target="#navs-templates-${usedTemplate}"]`).tab("show");
-  } else if (
-    !$(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).hasClass(
-      "active",
-    )
-  ) {
-    $(`button[data-bs-target="#navs-templates-${currentTemplate}"]`).tab(
-      "show",
-    );
+    showTemplateTab(usedTemplate);
+  } else {
+    const $currentTemplateButton = getTemplateTabButton(currentTemplate);
+    if (
+      $currentTemplateButton.length &&
+      !$currentTemplateButton.hasClass("active")
+    ) {
+      showTemplateTab(currentTemplate);
+    }
   }
 
   var hasExternalPlugins = false;
@@ -1764,7 +1834,7 @@ $(document).ready(() => {
     // }
 
     const method = $(this).data("method");
-    if (method !== "ui") {
+    if (method !== "ui" && method !== "default") {
       editor.setReadOnly(true);
     }
 
@@ -1810,10 +1880,6 @@ $(document).ready(() => {
       $(".save-settings").trigger("click");
     }
   });
-
-  // Remove all previously attached handlers to avoid duplication
-  $(document).off("click", ".step-navigation-item");
-  $(document).off("click", ".next-step, .previous-step");
 
   // Helper functions for styling step buttons and navigation
   const stepButtonStyles = {
@@ -1892,8 +1958,6 @@ $(document).ready(() => {
 
     if (!$targetStepItem.length) return; // Target step not found
 
-    const stepId = $targetStepItem.data("step-id");
-
     // Get validation state of all steps before changing active state
     const stepStates = [];
     $(`.step-navigation-item[data-template="${template}"]`).each(function () {
@@ -1921,10 +1985,11 @@ $(document).ready(() => {
     currentStep = targetStep;
 
     // Properly handle fade transition to ensure it happens every time
-    const $currentPane = $(
-      `#navs-templates-${template} .template-steps-content .tab-pane.active`,
+    const templateContainer = getTemplateContainer(template);
+    const $currentPane = templateContainer.find(
+      ".template-steps-content .tab-pane.active",
     );
-    const $targetPane = $(`#${stepId}`);
+    const $targetPane = getStepContainer(template, targetStep);
 
     // First remove 'show' to start fade-out transition
     $currentPane.removeClass("show");
@@ -1944,16 +2009,11 @@ $(document).ready(() => {
     const totalSteps = $(
       `.step-navigation-item[data-template="${template}"]`,
     ).length;
-    const $previousBtn = $(`#navs-templates-${template} .previous-step`);
-    const $nextBtn = $(`#navs-templates-${template} .next-step`);
+    const $previousBtn = templateContainer.find(".previous-step");
+    const $nextBtn = templateContainer.find(".next-step");
 
-    $previousBtn.toggleClass("disabled", targetStep === 1);
-    $nextBtn.toggleClass("disabled", targetStep === totalSteps);
-
-    // Scroll into view after transition is complete
-    setTimeout(() => {
-      $(`#${stepId}`)[0].scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 350); // Give enough time for the fade-in to complete
+    $previousBtn.toggleClass("visually-hidden", targetStep === 1);
+    $nextBtn.toggleClass("visually-hidden", targetStep === totalSteps);
   };
 
   // Unified and improved step navigation handler
@@ -1966,8 +2026,11 @@ $(document).ready(() => {
       const isNextButton = $(this).hasClass("next-step");
       const isPrevButton = $(this).hasClass("previous-step");
 
-      // Skip action if button is disabled
-      if ((isNextButton || isPrevButton) && $(this).hasClass("disabled")) {
+      // Skip action if button is visually-hidden
+      if (
+        (isNextButton || isPrevButton) &&
+        $(this).hasClass("visually-hidden")
+      ) {
         return;
       }
 
@@ -1976,19 +2039,20 @@ $(document).ready(() => {
 
       if (isDirectStepClick) {
         targetStep = parseInt($(this).data("step"));
-        template = $(this).data("template");
+        template = normalizeTemplateId($(this).data("template"));
 
         // Don't proceed if already on this step
         if (targetStep === currentStep) return;
       } else {
-        template = $(this).data("template");
+        template = normalizeTemplateId($(this).data("template"));
         targetStep = isNextButton ? currentStep + 1 : currentStep - 1;
       }
 
+      if (!template) template = currentTemplate;
+
       // Always validate current step to update its validation state
       // regardless of whether we're going forward or backward
-      const currentStepId = `navs-steps-${template}-${currentStep}`;
-      const currentStepContainer = $(`#${currentStepId}`);
+      const currentStepContainer = getStepContainer(template, currentStep);
 
       // Validate but don't block navigation - just update the UI indicators
       validateCurrentStepInputs(currentStepContainer, {
@@ -2022,7 +2086,9 @@ $(document).ready(() => {
     // Debounce to avoid excessive validation
     debounce(() => {
       // Get the template and step number
-      const template = stepContainer.attr("id").split("-")[2];
+      const template =
+        normalizeTemplateId(stepContainer.data("templateId")) ||
+        currentTemplate;
       const step = parseInt(stepContainer.data("step"));
 
       // Validate without focusing
@@ -2081,9 +2147,7 @@ $(document).ready(() => {
           <div class="input-group mb-2 multivalue-input-group">
             <input type="text"
                    class="form-control multivalue-input"
-                   value="${value.trim()}"
-                   placeholder="Enter value..."
-                   data-i18n="form.placeholder.multivalue_enter_value">
+                   value="${value.trim()}">
 
             <button type="button"
                     class="btn btn-outline-success add-multivalue-item">
@@ -2118,6 +2182,44 @@ $(document).ready(() => {
   isInit = false;
 
   // Multivalue functionality
+  const updateMultivalueLabels = ($container) => {
+    const $hiddenInput = $container.find(".multivalue-hidden-input");
+    const settingName = $hiddenInput.attr("name");
+    const baseId = $hiddenInput.attr("id");
+
+    $container.find(".multivalue-input-group").each(function (index) {
+      const $group = $(this);
+      const $input = $group.find(".multivalue-input");
+      const $label = $group.find("label");
+      const newIndex = index + 1;
+      const newId = `${baseId}_${newIndex}`;
+
+      $input.attr("id", newId);
+
+      // First item has no index, subsequent items have #1, #2, etc.
+      if (index === 0) {
+        $label.attr("for", newId).text(settingName);
+      } else {
+        $label.attr("for", newId).text(`${settingName} #${index}`);
+      }
+    });
+  };
+
+  const updateMultivalueFloatingLabel = ($container) => {
+    // Update floating label state for each input based on its value
+    $container.find(".multivalue-input-group").each(function () {
+      const $inputGroup = $(this);
+      const $input = $inputGroup.find(".multivalue-input");
+      const hasValue = $input.val().trim() !== "";
+
+      if (hasValue) {
+        $inputGroup.addClass("has-value");
+      } else {
+        $inputGroup.removeClass("has-value");
+      }
+    });
+  };
+
   const toggleMultivalueVisibility = ($container, isToggleAction = false) => {
     const $inputGroups = $container.find(".multivalue-input-group");
     const visibleLimit = 5;
@@ -2200,21 +2302,33 @@ $(document).ready(() => {
 
     if (isDisabled) return;
 
+    // Get the base ID and setting name from the hidden input
+    const $hiddenInput = $container.find(".multivalue-hidden-input");
+    const baseId = $hiddenInput.attr("id");
+    const settingName = $hiddenInput.attr("name");
+
+    // Calculate the index for the new input
+    const currentCount = $container.find(".multivalue-input-group").length;
+    const newIndex = currentCount + 1;
+    const inputId = `${baseId}_${newIndex}`;
+
     const inputGroupHtml = `
-      <div class="input-group mb-2 multivalue-input-group">
-        <input type="text"
-               class="form-control multivalue-input"
-               value="${value}"
-               placeholder="Enter value..."
-               data-i18n="form.placeholder.multivalue_enter_value">
-        <button type="button"
-                class="btn btn-outline-success add-multivalue-item">
-          <i class="bx bx-plus"></i>
-        </button>
-        <button type="button"
-                class="btn btn-outline-danger remove-multivalue-item">
-          <i class="bx bx-x"></i>
-        </button>
+      <div class="form-floating multivalue-input-group">
+        <div class="input-group">
+          <input type="text"
+                 class="form-control multivalue-input"
+                 value="${value}"
+                 id="${inputId}">
+          <button type="button"
+                  class="btn btn-outline-success add-multivalue-item">
+            <i class="bx bx-plus"></i>
+          </button>
+          <button type="button"
+                  class="btn btn-outline-danger remove-multivalue-item">
+            <i class="bx bx-x"></i>
+          </button>
+        </div>
+        <label for="${inputId}" class="text-truncate">Temporary</label>
       </div>
     `;
 
@@ -2225,8 +2339,19 @@ $(document).ready(() => {
       $inputsContainer.append(inputGroupHtml);
     }
 
+    // Update margin bottom for all input groups
+    const $allGroups = $container.find(".multivalue-input-group");
+    $allGroups.removeClass("mb-2");
+    $allGroups.not(":last").addClass("mb-2");
+
+    // Update all labels with correct indices
+    updateMultivalueLabels($container);
+
     const $newInput = $container.find(".multivalue-input").last();
     $newInput.focus();
+
+    // Update floating label behavior when new input is added
+    updateMultivalueFloatingLabel($container);
 
     updateMultivalueHiddenInput($container);
     toggleMultivalueVisibility($container, false);
@@ -2244,6 +2369,7 @@ $(document).ready(() => {
     if ($container.find(".multivalue-input-group").length <= 1) {
       $inputGroup.find(".multivalue-input").val("");
       updateMultivalueHiddenInput($container);
+      updateMultivalueFloatingLabel($container);
       return;
     }
 
@@ -2252,7 +2378,17 @@ $(document).ready(() => {
       .hasClass("expanded");
 
     $inputGroup.remove();
+
+    // Update margin bottom for remaining input groups
+    const $allGroups = $container.find(".multivalue-input-group");
+    $allGroups.removeClass("mb-2");
+    $allGroups.not(":last").addClass("mb-2");
+
+    // Update all labels with correct indices
+    updateMultivalueLabels($container);
+
     updateMultivalueHiddenInput($container);
+    updateMultivalueFloatingLabel($container);
     toggleMultivalueVisibility($container, false);
 
     if (wasExpanded) {
@@ -2267,6 +2403,7 @@ $(document).ready(() => {
   $(".multivalue-container").each(function () {
     const $container = $(this);
     updateMultivalueHiddenInput($container);
+    updateMultivalueFloatingLabel($container);
     toggleMultivalueVisibility($container, false);
   });
 
@@ -2294,6 +2431,13 @@ $(document).ready(() => {
   $(document).on("input", ".multivalue-input", function () {
     const $container = $(this).closest(".multivalue-container");
     updateMultivalueHiddenInput($container);
+    updateMultivalueFloatingLabel($container);
+  });
+
+  // Handle focus/blur for floating label behavior
+  $(document).on("focus blur", ".multivalue-input", function () {
+    const $container = $(this).closest(".multivalue-container");
+    updateMultivalueFloatingLabel($container);
   }); // Handle Enter key in multivalue inputs to add new item
   $(document).on("keydown", ".multivalue-input", function (e) {
     if (e.key === "Enter") {

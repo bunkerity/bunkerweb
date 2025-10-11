@@ -1,6 +1,74 @@
 # Changelog
 
-## v1.6.4 - ????/??/??
+## v1.6.5 - ????/??/??
+
+- [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
+- [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes
+- [FEATURE] Add the possibility use HTTPS with BunkerWeb's internal API
+- [FEATURE] Add reason data for bad behavior bans/reports
+- [FEATURE] Add session retention configuration via the `DATABASE_MAX_SESSION_AGE_DAYS` setting in the `Database` plugin and automatic cleanup job to purge old UI user sessions from the database
+- [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
+- [UI] Tweak the bad behavior details to look nice in the report page
+- [UI] Prevent renaming of template-based custom configs in update and edit functions for consistency
+- [UI] Fix template config not being editable in service easy mode
+- [UI] Introduce a `Templates` management page to create, edit, clone and delete service templates.
+- [UI] Add new `Template` column in the services page to display the template a service is based on (if any) and allow filtering by template.
+- [MISC] Update default value for Permissions-Policy header to include additional features and remove the deprecated ones
+- [DOCS] Add multi-language support to the documentation, including French, German, Spanish and Chinese (Mandarin) translations.
+- [DOCS] Add documentation about the possibility to extend bwcli via plugins commands
+- [DOCS] Add Docker logging best practices to advanced documentation
+- [DEPS] Updated luajit2 version to v2.1-20250826
+- [DEPS] Update coreruleset-v4 version to v4.19.0
+- [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the `Let's Encrypt` plugin.
+- [CONTRIBUTION] Thank you [tomkolp](https://github.com/tomkolp) for your contribution regarding the `Polish` translation of the web UI.
+
+## v1.6.5-rc3 - 2025/09/16
+
+- [BUGFIX] Fix lua session handling when using redis
+- [BUGFIX] Fix ctx error at startup with `DNSBL` plugin
+- [FEATURE] Introduce optional API token authentication to bolster security for BunkerWeb API calls, allowing users to enable token-based access control for enhanced protection against unauthorized requests
+- [FEATURE] Add the possibility to ignore IPs in `DNSBL` plugin
+- [LINUX] Improve nginx stop and reload handling in BunkerWeb service to use the pid file instead of the `pgrep` command
+- [UI] Fix incorrect key used when viewing service details
+- [UI] Fix 403 when changing IP address
+- [UI] Add the possibility to quickly ban IP addresses from the reports page
+- [UI] Fix date sorting in bans and reports pages
+- [UI] Add ipaddr.js library for robust IP address validation
+- [MISC] Update new `reloading` health status for BunkerWeb when NGINX is reloading and handle it in it's healthcheck file
+- [MISC] Automatically minify UI CSS files in Images/Packages build process
+- [MISC] Add LRU eviction fallback to avoid no memory errors
+- [DEPS] Update lua-resty-openssl version to v1.6.4
+
+## v1.6.5-rc2 - 2025/09/11
+
+- [BUGFIX] Enhance database backup and restore functionality with improved compatibility and options
+- [FEATURE] Add support for new reCAPTCHA version in `Antibot` plugin
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.0
+- [ALL-IN-ONE] Add support for disabling specific CrowdSec parsers
+- [UI] Fix occasional rate limiting when using the web UI by increasing the base limit in its template
+- [UI] Fix status code filtering in reports page
+- [UI] Fix IPs charts in home page to accurately reflect data
+- [MISC] Automatically minify loading, errors and antibot HTML files in Images/Packages build process
+- [DEPS] Update lua-resty-session version to v4.1.4
+- [DEPS] Update lua-resty-openssl version to v1.6.3
+- [DEPS] Update coreruleset-v4 version to v4.18.0
+- [SECURITY] Enforce restrictive umask across scripts and configurations for improved security
+
+## v1.6.5-rc1 - 2025/08/30
+
+- [FEATURE] Enhance update-check job to utilize cached GitHub release data and improve error handling
+- [BUGFIX] Update default algorithm for Let's Encrypt's `RFC2136` DNS provider from HMAC-SHA512 to HMAC-MD5
+- [BUGFIX] Fix issue with loading environment variables in the `robotstxt` plugin
+- [LINUX] Add upgrade capability to the easy-install script for seamless in-place updates
+- [LINUX] Fix logrotation of certbot logs, they know gets automatically deleted after 7 days
+- [UI] Always display all multiple settings to avoid confusion
+- [UI] Update step navigation buttons to use visually-hidden class for better accessibility
+- [UI] Fixed an issue where certain settings were reset when editing a service based on a template
+- [UI] Fixed an issue where non-template custom configurations were removed when editing a service using a template
+- [UI] Add Free Trial promotion card to pro.html for non-pro users
+- [UI] Add Force update button on PRO page to force the download of PRO plugins without checking for updates.
+
+## v1.6.4 - 2025/08/18
 
 - [SECURITY] Fix open-redirection vulnerability in the Web UI regarding the `next` parameter in the loading process ([CVE-2025-8066](https://github.com/bunkerity/bunkerweb/security/advisories/GHSA-xxx9-3fh5-g585)).
 - [FEATURE] Enhance `ModSecurity` plugin to support human-readable size values for request body limits (requests without files)

@@ -5,9 +5,49 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
-## Version 4.18.0 - 2025-MM-DD
+## Version 4.20.0-dev - 2025-MM-DD
 
-TBD
+## Version 4.19.0 - 2025-10-02
+
+## What's Changed
+### ⭐ Important changes
+* refactor: 920340 - delete 920341 by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4268
+### 🆕 New features and detections 🎉
+* fix: update lfi-os-files.data by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4240
+### 🧰 Other Changes
+* fix: dont block `.url` file extension by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4259
+* fix(933135): wrong score variable by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4262
+* fix(933153): missing inbound_anomaly_score by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4260
+* fix(953100): remove generic SQLSTATE error codes causing false positives by @Elnadrion in https://github.com/coreruleset/coreruleset/pull/4257
+* feat: add stricter sibling 954101 to 954100 by @franbuehler in https://github.com/coreruleset/coreruleset/pull/4258
+* fix(942550): cleanup regex by @fzipi in https://github.com/coreruleset/coreruleset/pull/3767
+* fix: reduce false positives with php response rules by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4272
+* fix: don't block on all question marks (942550 PL-1) by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4264
+* feat: whitelist application/csp-report content-type header by @Elnadrion in https://github.com/coreruleset/coreruleset/pull/4274
+
+## New Contributors
+* @touchweb-vincent made their first contribution in https://github.com/coreruleset/coreruleset/pull/4262
+* @Elnadrion made their first contribution in https://github.com/coreruleset/coreruleset/pull/4257
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.18.0...v4.19.0
+
+## Version 4.18.0 - 2025-09-03
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat: add `application/reports+json` content-type header by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4230
+* feat: update unix commands list by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4215
+* feat: added ssh commands by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4249
+* feat: detect `rmt` and `rmt-tar` by @theseion in https://github.com/coreruleset/coreruleset/pull/4242
+### 🧰 Other Changes
+* feat: Add product name tags by @TimDiam0nd in https://github.com/coreruleset/coreruleset/pull/3960
+* fix: remove dot star by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4235
+* fix(942370): remove dot star by @Xhoenix in https://github.com/coreruleset/coreruleset/pull/4234
+* fix: avoid matching non-ruby errors and source code by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4224
+* fix: don't replace cmdline suffixes for 932220 and 932250 by @theseion in https://github.com/coreruleset/coreruleset/pull/4231
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.17.1...v4.18.0
 
 ## Version 4.17.1 - 2025-08-05
 
@@ -413,7 +453,7 @@ Changes with direct rule impact (sorted by lowest rule ID per change where avail
  * fix: remove initialization rules for redundant IP reputation variables (901150, 901152) (Andrew Howe) [#2833]
  * fix: initialize all variables used properly (901169) (Ervin Hegedus) [#2802]
  * feat: improve sampling mode efficiency (901410, 901420, 901440) (Paul Beckett) [#2094]
- * fix: replace uses of 'ctl:ruleEngine=Off' with "ctl:ruleRemoveByTag=OWASP_CRS" to accomodate more than one ruleset (901450, 905100, 905110) (Jozef Sudolský) [#2156]
+ * fix: replace uses of 'ctl:ruleEngine=Off' with "ctl:ruleRemoveByTag=OWASP_CRS" to accommodate more than one ruleset (901450, 905100, 905110) (Jozef Sudolský) [#2156]
  * feat: remove old, commented-out IP reputation check rule (910110 PL1) (Paul Beckett) [#2148]
  * feat: detect 'burpcollaborator' scanner (913100 PL1) (Amir Hosein Aliakbarian) [#2152]
  * feat: detect 'httpx' scanner (913100 PL1) (Will Woodson) [#2045]
@@ -768,7 +808,7 @@ Changes without direct rule impact:
  * feat: add timezone variable to docker-compose (Felipe Zipitría) [#1995]
  * fix: indentations (Ervin Hegedus) [#1851]
  * fix: link for docs/OWASP-CRS-Documentation submodule (Ervin Hegedus) [#1885]
- * fix: multiple fixes when generating changelog PR (Max Leske) [#3418], [#3420], [#3422], [#3424] [#3429]
+ * fix: multiple fixes when generating changelog PR (Max Leske) [#3418], [#3420], [#3422], [#3424], [#3429]
  * fix: nginx logging in docker-compose (Felipe Zipitría) [#2036]
  * fix: remove all whitespace at EOL (Felipe Zipitría) [#2405, #2406]
  * fix: remove full stop from end of log message (920181 PL1) (Federico G. Schwindt) [#2011]

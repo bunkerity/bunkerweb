@@ -125,9 +125,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.6.1",
+      "name": "lua-resty-openssl v1.6.4",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "e0f52762fef5c31532e60c7d58c7a6d9ae5a6905",
+      "commit": "1c9e3f5f0ce5274d82f2faf259dd34d4b6b75eb6",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -152,9 +152,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.1.3",
+      "name": "lua-resty-session v4.1.4",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "c98014399817025620a064535cb43e785720adc0",
+      "commit": "f0aa06747e21055a18ed43ec83f8f333c5473010",
       "post_install": "rm -r src/deps/src/lua-resty-session/t"
     },
     {
@@ -193,9 +193,9 @@
     },
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20250529",
+      "name": "LuaJIT v2.1-20250826",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "afc74313c6f919f713e2a25003cf0066852bb24a",
+      "commit": "dcc9c9ee67e1a5d3d636bd7745e95ddb4a1c70bc",
       "post_install": "rm -r src/deps/src/luajit/t"
     },
     {

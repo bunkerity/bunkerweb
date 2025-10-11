@@ -128,3 +128,29 @@ def force_check():
     flash("A new check for PRO plugins has been scheduled.", "success")
     DATA["PRO_LOADING"] = True
     return redirect(url_for("pro.pro_page"))
+
+
+@pro.route("/pro/force-update", methods=["POST"])
+@login_required
+def force_update():
+    if DB.readonly:
+        return handle_error("Database is in read-only mode", "pro")
+
+    # Set metadata flag for downloader job to detect force mode
+    err = DB.set_metadata({"force_pro_update": True})
+    if err:
+        return handle_error(err, "pro")
+
+    # Ensure next scheduler run does not skip by date
+    err = DB.set_metadata({"last_pro_check": None})
+    if err:
+        return handle_error(err, "pro")
+
+    # Trigger a config cycle so the scheduler picks up changes promptly
+    err = DB.checked_changes(changes=["config"], plugins_changes={"pro"}, value=True)
+    if err:
+        return handle_error(err, "pro")
+
+    flash("A forced update of PRO plugins has been scheduled.", "success")
+    DATA["PRO_LOADING"] = True
+    return redirect(url_for("pro.pro_page"))

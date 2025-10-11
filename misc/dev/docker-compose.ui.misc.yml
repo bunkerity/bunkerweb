@@ -8,6 +8,8 @@ services:
     build:
       context: ../..
       dockerfile: ./src/bw/Dockerfile
+      args:
+        SKIP_MINIFY_HTML: "yes"
     ports:
       - 80:8080/tcp
       - 443:8443/tcp
@@ -81,7 +83,8 @@ services:
       context: ../..
       dockerfile: ./src/ui/Dockerfile
       args:
-        SKIP_MINIFY: "yes"
+        SKIP_MINIFY_JS: "yes"
+        SKIP_MINIFY_CSS: "yes"
     ports:
       - 7000:7000
     volumes:
@@ -94,6 +97,7 @@ services:
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "P@ssw0rd"
       CHECK_PRIVATE_IP: "no"
+      FLASK_SECRET: "secret"
       DEBUG: "1"
       MAX_WORKERS: "1"
       MAX_THREADS: "4"
@@ -128,7 +132,7 @@ services:
           - bw-db
 
   bw-syslog:
-    image: balabit/syslog-ng:4.8.0
+    image: balabit/syslog-ng:4.9.0
     cap_add:
       - NET_BIND_SERVICE # Bind to low ports
       - NET_BROADCAST # Send broadcasts

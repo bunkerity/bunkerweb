@@ -44,7 +44,7 @@ try:
         LOGGER.info(f"Creating directory {directory} as it does not exist")
         directory.mkdir(parents=True, exist_ok=True)
 
-    db = backup_database(datetime.now().astimezone(), backup_dir=directory)
+    db, _ = backup_database(datetime.now().astimezone(), backup_dir=directory)
 
     if directory == BACKUP_DIR:
         update_cache_file(db, directory)

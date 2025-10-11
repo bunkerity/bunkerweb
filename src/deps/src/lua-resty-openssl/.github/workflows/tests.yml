@@ -294,7 +294,7 @@ jobs:
       run: |
         git clone https://github.com/spacewander/lua-resty-rsa ../lua-resty-rsa
 
-        wget https://luarocks.org/releases/luarocks-3.9.2.tar.gz
+        wget https://luarocks.org/releases/luarocks-3.12.2.tar.gz
         tar zxf luarocks-*.tar.gz
         pushd luarocks-*/
         ./configure --with-lua=$LUAJIT_PREFIX \

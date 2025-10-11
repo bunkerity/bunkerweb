@@ -11,7 +11,7 @@ ci:
 # You can pass your custom .yamllint with args attribute.
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v5.0.0
+  rev: v6.0.0
   hooks:
     - id: check-yaml
       args: [--allow-multiple-documents]

@@ -1,0 +1,246 @@
+{% extends "dashboard.html" %}
+{% block head %}
+    <!-- Datatables -->
+    <link rel="preload"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          as="style" />
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='libs/datatables/datatables.min.css') }}"
+          nonce="{{ style_nonce }}" />
+{% endblock %}
+{% block content %}
+    <!-- Content -->
+    <div class="card table-responsive text-nowrap p-4 pb-8 min-vh-70">
+        <input type="hidden" id="templates_number" value="{{ templates|length }}" />
+        <textarea type="hidden"
+                  id="columns_preferences_defaults"
+                  class="visually-hidden">{{ columns_preferences_defaults['templates']|tojson }}</textarea>
+        <textarea type="hidden" id="columns_preferences" class="visually-hidden">{{ columns_preferences|tojson }}</textarea>
+        <textarea type="hidden" id="templates-usage" class="visually-hidden">{{ template_usage|default({})|tojson }}</textarea>
+        <input type="hidden"
+               id="csrf_token"
+               name="csrf_token"
+               value="{{ csrf_token() }}" />
+        <p id="templates-waiting"
+           class="text-center relative w-full p-2 text-primary rounded-lg fw-bold"
+           data-i18n="status.loading_templates">Loading templates...</p>
+        <table id="templates"
+               class="table responsive nowrap position-relative w-100 d-none">
+            <thead>
+                <tr>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Show the templates' details"
+                        data-i18n="tooltip.table.templates.details"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="Select all templates"
+                        data-i18n="tooltip.table.templates.select_all"></th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The ID of the Template"
+                        data-i18n="tooltip.table.templates.id">
+                        <span data-i18n="table.header.id">ID</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The user defined or auto-generated Template's name"
+                        data-i18n="tooltip.table.templates.name">
+                        <span data-i18n="table.header.name">Name</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The plugin containing the Template"
+                        data-i18n="tooltip.table.templates.plugin">
+                        <span data-i18n="table.header.plugin">Plugin</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Template's steps count"
+                        data-i18n="tooltip.table.templates.steps">
+                        <span data-i18n="table.header.steps">Steps</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Template's settings count"
+                        data-i18n="tooltip.table.templates.settings">
+                        <span data-i18n="table.header.settings">Settings</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The Template's configs count"
+                        data-i18n="tooltip.table.templates.configs">
+                        <span data-i18n="table.header.configs">Configs</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The template's creation method"
+                        data-i18n="tooltip.table.templates.method">
+                        <span data-i18n="table.header.method">Method</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The template's creation date"
+                        data-i18n="tooltip.table.templates.created">
+                        <span data-i18n="table.header.created">Created</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The template's last update date"
+                        data-i18n="tooltip.table.templates.last_update">
+                        <span data-i18n="table.header.last_update">Last update</span>
+                    </th>
+                    <th data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        data-bs-original-title="The actions that can be performed on the Template"
+                        data-i18n="tooltip.table.templates.actions">
+                        <span data-i18n="table.header.actions">Actions</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for template, template_data in templates.items() %}
+                    <tr data-template-id="{{ template }}">
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <a href="{{ url_for("templates") }}/{{ template }}"
+                               class="d-flex align-items-center"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="bottom"
+                               data-bs-original-title="{% if template_data.method != 'ui' or is_readonly %}View{% else %}Edit{% endif %} template {{ template }}"><i class="bx bx-{% if template_data.method != 'ui' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>&nbsp;{{ template }}</a>
+                        </td>
+                        <td>{{ template_data.name }}</td>
+                        <td>{{ template_data.plugin_id or '-' }}</td>
+                        <td>{{ template_data.steps|length }}</td>
+                        <td>{{ template_data.settings|length }}</td>
+                        <td>{{ template_data.configs|length }}</td>
+                        <td id="method-{{ template }}">{{ template_data.method }}</td>
+                        <td class="template-creation-date">{{ template_data.creation_date.astimezone().isoformat() }}</td>
+                        <td class="template-last-update-date">{{ template_data.last_update.astimezone().isoformat() }}</td>
+                        <td>
+                            <div class="d-flex justify-content-evenly">
+                                <a role="button"
+                                   class="btn btn-primary btn-sm me-1"
+                                   href="{{ url_for('templates.template_edit_page', template_id=template) }}"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="bottom"
+                                   data-bs-original-title="..."
+                                   data-i18n="{% if template_data.method != 'ui' or is_readonly %}tooltip.link.view_template{% else %}tooltip.link.edit_template{% endif %}"
+                                   data-i18n-options='{"template": "{{ template }}"}'>
+                                    <i class="bx bx-{% if template_data.method != 'ui' or is_readonly %}show{% else %}edit{% endif %} bx-xs"></i>
+                                </a>
+                                <div {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by readonly"{% endif %}>
+                                    <a role="button"
+                                       class="btn btn-outline-secondary btn-sm me-1{% if is_readonly %} disabled{% endif %}"
+                                       href="{{ url_for("templates.template_create_page") }}?clone={{ template }}"
+                                       data-bs-toggle="tooltip"
+                                       data-bs-placement="bottom"
+                                       data-bs-original-title="Clone template {{ template }}"
+                                       data-i18n="tooltip.link.clone_template"
+                                       data-i18n-options='{"template": "{{ template }}"}'>
+                                        <i class="bx bx-copy-alt bx-xs"></i>
+                                    </a>
+                                </div>
+                                {% set delete_tooltip_key = 'tooltip.disabled_readonly' if user_readonly else ('tooltip.disabled_db_readonly' if is_readonly else ('tooltip.disabled_by_method' if template_data['method'] != 'ui' else 'tooltip.button.delete_template')) %}
+                                {% set delete_tooltip_options = '{"method": "' ~ template_data['method'] ~ '"}' if template_data['method'] != 'ui' and not is_readonly else '{"name": "' ~ template_data['id'] ~ '"}' %}
+                                <div data-bs-toggle="tooltip"
+                                     data-bs-placement="bottom"
+                                     data-bs-original-title="..."
+                                     data-i18n="{{ delete_tooltip_key }}"
+                                     data-i18n-options='{{ delete_tooltip_options }}'>
+                                    <button type="button"
+                                            data-template-id="{{ template }}"
+                                            class="btn btn-outline-danger btn-sm me-1 delete-template{% if template_data['method'] != 'ui' %} disabled{% endif %}">
+                                        <i class="bx bx-trash bx-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
+                TZ: <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+            </span>
+        </table>
+    </div>
+    <div id="feedback-toast"
+         class="bs-toast toast fade bg-{% if theme == 'light' %}white{% else %}dark{% endif %} border"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         data-bs-autohide="true">
+        <div class="toast-header d-flex align-items-center">
+            <i class="d-block h-auto rounded tf-icons bx bx-xs bx-bell bx-tada me-2"></i>
+            <span class="fw-medium me-auto">BunkerWeb Forever</span>
+            <small class="text-body-secondary" data-i18n="flash.time.just_now">just now</small>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="toast"
+                    aria-label="Close"
+                    data-i18n="aria.label.close"></button>
+        </div>
+        <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
+    </div>
+    {% if not is_readonly %}
+        <div class="modal fade"
+             id="modal-delete-templates"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.delete_template">Delete templates</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <form action="{{ url_for("templates.templates_page") }}/delete"
+                          method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" id="selected-templates-input" name="templates" value="" />
+                            <input type="hidden" id="force-delete-input" name="force" value="false" />
+                            <div class="alert alert-danger text-center"
+                                 role="alert"
+                                 data-i18n="modal.body.delete_confirmation_alert">
+                                Are you sure you want to delete the selected templates?
+                            </div>
+                            <div id="selected-templates" class="mb-3"></div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit"
+                                    class="btn btn-outline-danger me-2"
+                                    data-i18n="button.delete">Delete</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.close">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!-- / Content -->
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='libs/datatables/datatables.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/dataTableInit.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='libs/lottie-player/lottie-player.min.js') }}"
+            nonce="{{ script_nonce }}"
+            defer></script>
+    <script src="{{ url_for('static', filename='js/pages/templates.js') }}"
+            nonce="{{ script_nonce }}"
+            defer
+            type="module"></script>
+{% endblock %}

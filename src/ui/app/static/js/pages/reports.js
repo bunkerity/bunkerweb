@@ -5,6 +5,8 @@ $(document).ready(function () {
       ? i18next.t
       : (key, fallback) => fallback || key; // Fallback
   const baseFlagsUrl = $("#base_flags_url").val().trim();
+  const isReadOnly = $("#is-read-only").val().trim() === "True";
+  const userReadOnly = $("#user-read-only").val().trim() === "True";
 
   const headers = [
     {
@@ -67,6 +69,11 @@ $(document).ready(function () {
       tooltip: "Security mode",
       i18n: "tooltip.table.reports.security_mode",
     },
+    {
+      title: "Actions",
+      tooltip: "Actions available for this report",
+      i18n: "tooltip.table.reports.actions",
+    },
   ];
 
   // Batch update tooltips
@@ -95,7 +102,7 @@ $(document).ready(function () {
         viewTotal: true,
         cascadePanes: true,
         collapse: false,
-        columns: [3, 4, 5, 6, 7, 9, 10, 12],
+        columns: [4, 5, 6, 7, 8, 10, 11, 13],
       },
     },
     topStart: {},
@@ -169,7 +176,7 @@ $(document).ready(function () {
             "Copy visible",
           )}</span>`,
           exportOptions: {
-            columns: ":visible:not(:first-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -179,7 +186,7 @@ $(document).ready(function () {
           filename: "bw_report",
           exportOptions: {
             modifier: { search: "none" },
-            columns: ":not(:first-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
         {
@@ -188,12 +195,85 @@ $(document).ready(function () {
           filename: "bw_report",
           exportOptions: {
             modifier: { search: "none" },
-            columns: ":not(:first-child)",
+            columns: ":not(:nth-child(-n+2)):not(:last-child)",
           },
         },
       ],
     },
+    {
+      extend: "collection",
+      text: `<span class="tf-icons bx bx-play bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.actions">${t(
+        "button.actions",
+        "Actions",
+      )}</span>`,
+      className: "btn btn-sm btn-outline-primary action-button disabled",
+      buttons: [{ extend: "ban_selected", className: "text-danger" }],
+    },
   ];
+
+  // Define batch ban button similar to bans page actions
+  $.fn.dataTable.ext.buttons.ban_selected = {
+    text: `<span class="tf-icons bx bx-block bx-18px me-2"></span><span data-i18n="button.ban_selected">${t(
+      "button.ban_selected",
+      "Ban selected",
+    )}</span>`,
+    action: function (e, dt, node, config) {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      const selected = dt.rows({ selected: true }).data().toArray();
+      if (!selected.length) return;
+
+      // Build bans array using per-row defaults and scope
+      const bans = [];
+      const seen = new Set();
+      selected.forEach((row) => {
+        const ip = row.ip;
+        const reason = row.reason || "ui";
+        const serverName = row.server_name;
+        const ban_scope =
+          serverName && serverName !== "_" ? "service" : "global";
+        const service = ban_scope === "service" ? serverName : "";
+        const expVal = Number(row.ban_default_exp);
+        const exp = Number.isFinite(expVal) ? expVal : 86400;
+        const key = `${ip}|${ban_scope}|${service || "_"}|${exp}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        bans.push({ ip, reason, ban_scope, service, exp });
+      });
+
+      if (!bans.length) return;
+
+      // Submit form to /bans/ban in new tab
+      const form = $("<form>", {
+        method: "POST",
+        action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
+        class: "visually-hidden",
+        target: "_blank",
+      });
+      form.append(
+        $("<input>", {
+          type: "hidden",
+          name: "csrf_token",
+          value: $("#csrf_token").val(),
+        }),
+      );
+      form.append(
+        $("<input>", {
+          type: "hidden",
+          name: "bans",
+          value: JSON.stringify(bans),
+        }),
+      );
+      form.appendTo("body").submit();
+    },
+  };
 
   // Custom button for auto-refresh
   let autoRefresh = false;
@@ -235,10 +315,11 @@ $(document).ready(function () {
   const reports_config = {
     tableSelector: "#reports",
     tableName: "reports",
-    columnVisibilityCondition: (column) => column > 1 && column < 13,
+    columnVisibilityCondition: (column) => column > 1 && column < 15,
     dataTableOptions: {
       columnDefs: [
         { orderable: false, targets: -1 },
+        { orderable: false, render: DataTable.render.select(), targets: 1 },
         {
           searchPanes: {
             show: true,
@@ -246,7 +327,7 @@ $(document).ready(function () {
             combiner: "or",
           },
           type: "ip-address",
-          targets: 3,
+          targets: 4,
         },
         {
           render: function (data, type, row) {
@@ -258,7 +339,7 @@ $(document).ready(function () {
             }
             return data;
           },
-          targets: 1,
+          targets: 2,
         },
         {
           searchPanes: {
@@ -266,7 +347,7 @@ $(document).ready(function () {
             header: t("searchpane.country", "Country"),
             combiner: "or",
           },
-          targets: 4,
+          targets: 5,
           render: function (data) {
             const countryCode = data.toLowerCase();
             const tooltipContent = "N/A";
@@ -296,7 +377,7 @@ $(document).ready(function () {
             header: t("searchpane.ip_address", "IP Address"),
             combiner: "or",
           },
-          targets: 3,
+          targets: 4,
         },
         {
           searchPanes: {
@@ -304,7 +385,7 @@ $(document).ready(function () {
             header: t("searchpane.method", "Method"),
             combiner: "or",
           },
-          targets: 5,
+          targets: 6,
         },
         {
           searchPanes: {
@@ -312,7 +393,7 @@ $(document).ready(function () {
             header: t("searchpane.url", "URL"),
             combiner: "or",
           },
-          targets: 6,
+          targets: 7,
           render: function (data, type, row) {
             if (type !== "display") {
               return data;
@@ -345,7 +426,7 @@ $(document).ready(function () {
             header: t("searchpane.status_code", "Status Code"),
             combiner: "or",
           },
-          targets: 7,
+          targets: 8,
         },
         {
           searchPanes: {
@@ -353,7 +434,7 @@ $(document).ready(function () {
             header: t("searchpane.reason", "Reason"),
             combiner: "or",
           },
-          targets: 9,
+          targets: 10,
         },
         {
           searchPanes: {
@@ -361,7 +442,7 @@ $(document).ready(function () {
             header: t("searchpane.server_name", "Server name"),
             combiner: "or",
           },
-          targets: 10,
+          targets: 11,
           render: function (data) {
             return data === "_"
               ? `<span data-i18n="status.default_server">default server</span>`
@@ -374,7 +455,7 @@ $(document).ready(function () {
             header: t("searchpane.data", "Data"),
             combiner: "or",
           },
-          targets: 11,
+          targets: 12,
         },
         {
           searchPanes: {
@@ -382,12 +463,48 @@ $(document).ready(function () {
             header: t("searchpane.security_mode", "Security mode"),
             combiner: "or",
           },
-          targets: 12,
+          targets: 13,
+        },
+        // Actions column renderer (last column)
+        {
+          targets: -1,
+          orderable: false,
+          render: function (data, type, row) {
+            if (type === "display") {
+              const readOnlyClass = isReadOnly ? " disabled" : "";
+              const banTooltip = isReadOnly
+                ? t(
+                    "tooltip.readonly_mode",
+                    "This action is not allowed in read-only mode.",
+                  )
+                : t("tooltip.button.ban_ip", "Ban this IP address");
+              return `
+                <div class="d-flex justify-content-center">
+                  <button type="button"
+                          class="btn btn-outline-danger btn-sm me-1 ban-single${readOnlyClass}"
+                          data-ip="${row.ip}"
+                          data-server_name="${row.server_name}"
+                          data-reason="${row.reason}"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          data-bs-original-title="${banTooltip}">
+                    <i class="bx bx-block bx-xs"></i>
+                  </button>
+                </div>
+              `;
+            }
+            return "";
+          },
         },
       ],
-      order: [[1, "desc"]],
+      order: [[2, "desc"]],
       autoFill: false,
       responsive: true,
+      select: {
+        style: "multi+shift",
+        selector: "td:nth-child(2)",
+        headerCheckbox: true,
+      },
       layout: layout,
       processing: true,
       serverSide: true,
@@ -422,6 +539,7 @@ $(document).ready(function () {
           orderable: false,
           className: "dtr-control",
         },
+        { data: null, defaultContent: "", orderable: false },
         {
           data: "date",
           title: "<span data-i18n='table.header.date'>Date</span>",
@@ -541,6 +659,11 @@ $(document).ready(function () {
           data: "security_mode",
           title:
             "<span data-i18n='table.header.security_mode'>Security mode</span>",
+        },
+        {
+          data: "actions",
+          title: "<span data-i18n='table.header.actions'>Actions</span>",
+          orderable: false,
         },
       ],
       headerCallback: function (thead) {
@@ -746,7 +869,7 @@ $(document).ready(function () {
 
       // Generate formatted content with error handling
       try {
-        const formattedContent = formatSecurityReportData(reportData);
+        const formattedContent = formatSecurityReportData(reportData, reason);
         $("#dataContent").html(formattedContent);
       } catch (formatError) {
         console.error("Error formatting report data:", formatError);
@@ -917,14 +1040,40 @@ $(document).ready(function () {
   };
 
   // Function to format security report data
-  function formatSecurityReportData(data) {
+  function formatSecurityReportData(data, reason = "") {
     if (!data || typeof data !== "object") {
       return '<div class="alert alert-warning" data-i18n="status.no_data">No data available</div>';
     }
 
-    let html = "";
+    const normalizedReason = String(reason || "")
+      .trim()
+      .toLowerCase();
+    const badBehaviorEntries = normalizeBadBehaviorEntries(data);
+    const isBadBehaviorReason =
+      normalizedReason === "bad behavior" ||
+      normalizedReason === "bad_behavior" ||
+      normalizedReason.includes("bad behavior");
+    const shouldFormatBadBehavior =
+      isBadBehaviorReason ||
+      (!normalizedReason && badBehaviorEntries.length > 0);
 
-    // Check if this looks like a ModSecurity-style report
+    if (shouldFormatBadBehavior) {
+      if (!badBehaviorEntries.length) {
+        return `
+          <div class="alert alert-info" data-i18n="status.no_data">
+            ${escapeHtml(
+              t(
+                "reports.bad_behavior_no_details",
+                "No bad behavior details were captured for this report.",
+              ),
+            )}
+          </div>
+          ${createRawDataFallback(data)}
+        `;
+      }
+      return formatBadBehaviorData(badBehaviorEntries);
+    }
+
     const hasSecurityFields =
       data.ids ||
       data.msgs ||
@@ -933,12 +1082,293 @@ $(document).ready(function () {
       data.anomaly_score;
 
     if (hasSecurityFields) {
-      html += formatModSecurityData(data);
-    } else {
-      html += formatGenericData(data);
+      return formatModSecurityData(data);
     }
 
+    return formatGenericData(data);
+  }
+
+  function normalizeBadBehaviorEntries(data) {
+    if (!data) {
+      return [];
+    }
+
+    if (Array.isArray(data)) {
+      return data.filter((entry) => isBadBehaviorEntry(entry));
+    }
+
+    if (typeof data === "object") {
+      if (Array.isArray(data.events)) {
+        return data.events.filter((entry) => isBadBehaviorEntry(entry));
+      }
+
+      const numericKeys = Object.keys(data).filter((key) => /^\d+$/.test(key));
+
+      if (numericKeys.length) {
+        return numericKeys
+          .sort((a, b) => Number(a) - Number(b))
+          .map((key) => data[key])
+          .filter((entry) => isBadBehaviorEntry(entry));
+      }
+
+      if (isBadBehaviorEntry(data)) {
+        return [data];
+      }
+    }
+
+    return [];
+  }
+
+  function isBadBehaviorEntry(entry) {
+    if (!entry || typeof entry !== "object") {
+      return false;
+    }
+
+    const indicativeKeys = [
+      "ip",
+      "method",
+      "url",
+      "status",
+      "server_name",
+      "date",
+      "id",
+    ];
+
+    return indicativeKeys.some((key) =>
+      Object.prototype.hasOwnProperty.call(entry, key),
+    );
+  }
+
+  function formatBadBehaviorData(entries) {
+    if (!entries || entries.length === 0) {
+      return '<div class="alert alert-info" data-i18n="status.no_data">No bad behavior activity recorded</div>';
+    }
+
+    const title = escapeHtml(
+      t(
+        "reports.bad_behavior_activity_detected",
+        "Bad behavior activity detected",
+      ),
+    );
+    const subtitle = escapeHtml(
+      t(
+        "reports.bad_behavior_activity_explanation",
+        "These requests exceeded the bad behavior threshold and were grouped together.",
+      ),
+    );
+    const totalLabel = escapeHtml(
+      t("reports.bad_behavior_total_requests", "Suspicious requests"),
+    );
+    const requestLabel = escapeHtml(
+      t("reports.bad_behavior_request_label", "Request"),
+    );
+    const ipLabel = escapeHtml(t("reports.bad_behavior_ip", "IP address"));
+    const serverLabel = escapeHtml(t("reports.bad_behavior_server", "Server"));
+    const urlLabel = escapeHtml(t("reports.bad_behavior_url", "URL"));
+    const capturedAtLabel = escapeHtml(
+      t("reports.bad_behavior_captured_at", "Captured at"),
+    );
+    const requestIdLabel = escapeHtml(
+      t("reports.bad_behavior_request_id", "Request ID"),
+    );
+    const defaultServerLabel = escapeHtml(
+      t("status.default_server", "default server"),
+    );
+
+    const statusCounts = entries.reduce((acc, entry) => {
+      const code =
+        entry &&
+        entry.status !== undefined &&
+        entry.status !== null &&
+        entry.status !== ""
+          ? String(entry.status)
+          : "N/A";
+      acc[code] = (acc[code] || 0) + 1;
+      return acc;
+    }, {});
+
+    const statusBadges = Object.entries(statusCounts)
+      .map(([code, count]) => {
+        const badgeClass = getStatusBadgeClass(code);
+        return `<span class="badge rounded-pill ${badgeClass}">${escapeHtml(
+          `${code} × ${count}`,
+        )}</span>`;
+      })
+      .join("");
+
+    let html = '<div class="bad-behavior-report">';
+
+    html += `
+      <div class="bad-behavior-summary card shadow-sm border-0 mb-4">
+        <div class="card-body d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="bad-behavior-summary__icon">
+              <span class="tf-icons bx bx-traffic-cone"></span>
+            </span>
+            <div>
+              <h6 class="bad-behavior-summary__title mb-1">${title}</h6>
+              <p class="bad-behavior-summary__subtitle mb-0">${subtitle}</p>
+            </div>
+          </div>
+          <span class="bad-behavior-summary__total badge bg-label-warning text-warning">
+            <span class="bad-behavior-summary__total-count">${escapeHtml(
+              String(entries.length),
+            )}</span>
+            <span class="bad-behavior-summary__total-label">${totalLabel}</span>
+          </span>
+        </div>
+      </div>
+    `;
+
+    if (statusBadges) {
+      html += `<div class="bad-behavior-statuses d-flex flex-wrap gap-2 mb-4">${statusBadges}</div>`;
+    }
+
+    entries.forEach((entry, index) => {
+      const methodClass = getMethodBadgeClass(entry.method);
+      const statusClass = getStatusBadgeClass(entry.status);
+      const methodText = escapeHtml(
+        (entry && entry.method ? String(entry.method) : "-").toUpperCase(),
+      );
+      const statusText = escapeHtml(
+        entry &&
+          entry.status !== undefined &&
+          entry.status !== null &&
+          entry.status !== ""
+          ? String(entry.status)
+          : "N/A",
+      );
+      const capturedAt = escapeHtml(formatBadBehaviorTimestamp(entry.date));
+      const ipValue = escapeHtml(entry && entry.ip ? entry.ip : "N/A");
+      const serverValue = escapeHtml(
+        entry && entry.server_name ? entry.server_name : "N/A",
+      );
+      const urlValue = escapeHtml(entry && entry.url ? entry.url : "N/A");
+      const requestNumber = escapeHtml(String(index + 1));
+      const serverContent =
+        entry && entry.server_name === "_"
+          ? `<span class="badge bg-label-secondary text-secondary bad-behavior-event__value fw-semibold">${defaultServerLabel}</span>`
+          : `<span class="bad-behavior-event__value text-break">${serverValue}</span>`;
+      const requestIdBlock =
+        entry && entry.id
+          ? `<div class="col-12">
+              <div class="bad-behavior-event__field">
+                <div class="bad-behavior-event__label">${requestIdLabel}</div>
+                <code class="bad-behavior-event__value text-break">${escapeHtml(
+                  entry.id,
+                )}</code>
+              </div>
+            </div>`
+          : "";
+
+      html += `
+        <article class="bad-behavior-event card shadow-sm border-0 mb-4">
+          <div class="card-body">
+            <div class="bad-behavior-event__header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge rounded-pill ${methodClass} text-uppercase">${methodText}</span>
+                <span class="badge rounded-pill ${statusClass}">${statusText}</span>
+              </div>
+              <span class="badge rounded-pill bad-behavior-event__sequence bg-label-secondary text-secondary">
+                ${requestLabel} ${requestNumber}
+              </span>
+            </div>
+            <div class="bad-behavior-event__meta small d-flex flex-wrap mb-3">
+              <span class="d-flex align-items-center">
+                <i class="bx bx-time-five me-2"></i>${capturedAtLabel}: ${capturedAt}
+              </span>
+            </div>
+            <div class="row gy-3 gx-4">
+              <div class="col-md-6">
+                <div class="bad-behavior-event__field">
+                  <div class="bad-behavior-event__label">${ipLabel}</div>
+                  <code class="bad-behavior-event__value text-break">${ipValue}</code>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="bad-behavior-event__field">
+                  <div class="bad-behavior-event__label">${serverLabel}</div>
+                  ${serverContent}
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="bad-behavior-event__field">
+                  <div class="bad-behavior-event__label">${urlLabel}</div>
+                  <code class="bad-behavior-event__value text-break">${urlValue}</code>
+                </div>
+              </div>
+              ${requestIdBlock}
+            </div>
+          </div>
+        </article>
+      `;
+    });
+
+    html += "</div>";
     return html;
+  }
+
+  function getMethodBadgeClass(method) {
+    const normalized = (method || "").toString().toUpperCase();
+    switch (normalized) {
+      case "GET":
+        return "bg-label-primary text-primary";
+      case "POST":
+        return "bg-label-success text-success";
+      case "PUT":
+      case "OPTIONS":
+        return "bg-label-info text-info";
+      case "DELETE":
+        return "bg-label-danger text-danger";
+      case "PATCH":
+        return "bg-label-warning text-warning";
+      default:
+        return "bg-label-secondary text-secondary";
+    }
+  }
+
+  function getStatusBadgeClass(status) {
+    const code = parseInt(status, 10);
+    if (!Number.isNaN(code)) {
+      if (code >= 500) {
+        return "bg-label-danger text-danger";
+      }
+      if (code >= 400) {
+        return "bg-label-warning text-warning";
+      }
+      if (code >= 300) {
+        return "bg-label-info text-info";
+      }
+      if (code >= 200) {
+        return "bg-label-success text-success";
+      }
+    }
+    return "bg-label-secondary text-secondary";
+  }
+
+  function formatBadBehaviorTimestamp(value) {
+    if (value === null || value === undefined || value === "") {
+      return t("status.not_applicable", "N/A");
+    }
+
+    let numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) {
+      const parsedDate = new Date(value);
+      if (!Number.isNaN(parsedDate.getTime())) {
+        return parsedDate.toLocaleString();
+      }
+      return String(value);
+    }
+
+    if (numericValue < 1e12) {
+      numericValue *= 1000;
+    }
+
+    const dateObj = new Date(numericValue);
+    if (!Number.isNaN(dateObj.getTime())) {
+      return dateObj.toLocaleString();
+    }
+    return String(value);
   }
 
   // Function to format ModSecurity-style data
@@ -1114,8 +1544,9 @@ $(document).ready(function () {
       dt.on("draw.dt", function () {
         updateCountryTooltips();
         updateHeaderTooltips(dt.table().header(), headers);
-        // Clean up any existing tooltips to prevent memory leaks
+        // Re-init tooltips for dynamic elements
         $(".tooltip").remove();
+        $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
         // Hide waiting message and show table
         $("#reports-waiting").addClass("visually-hidden");
         $("#reports").removeClass("d-none");
@@ -1177,4 +1608,71 @@ $(document).ready(function () {
     applyTranslations();
     $('[data-bs-toggle="tooltip"]').tooltip("dispose").tooltip();
   }
+
+  // Quick ban action from reports table
+  let actionLock = false;
+  $(document).on("click", ".ban-single", function () {
+    if (isReadOnly) {
+      alert(
+        t(
+          "alert.readonly_mode",
+          "This action is not allowed in read-only mode.",
+        ),
+      );
+      return;
+    }
+    if (actionLock) return;
+    actionLock = true;
+
+    // Fetch row data from DataTable
+    const $btn = $(this);
+    const $row = $btn.closest("tr");
+    const table = $("#reports").DataTable();
+    const rowData = table.row($row).data();
+    if (!rowData) {
+      actionLock = false;
+      return;
+    }
+
+    const ip = rowData.ip;
+    const reason = rowData.reason || "ui";
+    const serverName = rowData.server_name;
+    const ban_scope = serverName && serverName !== "_" ? "service" : "global";
+    const service = ban_scope === "service" ? serverName : "";
+    let parsedExp = Number(rowData.ban_default_exp);
+    const defaultBanExpSeconds = Number.isFinite(parsedExp) ? parsedExp : 86400; // allow 0 (permanent)
+
+    // Create and submit the form to /bans/ban
+    const form = $("<form>", {
+      method: "POST",
+      action: `${window.location.pathname.replace("/reports", "/bans")}/ban`,
+      class: "visually-hidden",
+      target: "_blank",
+    });
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "csrf_token",
+        value: $("#csrf_token").val(),
+      }),
+    );
+    const banPayload = [
+      {
+        ip: ip,
+        reason: reason,
+        ban_scope: ban_scope,
+        service: service,
+        exp: defaultBanExpSeconds,
+      },
+    ];
+    form.append(
+      $("<input>", {
+        type: "hidden",
+        name: "bans",
+        value: JSON.stringify(banPayload),
+      }),
+    );
+    form.appendTo("body").submit();
+    actionLock = false;
+  });
 });

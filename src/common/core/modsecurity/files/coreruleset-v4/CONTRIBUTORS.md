@@ -30,6 +30,8 @@
 
 ## Contributors:
 
+- [touchweb-vincent](https://github.com/touchweb-vincent)
+- [Elnadrion](https://github.com/Elnadrion)
 - [pha6d](https://github.com/pha6d)
 - [KIC-8462852](https://github.com/KIC-8462852)
 - [Muhammad Ayman](https://github.com/TheRubick)

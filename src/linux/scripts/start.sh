@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 # Source the utils helper script
 # shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
@@ -38,6 +41,7 @@ function start() {
             echo "HTTP_PORT=80"
             echo "HTTPS_PORT=443"
             echo "API_LISTEN_IP=127.0.0.1"
+            echo "API_TOKEN="
         } > /etc/bunkerweb/variables.env
         chown root:nginx /etc/bunkerweb/variables.env
         chmod 660 /etc/bunkerweb/variables.env
@@ -54,6 +58,7 @@ function start() {
     if [ ! -f /var/tmp/bunkerweb ] ; then
         mkdir -p /var/tmp/bunkerweb
         chown nginx:nginx /var/tmp/bunkerweb
+        chmod 2770 /var/tmp/bunkerweb
     fi
 
     # Create LOG folder
@@ -69,10 +74,14 @@ function start() {
     # Default values
     declare -A defaults=(
         [DNS_RESOLVERS]="9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4" # Quad9, Google
-        [API_LISTEN_IP]="127.0.0.1"
+        [API_LISTEN_HTTP]="yes"
+        [API_LISTEN_HTTPS]="no"
         [API_HTTP_PORT]="5000"
+        [API_HTTPS_PORT]="5443"
+        [API_LISTEN_IP]="127.0.0.1"
         [API_SERVER_NAME]="bwapi"
         [API_WHITELIST_IP]="127.0.0.0/8"
+        [API_TOKEN]=""
         [USE_REAL_IP]="no"
         [USE_PROXY_PROTOCOL]="no"
         [REAL_IP_FROM]="192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
@@ -107,7 +116,7 @@ function start() {
         fi
     done
 
-    echo -ne "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n" > /var/tmp/bunkerweb/tmp.env
+    echo -ne "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_LISTEN_HTTP=${API_LISTEN_HTTP}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_HTTPS=${API_LISTEN_HTTPS}\nAPI_HTTPS_PORT=${API_HTTPS_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nAPI_TOKEN=${API_TOKEN}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n" > /var/tmp/bunkerweb/tmp.env
     chown root:nginx /var/tmp/bunkerweb/tmp.env
     chmod 660 /var/tmp/bunkerweb/tmp.env
 
@@ -152,40 +161,60 @@ function start() {
 function stop() {
     log "SYSTEMCTL" "ℹ️" "Stopping BunkerWeb service ..."
 
-    pgrep nginx > /dev/null 2>&1
-    # shellcheck disable=SC2181
-    if [ $? -eq 0 ] ; then
-        log "SYSTEMCTL" "ℹ️ " "Stopping nginx..."
-        nginx -s stop
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            log "SYSTEMCTL" "❌" "Error while sending stop signal to nginx"
-            log "SYSTEMCTL" "ℹ️ " "Stopping nginx (force)..."
-            kill -TERM "$(cat /var/run/bunkerweb/nginx.pid)"
-            # shellcheck disable=SC2181
-            if [ $? -ne 0 ] ; then
-                log "SYSTEMCTL" "❌" "Error while sending term signal to nginx"
-            fi
+    pid_file="/var/run/bunkerweb/nginx.pid"
+
+    if [ -f "$pid_file" ] ; then
+        pid="$(cat "$pid_file" 2>/dev/null)"
+        if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
+            log "SYSTEMCTL" "ℹ️ " "Stopping nginx (PID $pid)..."
+            # Try graceful quit first
+            kill -QUIT "$pid" >/dev/null 2>&1
+            # Fallback to TERM if needed later
+        else
+            # PID file exists but process not running
+            log "SYSTEMCTL" "⚠️ " "PID file exists but nginx not running; cleaning up"
+            rm -f "$pid_file"
         fi
+    else
+        log "SYSTEMCTL" "ℹ️ " "nginx is not running"
     fi
+
+    # Wait for nginx to stop based on our own PID
     count=0
-    while true ; do
-        pgrep nginx > /dev/null 2>&1
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            break
+    if [ -n "$pid" ] ; then
+        while kill -0 "$pid" >/dev/null 2>&1 ; do
+            log "SYSTEMCTL" "ℹ️ " "Waiting for nginx to stop..."
+            sleep 1
+            count=$((count + 1))
+            if [ $count -ge 20 ] ; then
+                break
+            fi
+        done
+
+        if kill -0 "$pid" >/dev/null 2>&1 ; then
+            # Graceful stop timed out, try TERM
+            log "SYSTEMCTL" "ℹ️ " "Stopping nginx (TERM)..."
+            kill -TERM "$pid" >/dev/null 2>&1 || true
+            # Wait a bit more
+            extra=0
+            while kill -0 "$pid" >/dev/null 2>&1 ; do
+                sleep 1
+                extra=$((extra + 1))
+                if [ $extra -ge 5 ] ; then
+                    break
+                fi
+            done
         fi
-        log "SYSTEMCTL" "ℹ️ " "Waiting for nginx to stop..."
-        sleep 1
-        count=$((count + 1))
-        if [ $count -ge 20 ] ; then
-            break
+
+        if kill -0 "$pid" >/dev/null 2>&1 ; then
+            log "SYSTEMCTL" "❌" "Timeout while waiting nginx to stop"
+            exit 1
         fi
-    done
-    if [ $count -ge 20 ] ; then
-        log "SYSTEMCTL" "❌" "Timeout while waiting nginx to stop"
-        exit 1
     fi
+
+    # Ensure PID file is removed
+    [ -f "$pid_file" ] && rm -f "$pid_file"
+
     log "SYSTEMCTL" "ℹ️ " "nginx is stopped"
 
     log "SYSTEMCTL" "ℹ️" "BunkerWeb service stopped"
@@ -195,20 +224,25 @@ function reload()
 {
     log "SYSTEMCTL" "ℹ️" "Reloading BunkerWeb service ..."
 
-    pgrep nginx > /dev/null 2>&1
-    # shellcheck disable=SC2181
-    if [ $? -eq 0 ] ; then
-        log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
-        nginx -s reload
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            log "SYSTEMCTL" "❌" "Error while sending reload signal to nginx"
-            log "SYSTEMCTL" "ℹ️" "Reloading nginx (force) ..."
-            kill -HUP "$(cat /var/run/bunkerweb/nginx.pid)"
+    pid_file="/var/run/bunkerweb/nginx.pid"
+    if [ -f "$pid_file" ] ; then
+        pid="$(cat "$pid_file" 2>/dev/null)"
+        if [ -n "$pid" ] && kill -0 "$pid" >/dev/null 2>&1 ; then
+            log "SYSTEMCTL" "ℹ️" "Reloading nginx ..."
+            nginx -s reload
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
-                log "SYSTEMCTL" "❌" "Error while sending hup signal to nginx"
+                log "SYSTEMCTL" "❌" "Error while sending reload signal to nginx"
+                log "SYSTEMCTL" "ℹ️" "Reloading nginx (force) ..."
+                kill -HUP "$pid" >/dev/null 2>&1
+                # shellcheck disable=SC2181
+                if [ $? -ne 0 ] ; then
+                    log "SYSTEMCTL" "❌" "Error while sending hup signal to nginx"
+                fi
             fi
+        else
+            log "SYSTEMCTL" "❌" "nginx is not running"
+            exit 1
         fi
     else
         log "SYSTEMCTL" "❌" "nginx is not running"

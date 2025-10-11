@@ -55,7 +55,6 @@ PostgreSQL
 org.hsqldb.jdbc
 ADODB.Field (0x800A0BCD)
 SQL syntax
-Exception
 System.Data.SqlClient.SqlException
 Data type mismatch in criteria expression.
 Driver

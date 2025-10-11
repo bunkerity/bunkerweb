@@ -1,5 +1,6 @@
 local ngx = ngx
 local ngx_req = ngx.req
+local bit = require "bit"
 local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
 local class = require "middleclass"
@@ -41,16 +42,55 @@ local call_plugin = helpers.call_plugin
 
 api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
 
+-- Constant-time string comparison to mitigate timing attacks
+local function secure_compare(a, b)
+	if not a or not b then
+		return false
+	end
+	if #a ~= #b then
+		return false
+	end
+	local diff = 0
+	for i = 1, #a do
+		diff = bit.bor(diff, bit.bxor(a:byte(i), b:byte(i)))
+	end
+	return diff == 0
+end
+
+function api:is_allowed_token()
+	-- If no token configured, allow
+	if not self.api_token or self.api_token == "" then
+		return true, "ok"
+	end
+	local headers = ngx_req.get_headers()
+	local auth = headers["authorization"] or headers["Authorization"]
+	local provided = auth and auth:match("^[Bb]earer%s+(.+)$") or nil
+	if not provided then
+		return false, "missing API token"
+	end
+	if not secure_compare(provided, self.api_token) then
+		return false, "invalid API token"
+	end
+	return true, "ok"
+end
+
 function api:initialize(ctx)
 	self.ctx = ctx
 	local data, err = get_variable("API_WHITELIST_IP", false)
 	self.ips = {}
+	self.api_token = nil
 	if not data then
 		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. err)
 	else
 		for ip in data:gmatch("%S+") do
 			table.insert(self.ips, ip)
 		end
+	end
+
+	-- Load optional API token (from datastore variables, same pattern as whitelist)
+	local tok = get_variable("API_TOKEN", false)
+	if tok and tok ~= "" then
+		self.api_token = tok
 	end
 end
 
@@ -98,7 +138,7 @@ api.global.GET["^/health$"] = function(self)
 	local f = open("/var/tmp/bunkerweb_reloading", "r")
 	if f then
 		f:close()
-		return self:response(HTTP_OK, "success", "ok")
+		return self:response(HTTP_OK, "success", "reloading")
 	end
 
 	local data, err = get_variable("IS_LOADING", false)
@@ -205,6 +245,8 @@ api.global.POST["^/confs$"] = function(self)
 	local cmds = {
 		"rm -rf " .. destination .. "/*",
 		"tar xzf " .. tmp .. " -C " .. destination,
+		-- Remove the temporary archive once extracted
+		"rm -f " .. tmp,
 	}
 	for _, cmd in ipairs(cmds) do
 		local status = execute(cmd)

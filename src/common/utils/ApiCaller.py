@@ -8,6 +8,7 @@ from os.path import join
 from sys import path as sys_path
 from tarfile import open as tar_open
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from urllib.parse import urlsplit
 
 # Update system path for dependencies
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
@@ -60,8 +61,13 @@ class ApiCaller:
                             self.__logger.info(f"Successfully sent API request to {api.endpoint}{url}")
 
                         if resp and response:
-                            instance = api.endpoint.replace("http://", "").split(":")[0]
-                            responses[instance] = resp if isinstance(resp, dict) else resp.json()
+                            # Extract hostname from endpoint (supports http and https)
+                            try:
+                                host = urlsplit(api.endpoint).hostname or api.endpoint
+                            except Exception:
+                                host = api.endpoint.replace("http://", "").replace("https://", "").split(":")[0]
+                            if responses is not None:
+                                responses[host] = resp if isinstance(resp, dict) else resp.json()
                 except Exception as exc:
                     ret = False
                     self.__logger.error(f"API request generated an exception: {exc}")

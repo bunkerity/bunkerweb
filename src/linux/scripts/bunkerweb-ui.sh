@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enforce a restrictive default umask for all operations
+umask 027
+
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
 
@@ -49,10 +52,22 @@ start() {
     fi
 
     # Extract environment variables with fallback
-    LISTEN_ADDR=$(get_env_var "LISTEN_ADDR" "127.0.0.1")
+    LISTEN_ADDR=$(get_env_var "UI_LISTEN_ADDR" "")
+    if [ -z "$LISTEN_ADDR" ]; then
+        LISTEN_ADDR=$(get_env_var "LISTEN_ADDR" "127.0.0.1")
+    fi
     export LISTEN_ADDR
 
-    FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1")
+    LISTEN_PORT=$(get_env_var "UI_LISTEN_PORT" "")
+    if [ -z "$LISTEN_PORT" ]; then
+        LISTEN_PORT=$(get_env_var "LISTEN_PORT" "7000")
+    fi
+    export LISTEN_PORT
+
+    FORWARDED_ALLOW_IPS=$(get_env_var "UI_FORWARDED_ALLOW_IPS" "")
+    if [ -z "$FORWARDED_ALLOW_IPS" ]; then
+        FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1")
+    fi
     export FORWARDED_ALLOW_IPS
 
     export CAPTURE_OUTPUT="yes"

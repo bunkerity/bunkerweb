@@ -77,6 +77,24 @@ else
   echo "Autoconf service check skipped (disabled by AUTOCONF_MODE setting)"
 fi
 
+# Check API service status only if enabled
+if [ "${SERVICE_API:-yes}" = "yes" ]; then
+  status=$(supervisorctl status "api" 2>/dev/null)
+  if ! echo "$status" | grep -q "RUNNING"; then
+    echo "Service api is not running: $status"
+    exit 1
+  fi
+
+  /usr/share/bunkerweb/helpers/healthcheck-api.sh
+  # shellcheck disable=SC2181
+  if [ $? -ne 0 ]; then
+    echo "API health check failed"
+    exit 1
+  fi
+else
+  echo "API service check skipped (disabled by SERVICE_API setting)"
+fi
+
 # Everything is fine
 echo "All enabled services are healthy"
 exit 0

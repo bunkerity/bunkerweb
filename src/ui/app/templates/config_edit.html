@@ -16,7 +16,7 @@
     <div class="card p-1 mb-4 sticky-card">
         <div class="d-flex flex-wrap justify-content-around align-items-center">
             <div class="d-flex">
-                {% if not config_template and config_method and config_method != "ui" or is_readonly %}
+                {% if (not config_template and config_method and config_method != "ui") or is_readonly %}
                     <button type="button" class="btn btn-sm btn-secondary ms-2 disabled">
                         <i class="bx bx-xs bx-cube"></i>
                         &nbsp;<span data-i18n="button.service">Service</span>: {{ config_service or "Global" }}
@@ -121,7 +121,8 @@
                            value="{{ name }}"
                            pattern="^[a-zA-Z0-9_\-]{1,64}$"
                            required
-                           {% if not config_template and config_method and config_method != "ui" or is_readonly %}disabled{% endif %}>
+                           {% if (not config_template and config_method and config_method != "ui") or is_readonly %}disabled{% endif %}
+                           {% if config_template %}readonly data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Renaming a template-based custom config is not allowed."{% endif %}>
                     <label for="config-name" data-i18n="form.label.configuration_name">Configuration Name</label>
                     <span class="input-group-text border-0 border-primary border-bottom mt-2 pb-0 shadow-none"
                           id="config-name-suffix">.conf</span>

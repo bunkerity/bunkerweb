@@ -15,7 +15,6 @@
     "dnsbl",
     "customcert",
     "letsencrypt",
-    "letsencrypt_dns",
     "selfsigned"
   ],
   "set": [
@@ -23,16 +22,10 @@
     "whitelist",
     "letsencrypt",
     "customcert",
-    "letsencrypt_dns",
     "selfsigned",
     "ui"
   ],
-  "ssl_certificate": [
-    "customcert",
-    "letsencrypt_dns",
-    "letsencrypt",
-    "selfsigned"
-  ],
+  "ssl_certificate": ["customcert", "letsencrypt", "selfsigned"],
   "access": [
     "ssl",
     "whitelist",
@@ -69,6 +62,6 @@
   ],
   "log_stream": ["badbehavior", "bunkernet"],
   "log_default": ["badbehavior", "bunkernet", "errors", "misc", "metrics"],
-  "timer": ["badbehavior", "bunkernet", "metrics"],
+  "timer": ["metrics", "badbehavior", "bunkernet", "sessions"],
   "init_workers": []
 }

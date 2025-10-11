@@ -2,9 +2,9 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1390/badge)](https://bestpractices.coreinfrastructure.org/projects/1390)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-| Branch | Status |
----------|-------|
-| main | ![GHA build main](https://github.com/coreruleset/coreruleset/actions/workflows/test.yml/badge.svg?branch=main) |
+| Branch      | Status |
+|-------------|-------|
+| main        | ![GHA build main](https://github.com/coreruleset/coreruleset/actions/workflows/test.yml/badge.svg?branch=main) |
 | v3.3/master | ![GHA build v3.3/master](https://github.com/coreruleset/coreruleset/workflows/Regression%20Tests/badge.svg?branch=v3.3%2Fmaster) |
 
 
@@ -12,9 +12,9 @@
 
 The OWASP CRS is a set of generic attack detection rules for use with ModSecurity or compatible web application firewalls. The CRS aims to protect web applications from a wide range of attacks, including the OWASP Top Ten, with a minimum of false alerts.
 
-## CRS Resources
+## CRS Resources, Related Projects and Tools
 
-Please see the [OWASP CRS page](https://coreruleset.org/) to get introduced to CRS and view resources on installation, configuration, and working with CRS.
+Please see the [OWASP CRS page](https://coreruleset.org/) to get introduced to CRS and view resources on installation, configuration, and working with CRS. There you can also find a [list of projects related to CRS](https://coreruleset.org/) and a [list of tools](https://coreruleset.org/docs/6-development/6-6-useful_tools/) for both developers and users.
 
 ## Contributing to CRS
 
@@ -30,7 +30,7 @@ Read also our documentation on [how to contribute](./CONTRIBUTING.md).
 
 ## License
 
-Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.</br>
+Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.<br>
 Copyright (c) 2021-2025 CRS project. All rights reserved.
 
 The OWASP CRS is distributed under Apache Software License (ASL) version 2. Please see the enclosed LICENSE file for full details.

@@ -19,10 +19,19 @@ Follow these steps to configure and use the DNSBL feature:
 
 ### Configuration Settings
 
-| Setting      | Default                                             | Context   | Multiple | Description                                                                     |
-| ------------ | --------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | no       | **Enable DNSBL:** Set to `yes` to enable DNSBL checks for incoming connections. |
-| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | **DNSBL Servers:** List of DNSBL server domains to check, separated by spaces.  |
+**General**
+
+| Setting      | Default                                             | Context   | Multiple | Description                                                                 |
+| ------------ | --------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
+| `USE_DNSBL`  | `no`                                                | multisite | no       | Enable DNSBL: set to `yes` to enable DNSBL checks for incoming connections. |
+| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | DNSBL servers: list of DNSBL server domains to check, separated by spaces.  |
+
+**Ignore Lists**
+
+| Setting                | Default | Context   | Multiple | Description                                                                                    |
+| ---------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`      | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                |
+| `DNSBL_IGNORE_IP_URLS` | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes. |
 
 !!! tip "Choosing DNSBL Servers"
     Choose reputable DNSBL providers to minimize false positives. The default list includes well-established services that are suitable for most websites:
@@ -60,3 +69,40 @@ Follow these steps to configure and use the DNSBL feature:
     This configuration uses only:
 
     - **zen.spamhaus.org**: Spamhaus' combined list is often considered sufficient as a standalone solution due to its wide coverage and reputation for accuracy. It combines the SBL, XBL, and PBL lists in a single query, making it efficient and comprehensive.
+
+=== "Excluding Trusted IPs"
+
+    You can exclude specific clients from DNSBL checks using static values and/or remote files:
+
+    - `DNSBL_IGNORE_IP`: Add space-separated IPs and CIDR ranges. Example: `192.0.2.10 203.0.113.0/24 2001:db8::/32`.
+    - `DNSBL_IGNORE_IP_URLS`: Provide URLs whose contents list one IP/CIDR per line. Comments starting with `#` or `;` are ignored. Duplicate entries are de-duplicated.
+
+    When an incoming client IP matches the ignore list, BunkerWeb skips DNSBL lookups and caches the result as “ok” for faster subsequent requests.
+
+=== "Using Remote URLs"
+
+    The `dnsbl-download` job downloads and caches ignore IPs hourly:
+
+    - Protocols: `https://`, `http://`, and local `file://` paths.
+    - Per-URL cache with checksum prevents redundant downloads (1-hour grace).
+    - Per-service merged file: `/var/cache/bunkerweb/dnsbl/<service>/IGNORE_IP.list`.
+    - Loaded at startup and merged with `DNSBL_IGNORE_IP`.
+
+    Example combining static and URL sources:
+
+    ```yaml
+    USE_DNSBL: "yes"
+    DNSBL_LIST: "zen.spamhaus.org"
+    DNSBL_IGNORE_IP: "10.0.0.0/8 192.168.0.0/16 2001:db8::/32"
+    DNSBL_IGNORE_IP_URLS: "https://example.com/allow-cidrs.txt file:///etc/bunkerweb/dnsbl/ignore.txt"
+    ```
+
+=== "Using Local Files"
+
+    Load ignore IPs from local files using `file://` URLs:
+
+    ```yaml
+    USE_DNSBL: "yes"
+    DNSBL_LIST: "zen.spamhaus.org"
+    DNSBL_IGNORE_IP_URLS: "file:///etc/bunkerweb/dnsbl/ignore.txt file:///opt/data/allow-cidrs.txt"
+    ```

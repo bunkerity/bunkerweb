@@ -143,9 +143,12 @@ $(document).ready(function () {
       );
     modalInstance.show();
 
-    // Prepare data for submission (handle 'global' service)
+    // Prepare data for submission
+    // - Normalize type to lowercase to match backend storage
+    // - Convert translated 'global' label to null
     const configsToSubmit = configs.map((cfg) => ({
       ...cfg,
+      type: (cfg.type || "").toLowerCase(),
       service: cfg.service === t("scope.global", "global") ? null : cfg.service,
     }));
     $("#selected-configs-input-delete").val(JSON.stringify(configsToSubmit));
