@@ -35,7 +35,7 @@ services:
       POSTGRES_PASSWORD: "changeme" # Remember to set a stronger password for the database
       POSTGRES_DB: "db"
     volumes:
-      - bw-data:/var/lib/postgresql/data
+      - bw-data:/var/lib/postgresql
     networks:
       - bw-db
 
