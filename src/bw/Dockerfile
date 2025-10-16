@@ -1,4 +1,4 @@
-FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e AS builder
+FROM nginx:1.28-alpine-slim@sha256:ce2bd4775ed6859d35f47d65401ee9f35f1dd00b32ed05f0ce38b68aa1830195 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev
@@ -47,14 +47,13 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
-RUN apk add --no-cache nodejs npm parallel && \
-  cd /tmp && \
-  npm ci --ignore-scripts
-
 # Minify HTML files
 ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+  apk add --no-cache nodejs npm parallel && \
+  cd /tmp && \
+  npm ci --ignore-scripts && \
   find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
   parallel 'npx html-minifier-terser \
   --collapse-whitespace \
@@ -70,7 +69,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e
+FROM nginx:1.28-alpine-slim@sha256:ce2bd4775ed6859d35f47d65401ee9f35f1dd00b32ed05f0ce38b68aa1830195
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -79,11 +78,7 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl tzdata
 
 # Fix CVEs
-RUN apk add --no-cache "sqlite-libs>=3.48.0-r4" # CVE-2025-29088
-RUN apk add --no-cache "libcrypto3>=3.3.5-r0" "libssl3>=3.3.5-r0" "openssl>=3.3.5-r0" # CVE-2025-9230 CVE-2025-9231 CVE-2025-9232
-RUN apk add --no-cache "libexpat>=2.7.2-r0" # CVE-2025-59375
-RUN apk add --no-cache "tiff>=4.7.1-r0" # CVE-2025-8961 CVE-2025-9165
-RUN apk add --no-cache "curl>=8.14.1-r2" "libcurl>=8.14.1-r2" # CVE-2025-10148 CVE-2025-4947 CVE-2025-5025 CVE-2025-5399 CVE-2025-9086
+# There are no CVEs for the following packages
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

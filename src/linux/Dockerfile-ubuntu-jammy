@@ -73,7 +73,12 @@ COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
 ARG NODE_MAJOR=22
-RUN set -eux; \
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+ARG SKIP_MINIFY_CSS=no
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
+    set -eux; \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg; \
     chmod 644 /usr/share/keyrings/nodesource.gpg; \
     arch="$(dpkg --print-architecture)"; \
@@ -83,7 +88,8 @@ RUN set -eux; \
     node --version; npm --version; \
     cd /tmp; npm ci --ignore-scripts; \
     apt-get purge -y --auto-remove gnupg || true; \
-    rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nodesource.list /usr/share/keyrings/nodesource.gpg
+    rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nodesource.list /usr/share/keyrings/nodesource.gpg; \
+    fi
 
 # Minify JS files
 ARG SKIP_MINIFY=no
