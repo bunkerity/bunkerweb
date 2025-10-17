@@ -478,7 +478,7 @@ install_bunkerweb_debian() {
     run_cmd rm -f /tmp/bunkerweb-repo.sh
 
     run_cmd apt update
-    run_cmd apt install -y "bunkerweb=$BUNKERWEB_VERSION"
+    run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
 
     # Hold BunkerWeb package to prevent upgrades
     run_cmd apt-mark hold bunkerweb
@@ -502,10 +502,10 @@ install_bunkerweb_rpm() {
 
     if [ "$DISTRO_ID" = "fedora" ]; then
         run_cmd dnf makecache
-        run_cmd dnf install -y "bunkerweb-$BUNKERWEB_VERSION"
+        run_cmd dnf install -y --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
     else
         dnf check-update || true  # Don't fail if no updates available
-        run_cmd dnf install -y "bunkerweb-$BUNKERWEB_VERSION"
+        run_cmd dnf install -y --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
     fi
 
     # Lock BunkerWeb version
@@ -530,7 +530,7 @@ install_crowdsec() {
             case "$DISTRO_ID" in
                 "debian"|"ubuntu")
                     run_cmd apt update
-                    run_cmd apt install -y $dep
+                    run_cmd apt install -y "$dep"
                     ;;
                 "fedora"|"rhel"|"rocky"|"almalinux")
                     run_cmd dnf install -y $dep
@@ -1010,7 +1010,7 @@ upgrade_only() {
     case "$DISTRO_ID" in
         debian|ubuntu)
             run_cmd apt update
-            run_cmd apt install -y "bunkerweb=$BUNKERWEB_VERSION"
+            run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
             run_cmd apt-mark hold bunkerweb nginx
             ;;
         fedora|rhel|rocky|almalinux)
@@ -1019,7 +1019,7 @@ upgrade_only() {
             else
                 dnf check-update || true
             fi
-            run_cmd dnf install -y --allowerasing "bunkerweb-$BUNKERWEB_VERSION"
+            run_cmd dnf install -y --allowerasing --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
             run_cmd dnf versionlock add bunkerweb nginx
             ;;
     esac
