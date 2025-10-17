@@ -392,7 +392,7 @@ The API is organised by resource-focused routers. Use the sections below as a ca
 ### Custom configuration snippets
 
 - `GET /configs`: list custom config fragments (HTTP/server/stream/ModSecurity/CRS hooks) for a service (`service=global` by default). `with_data=true` embeds UTF-8 content when printable.
-- `POST /configs` and `POST /configs/upload`: create new snippets from JSON payloads or uploaded files. Accepted types include `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, and CRS plugin hooks. Names must match `^[\w_-]{1,64}$`.
+- `POST /configs` and `POST /configs/upload`: create new snippets from JSON payloads or uploaded files. Accepted types include `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, and CRS plugin hooks. Names must match `^[\w_-]{1,255}$`.
 - `GET /configs/{service}/{type}/{name}`: retrieve a snippet with optional content (`with_data=true`).
 - `PATCH /configs/{service}/{type}/{name}` and `PATCH .../upload`: update or move API-managed snippets; template- or file-managed entries stay read-only.
 - `DELETE /configs` and `DELETE /configs/{service}/{type}/{name}`: prune API-managed snippets while preserving template-managed ones, returning a `skipped` list for ignored entries.

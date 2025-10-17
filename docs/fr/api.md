@@ -391,7 +391,7 @@ L'API est organisée par routeurs thématiques. Utilisez les sections ci-dessous
 ### Extraits de configuration personnalisés
 
 -   `GET /configs` : liste les fragments de configuration personnalisés (hooks HTTP/server/stream/ModSecurity/CRS) pour un service (`service=global` par défaut). `with_data=true` intègre le contenu UTF-8 s'il est affichable.
--   `POST /configs` et `POST /configs/upload` : crée de nouveaux extraits depuis des données JSON ou des fichiers téléversés. Types acceptés : `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, et les hooks de plugins CRS. Les noms doivent correspondre à `^[\w_-]{1,64}$`.
+-   `POST /configs` et `POST /configs/upload` : crée de nouveaux extraits depuis des données JSON ou des fichiers téléversés. Types acceptés : `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, et les hooks de plugins CRS. Les noms doivent correspondre à `^[\w_-]{1,255}$`.
 -   `GET /configs/{service}/{type}/{name}` : récupère un extrait avec son contenu optionnel (`with_data=true`).
 -   `PATCH /configs/{service}/{type}/{name}` et `PATCH .../upload` : met à jour ou déplace les extraits gérés par l'API ; les entrées gérées par modèle ou fichier restent en lecture seule.
 -   `DELETE /configs` et `DELETE /configs/{service}/{type}/{name}` : supprime les extraits gérés par l'API tout en préservant ceux gérés par modèle, retournant une liste `skipped` pour les entrées ignorées.

@@ -392,7 +392,7 @@ La API está organizada por enrutadores centrados en recursos. Utiliza las secci
 ### Fragmentos de configuración personalizados
 
 - `GET /configs`: lista fragmentos de configuración personalizados (HTTP/servidor/stream/ModSecurity/ganchos CRS) para un servicio (`service=global` por defecto). `with_data=true` incrusta contenido UTF-8 cuando es imprimible.
-- `POST /configs` y `POST /configs/upload`: crea nuevos fragmentos a partir de cargas útiles JSON o archivos subidos. Los tipos aceptados incluyen `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, y ganchos de plugins CRS. Los nombres deben coincidir con `^[\w_-]{1,64}$`.
+- `POST /configs` y `POST /configs/upload`: crea nuevos fragmentos a partir de cargas útiles JSON o archivos subidos. Los tipos aceptados incluyen `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream`, y ganchos de plugins CRS. Los nombres deben coincidir con `^[\w_-]{1,255}$`.
 - `GET /configs/{service}/{type}/{name}`: recupera un fragmento con contenido opcional (`with_data=true`).
 - `PATCH /configs/{service}/{type}/{name}` y `PATCH .../upload`: actualiza o mueve fragmentos gestionados por la API; las entradas gestionadas por plantilla o archivo permanecen de solo lectura.
 - `DELETE /configs` y `DELETE /configs/{service}/{type}/{name}`: elimina fragmentos gestionados por la API conservando los gestionados por plantilla, devolviendo una lista `skipped` para las entradas ignoradas.
