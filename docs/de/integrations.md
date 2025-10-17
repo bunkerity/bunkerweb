@@ -1252,7 +1252,17 @@ networks:
   <figcaption>Kubernetes-Integration</figcaption>
 </figure>
 
-Um die Konfiguration von BunkerWeb-Instanzen in einer Kubernetes-Umgebung zu automatisieren, dient der Autoconf-Dienst als [Ingress-Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). Er konfiguriert die BunkerWeb-Instanzen basierend auf [Ingress-Ressourcen](https://kubernetes.io/docs/concepts/services-networking/ingress/) und überwacht auch andere Kubernetes-Objekte wie [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) für benutzerdefinierte Konfigurationen.
+Um die Konfiguration von BunkerWeb-Instanzen in einer Kubernetes-Umgebung zu automatisieren,
+dient der Autoconf-Dienst als [Ingress-Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+Er konfiguriert die BunkerWeb-Instanzen basierend auf [Ingress-Ressourcen](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+und überwacht auch andere Kubernetes-Objekte wie [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)
+für benutzerdefinierte Konfigurationen.
+
+!!! info "ConfigMap-Abgleich"
+    - Der Ingress-Controller verwaltet nur ConfigMaps, die die Annotation `bunkerweb.io/CONFIG_TYPE` enthalten.
+    - Ergänzen Sie `bunkerweb.io/CONFIG_SITE`, wenn die Konfiguration auf einen einzelnen Dienst eingeschränkt werden soll
+      (der Servername muss bereits existieren); lassen Sie die Annotation weg, um sie global anzuwenden.
+    - Wird die Annotation entfernt oder die ConfigMap gelöscht, verschwindet die zugehörige benutzerdefinierte Konfiguration in BunkerWeb.
 
 Für eine optimale Einrichtung wird empfohlen, BunkerWeb als **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)** zu definieren, was sicherstellt, dass auf allen Knoten ein Pod erstellt wird, während **Autoconf und Scheduler** als **einzeln repliziertes [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)** definiert werden.
 

@@ -1251,7 +1251,17 @@ networks:
   <figcaption>Integración con Kubernetes</figcaption>
 </figure>
 
-Para automatizar la configuración de las instancias de BunkerWeb en un entorno de Kubernetes, el servicio de autoconfiguración sirve como un [controlador de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). Configura las instancias de BunkerWeb basándose en los [recursos de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) y también supervisa otros objetos de Kubernetes, como [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), para configuraciones personalizadas.
+Para automatizar la configuración de las instancias de BunkerWeb en un entorno de Kubernetes,
+el servicio de autoconfiguración sirve como un [controlador de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+Configura las instancias de BunkerWeb basándose en los [recursos de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+y también supervisa otros objetos de Kubernetes, como [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/),
+para configuraciones personalizadas.
+
+!!! info "Reconciliación de ConfigMap"
+    - El controlador de Ingress solo gestiona las ConfigMap que tienen la anotación `bunkerweb.io/CONFIG_TYPE`.
+    - Añade `bunkerweb.io/CONFIG_SITE` si quieres limitar la configuración a un único servicio (el nombre del servidor debe existir);
+      déjala sin definir para aplicarla globalmente.
+    - Al quitar la anotación o eliminar la ConfigMap, se elimina la configuración personalizada correspondiente en BunkerWeb.
 
 Para una configuración óptima, se recomienda definir BunkerWeb como un **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**, lo que asegura que se cree un pod en todos los nodos, mientras que la **autoconfiguración y el programador** se definen como un **único [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) replicado**.
 

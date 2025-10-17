@@ -851,14 +851,18 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
 
 === "Kubernetes"
 
-    Lors de l'utilisation de l'[intégration Kubernetes](integrations.md#kubernetes), les configurations personnalisées sont gérées à l'aide de [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+    Lors de l'utilisation de l'[intégration Kubernetes](integrations.md#kubernetes),
+    les configurations personnalisées sont gérées à l'aide de [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
 
-    Pour simplifier, vous n'avez même pas besoin d'attacher le ConfigMap à un Pod (par ex. comme variable d'environnement ou volume) : le Pod d'autoconf écoute les événements ConfigMap et mettra à jour les configurations personnalisées lorsque nécessaire.
+    Vous n'avez pas besoin de monter la ConfigMap dans un Pod (par exemple en variable d'environnement ou en volume).
+    Le pod autoconf surveille les événements ConfigMap et applique automatiquement la configuration dès qu'une modification est détectée.
 
-    Lors de la création d'un ConfigMap, vous devrez ajouter des labels spéciaux :
+    Annotez chaque ConfigMap que le contrôleur Ingress doit gérer :
 
-    * **bunkerweb.io/CONFIG_TYPE** : doit être défini sur un type de configuration personnalisé valide (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream ou server-stream)
-    * **bunkerweb.io/CONFIG_SITE** : défini sur un nom de serveur pour appliquer la configuration à ce serveur spécifique (facultatif, sera appliqué globalement s'il n'est pas défini)
+    - `bunkerweb.io/CONFIG_TYPE` : obligatoire. Choisissez un type pris en charge (`http`, `server-http`, `default-server-http`, `modsec`,
+      `modsec-crs`, `crs-plugins-before`, `crs-plugins-after`, `stream` ou `server-stream`).
+    - `bunkerweb.io/CONFIG_SITE` : optionnel. Indiquez le nom de serveur principal (tel qu'exposé via votre `Ingress`)
+      pour limiter la configuration à ce service ; laissez vide pour l'appliquer globalement.
 
     Voici l'exemple :
 
@@ -879,8 +883,16 @@ Certaines intégrations offrent des moyens plus pratiques d'appliquer des config
       }
     ```
 
+    !!! info "Fonctionnement de la synchronisation"
+        - Le contrôleur Ingress surveille en continu les ConfigMap annotées.
+        - Si la variable d'environnement `NAMESPACES` est définie, seules les ConfigMap de ces espaces de noms sont prises en compte.
+        - La création ou la mise à jour d'une ConfigMap gérée déclenche immédiatement un rechargement de la configuration.
+        - La suppression de la ConfigMap – ou de l'annotation `bunkerweb.io/CONFIG_TYPE` – supprime la configuration personnalisée associée.
+        - Si vous définissez `bunkerweb.io/CONFIG_SITE`, le service référencé doit déjà exister ; sinon, la ConfigMap est ignorée jusqu'à son apparition.
+
     !!! tip "Custom Extra Config"
-        Depuis la version `1.6.0`, vous pouvez ajouter/remplacer des paramètres à l'aide de l'annotation `bunkerweb.io/CONFIG_TYPE=settings`. En voici un exemple :
+        Depuis la version `1.6.0`, vous pouvez ajouter/remplacer des paramètres à l'aide de l'annotation `bunkerweb.io/CONFIG_TYPE=settings`.
+        En voici un exemple :
 
         ```yaml
         apiVersion: v1

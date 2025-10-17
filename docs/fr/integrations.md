@@ -1194,7 +1194,16 @@ networks:
   <figcaption>Intégration Kubernetes</figcaption>
 </figure>
 
-Pour automatiser la configuration des instances BunkerWeb dans un environnement Kubernetes, le service autoconf sert de [contrôleur d'entrée](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). Il configure les instances BunkerWeb en fonction des [ressources d'entrée](https://kubernetes.io/docs/concepts/services-networking/ingress/) et surveille également d'autres objets Kubernetes, tels que [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), pour des configurations personnalisées.
+Pour automatiser la configuration des instances BunkerWeb dans un environnement Kubernetes,
+le service autoconf sert de [contrôleur d'entrée](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+Il configure les instances BunkerWeb en fonction des [ressources d'entrée](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+et surveille également d'autres objets Kubernetes, tels que [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), pour des configurations personnalisées.
+
+!!! info "Synchronisation des ConfigMap"
+    - Le contrôleur d'entrée ne gère que les ConfigMap portant l'annotation `bunkerweb.io/CONFIG_TYPE`.
+    - Ajoutez `bunkerweb.io/CONFIG_SITE` pour restreindre la configuration à un service (le nom de serveur doit déjà exister);
+      laissez l'annotation vide pour qu'elle s'applique globalement.
+    - Supprimer l'annotation ou la ConfigMap retire la configuration personnalisée correspondante dans BunkerWeb.
 
 Pour une configuration optimale, il est recommandé de définir BunkerWeb en tant que **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**, ce qui garantit qu'un pod est créé sur tous les nœuds, tandis que l'**autoconf et le scheduler** sont définis comme  un **seul déploiement[ répliqué](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**.
 

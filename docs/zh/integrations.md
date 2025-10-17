@@ -1255,7 +1255,16 @@ networks:
   <figcaption>Kubernetes 集成</figcaption>
 </figure>
 
-为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。它根据 [Ingress 资源](https://kubernetes.io/docs/concepts/services-networking/ingress/)配置 BunkerWeb 实例，并监控其他 Kubernetes 对象，例如 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)，以获取自定义配置。
+为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，
+autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。
+它根据 [Ingress 资源](https://kubernetes.io/docs/concepts/services-networking/ingress/) 配置 BunkerWeb 实例，
+并监控其他 Kubernetes 对象，例如 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)，以获取自定义配置。
+
+!!! info "ConfigMap 同步"
+    - Ingress 控制器仅管理带有 `bunkerweb.io/CONFIG_TYPE` 注解的 ConfigMap。
+    - 如果需要将配置限定到单个服务（服务器名必须已存在），请添加 `bunkerweb.io/CONFIG_SITE`；
+      未设置时表示全局应用。
+    - 删除该注解或删除 ConfigMap 会移除对应的自定义配置。
 
 为了获得最佳设置，建议将 BunkerWeb 定义为一个 **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**，这样可以确保在所有节点上都创建一个 pod，而将 **autoconf 和 scheduler** 定义为**单个副本的 [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**。
 

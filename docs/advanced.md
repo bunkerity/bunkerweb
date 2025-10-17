@@ -851,14 +851,18 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+    When using the [Kubernetes integration](integrations.md#kubernetes),
+    custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
 
-    To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
+    You do not need to mount the ConfigMap inside a Pod (for example as an environment variable or volume).
+    The autoconf Pod watches ConfigMap events and updates the custom configuration whenever a change is detected.
 
-    When creating a ConfigMap, you will need to add special labels :
+    Annotate each ConfigMap you want the ingress controller to manage:
 
-    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream or server-stream)
-    * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
+    - `bunkerweb.io/CONFIG_TYPE`: Required. Choose one of the supported custom configuration types (`http`, `server-http`,
+      `default-server-http`, `modsec`, `modsec-crs`, `crs-plugins-before`, `crs-plugins-after`, `stream`, or `server-stream`).
+    - `bunkerweb.io/CONFIG_SITE`: Optional. Set to the primary server name (as exposed through your `Ingress`) to scope the configuration to that service;
+      omit it to apply the config globally.
 
     Here is the example :
 
@@ -878,6 +882,13 @@ Some integrations provide more convenient ways to apply configurations, such as 
         }
       }
     ```
+
+    !!! info "How reconciliation works"
+        - The ingress controller continuously watches annotated ConfigMaps.
+        - If the `NAMESPACES` environment variable is set, only ConfigMaps from those namespaces are considered.
+        - Creating or updating a managed ConfigMap triggers an immediate configuration reload.
+        - Deleting the ConfigMap—or removing the `bunkerweb.io/CONFIG_TYPE` annotation—removes the associated custom configuration.
+        - If you set `bunkerweb.io/CONFIG_SITE`, the referenced service must already exist; otherwise, the ConfigMap is ignored until the service appears.
 
     !!! tip "Custom Extra Config"
         Since the `1.6.0` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :

@@ -51,6 +51,12 @@ class Config:
                 continue
             config["SERVER_NAME"] += f" {server_name}"
 
+        for db_service in self._db.get_services():
+            server_name = db_service.get("id", "")
+            if not server_name:
+                continue
+            config["SERVER_NAME"] += f" {server_name}"
+
         for service in self.__services:
             server_name = service["SERVER_NAME"].split(" ")[0]
             if not server_name:
@@ -181,12 +187,16 @@ class Config:
         if configs != self.__configs or first:
             self.__configs = configs
             changes.append("custom_configs")
-        if "instances" in changes or "services" in changes or extra_config != self.__extra_config:
+        if extra_config != self.__extra_config or first:
+            changes.append("extra_config")
+        if "instances" in changes or "services" in changes or "extra_config" in changes:
             old_env = self.__config.copy()
             new_env = self.__get_full_env() | extra_config
             if old_env != new_env or first:
                 self.__config = new_env
                 changes.append("config")
+            if "extra_config" in changes:
+                self.__extra_config = extra_config.copy()
 
         custom_configs = []
         if "custom_configs" in changes:
