@@ -398,7 +398,6 @@ class Database:
         value: Optional[str] = None,
         multisite: bool = False,
         session: Optional[scoped_session] = None,
-        accept_prefixed: bool = True,
         extra_services: Optional[List[str]] = None,
     ) -> Tuple[bool, str]:
         """Check if the setting exists in the database, if it's valid and if the value is valid"""
@@ -412,7 +411,7 @@ class Database:
 
                 db_setting = session.query(Settings).filter_by(id=setting).first()
 
-                if accept_prefixed and not db_setting:
+                if not db_setting:
                     for service in extra_services or []:
                         if setting.startswith(f"{service}_"):
                             db_setting = session.query(Settings).filter_by(id=setting.replace(f"{service}_", "")).first()
