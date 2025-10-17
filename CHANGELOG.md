@@ -3,6 +3,7 @@
 ## v1.6.6-rc1 - ????/??/??
 
 - [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
+- [DEPS] Updated lua-cjson version to v2.1.0.15
 
 ## v1.6.5 - 2025/10/03
 
