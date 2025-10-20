@@ -380,19 +380,21 @@ version_features.c:
 GENERATED_WRAPPER_FILES = \
                     psa_crypto_driver_wrappers.h \
                     psa_crypto_driver_wrappers_no_static.c
-$(GENERATED_WRAPPER_FILES): ../scripts/generate_driver_wrappers.py
-$(GENERATED_WRAPPER_FILES): ../scripts/data_files/driver_templates/psa_crypto_driver_wrappers.h.jinja
-$(GENERATED_WRAPPER_FILES): ../scripts/data_files/driver_templates/psa_crypto_driver_wrappers_no_static.c.jinja
+$(GENERATED_WRAPPER_FILES): $(gen_file_dep) ../scripts/generate_driver_wrappers.py
+$(GENERATED_WRAPPER_FILES): $(gen_file_dep) ../scripts/data_files/driver_templates/psa_crypto_driver_wrappers.h.jinja
+$(GENERATED_WRAPPER_FILES): $(gen_file_dep) ../scripts/data_files/driver_templates/psa_crypto_driver_wrappers_no_static.c.jinja
 $(GENERATED_WRAPPER_FILES):
 	echo "  Gen   $(GENERATED_WRAPPER_FILES)"
 	$(PYTHON) ../scripts/generate_driver_wrappers.py
 
 psa_crypto.o:psa_crypto_driver_wrappers.h
 
+RM ?= rm
+
 clean:
 ifndef WINDOWS
-	rm -f *.o *.s libmbed*
-	rm -f $(THIRDPARTY_CRYPTO_OBJECTS) $(THIRDPARTY_CRYPTO_OBJECTS:.o=.s)
+	$(RM) -f *.o *.s libmbed*
+	$(RM) -f $(THIRDPARTY_CRYPTO_OBJECTS) $(THIRDPARTY_CRYPTO_OBJECTS:.o=.s)
 else
 	if exist *.o del /Q /F *.o
 	if exist *.s del /Q /F *.s
@@ -402,7 +404,7 @@ endif
 
 neat: clean
 ifndef WINDOWS
-	rm -f $(GENERATED_FILES)
+	$(RM) -f $(GENERATED_FILES)
 else
 	for %f in ($(subst /,\,$(GENERATED_FILES))) if exist %f del /Q /F %f
 endif

@@ -1,5 +1,48 @@
 Mbed TLS ChangeLog (Sorted per branch, date)
 
+= Mbed TLS 3.6.5 branch released 2025-10-15
+
+API changes
+   * When building the library as a PSA client (MBEDTLS_PSA_CRYPTO_CLIENT
+     enabled and MBEDTLS_PSA_CRYPTO_C disabled), you need to provide the
+     function psa_can_do_cipher() in addition to psa_can_do_hash(). This
+     changed was made in Mbed TLS 3.6.0 but was not announced then.
+
+Features
+   * The new function mbedtls_cipher_finish_padded() is similar to
+     mbedtls_cipher_finish(), but makes it easier to process invalid-padding
+     conditions in constant time.
+
+Security
+   * Fix a timing side channel in CBC-PKCS7 decryption that could
+     allow an attacker who can submit chosen ciphertexts to recover
+     some plaintexts through a timing-based padding oracle attack.
+     Credits to Beat Heeb from Oberon microsystems AG. CVE-2025-59438
+   * Fix a local timing side-channel in modular inversion and GCD that was
+     exploitable in RSA key generation and other RSA operations (see the full
+     advisory for details), allowing a local attacker to fully recover the
+     private key. This can be exploited on some Arm-v9 CPUs by an unprivileged
+     attacker running code on the same core (SSBleed), or when Trustzone-M is
+     used, by the non-secure side abusing timer interrupts (M-Step), and
+     probably in other similar settings as well. Found and reported
+     independently by: SSBleed: Chang Liu (Tsinghua University) and Trevor E.
+     Carlson (National University of Singapore); M-Step: Cristiano Rodrigues
+     (University of Minho), Marton Bognar (DistriNet, KU Leuven), Sandro Pinto
+     (University of Minho), Jo Van Bulck (DistriNet, KU Leuven). CVE-2025-54764
+
+Bugfix
+    * Fix potential CMake parallel build failure when building both the static
+      and shared libraries.
+   * Fix a build error or incorrect TLS session
+     lifetime on platforms where mbedtls_time_t
+     is not time_t. Fixes #10236.
+
+Changes
+   * The function mbedtls_mpi_gcd() now always gives a non-negative output.
+     Previously the output was negative when B = 0 and A < 0, which was not
+     documented, and inconsistent as all other inputs resulted in a non-negative
+     output.
+
 = Mbed TLS 3.6.4 branch released 2025-06-30
 
 Features
