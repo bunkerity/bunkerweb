@@ -102,7 +102,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [wait-builds]
+    needs: [create-arm, wait-builds]
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: bunkerweb-all-in-one
@@ -119,7 +119,7 @@ jobs:
   # Remove ARM VM
   rm-arm:
     if: ${{ always() }}
-    needs: [push-images]
+    needs: [create-arm, push-images]
     uses: ./.github/workflows/rm-arm.yml
     secrets:
       ARM_ID: ${{ needs.create-arm.outputs.id }}
