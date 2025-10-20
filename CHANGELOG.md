@@ -2,6 +2,7 @@
 
 ## v1.6.6-rc1 - ????/??/??
 
+- [UI] Add DB-IP attribution in the web UI reports page footer
 - [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
 - [DEPS] Updated lua-cjson version to v2.1.0.15
 
