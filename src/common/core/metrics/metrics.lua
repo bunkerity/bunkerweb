@@ -259,7 +259,13 @@ function metrics:timer()
 		if not ok then
 			-- Fallback to direct set with LRU eviction if needed
 			if err == "no memory" then
-				ok, err = self.metrics_datastore.dict:set(key .. "_" .. wid, value)
+				local max_retries = tonumber(self.variables["METRICS_MEMORY_MAX_RETRIES"]) or 5
+                for attempt = 1, max_retries do
+                    ok, err = self.metrics_datastore.dict:set(key .. "_" .. wid, value)
+                    if ok or err ~= "no memory" then
+                        break
+                    end
+                end
 				if not ok then
 					ret = false
 					ret_err = err

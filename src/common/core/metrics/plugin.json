@@ -23,6 +23,15 @@
       "regex": "^\\d+[kKmMgG]?$",
       "type": "text"
     },
+    "METRICS_MEMORY_MAX_RETRIES": {
+      "context": "global",
+      "default": "5",
+      "help": "Maximum number of retries for memory operations.",
+      "id": "metrics-memory-max-retries",
+      "label": "Metrics memory max retries",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
     "METRICS_MAX_BLOCKED_REQUESTS": {
       "context": "global",
       "default": "1000",
