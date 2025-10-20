@@ -1,0 +1,129 @@
+name: Fix AIO Push
+
+permissions: read-all
+
+on:
+  push:
+    branches: [fix-aio-push]
+
+jobs:
+  # Build amd64 + 386 AIO container images
+  build-containers:
+    strategy:
+      matrix:
+        image: [all-in-one]
+        arch: [linux/amd64, linux/386]
+        include:
+          - release: dev
+            cache: false
+            push: false
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
+          - arch: linux/amd64
+            cache_suffix: amd64
+          - arch: linux/386
+            cache_suffix: "386"
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: ${{ matrix.release }}
+      ARCH: ${{ matrix.arch }}
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
+      CACHE: ${{ matrix.cache }}
+      PUSH: ${{ matrix.push }}
+      CACHE_SUFFIX: ${{ matrix.cache_suffix }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+
+  # Create ARM environment
+  create-arm:
+    uses: ./.github/workflows/create-arm.yml
+    secrets:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+
+  # Build arm64 + arm/v7 images
+  build-containers-arm:
+    needs: [create-arm]
+    strategy:
+      matrix:
+        image: [all-in-one]
+        arch: [linux/arm64, linux/arm/v7]
+        include:
+          - release: dev
+            cache: false
+            push: false
+          - image: all-in-one
+            dockerfile: src/all-in-one/Dockerfile
+          - arch: linux/arm64
+            cache_suffix: arm64
+          - arch: linux/arm/v7
+            cache_suffix: armv7
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: ${{ matrix.release }}
+      ARCH: ${{ matrix.arch }}
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
+      CACHE: ${{ matrix.cache }}
+      PUSH: ${{ matrix.push }}
+      CACHE_SUFFIX: ${{ matrix.cache_suffix }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+
+  # Wait for all builds and extract VERSION
+  wait-builds:
+    runs-on: ubuntu-latest
+    needs: [build-containers, build-containers-arm]
+    outputs:
+      version: ${{ steps.getversion.outputs.version }}
+      versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Get VERSION
+        id: getversion
+        run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
+      - name: Get VERSION (for RPM based)
+        id: getversionrpm
+        run: echo "versionrpm=$(cat src/VERSION | tr -d '\n' | sed 's/-/_/g')" >> "$GITHUB_OUTPUT"
+
+  # Push Docker images
+  push-images:
+    permissions:
+      contents: read
+      packages: write
+    needs: [wait-builds]
+    uses: ./.github/workflows/push-docker.yml
+    with:
+      IMAGE: bunkerweb-all-in-one
+      TAGS: bunkerity/bunkerweb-all-in-one:dev,bunkerity/bunkerweb-all-in-one:${{ needs.wait-builds.outputs.version }},ghcr.io/bunkerity/bunkerweb-all-in-one:dev,ghcr.io/bunkerity/bunkerweb-all-in-one:${{ needs.wait-builds.outputs.version }}
+      CACHE_FROM: all-in-one-dev
+      DOCKERFILE: src/all-in-one/Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+      ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
+      ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+
+  # Remove ARM VM
+  rm-arm:
+    if: ${{ always() }}
+    needs: [push-images]
+    uses: ./.github/workflows/rm-arm.yml
+    secrets:
+      ARM_ID: ${{ needs.create-arm.outputs.id }}
+      SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+      SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
+      SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
