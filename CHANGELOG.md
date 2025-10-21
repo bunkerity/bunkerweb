@@ -3,6 +3,7 @@
 ## v1.6.6-rc1 - ????/??/??
 
 - [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
+- [UI] Add `RAW` mode when editing/creating templates
 - [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
 - [DEPS] Updated lua-cjson version to v2.1.0.15
 - [DEPS] Update Mbed TLS version to v3.6.5

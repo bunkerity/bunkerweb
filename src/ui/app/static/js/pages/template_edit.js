@@ -83,6 +83,16 @@ const dom = {
   templateImportWarningModal: document.getElementById(
     "template-import-warning-modal",
   ),
+  missingConfigsModal: document.getElementById("missing-configs-modal"),
+  missingConfigsList: document.getElementById("missing-configs-list"),
+  missingConfigsDropzone: document.getElementById("missing-configs-dropzone"),
+  missingConfigsUploadInput: document.getElementById("missing-configs-upload"),
+  missingConfigsBrowseBtn: document.getElementById("missing-configs-browse"),
+  missingConfigsUploadFeedback: document.getElementById(
+    "missing-configs-upload-feedback",
+  ),
+  missingConfigsDoneBtn: document.getElementById("missing-configs-done"),
+  rawConfigDropzone: document.getElementById("raw-config-dropzone"),
 };
 
 const normalizeSettingKey = (value) =>
@@ -314,11 +324,14 @@ const state = {
   settingToRemove: null,
   viewMode: normalizeViewMode(ctx.viewMode),
   pendingTemplateImportFile: null,
+  currentMissingConfigs: [],
+  pendingTemplateData: null,
 };
 
 let deleteStepModalInstance = null;
 let settingRemoveModalInstance = null;
 let templateImportWarningModalInstance = null;
+let missingConfigsModalInstance = null;
 
 const toggleRawConfigEmptyState = (hasItems) => {
   if (!dom.rawConfigsEmptyState) return;
@@ -361,6 +374,270 @@ const readTemplateFile = (file) =>
 const updateViewModeInput = () => {
   if (dom.viewModeInput) {
     dom.viewModeInput.value = state.viewMode;
+  }
+};
+
+const ensureMissingConfigsModal = () => {
+  if (!missingConfigsModalInstance && dom.missingConfigsModal) {
+    missingConfigsModalInstance = new bootstrap.Modal(dom.missingConfigsModal, {
+      backdrop: "static",
+    });
+  }
+  return missingConfigsModalInstance;
+};
+
+const showMissingConfigsModal = (missingConfigs, templateData = null) => {
+  if (!Array.isArray(missingConfigs) || missingConfigs.length === 0) {
+    return;
+  }
+
+  state.currentMissingConfigs = [...missingConfigs];
+  state.pendingTemplateData = templateData;
+  ensureMissingConfigsModal();
+
+  if (dom.missingConfigsList) {
+    dom.missingConfigsList.innerHTML = "";
+    missingConfigs.forEach((config) => {
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex align-items-center gap-2";
+      li.setAttribute("data-config-ref", config);
+      li.innerHTML = `
+        <i class="bx bx-file text-muted"></i>
+        <code class="flex-grow-1">${config}</code>
+        <span class="badge bg-warning text-dark">Missing</span>
+      `;
+      dom.missingConfigsList.appendChild(li);
+    });
+  }
+
+  // Clear upload feedback
+  if (dom.missingConfigsUploadFeedback) {
+    dom.missingConfigsUploadFeedback.textContent = "";
+    dom.missingConfigsUploadFeedback.className = "mt-2 small";
+  }
+
+  if (missingConfigsModalInstance) {
+    missingConfigsModalInstance.show();
+  }
+};
+
+const closeMissingConfigsModal = () => {
+  if (missingConfigsModalInstance) {
+    missingConfigsModalInstance.hide();
+  }
+  state.currentMissingConfigs = [];
+  state.pendingTemplateData = null;
+};
+
+const updateMissingConfigItem = (configRef, status) => {
+  if (!dom.missingConfigsList) return;
+
+  const item = dom.missingConfigsList.querySelector(
+    `[data-config-ref="${configRef}"]`,
+  );
+  if (!item) return;
+
+  const badge = item.querySelector(".badge");
+  if (!badge) return;
+
+  if (status === "uploaded") {
+    badge.className = "badge bg-success";
+    badge.textContent = "✓ Uploaded";
+  } else if (status === "missing") {
+    badge.className = "badge bg-warning text-dark";
+    badge.textContent = "Missing";
+  }
+};
+
+const setMissingConfigsFeedback = (message, type = "info") => {
+  if (!dom.missingConfigsUploadFeedback) return;
+
+  dom.missingConfigsUploadFeedback.textContent = message;
+  dom.missingConfigsUploadFeedback.className = `mt-2 small ${type}`;
+};
+
+const handleMissingConfigsUpload = async (files) => {
+  if (!files || files.length === 0) return;
+
+  setMissingConfigsFeedback("", "");
+
+  try {
+    // Build a map of expected filename -> type from missing configs
+    const expectedTypes = new Map();
+    state.currentMissingConfigs.forEach((missingRef) => {
+      // Parse the reference (e.g., "modsec/wordpress_false_positives.conf" or "wordpress_false_positives.conf")
+      const normalized = normalizeConfigReference(missingRef);
+      const parts = normalized.split("/");
+      let expectedType = "server_http"; // default
+      let expectedName = normalized;
+
+      if (parts.length === 2) {
+        expectedType = normalizeConfigType(parts[0]);
+        expectedName = parts[1];
+      } else {
+        expectedName = parts[0];
+      }
+
+      // Remove .conf extension if present
+      const baseName = expectedName.replace(/\.conf$/, "");
+      expectedTypes.set(baseName, expectedType);
+    });
+
+    // Read all files
+    const readers = Array.from(files).map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          resolve({ file, content: event.target.result });
+        };
+        reader.onerror = () => reject(new Error("read-error"));
+        reader.readAsText(file);
+      });
+    });
+
+    const results = await Promise.all(readers);
+    const baseResult = collectRawFormData({ validate: false });
+    if (!baseResult.payload) {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.raw_configs_import_invalid",
+          "Unable to import configs because the current JSON is invalid.",
+        ),
+        "error",
+      );
+      return;
+    }
+
+    const payload = JSON.parse(JSON.stringify(baseResult.payload));
+    if (!Array.isArray(payload.configs)) payload.configs = [];
+    const added = [];
+
+    results.forEach(({ file, content }, index) => {
+      const baseName = deriveConfigNameFromFile(file.name);
+      if (!baseName) return;
+
+      // Use the expected type if we know it, otherwise default
+      const expectedType = expectedTypes.get(baseName);
+      const normalizedType = expectedType || normalizeConfigType("server_http");
+      const normalizedName = baseName;
+
+      const ref = buildConfigReference(normalizedType, normalizedName);
+      const existingIndex = payload.configs.findIndex(
+        (cfg) => buildConfigReference(cfg.type, cfg.name) === ref,
+      );
+
+      const configPayload = {
+        type: normalizedType,
+        name: normalizedName,
+        data: content,
+      };
+
+      if (existingIndex >= 0) {
+        payload.configs[existingIndex] = {
+          ...payload.configs[existingIndex],
+          ...configPayload,
+        };
+      } else {
+        configPayload.order = payload.configs.length + index;
+        payload.configs.push(configPayload);
+      }
+      added.push({ name: file.name, type: normalizedType });
+    });
+
+    if (added.length === 0) {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.raw_configs_import_none",
+          "No configs were imported.",
+        ),
+        "error",
+      );
+      return;
+    }
+
+    // Update the editor with the new configs
+    loadTemplateIntoEditor(payload);
+    ensureRawEditor();
+    updateRawEditorContent(payload);
+    toggleRawConfigEmptyState(
+      Array.isArray(payload.configs) && payload.configs.length > 0,
+    );
+
+    // Add uploaded configs to the "Custom config imports" list display
+    if (dom.rawConfigsUploadList) {
+      toggleRawConfigEmptyState(true);
+      dom.rawConfigsUploadList.classList.remove("d-none");
+      added.forEach(({ name, type }) => {
+        const item = document.createElement("li");
+        item.className =
+          "list-group-item d-flex justify-content-between align-items-center";
+        item.innerHTML = `<span>${name}</span><span class="badge bg-label-primary text-uppercase">${type}</span>`;
+        dom.rawConfigsUploadList.prepend(item);
+      });
+    }
+
+    // Check which missing configs were resolved
+    const uploadedRefs = [];
+    const currentConfigs = payload.configs;
+
+    state.currentMissingConfigs.forEach((missingRef) => {
+      const found = currentConfigs.some((cfg) => {
+        const configRef = buildConfigReference(cfg.type, cfg.name);
+        return (
+          normalizeConfigReference(configRef) ===
+          normalizeConfigReference(missingRef)
+        );
+      });
+
+      if (found) {
+        uploadedRefs.push(missingRef);
+        updateMissingConfigItem(missingRef, "uploaded");
+      }
+    });
+
+    const stillMissing = state.currentMissingConfigs.filter(
+      (ref) => !uploadedRefs.includes(ref),
+    );
+
+    if (uploadedRefs.length === state.currentMissingConfigs.length) {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.missing_configs_upload_success",
+          "{{count}} config file(s) uploaded successfully",
+          { count: uploadedRefs.length },
+        ),
+        "success",
+      );
+    } else if (uploadedRefs.length > 0) {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.missing_configs_upload_partial",
+          "{{uploaded}} of {{total}} configs uploaded. Still missing: {{missing}}",
+          {
+            uploaded: uploadedRefs.length,
+            total: state.currentMissingConfigs.length,
+            missing: stillMissing.join(", "),
+          },
+        ),
+        "warning",
+      );
+    } else {
+      setMissingConfigsFeedback(
+        translate(
+          "template.editor.missing_configs_upload_failed",
+          "No matching configs found. Please check filenames.",
+        ),
+        "error",
+      );
+    }
+  } catch (error) {
+    setMissingConfigsFeedback(
+      translate(
+        "template.editor.missing_configs_upload_failed",
+        "Failed to upload config files",
+      ),
+      "error",
+    );
   }
 };
 
@@ -2561,6 +2838,31 @@ const createSettingRow = ({
   return wrapper;
 };
 
+const updateConfigDisplayInUploadList = (configName, configType) => {
+  if (!dom.rawConfigsUploadList) return;
+
+  // Find the matching item in the upload list by config name
+  const items = Array.from(dom.rawConfigsUploadList.querySelectorAll("li"));
+  const matchingItem = items.find((item) => {
+    const nameSpan = item.querySelector("span:first-child");
+    if (!nameSpan) return false;
+    const displayedName = nameSpan.textContent.trim();
+    // Match either "name.conf" or just "name"
+    return (
+      displayedName === `${configName}.conf` ||
+      displayedName === configName ||
+      displayedName.replace(/\.conf$/, "") === configName
+    );
+  });
+
+  if (matchingItem) {
+    const badge = matchingItem.querySelector(".badge");
+    if (badge) {
+      badge.textContent = configType.toUpperCase();
+    }
+  }
+};
+
 const createConfigRow = ({
   type = "",
   name = "",
@@ -2748,6 +3050,11 @@ const createConfigRow = ({
       updateSummary();
     }
     applyTypeValidation();
+
+    // Update the display in the Custom config imports list
+    if (nameField?.value) {
+      updateConfigDisplayInUploadList(nameField.value, typeInput.value);
+    }
   };
 
   typeInput.addEventListener("input", handleTypeChange);
@@ -3599,6 +3906,7 @@ const syncRawEditorFromEasy = ({ ensureEditor = false } = {}) => {
 
 const buildPayloadFromRawObject = (raw, { validate = true } = {}) => {
   const errors = [];
+  const missingConfigs = [];
   const registerError = (message) => {
     if (validate) errors.push(message);
   };
@@ -3836,6 +4144,7 @@ const buildPayloadFromRawObject = (raw, { validate = true } = {}) => {
         return;
       }
       if (!configMap.has(ref)) {
+        missingConfigs.push(ref);
         registerError(
           translate(
             "template.editor.raw_validation_step_config_unknown",
@@ -3907,7 +4216,12 @@ const buildPayloadFromRawObject = (raw, { validate = true } = {}) => {
 
   payload.name = payload.name || payload.id;
 
-  return { isValid: errors.length === 0, errors, payload };
+  return {
+    isValid: errors.length === 0,
+    errors,
+    payload,
+    missingConfigs: Array.from(new Set(missingConfigs)),
+  };
 };
 
 const collectRawFormData = ({ validate = true } = {}) => {
@@ -3921,7 +4235,12 @@ const collectRawFormData = ({ validate = true } = {}) => {
       "template.editor.raw_validation_empty",
       "Template JSON cannot be empty.",
     );
-    return { isValid: false, errors: [message], payload: null };
+    return {
+      isValid: false,
+      errors: [message],
+      payload: null,
+      missingConfigs: [],
+    };
   }
   try {
     const parsed = JSON.parse(text);
@@ -3932,7 +4251,12 @@ const collectRawFormData = ({ validate = true } = {}) => {
       "Invalid JSON payload: {{error}}",
       { error: error.message },
     );
-    return { isValid: false, errors: [message], payload: null };
+    return {
+      isValid: false,
+      errors: [message],
+      payload: null,
+      missingConfigs: [],
+    };
   }
 };
 
@@ -3974,7 +4298,14 @@ const importTemplateFile = async (file) => {
 
     const result = buildPayloadFromRawObject(parsed, { validate: true });
     if (!result.isValid) {
-      showFeedback("danger", result.errors);
+      // If there are missing configs, show the helpful modal
+      if (result.missingConfigs && result.missingConfigs.length > 0) {
+        showMissingConfigsModal(result.missingConfigs, parsed);
+        // Still show the regular errors too
+        showFeedback("danger", result.errors);
+      } else {
+        showFeedback("danger", result.errors);
+      }
       return false;
     }
 
@@ -4192,6 +4523,24 @@ const setupViewModeTabs = () => {
       if (targetMode === "easy") {
         const result = collectRawFormData({ validate: false });
         if (!result.payload) {
+          showFeedback("danger", result.errors || []);
+          event.preventDefault();
+          return;
+        }
+        // Check for missing configs even in non-validation mode
+        if (result.missingConfigs && result.missingConfigs.length > 0) {
+          // Get the raw template text for later re-import
+          const source =
+            (rawEditorState.editor && rawEditorState.editor.getValue()) ||
+            dom.rawTemplateValue?.value ||
+            "";
+          let parsedTemplate = null;
+          try {
+            parsedTemplate = JSON.parse(source.trim());
+          } catch (e) {
+            // Ignore parse errors, will be caught elsewhere
+          }
+          showMissingConfigsModal(result.missingConfigs, parsedTemplate);
           showFeedback("danger", result.errors || []);
           event.preventDefault();
           return;
@@ -4521,6 +4870,144 @@ const initEventListeners = () => {
   if (dom.confirmTemplateImportBtn) {
     dom.confirmTemplateImportBtn.addEventListener("click", () => {
       flushPendingTemplateImport();
+    });
+  }
+
+  // Missing configs modal upload functionality
+  if (dom.missingConfigsUploadInput) {
+    dom.missingConfigsUploadInput.addEventListener("change", (event) => {
+      const files = event.target?.files;
+      if (files && files.length) {
+        handleMissingConfigsUpload(files);
+      }
+      // Reset input
+      if (dom.missingConfigsUploadInput) {
+        dom.missingConfigsUploadInput.value = "";
+      }
+    });
+  }
+
+  if (dom.missingConfigsBrowseBtn && dom.missingConfigsUploadInput) {
+    dom.missingConfigsBrowseBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      dom.missingConfigsUploadInput.click();
+    });
+  }
+
+  if (dom.missingConfigsDropzone) {
+    const dropzone = dom.missingConfigsDropzone;
+
+    const handleDragEnter = (event) => {
+      preventDragDefaults(event);
+      dropzone.classList.add("is-dragover");
+    };
+
+    const handleDragLeave = (event) => {
+      preventDragDefaults(event);
+      if (event.target === dropzone) {
+        dropzone.classList.remove("is-dragover");
+      }
+    };
+
+    ["dragenter", "dragover"].forEach((eventName) =>
+      dropzone.addEventListener(eventName, handleDragEnter),
+    );
+    ["dragleave", "dragend"].forEach((eventName) =>
+      dropzone.addEventListener(eventName, handleDragLeave),
+    );
+
+    dropzone.addEventListener("drop", (event) => {
+      preventDragDefaults(event);
+      dropzone.classList.remove("is-dragover");
+      const files = event.dataTransfer?.files;
+      if (files && files.length) {
+        handleMissingConfigsUpload(files);
+      }
+    });
+
+    dropzone.addEventListener("click", (event) => {
+      if (event.target && event.target.closest("button")) {
+        return; // Let button handle its own click
+      }
+      dom.missingConfigsUploadInput?.click();
+    });
+
+    dropzone.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        dom.missingConfigsUploadInput?.click();
+      }
+    });
+  }
+
+  if (dom.missingConfigsDoneBtn) {
+    dom.missingConfigsDoneBtn.addEventListener("click", () => {
+      const pendingTemplate = state.pendingTemplateData;
+
+      // Close both modals
+      closeMissingConfigsModal();
+      if (templateImportWarningModalInstance) {
+        templateImportWarningModalInstance.hide();
+      }
+
+      // If we have pending template data, re-import it now that configs are uploaded
+      if (pendingTemplate) {
+        // Get the currently uploaded configs with data from the editor
+        const easyPayload = buildEasyPayload({ validate: false });
+        const currentConfigs = easyPayload?.payload?.configs || [];
+
+        // Merge the configs into the pending template
+        const mergedTemplate = {
+          ...pendingTemplate,
+          configs: currentConfigs,
+        };
+
+        const result = buildPayloadFromRawObject(mergedTemplate, {
+          validate: true,
+        });
+
+        if (result.isValid) {
+          clearFeedback();
+          loadTemplateIntoEditor(result.payload);
+          ensureRawEditor();
+          updateRawEditorContent(result.payload);
+          toggleRawConfigEmptyState(
+            Array.isArray(result.payload.configs) &&
+              result.payload.configs.length > 0,
+          );
+          showFeedback(
+            "success",
+            translate(
+              "template.editor.missing_configs_resolved",
+              "All missing configs have been uploaded! Template imported successfully.",
+            ),
+          );
+        } else if (result.missingConfigs && result.missingConfigs.length > 0) {
+          // Still have missing configs - show the modal again
+          showMissingConfigsModal(result.missingConfigs, mergedTemplate);
+          showFeedback("warning", result.errors);
+        } else {
+          // Other validation errors
+          showFeedback("danger", result.errors);
+        }
+      } else {
+        // No pending template, just re-validate current state
+        const result = collectActivePayload({ validate: true });
+        if (result.isValid) {
+          clearFeedback();
+          showFeedback(
+            "success",
+            translate(
+              "template.editor.missing_configs_resolved",
+              "All missing configs have been uploaded!",
+            ),
+          );
+        } else if (result.missingConfigs && result.missingConfigs.length > 0) {
+          // Still have missing configs
+          showFeedback("warning", result.errors);
+        }
+      }
     });
   }
 };

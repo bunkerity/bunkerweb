@@ -1358,7 +1358,20 @@
       "raw_editor_drop_hint": "Drop a template JSON file to replace the current content.",
       "raw_editor_override_title": "Replace template JSON?",
       "raw_editor_override_body": "Importing this file will completely replace the current template JSON. Changes made in the editor will be lost. Do you want to continue?",
-      "raw_editor_override_confirm": "Replace template"
+      "raw_editor_override_confirm": "Replace template",
+      "missing_configs_title": "Missing Custom Configs",
+      "missing_configs_body": "The imported template references custom configs that haven't been uploaded yet. Please import these configs to complete the template setup:",
+      "missing_configs_hint_title": "Tip:",
+      "missing_configs_hint_body": "Upload files will be automatically added to your template. Make sure the filenames match the missing configs listed above.",
+      "missing_configs_upload_label": "Upload missing configs",
+      "missing_configs_drop_hint": "Drag and drop config files here",
+      "missing_configs_drop_or": "or",
+      "missing_configs_browse": "Browse Files",
+      "missing_configs_done": "Done",
+      "missing_configs_upload_success": "{{count}} config file(s) uploaded successfully",
+      "missing_configs_upload_partial": "{{uploaded}} of {{total}} configs uploaded. Still missing: {{missing}}",
+      "missing_configs_upload_failed": "Failed to upload config files",
+      "missing_configs_resolved": "All missing configs have been uploaded! Template imported successfully."
     }
   },
   "theme": {

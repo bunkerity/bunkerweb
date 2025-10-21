@@ -478,6 +478,85 @@
             </div>
         </div>
     </div>
+    <div class="modal fade"
+         id="missing-configs-modal"
+         tabindex="-1"
+         aria-labelledby="missing-configs-modal-title"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-sm">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title d-flex align-items-center gap-2"
+                        id="missing-configs-modal-title">
+                        <i class="bx bx-info-circle text-info"></i>
+                        <span data-i18n="template.editor.missing_configs_title">Missing Custom Configs</span>
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            data-i18n-aria-label="button.close"></button>
+                </div>
+                <div class="modal-body">
+                    <p data-i18n="template.editor.missing_configs_body">
+                        The imported template references custom configs that haven't been uploaded yet. Please import these configs to complete the template setup:
+                    </p>
+                    <ul id="missing-configs-list" class="list-group small mb-3"></ul>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" data-i18n="template.editor.missing_configs_upload_label">
+                            Upload missing configs
+                        </label>
+                        <div id="missing-configs-dropzone"
+                             class="missing-configs-dropzone text-center"
+                             role="button"
+                             tabindex="0"
+                             aria-label="Upload missing config files">
+                            <div class="missing-configs-dropzone-content">
+                                <i class="bx bx-cloud-upload bx-lg mb-2 text-primary"></i>
+                                <p class="mb-1 fw-semibold" data-i18n="template.editor.missing_configs_drop_hint">
+                                    Drag and drop config files here
+                                </p>
+                                <p class="text-muted small mb-3" data-i18n="template.editor.missing_configs_drop_or">
+                                    or
+                                </p>
+                                <button type="button"
+                                        id="missing-configs-browse"
+                                        class="btn btn-sm btn-outline-primary"
+                                        data-i18n="template.editor.missing_configs_browse">
+                                    Browse Files
+                                </button>
+                            </div>
+                        </div>
+                        <input type="file"
+                               id="missing-configs-upload"
+                               class="visually-hidden"
+                               multiple
+                               accept=".conf,.txt,.json,.lua,.tmpl,.cfg,text/plain">
+                        <div id="missing-configs-upload-feedback" class="mt-2 small"></div>
+                    </div>
+                    <div class="alert alert-info d-flex align-items-start gap-2 mb-0">
+                        <i class="bx bx-bulb flex-shrink-0"></i>
+                        <div>
+                            <strong data-i18n="template.editor.missing_configs_hint_title">Tip:</strong>
+                            <p class="mb-0 small" data-i18n="template.editor.missing_configs_hint_body">
+                                Upload files will be automatically added to your template. Make sure the filenames match the missing configs listed above.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-end gap-2">
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm"
+                            data-bs-dismiss="modal"
+                            data-i18n="button.close">Close</button>
+                    <button type="button"
+                            class="btn btn-sm btn-bw-green"
+                            id="missing-configs-done"
+                            data-i18n="template.editor.missing_configs_done">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal modal-lg fade setting-selector-modal"
          id="setting-selector-modal"
          tabindex="-1"
