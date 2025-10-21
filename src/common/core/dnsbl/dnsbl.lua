@@ -42,13 +42,13 @@ function dnsbl:initialize(ctx)
 	-- Decode ignore lists during request phases when needed
 	local phase = get_phase()
 	if phase ~= "init" and phase ~= "timer" and self:is_needed() then
-		-- Load pre-downloaded lists from datastore if available
-		local datastore_lists, err = self.datastore:get("plugin_dnsbl_lists_" .. self.ctx.bw.server_name, true)
-		if not datastore_lists then
+		-- Load pre-downloaded lists from internalstore if available
+		local internalstore_lists, err = self.internalstore:get("plugin_dnsbl_lists_" .. self.ctx.bw.server_name, true)
+		if not internalstore_lists then
 			self.logger:log(ERR, err)
 			self.lists = {}
 		else
-			self.lists = datastore_lists
+			self.lists = internalstore_lists
 		end
 		-- Ensure kinds and merge with variable values
 		local kinds = { ["IGNORE_IP"] = {} }
@@ -115,11 +115,11 @@ function dnsbl:init()
 			lists[kind] = deduplicate_list(lists[kind])
 		end
 
-		-- Store service-specific lists into datastore
+		-- Store service-specific lists into internalstore
 		local ok
-		ok, err = self.datastore:set("plugin_dnsbl_lists_" .. key, lists, nil, true)
+		ok, err = self.internalstore:set("plugin_dnsbl_lists_" .. key, lists, nil, true)
 		if not ok then
-			return self:ret(false, "can't store dnsbl " .. key .. " lists into datastore : " .. err)
+			return self:ret(false, "can't store dnsbl " .. key .. " lists into internalstore : " .. err)
 		end
 
 		self.logger:log(INFO, "successfully loaded " .. tostring(i) .. " IGNORE_IP entries for the service: " .. key)

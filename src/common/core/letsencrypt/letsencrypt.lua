@@ -96,7 +96,7 @@ function letsencrypt:init()
 							table.insert(parts, part)
 						end
 						cert_identifier = table.concat(parts, ".", 2)
-						data = self.datastore:get("plugin_letsencrypt_" .. cert_identifier, true)
+						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
 					else
 						for part in server_names:gmatch("%S+") do
 							wildcard_servers[part] = false
@@ -186,9 +186,9 @@ function letsencrypt:init()
 		ret_err = "let's encrypt is not used"
 	end
 
-	local ok, err = self.datastore:set("plugin_letsencrypt_wildcard_servers", wildcard_servers, nil, true)
+	local ok, err = self.internalstore:set("plugin_letsencrypt_wildcard_servers", wildcard_servers, nil, true)
 	if not ok then
-		return self:ret(false, "error while setting wildcard servers into datastore : " .. err)
+		return self:ret(false, "error while setting wildcard servers into internalstore : " .. err)
 	end
 
 	return self:ret(ret_ok, ret_err)
@@ -199,7 +199,7 @@ function letsencrypt:ssl_certificate()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
-	local wildcard_servers, err = self.datastore:get("plugin_letsencrypt_wildcard_servers", true)
+	local wildcard_servers, err = self.internalstore:get("plugin_letsencrypt_wildcard_servers", true)
 	if not wildcard_servers then
 		return self:ret(false, "can't get wildcard servers : " .. err)
 	end
@@ -211,9 +211,9 @@ function letsencrypt:ssl_certificate()
 		server_name = table.concat(parts, ".", 2)
 	end
 	local data
-	data, err = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
+	data, err = self.internalstore:get("plugin_letsencrypt_" .. server_name, true)
 	if not data and err ~= "not found" then
-		return self:ret(false, "error while getting plugin_letsencrypt_" .. server_name .. " from datastore : " .. err)
+		return self:ret(false, "error while getting plugin_letsencrypt_" .. server_name .. " from internalstore : " .. err)
 	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end
@@ -236,9 +236,9 @@ function letsencrypt:load_data(data, server_name)
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_letsencrypt_" .. key
 		local ok
-		ok, err = self.datastore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
 		if not ok then
-			return false, "error while setting data into datastore : " .. err
+			return false, "error while setting data into internalstore : " .. err
 		end
 	end
 	return true

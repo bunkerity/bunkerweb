@@ -219,6 +219,7 @@ helpers.fill_ctx = function(no_ref)
 	if not use_redis then
 		table.insert(errors, "can't get variable from datastore : " .. err)
 	end
+	ctx.bw.internalstore = require "bunkerweb.datastore":new(subsystem == "http" and shared.internalstore or shared.internalstore_stream)
 	ctx.bw.datastore = require "bunkerweb.datastore":new()
 	ctx.bw.clusterstore = require "bunkerweb.clusterstore":new()
 	ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes", ctx)
