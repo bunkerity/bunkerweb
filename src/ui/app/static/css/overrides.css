@@ -190,6 +190,95 @@ button.list-group-item-secondary.active {
   color: #8b9197 !important;
 }
 
+.raw-template-editor {
+  min-height: 420px;
+}
+
+.raw-template-editor-wrapper {
+  position: relative;
+  border-radius: var(--bs-border-radius-lg);
+  overflow: hidden;
+}
+
+.raw-template-drop-target {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed transparent;
+  border-radius: inherit;
+  pointer-events: none;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.raw-template-drop-target.is-dragover {
+  border-color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+  pointer-events: none;
+}
+
+.raw-template-drop-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--bs-primary);
+  background-color: rgba(var(--bs-body-bg-rgb, 255, 255, 255), 0.65);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.raw-template-drop-target.is-dragover .raw-template-drop-label {
+  opacity: 1;
+}
+
+.raw-config-dropzone {
+  border: 2px dashed var(--bs-primary);
+  border-radius: var(--bs-border-radius-lg);
+  background-color: var(--bs-body-bg);
+  padding: 2.5rem 1.5rem;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.raw-config-dropzone:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.raw-config-dropzone.is-dragover {
+  background-color: rgba(var(--bs-primary-rgb), 0.06);
+  border-color: var(--bs-primary);
+  box-shadow: 0 0.5rem 1.5rem rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.raw-config-dropzone.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: rgba(var(--bs-primary-rgb), 0.2);
+}
+
+.raw-config-dropzone.is-disabled .raw-config-browse-btn {
+  pointer-events: none;
+}
+
+.raw-config-dropzone .bx {
+  color: var(--bs-primary);
+}
+
+.raw-configs-upload-list .list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .buy-now .btn-buy-now {
   position: unset;
   box-shadow: 0 1px 20px 1px var(--bs-primary); /* Initial shadow */
