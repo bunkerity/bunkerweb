@@ -860,7 +860,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
     Annotieren Sie jede ConfigMap, die vom Ingress-Controller verwaltet werden soll:
 
     - `bunkerweb.io/CONFIG_TYPE`: Pflichtfeld. Wählen Sie einen unterstützten Typ (`http`, `server-http`, `default-server-http`, `modsec`,
-      `modsec-crs`, `crs-plugins-before`, `crs-plugins-after`, `stream` oder `server-stream`).
+      `modsec-crs`, `crs-plugins-before`, `crs-plugins-after`, `stream`, `server-stream` oder `settings`).
     - `bunkerweb.io/CONFIG_SITE`: Optional. Setzen Sie den primären Servernamen (wie in Ihrem `Ingress` deklariert),
       um die Konfiguration auf diesen Dienst zu beschränken; lassen Sie den Wert weg, um sie global anzuwenden.
 
@@ -892,7 +892,14 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
           andernfalls wird die ConfigMap ignoriert, bis der Dienst verfügbar ist.
 
     !!! tip "Benutzerdefinierte zusätzliche Konfiguration"
-        Seit Version `1.6.0` können Sie Einstellungen über die Annotation `bunkerweb.io/CONFIG_TYPE=settings` hinzufügen/überschreiben. Hier ist ein Beispiel:
+        Seit Version `1.6.0` können Sie Einstellungen hinzufügen oder überschreiben, indem Sie eine ConfigMap mit `bunkerweb.io/CONFIG_TYPE=settings` annotieren.
+        Der Autoconf-Ingress-Controller liest jeden Eintrag unter `data` und behandelt ihn wie eine Umgebungsvariable:
+
+        - Ohne `bunkerweb.io/CONFIG_SITE` werden alle Schlüssel global angewendet.
+        - Wenn `bunkerweb.io/CONFIG_SITE` gesetzt ist, fügt der Controller nicht bereits spezifischen Schlüsseln automatisch das Präfix `<Servername>_` hinzu (alle `/` werden dabei durch `_` ersetzt). Fügen Sie das Präfix selbst hinzu, wenn Sie globale und dienstspezifische Schlüssel in derselben ConfigMap mischen möchten.
+        - Ungültige Namen oder Werte werden übersprungen und als Warnung in den Autoconf-Protokollen ausgegeben.
+
+        Hier ist ein Beispiel:
 
         ```yaml
         apiVersion: v1
@@ -920,7 +927,7 @@ Einige Integrationen bieten bequemere Möglichkeiten zum Anwenden von Konfigurat
 
     Beim Erstellen einer Config müssen Sie spezielle Labels hinzufügen:
 
-    *   **bunkerweb.CONFIG_TYPE**: Muss auf einen gültigen Typ für benutzerdefinierte Konfigurationen gesetzt werden (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream oder server-stream)
+    *   **bunkerweb.CONFIG_TYPE**: Muss auf einen gültigen Typ für benutzerdefinierte Konfigurationen gesetzt werden (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream, server-stream oder settings)
     *   **bunkerweb.CONFIG_SITE**: Auf einen Servernamen setzen, um die Konfiguration auf diesen spezifischen Server anzuwenden (optional, wird global angewendet, wenn nicht gesetzt)
 
     Hier ist das Beispiel:
