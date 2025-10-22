@@ -123,9 +123,12 @@ networks:
 
 ### Redis 集成 {#redis-integration}
 
-BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化封禁和报告](advanced.md#persistence-of-bans-and-reports)。要管理 Redis：
+BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化封禁和报告](advanced.md#persistence-of-bans-and-reports)。请注意：
 
-- 要禁用 Redis，请设置 `USE_REDIS=no` 或将 `REDIS_HOST` 指向一个外部主机。
+- 只有在 `USE_REDIS=yes` **且** `REDIS_HOST` 保持默认值 (`127.0.0.1`/`localhost`) 时，内置 Redis 服务才会启动。
+- 它仅监听容器的回环接口，因此只能被容器内部的进程访问，其他容器或宿主机无法直接访问。
+- 仅当你已经准备好外部 Redis/Valkey 终端时才覆盖 `REDIS_HOST`，否则内置实例将不会启动。
+- 若要完全禁用 Redis，请设置 `USE_REDIS=no`。
 - Redis 日志在 Docker 日志和 `/var/log/bunkerweb/redis.log` 中以 `[REDIS]` 前缀出现。
 
 ### CrowdSec 集成 {#crowdsec-integration}

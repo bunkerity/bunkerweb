@@ -123,10 +123,13 @@ Standardmäßig wird der Einrichtungsassistent automatisch gestartet, wenn Sie d
 
 ### Redis-Integration {#redis-integration}
 
-Das BunkerWeb **All-In-One**-Image enthält standardmäßig Redis für die [Persistenz von Sperren und Berichten](advanced.md#persistence-of-bans-and-reports). Um Redis zu verwalten:
+Das BunkerWeb **All-In-One**-Image enthält standardmäßig Redis für die [Persistenz von Sperren und Berichten](advanced.md#persistence-of-bans-and-reports). Beachten Sie dabei:
 
-- Um Redis zu deaktivieren, setzen Sie `USE_REDIS=no` oder verweisen Sie `REDIS_HOST` auf einen externen Host.
-- Redis-Protokolle werden mit dem Präfix `[REDIS]` in den Docker-Protokollen und in `/var/log/bunkerweb/redis.log` angezeigt.
+- Der eingebettete Redis-Dienst startet nur, wenn `USE_REDIS=yes` **und** `REDIS_HOST` auf dem Standardwert (`127.0.0.1`/`localhost`) bleibt.
+- Er lauscht auf dem Loopback-Interface des Containers und ist daher nur aus dem Container heraus erreichbar – nicht von anderen Containern oder vom Host.
+- Überschreiben Sie `REDIS_HOST` nur, wenn ein externer Redis-/Valkey-Endpunkt verfügbar ist; andernfalls wird die eingebettete Instanz nicht gestartet.
+- Um Redis vollständig zu deaktivieren, setzen Sie `USE_REDIS=no`.
+- Redis-Protokolle erscheinen mit dem Präfix `[REDIS]` in den Docker-Protokollen sowie in `/var/log/bunkerweb/redis.log`.
 
 ### CrowdSec-Integration {#crowdsec-integration}
 

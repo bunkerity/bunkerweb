@@ -123,9 +123,12 @@ Por defecto, el asistente de configuración se inicia automáticamente cuando ej
 
 ### Integración con Redis {#redis-integration}
 
-La imagen **Todo en Uno** de BunkerWeb incluye Redis listo para usar para la [persistencia de baneos e informes](advanced.md#persistence-of-bans-and-reports). Para gestionar Redis:
+La imagen **Todo en Uno** de BunkerWeb incluye Redis listo para usar para la [persistencia de baneos e informes](advanced.md#persistence-of-bans-and-reports). Ten en cuenta:
 
-- Para deshabilitar Redis, establece `USE_REDIS=no` o apunta `REDIS_HOST` a un host externo.
+- El servicio Redis integrado solo se inicia cuando `USE_REDIS=yes` **y** `REDIS_HOST` se mantiene en su valor predeterminado (`127.0.0.1`/`localhost`).
+- Escucha en la interfaz de loopback del contenedor, por lo que solo está disponible para los procesos del contenedor, no para otros contenedores ni para el host.
+- Sobrescribe `REDIS_HOST` únicamente cuando tengas un extremo Redis/Valkey externo disponible; de lo contrario, la instancia integrada no se iniciará.
+- Para deshabilitar Redis por completo, establece `USE_REDIS=no`.
 - Los registros de Redis aparecen con el prefijo `[REDIS]` en los registros de Docker y en `/var/log/bunkerweb/redis.log`.
 
 ### Integración con CrowdSec {#crowdsec-integration}

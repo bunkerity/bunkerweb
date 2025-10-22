@@ -65,10 +65,13 @@ Par défaut, l'assistant d'installation est lancé automatiquement lorsque vous 
 
 ### Intégration Redis {#redis-integration}
 
-L'image **BunkerWeb All-In-One** inclut Redis prêt à l'emploi pour la [persistance des bannissements et des rapports](advanced.md#persistence-of-bans-and-reports). Pour gérer Redis :
+L'image **BunkerWeb All-In-One** inclut Redis prêt à l'emploi pour la [persistance des bannissements et des rapports](advanced.md#persistence-of-bans-and-reports). Gardez en tête :
 
-- Pour désactiver Redis, définissez `USE_REDIS=no` ou pointez `REDIS_HOST` vers un hôte externe.
-- Les journaux Redis apparaissent `[REDIS]` avec le préfixe dans les journaux Docker et `/var/log/bunkerweb/redis.log`.
+- Le service Redis embarqué ne démarre que si `USE_REDIS=yes` **et** si `REDIS_HOST` reste sur sa valeur par défaut (`127.0.0.1`/`localhost`).
+- Il écoute sur l'interface loopback du conteneur ; il est donc accessible depuis les processus du conteneur, mais pas depuis d'autres conteneurs ni l'hôte.
+- Ne redéfinissez `REDIS_HOST` que si vous disposez d'un point de terminaison Redis/Valkey externe, autrement l'instance embarquée ne sera pas lancée.
+- Pour désactiver Redis complètement, définissez `USE_REDIS=no`.
+- Les journaux Redis apparaissent avec le préfixe `[REDIS]` dans les journaux Docker et dans `/var/log/bunkerweb/redis.log`.
 
 ### Intégration CrowdSec {#crowdsec-integration}
 

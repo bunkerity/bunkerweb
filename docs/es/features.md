@@ -4138,6 +4138,9 @@ El complemento Redis integra [Redis](https://redis.io/) o [Valkey](https://valke
 4.  El complemento admite varias opciones de implementación de Redis/Valkey, incluidos servidores independientes, autenticación con contraseña, cifrado SSL/TLS y Redis Sentinel para alta disponibilidad.
 5.  La reconexión automática y los tiempos de espera configurables garantizan la solidez en los entornos de producción.
 
+!!! note "Especificaciones de la imagen All-In-One"
+    La imagen Docker All-In-One incluye un servidor Redis integrado. Se inicia automáticamente solo cuando `USE_REDIS=yes` y `REDIS_HOST` permanece en su valor predeterminado (`127.0.0.1`/`localhost`). Si se sobrescribe `REDIS_HOST`, BunkerWeb espera un endpoint Redis/Valkey externo y no arrancará el servidor integrado; además, este servicio integrado escucha únicamente en el loopback y no es accesible desde otros contenedores.
+
 ### Cómo usar
 
 Siga estos pasos para configurar y usar el complemento de Redis:
