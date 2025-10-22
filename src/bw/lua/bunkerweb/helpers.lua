@@ -15,6 +15,7 @@ local stash_ref = bwctx.stash_ref
 local subsystem = ngx.config.subsystem
 local var = ngx.var
 local req = ngx.req
+local shared = ngx.shared
 local ip_is_global = utils.ip_is_global
 local is_ipv4 = utils.is_ipv4
 local is_ipv6 = utils.is_ipv6
