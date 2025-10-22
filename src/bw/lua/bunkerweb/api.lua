@@ -1,5 +1,6 @@
 local ngx = ngx
 local ngx_req = ngx.req
+local shared = ngx.shared
 local bit = require "bit"
 local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
@@ -14,6 +15,7 @@ local utils = require "bunkerweb.utils"
 local api = class("api")
 
 local datastore = cdatastore:new()
+local internalstore = cdatastore:new(shared.internalstore)
 local logger = clogger:new("API")
 
 local get_country = utils.get_country
@@ -87,7 +89,7 @@ function api:initialize(ctx)
 		end
 	end
 
-	-- Load optional API token (from datastore variables, same pattern as whitelist)
+	-- Load optional API token (from internalstore variables, same pattern as whitelist)
 	local tok = get_variable("API_TOKEN", false)
 	if tok and tok ~= "" then
 		self.api_token = tok
@@ -484,9 +486,9 @@ api.global.GET["^/bans$"] = function(self)
 end
 
 api.global.GET["^/variables$"] = function(self)
-	local variables, err = datastore:get("variables", true)
+	local variables, err = internalstore:get("variables", true)
 	if not variables then
-		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't access variables from datastore : " .. err)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't access variables from internalstore : " .. err)
 	end
 	return self:response(HTTP_OK, "success", variables)
 end
@@ -517,7 +519,7 @@ function api:do_api_call()
 			end
 		end
 	end
-	local list, err = datastore:get("plugins", true)
+	local list, err = internalstore:get("plugins", true)
 	if not list then
 		local _, resp = self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
 		return false, resp["msg"], HTTP_INTERNAL_SERVER_ERROR, encode(resp)

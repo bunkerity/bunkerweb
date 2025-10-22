@@ -129,6 +129,15 @@
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
+  "INTERNALSTORE_MEMORY_SIZE": {
+    "context": "global",
+    "default": "64m",
+    "help": "Size of the internal internalstore.",
+    "id": "internalstore-memory-size",
+    "label": "Internalstore memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
   "DATASTORE_MEMORY_SIZE": {
     "context": "global",
     "default": "64m",

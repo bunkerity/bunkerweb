@@ -36,7 +36,7 @@ function robotstxt:initialize(ctx)
 	}
 	if get_phase() ~= "init" and self:is_needed() then
 		local server_name = self.ctx.bw.server_name
-		local robots_rules, err = self.datastore:get("plugin_robotstxt_rules_" .. server_name, true)
+		local robots_rules, err = self.internalstore:get("plugin_robotstxt_rules_" .. server_name, true)
 		if not robots_rules then
 			self.logger:log(ERR, err)
 		else
@@ -190,11 +190,11 @@ function robotstxt:init()
 			end
 		end
 
-		-- Load rules into datastore
+		-- Load rules into internalstore
 		local ok
-		ok, err = self.datastore:set("plugin_robotstxt_rules_" .. srv, rules, nil, true)
+		ok, err = self.internalstore:set("plugin_robotstxt_rules_" .. srv, rules, nil, true)
 		if not ok then
-			return self:ret(false, "can't store robotstxt rules for " .. srv .. " into datastore : " .. err)
+			return self:ret(false, "can't store robotstxt rules for " .. srv .. " into internalstore : " .. err)
 		end
 
 		self.logger:log(INFO, "successfully loaded " .. tostring(#rules) .. " rules for the service: " .. srv)
