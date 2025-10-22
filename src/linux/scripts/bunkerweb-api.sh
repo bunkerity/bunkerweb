@@ -3,6 +3,14 @@
 # Enforce a restrictive default umask for all operations
 umask 027
 
+# Source the utils helper script
+# shellcheck disable=SC1091
+source /usr/share/bunkerweb/helpers/utils.sh
+
+# Get the highest Python version available and export it
+PYTHON_BIN=$(get_python_bin)
+export PYTHON_BIN
+
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/api
 
 API_PID_FILE=/var/run/bunkerweb/api.pid
@@ -197,7 +205,13 @@ start() {
         done < /etc/bunkerweb/api.env
     fi
 
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/api --logger-class utils.logger.APILogger --config /usr/share/bunkerweb/api/utils/gunicorn.conf.py"
+    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m gunicorn \
+        --chdir /usr/share/bunkerweb/api \
+        --logger-class utils.logger.APILogger \
+        --config /usr/share/bunkerweb/api/utils/gunicorn.conf.py; then
+        echo "Failed to start API service (nginx user execution error)"
+        exit 1
+    fi
 }
 
 stop() {

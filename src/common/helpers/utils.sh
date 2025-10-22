@@ -1,5 +1,39 @@
 #!/bin/bash
 
+# Helper to find the highest available Python binary
+function get_python_bin() {
+	local python_bin="python3"
+
+	for version in 3.13 3.12 3.11 3.10 3.9; do
+		if command -v "python${version}" >/dev/null 2>&1; then
+			python_bin="python${version}"
+			break
+		fi
+	done
+
+	echo "$python_bin"
+}
+
+# Execute a command as the nginx user using the safest available helper
+function run_as_nginx() {
+	if command -v setpriv >/dev/null 2>&1; then
+		setpriv --reuid=nginx --regid=nginx --init-groups --inh-caps=-all -- "$@"
+		return $?
+	fi
+
+	if command -v runuser >/dev/null 2>&1; then
+		runuser -u nginx -- "$@"
+		return $?
+	fi
+
+	if command -v sudo >/dev/null 2>&1; then
+		sudo -n -E -u nginx -g nginx -- "$@"
+		return $?
+	fi
+
+	return 1
+}
+
 # check rx or rwx permissions on a folder
 function check_permissions() {
 	if [ "$1" = "rx" ] ; then

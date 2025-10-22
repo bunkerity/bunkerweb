@@ -7,6 +7,10 @@ umask 027
 # shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
 
+# Get the highest Python version available and export it
+PYTHON_BIN=$(get_python_bin)
+export PYTHON_BIN
+
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/db
 
@@ -111,6 +115,7 @@ function start() {
     installed_version=$(cat /usr/share/bunkerweb/VERSION)
     # Create temporary Python script
     cat > /tmp/version_check.py << EOL
+#!/usr/bin/env python3
 from os import getenv
 import sqlalchemy as sa
 from traceback import format_exc
@@ -145,7 +150,13 @@ EOL
     chown root:nginx /tmp/version_check.py
     chmod 640 /tmp/version_check.py
 
-    current_version=$(sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_check.py")
+    current_version=$(run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /tmp/version_check.py)
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ]; then
+        log "SYSTEMCTL" "❌" "Failed to retrieve database version (nginx user execution error)"
+        rm -f /tmp/version_check.py
+        exit 1
+    fi
     rm -f /tmp/version_check.py
 
     if [ -f /var/tmp/bunkerweb/database_error ]; then
@@ -176,10 +187,10 @@ EOL
                 fi
 
                 # Stamp the database with the determined revision
-                if python3 -m alembic stamp "$REVISION"; then
+                if $PYTHON_BIN -m alembic stamp "$REVISION"; then
                     # Run database migration
                     log "SYSTEMCTL" "ℹ️" "Running database migration..."
-                    if ! python3 -m alembic upgrade head; then
+                    if ! $PYTHON_BIN -m alembic upgrade head; then
                         log "SYSTEMCTL" "❌" "Database migration failed"
                         exit 1
                     fi
@@ -193,6 +204,7 @@ EOL
         else
             # Create temporary Python script to update version
             cat > /tmp/version_update.py << EOL
+#!/usr/bin/env python3
 import sqlalchemy as sa
 from os import getenv
 
@@ -209,7 +221,11 @@ EOL
             chown root:nginx /tmp/version_update.py
             chmod 640 /tmp/version_update.py
 
-            sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 /tmp/version_update.py"
+            if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /tmp/version_update.py; then
+                log "SYSTEMCTL" "❌" "Failed to update database version (nginx user execution error)"
+                rm -f /tmp/version_update.py
+                exit 1
+            fi
             rm -f /tmp/version_update.py
         fi
     fi
@@ -218,10 +234,9 @@ EOL
 
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH /usr/share/bunkerweb/scheduler/main.py --variables /etc/bunkerweb/variables.env"
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
-        log "SYSTEMCTL" "❌" "Scheduler failed"
+    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" /usr/share/bunkerweb/scheduler/main.py \
+        --variables /etc/bunkerweb/variables.env; then
+        log "SYSTEMCTL" "❌" "Scheduler execution failed (nginx user execution error)"
         exit 1
     fi
 

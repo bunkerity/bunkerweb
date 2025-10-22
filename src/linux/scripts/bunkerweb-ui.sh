@@ -3,6 +3,14 @@
 # Enforce a restrictive default umask for all operations
 umask 027
 
+# Source the utils helper script
+# shellcheck disable=SC1091
+source /usr/share/bunkerweb/helpers/utils.sh
+
+# Get the highest Python version available and export it
+PYTHON_BIN=$(get_python_bin)
+export PYTHON_BIN
+
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
 
@@ -107,8 +115,21 @@ start() {
         rm -f /var/tmp/bunkerweb/ui.error
     fi
 
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.TmpUiLogger --config /usr/share/bunkerweb/ui/utils/tmp-gunicorn.conf.py -D"
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.UiLogger --config /usr/share/bunkerweb/ui/utils/gunicorn.conf.py"
+    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m gunicorn \
+        --chdir /usr/share/bunkerweb/ui \
+        --logger-class utils.logger.TmpUiLogger \
+        --config /usr/share/bunkerweb/ui/utils/tmp-gunicorn.conf.py -D; then
+        echo "Failed to start temporary UI service (nginx user execution error)"
+        exit 1
+    fi
+
+    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m gunicorn \
+        --chdir /usr/share/bunkerweb/ui \
+        --logger-class utils.logger.UiLogger \
+        --config /usr/share/bunkerweb/ui/utils/gunicorn.conf.py; then
+        echo "Failed to start UI service (nginx user execution error)"
+        exit 1
+    fi
 }
 
 # Function to stop the UI
