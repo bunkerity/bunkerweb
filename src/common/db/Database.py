@@ -2640,6 +2640,7 @@ class Database:
         _type: Literal["external", "ui", "pro"] = "external",
         delete_missing: bool = True,
         only_clear_metadata: bool = False,
+        per_plugin_commit: bool = True,
     ) -> str:
         """Update external plugins from the database"""
         to_put = []
@@ -2684,9 +2685,15 @@ class Database:
                     else:
                         session.query(Plugins).filter(Plugins.id.in_(missing_ids)).update({Plugins.data: None, Plugins.checksum: None})
 
+                    try:
+                        session.commit()
+                    except BaseException as e:
+                        return str(e)
+
             db_settings = [setting.id for setting in session.query(Settings).with_entities(Settings.id)]
 
             for plugin in plugins:
+                local_to_put = []
                 settings = plugin.pop("settings", {})
                 jobs = plugin.pop("jobs", [])
                 page = plugin.pop("page", False)
@@ -2788,11 +2795,11 @@ class Database:
                         if setting not in db_ids or not db_setting:
                             changes = True
                             for sel_order, select in enumerate(value.pop("select", []), start=1):
-                                to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))
+                                local_to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))
 
                             for msel_order, multiselect in enumerate(value.pop("multiselect", []), start=1):
                                 if isinstance(multiselect, dict):
-                                    to_put.append(
+                                    local_to_put.append(
                                         Multiselects(
                                             setting_id=setting,
                                             option_id=multiselect.get("id", ""),
@@ -2802,7 +2809,7 @@ class Database:
                                         )
                                     )
 
-                            to_put.append(Settings(**value | {"order": order}))
+                            local_to_put.append(Settings(**value | {"order": order}))
                         else:
                             updates = {}
 
@@ -2850,7 +2857,7 @@ class Database:
                                 session.query(Selects).filter(Selects.setting_id == setting).delete()
                                 # Add new selects with the new values
                                 for sel_order, select in enumerate(value.get("select", []), start=1):
-                                    to_put.append(Selects(setting_id=setting, value=self._empty_if_none(select), order=sel_order))
+                                    local_to_put.append(Selects(setting_id=setting, value=self._empty_if_none(select), order=sel_order))
 
                             # Handle multiselects
                             db_multiselect_values = [
@@ -2873,7 +2880,7 @@ class Database:
                                 # Add new multiselects with the new values
                                 for msel_order, multiselect in enumerate(value.get("multiselect", []), start=1):
                                     if isinstance(multiselect, dict):
-                                        to_put.append(
+                                        local_to_put.append(
                                             Multiselects(
                                                 setting_id=setting,
                                                 option_id=multiselect.get("id", ""),
@@ -2909,7 +2916,7 @@ class Database:
                             job["file_name"] = job.pop("file")
                             job["reload"] = job.get("reload", False)
                             job["run_async"] = job.pop("async", False)
-                            to_put.append(Jobs(plugin_id=plugin["id"], **job))
+                            local_to_put.append(Jobs(plugin_id=plugin["id"], **job))
                         else:
                             updates = {}
 
@@ -2959,7 +2966,7 @@ class Database:
 
                         if not db_plugin_page:
                             changes = True
-                            to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
+                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=content, checksum=checksum))
                             remove = False
                         elif checksum != db_plugin_page.checksum:
                             changes = True
@@ -2995,7 +3002,7 @@ class Database:
                                 continue
 
                             changes = True
-                            to_put.append(Bw_cli_commands(name=command, plugin_id=plugin["id"], file_name=file_name))
+                            local_to_put.append(Bw_cli_commands(name=command, plugin_id=plugin["id"], file_name=file_name))
                         else:
                             updates = {}
 
@@ -3012,82 +3019,410 @@ class Database:
                     db_names = [template.id for template in session.query(Templates).with_entities(Templates.id).filter_by(plugin_id=plugin["id"])]
                     templates_path = plugin_path.joinpath("templates")
 
-                    if not templates_path.is_dir():
-                        if db_names:
-                            self.logger.warning(f'Plugin "{plugin["id"]}"\'s templates directory does not exist, removing all templates')
-                            for template in db_names:
-                                session.query(Templates).filter_by(id=template, plugin_id=plugin["id"]).delete()
+                    if templates_path.is_dir():
+                        saved_templates = set()
+                        for template_file in templates_path.iterdir():
+                            if template_file.is_dir():
+                                continue
+
+                            try:
+                                template_data = loads(template_file.read_text())
+                            except JSONDecodeError:
+                                self.logger.error(
+                                    f"{plugin.get('type', 'core').title()} Plugin \"{plugin['id']}\"'s Template file \"{template_file}\" is not a valid JSON file"
+                                )
+                                continue
+
+                            template_id = template_file.stem
+
+                            db_template = session.query(Templates).with_entities(Templates.id).filter_by(id=template_id, plugin_id=plugin["id"]).first()
+
+                            if not db_template:
+                                changes = True
+                                current_time = datetime.now().astimezone()
+                                local_to_put.append(
+                                    Templates(
+                                        id=template_id,
+                                        plugin_id=plugin["id"],
+                                        name=template_data.get("name", template_id),
+                                        method=plugin["method"],
+                                        creation_date=current_time,
+                                        last_update=current_time,
+                                    )
+                                )
+
+                            saved_templates.add(template_id)
+
+                            db_ids = [step.id for step in session.query(Template_steps).with_entities(Template_steps.id).filter_by(template_id=template_id)]
+                            missing_ids = [x for x in range(1, len(template_data.get("steps", [])) + 1) if x not in db_ids]
+
+                            if missing_ids:
+                                changes = True
+                                session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).delete()
+                                session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).delete()
+                                session.query(Template_steps).filter(Template_steps.id.in_(missing_ids)).delete()
+
+                            steps_settings = {}
+                            steps_configs = {}
+                            for step_id, step in enumerate(template_data.get("steps", []), start=1):
+                                db_step = (
+                                    session.query(Template_steps)
+                                    .with_entities(Template_steps.id, Template_steps.title, Template_steps.subtitle)
+                                    .filter_by(id=step_id, template_id=template_id)
+                                    .first()
+                                )
+                                if not db_step:
+                                    changes = True
+                                    local_to_put.append(Template_steps(id=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
+                                else:
+                                    updates = {}
+
+                                    if step["title"] != db_step.title:
+                                        updates[Template_steps.title] = step["title"]
+
+                                    if step["subtitle"] != db_step.subtitle:
+                                        updates[Template_steps.subtitle] = step["subtitle"]
+
+                                    if updates:
+                                        changes = True
+                                        session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
+
+                                for setting in step.get("settings", []):
+                                    if step_id not in steps_settings:
+                                        steps_settings[step_id] = []
+                                    steps_settings[step_id].append(setting)
+
+                                for config in step.get("configs", []):
+                                    if step_id not in steps_configs:
+                                        steps_configs[step_id] = []
+                                    steps_configs[step_id].append(config)
+
+                            db_template_settings = [
+                                f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
+                                for template_setting in session.query(Template_settings)
+                                .with_entities(Template_settings.id, Template_settings.setting_id, Template_settings.suffix)
+                                .filter_by(template_id=template_id)
+                                .order_by(Template_settings.order)
+                            ]
+                            missing_ids = [setting for setting in template_data.get("settings", {}) if setting not in db_template_settings]
+
+                            if missing_ids:
+                                changes = True
+                                session.query(Template_settings).filter(Template_settings.id.in_(missing_ids)).delete()
+
+                            order = 0
+                            for setting, default in template_data.get("settings", {}).items():
+                                setting_id, suffix = setting.rsplit("_", 1) if self.SUFFIX_RX.search(setting) else (setting, None)
+                                if suffix is not None:
+                                    suffix = int(suffix)
+                                else:
+                                    suffix = 0
+
+                                if setting_id in self.RESTRICTED_TEMPLATE_SETTINGS:
+                                    self.logger.error(
+                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" is restricted, skipping it'
+                                    )
+                                    session.query(Template_settings).filter_by(template_id=template_id, setting_id=setting_id, suffix=suffix).delete()
+                                    continue
+                                elif setting_id not in plugin_settings and setting_id not in db_settings:
+                                    self.logger.error(
+                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" does not exist, skipping it'
+                                    )
+                                    session.query(Template_settings).filter_by(template_id=template_id, setting_id=setting_id, suffix=suffix).delete()
+                                    continue
+
+                                success, err = self.is_valid_setting(setting_id, value=default, multisite=True, session=session)
+                                if not success:
+                                    self.logger.error(
+                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" is not a valid template setting ({err}), skipping it'
+                                    )
+                                    session.query(Template_settings).filter_by(template_id=template_id, setting_id=setting_id, suffix=suffix).delete()
+                                    continue
+
+                                step_id = None
+                                for step, settings in steps_settings.items():
+                                    if setting in settings:
+                                        step_id = step
+                                        break
+
+                                if not step_id:
+                                    self.logger.error(
+                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" doesn\'t belong to a step, skipping it'
+                                    )
+                                    continue
+
+                                template_setting = (
+                                    session.query(Template_settings)
+                                    .with_entities(
+                                        Template_settings.id,
+                                        Template_settings.step_id,
+                                        Template_settings.default,
+                                        Template_settings.order,
+                                    )
+                                    .filter_by(template_id=template_id, setting_id=setting_id, step_id=step_id, suffix=suffix)
+                                    .first()
+                                )
+
+                                if not template_setting:
+                                    changes = True
+                                    local_to_put.append(
+                                        Template_settings(
+                                            template_id=template_id,
+                                            setting_id=setting_id,
+                                            step_id=step_id,
+                                            suffix=suffix,
+                                            default=default,
+                                            order=order,
+                                        )
+                                    )
+                                elif step_id != template_setting.step_id or default != template_setting.default or order != template_setting.order:
+                                    changes = True
+                                    session.query(Template_settings).filter_by(id=template_setting.id).update(
+                                        {
+                                            Template_settings.step_id: step_id,
+                                            Template_settings.default: default,
+                                            Template_settings.order: order,
+                                        }
+                                    )
+
+                                order += 1
+
+                            db_template_configs = [
+                                f"{config.type.replace('_', '-')}/{config.name}.conf"
+                                for config in session.query(Template_custom_configs)
+                                .with_entities(Template_custom_configs.type, Template_custom_configs.name)
+                                .filter_by(template_id=template_id)
+                                .order_by(Template_custom_configs.order)
+                            ]
+                            missing_ids = [config for config in template_data.get("configs", {}) if config not in db_template_configs]
+
+                            if missing_ids:
+                                changes = True
+                                session.query(Template_custom_configs).filter(Template_custom_configs.name.in_(missing_ids)).delete()
+
+                            order = 0
+                            for config in template_data.get("configs", []):
+                                try:
+                                    config_type, config_name = config.split("/", 1)
+                                except ValueError:
+                                    self.logger.error(
+                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" is invalid, skipping it'
+                                    )
+                                    continue
+
+                                if config_type.replace("-", "_") not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
+                                    self.logger.error(
+                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" is not a valid type, skipping it'
+                                    )
+                                    continue
+
+                                if not templates_path.joinpath(template_id, "configs", config_type, config_name).is_file():
+                                    self.logger.error(
+                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" does not exist, skipping it'
+                                    )
+                                    continue
+
+                                content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
+                                checksum = bytes_hash(content, algorithm="sha256")
+                                config_name = config_name.replace(".conf", "").replace("-", "_").lower()
+
+                                step_id = None
+                                for step, configs in steps_configs.items():
+                                    if config in configs:
+                                        step_id = step
+                                        break
+
+                                if not step_id:
+                                    self.logger.error(
+                                        f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" doesn\'t belong to a step, skipping it'
+                                    )
+                                    continue
+
+                                template_config = (
+                                    session.query(Template_custom_configs)
+                                    .with_entities(
+                                        Template_custom_configs.id,
+                                        Template_custom_configs.step_id,
+                                        Template_custom_configs.checksum,
+                                        Template_custom_configs.order,
+                                    )
+                                    .filter_by(template_id=template_id, step_id=step_id, type=config_type, name=config_name)
+                                    .first()
+                                )
+
+                                if not template_config:
+                                    changes = True
+                                    local_to_put.append(
+                                        Template_custom_configs(
+                                            template_id=template_id,
+                                            step_id=step_id,
+                                            type=config_type,
+                                            name=config_name,
+                                            data=content,
+                                            checksum=checksum,
+                                            order=order,
+                                        )
+                                    )
+                                elif step_id != template_config.step_id or checksum != template_config.checksum or order != template_config.order:
+                                    changes = True
+                                    session.query(Template_custom_configs).filter_by(id=template_config.id).update(
+                                        {
+                                            Template_custom_configs.step_id: step_id,
+                                            Template_custom_configs.data: content,
+                                            Template_custom_configs.checksum: checksum,
+                                            Template_custom_configs.order: order,
+                                        }
+                                    )
+
+                                order += 1
+
+                        for template in db_names:
+                            if template not in saved_templates:
+                                changes = True
                                 session.query(Template_steps).filter_by(template_id=template).delete()
                                 session.query(Template_settings).filter_by(template_id=template).delete()
                                 session.query(Template_custom_configs).filter_by(template_id=template).delete()
+                                session.query(Templates).filter_by(id=template, plugin_id=plugin["id"]).delete()
+
+                    elif db_names:
+                        self.logger.warning(f'Plugin "{plugin["id"]}"\'s templates directory does not exist, removing all templates')
+                        for template in db_names:
+                            session.query(Templates).filter_by(id=template, plugin_id=plugin["id"]).delete()
+                            session.query(Template_steps).filter_by(template_id=template).delete()
+                            session.query(Template_settings).filter_by(template_id=template).delete()
+                            session.query(Template_custom_configs).filter_by(template_id=template).delete()
+
+                    try:
+                        if per_plugin_commit:
+                            if local_to_put:
+                                session.add_all(local_to_put)
+                            # Commit also captures any .update() / .delete() executed above.
+                            session.commit()
+                        else:
+                            to_put.extend(local_to_put)
+                    except BaseException as e:
+                        session.rollback()
+                        return str(e)
+
+                    continue
+
+                changes = True
+                local_to_put.append(
+                    Plugins(
+                        id=plugin["id"],
+                        name=plugin["name"],
+                        description=plugin["description"],
+                        version=plugin["version"],
+                        stream=plugin["stream"],
+                        type=_type,
+                        method=plugin["method"],
+                        data=plugin.get("data"),
+                        checksum=plugin.get("checksum"),
+                    )
+                )
+
+                order = 0
+                plugin_settings = set()
+                for setting, value in settings.items():
+                    db_setting = session.query(Settings).filter_by(id=setting).first()
+
+                    if db_setting is not None:
+                        self.logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
                         continue
 
-                    saved_templates = set()
-                    for template_file in templates_path.iterdir():
+                    value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
+
+                    for sel_order, select in enumerate(value.pop("select", []), start=1):
+                        local_to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))
+
+                    for msel_order, multiselect in enumerate(value.pop("multiselect", []), start=1):
+                        if isinstance(multiselect, dict):
+                            local_to_put.append(
+                                Multiselects(
+                                    setting_id=value["id"],
+                                    option_id=multiselect.get("id", ""),
+                                    label=multiselect.get("label", ""),
+                                    value=self._empty_if_none(multiselect.get("value", "")),
+                                    order=msel_order,
+                                )
+                            )
+
+                    local_to_put.append(Settings(**value | {"order": order}))
+                    order += 1
+                    plugin_settings.add(setting)
+
+                for job in jobs:
+                    db_job = session.query(Jobs).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
+
+                    if db_job is not None:
+                        self.logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
+                        continue
+
+                    job["file_name"] = job.pop("file")
+                    job["reload"] = job.get("reload", False)
+                    job["run_async"] = job.pop("async", False)
+                    local_to_put.append(Jobs(plugin_id=plugin["id"], **job))
+
+                plugin_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"])
+                plugin_path = (
+                    plugin_path
+                    if plugin_path.is_dir()
+                    else (
+                        Path(sep, "etc", "bunkerweb", "plugins", plugin["id"])
+                        if _type == "external"
+                        else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"])
+                    )
+                )
+
+                if page:
+                    path_ui = plugin_path.joinpath("ui")
+                    if path_ui.is_dir():
+                        with BytesIO() as plugin_page_content:
+                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
+                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
+                            plugin_page_content.seek(0)
+                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
+
+                            local_to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
+
+                for command, file_name in commands.items():
+                    if not plugin_path.joinpath("bwcli", file_name).is_file():
+                        self.logger.warning(f'Command "{command}"\'s file "{file_name}" does not exist in the plugin directory, skipping it')
+                        continue
+
+                    local_to_put.append(Bw_cli_commands(name=command, plugin_id=plugin["id"], file_name=file_name))
+
+                templates_path = plugin_path.joinpath("templates")
+
+                if templates_path.is_dir():
+                    for template_file in plugin_path.joinpath("templates").iterdir():
                         if template_file.is_dir():
                             continue
 
                         try:
                             template_data = loads(template_file.read_text())
                         except JSONDecodeError:
-                            self.logger.error(
-                                f"{plugin.get('type', 'core').title()} Plugin \"{plugin['id']}\"'s Template file \"{template_file}\" is not a valid JSON file"
-                            )
+                            self.logger.error(f'Template file "{template_file}" is not a valid JSON file')
                             continue
 
                         template_id = template_file.stem
+                        current_time = datetime.now().astimezone()
 
-                        db_template = session.query(Templates).with_entities(Templates.id).filter_by(id=template_id, plugin_id=plugin["id"]).first()
-
-                        if not db_template:
-                            changes = True
-                            current_time = datetime.now().astimezone()
-                            to_put.append(
-                                Templates(
-                                    id=template_id,
-                                    plugin_id=plugin["id"],
-                                    name=template_data.get("name", template_id),
-                                    method=plugin["method"],
-                                    creation_date=current_time,
-                                    last_update=current_time,
-                                )
+                        local_to_put.append(
+                            Templates(
+                                id=template_id,
+                                plugin_id=plugin["id"],
+                                name=template_data.get("name", template_id),
+                                method=plugin["method"],
+                                creation_date=current_time,
+                                last_update=current_time,
                             )
-
-                        saved_templates.add(template_id)
-
-                        db_ids = [step.id for step in session.query(Template_steps).with_entities(Template_steps.id).filter_by(template_id=template_id)]
-                        missing_ids = [x for x in range(1, len(template_data.get("steps", [])) + 1) if x not in db_ids]
-
-                        if missing_ids:
-                            changes = True
-                            session.query(Template_settings).filter(Template_settings.step_id.in_(missing_ids)).delete()
-                            session.query(Template_custom_configs).filter(Template_custom_configs.step_id.in_(missing_ids)).delete()
-                            session.query(Template_steps).filter(Template_steps.id.in_(missing_ids)).delete()
+                        )
 
                         steps_settings = {}
                         steps_configs = {}
                         for step_id, step in enumerate(template_data.get("steps", []), start=1):
-                            db_step = (
-                                session.query(Template_steps)
-                                .with_entities(Template_steps.id, Template_steps.title, Template_steps.subtitle)
-                                .filter_by(id=step_id, template_id=template_id)
-                                .first()
-                            )
-                            if not db_step:
-                                changes = True
-                                to_put.append(Template_steps(id=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
-                            else:
-                                updates = {}
-
-                                if step["title"] != db_step.title:
-                                    updates[Template_steps.title] = step["title"]
-
-                                if step["subtitle"] != db_step.subtitle:
-                                    updates[Template_steps.subtitle] = step["subtitle"]
-
-                                if updates:
-                                    changes = True
-                                    session.query(Template_steps).filter(Template_steps.id == db_step.id).update(updates)
+                            local_to_put.append(Template_steps(id=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
 
                             for setting in step.get("settings", []):
                                 if step_id not in steps_settings:
@@ -3098,19 +3433,6 @@ class Database:
                                 if step_id not in steps_configs:
                                     steps_configs[step_id] = []
                                 steps_configs[step_id].append(config)
-
-                        db_template_settings = [
-                            f"{template_setting.setting_id}_{template_setting.suffix}" if template_setting.suffix else template_setting.setting_id
-                            for template_setting in session.query(Template_settings)
-                            .with_entities(Template_settings.id, Template_settings.setting_id, Template_settings.suffix)
-                            .filter_by(template_id=template_id)
-                            .order_by(Template_settings.order)
-                        ]
-                        missing_ids = [setting for setting in template_data.get("settings", {}) if setting not in db_template_settings]
-
-                        if missing_ids:
-                            changes = True
-                            session.query(Template_settings).filter(Template_settings.id.in_(missing_ids)).delete()
 
                         order = 0
                         for setting, default in template_data.get("settings", {}).items():
@@ -3124,13 +3446,11 @@ class Database:
                                 self.logger.error(
                                     f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" is restricted, skipping it'
                                 )
-                                session.query(Template_settings).filter_by(template_id=template_id, setting_id=setting_id, suffix=suffix).delete()
                                 continue
                             elif setting_id not in plugin_settings and setting_id not in db_settings:
                                 self.logger.error(
                                     f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" does not exist, skipping it'
                                 )
-                                session.query(Template_settings).filter_by(template_id=template_id, setting_id=setting_id, suffix=suffix).delete()
                                 continue
 
                             success, err = self.is_valid_setting(setting_id, value=default, multisite=True, session=session)
@@ -3138,7 +3458,6 @@ class Database:
                                 self.logger.error(
                                     f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" is not a valid template setting ({err}), skipping it'
                                 )
-                                session.query(Template_settings).filter_by(template_id=template_id, setting_id=setting_id, suffix=suffix).delete()
                                 continue
 
                             step_id = None
@@ -3153,54 +3472,17 @@ class Database:
                                 )
                                 continue
 
-                            template_setting = (
-                                session.query(Template_settings)
-                                .with_entities(
-                                    Template_settings.id,
-                                    Template_settings.step_id,
-                                    Template_settings.default,
-                                    Template_settings.order,
+                            local_to_put.append(
+                                Template_settings(
+                                    template_id=template_id,
+                                    setting_id=setting_id,
+                                    step_id=step_id,
+                                    default=default,
+                                    suffix=suffix,
+                                    order=order,
                                 )
-                                .filter_by(template_id=template_id, setting_id=setting_id, step_id=step_id, suffix=suffix)
-                                .first()
                             )
-
-                            if not template_setting:
-                                changes = True
-                                to_put.append(
-                                    Template_settings(
-                                        template_id=template_id,
-                                        setting_id=setting_id,
-                                        step_id=step_id,
-                                        suffix=suffix,
-                                        default=default,
-                                        order=order,
-                                    )
-                                )
-                            elif step_id != template_setting.step_id or default != template_setting.default or order != template_setting.order:
-                                changes = True
-                                session.query(Template_settings).filter_by(id=template_setting.id).update(
-                                    {
-                                        Template_settings.step_id: step_id,
-                                        Template_settings.default: default,
-                                        Template_settings.order: order,
-                                    }
-                                )
-
                             order += 1
-
-                        db_template_configs = [
-                            f"{config.type.replace('_', '-')}/{config.name}.conf"
-                            for config in session.query(Template_custom_configs)
-                            .with_entities(Template_custom_configs.type, Template_custom_configs.name)
-                            .filter_by(template_id=template_id)
-                            .order_by(Template_custom_configs.order)
-                        ]
-                        missing_ids = [config for config in template_data.get("configs", {}) if config not in db_template_configs]
-
-                        if missing_ids:
-                            changes = True
-                            session.query(Template_custom_configs).filter(Template_custom_configs.name.in_(missing_ids)).delete()
 
                         order = 0
                         for config in template_data.get("configs", []):
@@ -3240,284 +3522,30 @@ class Database:
                                 )
                                 continue
 
-                            template_config = (
-                                session.query(Template_custom_configs)
-                                .with_entities(
-                                    Template_custom_configs.id,
-                                    Template_custom_configs.step_id,
-                                    Template_custom_configs.checksum,
-                                    Template_custom_configs.order,
+                            local_to_put.append(
+                                Template_custom_configs(
+                                    template_id=template_id,
+                                    step_id=step_id,
+                                    type=config_type,
+                                    name=config_name,
+                                    data=content,
+                                    checksum=checksum,
+                                    order=order,
                                 )
-                                .filter_by(template_id=template_id, step_id=step_id, type=config_type, name=config_name)
-                                .first()
                             )
-
-                            if not template_config:
-                                changes = True
-                                to_put.append(
-                                    Template_custom_configs(
-                                        template_id=template_id,
-                                        step_id=step_id,
-                                        type=config_type,
-                                        name=config_name,
-                                        data=content,
-                                        checksum=checksum,
-                                        order=order,
-                                    )
-                                )
-                            elif step_id != template_config.step_id or checksum != template_config.checksum or order != template_config.order:
-                                changes = True
-                                session.query(Template_custom_configs).filter_by(id=template_config.id).update(
-                                    {
-                                        Template_custom_configs.step_id: step_id,
-                                        Template_custom_configs.data: content,
-                                        Template_custom_configs.checksum: checksum,
-                                        Template_custom_configs.order: order,
-                                    }
-                                )
-
                             order += 1
 
-                    for template in db_names:
-                        if template not in saved_templates:
-                            changes = True
-                            session.query(Template_steps).filter_by(template_id=template).delete()
-                            session.query(Template_settings).filter_by(template_id=template).delete()
-                            session.query(Template_custom_configs).filter_by(template_id=template).delete()
-                            session.query(Templates).filter_by(id=template, plugin_id=plugin["id"]).delete()
-
-                    continue
-
-                changes = True
-                to_put.append(
-                    Plugins(
-                        id=plugin["id"],
-                        name=plugin["name"],
-                        description=plugin["description"],
-                        version=plugin["version"],
-                        stream=plugin["stream"],
-                        type=_type,
-                        method=plugin["method"],
-                        data=plugin.get("data"),
-                        checksum=plugin.get("checksum"),
-                    )
-                )
-
-                order = 0
-                plugin_settings = set()
-                for setting, value in settings.items():
-                    db_setting = session.query(Settings).filter_by(id=setting).first()
-
-                    if db_setting is not None:
-                        self.logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
-                        continue
-
-                    value.update({"plugin_id": plugin["id"], "name": value["id"], "id": setting})
-
-                    for sel_order, select in enumerate(value.pop("select", []), start=1):
-                        to_put.append(Selects(setting_id=value["id"], value=self._empty_if_none(select), order=sel_order))
-
-                    for msel_order, multiselect in enumerate(value.pop("multiselect", []), start=1):
-                        if isinstance(multiselect, dict):
-                            to_put.append(
-                                Multiselects(
-                                    setting_id=value["id"],
-                                    option_id=multiselect.get("id", ""),
-                                    label=multiselect.get("label", ""),
-                                    value=self._empty_if_none(multiselect.get("value", "")),
-                                    order=msel_order,
-                                )
-                            )
-
-                    to_put.append(Settings(**value | {"order": order}))
-                    order += 1
-                    plugin_settings.add(setting)
-
-                for job in jobs:
-                    db_job = session.query(Jobs).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
-
-                    if db_job is not None:
-                        self.logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
-                        continue
-
-                    job["file_name"] = job.pop("file")
-                    job["reload"] = job.get("reload", False)
-                    job["run_async"] = job.pop("async", False)
-                    to_put.append(Jobs(plugin_id=plugin["id"], **job))
-
-                plugin_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin["id"])
-                plugin_path = (
-                    plugin_path
-                    if plugin_path.is_dir()
-                    else (
-                        Path(sep, "etc", "bunkerweb", "plugins", plugin["id"])
-                        if _type == "external"
-                        else Path(sep, "etc", "bunkerweb", "pro", "plugins", plugin["id"])
-                    )
-                )
-
-                if page:
-                    path_ui = plugin_path.joinpath("ui")
-                    if path_ui.is_dir():
-                        with BytesIO() as plugin_page_content:
-                            with tar_open(fileobj=plugin_page_content, mode="w:gz", compresslevel=9) as tar:
-                                tar.add(path_ui, arcname=path_ui.name, recursive=True)
-                            plugin_page_content.seek(0)
-                            checksum = bytes_hash(plugin_page_content, algorithm="sha256")
-
-                            to_put.append(Plugin_pages(plugin_id=plugin["id"], data=plugin_page_content.getvalue(), checksum=checksum))
-
-                for command, file_name in commands.items():
-                    if not plugin_path.joinpath("bwcli", file_name).is_file():
-                        self.logger.warning(f'Command "{command}"\'s file "{file_name}" does not exist in the plugin directory, skipping it')
-                        continue
-
-                    to_put.append(Bw_cli_commands(name=command, plugin_id=plugin["id"], file_name=file_name))
-
-                templates_path = plugin_path.joinpath("templates")
-
-                if not templates_path.is_dir():
-                    continue
-
-                for template_file in plugin_path.joinpath("templates").iterdir():
-                    if template_file.is_dir():
-                        continue
-
-                    try:
-                        template_data = loads(template_file.read_text())
-                    except JSONDecodeError:
-                        self.logger.error(f'Template file "{template_file}" is not a valid JSON file')
-                        continue
-
-                    template_id = template_file.stem
-                    current_time = datetime.now().astimezone()
-
-                    to_put.append(
-                        Templates(
-                            id=template_id,
-                            plugin_id=plugin["id"],
-                            name=template_data.get("name", template_id),
-                            method=plugin["method"],
-                            creation_date=current_time,
-                            last_update=current_time,
-                        )
-                    )
-
-                    steps_settings = {}
-                    steps_configs = {}
-                    for step_id, step in enumerate(template_data.get("steps", []), start=1):
-                        to_put.append(Template_steps(id=step_id, template_id=template_id, title=step["title"], subtitle=step["subtitle"]))
-
-                        for setting in step.get("settings", []):
-                            if step_id not in steps_settings:
-                                steps_settings[step_id] = []
-                            steps_settings[step_id].append(setting)
-
-                        for config in step.get("configs", []):
-                            if step_id not in steps_configs:
-                                steps_configs[step_id] = []
-                            steps_configs[step_id].append(config)
-
-                    order = 0
-                    for setting, default in template_data.get("settings", {}).items():
-                        setting_id, suffix = setting.rsplit("_", 1) if self.SUFFIX_RX.search(setting) else (setting, None)
-                        if suffix is not None:
-                            suffix = int(suffix)
-                        else:
-                            suffix = 0
-
-                        if setting_id in self.RESTRICTED_TEMPLATE_SETTINGS:
-                            self.logger.error(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" is restricted, skipping it'
-                            )
-                            continue
-                        elif setting_id not in plugin_settings and setting_id not in db_settings:
-                            self.logger.error(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" does not exist, skipping it'
-                            )
-                            continue
-
-                        success, err = self.is_valid_setting(setting_id, value=default, multisite=True, session=session)
-                        if not success:
-                            self.logger.error(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" is not a valid template setting ({err}), skipping it'
-                            )
-                            continue
-
-                        step_id = None
-                        for step, settings in steps_settings.items():
-                            if setting in settings:
-                                step_id = step
-                                break
-
-                        if not step_id:
-                            self.logger.error(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Setting "{setting}" doesn\'t belong to a step, skipping it'
-                            )
-                            continue
-
-                        to_put.append(
-                            Template_settings(
-                                template_id=template_id,
-                                setting_id=setting_id,
-                                step_id=step_id,
-                                default=default,
-                                suffix=suffix,
-                                order=order,
-                            )
-                        )
-                        order += 1
-
-                    order = 0
-                    for config in template_data.get("configs", []):
-                        try:
-                            config_type, config_name = config.split("/", 1)
-                        except ValueError:
-                            self.logger.error(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" is invalid, skipping it'
-                            )
-                            continue
-
-                        if config_type.replace("-", "_") not in self.MULTISITE_CUSTOM_CONFIG_TYPES:
-                            self.logger.error(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" is not a valid type, skipping it'
-                            )
-                            continue
-
-                        if not templates_path.joinpath(template_id, "configs", config_type, config_name).is_file():
-                            self.logger.error(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" does not exist, skipping it'
-                            )
-                            continue
-
-                        content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
-                        checksum = bytes_hash(content, algorithm="sha256")
-                        config_name = config_name.replace(".conf", "").replace("-", "_").lower()
-
-                        step_id = None
-                        for step, configs in steps_configs.items():
-                            if config in configs:
-                                step_id = step
-                                break
-
-                        if not step_id:
-                            self.logger.error(
-                                f'{plugin.get("type", "core").title()} Plugin "{plugin["id"]}"\'s Template "{template_id}"\'s Custom config "{config}" doesn\'t belong to a step, skipping it'
-                            )
-                            continue
-
-                        to_put.append(
-                            Template_custom_configs(
-                                template_id=template_id,
-                                step_id=step_id,
-                                type=config_type,
-                                name=config_name,
-                                data=content,
-                                checksum=checksum,
-                                order=order,
-                            )
-                        )
-                        order += 1
+                try:
+                    if per_plugin_commit:
+                        if local_to_put:
+                            session.add_all(local_to_put)
+                        # Commit also captures any .update() / .delete() executed above.
+                        session.commit()
+                    else:
+                        to_put.extend(local_to_put)
+                except BaseException as e:
+                    session.rollback()
+                    return str(e)
 
             if changes:
                 with suppress(ProgrammingError, OperationalError):
@@ -3533,9 +3561,11 @@ class Database:
                             metadata.reload_ui_plugins = True
 
             try:
-                session.add_all(to_put)
+                if not per_plugin_commit and to_put:
+                    session.add_all(to_put)
                 session.commit()
             except BaseException as e:
+                session.rollback()
                 return str(e)
 
         return ""

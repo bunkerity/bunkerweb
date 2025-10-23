@@ -2,6 +2,7 @@
 
 ## v1.6.6-rc1 - ????/??/??
 
+- [FEATURE] Enhance plugin update process with per-plugin commit option and improved error handling
 - [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
 - [UI] Add `RAW` mode when editing/creating templates
 - [ALL-IN-ONE] Add Redis data directory creation in entrypoint script to fix redis not being able to start
