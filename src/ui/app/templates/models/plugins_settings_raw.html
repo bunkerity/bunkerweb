@@ -2,41 +2,17 @@
        id="csrf_token"
        name="csrf_token"
        value="{{ csrf_token() }}">
-<div class="position-absolute top-0 end-0 m-3" style="z-index: 1000">
-    <div class="d-flex flex-wrap justify-content-center align-items-center">
-        <div class="card mt-1 me-2"
-             {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS" data-i18n="tooltip.copy_https_only"{% endif %}>
-            <button type="button"
-                    class="btn btn-sm btn-outline-secondary copy-settings{% if not request.is_secure %} disabled{% endif %}">
-                <i class="bx bx-copy-alt bx-xs"></i>
-                <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.copy">Copy</span></span>
-            </button>
-        </div>
-        <div class="card mt-1 me-1"
-             {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
-             {% endif %}>
-            <!-- Save button container -->
-            <button type="button"
-                    class="btn btn-sm btn-outline-bw-green save-settings{% if is_readonly %} disabled{% endif %}">
-                <i class="bx bx-save bx-xs"></i>
-                <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
-            </button>
-        </div>
-    </div>
-</div>
-<div class="card bg-primary p-1 d-flex flex-column"
-     {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Disabled by {% if is_readonly %}readonly{% else %}{{ service_method }}{% endif %}
-     "
-     {% endif %}>
-    {% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] if current_endpoint != "global-config" else [] %}
-    {% set entire_config = config_lines|list %}
-    {% set default_settings = ["IS_DRAFT=no"] if current_endpoint != "global-config" else [] %}
+{% set config_lines = ["IS_DRAFT=" + config.get('IS_DRAFT', {}).get('value', 'no')] if current_endpoint != "global-config" else [] %}
+{% set entire_config = config_lines|list %}
+{% set default_settings = ["IS_DRAFT=no"] if current_endpoint != "global-config" else [] %}
+{% set disabled_settings = namespace(items=[]) %}
     {% for plugin_data in plugins.values() %}
         {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
         {% if filtered_settings %}
             {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings %}
                 {% set setting_config = config.get(setting, {}) %}
                 {% set setting_default = setting_data.get("default", "") %}
+                {% set setting_method = setting_config.get("method", "default") %}
                 {% set setting_value = setting_config.get("value", setting_default) %}
                 {% if current_endpoint == "new" or clone %}
                     {% set setting_method = "default" %}
@@ -45,51 +21,93 @@
                         {% set setting_value = "" %}
                     {% endif %}
                 {% endif %}
+                {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                {% if disabled %}
+                    {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
+                {% endif %}
                 {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
                 {% if setting_value != setting_default %}
                     {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                     {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
                 {% endif %}
-            {% endfor %}
-        {% endif %}
-        {% set plugin_multiples = get_multiples(filtered_settings, config) %}
-        {% if plugin_multiples %}
-            {% for multiple, multiples in plugin_multiples.items() %}
+        {% endfor %}
+    {% endif %}
+    {% set plugin_multiples = get_multiples(filtered_settings, config) %}
+    {% if plugin_multiples %}
+        {% for multiple, multiples in plugin_multiples.items() %}
                 {% for setting_suffix, settings in multiples.items() %}
                     {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
                         {% set setting_config = config.get(setting, {}) %}
                         {% set setting_default = setting_data.get("default", "") %}
+                        {% set setting_method = setting_config.get("method", "default") %}
                         {% set setting_value = setting_config.get("value", setting_default) %}
+                        {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                        {% if disabled %}
+                            {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
+                        {% endif %}
                         {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
                         {% if setting_value != setting_default %}
                             {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
                             {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
                         {% endif %}
-                    {% endfor %}
                 {% endfor %}
             {% endfor %}
-        {% endif %}
-    {% endfor %}
-    <!-- Join the configuration lines with newlines -->
-    {% set raw_config = config_lines | join('\r\n') %}
-    {% set raw_entire_config = entire_config | join('\r\n') %}
-    <input type="hidden"
-           id="raw-entire-config"
-           name="raw-entire-config"
-           value="{{ raw_entire_config }}">
-    <input type="hidden"
-           id="raw-config-defaults"
-           name="raw-config"
-           value="{{ default_settings | join('\r\n') }}">
-    <div class="form-floating">
-        <textarea class="form-control w-100 h-100 text-white courier-prime"
-                  rows="35"
-                  id="raw-config"
-                  aria-label="Raw configuration"
-                  data-i18n="aria.label.raw_configuration"
-                  {% if is_readonly %}readonly{% endif %}>{{ raw_config|safe }}</textarea>
-        <label for="raw-config"
-               class="text-white"
-               data-i18n="form.label.raw_configuration">Raw configuration</label>
+        {% endfor %}
+    {% endif %}
+{% endfor %}
+<!-- Join the configuration lines with newlines -->
+{% set raw_config = config_lines | join('\r\n') %}
+{% set raw_entire_config = entire_config | join('\r\n') %}
+<input type="hidden"
+       id="raw-entire-config"
+       name="raw-entire-config"
+       value="{{ raw_entire_config }}">
+<input type="hidden"
+       id="raw-config-defaults"
+       name="raw-config"
+       value="{{ default_settings | join('\r\n') }}">
+<input type="hidden"
+       id="raw-config-disabled"
+       value="{{ disabled_settings.items | join('\r\n') }}">
+<div class="card raw-config-container border-0 shadow-sm mt-3 mt-lg-4">
+    <div class="card-header raw-config-toolbar d-flex flex-wrap justify-content-between align-items-start gap-3 border-0">
+        <div class="raw-config-toolbar__title">
+            <h5 class="mb-0 fw-semibold text-white"
+                data-i18n="form.label.raw_configuration">Raw configuration</h5>
+            <div class="raw-config-toolbar__legend text-white-50 small d-flex align-items-center gap-2 mt-2">
+                <span class="raw-config-legend-chip"></span>
+                <span data-i18n="legend.locked_settings_hint">Locked settings are highlighted</span>
+            </div>
+        </div>
+        <div class="raw-config-toolbar__actions d-flex flex-wrap align-items-center gap-2">
+            <div class="raw-config-toolbar__action"
+                 {% if not request.is_secure %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The copy feature is only available over HTTPS" data-i18n="tooltip.copy_https_only"{% endif %}>
+                <button type="button"
+                        class="btn btn-sm btn-outline-light raw-config-action-btn copy-settings{% if not request.is_secure %} disabled{% endif %}">
+                    <i class="bx bx-copy-alt bx-xs"></i>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.copy">Copy</span></span>
+                </button>
+            </div>
+            <div class="raw-config-toolbar__action"
+                 {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
+                 {% endif %}>
+                <button type="button"
+                        class="btn btn-sm btn-bw-green raw-config-save-btn save-settings{% if is_readonly %} disabled{% endif %}">
+                    <i class="bx bx-save bx-xs"></i>
+                    <span class="d-none d-md-inline">&nbsp;<span data-i18n="button.save">Save</span></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body raw-config-editor-shell">
+        <div id="raw-config-editor"
+             class="ace-editor border rounded position-relative w-100 raw-config-editor courier-prime"
+             data-method="ui"
+             data-readonly="{{ 'true' if is_readonly else 'false' }}"
+             data-source="#raw-config"
+             role="textbox"
+             aria-label="Raw configuration"
+             data-i18n-aria-label="aria.label.raw_configuration"></div>
+        <textarea id="raw-config" class="d-none">{{- raw_config|safe -}}</textarea>
     </div>
 </div>

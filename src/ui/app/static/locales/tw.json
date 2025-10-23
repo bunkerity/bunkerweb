@@ -717,6 +717,10 @@
       "success": "成功"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "已鎖定 ({{method}})",
+    "locked_settings_hint": "鎖定的設定會反白顯示"
+  },
   "logs": {
     "eventsource_failed": "EventSource 連線失敗",
     "parse_error": "解析串流資料失敗：{{error}}",

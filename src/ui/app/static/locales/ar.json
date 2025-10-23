@@ -724,6 +724,10 @@
       "success": "نجاح"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "مقفل ({{method}})",
+    "locked_settings_hint": "الإعدادات المقفلة مميزة"
+  },
   "logs": {
     "eventsource_failed": "فشل اتصال EventSource",
     "parse_error": "فشل في تحليل بيانات التدفق: {{error}}",

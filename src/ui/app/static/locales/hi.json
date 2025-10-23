@@ -712,6 +712,10 @@
       "success": "सफलता"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "लॉक किया गया ({{method}})",
+    "locked_settings_hint": "लॉक की गई सेटिंग्स हाइलाइट की गई हैं"
+  },
   "link": {
     "back_to_login": "लॉगिन पर वापस जाएं",
     "forgot_password": "पासवर्ड भूल गए?",

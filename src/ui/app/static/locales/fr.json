@@ -721,6 +721,10 @@
       "success": "Succès"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "Verrouillé ({{method}})",
+    "locked_settings_hint": "Les paramètres verrouillés sont mis en surbrillance"
+  },
   "logs": {
     "eventsource_failed": "Échec de la connexion EventSource",
     "parse_error": "Échec de l'analyse des données de flux : {{error}}",

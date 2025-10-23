@@ -8,6 +8,14 @@ $(document).ready(function () {
   const editorElement = $("#config-value");
   const initialContent = editorElement.text().trim();
   const editor = ace.edit(editorElement[0]);
+  const triggerConfigSave = () => {
+    const $saveBtn = $(".save-config").not(".disabled");
+    if ($saveBtn.length) {
+      $saveBtn.first().trigger("click");
+      return true;
+    }
+    return false;
+  };
 
   var theme = $("#theme").val();
 
@@ -56,6 +64,15 @@ $(document).ready(function () {
   });
 
   editor.renderer.setScrollMargin(10, 10);
+
+  editor.commands.addCommand({
+    name: "saveCustomConfigShortcut",
+    bindKey: { win: "Ctrl-S", mac: "Command-S" },
+    exec: () => {
+      triggerConfigSave();
+    },
+    readOnly: false,
+  });
 
   editorElement.removeClass("visually-hidden");
   $("#config-waiting").addClass("visually-hidden");
@@ -231,36 +248,31 @@ $(document).ready(function () {
       $("<input>", {
         type: "hidden",
         name: "service",
-        value: $("<div>").text(selectedService).html(),
-      }),
+      }).val(selectedService),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "type",
-        value: $("<div>").text(selectedType).html(),
-      }),
+      }).val(selectedType),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "name",
-        value: $("<div>").text(configName).html(),
-      }),
+      }).val(configName),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "value",
-        value: $("<div>").text(value).html(),
-      }),
+      }).val(value),
     );
     form.append(
       $("<input>", {
         type: "hidden",
         name: "csrf_token",
-        value: $("<div>").text($("#csrf_token").val()).html(), // Sanitize the value
-      }),
+      }).val($("#csrf_token").val()),
     );
 
     $(window).off("beforeunload");
@@ -268,6 +280,17 @@ $(document).ready(function () {
   });
 
   changeTypesVisibility();
+
+  $(document).on("keydown.configEditSave", function (e) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    if (e.key.toLowerCase() !== "s") return;
+    if (!$(".save-config").length) return;
+
+    if ($(e.target).hasClass("ace_text-input")) return;
+
+    e.preventDefault();
+    triggerConfigSave();
+  });
 
   $(window).on("beforeunload", function (e) {
     if (isReadOnly) return;

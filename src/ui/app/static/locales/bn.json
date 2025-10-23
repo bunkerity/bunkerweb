@@ -721,6 +721,10 @@
       "success": "সফল"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "লক করা হয়েছে ({{method}})",
+    "locked_settings_hint": "লক করা সেটিংস হাইলাইট করা হয়েছে"
+  },
   "logs": {
     "eventsource_failed": "EventSource সংযোগ ব্যর্থ হয়েছে",
     "parse_error": "স্ট্রিম ডেটা পার্স করতে ব্যর্থ: {{error}}",

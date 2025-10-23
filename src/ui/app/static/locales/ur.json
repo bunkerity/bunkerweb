@@ -712,6 +712,10 @@
       "success": "کامیاب"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "مقفل ({{method}})",
+    "locked_settings_hint": "لاک شدہ ترتیبات نمایاں ہیں"
+  },
   "logs": {
     "eventsource_failed": "EventSource کنکشن ناکام ہوگیا",
     "parse_error": "سٹریم ڈیٹا پارس کرنے میں ناکام: {{error}}",

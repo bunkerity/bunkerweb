@@ -721,6 +721,10 @@
       "success": "Success"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "Locked ({{method}})",
+    "locked_settings_hint": "Locked settings are highlighted"
+  },
   "logs": {
     "eventsource_failed": "EventSource connection failed",
     "parse_error": "Failed to parse stream data: {{error}}",

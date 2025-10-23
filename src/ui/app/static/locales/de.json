@@ -721,6 +721,10 @@
       "success": "Erfolg"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "Gesperrt ({{method}})",
+    "locked_settings_hint": "Gesperrte Einstellungen sind hervorgehoben"
+  },
   "logs": {
     "eventsource_failed": "EventSource-Verbindung fehlgeschlagen",
     "parse_error": "Fehler beim Parsen der Stream-Daten: {{error}}",

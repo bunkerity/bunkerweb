@@ -721,6 +721,10 @@
       "success": "Sucesso"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "Bloqueado ({{method}})",
+    "locked_settings_hint": "Configurações bloqueadas estão destacadas"
+  },
   "logs": {
     "eventsource_failed": "Conexão EventSource falhou",
     "parse_error": "Falha ao analisar dados do stream: {{error}}",

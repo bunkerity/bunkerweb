@@ -712,6 +712,10 @@
       "success": "Sucesso"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "Bloqueado ({{method}})",
+    "locked_settings_hint": "Configurações bloqueadas estão destacadas"
+  },
   "link": {
     "back_to_login": "Voltar ao Login",
     "forgot_password": "Esqueceu a Senha?",

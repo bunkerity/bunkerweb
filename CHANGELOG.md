@@ -5,6 +5,8 @@
 - [FEATURE] Enhance plugin update process with per-plugin commit option and improved error handling
 - [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
 - [UI] Add `RAW` mode when editing/creating templates
+- [UI] Enhanced the raw configuration editor with disabled settings highlighting and improved UI elements.
+- [UI] Implemented **Ctrl+S** / **Command+S** shortcuts for saving RAW global config / services / custom configurations.
 - [ALL-IN-ONE] Add Redis data directory creation in entrypoint script to fix redis not being able to start
 - [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
 - [DOCS] Add persistent data storage documentation for the AIO image

@@ -712,6 +712,10 @@
       "success": "Başarılı"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "Kilitli ({{method}})",
+    "locked_settings_hint": "Kilitli ayarlar vurgulanıyor"
+  },
   "link": {
     "back_to_login": "Girişe Dön",
     "forgot_password": "Şifremi Unuttum?",

@@ -712,6 +712,10 @@
       "success": "成功"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "已锁定 ({{method}})",
+    "locked_settings_hint": "锁定的设置会突出显示"
+  },
   "logs": {
     "eventsource_failed": "EventSource 连接失败",
     "parse_error": "解析流数据失败：{{error}}",

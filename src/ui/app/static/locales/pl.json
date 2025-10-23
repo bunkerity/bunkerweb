@@ -721,6 +721,10 @@
       "success": "Sukces"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "Zablokowane ({{method}})",
+    "locked_settings_hint": "Zablokowane ustawienia są wyróżnione"
+  },
   "logs": {
     "eventsource_failed": "Połączenie EventSource nie powiodło się.",
     "parse_error": "Nie udało się przeanalizować danych strumienia: {{error}}",

@@ -397,8 +397,7 @@
                                  aria-disabled="{{ 'true' if not can_edit_template else 'false' }}">
                                 <div class="raw-config-dropzone-content">
                                     <i class="bx bx-file-import bx-lg mb-3 text-primary"></i>
-                                    <p class="mb-1"
-                                       data-i18n="template.editor.raw_configs_drop_hint">
+                                    <p class="mb-1" data-i18n="template.editor.raw_configs_drop_hint">
                                         Drag and drop config files here or click to browse.
                                     </p>
                                     <p class="text-muted small mb-3"
@@ -409,9 +408,7 @@
                                             id="raw-config-browse"
                                             class="btn btn-sm btn-outline-primary raw-config-browse-btn"
                                             {% if not can_edit_template %}disabled{% endif %}
-                                            data-i18n="template.editor.raw_configs_browse">
-                                        Browse files
-                                    </button>
+                                            data-i18n="template.editor.raw_configs_browse">Browse files</button>
                                 </div>
                             </div>
                             <input type="file"
@@ -460,8 +457,7 @@
                             data-i18n-aria-label="button.close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-0"
-                       data-i18n="template.editor.raw_editor_override_body">
+                    <p class="mb-0" data-i18n="template.editor.raw_editor_override_body">
                         Importing this file will completely replace the current template JSON. Changes made in the editor will be lost. Do you want to continue?
                     </p>
                 </div>
@@ -501,11 +497,11 @@
                     <p data-i18n="template.editor.missing_configs_body">
                         The imported template references custom configs that haven't been uploaded yet. Please import these configs to complete the template setup:
                     </p>
-                    <ul id="missing-configs-list" class="list-group small mb-3"></ul>
+                    <ul id="missing-configs-list" class="list-group small mb-3">
+                    </ul>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold" data-i18n="template.editor.missing_configs_upload_label">
-                            Upload missing configs
-                        </label>
+                        <label class="form-label fw-semibold"
+                               data-i18n="template.editor.missing_configs_upload_label">Upload missing configs</label>
                         <div id="missing-configs-dropzone"
                              class="missing-configs-dropzone text-center"
                              role="button"
@@ -513,18 +509,16 @@
                              aria-label="Upload missing config files">
                             <div class="missing-configs-dropzone-content">
                                 <i class="bx bx-cloud-upload bx-lg mb-2 text-primary"></i>
-                                <p class="mb-1 fw-semibold" data-i18n="template.editor.missing_configs_drop_hint">
+                                <p class="mb-1 fw-semibold"
+                                   data-i18n="template.editor.missing_configs_drop_hint">
                                     Drag and drop config files here
                                 </p>
-                                <p class="text-muted small mb-3" data-i18n="template.editor.missing_configs_drop_or">
-                                    or
-                                </p>
+                                <p class="text-muted small mb-3"
+                                   data-i18n="template.editor.missing_configs_drop_or">or</p>
                                 <button type="button"
                                         id="missing-configs-browse"
                                         class="btn btn-sm btn-outline-primary"
-                                        data-i18n="template.editor.missing_configs_browse">
-                                    Browse Files
-                                </button>
+                                        data-i18n="template.editor.missing_configs_browse">Browse Files</button>
                             </div>
                         </div>
                         <input type="file"
@@ -538,7 +532,8 @@
                         <i class="bx bx-bulb flex-shrink-0"></i>
                         <div>
                             <strong data-i18n="template.editor.missing_configs_hint_title">Tip:</strong>
-                            <p class="mb-0 small" data-i18n="template.editor.missing_configs_hint_body">
+                            <p class="mb-0 small"
+                               data-i18n="template.editor.missing_configs_hint_body">
                                 Upload files will be automatically added to your template. Make sure the filenames match the missing configs listed above.
                             </p>
                         </div>

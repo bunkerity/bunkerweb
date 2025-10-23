@@ -713,6 +713,10 @@
       "success": "Успех"
     }
   },
+  "legend": {
+    "locked_settings_annotation": "Заблокировано ({{method}})",
+    "locked_settings_hint": "Заблокированные параметры выделены"
+  },
   "link": {
     "back_to_login": "Назад ко входу",
     "forgot_password": "Забыли пароль?",
