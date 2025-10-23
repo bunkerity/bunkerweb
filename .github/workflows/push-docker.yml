@@ -102,5 +102,5 @@ jobs:
             type=gha,scope=${{ inputs.CACHE_FROM }}-386
             type=gha,scope=${{ inputs.CACHE_FROM }}-arm64
             type=gha,scope=${{ inputs.CACHE_FROM }}-armv7
-          provenance: false
-          sbom: false
+          provenance: true
+          sbom: true
