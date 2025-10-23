@@ -584,6 +584,11 @@ button.list-group-item-secondary.active {
   z-index: 1089;
 }
 
+#feedback-toast-container .toast-body {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
 /*
 * Main overrides
 ******************************************************************************/
