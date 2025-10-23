@@ -377,7 +377,7 @@ $(document).ready(() => {
     return true; // Tab change is allowed
   };
 
-  const highlightSettings = (matchedSettings, fadeTimeout = 600) => {
+  const highlightSettings = (matchedSettings, fadeTimeout = 800) => {
     matchedSettings.each(function () {
       const $setting = $(this);
       $setting.removeClass("setting-highlight setting-highlight-fade");
@@ -2154,7 +2154,7 @@ $(document).ready(() => {
     // First remove 'show' to start fade-out transition
     $currentPane.removeClass("show");
 
-    // After fade-out completes, switch the active panes
+    // After fade-out completes, switch active panes
     setTimeout(() => {
       $currentPane.removeClass("active");
       $targetPane.addClass("active");
@@ -2927,14 +2927,14 @@ $(document).ready(() => {
             // Highlight settings after navigation is complete
             setTimeout(() => {
               if (matchedSettings.length > 0) {
-                highlightSettings(matchedSettings, 1000);
+                highlightSettings(matchedSettings, 1500);
               }
             }, 200);
           }, 10);
         } else {
           // If we're already on the correct plugin, just highlight
           if (matchedSettings.length > 0) {
-            highlightSettings(matchedSettings, 1000);
+            highlightSettings(matchedSettings, 1500);
           }
         }
       }
