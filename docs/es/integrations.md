@@ -47,6 +47,59 @@ Por defecto, el contenedor expone:
 - 7000/tcp para el acceso a la interfaz de usuario web sin BunkerWeb delante (no recomendado para producción)
 - 8888/tcp para la API cuando `SERVICE_API=yes` (uso interno; prefiere exponerla a través de BunkerWeb como un proxy inverso en lugar de publicarla directamente)
 
+Se requiere un volumen nombrado (o un bind mount) para persistir la base de datos SQLite, la caché y las copias de seguridad almacenadas en `/data` dentro del contenedor:
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "Uso de una carpeta local para datos persistentes"
+    El contenedor Todo en Uno ejecuta sus servicios como un **usuario no privilegiado con UID 101 y GID 101**. Esto mejora la seguridad: incluso si algún componente se ve comprometido, no obtiene privilegios de root (UID/GID 0) en el host.
+
+    Si montas una **carpeta local**, asegúrate de que los permisos del directorio permitan que ese usuario no privilegiado pueda escribir datos:
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    O, si la carpeta ya existe:
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    Cuando utilices [Docker en modo rootless](https://docs.docker.com/engine/security/rootless) o [Podman](https://podman.io/), los UID/GID del contenedor se remapean. Verifica primero tus rangos `subuid` y `subgid`:
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    Por ejemplo, si el rango comienza en **100000**, el UID/GID efectivo será **100100** (100000 + 100):
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    O, si la carpeta ya existe:
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 La imagen Todo en Uno viene con varios servicios integrados, que se pueden controlar mediante variables de entorno:
 
 - `SERVICE_UI=yes` (predeterminado) - Habilita el servicio de la interfaz de usuario web

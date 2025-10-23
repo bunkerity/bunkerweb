@@ -4,7 +4,9 @@
 
 - [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
 - [UI] Add `RAW` mode when editing/creating templates
+- [ALL-IN-ONE] Add Redis data directory creation in entrypoint script to fix redis not being able to start
 - [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
+- [DOCS] Add persistent data storage documentation for the AIO image
 - [DEPS] Updated lua-cjson version to v2.1.0.15
 - [DEPS] Update Mbed TLS version to v3.6.5
 

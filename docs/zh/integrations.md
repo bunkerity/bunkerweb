@@ -47,6 +47,59 @@ docker run -d \
 - 7000/tcp 用于在没有 BunkerWeb 前置的情况下的 Web UI 访问（不建议在生产环境中使用）
 - 当 `SERVICE_API=yes` 时，8888/tcp 用于 API（内部使用；建议通过 BunkerWeb 作为反向代理暴露，而不是直接发布）
 
+需要一个命名卷（或绑定挂载）来持久化容器内 `/data` 目录下的 SQLite 数据库、缓存和备份：
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "使用本地文件夹存储持久化数据"
+    一体化容器以内置的 **非特权用户（UID 101、GID 101）** 运行各项服务。这能够提升安全性：即便组件被攻破，也无法在宿主机上获得 root 权限（UID/GID 0）。
+
+    如果挂载了一个**本地文件夹**，请确保目录权限允许该非特权用户写入：
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    如果目录已存在，可以执行：
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    在使用 [Docker 无根模式](https://docs.docker.com/engine/security/rootless) 或 [Podman](https://podman.io/) 时，容器内的 UID/GID 会被重新映射。请先检查自己的 `subuid` 与 `subgid` 范围：
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    例如，如果起始值是 **100000**，对应的映射 UID/GID 将是 **100100**（100000 + 100）：
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    或者，如果目录已存在：
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 一体化镜像内置了几个服务，可以通过环境变量来控制：
 
 - `SERVICE_UI=yes` (默认) - 启用 Web UI 服务

@@ -46,6 +46,59 @@ Par défaut, le conteneur expose :
 - 8443/udp pour QUIC
 - 7000/tcp pour l'accès à l'interface utilisateur web sans BunkerWeb en façade (non recommandé pour la production)
 
+Un volume nommé (ou un bind mount) est nécessaire pour conserver la base SQLite, le cache et les sauvegardes stockés sous `/data` dans le conteneur :
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "Utilisation d'un dossier local pour les données persistantes"
+    Le conteneur tout-en-un exécute ses services en tant qu'**utilisateur non privilégié UID 101 / GID 101**. Cela renforce la sécurité : même si une composante est compromise, elle n'obtient pas les privilèges root (UID/GID 0) sur l'hôte.
+
+    Si vous montez un **dossier local**, assurez-vous que les permissions permettent à cet utilisateur non privilégié d'écrire dedans :
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    Ou, si le dossier existe déjà :
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    Lorsque vous utilisez [Docker en mode rootless](https://docs.docker.com/engine/security/rootless) ou [Podman](https://podman.io/), les UID/GID du conteneur sont remappés. Vérifiez d'abord vos plages `subuid` et `subgid` :
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    Par exemple, si la plage commence à **100000**, l'UID/GID effectif sera **100100** (100000 + 100) :
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    Ou, si le dossier existe déjà :
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 L'image tout-en-un est livrée avec plusieurs services intégrés, qui peuvent être contrôlés à l'aide de variables d'environnement :
 
 - `SERVICE_UI=yes` (par défaut) - Active le service d'interface utilisateur Web

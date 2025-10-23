@@ -9,6 +9,25 @@ umask 027
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
+# Ensure Redis data directory exists when running the AIO image
+if [ "${USE_REDIS}" = "yes" ]; then
+	redis_dir="/var/lib/redis"
+	if [ -L "$redis_dir" ]; then
+		redis_dir="$(readlink "$redis_dir")"
+	fi
+	if [ ! -d "$redis_dir" ]; then
+		if mkdir -p "$redis_dir"; then
+			# Align permissions with build-time defaults
+			chmod 770 "$redis_dir"
+			chown nginx:nginx "$redis_dir"
+			log "ENTRYPOINT" "✅" "Created Redis data directory at $redis_dir"
+		else
+			log "ENTRYPOINT" "❌" "Failed to create Redis data directory at $redis_dir (check /data permissions)"
+			exit 1
+		fi
+	fi
+fi
+
 handle_docker_secrets
 
 # trap SIGTERM and SIGINT

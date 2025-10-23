@@ -47,6 +47,59 @@ Standardmäßig stellt der Container Folgendes bereit:
 - 7000/tcp für den Zugriff auf die Web-UI ohne BunkerWeb davor (nicht für die Produktion empfohlen)
 - 8888/tcp für die API, wenn `SERVICE_API=yes` (interne Verwendung; vorzugsweise über BunkerWeb als Reverse-Proxy bereitstellen, anstatt direkt zu veröffentlichen)
 
+Ein benanntes Volume (oder Bind-Mount) ist erforderlich, um die unter `/data` gespeicherten SQLite-Datenbanken, Caches und Backups zu persistieren:
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "Verwendung eines lokalen Ordners für persistente Daten"
+    Der All-In-One-Container führt seine Dienste als **unprivilegierter Benutzer mit der UID 101 und GID 101** aus. Das erhöht die Sicherheit: Selbst wenn eine Komponente kompromittiert wird, erhält sie keine Root-Rechte (UID/GID 0) auf dem Host.
+
+    Wenn Sie einen **lokalen Ordner** einbinden, stellen Sie sicher, dass die Verzeichnisberechtigungen es diesem unprivilegierten Benutzer erlauben, darin zu schreiben:
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    Oder, falls der Ordner bereits existiert:
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    Bei Verwendung von [Docker im rootless-Modus](https://docs.docker.com/engine/security/rootless) oder [Podman](https://podman.io/) werden Container-UIDs/GIDs auf andere Werte des Hosts abgebildet. Prüfen Sie daher zuerst Ihre subuid-/subgid-Bereiche:
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    Beginnt der Bereich beispielsweise bei **100000**, lautet die zugeordnete UID/GID **100100** (100000 + 100):
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    Oder, wenn der Ordner bereits existiert:
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 Das All-In-One-Image enthält mehrere integrierte Dienste, die über Umgebungsvariablen gesteuert werden können:
 
 - `SERVICE_UI=yes` (Standard) - Aktiviert den Web-UI-Dienst
