@@ -35,10 +35,10 @@ end
 function securitytxt:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "securitytxt", ctx)
-	-- Load data from datastore if needed
+	-- Load data from internalstore if needed
 	if get_phase() ~= "init" then
-		-- Get security policies from datastore
-		local security_policies, err = self.datastore:get("plugin_securitytxt_security_policies", true)
+		-- Get security policies from internalstore
+		local security_policies, err = self.internalstore:get("plugin_securitytxt_security_policies", true)
 		if not security_policies then
 			self.logger:log(ERR, err)
 			return
@@ -117,7 +117,7 @@ function securitytxt:init()
 		end
 	end
 	local ok
-	ok, err = self.datastore:set("plugin_securitytxt_security_policies", data, nil, true)
+	ok, err = self.internalstore:set("plugin_securitytxt_security_policies", data, nil, true)
 	if not ok then
 		return self:ret(false, err)
 	end

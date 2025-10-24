@@ -4130,6 +4130,9 @@ Redis 插件将 [Redis](https://redis.io/) 或 [Valkey](https://valkey.io/) 集�
 4.  该插件支持各种 Redis/Valkey 部署选项，包括独立服务器、密码验证、SSL/TLS 加密和用于高可用性的 Redis Sentinel。
 5.  自动重新连接和可配置的超时可确保在生产环境中的稳健性。
 
+!!! note "一体化镜像注意事项"
+    一体化 Docker 镜像自带 Redis 服务器。仅当 `USE_REDIS=yes` 且 `REDIS_HOST` 保持默认值 (`127.0.0.1`/`localhost`) 时才会自动启动。若覆盖 `REDIS_HOST`，BunkerWeb 会改为连接外部 Redis/Valkey 终端，并且不会启动内置服务器；内置服务只监听回环接口，其他容器无法直接访问。
+
 ### 如何使用
 
 请按照以下步骤配置和使用 Redis 插件：

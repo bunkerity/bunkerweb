@@ -23,10 +23,10 @@ function headers:initialize(ctx)
 		["X_CONTENT_TYPE_OPTIONS"] = "X-Content-Type-Options",
 		["X_DNS_PREFETCH_CONTROL"] = "X-DNS-Prefetch-Control",
 	}
-	-- Load data from datastore if needed
+	-- Load data from internalstore if needed
 	if get_phase() ~= "init" then
-		-- Get custom headers from datastore
-		local custom_headers, err = self.datastore:get("plugin_headers_custom_headers", true)
+		-- Get custom headers from internalstore
+		local custom_headers, err = self.internalstore:get("plugin_headers_custom_headers", true)
 		if not custom_headers then
 			self.logger:log(ERR, err)
 			return
@@ -69,7 +69,7 @@ function headers:init()
 		end
 	end
 	local ok
-	ok, err = self.datastore:set("plugin_headers_custom_headers", data, nil, true)
+	ok, err = self.internalstore:set("plugin_headers_custom_headers", data, nil, true)
 	if not ok then
 		return self:ret(false, err)
 	end

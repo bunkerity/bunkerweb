@@ -56,6 +56,64 @@ The All-In-One image comes with several built-in services, which can be controll
 - `USE_REDIS=yes` (default) - Enables the built-in [Redis](#redis-integration) instance
 - `USE_CROWDSEC=no` (default) - [CrowdSec](#crowdsec-integration) integration is disabled by default
 
+A named volume (or bind mount) is required to persist the SQLite database, cache, and backups stored under `/data` inside the container:
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
+    container_name: bunkerweb-aio
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp"
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "Using a local folder for persistent data"
+    The All-In-One container runs services as an **unprivileged user with UID 101 and GID 101**. This improves security: even if a component is compromised, it does not gain root (UID/GID 0) on the host.
+
+    If you bind mount a **local folder**, ensure the directory permissions allow that unprivileged user to write data:
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    Or, if the folder already exists:
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    When using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [Podman](https://podman.io/), container UIDs/GIDs are remapped. Check your subuid/subgid ranges first:
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    For example, if the range starts at **100000**, the effective UID/GID becomes **100100** (100000 + 100):
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    Or, if the folder already exists:
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 ### API Integration
 
 The All-In-One image embeds the BunkerWeb API. It is disabled by default and can be enabled by setting `SERVICE_API=yes`.
@@ -123,10 +181,13 @@ By default, the setup wizard is automagically launched when you run the AIO cont
 
 ### Redis Integration {#redis-integration}
 
-The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](advanced.md#persistence-of-bans-and-reports). To manage Redis:
+The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](advanced.md#persistence-of-bans-and-reports). Keep in mind:
 
-- To disable Redis, set `USE_REDIS=no` or point `REDIS_HOST` to an external host.
-- Redis logs appear with `[REDIS]` prefix in Docker logs and `/var/log/bunkerweb/redis.log`.
+- The embedded Redis service only starts when `USE_REDIS=yes` **and** `REDIS_HOST` is left at its default (`127.0.0.1`/`localhost`).
+- It listens on the container loopback interface, so it is available to processes inside the container but not from other containers or the host.
+- Override `REDIS_HOST` only when you have an external Redis/Valkey endpoint to connect to—doing so prevents the embedded instance from launching.
+- To disable Redis entirely, set `USE_REDIS=no`.
+- Redis logs appear with the `[REDIS]` prefix in Docker logs and in `/var/log/bunkerweb/redis.log`.
 
 ### CrowdSec Integration {#crowdsec-integration}
 

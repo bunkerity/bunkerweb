@@ -95,7 +95,7 @@
       "default": "yes",
       "help": "Only perform RDNS antibot checks on global IP addresses.",
       "id": "antibot-rdns-global",
-      "label": "Blacklist reverse DNS global IPs",
+      "label": "Antibot reverse DNS global IPs",
       "regex": "^(yes|no)$",
       "type": "check"
     },

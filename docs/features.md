@@ -4170,6 +4170,9 @@ The Redis plugin integrates [Redis](https://redis.io/) or [Valkey](https://valke
 4. The plugin supports various Redis/Valkey deployment options, including standalone servers, password authentication, SSL/TLS encryption, and Redis Sentinel for high availability.
 5. Automatic reconnection and configurable timeouts ensure robustness in production environments.
 
+!!! note "All-In-One image specifics"
+    The All-In-One Docker image ships with an embedded Redis server. It launches automatically only when `USE_REDIS=yes` and `REDIS_HOST` remains at its default (`127.0.0.1`/`localhost`). Overriding `REDIS_HOST` tells BunkerWeb to use an external Redis/Valkey endpoint instead and prevents the embedded server from starting; the embedded service also listens on loopback and is not reachable from other containers.
+
 ### How to Use
 
 Follow these steps to configure and use the Redis plugin:

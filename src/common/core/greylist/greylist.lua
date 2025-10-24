@@ -25,12 +25,12 @@ function greylist:initialize(ctx)
 	plugin.initialize(self, "greylist", ctx)
 	-- Decode lists
 	if get_phase() ~= "init" and self:is_needed() then
-		local datastore_lists, err = self.datastore:get("plugin_greylist_lists_" .. self.ctx.bw.server_name, true)
-		if not datastore_lists then
+		local internalstore_lists, err = self.internalstore:get("plugin_greylist_lists_" .. self.ctx.bw.server_name, true)
+		if not internalstore_lists then
 			self.logger:log(ERR, err)
 			self.lists = {}
 		else
-			self.lists = datastore_lists
+			self.lists = internalstore_lists
 		end
 		local kinds = {
 			["IP"] = {},
@@ -108,11 +108,11 @@ function greylist:init()
 			greylists[kind] = deduplicate_list(greylists[kind])
 		end
 
-		-- Load service specific ones into datastore
+		-- Load service specific ones into internalstore
 		local ok
-		ok, err = self.datastore:set("plugin_greylist_lists_" .. key, greylists, nil, true)
+		ok, err = self.internalstore:set("plugin_greylist_lists_" .. key, greylists, nil, true)
 		if not ok then
-			return self:ret(false, "can't store greylist " .. key .. " list into datastore : " .. err)
+			return self:ret(false, "can't store greylist " .. key .. " list into internalstore : " .. err)
 		end
 
 		self.logger:log(

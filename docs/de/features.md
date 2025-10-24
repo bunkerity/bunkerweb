@@ -3997,6 +3997,9 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS and Redis Sentinel.
 5.  Automatische Wiederverbindung and konfigurierbare Timeouts sorgen für Robustheit.
 
+!!! note "Spezifika des All-In-One-Images"
+    Das All-In-One-Docker-Image enthält einen eingebetteten Redis-Server. Er startet automatisch nur, wenn `USE_REDIS=yes` gesetzt ist und `REDIS_HOST` auf dem Standardwert (`127.0.0.1`/`localhost`) bleibt. Wird `REDIS_HOST` überschrieben, erwartet BunkerWeb einen externen Redis-/Valkey-Endpunkt und startet den eingebetteten Dienst nicht; zudem lauscht der eingebettete Dienst ausschließlich auf dem Loopback-Interface und ist von anderen Containern aus nicht erreichbar.
+
 ### Verwendung
 
 1.  **Aktivieren:** `USE_REDIS: yes`.

@@ -1,4 +1,4 @@
-FROM fedora:42@sha256:0c5ab5380e63cb322552d624d2c78b835f11b526cfd32e1d6f687d0c245f38ce AS builder
+FROM fedora:42@sha256:aa7befe5cfd1f0e062728c16453cd1c479d4134c7b85eac00172f3025ab0d522 AS builder
 
 ENV OS=fedora
 ENV NGINX_VERSION=1.28.0
@@ -111,7 +111,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM fedora:42@sha256:0c5ab5380e63cb322552d624d2c78b835f11b526cfd32e1d6f687d0c245f38ce
+FROM fedora:42@sha256:aa7befe5cfd1f0e062728c16453cd1c479d4134c7b85eac00172f3025ab0d522
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

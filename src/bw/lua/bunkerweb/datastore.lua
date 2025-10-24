@@ -57,6 +57,28 @@ function datastore:set(key, value, exptime, worker)
 	end
 end
 
+function datastore:set_with_retries(key, value, exptime, max_retries)
+    max_retries = max_retries or 5
+    local success, err
+	-- Try multiple times if we need to make room for the new value
+    for i = 1, max_retries do
+        if exptime == nil or exptime < 0 then
+            success, err = self.dict:set(key, value)
+        else
+            success, err = self.dict:set(key, value, exptime)
+        end
+        -- Ok case
+        if success then
+            return true, "success"
+        end
+        -- Unknown error, can't do nothing
+        if err ~= "no memory" then
+            return false, err
+        end
+    end
+    return false, err or "max retries reached"
+end
+
 function datastore:delete(key, worker)
 	if worker then
 		if not lru then

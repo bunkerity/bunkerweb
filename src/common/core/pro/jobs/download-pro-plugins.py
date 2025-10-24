@@ -393,6 +393,10 @@ try:
 
     if err:
         LOGGER.error(f"Couldn't update Pro plugins to database: {err}")
+        # Only cleanup newly added plugins if the error suggests a database issue
+        if "max_allowed_packet" in err.lower() or "packet" in err.lower():
+            LOGGER.warning("Database packet size issue detected. Consider increasing max_allowed_packet in MariaDB/MySQL configuration.")
+
         plugins_to_cleanup = [plugin_id for plugin_id in pro_plugins_ids if plugin_id not in existing_pro_plugin_ids]
         if plugins_to_cleanup:
             LOGGER.warning("Cleaning up Pro plugins that were not previously in the database due to the failed update.")
