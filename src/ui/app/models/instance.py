@@ -10,7 +10,6 @@ from urllib.parse import quote
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
-from app.routes.utils import get_redis_client
 from app.utils import LOGGER
 
 
@@ -310,6 +309,8 @@ class InstancesUtils:
         instances: Optional[List[Instance]] = None,
     ) -> dict[str, Any]:
         """Get paginated and filtered reports using optimized query endpoint"""
+        from app.routes.utils import get_redis_client
+
         redis_client = get_redis_client()
 
         # If Redis is available, use it for optimized queries
@@ -460,6 +461,8 @@ class InstancesUtils:
 
     def get_metrics(self, plugin_id: str, hostname: Optional[str] = None, *, instances: Optional[List[Instance]] = None):
         """Get metrics from all instances or a specific instance, with Redis integration"""
+        from app.routes.utils import get_redis_client
+
         redis_client = get_redis_client()
 
         def aggregate_metrics(base_metrics: dict, new_metrics: dict) -> dict[str, Any]:
