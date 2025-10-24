@@ -118,9 +118,9 @@ certbot-dns-google==5.0.0 \
     --hash=sha256:7fce0fc1ca5bff01e642888443ea2d1bfcf6a223fdf3109639a9ceeb63d8cc08 \
     --hash=sha256:fc2d5bae2ca3571b14d2a34addad24cc7e0f338fb665bc3d59da76aaf121dcc1
     # via -r requirements.in
-certbot-dns-infomaniak==0.2.3 \
-    --hash=sha256:711fc69e781c5845a4edb295da212bec1070d641cc022c9938b5a3f6e4c23912 \
-    --hash=sha256:754ce4cd641309b11b7877081b493a183cda38125b48684763ff2ac81f6e68a8
+certbot-dns-infomaniak==0.2.4 \
+    --hash=sha256:45c2c8c49b7346dc66c7b59bfed46b07543e963d4bb028614cefd7337b171462 \
+    --hash=sha256:6a3d2103174d5b59bdb9f704061c53d04817ce3c71155a40798d43bb7983e7ba
     # via -r requirements.in
 certbot-dns-ionos==2024.11.9 \
     --hash=sha256:333be82806ae28a02c979baa8eb0bbc4862ad26549f60685468fadbf1fe3609e \
@@ -922,12 +922,6 @@ s3transfer==0.14.0 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via certbot-dns-domainoffensive
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==80.9.0 \
-    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
-    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
     # via -r requirements.in
 six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
@@ -1002,10 +996,15 @@ zope-interface==8.0.1 \
     --hash=sha256:f8e88f35f86bbe8243cad4b2972deef0fdfca0a0723455abbebdc83bbab96b69 \
     --hash=sha256:fcf9097ff3003b7662299f1c25145e15260ec2a27f9a9e69461a585d79ca8552 \
     --hash=sha256:fd7195081b8637eeed8d73e4d183b07199a1dc738fb28b3de6666b1b55662570
+    # via certbot-dns-domainoffensive
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==80.9.0 \
+    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
+    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
     # via
     #   certbot-dns-bunny
     #   certbot-dns-desec
     #   certbot-dns-domainoffensive
-    #   certbot-dns-infomaniak
     #   certbot-dns-ionos
     #   certbot-dns-scaleway
