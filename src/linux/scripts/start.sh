@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Enforce a restrictive default umask for all operations
-umask 027
-
 # Source the utils helper script
 # shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
 
+# Get the highest Python version available and export it
+PYTHON_BIN=$(get_python_bin)
+export PYTHON_BIN
+
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python
-
 # Display usage information
 function display_help() {
     echo "Usage: $(basename "$0") [start|stop|reload|restart]"
@@ -120,17 +120,14 @@ function start() {
     chown root:nginx /var/tmp/bunkerweb/tmp.env
     chmod 660 /var/tmp/bunkerweb/tmp.env
 
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env"
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
+    if ! run_as_nginx env PYTHONPATH="/usr/share/bunkerweb/deps/python" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
+        --variables /var/tmp/bunkerweb/tmp.env; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
         exit 1
     fi
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
-    sudo -E -u nginx -g nginx /usr/sbin/nginx -e /var/log/bunkerweb/error.log
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
+    if ! run_as_nginx /usr/sbin/nginx -e /var/log/bunkerweb/error.log; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
     fi

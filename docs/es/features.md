@@ -1665,7 +1665,7 @@ CrowdSec es un motor de seguridad moderno y de código abierto que detecta y blo
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.0 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
+        image: crowdsecurity/crowdsec:v1.7.1 # Use la última versión pero siempre fije la versión para una mejor estabilidad/seguridad
         volumes:
           - cs-data:/var/lib/crowdsec/data # Para persistir los datos de CrowdSec
           - bw-logs:/var/log:ro # Los registros de BunkerWeb para que CrowdSec los analice
@@ -4137,6 +4137,9 @@ El complemento Redis integra [Redis](https://redis.io/) o [Valkey](https://valke
 3.  Múltiples instancias de BunkerWeb pueden compartir estos datos, lo que permite la agrupación en clúster y el equilibrio de carga sin problemas.
 4.  El complemento admite varias opciones de implementación de Redis/Valkey, incluidos servidores independientes, autenticación con contraseña, cifrado SSL/TLS y Redis Sentinel para alta disponibilidad.
 5.  La reconexión automática y los tiempos de espera configurables garantizan la solidez en los entornos de producción.
+
+!!! note "Especificaciones de la imagen All-In-One"
+    La imagen Docker All-In-One incluye un servidor Redis integrado. Se inicia automáticamente solo cuando `USE_REDIS=yes` y `REDIS_HOST` permanece en su valor predeterminado (`127.0.0.1`/`localhost`). Si se sobrescribe `REDIS_HOST`, BunkerWeb espera un endpoint Redis/Valkey externo y no arrancará el servidor integrado; además, este servicio integrado escucha únicamente en el loopback y no es accesible desde otros contenedores.
 
 ### Cómo usar
 

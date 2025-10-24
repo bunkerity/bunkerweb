@@ -57,6 +57,23 @@ jobs:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Check ARM SSH connectivity
+        run: |
+          echo "Testing SSH connectivity to ARM node..."
+          for i in {1..5}; do
+            if ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Connection test $i successful' && docker info > /dev/null 2>&1 && echo 'Docker is running'"; then
+              echo "✓ SSH connection and Docker verified"
+              break
+            fi
+            echo "Retry $i/5 failed, waiting 10 seconds..."
+            sleep 10
+          done
+          echo "Waiting for connection to stabilize..."
+          sleep 5
+          echo "Final connectivity check..."
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Final check OK' && uptime"
+        env:
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
       - name: Setup Buildx (ARM)
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         with:
@@ -71,16 +88,19 @@ jobs:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build and push
       - name: Build and push
-        continue-on-error: ${{ inputs.IMAGE == 'bunkerweb-all-in-one' }}
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
-          platforms: ${{ inputs.IMAGE == 'bunkerweb-all-in-one' && 'linux/amd64,linux/arm64' || 'linux/amd64,linux/386,linux/arm64,linux/arm/v7' }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ inputs.TAGS }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=gha,scope=${{ inputs.CACHE_FROM }}-amd64
-            type=gha,scope=${{ inputs.CACHE_FROM }}-386
-            type=gha,scope=${{ inputs.CACHE_FROM }}-arm
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-amd64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-386
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-arm64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv7
+          outputs: type=registry,oci-mediatypes=true,compression=zstd
+          provenance: true
+          sbom: true

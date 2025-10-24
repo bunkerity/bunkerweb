@@ -47,6 +47,59 @@ docker run -d \
 - 7000/tcp 用于在没有 BunkerWeb 前置的情况下的 Web UI 访问（不建议在生产环境中使用）
 - 当 `SERVICE_API=yes` 时，8888/tcp 用于 API（内部使用；建议通过 BunkerWeb 作为反向代理暴露，而不是直接发布）
 
+需要一个命名卷（或绑定挂载）来持久化容器内 `/data` 目录下的 SQLite 数据库、缓存和备份：
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "使用本地文件夹存储持久化数据"
+    一体化容器以内置的 **非特权用户（UID 101、GID 101）** 运行各项服务。这能够提升安全性：即便组件被攻破，也无法在宿主机上获得 root 权限（UID/GID 0）。
+
+    如果挂载了一个**本地文件夹**，请确保目录权限允许该非特权用户写入：
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    如果目录已存在，可以执行：
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    在使用 [Docker 无根模式](https://docs.docker.com/engine/security/rootless) 或 [Podman](https://podman.io/) 时，容器内的 UID/GID 会被重新映射。请先检查自己的 `subuid` 与 `subgid` 范围：
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    例如，如果起始值是 **100000**，对应的映射 UID/GID 将是 **100100**（100000 + 100）：
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    或者，如果目录已存在：
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 一体化镜像内置了几个服务，可以通过环境变量来控制：
 
 - `SERVICE_UI=yes` (默认) - 启用 Web UI 服务
@@ -123,9 +176,12 @@ networks:
 
 ### Redis 集成 {#redis-integration}
 
-BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化封禁和报告](advanced.md#persistence-of-bans-and-reports)。要管理 Redis：
+BunkerWeb **一体化**镜像开箱即用地包含了 Redis，用于[持久化封禁和报告](advanced.md#persistence-of-bans-and-reports)。请注意：
 
-- 要禁用 Redis，请设置 `USE_REDIS=no` 或将 `REDIS_HOST` 指向一个外部主机。
+- 只有在 `USE_REDIS=yes` **且** `REDIS_HOST` 保持默认值 (`127.0.0.1`/`localhost`) 时，内置 Redis 服务才会启动。
+- 它仅监听容器的回环接口，因此只能被容器内部的进程访问，其他容器或宿主机无法直接访问。
+- 仅当你已经准备好外部 Redis/Valkey 终端时才覆盖 `REDIS_HOST`，否则内置实例将不会启动。
+- 若要完全禁用 Redis，请设置 `USE_REDIS=no`。
 - Redis 日志在 Docker 日志和 `/var/log/bunkerweb/redis.log` 中以 `[REDIS]` 前缀出现。
 
 ### CrowdSec 集成 {#crowdsec-integration}
@@ -1255,7 +1311,16 @@ networks:
   <figcaption>Kubernetes 集成</figcaption>
 </figure>
 
-为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。它根据 [Ingress 资源](https://kubernetes.io/docs/concepts/services-networking/ingress/)配置 BunkerWeb 实例，并监控其他 Kubernetes 对象，例如 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)，以获取自定义配置。
+为了在 Kubernetes 环境中自动化 BunkerWeb 实例的配置，
+autoconf 服务充当一个 [Ingress 控制器](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。
+它根据 [Ingress 资源](https://kubernetes.io/docs/concepts/services-networking/ingress/) 配置 BunkerWeb 实例，
+并监控其他 Kubernetes 对象，例如 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)，以获取自定义配置。
+
+!!! info "ConfigMap 同步"
+    - Ingress 控制器仅管理带有 `bunkerweb.io/CONFIG_TYPE` 注解的 ConfigMap。
+    - 如果需要将配置限定到单个服务（服务器名必须已存在），请添加 `bunkerweb.io/CONFIG_SITE`；
+      未设置时表示全局应用。
+    - 删除该注解或删除 ConfigMap 会移除对应的自定义配置。
 
 为了获得最佳设置，建议将 BunkerWeb 定义为一个 **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**，这样可以确保在所有节点上都创建一个 pod，而将 **autoconf 和 scheduler** 定义为**单个副本的 [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**。
 

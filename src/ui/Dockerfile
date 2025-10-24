@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:9ba6d8cbebf0fb6546ae71f2a1c14f6ffd2fdab83af7fa5669734ef30ad48844 AS builder
+FROM python:3.13-alpine@sha256:e5fa639e49b85986c4481e28faa2564b45aa8021413f31026c3856e5911618b1 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -40,13 +40,17 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
-RUN apk add --no-cache nodejs npm parallel && \
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+ARG SKIP_MINIFY_CSS=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ]; }; then \
+  apk add --no-cache nodejs npm parallel && \
   cd /tmp && \
-  npm ci --ignore-scripts
+  npm ci --ignore-scripts; \
+  fi
 
 # Minify JS files
-ARG SKIP_MINIFY_JS=no
-RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
   find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
   | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
   else \
@@ -54,15 +58,14 @@ RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
   fi
 
 # Minify CSS files
-ARG SKIP_MINIFY_CSS=no
-RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
   | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
   else \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.13-alpine@sha256:9ba6d8cbebf0fb6546ae71f2a1c14f6ffd2fdab83af7fa5669734ef30ad48844
+FROM python:3.13-alpine@sha256:e5fa639e49b85986c4481e28faa2564b45aa8021413f31026c3856e5911618b1
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -79,7 +82,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client postgresql-
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.5.4-r0" "libssl3>=3.5.4-r0" # CVE-2025-9230 CVE-2025-9231 CVE-2025-9232
+# There are no CVEs for the following packages
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

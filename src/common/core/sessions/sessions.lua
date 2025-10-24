@@ -28,7 +28,7 @@ function sessions:initialize(ctx)
 	self.randoms = {}
 	for _, var in ipairs(is_random) do
 		if self.variables[var] == "random" then
-			local data, _ = self.datastore:get("storage_sessions_" .. var)
+			local data, _ = self.internalstore:get("storage_sessions_" .. var)
 			if data then
 				self.randoms[var] = data
 			end
@@ -100,9 +100,9 @@ function sessions:init()
 			config.secret = self.randoms["SESSIONS_SECRET"]
 		else
 			config.secret = utils.rand(16)
-			local ok, err = self.datastore:set("storage_sessions_SESSIONS_SECRET", config.secret)
+			local ok, err = self.internalstore:set("storage_sessions_SESSIONS_SECRET", config.secret)
 			if not ok then
-				self.logger:log(ERR, "error from datastore:set : " .. err)
+				self.logger:log(ERR, "error from internalstore:set : " .. err)
 			end
 		end
 	end
@@ -111,9 +111,9 @@ function sessions:init()
 			config.cookie_name = self.randoms["SESSIONS_NAME"]
 		else
 			config.cookie_name = utils.rand(16)
-			local ok, err = self.datastore:set("storage_sessions_SESSIONS_NAME", config.cookie_name)
+			local ok, err = self.internalstore:set("storage_sessions_SESSIONS_NAME", config.cookie_name)
 			if not ok then
-				self.logger:log(ERR, "error from datastore:set : " .. err)
+				self.logger:log(ERR, "error from internalstore:set : " .. err)
 			end
 		end
 	end
@@ -154,13 +154,13 @@ function sessions:init()
 			config.redis.port = tonumber(redis_vars["REDIS_PORT"])
 		end
 	end
-	local ok_set, err_set = self.datastore:set("storage_sessions_STORAGE", config.storage)
+	local ok_set, err_set = self.internalstore:set("storage_sessions_STORAGE", config.storage)
 	if not ok_set then
-		self.logger:log(ERR, "error from datastore:set : " .. err_set)
+		self.logger:log(ERR, "error from internalstore:set : " .. err_set)
 	end
-	ok_set, err_set = self.datastore:set("storage_sessions_CONFIG", encode(config))
+	ok_set, err_set = self.internalstore:set("storage_sessions_CONFIG", encode(config))
 	if not ok_set then
-		self.logger:log(ERR, "error from datastore:set : " .. err_set)
+		self.logger:log(ERR, "error from internalstore:set : " .. err_set)
 	end
 	sessions_config = config
 	session_init(config)
@@ -177,11 +177,11 @@ function sessions:timer()
 	local storage = "cookie"
 	local change = false
 	local use_redis, _ = get_variable("USE_REDIS", false)
-	local prev_storage, prev_err = self.datastore:get("storage_sessions_STORAGE")
+	local prev_storage, prev_err = self.internalstore:get("storage_sessions_STORAGE")
 	if prev_storage == nil and prev_err then
 		self.logger:log(
 			ERR,
-			"failed to get previous session storage from datastore: " .. prev_err .. ", assuming cookie"
+			"failed to get previous session storage from internalstore: " .. prev_err .. ", assuming cookie"
 		)
 		prev_storage = "cookie"
 	end
@@ -189,12 +189,12 @@ function sessions:timer()
 		if prev_storage ~= "cookie" then
 			change = true
 		end
-		local ok_set, err_set = self.datastore:set("storage_sessions_STORAGE", storage)
+		local ok_set, err_set = self.internalstore:set("storage_sessions_STORAGE", storage)
 		if not ok_set then
 			self.logger:log(ERR, "failed to set storage_sessions_STORAGE: " .. err_set)
 			return self:ret(false, "redis disabled -> cookie")
 		end
-		self.datastore:set("storage_sessions_CHANGE", change)
+		self.internalstore:set("storage_sessions_CHANGE", change)
 		return self:ret(true, "timer done (storage = " .. storage .. ")")
 	end
 
@@ -241,13 +241,13 @@ function sessions:timer()
 	end
 
 	-- Save storage type and change flag
-	local ok_set, err_set = self.datastore:set("storage_sessions_STORAGE", storage)
+	local ok_set, err_set = self.internalstore:set("storage_sessions_STORAGE", storage)
 	if not ok_set then
 		ret = false
 		ret_err = "failed to set storage_sessions_STORAGE: " .. err_set
 		self.logger:log(ERR, "failed to set storage_sessions_STORAGE: " .. err_set)
 	end
-	self.datastore:set("storage_sessions_CHANGE", change)
+	self.internalstore:set("storage_sessions_CHANGE", change)
 
 	return self:ret(ret, ret_err)
 end

@@ -1473,7 +1473,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.0 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
+        image: crowdsecurity/crowdsec:v1.7.1 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
         volumes:
           - cs-data:/var/lib/crowdsec/data # Pour persister les données de CrowdSec
           - bw-logs:/var/log:ro # Les journaux de BunkerWeb à analyser par CrowdSec
@@ -3623,6 +3623,9 @@ Comment ça marche :
 3. Plusieurs instances partagent ces données pour un clustering fluide.
 4. Prend en charge déploiements standalone, auth par mot de passe, SSL/TLS et Redis Sentinel.
 5. Reconnexion automatique et timeouts configurables pour la robustesse.
+
+!!! note "Spécificités de l'image All-In-One"
+    L'image Docker All-In-One embarque un serveur Redis. Il se lance automatiquement uniquement si `USE_REDIS=yes` et si `REDIS_HOST` reste sur sa valeur par défaut (`127.0.0.1`/`localhost`). Si vous redéfinissez `REDIS_HOST`, BunkerWeb s'attend à un point de terminaison Redis/Valkey externe et n'amorcera pas le serveur embarqué ; ce service embarqué écoute par ailleurs sur la boucle locale et n'est pas accessible depuis d'autres conteneurs.
 
 ### Comment l’utiliser
 

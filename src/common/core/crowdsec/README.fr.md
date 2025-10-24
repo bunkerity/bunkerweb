@@ -138,7 +138,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.0 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
+        image: crowdsecurity/crowdsec:v1.7.1 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
         volumes:
           - cs-data:/var/lib/crowdsec/data # Pour persister les données de CrowdSec
           - bw-logs:/var/log:ro # Les journaux de BunkerWeb à analyser par CrowdSec

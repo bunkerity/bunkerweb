@@ -47,6 +47,59 @@ Por defecto, el contenedor expone:
 - 7000/tcp para el acceso a la interfaz de usuario web sin BunkerWeb delante (no recomendado para producción)
 - 8888/tcp para la API cuando `SERVICE_API=yes` (uso interno; prefiere exponerla a través de BunkerWeb como un proxy inverso en lugar de publicarla directamente)
 
+Se requiere un volumen nombrado (o un bind mount) para persistir la base de datos SQLite, la caché y las copias de seguridad almacenadas en `/data` dentro del contenedor:
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "Uso de una carpeta local para datos persistentes"
+    El contenedor Todo en Uno ejecuta sus servicios como un **usuario no privilegiado con UID 101 y GID 101**. Esto mejora la seguridad: incluso si algún componente se ve comprometido, no obtiene privilegios de root (UID/GID 0) en el host.
+
+    Si montas una **carpeta local**, asegúrate de que los permisos del directorio permitan que ese usuario no privilegiado pueda escribir datos:
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    O, si la carpeta ya existe:
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    Cuando utilices [Docker en modo rootless](https://docs.docker.com/engine/security/rootless) o [Podman](https://podman.io/), los UID/GID del contenedor se remapean. Verifica primero tus rangos `subuid` y `subgid`:
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    Por ejemplo, si el rango comienza en **100000**, el UID/GID efectivo será **100100** (100000 + 100):
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    O, si la carpeta ya existe:
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 La imagen Todo en Uno viene con varios servicios integrados, que se pueden controlar mediante variables de entorno:
 
 - `SERVICE_UI=yes` (predeterminado) - Habilita el servicio de la interfaz de usuario web
@@ -123,9 +176,12 @@ Por defecto, el asistente de configuración se inicia automáticamente cuando ej
 
 ### Integración con Redis {#redis-integration}
 
-La imagen **Todo en Uno** de BunkerWeb incluye Redis listo para usar para la [persistencia de baneos e informes](advanced.md#persistence-of-bans-and-reports). Para gestionar Redis:
+La imagen **Todo en Uno** de BunkerWeb incluye Redis listo para usar para la [persistencia de baneos e informes](advanced.md#persistence-of-bans-and-reports). Ten en cuenta:
 
-- Para deshabilitar Redis, establece `USE_REDIS=no` o apunta `REDIS_HOST` a un host externo.
+- El servicio Redis integrado solo se inicia cuando `USE_REDIS=yes` **y** `REDIS_HOST` se mantiene en su valor predeterminado (`127.0.0.1`/`localhost`).
+- Escucha en la interfaz de loopback del contenedor, por lo que solo está disponible para los procesos del contenedor, no para otros contenedores ni para el host.
+- Sobrescribe `REDIS_HOST` únicamente cuando tengas un extremo Redis/Valkey externo disponible; de lo contrario, la instancia integrada no se iniciará.
+- Para deshabilitar Redis por completo, establece `USE_REDIS=no`.
 - Los registros de Redis aparecen con el prefijo `[REDIS]` en los registros de Docker y en `/var/log/bunkerweb/redis.log`.
 
 ### Integración con CrowdSec {#crowdsec-integration}
@@ -1251,7 +1307,17 @@ networks:
   <figcaption>Integración con Kubernetes</figcaption>
 </figure>
 
-Para automatizar la configuración de las instancias de BunkerWeb en un entorno de Kubernetes, el servicio de autoconfiguración sirve como un [controlador de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). Configura las instancias de BunkerWeb basándose en los [recursos de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) y también supervisa otros objetos de Kubernetes, como [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), para configuraciones personalizadas.
+Para automatizar la configuración de las instancias de BunkerWeb en un entorno de Kubernetes,
+el servicio de autoconfiguración sirve como un [controlador de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+Configura las instancias de BunkerWeb basándose en los [recursos de Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+y también supervisa otros objetos de Kubernetes, como [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/),
+para configuraciones personalizadas.
+
+!!! info "Reconciliación de ConfigMap"
+    - El controlador de Ingress solo gestiona las ConfigMap que tienen la anotación `bunkerweb.io/CONFIG_TYPE`.
+    - Añade `bunkerweb.io/CONFIG_SITE` si quieres limitar la configuración a un único servicio (el nombre del servidor debe existir);
+      déjala sin definir para aplicarla globalmente.
+    - Al quitar la anotación o eliminar la ConfigMap, se elimina la configuración personalizada correspondiente en BunkerWeb.
 
 Para una configuración óptima, se recomienda definir BunkerWeb como un **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**, lo que asegura que se cree un pod en todos los nodos, mientras que la **autoconfiguración y el programador** se definen como un **único [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) replicado**.
 

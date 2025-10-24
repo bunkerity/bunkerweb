@@ -851,14 +851,17 @@ systemctl status systemd-resolved
 
 === "Kubernetes"
 
-    当使用 [Kubernetes 集成](integrations.md#kubernetes)时，自定义配置是使用 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) 管理的。
+    当使用 [Kubernetes 集成](integrations.md#kubernetes)时，
+    自定义配置通过 [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) 管理。
 
-    为了简单起见，您甚至不需要将 ConfigMap 与 Pod 一起使用（例如作为环境变量或卷）：autoconf Pod 正在监听 ConfigMap 事件，并会在需要时更新自定义配置。
+    无需将 ConfigMap 挂载到 Pod（例如作为环境变量或卷）。
+    Autoconf Pod 会监听 ConfigMap 事件并在检测到更改时立即更新配置。
 
-    创建 ConfigMap 时，您需要添加特殊的标签：
+    请为需要由 Ingress 控制器管理的 ConfigMap 添加以下注解：
 
-    *   **bunkerweb.io/CONFIG_TYPE**：必须设置为有效的自定义配置类型（http、server-http、default-server-http、modsec、modsec-crs、crs-plugins-before、crs-plugins-after、stream 或 server-stream）
-    *   **bunkerweb.io/CONFIG_SITE**：设置为服务器名称以将配置应用于该特定服务器（可选，如果未设置则将全局应用）
+    - `bunkerweb.io/CONFIG_TYPE`：必填。请选择受支持的类型（`http`、`server-http`、`default-server-http`、`modsec`,
+      `modsec-crs`、`crs-plugins-before`、`crs-plugins-after`、`stream`、`server-stream` 或 `settings`）。
+    - `bunkerweb.io/CONFIG_SITE`：可选。设置为主要服务器名称（在 `Ingress` 中声明）以仅作用于该服务；不设置则表示全局生效。
 
     这是一个示例：
 
@@ -879,8 +882,22 @@ systemctl status systemd-resolved
       }
     ```
 
+    !!! info "同步方式"
+        - Ingress 控制器会持续监听带注解的 ConfigMap。
+        - 如果设置了 `NAMESPACES` 环境变量，则仅处理这些命名空间中的 ConfigMap。
+        - 创建或更新受管 ConfigMap 会立即触发配置重新加载。
+        - 删除 ConfigMap，或移除 `bunkerweb.io/CONFIG_TYPE` 注解，会清除对应的自定义配置。
+        - 当指定 `bunkerweb.io/CONFIG_SITE` 时，引用的服务必须已经存在；否则该 ConfigMap 会被忽略，直到服务出现。
+
     !!! tip "自定义额外配置"
-        自 `1.6.0` 版本起，您可以使用 `bunkerweb.io/CONFIG_TYPE=settings` 注解来添加/覆盖设置。这是一个示例：
+        自 `1.6.0` 版本起，您可以在 ConfigMap 上添加 `bunkerweb.io/CONFIG_TYPE=settings` 注解来新增或覆盖设置。
+        autoconf 的 Ingress 控制器会读取 `data` 下的每个键值对，并像处理环境变量一样应用它们：
+
+        - 未定义 `bunkerweb.io/CONFIG_SITE` 时，所有键都会全局生效。
+        - 定义了 `bunkerweb.io/CONFIG_SITE` 时，控制器会自动为尚未限定的键添加 `<服务器名称>_` 前缀（其中所有 `/` 会被替换为 `_`）。如果需要在同一份 ConfigMap 中混合全局键和特定键，请自行添加该前缀。
+        - 无效的键名或取值会被跳过，并在 autoconf 控制器日志中记录警告。
+
+        示例：
 
         ```yaml
         apiVersion: v1
@@ -908,7 +925,7 @@ systemctl status systemd-resolved
 
     创建配置时，您需要添加特殊的标签：
 
-    *   **bunkerweb.CONFIG_TYPE**：必须设置为有效的自定义配置类型（http、server-http、default-server-http、modsec、modsec-crs、crs-plugins-before、crs-plugins-after、stream 或 server-stream）
+    *   **bunkerweb.CONFIG_TYPE**：必须设置为有效的自定义配置类型（http、server-http、default-server-http、modsec、modsec-crs、crs-plugins-before、crs-plugins-after、stream、server-stream 或 settings）
     *   **bunkerweb.CONFIG_SITE**：设置为服务器名称以将配置应用于该特定服务器（可选，如果未设置则将全局应用）
 
     这是一个示例：

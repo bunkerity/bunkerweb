@@ -144,6 +144,9 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
 
 在底层，每当您编辑设置或添加新配置时，BunkerWeb 都会自动将更改存储在数据库中，从而确保数据的持久性和一致性。BunkerWeb 支持多种后端数据库选项，包括 SQLite、MariaDB、MySQL 和 PostgreSQL。
 
+!!! tip
+    如果您使用 Web UI 进行日常管理，我们建议迁移到外部数据库引擎（PostgreSQL 或 MySQL/MariaDB），而不是继续使用 SQLite。外部数据库在多用户环境下处理并发请求和长期增长更加稳定。
+
 使用 `DATABASE_URI` 设置配置数据库非常简单，该设置遵循每种支持的数据库的指定格式：
 
 !!! warning
@@ -157,6 +160,27 @@ BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库�
 - **PostgreSQL**: `postgresql://bunkerweb:changeme@bw-db:5432/db`
 
 通过在配置中指定适当的数据库 URI，您可以将 BunkerWeb 与您首选的数据库后端无缝集成，从而确保高效可靠地存储您的配置数据。
+
+### 数据库兼容性矩阵
+
+| 集成             | PostgreSQL                   | MariaDB            | MySQL             | SQLite |
+| :--------------- | :--------------------------- | :----------------- | :---------------- | :----- |
+| **Docker**       | ✅ `v17` 及更早版本 (❌ `v18`) | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Kubernetes**   | ✅ `v17` 及更早版本 (❌ `v18`) | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Autoconf**     | ✅ `v17` 及更早版本 (❌ `v18`) | ✅ `v11` 及更早版本 | ✅ `v9` 及更早版本 | ✅ 支持 |
+| **Linux 软件包** | 见下方说明                   | 见下方说明         | 见下方说明        | ✅ 支持 |
+
+!!! info "说明"
+    - **PostgreSQL**: 不支持 `v18`，因为我们提供的 Alpine 基础镜像仅包含 `v17` 客户端软件包。
+    - **Linux**: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。
+    - **SQLite**: 随软件包一起提供，可立即使用。
+
+有助于安装数据库客户端的外部资源：
+
+- [PostgreSQL 下载与仓库指南](https://www.postgresql.org/download/)
+- [MariaDB 仓库配置工具](https://mariadb.org/download/?t=repo-config)
+- [MySQL 仓库配置指南](https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/)
+- [SQLite 下载页面](https://www.sqlite.org/download.html)
 
 <figure markdown>
   ![概述](assets/img/bunkerweb_db.svg){ align=center, width="800" }

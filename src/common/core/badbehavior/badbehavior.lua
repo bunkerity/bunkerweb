@@ -325,7 +325,7 @@ function badbehavior:increase(
 		counter = local_counter + 1
 	end
 	-- Store local counter
-	local ok, err = self.datastore:set("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
+	local ok, err = self.datastore:set_with_retries("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
 	if not ok then
 		self.logger:log(ERR, "(increase) can't save counts to the datastore : " .. err)
 		return false, err
@@ -383,7 +383,7 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 		counter = 0
 		self.datastore:delete("plugin_badbehavior_count_" .. key_suffix)
 	else
-		local ok, err = self.datastore:set("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
+		local ok, err = self.datastore:set_with_retries("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
 		if not ok then
 			self.logger:log(ERR, "(decrease) can't save counts to the datastore : " .. err)
 			return false, err

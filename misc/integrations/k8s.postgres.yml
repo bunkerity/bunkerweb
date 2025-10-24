@@ -224,7 +224,7 @@ spec:
             - name: POSTGRES_PASSWORD
               value: "changeme"
           volumeMounts:
-            - mountPath: "/var/lib/postgresql/data"
+            - mountPath: "/var/lib/postgresql"
               name: vol-db
       volumes:
         - name: vol-db

@@ -13,6 +13,15 @@ from app.utils import LOGGER, flash
 
 templates = Blueprint("templates", __name__)
 
+VIEW_MODES = {"easy", "raw"}
+
+
+def _normalize_view_mode(raw: Optional[str]) -> str:
+    if not isinstance(raw, str):
+        return "easy"
+    candidate = raw.strip().lower()
+    return candidate if candidate in VIEW_MODES else "easy"
+
 
 def _normalise_tags(raw: Any) -> List[str]:
     if isinstance(raw, (list, tuple, set)):
@@ -248,6 +257,7 @@ def _build_editor_context(
     templates_index: Optional[Dict[str, Dict[str, Any]]] = None,
     template_meta: Optional[Dict[str, Any]] = None,
     clone_meta: Optional[Dict[str, str]] = None,
+    view_mode: str = "easy",
 ) -> Dict[str, Any]:
     templates_index = templates_index or DB.get_templates()
     template_meta = template_meta or {}
@@ -284,9 +294,12 @@ def _build_editor_context(
     ]
 
     multisite_settings_catalog = _build_multisite_settings_catalog()
+    normalized_view_mode = _normalize_view_mode(view_mode)
 
     return {
-        "mode": mode,
+        "view_mode": normalized_view_mode,
+        "mode": normalized_view_mode,
+        "editor_mode": mode,
         "template_id": template_id,
         "template_data": template_data,
         "template_meta": template_meta,
@@ -312,6 +325,7 @@ def templates_page():
 def template_create_page():
     clone_id = request.args.get("clone", "").strip()
     templates_index = DB.get_templates()
+    view_mode = _normalize_view_mode(request.args.get("view", request.args.get("mode")))
     template_payload = {
         "id": "",
         "name": "",
@@ -339,6 +353,7 @@ def template_create_page():
         template_data=template_payload,
         templates_index=templates_index,
         clone_meta=clone_meta,
+        view_mode=view_mode,
     )
     return render_template("template_edit.html", **context)
 
@@ -353,12 +368,14 @@ def template_edit_page(template_id: str):
 
     templates_index = DB.get_templates()
     template_meta = templates_index.get(template_id, {})
+    view_mode = _normalize_view_mode(request.args.get("view", request.args.get("mode")))
     context = _build_editor_context(
         mode="edit",
         template_id=template_id,
         template_data=_convert_template_details({**details, "id": template_id}),
         templates_index=templates_index,
         template_meta=template_meta,
+        view_mode=view_mode,
     )
     return render_template("template_edit.html", **context)
 

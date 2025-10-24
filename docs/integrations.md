@@ -56,6 +56,64 @@ The All-In-One image comes with several built-in services, which can be controll
 - `USE_REDIS=yes` (default) - Enables the built-in [Redis](#redis-integration) instance
 - `USE_CROWDSEC=no` (default) - [CrowdSec](#crowdsec-integration) integration is disabled by default
 
+A named volume (or bind mount) is required to persist the SQLite database, cache, and backups stored under `/data` inside the container:
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.5
+    container_name: bunkerweb-aio
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp"
+    volumes:
+      - bw-storage:/data
+...
+volumes:
+  bw-storage:
+```
+
+!!! warning "Using a local folder for persistent data"
+    The All-In-One container runs services as an **unprivileged user with UID 101 and GID 101**. This improves security: even if a component is compromised, it does not gain root (UID/GID 0) on the host.
+
+    If you bind mount a **local folder**, ensure the directory permissions allow that unprivileged user to write data:
+
+    ```shell
+    mkdir bw-data && \
+    chown root:101 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    Or, if the folder already exists:
+
+    ```shell
+    chown -R root:101 bw-data && \
+    chmod -R 770 bw-data
+    ```
+
+    When using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [Podman](https://podman.io/), container UIDs/GIDs are remapped. Check your subuid/subgid ranges first:
+
+    ```shell
+    grep ^$(whoami): /etc/subuid && \
+    grep ^$(whoami): /etc/subgid
+    ```
+
+    For example, if the range starts at **100000**, the effective UID/GID becomes **100100** (100000 + 100):
+
+    ```shell
+    mkdir bw-data && \
+    sudo chgrp 100100 bw-data && \
+    chmod 770 bw-data
+    ```
+
+    Or, if the folder already exists:
+
+    ```shell
+    sudo chgrp -R 100100 bw-data && \
+    sudo chmod -R 770 bw-data
+    ```
+
 ### API Integration
 
 The All-In-One image embeds the BunkerWeb API. It is disabled by default and can be enabled by setting `SERVICE_API=yes`.
@@ -123,10 +181,13 @@ By default, the setup wizard is automagically launched when you run the AIO cont
 
 ### Redis Integration {#redis-integration}
 
-The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](advanced.md#persistence-of-bans-and-reports). To manage Redis:
+The BunkerWeb **All-In-One** image includes Redis out-of-the-box for the [persistence of bans and reports](advanced.md#persistence-of-bans-and-reports). Keep in mind:
 
-- To disable Redis, set `USE_REDIS=no` or point `REDIS_HOST` to an external host.
-- Redis logs appear with `[REDIS]` prefix in Docker logs and `/var/log/bunkerweb/redis.log`.
+- The embedded Redis service only starts when `USE_REDIS=yes` **and** `REDIS_HOST` is left at its default (`127.0.0.1`/`localhost`).
+- It listens on the container loopback interface, so it is available to processes inside the container but not from other containers or the host.
+- Override `REDIS_HOST` only when you have an external Redis/Valkey endpoint to connect to—doing so prevents the embedded instance from launching.
+- To disable Redis entirely, set `USE_REDIS=no`.
+- Redis logs appear with the `[REDIS]` prefix in Docker logs and in `/var/log/bunkerweb/redis.log`.
 
 ### CrowdSec Integration {#crowdsec-integration}
 
@@ -674,7 +735,7 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `-f, --force`           | Forces the installation to proceed even on an unsupported OS version. |
 | `-q, --quiet`           | Silent installation (suppress output).                                |
 | `--api`, `--enable-api` | Enables the API (FastAPI) systemd service (disabled by default).      |
-| `--no-api`              | Explicitly disables the API service.                                   |
+| `--no-api`              | Explicitly disables the API service.                                  |
 | `-h, --help`            | Displays the help message with all available options.                 |
 | `--dry-run`             | Show what would be installed without doing it.                        |
 
@@ -1256,18 +1317,38 @@ networks:
   <figcaption>Kubernetes integration</figcaption>
 </figure>
 
-To automate the configuration of BunkerWeb instances in a Kubernetes environment, the autoconf service serves as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). It configures the BunkerWeb instances based on [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/) and also monitors other Kubernetes objects, such as [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), for custom configurations.
+To automate the configuration of BunkerWeb instances in a Kubernetes environment,
+the autoconf service serves as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
+It configures the BunkerWeb instances based on [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+and also monitors other Kubernetes objects, such as [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), for custom configurations.
 
-For an optimal setup, it is recommended to define BunkerWeb as a **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**, which ensures that a pod is created on all nodes, while the **autoconf and scheduler** are defined as **single replicated [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**.
+!!! info "ConfigMap reconciliation"
+    - The ingress controller only manages ConfigMaps that carry the `bunkerweb.io/CONFIG_TYPE` annotation.
+    - Add `bunkerweb.io/CONFIG_SITE` when you want to scope the configuration to a single service (the server name must already exist);
+      omit it to apply the configuration globally.
+    - Removing the annotation or deleting the ConfigMap removes the related custom configuration from BunkerWeb.
 
-Given the presence of multiple BunkerWeb instances, it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service. This service will be utilized by the instances to cache and share data among themselves. Further information about the Redis/Valkey settings can be found [here](features.md#redis).
+For an optimal setup, it is recommended to define BunkerWeb as a **[DaemonSet](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)**,
+which ensures that a pod is created on all nodes,
+while the **autoconf and scheduler** are defined as **single replicated [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)**.
+
+Given the presence of multiple BunkerWeb instances,
+it is necessary to establish a shared data store implemented as a [Redis](https://redis.io/) or [Valkey](https://valkey.io/) service.
+This service will be utilized by the instances to cache and share data among themselves.
+Further information about the Redis/Valkey settings can be found [here](features.md#redis).
 
 !!! info "Database backend"
-    Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations) of the repository for more information.
+    Please be aware that our instructions assume you are using MariaDB as the default database backend,
+    as configured by the `DATABASE_URI` setting.
+    However, we understand that you may prefer to utilize alternative backends for your Docker integration.
+    If that is the case, rest assured that other database backends are still possible.
+    See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/misc/integrations)
+    of the repository for more information.
 
     Clustered database backends setup are out-of-the-scope of this documentation.
 
-Please ensure that the autoconf services have access to the Kubernetes API. It is recommended to utilize [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for this purpose.
+Please ensure that the autoconf services have access to the Kubernetes API.
+It is recommended to utilize [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for this purpose.
 
 !!! warning "Custom CA for Kubernetes API"
     If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the `KUBERNETES_SSL_CA_CERT` environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the `KUBERNETES_SSL_VERIFY` environment variable of the ingress controller to `no` (default is `yes`).

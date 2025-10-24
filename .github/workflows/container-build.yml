@@ -53,7 +53,7 @@ jobs:
         if: inputs.RELEASE == '1.5'
         run: chmod +x ./misc/update-version.sh && ./misc/update-version.sh dev
       - name: Setup SSH for ARM node
-        if: inputs.CACHE_SUFFIX == 'arm'
+        if: startsWith(inputs.CACHE_SUFFIX, 'arm')
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
@@ -65,12 +65,30 @@ jobs:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Check ARM SSH connectivity
+        if: startsWith(inputs.CACHE_SUFFIX, 'arm')
+        run: |
+          echo "Testing SSH connectivity to ARM node..."
+          for i in {1..5}; do
+            if ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Connection test $i successful' && docker info > /dev/null 2>&1 && echo 'Docker is running'"; then
+              echo "✓ SSH connection and Docker verified"
+              break
+            fi
+            echo "Retry $i/5 failed, waiting 10 seconds..."
+            sleep 10
+          done
+          echo "Waiting for connection to stabilize..."
+          sleep 5
+          echo "Final connectivity check..."
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Final check OK' && uptime"
+        env:
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
       - name: Setup Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
-        if: inputs.CACHE_SUFFIX != 'arm'
+        if: startsWith(inputs.CACHE_SUFFIX, 'arm') == false
       - name: Setup Buildx (ARM)
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
-        if: inputs.CACHE_SUFFIX == 'arm'
+        if: startsWith(inputs.CACHE_SUFFIX, 'arm')
         with:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7
@@ -102,8 +120,8 @@ jobs:
           platforms: ${{ inputs.ARCH }}
           load: true
           tags: local/${{ inputs.IMAGE }}
-          cache-from: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
-          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=min
+          cache-from: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
+          cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=max
           labels: ${{ steps.meta.outputs.labels }}
       # Build non-cached image
       - name: Build image
@@ -113,13 +131,13 @@ jobs:
           context: .
           file: ${{ inputs.DOCKERFILE }}
           platforms: ${{ inputs.ARCH }}
-          load: ${{ inputs.CACHE_SUFFIX != 'arm' }}
+          load: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
           tags: local/${{ inputs.IMAGE }}
-          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=min
+          cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=max
           labels: ${{ steps.meta.outputs.labels }}
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
-        if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
+        if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
         with:
           vuln-type: os
@@ -133,7 +151,7 @@ jobs:
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
       # - name: Docker Scout Analysis # TODO: Add back when the openssl shenanigans are fixed
-      #   if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
+      #   if: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
       #   uses: docker/scout-action@aceeb83b88f2ae54376891227858dda7af647183 # v1.18.1
       #   with:
       #     command: cves,recommendations

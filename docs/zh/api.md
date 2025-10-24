@@ -392,7 +392,7 @@ API 按资源聚焦的路由器组织。使用以下部分作为功能地图；`
 ### 自定义配置片段
 
 - `GET /configs`：列出服务的自定义配置片段（HTTP/服务器/流/ModSecurity/CRS 挂钩）（默认为 `service=global`）。`with_data=true` 在可打印时嵌入 UTF-8 内容。
-- `POST /configs` 和 `POST /configs/upload`：从 JSON 负载或上传的文件创建新片段。接受的类型包括 `http`、`server_http`、`default_server_http`、`modsec`、`modsec_crs`、`stream`、`server_stream` 和 CRS 插件挂钩。名称必须匹配 `^[\w_-]{1,64}$`。
+- `POST /configs` 和 `POST /configs/upload`：从 JSON 负载或上传的文件创建新片段。接受的类型包括 `http`、`server_http`、`default_server_http`、`modsec`、`modsec_crs`、`stream`、`server_stream` 和 CRS 插件挂钩。名称必须匹配 `^[\w_-]{1,255}$`。
 - `GET /configs/{service}/{type}/{name}`：检索带有可选内容的片段（`with_data=true`）。
 - `PATCH /configs/{service}/{type}/{name}` 和 `PATCH .../upload`：更新或移动 API 管理的片段；模板或文件管理的条目保持只读。
 - `DELETE /configs` 和 `DELETE /configs/{service}/{type}/{name}`：修剪 API 管理的片段，同时保留模板管理的片段，并为被忽略的条目返回一个 `skipped` 列表。

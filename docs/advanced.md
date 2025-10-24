@@ -851,14 +851,18 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+    When using the [Kubernetes integration](integrations.md#kubernetes),
+    custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
 
-    To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
+    You do not need to mount the ConfigMap inside a Pod (for example as an environment variable or volume).
+    The autoconf Pod watches ConfigMap events and updates the custom configuration whenever a change is detected.
 
-    When creating a ConfigMap, you will need to add special labels :
+    Annotate each ConfigMap you want the ingress controller to manage:
 
-    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream or server-stream)
-    * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
+    - `bunkerweb.io/CONFIG_TYPE`: Required. Choose one of the supported custom configuration types (`http`, `server-http`,
+      `default-server-http`, `modsec`, `modsec-crs`, `crs-plugins-before`, `crs-plugins-after`, `stream`, `server-stream`, or `settings`).
+    - `bunkerweb.io/CONFIG_SITE`: Optional. Set to the primary server name (as exposed through your `Ingress`) to scope the configuration to that service;
+      omit it to apply the config globally.
 
     Here is the example :
 
@@ -879,8 +883,22 @@ Some integrations provide more convenient ways to apply configurations, such as 
       }
     ```
 
+    !!! info "How reconciliation works"
+        - The ingress controller continuously watches annotated ConfigMaps.
+        - If the `NAMESPACES` environment variable is set, only ConfigMaps from those namespaces are considered.
+        - Creating or updating a managed ConfigMap triggers an immediate configuration reload.
+        - Deleting the ConfigMap—or removing the `bunkerweb.io/CONFIG_TYPE` annotation—removes the associated custom configuration.
+        - If you set `bunkerweb.io/CONFIG_SITE`, the referenced service must already exist; otherwise, the ConfigMap is ignored until the service appears.
+
     !!! tip "Custom Extra Config"
-        Since the `1.6.0` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
+        Since version `1.6.0`, you can add or override settings by annotating a ConfigMap with `bunkerweb.io/CONFIG_TYPE=settings`.
+        The autoconf ingress controller reads each entry under `data` and applies it like an environment variable:
+
+        - Without `bunkerweb.io/CONFIG_SITE`, all keys are applied globally.
+        - When `bunkerweb.io/CONFIG_SITE` is set, the controller automatically prefixes each key with `<server-name>_` (every `/` replaced by `_`) if the key is not already scoped. Add the prefix yourself if you need to mix global and site-specific keys in the same ConfigMap.
+        - Invalid setting names or values are skipped and a warning is logged by the autoconf controller.
+
+        Here is an example :
 
         ```yaml
         apiVersion: v1
@@ -908,7 +926,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     When creating a Config, you will need to add special labels :
 
-    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream or server-stream)
+    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream, server-stream or settings)
     * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
 
     Here is the example :

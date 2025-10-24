@@ -309,13 +309,14 @@
                                                              {% endif %}>
                                                             <label for="{{ step_config_id }}" class="form-label fw-semibold fs-6">{{ step_config }}</label>
                                                             <textarea id="{{ step_config_id }}-default" class="visually-hidden">{{ template_data["configs"].get(step_config, "") }}</textarea>
+                                                            <textarea id="{{ step_config_id }}-value" class="visually-hidden">{{- step_config_value|safe -}}</textarea>
                                                             <div id="{{ step_config_id }}"
                                                                  aria-labelledby="label-{{ step_config_id }}"
                                                                  data-language="{% if step_config.startswith(('crs', 'modsec')) %}ModSecurity{% else %}NGINX{% endif %}"
                                                                  data-name="CUSTOM_CONF_{{ step_config.split("/")[0] |upper }}_{{ step_config.split("/")[1] .replace(".conf", "") }}"
                                                                  data-method="{% if is_readonly %}readonly{% else %}{{ step_config_method }}{% endif %}"
+                                                                 data-source="#{{ step_config_id }}-value"
                                                                  class="ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0 mt-6">
-                                                                {{ step_config_value }}
                                                             </div>
                                                         </div>
                                                     {% endfor %}

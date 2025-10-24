@@ -94,9 +94,24 @@ class Controller(Config):
         raise NotImplementedError
 
     def _is_service_present(self, server_name):
+        if not isinstance(server_name, str):
+            return False
+
+        normalized_server_name = server_name.strip().split(" ")[0]
+        if not normalized_server_name:
+            return False
+
         for service in self._services:
-            if "SERVER_NAME" not in service or not service["SERVER_NAME"]:
+            service_name = service.get("SERVER_NAME", "")
+            if not service_name:
                 continue
-            if server_name == service["SERVER_NAME"].strip().split(" ")[0]:
+            if normalized_server_name == service_name.strip().split(" ")[0]:
                 return True
+
+        db_services = self._db.get_services()
+        for service in db_services:
+            db_service_name = service.get("id", "")
+            if normalized_server_name == db_service_name:
+                return True
+
         return False

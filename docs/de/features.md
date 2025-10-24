@@ -1626,7 +1626,7 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.0 # Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit
+        image: crowdsecurity/crowdsec:v1.7.1 # Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit
         volumes:
           - cs-data:/var/lib/crowdsec/data # Zum Persistieren der CrowdSec-Daten
           - bw-logs:/var/log:ro # Die BunkerWeb-Protokolle, die von CrowdSec analysiert werden sollen
@@ -3996,6 +3996,9 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 3.  Mehrere Instanzen teilen diese Daten für ein reibungsloses Clustering.
 4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS and Redis Sentinel.
 5.  Automatische Wiederverbindung and konfigurierbare Timeouts sorgen für Robustheit.
+
+!!! note "Spezifika des All-In-One-Images"
+    Das All-In-One-Docker-Image enthält einen eingebetteten Redis-Server. Er startet automatisch nur, wenn `USE_REDIS=yes` gesetzt ist und `REDIS_HOST` auf dem Standardwert (`127.0.0.1`/`localhost`) bleibt. Wird `REDIS_HOST` überschrieben, erwartet BunkerWeb einen externen Redis-/Valkey-Endpunkt und startet den eingebetteten Dienst nicht; zudem lauscht der eingebettete Dienst ausschließlich auf dem Loopback-Interface und ist von anderen Containern aus nicht erreichbar.
 
 ### Verwendung
 

@@ -164,7 +164,7 @@ def configs_new():
             next=True,
         )
         config_name = request.form["name"]
-        if not match(r"^[\w_-]{1,64}$", config_name):
+        if not match(r"^[\w_-]{1,255}$", config_name):
             return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
 
         verify_data_in_form(
@@ -300,7 +300,7 @@ def configs_edit(service: str, config_type: str, name: str):
             next=True,
         )
         new_name = secure_filename(request.form["name"])
-        if not match(r"^[\w_-]{1,64}$", new_name):
+        if not match(r"^[\w_-]{1,255}$", new_name):
             return handle_error("Invalid name parameter on /configs/new.", "configs.configs_new", True)
 
         # Forbid renaming template-based configs (content can still be edited)

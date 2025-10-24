@@ -55,7 +55,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION != 'testing'
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
           body: |
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
@@ -82,7 +82,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION == 'testing'
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
           body: |
             **The testing version of BunkerWeb should not be used in production, please use the latest stable version instead.**

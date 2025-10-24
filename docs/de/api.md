@@ -392,7 +392,7 @@ Die API ist nach ressourcenorientierten Routern organisiert. Verwenden Sie die f
 ### Benutzerdefinierte Konfigurations-Snippets
 
 -   `GET /configs`: listet benutzerdefinierte Konfigurationsfragmente (HTTP/Server/Stream/ModSecurity/CRS-Hooks) für einen Dienst auf (`service=global` standardmäßig). `with_data=true` bettet UTF-8-Inhalt ein, wenn er druckbar ist.
--   `POST /configs` und `POST /configs/upload`: erstellt neue Snippets aus JSON-Payloads oder hochgeladenen Dateien. Akzeptierte Typen sind `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream` und CRS-Plugin-Hooks. Namen müssen mit `^[\w_-]{1,64}$` übereinstimmen.
+-   `POST /configs` und `POST /configs/upload`: erstellt neue Snippets aus JSON-Payloads oder hochgeladenen Dateien. Akzeptierte Typen sind `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream` und CRS-Plugin-Hooks. Namen müssen mit `^[\w_-]{1,255}$` übereinstimmen.
 -   `GET /configs/{service}/{type}/{name}`: ruft ein Snippet mit optionalem Inhalt ab (`with_data=true`).
 -   `PATCH /configs/{service}/{type}/{name}` und `PATCH .../upload`: aktualisiert oder verschiebt API-verwaltete Snippets; vorlagen- oder dateiverwaltete Einträge bleiben schreibgeschützt.
 -   `DELETE /configs` und `DELETE /configs/{service}/{type}/{name}`: entfernt API-verwaltete Snippets unter Beibehaltung von vorlagenverwalteten, wobei eine `skipped`-Liste für ignorierte Einträge zurückgegeben wird.
