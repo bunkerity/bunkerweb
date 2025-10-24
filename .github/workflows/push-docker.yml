@@ -97,9 +97,10 @@ jobs:
           tags: ${{ inputs.TAGS }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=gha,scope=${{ inputs.CACHE_FROM }}-amd64
-            type=gha,scope=${{ inputs.CACHE_FROM }}-386
-            type=gha,scope=${{ inputs.CACHE_FROM }}-arm64
-            type=gha,scope=${{ inputs.CACHE_FROM }}-armv7
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-amd64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-386
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-arm64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv7
+          outputs: type=registry,oci-mediatypes=true,compression=zstd
           provenance: true
           sbom: true

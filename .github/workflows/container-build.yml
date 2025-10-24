@@ -120,8 +120,8 @@ jobs:
           platforms: ${{ inputs.ARCH }}
           load: true
           tags: local/${{ inputs.IMAGE }}
-          cache-from: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
-          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=min
+          cache-from: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
+          cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=max
           labels: ${{ steps.meta.outputs.labels }}
       # Build non-cached image
       - name: Build image
@@ -133,7 +133,7 @@ jobs:
           platforms: ${{ inputs.ARCH }}
           load: ${{ startsWith(inputs.CACHE_SUFFIX, 'arm') == false }}
           tags: local/${{ inputs.IMAGE }}
-          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=min
+          cache-to: type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.IMAGE }}-${{ inputs.CACHE_SUFFIX }},mode=max
           labels: ${{ steps.meta.outputs.labels }}
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
