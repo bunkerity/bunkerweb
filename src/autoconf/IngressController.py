@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from os import getenv
-from re import compile as re_compile
+from re import compile as re_compile, split as re_split
 from time import sleep
 from traceback import format_exc
 from typing import List, Optional, Tuple
@@ -53,16 +53,51 @@ class IngressController(Controller):
         self.__service_name = getenv("BUNKERWEB_SERVICE_NAME", "bunkerweb")
         self.__namespace = getenv("BUNKERWEB_NAMESPACE", "bunkerweb")
 
+        self.__ignored_annotations_exact = set()
+        self.__ignored_annotation_suffixes = set()
+        ignore_annotations = getenv("KUBERNETES_IGNORE_ANNOTATIONS", "")
+        if ignore_annotations:
+            tokens = [token.strip() for token in re_split(r"[,\s]+", ignore_annotations) if token.strip()]
+            for token in tokens:
+                if "/" in token:
+                    self.__ignored_annotations_exact.add(token)
+                    if token.startswith("bunkerweb.io/"):
+                        suffix = token.split("/", 1)[1]
+                        if suffix:
+                            self.__ignored_annotation_suffixes.add(suffix)
+                else:
+                    self.__ignored_annotation_suffixes.add(token)
+                    self.__ignored_annotations_exact.add(f"bunkerweb.io/{token}")
+
+            self._logger.info(
+                "Ignoring annotations while collecting instances: "
+                + ", ".join(sorted(self.__ignored_annotations_exact))
+            )
+
     def _get_controller_instances(self) -> list:
         instances = []
         pods = self.__corev1.list_pod_for_all_namespaces(watch=False).items
         for pod in pods:
-            if (
-                pod.metadata.annotations
-                and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                and (pod.metadata.namespace in self._namespaces if self._namespaces else True)
-            ):
-                instances.append(pod)
+            metadata = pod.metadata
+            if not metadata:
+                continue
+
+            annotations = metadata.annotations or {}
+            if "bunkerweb.io/INSTANCE" not in annotations:
+                continue
+
+            if self._namespaces and metadata.namespace not in self._namespaces:
+                continue
+
+            if any(self.__should_ignore_annotation(annotation) for annotation in annotations):
+                self._logger.info(
+                    "Skipping pod %s/%s because of ignored annotations",
+                    metadata.namespace,
+                    metadata.name,
+                )
+                continue
+
+            instances.append(pod)
         return instances
 
     def _get_controller_services(self) -> list:
@@ -117,6 +152,8 @@ class IngressController(Controller):
         for controller_service in self._get_controller_services():
             if controller_service.metadata.annotations:
                 for annotation, value in controller_service.metadata.annotations.items():
+                    if self.__should_ignore_annotation(annotation):
+                        continue
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
                     instance["env"][annotation.replace("bunkerweb.io/", "", 1)] = value
@@ -194,6 +231,8 @@ class IngressController(Controller):
                 server_name = service["SERVER_NAME"].strip().split(" ")[0]
 
                 for annotation, value in controller_service.metadata.annotations.items():
+                    if self.__should_ignore_annotation(annotation):
+                        continue
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
                     setting = annotation.replace("bunkerweb.io/", "", 1)
@@ -261,6 +300,15 @@ class IngressController(Controller):
                                 service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
 
         return services
+
+    def __should_ignore_annotation(self, annotation: str) -> bool:
+        if annotation in self.__ignored_annotations_exact:
+            return True
+        if annotation.startswith("bunkerweb.io/"):
+            suffix = annotation.split("/", 1)[1]
+            if suffix in self.__ignored_annotation_suffixes:
+                return True
+        return False
 
     def get_configs(self) -> Tuple[dict, dict]:
         configs = {config_type: {} for config_type in self._supported_config_types}

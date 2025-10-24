@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+from os import getenv
 from contextlib import suppress
 from time import sleep
 from traceback import format_exc
 from threading import Thread, Lock
 from typing import Any, Dict, List
 from docker import DockerClient
+from re import split as re_split
 from base64 import b64decode
 
 from docker.models.services import Service
@@ -22,6 +24,25 @@ class SwarmController(Controller):
         self.__swarm_services = []
         self.__swarm_configs = []
         self._logger.warning("Swarm integration is deprecated and will be removed in a future release")
+        self.__ignored_labels_exact = set()
+        self.__ignored_label_suffixes = set()
+        ignore_labels = getenv("SWARM_IGNORE_LABELS", "")
+        if ignore_labels:
+            tokens = [token.strip() for token in re_split(r"[,\s]+", ignore_labels) if token.strip()]
+            for token in tokens:
+                if token.startswith("bunkerweb."):
+                    self.__ignored_labels_exact.add(token)
+                    suffix = token.split(".", 1)[1] if "." in token else ""
+                    if suffix:
+                        self.__ignored_label_suffixes.add(suffix)
+                else:
+                    self.__ignored_label_suffixes.add(token)
+                    self.__ignored_labels_exact.add(f"bunkerweb.{token}")
+
+            self._logger.info(
+                "Ignoring Swarm labels while collecting instances: "
+                + ", ".join(sorted(self.__ignored_labels_exact))
+            )
 
     def _get_controller_swarm_services(self, label_key: str) -> List[Service]:
         """
@@ -40,10 +61,7 @@ class SwarmController(Controller):
             self._logger.error(f"Failed to retrieve services with label '{label_key}': {e}")
             return []
 
-        if not self._namespaces:
-            return services
-
-        namespace_set = set(self._namespaces)
+        namespace_set = set(self._namespaces or [])
         valid_services = []
 
         for service in services:
@@ -54,13 +72,17 @@ class SwarmController(Controller):
                     self._logger.warning(f"Unexpected label format for service {service.id}: {labels}")
                     continue
 
-                # Check if the namespace label matches any in the set
-                namespace = labels.get("bunkerweb.NAMESPACE", "")
-                if namespace in namespace_set:
-                    self._logger.debug(f"Service {service.id} matches namespace '{namespace}'.")
-                    valid_services.append(service)
-                else:
-                    self._logger.debug(f"Service {service.id} does not match any namespace.")
+                if namespace_set:
+                    namespace = labels.get("bunkerweb.NAMESPACE", "")
+                    if namespace not in namespace_set:
+                        self._logger.debug(f"Service {service.id} does not match any namespace.")
+                        continue
+
+                if any(self.__should_ignore_label(label) for label in labels):
+                    self._logger.info("Skipping service %s because of ignored labels", service.id)
+                    continue
+
+                valid_services.append(service)
 
             except AttributeError as e:
                 self._logger.warning(f"Service {service.id} missing expected attributes: {e}")
@@ -107,6 +129,8 @@ class SwarmController(Controller):
         self.__swarm_services.append(controller_service.id)
         service = {}
         for variable, value in controller_service.attrs["Spec"]["Labels"].items():
+            if self.__should_ignore_label(variable):
+                continue
             if not variable.startswith("bunkerweb."):
                 continue
             service[variable.replace("bunkerweb.", "", 1)] = value
@@ -147,6 +171,15 @@ class SwarmController(Controller):
             configs=self._configs,
             first=not self._loaded,
         )
+
+    def __should_ignore_label(self, label: str) -> bool:
+        if label in self.__ignored_labels_exact:
+            return True
+        if label.startswith("bunkerweb."):
+            suffix = label.split(".", 1)[1]
+            if suffix in self.__ignored_label_suffixes:
+                return True
+        return False
 
     def __process_event(self, event):
         if "Actor" not in event or "ID" not in event["Actor"] or "Type" not in event:

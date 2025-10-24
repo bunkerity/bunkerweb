@@ -384,6 +384,9 @@ services:
 !!! info "Full list"
     For the complete list of environment variables, see the [settings section](features.md) of the documentation.
 
+!!! tip "Skipping labelled containers"
+    When a container should be ignored by autoconf, set `DOCKER_IGNORE_LABELS` on the controller. Provide a space- or comma-separated list of label keys (for example `bunkerweb.SERVER_NAME`) or just the suffix (`SERVER_NAME`). Any container or custom-config source carrying a matching label is skipped during discovery, and the label is ignored when translating settings.
+
 ### Using Docker secrets
 
 Instead of passing sensitive settings via environment variables, you can store them as Docker secrets. For each setting you want to secure, create a Docker secret with the name matching the setting key (in uppercase). BunkerWeb's entrypoint scripts automatically load secrets from `/run/secrets` and export them as environment variables.
@@ -1383,6 +1386,9 @@ Once the BunkerWeb Kubernetes stack is successfully set up and operational (refe
 
 It is important to note that the BunkerWeb settings need to be specified as annotations for the Ingress resource. For the domain part, please use the special value **`bunkerweb.io`**. By including the appropriate annotations, you can configure BunkerWeb accordingly for the Ingress resource.
 
+!!! tip "Ignoring noisy annotations"
+  When some annotations should not impact autoconf, set `KUBERNETES_IGNORE_ANNOTATIONS` on the controller deployment. Provide a space- or comma-separated list of annotation keys (for example `bunkerweb.io/EXTRA_FOO`) or just the suffix (`EXTRA_FOO`). Matching annotations are stripped from ingress-derived settings, and pods carrying them are skipped entirely during instance discovery.
+
 !!! info "TLS support"
     BunkerWeb ingress controller fully supports custom HTTPS certificates using the tls spec as shown in the example. Configuring solutions such as `cert-manager` to automatically generate tls secrets is out of the scope of this documentation.
 
@@ -1898,6 +1904,9 @@ networks:
 
 !!! info "Swarm mandatory setting"
     Please note that the `SWARM_MODE: "yes"` environment variable is mandatory when using the Swarm integration.
+
+!!! tip "Skipping labelled services"
+  Need to exclude a Swarm service from autoconf? Set `SWARM_IGNORE_LABELS` on the controller. Supply a space- or comma-separated list of label keys (e.g. `bunkerweb.SERVER_NAME`) or suffixes (`SERVER_NAME`) and any service carrying those labels will be ignored during discovery.
 
 ### Swarm services
 
