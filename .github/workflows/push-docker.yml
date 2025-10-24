@@ -88,19 +88,19 @@ jobs:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build and push
       - name: Build and push
-        continue-on-error: ${{ inputs.IMAGE == 'bunkerweb-all-in-one' }}
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
-          platforms: ${{ inputs.IMAGE == 'bunkerweb-all-in-one' && 'linux/amd64,linux/arm64' || 'linux/amd64,linux/386,linux/arm64,linux/arm/v7' }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ inputs.TAGS }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
-            type=gha,scope=${{ inputs.CACHE_FROM }}-amd64
-            type=gha,scope=${{ inputs.CACHE_FROM }}-386
-            type=gha,scope=${{ inputs.CACHE_FROM }}-arm64
-            type=gha,scope=${{ inputs.CACHE_FROM }}-armv7
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-amd64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-386
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-arm64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv7
+          outputs: type=registry,oci-mediatypes=true,compression=zstd
           provenance: true
           sbom: true
