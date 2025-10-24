@@ -56,36 +56,36 @@ if not ret:
 domains = {}
 if test_type in ["docker", "autoconf", "linux"]:
     domains = {
-        r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-        r"auth\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-        r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
-        r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
-        r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3"),
+        "www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        "auth.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        "app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
+        "app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        "app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3"),
     }
 elif test_type == "kubernetes":
     domains = {
-        r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
-        r"auth\.example\.com": Test.random_string(1) + "." + getenv("TEST_DOMAIN1_2"),
-        r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-        r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
-        r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
+        "www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        "auth.example.com": Test.random_string(1) + "." + getenv("TEST_DOMAIN1_2"),
+        "app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        "app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
+        "app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
     }
 else:  # swarm
     domains = {
-        r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
-        r"auth\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
-        r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-        r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
-        r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
+        "www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
+        "auth.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        "app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        "app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
+        "app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
     }
 
 domains.update(
     {
-        r"www\\\\\.example\\\\\.com": domains[r"www\.example\.com"],
-        r"auth\\\\\.example\\\\\.com": domains[r"auth\.example\.com"],
-        r"app1\\\\\.example\\\\\.com": domains[r"app1\.example\.com"],
-        r"app2\\\\\.example\\\\\.com": domains[r"app2\.example\.com"],
-        r"app3\\\\\.example\\\\\.com": domains[r"app3\.example\.com"],
+        "www\\\\.example\\\\.com": domains["www.example.com"],
+        "auth\\\\.example\\\\.com": domains["auth.example.com"],
+        "app1\\\\.example\\\\.com": domains["app1.example.com"],
+        "app2\\\\.example\\\\.com": domains["app2.example.com"],
+        "app3\\\\.example\\\\.com": domains["app3.example.com"],
     }
 )
 
