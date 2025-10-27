@@ -69,10 +69,14 @@ class IngressController(Controller):
                     self.__ignored_annotation_suffixes.add(token)
                     self.__ignored_annotations_exact.add(f"bunkerweb.io/{token}")
 
-            self._logger.info(
-                "Ignoring annotations while collecting instances: "
-                + ", ".join(sorted(self.__ignored_annotations_exact))
-            )
+            self._logger.info("Ignoring annotations while collecting instances: " + ", ".join(sorted(self.__ignored_annotations_exact)))
+
+    def __should_ignore_annotation(self, annotation: str) -> bool:
+        if annotation in self.__ignored_annotations_exact:
+            return True
+        if annotation.removeprefix("bunkerweb.io/") in self.__ignored_annotation_suffixes:
+            return True
+        return False
 
     def _get_controller_instances(self) -> list:
         instances = []
@@ -84,17 +88,15 @@ class IngressController(Controller):
 
             annotations = metadata.annotations or {}
             if "bunkerweb.io/INSTANCE" not in annotations:
+                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because it is not a bunkerweb instance")
                 continue
 
             if self._namespaces and metadata.namespace not in self._namespaces:
+                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because its namespace is not in the allowed namespaces")
                 continue
 
             if any(self.__should_ignore_annotation(annotation) for annotation in annotations):
-                self._logger.info(
-                    "Skipping pod %s/%s because of ignored annotations",
-                    metadata.namespace,
-                    metadata.name,
-                )
+                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because of ignored annotations")
                 continue
 
             instances.append(pod)
@@ -108,10 +110,18 @@ class IngressController(Controller):
             if self.__ingress_class:
                 ingress_class_name = getattr(ingress.spec, "ingress_class_name", None)
                 if ingress_class_name != self.__ingress_class:
+                    self._logger.info(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its ingress class is not allowed")
                     continue
 
             # Skip if the namespace is not in the allowed namespaces (when specified)
             if self._namespaces and ingress.metadata.namespace not in self._namespaces:
+                self._logger.info(
+                    f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its namespace is not in the allowed namespaces"
+                )
+                continue
+
+            if ingress.metadata.annotations and any(self.__should_ignore_annotation(annotation) for annotation in ingress.metadata.annotations):
+                self._logger.info(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because of ignored annotations")
                 continue
 
             # Add the ingress to services if it passes all checks
@@ -152,8 +162,6 @@ class IngressController(Controller):
         for controller_service in self._get_controller_services():
             if controller_service.metadata.annotations:
                 for annotation, value in controller_service.metadata.annotations.items():
-                    if self.__should_ignore_annotation(annotation):
-                        continue
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
                     instance["env"][annotation.replace("bunkerweb.io/", "", 1)] = value
@@ -231,8 +239,6 @@ class IngressController(Controller):
                 server_name = service["SERVER_NAME"].strip().split(" ")[0]
 
                 for annotation, value in controller_service.metadata.annotations.items():
-                    if self.__should_ignore_annotation(annotation):
-                        continue
                     if not annotation.startswith("bunkerweb.io/"):
                         continue
                     setting = annotation.replace("bunkerweb.io/", "", 1)
@@ -301,25 +307,25 @@ class IngressController(Controller):
 
         return services
 
-    def __should_ignore_annotation(self, annotation: str) -> bool:
-        if annotation in self.__ignored_annotations_exact:
-            return True
-        if annotation.startswith("bunkerweb.io/"):
-            suffix = annotation.split("/", 1)[1]
-            if suffix in self.__ignored_annotation_suffixes:
-                return True
-        return False
-
     def get_configs(self) -> Tuple[dict, dict]:
         configs = {config_type: {} for config_type in self._supported_config_types}
         config = {}
         managed_configmaps = set()
         for configmap in self.__corev1.list_config_map_for_all_namespaces(watch=False).items:
-            if (
-                not configmap.metadata.annotations
-                or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations
-                or not (configmap.metadata.namespace in self._namespaces if self._namespaces else True)
-            ):
+            if not configmap.metadata.annotations or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations:
+                self._logger.info(
+                    f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because it has no bunkerweb.io/CONFIG_TYPE annotation"
+                )
+                continue
+
+            if self._namespaces and configmap.metadata.namespace not in self._namespaces:
+                self._logger.info(
+                    f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because its namespace is not in the allowed namespaces"
+                )
+                continue
+
+            if any(self.__should_ignore_annotation(annotation) for annotation in configmap.metadata.annotations):
+                self._logger.info(f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because of ignored annotations")
                 continue
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
@@ -372,10 +378,15 @@ class IngressController(Controller):
             return False
 
         if obj.metadata and self._namespaces and obj.metadata.namespace not in self._namespaces:
+            self._logger.info(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because its namespace is not in the allowed namespaces")
             return False
 
         annotations = obj.metadata.annotations if obj.metadata else None
         data = getattr(obj, "data", None)
+
+        if annotations and any(self.__should_ignore_annotation(annotation) for annotation in annotations):
+            self._logger.info(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because of ignored annotations")
+            return False
 
         ret = False
         if obj.kind == "Pod":

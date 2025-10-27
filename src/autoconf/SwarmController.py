@@ -30,19 +30,24 @@ class SwarmController(Controller):
         if ignore_labels:
             tokens = [token.strip() for token in re_split(r"[,\s]+", ignore_labels) if token.strip()]
             for token in tokens:
-                if token.startswith("bunkerweb."):
+                if "." in token:
                     self.__ignored_labels_exact.add(token)
-                    suffix = token.split(".", 1)[1] if "." in token else ""
-                    if suffix:
-                        self.__ignored_label_suffixes.add(suffix)
+                    if token.startswith("bunkerweb."):
+                        suffix = token.split(".", 1)[1]
+                        if suffix:
+                            self.__ignored_label_suffixes.add(suffix)
                 else:
                     self.__ignored_label_suffixes.add(token)
                     self.__ignored_labels_exact.add(f"bunkerweb.{token}")
 
-            self._logger.info(
-                "Ignoring Swarm labels while collecting instances: "
-                + ", ".join(sorted(self.__ignored_labels_exact))
-            )
+            self._logger.info("Ignoring Swarm labels while collecting instances: " + ", ".join(sorted(self.__ignored_labels_exact)))
+
+    def __should_ignore_label(self, label: str) -> bool:
+        if label in self.__ignored_labels_exact:
+            return True
+        if label.removeprefix("bunkerweb.") in self.__ignored_label_suffixes:
+            return True
+        return False
 
     def _get_controller_swarm_services(self, label_key: str) -> List[Service]:
         """
@@ -145,7 +150,12 @@ class SwarmController(Controller):
             if not config.name or not config.attrs or not config.attrs.get("Spec", {}).get("Labels", {}) or not config.attrs.get("Spec", {}).get("Data", {}):
                 continue
 
-            config_type = config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_TYPE"]
+            labels = config.attrs["Spec"].get("Labels", {}) or {}
+            if any(self.__should_ignore_label(label) for label in labels):
+                self._logger.info("Skipping Swarm config %s because of ignored labels", config.id)
+                continue
+
+            config_type = labels["bunkerweb.CONFIG_TYPE"]
             config_name = config.name
             if config_type not in self._supported_config_types:
                 self._logger.warning(
@@ -153,13 +163,13 @@ class SwarmController(Controller):
                 )
                 continue
             config_site = ""
-            if "bunkerweb.CONFIG_SITE" in config.attrs["Spec"]["Labels"]:
-                if not self._is_service_present(config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_SITE"]):
+            if "bunkerweb.CONFIG_SITE" in labels:
+                if not self._is_service_present(labels["bunkerweb.CONFIG_SITE"]):
                     self._logger.warning(
-                        f"Ignoring config {config_name} because {config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']} doesn't exist",
+                        f"Ignoring config {config_name} because {labels['bunkerweb.CONFIG_SITE']} doesn't exist",
                     )
                     continue
-                config_site = f"{config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']}/"
+                config_site = f"{labels['bunkerweb.CONFIG_SITE']}/"
             configs[config_type][f"{config_site}{config_name}"] = b64decode(config.attrs["Spec"]["Data"])
             self.__swarm_configs.append(config.id)
         return configs
@@ -172,15 +182,6 @@ class SwarmController(Controller):
             first=not self._loaded,
         )
 
-    def __should_ignore_label(self, label: str) -> bool:
-        if label in self.__ignored_labels_exact:
-            return True
-        if label.startswith("bunkerweb."):
-            suffix = label.split(".", 1)[1]
-            if suffix in self.__ignored_label_suffixes:
-                return True
-        return False
-
     def __process_event(self, event):
         if "Actor" not in event or "ID" not in event["Actor"] or "Type" not in event:
             return False
@@ -190,7 +191,10 @@ class SwarmController(Controller):
             if event["Actor"]["ID"] in self.__swarm_instances or event["Actor"]["ID"] in self.__swarm_services:
                 return True
             try:
-                labels = self.__client.services.get(event["Actor"]["ID"]).attrs["Spec"]["Labels"]
+                labels = self.__client.services.get(event["Actor"]["ID"]).attrs["Spec"].get("Labels", {}) or {}
+                if any(self.__should_ignore_label(label) for label in labels):
+                    self._logger.info(f"Skipping Swarm service {event['Actor']['ID']} because of ignored labels")
+                    return False
                 return ("bunkerweb.INSTANCE" in labels or "bunkerweb.SERVER_NAME" in labels) and (
                     not self._namespaces or any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces)
                 )
@@ -200,7 +204,10 @@ class SwarmController(Controller):
             if event["Actor"]["ID"] in self.__swarm_configs:
                 return True
             try:
-                labels = self.__client.services.get(event["Actor"]["ID"]).attrs["Spec"]["Labels"]
+                labels = self.__client.configs.get(event["Actor"]["ID"]).attrs["Spec"].get("Labels", {}) or {}
+                if any(self.__should_ignore_label(label) for label in labels):
+                    self._logger.info(f"Skipping Swarm config {event['Actor']['ID']} because of ignored labels")
+                    return False
                 return "bunkerweb.CONFIG_TYPE" in labels and (
                     not self._namespaces or any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces)
                 )
