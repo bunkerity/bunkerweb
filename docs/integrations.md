@@ -1387,7 +1387,7 @@ Once the BunkerWeb Kubernetes stack is successfully set up and operational (refe
 It is important to note that the BunkerWeb settings need to be specified as annotations for the Ingress resource. For the domain part, please use the special value **`bunkerweb.io`**. By including the appropriate annotations, you can configure BunkerWeb accordingly for the Ingress resource.
 
 !!! tip "Ignoring noisy annotations"
-  When some annotations should not impact autoconf, set `KUBERNETES_IGNORE_ANNOTATIONS` on the controller deployment. Provide a space- or comma-separated list of annotation keys (for example `bunkerweb.io/EXTRA_FOO`) or just the suffix (`EXTRA_FOO`). Matching annotations are stripped from ingress-derived settings, and pods carrying them are skipped entirely during instance discovery.
+    When some annotations should not impact autoconf, set `KUBERNETES_IGNORE_ANNOTATIONS` on the controller deployment. Provide a space- or comma-separated list of annotation keys (for example `bunkerweb.io/EXTRA_FOO`) or just the suffix (`EXTRA_FOO`). Matching annotations are stripped from ingress-derived settings, and pods carrying them are skipped entirely during instance discovery.
 
 !!! info "TLS support"
     BunkerWeb ingress controller fully supports custom HTTPS certificates using the tls spec as shown in the example. Configuring solutions such as `cert-manager` to automatically generate tls secrets is out of the scope of this documentation.
