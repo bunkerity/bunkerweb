@@ -319,6 +319,9 @@ class IngressController(Controller):
         return config, configs
 
     def __process_event(self, event):
+        if self._first_start:
+            return True
+
         obj = event["object"]
         if not obj:
             return False
@@ -414,6 +417,7 @@ class IngressController(Controller):
                         self.__internal_lock.release()
                         locked = False
                         continue
+                    self._first_start = False
 
                     to_apply = False
                     while not applied:

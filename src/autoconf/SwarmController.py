@@ -149,6 +149,9 @@ class SwarmController(Controller):
         )
 
     def __process_event(self, event):
+        if self._first_start:
+            return True
+
         if "Actor" not in event or "ID" not in event["Actor"] or "Type" not in event:
             return False
         if event["Type"] not in ("service", "config"):
@@ -189,6 +192,7 @@ class SwarmController(Controller):
                         self.__internal_lock.release()
                         locked = False
                         continue
+                    self._first_start = False
 
                     try:
                         to_apply = False

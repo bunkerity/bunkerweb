@@ -135,7 +135,7 @@ class DockerController(Controller):
         return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded)
 
     def __process_event(self, event):
-        return (
+        return self._first_start or (
             "Actor" in event
             and "Attributes" in event["Actor"]
             and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"] or "bunkerweb.SERVER_NAME" in event["Actor"]["Attributes"])
@@ -149,6 +149,7 @@ class DockerController(Controller):
             try:
                 if not self.__process_event(event):
                     continue
+                self._first_start = False
                 to_apply = False
                 while not applied:
                     waiting = self.have_to_wait()

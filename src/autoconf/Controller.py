@@ -19,6 +19,7 @@ class Controller(Config):
         self._extra_config = {}
         self._logger = setup_logger(f"{self._type}-controller", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
         self._namespaces = None
+        self._first_start = True
         namespaces = getenv("NAMESPACES")
         if namespaces:
             self._namespaces = namespaces.strip().split(" ")
@@ -31,11 +32,17 @@ class Controller(Config):
     def wait(self, wait_time: int) -> list:
         all_ready = False
         while not all_ready:
+            if self.have_to_wait():
+                self._logger.info(f"Waiting for the database to be ready, retrying in {wait_time}s ...")
+                sleep(wait_time)
+                continue
+
             self._instances = self.get_instances()
             if not self._instances:
                 self._logger.warning(f"No instance found, waiting {wait_time}s ...")
                 sleep(wait_time)
                 continue
+
             all_ready = True
             for instance in self._instances:
                 if not instance["health"]:
@@ -57,6 +64,9 @@ class Controller(Config):
         instances = []
         for controller_instance in self._get_controller_instances():
             instances.extend(self._to_instances(controller_instance))
+        for db_instance in self._db.get_instances(autoconf=True):
+            if not any(db_instance["id"] == instance["id"] for instance in instances):
+                instances.append(db_instance)
         return instances
 
     @abstractmethod

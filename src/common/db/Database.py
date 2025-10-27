@@ -4102,7 +4102,7 @@ class Database:
 
         return ""
 
-    def get_instances(self, *, method: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_instances(self, *, method: Optional[str] = None, autoconf: bool = False) -> List[Dict[str, Any]]:
         """Get instances."""
         with self._db_session() as session:
             query = session.query(Instances)
@@ -4123,6 +4123,7 @@ class Database:
                     "creation_date": instance.creation_date,
                     "last_seen": instance.last_seen,
                 }
+                | ({"health": instance.status == "up", "env": {}} if autoconf else {})
                 for instance in query
             ]
 
