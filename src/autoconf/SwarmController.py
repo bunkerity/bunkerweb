@@ -84,7 +84,7 @@ class SwarmController(Controller):
                         continue
 
                 if any(self.__should_ignore_label(label) for label in labels):
-                    self._logger.info("Skipping service %s because of ignored labels", service.id)
+                    self._logger.info(f"Skipping service {getattr(service, 'name', service.id)} because of ignored labels")
                     continue
 
                 valid_services.append(service)
@@ -152,7 +152,7 @@ class SwarmController(Controller):
 
             labels = config.attrs["Spec"].get("Labels", {}) or {}
             if any(self.__should_ignore_label(label) for label in labels):
-                self._logger.info("Skipping Swarm config %s because of ignored labels", config.id)
+                self._logger.info(f"Skipping Swarm config {getattr(config, 'name', config.id)} because of ignored labels")
                 continue
 
             config_type = labels["bunkerweb.CONFIG_TYPE"]

@@ -80,10 +80,7 @@ class DockerController(Controller):
                         continue
 
                 if any(self.__should_ignore_label(label) for label in labels):
-                    self._logger.info(
-                        "Skipping container %s because of ignored labels",
-                        getattr(container, "name", container.id),
-                    )
+                    self._logger.info(f"Skipping container {getattr(container, 'name', container.id)} because of ignored labels")
                     continue
 
                 valid_containers.append(container)
