@@ -88,7 +88,6 @@ class IngressController(Controller):
 
             annotations = metadata.annotations or {}
             if "bunkerweb.io/INSTANCE" not in annotations:
-                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because it is not a bunkerweb instance")
                 continue
 
             if self._namespaces and metadata.namespace not in self._namespaces:
@@ -313,9 +312,6 @@ class IngressController(Controller):
         managed_configmaps = set()
         for configmap in self.__corev1.list_config_map_for_all_namespaces(watch=False).items:
             if not configmap.metadata.annotations or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations:
-                self._logger.info(
-                    f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because it has no bunkerweb.io/CONFIG_TYPE annotation"
-                )
                 continue
 
             if self._namespaces and configmap.metadata.namespace not in self._namespaces:

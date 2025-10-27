@@ -181,7 +181,6 @@ class DockerController(Controller):
 
         has_instance_label = "bunkerweb.INSTANCE" in attributes or "bunkerweb.SERVER_NAME" in attributes
         if not has_instance_label:
-            self._logger.info(f"Skipping Docker event for {attributes.get('name') or attributes.get('container')} because it has no bunkerweb labels")
             return False
 
         if self._namespaces and not any(attributes.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces):
