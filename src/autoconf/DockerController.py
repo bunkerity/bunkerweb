@@ -172,6 +172,9 @@ class DockerController(Controller):
         return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded)
 
     def __process_event(self, event):
+        if self._first_start:
+            return True
+
         attributes = event.get("Actor", {}).get("Attributes")
         if not isinstance(attributes, dict):
             return False
@@ -200,6 +203,7 @@ class DockerController(Controller):
             try:
                 if not self.__process_event(event):
                     continue
+                self._first_start = False
                 to_apply = False
                 while not applied:
                     waiting = self.have_to_wait()

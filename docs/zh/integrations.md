@@ -108,6 +108,7 @@ volumes:
 - `AUTOCONF_MODE=no` (默认) - 启用自动配置服务
 - `USE_REDIS=yes` (默认) - 启用内置的 [Redis](#redis-integration) 实例
 - `USE_CROWDSEC=no` (默认) - [CrowdSec](#crowdsec-integration) 集成默认禁用
+- `HIDE_SERVICE_LOGS=`（可选）- 以逗号分隔的服务列表，用于在容器日志中静音这些服务。支持的值：`api`、`autoconf`、`bunkerweb`、`crowdsec`、`redis`、`scheduler`、`ui`、`nginx.access`、`nginx.error`、`modsec`。日志仍会写入 `/var/log/bunkerweb/<service>.log`。
 
 ### API 集成
 

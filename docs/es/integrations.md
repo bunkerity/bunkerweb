@@ -108,6 +108,7 @@ La imagen Todo en Uno viene con varios servicios integrados, que se pueden contr
 - `AUTOCONF_MODE=no` (predeterminado) - Habilita el servicio de autoconfiguración
 - `USE_REDIS=yes` (predeterminado) - Habilita la instancia de [Redis](#redis-integration) integrada
 - `USE_CROWDSEC=no` (predeterminado) - La integración con [CrowdSec](#crowdsec-integration) está deshabilitada por defecto
+- `HIDE_SERVICE_LOGS=` (opcional) - Lista separada por comas de servicios cuyos registros se silencian en los logs del contenedor. Valores admitidos: `api`, `autoconf`, `bunkerweb`, `crowdsec`, `redis`, `scheduler`, `ui`, `nginx.access`, `nginx.error`, `modsec`. Los archivos en `/var/log/bunkerweb/<service>.log` se siguen actualizando.
 
 ### Integración de la API
 

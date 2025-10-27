@@ -106,6 +106,7 @@ L'image tout-en-un est livrée avec plusieurs services intégrés, qui peuvent �
 - `AUTOCONF_MODE=no` (par défaut) - Active le service autoconf
 - `USE_REDIS=yes` (par défaut) : active l' [ instance](#redis-integration) Redis intégrée
 - `USE_CROWDSEC=no` (par défaut) - [ L'intégration CrowdSec](#crowdsec-integration) est désactivée par défaut
+- `HIDE_SERVICE_LOGS=` (optionnel) - Liste de services séparés par des virgules à masquer dans les logs du conteneur. Valeurs acceptées : `api`, `autoconf`, `bunkerweb`, `crowdsec`, `redis`, `scheduler`, `ui`, `nginx.access`, `nginx.error`, `modsec`. Les fichiers sous `/var/log/bunkerweb/<service>.log` continuent d'être alimentés.
 
 ### Accès à l'assistant d'installation
 

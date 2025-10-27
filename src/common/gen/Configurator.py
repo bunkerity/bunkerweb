@@ -84,6 +84,7 @@ class Configurator:
                 "IGNORE_REGEX_CHECK",
                 "CROWDSEC_DISABLE_PARSERS",
                 "CROWDSEC_EXTRA_COLLECTIONS",
+                "HIDE_SERVICE_LOGS",
             }
         )
 
