@@ -108,6 +108,7 @@ volumes:
 - `AUTOCONF_MODE=no` (默认) - 启用自动配置服务
 - `USE_REDIS=yes` (默认) - 启用内置的 [Redis](#redis-integration) 实例
 - `USE_CROWDSEC=no` (默认) - [CrowdSec](#crowdsec-integration) 集成默认禁用
+- `HIDE_SERVICE_LOGS=`（可选）- 以逗号分隔的服务列表，用于在容器日志中静音这些服务。支持的值：`api`、`autoconf`、`bunkerweb`、`crowdsec`、`redis`、`scheduler`、`ui`、`nginx.access`、`nginx.error`、`modsec`。日志仍会写入 `/var/log/bunkerweb/<service>.log`。
 
 ### API 集成
 
@@ -1365,6 +1366,9 @@ helm install -f myvalues.yaml mybunkerweb bunkerweb/bunkerweb
 一旦 BunkerWeb Kubernetes 堆栈成功设置并运行（有关详细信息，请参阅自动配置日志），您就可以继续在集群内部署 Web 应用程序并声明您的 Ingress 资源。
 
 需要注意的是，BunkerWeb 设置需要作为 Ingress 资源的注解来指定。对于域部分，请使用特殊值 **`bunkerweb.io`**。通过包含适当的注解，您可以相应地为 Ingress 资源配置 BunkerWeb。
+
+!!! tip "忽略嘈杂的注解"
+    当某些注解不应影响 autoconf 时，请在控制器部署中设置 `KUBERNETES_IGNORE_ANNOTATIONS`。提供以空格或逗号分隔的注解键列表（例如 `bunkerweb.io/EXTRA_FOO`）或仅后缀（`EXTRA_FOO`）。匹配的注解将从 ingress 派生的设置中剥离，并且在实例发现期间完全跳过携带它们的 pod。
 
 !!! info "TLS 支持"
     BunkerWeb ingress 控制器完全支持使用 tls 规范的自定义 HTTPS 证书，如示例所示。配置诸如 `cert-manager` 之类的解决方案以自动生成 tls secret 超出了本文档的范围。

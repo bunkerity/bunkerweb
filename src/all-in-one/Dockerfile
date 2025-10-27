@@ -231,7 +231,6 @@ LABEL maintainer="Bunkerity <contact@bunkerity.com>"
 LABEL version="1.6.5"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
-LABEL bunkerweb.INSTANCE="bunkerweb"
 
 VOLUME /data
 

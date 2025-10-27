@@ -108,6 +108,7 @@ La imagen Todo en Uno viene con varios servicios integrados, que se pueden contr
 - `AUTOCONF_MODE=no` (predeterminado) - Habilita el servicio de autoconfiguración
 - `USE_REDIS=yes` (predeterminado) - Habilita la instancia de [Redis](#redis-integration) integrada
 - `USE_CROWDSEC=no` (predeterminado) - La integración con [CrowdSec](#crowdsec-integration) está deshabilitada por defecto
+- `HIDE_SERVICE_LOGS=` (opcional) - Lista separada por comas de servicios cuyos registros se silencian en los logs del contenedor. Valores admitidos: `api`, `autoconf`, `bunkerweb`, `crowdsec`, `redis`, `scheduler`, `ui`, `nginx.access`, `nginx.error`, `modsec`. Los archivos en `/var/log/bunkerweb/<service>.log` se siguen actualizando.
 
 ### Integración de la API
 
@@ -376,6 +377,9 @@ services:
 
 !!! info "Lista completa"
     Para la lista completa de variables de entorno, consulta la [sección de configuraciones](features.md) de la documentación.
+
+!!! tip "Omitir contenedores etiquetados"
+    Cuando un contenedor debe ser ignorado por autoconf, establece `DOCKER_IGNORE_LABELS` en el controlador. Proporciona una lista de claves de etiquetas separadas por espacios o comas (por ejemplo `bunkerweb.SERVER_NAME`) o solo el sufijo (`SERVER_NAME`). Cualquier contenedor o fuente de configuración personalizada que lleve una etiqueta coincidente se omite durante el descubrimiento, y la etiqueta se ignora al traducir las configuraciones.
 
 ### Usando secretos de Docker
 
@@ -1363,6 +1367,9 @@ Una vez que la pila de BunkerWeb para Kubernetes esté configurada y operativa c
 
 Es importante tener en cuenta que las configuraciones de BunkerWeb deben especificarse como anotaciones para el recurso de Ingress. Para la parte del dominio, utiliza el valor especial **`bunkerweb.io`**. Al incluir las anotaciones apropiadas, puedes configurar BunkerWeb en consecuencia para el recurso de Ingress.
 
+!!! tip "Ignorar anotaciones ruidosas"
+    Cuando algunas anotaciones no deben impactar autoconf, establece `KUBERNETES_IGNORE_ANNOTATIONS` en el despliegue del controlador. Proporciona una lista de claves de anotaciones separadas por espacios o comas (por ejemplo `bunkerweb.io/EXTRA_FOO`) o solo el sufijo (`EXTRA_FOO`). Las anotaciones coincidentes se eliminan de las configuraciones derivadas del ingress, y los pods que las llevan se omiten por completo durante el descubrimiento de instancias.
+
 !!! info "Soporte TLS"
     El controlador de ingress de BunkerWeb es totalmente compatible con certificados HTTPS personalizados utilizando la especificación tls como se muestra en el ejemplo. La configuración de soluciones como `cert-manager` para generar automáticamente secretos tls está fuera del alcance de esta documentación.
 
@@ -1877,6 +1884,9 @@ networks:
 
 !!! info "Configuración obligatoria de Swarm"
     Ten en cuenta que la variable de entorno `SWARM_MODE: "yes"` es obligatoria cuando se utiliza la integración con Swarm.
+
+!!! tip "Omitir servicios etiquetados"
+    ¿Necesitas excluir un servicio de Swarm de autoconf? Establece `SWARM_IGNORE_LABELS` en el controlador. Proporciona una lista de claves de etiquetas separadas por espacios o comas (por ejemplo `bunkerweb.SERVER_NAME`) o sufijos (`SERVER_NAME`) y cualquier servicio que lleve esas etiquetas será ignorado durante el descubrimiento.
 
 ### Servicios de Swarm
 
