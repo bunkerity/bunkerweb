@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+from os import getenv
 from time import sleep
 from typing import Any, Dict, List
 from docker import DockerClient
-from re import compile as re_compile
+from re import compile as re_compile, split as re_split
 from traceback import format_exc
 
 from docker.models.containers import Container
@@ -16,6 +17,30 @@ class DockerController(Controller):
         super().__init__("docker")
         self.__client = DockerClient(base_url=docker_host)
         self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_STREAM|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(.+)$")
+        self.__ignored_labels_exact = set()
+        self.__ignored_label_suffixes = set()
+        ignore_labels = getenv("DOCKER_IGNORE_LABELS", "")
+        if ignore_labels:
+            tokens = [token.strip() for token in re_split(r"[,\s]+", ignore_labels) if token.strip()]
+            for token in tokens:
+                if "." in token:
+                    self.__ignored_labels_exact.add(token)
+                    if token.startswith("bunkerweb."):
+                        suffix = token.split(".", 1)[1]
+                        if suffix:
+                            self.__ignored_label_suffixes.add(suffix)
+                else:
+                    self.__ignored_label_suffixes.add(token)
+                    self.__ignored_labels_exact.add(f"bunkerweb.{token}")
+
+            self._logger.info("Ignoring Docker labels while collecting instances: " + ", ".join(sorted(self.__ignored_labels_exact)))
+
+    def __should_ignore_label(self, label: str) -> bool:
+        if label in self.__ignored_labels_exact:
+            return True
+        if label.removeprefix("bunkerweb.") in self.__ignored_label_suffixes:
+            return True
+        return False
 
     def _get_controller_containers(self, label_key: str) -> List[Container]:
         """
@@ -34,10 +59,7 @@ class DockerController(Controller):
             self._logger.error(f"Failed to retrieve containers with label '{label_key}': {e}")
             return []
 
-        if not self._namespaces:
-            return containers
-
-        namespace_set = set(self._namespaces)
+        namespace_set = set(self._namespaces or [])
         valid_containers = []
 
         for container in containers:
@@ -51,13 +73,17 @@ class DockerController(Controller):
                         self._logger.warning(f"Unexpected label format for container {container.id}: {labels}")
                         continue
 
-                # Check if the namespace label matches any in the set
-                namespace = labels.get("bunkerweb.NAMESPACE", "")
-                if namespace in namespace_set:
-                    self._logger.debug(f"Container {container.id} matches namespace '{namespace}'.")
-                    valid_containers.append(container)
-                else:
-                    self._logger.debug(f"Container {container.id} does not match any namespace.")
+                if namespace_set:
+                    namespace = labels.get("bunkerweb.NAMESPACE", "")
+                    if namespace not in namespace_set:
+                        self._logger.debug(f"Container {container.id} does not match any namespace.")
+                        continue
+
+                if any(self.__should_ignore_label(label) for label in labels):
+                    self._logger.info(f"Skipping container {getattr(container, 'name', container.id)} because of ignored labels")
+                    continue
+
+                valid_containers.append(container)
 
             except AttributeError as e:
                 self._logger.warning(f"Container {container.id} missing expected attributes: {e}")
@@ -94,6 +120,8 @@ class DockerController(Controller):
     def _to_services(self, controller_service) -> List[dict]:
         service = {}
         for variable, value in controller_service.labels.items():
+            if self.__should_ignore_label(variable):
+                continue
             if not variable.startswith("bunkerweb."):
                 continue
             service[variable.replace("bunkerweb.", "", 1)] = value
@@ -106,6 +134,13 @@ class DockerController(Controller):
             labels = container.labels  # type: ignore (labels is inside a container)
             if isinstance(labels, list):
                 labels = {label: "" for label in labels}
+            if not isinstance(labels, dict):
+                self._logger.warning(f"Unexpected label format for container {container.id}: {labels}")
+                continue
+
+            if any(self.__should_ignore_label(label) for label in labels):
+                self._logger.info(f"Skipping container {getattr(container, 'name', container.id)} while collecting configs because of ignored labels")
+                continue
 
             if self._namespaces and not any(labels.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces):
                 continue
@@ -123,6 +158,8 @@ class DockerController(Controller):
                 continue
 
             for variable, value in labels.items():
+                if self.__should_ignore_label(variable):
+                    continue
                 if not variable.startswith("bunkerweb."):
                     continue
                 result = self.__custom_confs_rx.search(variable)
@@ -135,12 +172,29 @@ class DockerController(Controller):
         return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded)
 
     def __process_event(self, event):
-        return self._first_start or (
-            "Actor" in event
-            and "Attributes" in event["Actor"]
-            and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"] or "bunkerweb.SERVER_NAME" in event["Actor"]["Attributes"])
-            and (not self._namespaces or any(event["Actor"]["Attributes"].get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces))
-        )
+        if self._first_start:
+            return True
+
+        attributes = event.get("Actor", {}).get("Attributes")
+        if not isinstance(attributes, dict):
+            return False
+
+        has_instance_label = "bunkerweb.INSTANCE" in attributes or "bunkerweb.SERVER_NAME" in attributes
+        if not has_instance_label:
+            self._logger.info(f"Skipping Docker event for {attributes.get('name') or attributes.get('container')} because it has no bunkerweb labels")
+            return False
+
+        if self._namespaces and not any(attributes.get("bunkerweb.NAMESPACE", "") == namespace for namespace in self._namespaces):
+            self._logger.info(
+                f"Skipping Docker event for {attributes.get('name') or attributes.get('container')} because its namespace is not in the allowed namespaces"
+            )
+            return False
+
+        if any(self.__should_ignore_label(label) for label in attributes):
+            self._logger.info(f"Skipping Docker event for {attributes.get('name') or attributes.get('container')} because of ignored labels")
+            return False
+
+        return True
 
     def process_events(self):
         self._set_autoconf_load_db()

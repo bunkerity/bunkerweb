@@ -1367,6 +1367,9 @@ helm install -f myvalues.yaml mybunkerweb bunkerweb/bunkerweb
 
 需要注意的是，BunkerWeb 设置需要作为 Ingress 资源的注解来指定。对于域部分，请使用特殊值 **`bunkerweb.io`**。通过包含适当的注解，您可以相应地为 Ingress 资源配置 BunkerWeb。
 
+!!! tip "忽略嘈杂的注解"
+    当某些注解不应影响 autoconf 时，请在控制器部署中设置 `KUBERNETES_IGNORE_ANNOTATIONS`。提供以空格或逗号分隔的注解键列表（例如 `bunkerweb.io/EXTRA_FOO`）或仅后缀（`EXTRA_FOO`）。匹配的注解将从 ingress 派生的设置中剥离，并且在实例发现期间完全跳过携带它们的 pod。
+
 !!! info "TLS 支持"
     BunkerWeb ingress 控制器完全支持使用 tls 规范的自定义 HTTPS 证书，如示例所示。配置诸如 `cert-manager` 之类的解决方案以自动生成 tls secret 超出了本文档的范围。
 
