@@ -376,6 +376,9 @@ services:
 !!! info "Vollständige Liste"
     Die vollständige Liste der Umgebungsvariablen finden Sie im [Einstellungsbereich](features.md) der Dokumentation.
 
+!!! tip "Beschriftete Container überspringen"
+    Wenn ein Container von autoconf ignoriert werden soll, setzen Sie `DOCKER_IGNORE_LABELS` auf dem Controller. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Label-Schlüsseln an (zum Beispiel `bunkerweb.SERVER_NAME`) oder nur das Suffix (`SERVER_NAME`). Jeder Container oder jede benutzerdefinierte Konfigurationsquelle mit einem übereinstimmenden Label wird bei der Erkennung übersprungen, und das Label wird bei der Übersetzung der Einstellungen ignoriert.
+
 ### Verwendung von Docker-Secrets
 
 Anstatt sensible Einstellungen über Umgebungsvariablen zu übergeben, können Sie sie als Docker-Secrets speichern. Erstellen Sie für jede Einstellung, die Sie sichern möchten, ein Docker-Secret mit dem Namen, der dem Einstellungsschlüssel entspricht (in Großbuchstaben). Die Einstiegsskripte von BunkerWeb laden Secrets automatisch aus `/run/secrets` und exportieren sie als Umgebungsvariablen.
@@ -1364,6 +1367,9 @@ Sobald der BunkerWeb-Kubernetes-Stack erfolgreich eingerichtet und betriebsberei
 
 Es ist wichtig zu beachten, dass die BunkerWeb-Einstellungen als Annotationen für die Ingress-Ressource angegeben werden müssen. Für den Domain-Teil verwenden Sie bitte den speziellen Wert **`bunkerweb.io`**. Durch das Einfügen der entsprechenden Annotationen können Sie BunkerWeb entsprechend für die Ingress-Ressource konfigurieren.
 
+!!! tip "Störende Annotationen ignorieren"
+    Wenn einige Annotationen autoconf nicht beeinflussen sollen, setzen Sie `KUBERNETES_IGNORE_ANNOTATIONS` auf dem Controller-Deployment. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Annotationsschlüsseln an (zum Beispiel `bunkerweb.io/EXTRA_FOO`) oder nur das Suffix (`EXTRA_FOO`). Übereinstimmende Annotationen werden aus den vom Ingress abgeleiteten Einstellungen entfernt, und Pods, die sie tragen, werden bei der Instanzerkennung vollständig übersprungen.
+
 !!! info "TLS-Unterstützung"
     Der BunkerWeb-Ingress-Controller unterstützt vollständig benutzerdefinierte HTTPS-Zertifikate unter Verwendung der TLS-Spezifikation, wie im Beispiel gezeigt. Die Konfiguration von Lösungen wie `cert-manager` zur automatischen Generierung von TLS-Secrets liegt außerhalb des Geltungsbereichs dieser Dokumentation.
 
@@ -1879,6 +1885,9 @@ networks:
 
 !!! info "Obligatorische Swarm-Einstellung"
     Bitte beachten Sie, dass die Umgebungsvariable `SWARM_MODE: "yes"` bei Verwendung der Swarm-Integration obligatorisch ist.
+
+!!! tip "Beschriftete Dienste überspringen"
+    Müssen Sie einen Swarm-Dienst von autoconf ausschließen? Setzen Sie `SWARM_IGNORE_LABELS` auf dem Controller. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Label-Schlüsseln an (z.B. `bunkerweb.SERVER_NAME`) oder Suffixen (`SERVER_NAME`), und jeder Dienst mit diesen Labels wird bei der Erkennung ignoriert.
 
 ### Swarm-Dienste
 

@@ -320,6 +320,9 @@ services:
 !!! info "Liste complète"
     Pour obtenir la liste complète des variables d'environnement, consultez la [section des paramètres](features.md) de la documentation.
 
+!!! tip "Ignorer les conteneurs étiquetés"
+    Lorsqu'un conteneur doit être ignoré par autoconf, définissez `DOCKER_IGNORE_LABELS` sur le contrôleur. Fournissez une liste de clés d'étiquettes séparées par des espaces ou des virgules (par exemple `bunkerweb.SERVER_NAME`) ou simplement le suffixe (`SERVER_NAME`). Tout conteneur ou source de configuration personnalisée portant une étiquette correspondante est ignoré lors de la découverte, et l'étiquette est ignorée lors de la traduction des paramètres.
+
 ### Utilisation des secrets Docker
 
 Au lieu de transmettre des paramètres sensibles via des variables d'environnement, vous pouvez les stocker en tant que secrets Docker. Pour chaque paramètre que vous souhaitez sécuriser, créez un secret Docker dont le nom correspond à la clé de paramètre (en majuscules). Les scripts d'entrée de BunkerWeb chargent automatiquement les secrets `/run/secrets` et les exportent en tant que variables d'environnement.
@@ -1305,6 +1308,9 @@ Une fois que la pile Kubernetes de BunkerWeb est correctement configurée et op�
 
 Il est important de noter que les paramètres BunkerWeb doivent être spécifiés en tant qu'annotations pour la ressource Ingress. Pour la partie domaine, veuillez utiliser la valeur spéciale **`bunkerweb.io`**. En incluant les annotations appropriées, vous pouvez configurer BunkerWeb en conséquence pour la ressource Ingress.
 
+!!! tip "Ignorer les annotations bruyantes"
+    Lorsque certaines annotations ne doivent pas impacter autoconf, définissez `KUBERNETES_IGNORE_ANNOTATIONS` sur le déploiement du contrôleur. Fournissez une liste de clés d'annotations séparées par des espaces ou des virgules (par exemple `bunkerweb.io/EXTRA_FOO`) ou simplement le suffixe (`EXTRA_FOO`). Les annotations correspondantes sont supprimées des paramètres dérivés de l'ingress, et les pods les portant sont entièrement ignorés lors de la découverte des instances.
+
 !!! info "Prise en charge TLS"
     Le contrôleur d'entrée BunkerWeb prend entièrement en charge les certificats HTTPS personnalisés à l'aide de la spécification tls, comme indiqué dans l'exemple. La configuration de solutions telles que `cert-manager` la génération automatique de secrets tls n'entre pas dans le cadre de cette documentation.
 
@@ -1820,6 +1826,9 @@ networks:
 
 !!! info "Réglage obligatoire de l'swarm"
     Veuillez noter que la `SWARM_MODE: "yes"` variable d'environnement est obligatoire lors de l'utilisation de l'intégration Swarm.
+
+!!! tip "Ignorer les services étiquetés"
+    Besoin d'exclure un service Swarm d'autoconf ? Définissez `SWARM_IGNORE_LABELS` sur le contrôleur. Fournissez une liste de clés d'étiquettes séparées par des espaces ou des virgules (par exemple `bunkerweb.SERVER_NAME`) ou des suffixes (`SERVER_NAME`) et tout service portant ces étiquettes sera ignoré lors de la découverte.
 
 ### Services Swarm
 
