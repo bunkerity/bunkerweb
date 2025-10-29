@@ -1,14 +1,13 @@
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from itertools import chain
-from threading import Thread
 from time import time
 from typing import Dict, List
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from regex import sub
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 
 from app.routes.utils import CUSTOM_CONF_RX, handle_error, verify_data_in_form, wait_applying
 from app.utils import LOGGER, get_blacklisted_settings
@@ -100,7 +99,7 @@ def services_convert():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    Thread(target=convert_services, args=(services, convert_to)).start()
+    CONFIG_TASKS_EXECUTOR.submit(convert_services, services, convert_to)
 
     return redirect(
         url_for(
@@ -171,7 +170,7 @@ def services_delete():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    Thread(target=delete_services, args=(services,)).start()
+    CONFIG_TASKS_EXECUTOR.submit(delete_services, services)
 
     return redirect(
         url_for(
@@ -364,7 +363,7 @@ def services_service_page(service: str):
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=update_service, args=(service, variables.copy(), is_draft, mode, clone)).start()
+        CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone)
 
         new_service = False
         if service == "new":

@@ -55,7 +55,6 @@ class DockerTest(Test):
             if data["services"]["bw-scheduler"]["environment"].get("AUTO_LETS_ENCRYPT", "no") == "yes":
                 data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
                 data["services"]["bw-scheduler"]["environment"]["LETS_ENCRYPT_MAX_RETRIES"] = "3"
-                data["services"]["bw-scheduler"]["environment"]["LETS_ENCRYPT_PROFILE"] = "shortlived"
             data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
             data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
             data["services"]["bw-scheduler"]["environment"]["USE_BUNKERNET"] = "no"
