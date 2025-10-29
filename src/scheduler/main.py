@@ -940,6 +940,7 @@ if __name__ == "__main__":
                 env["TZ"] = tz
 
         LOGGER.info("Executing scheduler ...")
+        JOB.restore_cache(job_name="failover-backup", plugin_id="jobs")
 
         del dotenv_env
 

@@ -30,6 +30,7 @@ class KubernetesTest(Test):
                 "AUTO_LETS_ENCRYPT": "yes",
                 "USE_LETS_ENCRYPT_STAGING": "yes",
                 "LETS_ENCRYPT_MAX_RETRIES": "3",
+                "LETS_ENCRYPT_PROFILE": "shortlived",
                 "USE_REAL_IP": "yes",
                 "USE_PROXY_PROTOCOL": "yes",
                 "REAL_IP_FROM": "100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
