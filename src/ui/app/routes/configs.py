@@ -1,6 +1,5 @@
 from json import JSONDecodeError, loads
 from re import match
-from threading import Thread
 from time import time
 from typing import Dict, Literal, Optional
 
@@ -8,7 +7,7 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.utils import flash
 
 from app.routes.utils import handle_error, verify_data_in_form, wait_applying
@@ -118,7 +117,7 @@ def configs_delete():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    Thread(target=delete_configs, args=(configs,)).start()
+    CONFIG_TASKS_EXECUTOR.submit(delete_configs, configs)
 
     return redirect(
         url_for(
@@ -218,7 +217,7 @@ def configs_new():
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=create_config, args=(service if service != "global" else None, config_type, config_name, config_value)).start()
+        CONFIG_TASKS_EXECUTOR.submit(create_config, service if service != "global" else None, config_type, config_name, config_value)
 
         return redirect(
             url_for(

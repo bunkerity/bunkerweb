@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from contextlib import suppress
+from atexit import register
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from importlib.util import module_from_spec, spec_from_file_location
 from ipaddress import ip_address
@@ -11,7 +13,7 @@ from os.path import abspath, join
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
 from sys import path as sys_path, modules as sys_modules
-from threading import Thread
+from threading import Lock
 from time import time
 from traceback import format_exc
 from warnings import filterwarnings
@@ -137,6 +139,32 @@ HOOKS = {
         "log_prefix": "Styles",
     },
 }
+
+DB_CHECK_MIN_INTERVAL_SECONDS = 2.0
+DB_CHECK_STALE_INTERVAL_SECONDS = 30.0
+DB_CHECK_LAST_RUN_KEY = "DB_STATE_CHECK_LAST_RUN"
+DB_CHECK_RUNNING_KEY = "DB_STATE_CHECK_RUNNING"
+
+# Shared thread pool executors for background tasks to prevent thread spawning on every request
+_db_check_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-db-check")
+_periodic_tasks_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="bw-ui-periodic")
+_user_access_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-access")
+_config_tasks_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-ui-config")
+
+_db_check_lock = Lock()
+_db_check_future = None
+_db_check_next_allowed = 0.0
+
+
+def _shutdown_executors():
+    """Shutdown all thread pool executors on application exit."""
+    _db_check_executor.shutdown(wait=False)
+    _periodic_tasks_executor.shutdown(wait=False)
+    _user_access_executor.shutdown(wait=False)
+    _config_tasks_executor.shutdown(wait=False)
+
+
+register(_shutdown_executors)
 
 
 class DynamicFlask(Flask):
@@ -754,6 +782,63 @@ def check_database_state(request_method: str, request_path: str):
             DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat()
 
 
+def schedule_database_state_check(request_method: str, request_path: str):
+    global _db_check_future, _db_check_next_allowed
+    now = time()
+    with _db_check_lock:
+        if now < _db_check_next_allowed:
+            return
+        if _db_check_future and not _db_check_future.done():
+            return
+
+        DATA.load_from_file()
+        last_run_raw = DATA.get(DB_CHECK_LAST_RUN_KEY)
+        last_run_ts = 0.0
+        if isinstance(last_run_raw, (int, float)):
+            last_run_ts = float(last_run_raw)
+        elif isinstance(last_run_raw, str):
+            with suppress(ValueError):
+                last_run_ts = datetime.fromisoformat(last_run_raw).timestamp()
+
+        running = bool(DATA.get(DB_CHECK_RUNNING_KEY, False))
+        if running:
+            if last_run_ts and now - last_run_ts >= DB_CHECK_STALE_INTERVAL_SECONDS:
+                DATA[DB_CHECK_RUNNING_KEY] = False
+                running = False
+            else:
+                return
+
+        if last_run_ts and now - last_run_ts < DB_CHECK_MIN_INTERVAL_SECONDS:
+            return
+
+        run_started_iso = datetime.now().astimezone().isoformat()
+        DATA.update(
+            {
+                DB_CHECK_RUNNING_KEY: True,
+                DB_CHECK_LAST_RUN_KEY: run_started_iso,
+            }
+        )
+
+        def _run_check():
+            try:
+                check_database_state(request_method, request_path)
+            except BaseException:
+                LOGGER.exception("Unexpected error while checking database state")
+            finally:
+                finished_iso = datetime.now().astimezone().isoformat()
+                with _db_check_lock:
+                    DATA.load_from_file()
+                    DATA.update(
+                        {
+                            DB_CHECK_RUNNING_KEY: False,
+                            DB_CHECK_LAST_RUN_KEY: finished_iso,
+                        }
+                    )
+
+        _db_check_future = _db_check_executor.submit(_run_check)
+        _db_check_next_allowed = now + DB_CHECK_MIN_INTERVAL_SECONDS
+
+
 @app.before_request
 def before_request():
     DATA.load_from_file()
@@ -784,13 +869,13 @@ def before_request():
         # Plugin reload trigger
         if not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False):
             safe_reload_plugins()
-            Thread(target=restart_workers).start()
+            _periodic_tasks_executor.submit(restart_workers)
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
-            Thread(target=update_latest_stable_release).start()
+            _periodic_tasks_executor.submit(update_latest_stable_release)
 
-        Thread(target=check_database_state, args=(request.method, request.path)).start()
+        schedule_database_state_check(request.method, request.path)
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 
@@ -989,7 +1074,7 @@ def teardown_request(teardown):
         and current_user.is_authenticated
         and "session_id" in session
     ):
-        Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
+        _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:

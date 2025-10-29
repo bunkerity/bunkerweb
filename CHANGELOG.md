@@ -9,7 +9,8 @@
 - [UI] Implemented **Ctrl+S** / **Command+S** shortcuts for saving RAW global config / services / custom configurations.
 - [ALL-IN-ONE] Add Redis data directory creation in entrypoint script to fix redis not being able to start
 - [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
-- [DOCS] Add persistent data storage documentation for the AIO image
+- [UI] Refactor threading to use a shared ThreadPoolExecutor for configuration tasks across routes, preventing gradual RAM growth over time
+- [DOCS] Add documentation for persistent data storage in the all-in-one image
 - [DEPS] Updated lua-cjson version to v2.1.0.15
 - [DEPS] Update Mbed TLS version to v3.6.5
 
