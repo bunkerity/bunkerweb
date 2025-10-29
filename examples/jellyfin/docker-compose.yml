@@ -42,7 +42,7 @@ services:
       REVERSE_PROXY_BUFFERING: "no"
       REVERSE_PROXY_URL_1: "/socket"
       REVERSE_PROXY_HOST_1: "http://jellyfin:8096"
-      REVERSE_PROXY_WS: "yes"
+      REVERSE_PROXY_WS_1: "yes"
       CUSTOM_CONF_MODSEC_CRS_jellyfin: |
         SecRule REQUEST_FILENAME "/web/config.json" "id:1000000,ctl:ruleRemoveById=930130,ctl:ruleRemoveById=949110,nolog"
     restart: "unless-stopped"
