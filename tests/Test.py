@@ -176,6 +176,20 @@ class Test(ABC):
                 sock.close()
                 x509 = crypto.load_certificate(crypto.FILETYPE_ASN1, cert)
                 cert_cn = x509.get_subject().CN
+                if not cert_cn:
+                    # Fallback to the first DNS entry from subjectAltName when CN is empty
+                    for idx in range(x509.get_extension_count()):
+                        extension = x509.get_extension(idx)
+                        if extension.get_short_name().decode() != "subjectAltName":
+                            continue
+                        subject_alt_names = str(extension).split(",")
+                        for name in subject_alt_names:
+                            name = name.strip()
+                            if name.startswith("DNS:"):
+                                cert_cn = name.split("DNS:", 1)[1].strip()
+                                break
+                        if cert_cn:
+                            break
                 if cert_cn != ex_tls:
                     log("TEST", "⚠️", f"wrong cert CN : {cert_cn} != {ex_tls}")
                     return False
