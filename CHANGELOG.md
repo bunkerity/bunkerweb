@@ -3,6 +3,7 @@
 ## v1.6.6-rc1 - ????/??/??
 
 - [FEATURE] Enhance plugin update process with per-plugin commit option and improved error handling
+- [FEATURE] Refactor wildcard certificate handling in certbot and letsencrypt plugin to improve reliability, performance and user experience
 - [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
 - [UI] Add `RAW` mode when editing/creating templates
 - [UI] Enhanced the raw configuration editor with disabled settings highlighting and improved UI elements.

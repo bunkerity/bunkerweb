@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from base64 import b64decode
+from collections import defaultdict
 from datetime import datetime, timedelta
 from json import loads
 from os import environ, getenv, sep
@@ -12,7 +13,7 @@ from subprocess import DEVNULL, PIPE, STDOUT, Popen, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import Dict, List, Optional, Set, Tuple, Type, Union
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
@@ -344,17 +345,70 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
 
 
 def extract_wildcards_from_domains(domains: List[str]) -> List[str]:
-    wildcards = set()
-    for domain in domains:
-        parts = domain.split(".")
-        if len(parts) > 2:
-            base_domain = ".".join(parts[1:])
-            wildcards.add(f"*.{base_domain}")
-            wildcards.add(base_domain)
-        else:
-            wildcards.add(domain)
+    cleaned_labels: List[List[str]] = []
 
-    return sorted(wildcards, key=lambda x: x[0] != "*")
+    for domain in domains:
+        cleaned = domain.strip().removeprefix("*.").lower()
+        if not cleaned:
+            continue
+        labels = [part for part in cleaned.split(".") if part]
+        if labels:
+            cleaned_labels.append(labels)
+
+    if not cleaned_labels:
+        return []
+
+    grouped: Dict[str, List[List[str]]] = defaultdict(list)
+    for labels in cleaned_labels:
+        key = ".".join(labels[-2:]) if len(labels) >= 2 else ".".join(labels)
+        grouped[key].append(labels)
+
+    bases: Set[str] = set()
+    for labels_list in grouped.values():
+        bases.update(_determine_wildcard_bases(labels_list))
+
+    results = set()
+    for base in bases:
+        base = base.strip(".")
+        if not base:
+            continue
+        results.add(f"*.{base}")
+        results.add(base)
+
+    return sorted(results, key=lambda value: (0 if value.startswith("*.") else 1, value))
+
+
+def _determine_wildcard_bases(labels_list: List[List[str]]) -> Set[str]:
+    if not labels_list:
+        return set()
+
+    if len(labels_list) == 1:
+        labels = labels_list[0]
+        if len(labels) > 2:
+            return {".".join(labels[1:])}
+        return {".".join(labels)}
+
+    min_len = min(len(labels) for labels in labels_list)
+    common_suffix: List[str] = []
+
+    for idx in range(1, min_len + 1):
+        label = labels_list[0][-idx]
+        if all(labels[-idx] == label for labels in labels_list):
+            common_suffix.insert(0, label)
+        else:
+            break
+
+    if len(common_suffix) >= 2 and len(common_suffix) >= (min_len - 1):
+        return {".".join(common_suffix)}
+
+    bases: Set[str] = set()
+    for labels in labels_list:
+        if len(labels) > 2:
+            bases.add(".".join(labels[1:]))
+        else:
+            bases.add(".".join(labels))
+
+    return bases
 
 
 def certbot_delete(service: str, cmd_env: Dict[str, str] = None) -> int:
