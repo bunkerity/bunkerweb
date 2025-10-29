@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --no-emit-trusted-host requirements.armv7.in
 #
-alembic==1.17.0 \
-    --hash=sha256:4652a0b3e19616b57d652b82bfa5e38bf5dbea0813eed971612671cb9e90c0fe \
-    --hash=sha256:80523bc437d41b35c5db7e525ad9d908f79de65c27d6a5a5eab6df348a352d99
+alembic==1.17.1 \
+    --hash=sha256:8a289f6778262df31571d29cca4c7fbacd2f0f582ea0816f4c399b6da7528486 \
+    --hash=sha256:cbc2386e60f89608bb63f30d2d6cc66c7aaed1fe105bd862828600e5ad167023
     # via -r requirements.armv7.in
 cffi==2.0.0 \
     --hash=sha256:00bdf7acc5f795150faa6957054fbbca2439db2f775ce831222b66f192f03beb \
@@ -300,6 +300,10 @@ markupsafe==3.0.3 \
     --hash=sha256:f71a396b3bf33ecaa1626c255855702aca4d3d9fea5e051b41ac59a9c1c41edc \
     --hash=sha256:f9e130248f4462aaa8e2552d547f36ddadbeaa573879158d721bbd33dfe4743a \
     --hash=sha256:fed51ac40f757d41b7c48425901843666a6677e3e8eb0abcff09e4ba6e664f50
+    # via mako
+psycopg[c,pool]==3.2.11 \
+    --hash=sha256:217231b2b6b72fba88281b94241b2f16043ee67f81def47c52a01b72ff0c086a \
+    --hash=sha256:398bb484ed44361e041c8f804ed7af3d2fcefbffdace1d905b7446c319321706
     # via -r requirements.armv7.in
 psycopg-c==3.2.11 \
     --hash=sha256:b3104bcbd62e34cfc736bbdaa4cdcb7e9bfc9a4c0a1f0992cac0f68ea941a450
@@ -307,10 +311,6 @@ psycopg-c==3.2.11 \
 psycopg-pool==3.2.6 \
     --hash=sha256:0f92a7817719517212fbfe2fd58b8c35c1850cdd2a80d36b581ba2085d9148e5 \
     --hash=sha256:5887318a9f6af906d041a0b1dc1c60f8f0dda8340c2572b74e10907b51ed5da7
-    # via mako
-psycopg[c,pool]==3.2.11 \
-    --hash=sha256:217231b2b6b72fba88281b94241b2f16043ee67f81def47c52a01b72ff0c086a \
-    --hash=sha256:398bb484ed44361e041c8f804ed7af3d2fcefbffdace1d905b7446c319321706
     # via psycopg
 pycparser==2.23 \
     --hash=sha256:78816d4f24add8f10a06d6f05b4d424ad9e96cfebf68a4ddc99c65c0720d00c2 \
