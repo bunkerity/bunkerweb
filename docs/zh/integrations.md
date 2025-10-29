@@ -216,7 +216,7 @@ docker run -d \
 
 | 类型       | 名称                                    | 目的                                                                                                                                                         |
 | ---------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **集合**   | `crowdsecurity/nginx`                   | 保护 Nginx 服务器免受各种基于 HTTP 的攻击，从暴力破解到注入尝试。                                                                                            |
+| **集合**   | `bunkerity/bunkerweb`                   | 保护 Nginx 服务器免受各种基于 HTTP 的攻击，从暴力破解到注入尝试。                                                                                            |
 | **集合**   | `crowdsecurity/appsec-virtual-patching` | 提供一个动态更新的 WAF 风格规则集，针对已知的 CVE，每日自动修补以保护 Web 应用程序免受新发现的漏洞影响。                                                     |
 | **集合**   | `crowdsecurity/appsec-generic-rules`    | 对 `crowdsecurity/appsec-virtual-patching` 进行补充，提供针对通用应用层攻击模式的启发式规则——例如枚举、路径遍历和自动化探测——填补了尚无 CVE 特定规则的空白。 |
 | **解析器** | `crowdsecurity/geoip-enrich`            | 用 GeoIP 上下文丰富事件                                                                                                                                      |
@@ -227,13 +227,17 @@ docker run -d \
 入口点脚本调用：
 
 ```bash
-cscli install collection crowdsecurity/nginx
+cscli hub update
+cscli install collection bunkerity/bunkerweb
 cscli install collection crowdsecurity/appsec-virtual-patching
 cscli install collection crowdsecurity/appsec-generic-rules
 cscli install parser     crowdsecurity/geoip-enrich
 ```
 
 </details>
+
+!!! info "Docker 中看不到集合？"
+    如果在容器内执行 `cscli collections list` 仍然看不到 `bunkerity/bunkerweb`，请运行 `docker exec -it bunkerweb-aio cscli hub update`，然后重启容器（`docker restart bunkerweb-aio`），以刷新本地 hub 缓存。
 
 ---
 
@@ -816,7 +820,7 @@ sudo ./install-bunkerweb.sh --yes --api
 
 - 它会添加官方的 CrowdSec 仓库并安装代理。
 - 它会创建一个新的采集文件，让 CrowdSec 解析 BunkerWeb 的日志（`access.log`、`error.log` 和 `modsec_audit.log`）。
-- 它会安装必要的集合（`crowdsecurity/nginx`）和解析器（`crowdsecurity/geoip-enrich`）。
+- 它会安装必要的集合（`bunkerity/bunkerweb`）和解析器（`crowdsecurity/geoip-enrich`）。
 - 它会为 BunkerWeb 注册一个拦截器，并自动在 `/etc/bunkerweb/variables.env` 中配置 API 密钥。
 - 如果您还选择了**AppSec 组件**，它会安装 `appsec-virtual-patching` 和 `appsec-generic-rules` 集合，并为 BunkerWeb 配置 AppSec 端点。
 

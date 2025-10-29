@@ -26,14 +26,16 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 === "Docker"
     **采集文件**
 
-    您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。由于 BunkerWeb 基于 NGINX，您可以在采集文件中为 `type` 参数使用 `nginx` 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：
+    您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。请在采集文件中将 `type` 参数设置为专用的 `bunkerweb` 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：
 
     ```yaml
     filenames:
       - /var/log/bunkerweb.log
     labels:
-      type: nginx
+      type: bunkerweb
     ```
+
+    如果在 CrowdSec 容器内仍然看不到该集合，请运行 `docker exec -it <crowdsec-container> cscli hub update`，然后重启该容器（`docker restart <crowdsec-container>`），以加载新的资源。请将 `<crowdsec-container>` 替换为 CrowdSec 容器的实际名称。
 
     **应用程序安全组件（*可选*）**
 
@@ -146,8 +148,8 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # 如果您不想使用 AppSec 组件，请注释掉此行
         environment:
           BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # 记得为 bouncer 设置一个更强的密钥
-          COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-          #   COLLECTIONS: "crowdsecurity/nginx" # 如果您不想使用 AppSec 组件，请改用此行
+          COLLECTIONS: "bunkerity/bunkerweb crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          #   COLLECTIONS: "bunkerity/bunkerweb" # 如果您不想使用 AppSec 组件，请改用此行
         networks:
           - bw-universe
 
@@ -199,7 +201,14 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
       - /var/log/bunkerweb/error.log
       - /var/log/bunkerweb/modsec_audit.log
     labels:
-        type: nginx
+        type: bunkerweb
+    ```
+
+    更新 CrowdSec hub 并安装 BunkerWeb 集合：
+
+    ```shell
+    sudo cscli hub update
+    sudo cscli collections install bunkerity/bunkerweb
     ```
 
     现在，使用 `cscli` 工具将您的自定义 bouncer 添加到 CrowdSec API：

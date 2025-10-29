@@ -2,6 +2,7 @@
 
 ## v1.6.6-rc1 - ????/??/??
 
+- [BUGFIX] Update BunkerWeb integration to use dedicated CrowdSec collection so that CrowdSec now works with the log format used by BunkerWeb.
 - [FEATURE] Enhance plugin update process with per-plugin commit option and improved error handling
 - [FEATURE] Refactor wildcard certificate handling in certbot and letsencrypt plugin to improve reliability, performance and user experience
 - [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
@@ -9,6 +10,7 @@
 - [UI] Enhanced the raw configuration editor with disabled settings highlighting and improved UI elements.
 - [UI] Implemented **Ctrl+S** / **Command+S** shortcuts for saving RAW global config / services / custom configurations.
 - [ALL-IN-ONE] Add Redis data directory creation in entrypoint script to fix redis not being able to start
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.3
 - [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
 - [UI] Refactor threading to use a shared ThreadPoolExecutor for configuration tasks across routes, preventing gradual RAM growth over time
 - [DOCS] Add documentation for persistent data storage in the all-in-one image

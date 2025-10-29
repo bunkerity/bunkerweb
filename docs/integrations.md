@@ -221,7 +221,7 @@ On first startup (or after upgrading), these assets are automatically installed 
 
 | Type           | Name                                    | Purpose                                                                                                                                                                                                                            |
 | -------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Collection** | `crowdsecurity/nginx`                   | Defend Nginx servers against a broad array of HTTP-based attacks, from brute-force to injection attempts.                                                                                                                          |
+| **Collection** | `bunkerity/bunkerweb`                   | Defend Nginx servers against a broad array of HTTP-based attacks, from brute-force to injection attempts.                                                                                                                          |
 | **Collection** | `crowdsecurity/appsec-virtual-patching` | Delivers a dynamically updated WAF-style rule set targeting known CVEs, automatically patched daily to shield web applications from newly discovered vulnerabilities.                                                              |
 | **Collection** | `crowdsecurity/appsec-generic-rules`    | Complements `crowdsecurity/appsec-virtual-patching` with heuristics for generic application-layer attack patterns—such as enumeration, path traversal, and automated probes—filling gaps where CVE-specific rules don’t yet exist. |
 | **Parser**     | `crowdsecurity/geoip-enrich`            | Enriches events with GeoIP context                                                                                                                                                                                                 |
@@ -232,13 +232,17 @@ On first startup (or after upgrading), these assets are automatically installed 
 The entrypoint script invokes:
 
 ```bash
-cscli install collection crowdsecurity/nginx
+cscli hub update
+cscli install collection bunkerity/bunkerweb
 cscli install collection crowdsecurity/appsec-virtual-patching
 cscli install collection crowdsecurity/appsec-generic-rules
 cscli install parser     crowdsecurity/geoip-enrich
 ```
 
 </details>
+
+!!! info "Collection missing in Docker?"
+    If `cscli collections list` inside the container still does not show `bunkerity/bunkerweb`, run `docker exec -it bunkerweb-aio cscli hub update` and then restart the container (`docker restart bunkerweb-aio`) to refresh the local hub cache.
 
 ---
 
@@ -825,7 +829,7 @@ If you opt to install CrowdSec during the interactive setup, the script fully au
 
 - It adds the official CrowdSec repository and installs the agent.
 - It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (`access.log`, `error.log`, and `modsec_audit.log`).
-- It installs essential collections (`crowdsecurity/nginx`) and parsers (`crowdsecurity/geoip-enrich`).
+- It installs essential collections (`bunkerity/bunkerweb`) and parsers (`crowdsecurity/geoip-enrich`).
 - It registers a bouncer for BunkerWeb and automatically configures the API key in `/etc/bunkerweb/variables.env`.
 - If you also select the **AppSec Component**, it installs the `appsec-virtual-patching` and `appsec-generic-rules` collections and configures the AppSec endpoint for BunkerWeb.
 

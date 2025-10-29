@@ -31,9 +31,8 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 ### Integration workflow
 
 1. Prepare the CrowdSec agent so it ingests BunkerWeb logs.
-2. Install the custom parser so CrowdSec understands BunkerWeb’s `$request_id`-enhanced log format.
-3. Configure BunkerWeb to query the CrowdSec Local API.
-4. Validate the link with the `/crowdsec/ping` API or the admin UI CrowdSec card.
+2. Configure BunkerWeb to query the CrowdSec Local API.
+3. Validate the link with the `/crowdsec/ping` API or the admin UI CrowdSec card.
 
 The detailed instructions below follow this sequence.
 
@@ -44,14 +43,16 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
 === "Docker"
     **Acquisition file**
 
-    You will need to run a CrowdSec instance and configure it to parse BunkerWeb logs. Since BunkerWeb is based on NGINX, you can use the `nginx` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored as is without additional data):
+    You will need to run a CrowdSec instance and configure it to parse BunkerWeb logs. Use the dedicated `bunkerweb` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored as is without additional data):
 
     ```yaml
     filenames:
       - /var/log/bunkerweb.log
     labels:
-      type: nginx
+      type: bunkerweb
     ```
+
+    If the collection is not visible from inside the CrowdSec container, execute `docker exec -it <crowdsec-container> cscli hub update` and then restart that container (`docker restart <crowdsec-container>`) so the new assets become available. Replace `<crowdsec-container>` with the name of your CrowdSec container.
 
     **Application Security Component (*optional*)**
 
@@ -156,7 +157,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.1 # Use the latest version but always pin the version for a better stability/security
+        image: crowdsecurity/crowdsec:v1.7.3 # Use the latest version but always pin the version for a better stability/security
         volumes:
           - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
           - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
@@ -164,8 +165,8 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
           - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # Comment if you don't want to use the AppSec Component
         environment:
           BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # Remember to set a stronger key for the bouncer
-          COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-          #   COLLECTIONS: "crowdsecurity/nginx" # If you don't want to use the AppSec Component use this line instead
+          COLLECTIONS: "bunkerity/bunkerweb crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          #   COLLECTIONS: "bunkerity/bunkerweb" # If you don't want to use the AppSec Component use this line instead
         networks:
           - bw-universe
 
@@ -217,7 +218,14 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
       - /var/log/bunkerweb/error.log
       - /var/log/bunkerweb/modsec_audit.log
     labels:
-        type: nginx
+        type: bunkerweb
+    ```
+
+    Update the CrowdSec hub and install the BunkerWeb collection:
+
+    ```shell
+    sudo cscli hub update
+    sudo cscli collections install bunkerity/bunkerweb
     ```
 
     Now, add your custom bouncer to the CrowdSec API using the `cscli` tool:
@@ -284,39 +292,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
 
     Refer to the [All-In-One (AIO) Image integration documentation](integrations.md#crowdsec-integration).
 
-### Step&nbsp;2 – Install the BunkerWeb-specific log parser (keeps request IDs)
-
-BunkerWeb’s default access log format includes the virtual host and a unique `$request_id`. CrowdSec’s stock parser skips those fields, so install a custom parser under your own namespace to keep both tools in sync:
-
-1. Duplicate the upstream parser and adapt its GROK rule under your own namespace:
-
-    ```shell
-    sudo cp /etc/crowdsec/parsers/s02-enrich/nginx-logs.yaml /etc/crowdsec/parsers/s02-enrich/bunkerweb-nginx-logs.yaml
-    sudo sed -i 's/%{IPORHOST:remote_addr} - %{DATA:remote_user}/%{NOTSPACE:bw_server_name} %{IPORHOST:remote_addr} - %{DATA:request_id} %{DATA:remote_user}/' /etc/crowdsec/parsers/s02-enrich/bunkerweb-nginx-logs.yaml
-    sudo sed -i 's/name: crowdsecurity\/nginx-logs/name: bunkerity\/bunkerweb-nginx-logs/' /etc/crowdsec/parsers/s02-enrich/bunkerweb-nginx-logs.yaml
-    sudo sed -i 's/description: Parse nginx access logs/description: Parse BunkerWeb access logs that include a request_id/' /etc/crowdsec/parsers/s02-enrich/bunkerweb-nginx-logs.yaml
-    ```
-
-    The new `%{NOTSPACE:bw_server_name}` and `%{DATA:request_id}` capture groups at the beginning of the pattern are the critical changes. Keeping the file inside `/etc/crowdsec/parsers/s02-enrich/` prevents CrowdSec upgrades from overwriting your customisation, and the `bunkerity/` namespace avoids collisions with official parsers.
-
-2. Point your acquisition file to the custom parser:
-
-    ```yaml
-    filenames:
-      - /var/log/bunkerweb/access.log
-    labels:
-      type: bunkerweb-nginx
-    ```
-
-3. Reload CrowdSec to pick up the new parser:
-
-    ```shell
-    sudo systemctl reload crowdsec
-    ```
-
-With this parser in place, CrowdSec continues to analyse the access logs while BunkerWeb retains the `$request_id` needed for its own tooling.
-
-### Step&nbsp;3 – Configure BunkerWeb settings
+### Step&nbsp;2 – Configure BunkerWeb settings
 
 Apply the following environment variables (or values via the scheduler UI/API) so the BunkerWeb instance can talk to the CrowdSec Local API. At a minimum you must set `USE_CROWDSEC`, `CROWDSEC_API`, and a valid `CROWDSEC_API_KEY` that you created with `cscli bouncers add`.
 
@@ -380,7 +356,7 @@ Apply the following environment variables (or values via the scheduler UI/API) s
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
 
-### Step&nbsp;4 – Validate the integration
+### Step&nbsp;3 – Validate the integration
 
 - From the BunkerWeb host (or inside the container), run:
 

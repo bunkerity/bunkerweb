@@ -243,7 +243,7 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	fi
 
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Processing required collections and parsers..."
-	install_or_upgrade_collection "crowdsecurity/nginx"
+	install_or_upgrade_collection "bunkerity/bunkerweb"
 	install_or_upgrade_collection "crowdsecurity/linux"
 
 	if [[ "${CROWDSEC_APPSEC_URL}" == http://127.0.0.1* || "${CROWDSEC_APPSEC_URL}" == http://localhost* ]]; then

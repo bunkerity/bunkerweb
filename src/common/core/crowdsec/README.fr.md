@@ -26,14 +26,16 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
 === "Docker"
     **Fichier d'acquisition**
 
-    Vous devrez exécuter une instance de CrowdSec et la configurer pour analyser les journaux de BunkerWeb. Comme BunkerWeb est basé sur NGINX, vous pouvez utiliser la valeur `nginx` pour le paramètre `type` dans votre fichier d'acquisition (en supposant que les journaux de BunkerWeb sont stockés tels quels sans données supplémentaires) :
+    Vous devrez exécuter une instance de CrowdSec et la configurer pour analyser les journaux de BunkerWeb. Utilisez la valeur dédiée `bunkerweb` pour le paramètre `type` dans votre fichier d'acquisition (en supposant que les journaux de BunkerWeb sont stockés tels quels sans données supplémentaires) :
 
     ```yaml
     filenames:
       - /var/log/bunkerweb.log
     labels:
-      type: nginx
+      type: bunkerweb
     ```
+
+    Si la collection n'apparaît pas dans le conteneur CrowdSec, exécutez `docker exec -it <crowdsec-container> cscli hub update`, puis redémarrez ce conteneur (`docker restart <crowdsec-container>`) afin que les nouveaux artefacts soient disponibles. Remplacez `<crowdsec-container>` par le nom de votre conteneur CrowdSec.
 
     **Composant de sécurité applicative (*optionnel*)**
 
@@ -146,8 +148,8 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
           - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # Commentez si vous ne voulez pas utiliser le composant AppSec
         environment:
           BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # N'oubliez pas de définir une clé plus forte pour le bouncer
-          COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-          #   COLLECTIONS: "crowdsecurity/nginx" # Si vous ne voulez pas utiliser le composant AppSec, utilisez plutôt cette ligne
+          COLLECTIONS: "bunkerity/bunkerweb crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          #   COLLECTIONS: "bunkerity/bunkerweb" # Si vous ne voulez pas utiliser le composant AppSec, utilisez plutôt cette ligne
         networks:
           - bw-universe
 
@@ -199,7 +201,14 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
       - /var/log/bunkerweb/error.log
       - /var/log/bunkerweb/modsec_audit.log
     labels:
-        type: nginx
+        type: bunkerweb
+    ```
+
+    Mettez à jour le hub CrowdSec et installez la collection BunkerWeb :
+
+    ```shell
+    sudo cscli hub update
+    sudo cscli collections install bunkerity/bunkerweb
     ```
 
     Maintenant, ajoutez votre bouncer personnalisé à l'API CrowdSec en utilisant l'outil `cscli` :

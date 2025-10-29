@@ -158,7 +158,7 @@ Au premier démarrage (ou après la mise à niveau), les ressources suivantes so
 
 | Type           | Nom                                     | But                                                                                                                                                                                                                                                                                                 |
 | -------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Collection** | `crowdsecurity/nginx`                   | Protégez les serveurs Nginx contre un large éventail d'attaques basées sur HTTP, de la force brute aux tentatives d'injection.                                                                                                                                                                      |
+| **Collection** | `bunkerity/bunkerweb`                   | Protégez les serveurs Nginx contre un large éventail d'attaques basées sur HTTP, de la force brute aux tentatives d'injection.                                                                                                                                                                      |
 | **Collection** | `crowdsecurity/appsec-virtual-patching` | Fournit un ensemble de règles de type WAF mis à jour dynamiquement ciblant les CVE connues, automatiquement corrigé quotidiennement pour protéger les applications Web contre les vulnérabilités nouvellement découvertes.                                                                          |
 | **Collection** | `crowdsecurity/appsec-generic-rules`    | Compléments `crowdsecurity/appsec-virtual-patching` avec des heuristiques pour les modèles d'attaque génériques de la couche application, tels que l'énumération, la traversée de chemin et les sondes automatisées, comblant les lacunes là où il n'existe pas encore de règles spécifiques à CVE. |
 | **Analyseur**  | `crowdsecurity/geoip-enrich`            | Enrichit les événements avec le contexte GeoIP                                                                                                                                                                                                                                                      |
@@ -169,13 +169,17 @@ Au premier démarrage (ou après la mise à niveau), les ressources suivantes so
 Le script entrypoint appelle :
 
 ```bash
-cscli install collection crowdsecurity/nginx
+cscli hub update
+cscli install collection bunkerity/bunkerweb
 cscli install collection crowdsecurity/appsec-virtual-patching
 cscli install collection crowdsecurity/appsec-generic-rules
 cscli install parser     crowdsecurity/geoip-enrich
 ```
 
 </details>
+
+!!! info "Collection absente dans Docker ?"
+    Si `cscli collections list` à l'intérieur du conteneur n'affiche toujours pas `bunkerity/bunkerweb`, exécutez `docker exec -it bunkerweb-aio cscli hub update` puis redémarrez le conteneur (`docker restart bunkerweb-aio`) pour rafraîchir le cache local du hub.
 
 ---
 
@@ -758,7 +762,7 @@ Si vous choisissez d'installer CrowdSec lors de la configuration interactive, le
 
 - Il ajoute le dépôt officiel CrowdSec et installe l'agent.
 - Il crée un nouveau fichier d'acquisition pour que CrowdSec analyse les journaux de BunkerWeb (`access.log`, `error.log`, et `modsec_audit.log`).
-- Il installe les collections essentielles (`crowdsecurity/nginx`) et les analyseurs syntaxiques (`crowdsecurity/geoip-enrich`).
+- Il installe les collections essentielles (`bunkerity/bunkerweb`) et les analyseurs syntaxiques (`crowdsecurity/geoip-enrich`).
 - Il enregistre un videur pour BunkerWeb et configure automatiquement la clé API dans `/etc/bunkerweb/variables.env`.
 - Si vous sélectionnez également le **composant AppSec**, il installe les `appsec-virtual-patching` collections  et `appsec-generic-rules` configure  le point de terminaison AppSec pour BunkerWeb.
 

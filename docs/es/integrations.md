@@ -216,7 +216,7 @@ En el primer inicio (o después de una actualización), estos activos se instala
 
 | Tipo           | Nombre                                  | Propósito                                                                                                                                                                                                                                                          |
 | :------------- | :-------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Colección**  | `crowdsecurity/nginx`                   | Defiende los servidores Nginx contra una amplia gama de ataques basados en HTTP, desde fuerza bruta hasta intentos de inyección.                                                                                                                                   |
+| **Colección**  | `bunkerity/bunkerweb`                   | Defiende los servidores Nginx contra una amplia gama de ataques basados en HTTP, desde fuerza bruta hasta intentos de inyección.                                                                                                                                   |
 | **Colección**  | `crowdsecurity/appsec-virtual-patching` | Ofrece un conjunto de reglas de estilo WAF actualizado dinámicamente que apunta a CVEs conocidos, parcheado automáticamente a diario para proteger las aplicaciones web de vulnerabilidades recién descubiertas.                                                   |
 | **Colección**  | `crowdsecurity/appsec-generic-rules`    | Complementa `crowdsecurity/appsec-virtual-patching` con heurísticas para patrones de ataque genéricos a nivel de aplicación, como enumeración, recorrido de rutas y sondeos automatizados, llenando los vacíos donde las reglas específicas de CVE aún no existen. |
 | **Analizador** | `crowdsecurity/geoip-enrich`            | Enriquece los eventos con contexto de GeoIP.                                                                                                                                                                                                                       |
@@ -227,13 +227,17 @@ En el primer inicio (o después de una actualización), estos activos se instala
 El script de punto de entrada invoca:
 
 ```bash
-cscli install collection crowdsecurity/nginx
+cscli hub update
+cscli install collection bunkerity/bunkerweb
 cscli install collection crowdsecurity/appsec-virtual-patching
 cscli install collection crowdsecurity/appsec-generic-rules
 cscli install parser     crowdsecurity/geoip-enrich
 ```
 
 </details>
+
+!!! info "¿No aparece la colección en Docker?"
+    Si dentro del contenedor `cscli collections list` sigue sin mostrar `bunkerity/bunkerweb`, ejecuta `docker exec -it bunkerweb-aio cscli hub update` y reinicia después el contenedor (`docker restart bunkerweb-aio`) para actualizar la caché local del hub.
 
 ---
 
@@ -815,7 +819,7 @@ Si optas por instalar CrowdSec durante la configuración interactiva, el script 
 
 - Añade el repositorio oficial de CrowdSec e instala el agente.
 - Crea un nuevo archivo de adquisición para que CrowdSec analice los registros de BunkerWeb (`access.log`, `error.log` y `modsec_audit.log`).
-- Instala colecciones esenciales (`crowdsecurity/nginx`) y analizadores (`crowdsecurity/geoip-enrich`).
+- Instala colecciones esenciales (`bunkerity/bunkerweb`) y analizadores (`crowdsecurity/geoip-enrich`).
 - Registra un bouncer para BunkerWeb y configura automáticamente la clave de la API en `/etc/bunkerweb/variables.env`.
 - Si también seleccionas el **Componente AppSec**, instala las colecciones `appsec-virtual-patching` y `appsec-generic-rules` y configura el punto final de AppSec para BunkerWeb.
 

@@ -567,7 +567,7 @@ install_crowdsec() {
   - /var/log/bunkerweb/error.log
   - /var/log/bunkerweb/modsec_audit.log
 labels:
-  type: nginx
+  type: bunkerweb
 "
     if [ -f "$ACQ_FILE" ]; then
         cp "$ACQ_FILE" "${ACQ_FILE}.bak"
@@ -581,7 +581,7 @@ labels:
     echo -e "${YELLOW}--- Step 3: Update hub and install core collections/parsers ---${NC}"
     print_step "Updating hub and installing detection collections/parsers"
     cscli hub update
-    cscli collections install crowdsecurity/nginx
+    cscli collections install bunkerity/bunkerweb
     cscli parsers install crowdsecurity/geoip-enrich
 
     # AppSec installation if chosen

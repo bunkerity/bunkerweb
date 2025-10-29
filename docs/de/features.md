@@ -1514,14 +1514,16 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
 === "Docker"
     **Akquisitionsdatei**
 
-    Sie müssen eine CrowdSec-Instanz ausführen und diese so konfigurieren, dass sie die BunkerWeb-Protokolle analysiert. Da BunkerWeb auf NGINX basiert, können Sie den Wert `nginx` für den Parameter `type` in Ihrer Akquisitionsdatei verwenden (vorausgesetzt, die BunkerWeb-Protokolle werden unverändert ohne zusätzliche Daten gespeichert):
+    Sie müssen eine CrowdSec-Instanz ausführen und diese so konfigurieren, dass sie die BunkerWeb-Protokolle analysiert. Verwenden Sie den dedizierten Wert `bunkerweb` für den Parameter `type` in Ihrer Akquisitionsdatei (vorausgesetzt, die BunkerWeb-Protokolle werden unverändert ohne zusätzliche Daten gespeichert):
 
     ```yaml
     filenames:
       - /var/log/bunkerweb.log
     labels:
-      type: nginx
+      type: bunkerweb
     ```
+
+    Wenn die Sammlung im CrowdSec-Container nicht angezeigt wird, führen Sie `docker exec -it <crowdsec-container> cscli hub update` aus und starten Sie anschließend diesen Container neu (`docker restart <crowdsec-container>`), damit die neuen Assets verfügbar werden. Ersetzen Sie `<crowdsec-container>` durch den Namen Ihres CrowdSec-Containers.
 
     **Anwendungssicherheitskomponente (*optional*)**
 
@@ -1634,8 +1636,8 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
           - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # Auskommentieren, wenn Sie die AppSec-Komponente nicht verwenden möchten
         environment:
           BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # Vergessen Sie nicht, einen stärkeren Schlüssel für den Bouncer festzulegen
-          COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-          #   COLLECTIONS: "crowdsecurity/nginx" # Wenn Sie die AppSec-Komponente nicht verwenden möchten, verwenden Sie stattdessen diese Zeile
+          COLLECTIONS: "bunkerity/bunkerweb crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          #   COLLECTIONS: "bunkerity/bunkerweb" # Wenn Sie die AppSec-Komponente nicht verwenden möchten, verwenden Sie stattdessen diese Zeile
         networks:
           - bw-universe
 
@@ -1686,7 +1688,14 @@ CrowdSec ist eine moderne Open-Source-Sicherheits-Engine, die bösartige IP-Adre
       - /var/log/bunkerweb/error.log
       - /var/log/bunkerweb/modsec_audit.log
     labels:
-        type: nginx
+        type: bunkerweb
+    ```
+
+    Aktualisieren Sie den CrowdSec-Hub und installieren Sie die BunkerWeb-Sammlung:
+
+    ```shell
+    sudo cscli hub update
+    sudo cscli collections install bunkerity/bunkerweb
     ```
 
     Fügen Sie nun Ihren benutzerdefinierten Bouncer zur CrowdSec-API hinzu, indem Sie das Tool `cscli` verwenden:
@@ -3996,9 +4005,6 @@ Der Redis-Plugin integriert [Redis](https://redis.io/) oder [Valkey](https://val
 3.  Mehrere Instanzen teilen diese Daten für ein reibungsloses Clustering.
 4.  Unterstützt Standalone-Bereitstellungen, passwortbasierte Authentifizierung, SSL/TLS and Redis Sentinel.
 5.  Automatische Wiederverbindung and konfigurierbare Timeouts sorgen für Robustheit.
-
-!!! note "Spezifika des All-In-One-Images"
-    Das All-In-One-Docker-Image enthält einen eingebetteten Redis-Server. Er startet automatisch nur, wenn `USE_REDIS=yes` gesetzt ist und `REDIS_HOST` auf dem Standardwert (`127.0.0.1`/`localhost`) bleibt. Wird `REDIS_HOST` überschrieben, erwartet BunkerWeb einen externen Redis-/Valkey-Endpunkt und startet den eingebetteten Dienst nicht; zudem lauscht der eingebettete Dienst ausschließlich auf dem Loopback-Interface und ist von anderen Containern aus nicht erreichbar.
 
 ### Verwendung
 
