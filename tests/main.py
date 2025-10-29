@@ -79,16 +79,6 @@ else:  # swarm
         "app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
     }
 
-domains.update(
-    {
-        "www\\\\.example\\\\.com": domains["www.example.com"],
-        "auth\\\\.example\\\\.com": domains["auth.example.com"],
-        "app1\\\\.example\\\\.com": domains["app1.example.com"],
-        "app2\\\\.example\\\\.com": domains["app2.example.com"],
-        "app3\\\\.example\\\\.com": domains["app3.example.com"],
-    }
-)
-
 for example in glob("./examples/*"):
     if isfile(f"{example}/tests.json"):
         try:

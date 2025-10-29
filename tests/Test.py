@@ -5,7 +5,7 @@ from traceback import format_exc
 from shutil import copytree
 from os.path import isdir, join
 from os import mkdir, walk, rename
-from re import compile as re_compile, sub, search, MULTILINE
+from re import compile as re_compile, escape, sub, search, MULTILINE
 from subprocess import run
 from logger import log
 from string import ascii_lowercase, digits
@@ -132,8 +132,9 @@ class Test(ABC):
             ok = False
             ex_url = test["url"]
             for ex_domain, test_domain in self._domains.items():
-                if search(ex_domain, ex_url):
-                    ex_url = sub(ex_domain, test_domain, ex_url)
+                escaped_domain = escape(ex_domain)
+                if search(escaped_domain, ex_url):
+                    ex_url = sub(escaped_domain, test_domain, ex_url)
                     break
             if test["type"] == "string":
                 r = get(ex_url, timeout=10, verify=False)
@@ -154,8 +155,9 @@ class Test(ABC):
                 tls_edit = test.get("tls_edit", True)
                 if tls_edit:
                     for ex_domain, test_domain in self._domains.items():
-                        if search(ex_domain, ex_tls):
-                            ex_tls = sub(ex_domain, test_domain, ex_tls)
+                        escaped_domain = escape(ex_domain)
+                        if search(escaped_domain, ex_tls):
+                            ex_tls = sub(escaped_domain, test_domain, ex_tls)
                             break
 
                 parsed_url = urlparse(ex_url)
