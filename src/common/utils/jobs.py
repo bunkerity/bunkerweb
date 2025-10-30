@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from inspect import currentframe, getframeinfo
 from io import BytesIO
 from logging import Logger
-from os import getenv
+from os import getenv, replace
 from os.path import sep
 from pathlib import Path
 from shutil import rmtree
@@ -13,6 +13,8 @@ from tarfile import TarFile, open as tar_open
 from threading import Lock
 from traceback import format_exc
 from typing import Any, Dict, Literal, Optional, Tuple, Union
+from tempfile import NamedTemporaryFile
+from stat import S_IMODE
 
 from common_utils import bytes_hash, file_hash
 
@@ -23,6 +25,42 @@ EXPIRE_TIME = {
     "week": timedelta(weeks=1).total_seconds(),
     "month": timedelta(days=30).total_seconds(),
 }
+
+
+def _write_atomic(target: Path, data: bytes) -> None:
+    """Write data to target atomically to avoid partial files."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    existing_mode = None
+    try:
+        existing_mode = target.stat().st_mode
+    except FileNotFoundError:
+        existing_mode = None
+
+    attempt = 0
+    last_exc: Optional[BaseException] = None
+    while attempt < 3:
+        attempt += 1
+        with NamedTemporaryFile(dir=target.parent, prefix=f".{target.name}.", delete=False) as tmp:
+            tmp.write(data)
+            tmp.flush()
+            tmp_path = Path(tmp.name)
+
+        if existing_mode is not None:
+            tmp_path.chmod(S_IMODE(existing_mode))
+
+        try:
+            replace(tmp_path, target)
+            return
+        except FileNotFoundError as exc:
+            last_exc = exc
+            tmp_path.unlink(missing_ok=True)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            continue
+        except Exception:
+            tmp_path.unlink(missing_ok=True)
+            raise
+
+    raise last_exc or FileNotFoundError(f"Failed to write atomically to {target}")
 
 
 class Job:
@@ -55,6 +93,8 @@ class Job:
         # Additional validation for job_path
         if self.job_path == Path(sep, "var", "cache", "bunkerweb"):
             raise ValueError("Could not determine job path. Ensure passed_plugin_id is valid.")
+
+        self.job_path.mkdir(parents=True, exist_ok=True)
 
         self.db = db
         if not self.db:
@@ -107,8 +147,7 @@ class Job:
                     continue
                 elif job_cache_file["job_name"] != job_name:
                     continue
-                cache_path.parent.mkdir(parents=True, exist_ok=True)
-                cache_path.write_bytes(job_cache_file["data"])
+                _write_atomic(cache_path, job_cache_file["data"])
                 ignored_dirs.add(cache_path.parent.as_posix())
                 self.logger.debug(
                     "Restored cache file " + ((job_cache_file["service_id"] + "/") if job_cache_file["service_id"] else "") + job_cache_file["file_name"]
@@ -209,8 +248,7 @@ class Job:
             content = file_cache.read_bytes()
 
         if not name.startswith("folder:") and (overwrite_file or not cache_path.is_file()):
-            cache_path.parent.mkdir(parents=True, exist_ok=True)
-            cache_path.write_bytes(content)
+            _write_atomic(cache_path, content)
 
         if not checksum:
             checksum = bytes_hash(content)

@@ -80,7 +80,7 @@ BunkerWeb offers an optional [user interface](web-ui.md) to manage your instance
 
 Don't want to self-host and manage your own BunkerWeb instance(s)? You might be interested in BunkerWeb Cloud, our fully managed SaaS offering for BunkerWeb.
 
-Try our [BunkerWeb Cloud offer](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) and get access to:
+Order your [BunkerWeb Cloud instance](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) and get access to:
 
 - A fully managed BunkerWeb instance hosted in our cloud
 - All BunkerWeb features, including PRO ones

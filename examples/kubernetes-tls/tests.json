@@ -1,7 +1,7 @@
 {
   "name": "kubernetes-tls",
   "kinds": ["kubernetes"],
-  "timeout": 90,
+  "timeout": 120,
   "delay": 300,
   "tests": [
     {

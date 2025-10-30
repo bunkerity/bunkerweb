@@ -27,6 +27,22 @@ local match = string.match
 local decode = cjson.decode
 local execute = os.execute
 local remove = os.remove
+local insert = table.insert
+local ipairs = ipairs
+
+local function get_wildcard_cert_identifier(host)
+	if not host or host == "" then
+		return host
+	end
+	local parts = {}
+	for part in host:gmatch("[^.]+") do
+		insert(parts, part)
+	end
+	if #parts <= 2 then
+		return host
+	end
+	return table.concat(parts, ".", 2)
+end
 
 function letsencrypt:initialize(ctx)
 	-- Call parent initialize
@@ -81,21 +97,25 @@ function letsencrypt:init()
 					)
 				then
 					local data
+					local server_names = multisite_vars["SERVER_NAME"]
+					local cert_identifier = server_names:match("%S+")
+					local server_list = {}
+					for part in server_names:gmatch("%S+") do
+						insert(server_list, part)
+					end
+
 					if
 						multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 						and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 					then
-						for part in server_name:gmatch("%S+") do
-							wildcard_servers[part] = true
+						cert_identifier = get_wildcard_cert_identifier(cert_identifier)
+						for _, part in ipairs(server_list) do
+							wildcard_servers[part] = cert_identifier
 						end
-						local parts = {}
-						for part in server_name:gmatch("[^.]+") do
-							table.insert(parts, part)
-						end
-						server_name = table.concat(parts, ".", 2)
-						data = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
+						wildcard_servers[cert_identifier] = cert_identifier
+						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
 					else
-						for part in server_name:gmatch("%S+") do
+						for _, part in ipairs(server_list) do
 							wildcard_servers[part] = false
 						end
 					end
@@ -103,8 +123,8 @@ function letsencrypt:init()
 						-- Load certificate
 						local check
 						check, data = read_files({
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
-							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem",
+							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
+							"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
 						})
 						if not check then
 							self.logger:log(ERR, "error while reading files : " .. data)
@@ -115,7 +135,7 @@ function letsencrypt:init()
 								multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 								and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 							then
-								check, err = self:load_data(data, server_name)
+								check, err = self:load_data(data, cert_identifier)
 							else
 								check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 							end
@@ -144,31 +164,35 @@ function letsencrypt:init()
 			if not challenge then
 				return self:ret(false, "can't get LETS_ENCRYPT_CHALLENGE variable : " .. err)
 			end
-			server_name = server_name:match("%S+")
-			if challenge == "dns" and use_wildcard == "yes" then
-				for part in server_name:gmatch("%S+") do
-					wildcard_servers[part] = true
+			local server_names = server_name
+			local cert_identifier = server_names:match("%S+")
+			local server_list = {}
+			for part in server_names:gmatch("%S+") do
+				insert(server_list, part)
+			end
+			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
+			if use_wildcard_mode then
+				cert_identifier = get_wildcard_cert_identifier(cert_identifier)
+				for _, part in ipairs(server_list) do
+					wildcard_servers[part] = cert_identifier
 				end
-				local parts = {}
-				for part in server_name:gmatch("[^.]+") do
-					table.insert(parts, part)
-				end
-				server_name = table.concat(parts, ".", 2)
+				wildcard_servers[cert_identifier] = cert_identifier
 			else
-				for part in server_name:gmatch("%S+") do
+				for _, part in ipairs(server_list) do
 					wildcard_servers[part] = false
 				end
 			end
 			local check, data = read_files({
-				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
-				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem",
+				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/fullchain.pem",
+				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. cert_identifier .. "/privkey.pem",
 			})
 			if not check then
 				self.logger:log(ERR, "error while reading files : " .. data)
 				ret_ok = false
 				ret_err = "error reading files"
 			else
-				check, err = self:load_data(data, server_name)
+				local load_key = use_wildcard_mode and cert_identifier or server_names
+				check, err = self:load_data(data, load_key)
 				if not check then
 					self.logger:log(ERR, "error while loading data : " .. err)
 					ret_ok = false
@@ -180,9 +204,9 @@ function letsencrypt:init()
 		ret_err = "let's encrypt is not used"
 	end
 
-	local ok, err = self.datastore:set("plugin_letsencrypt_wildcard_servers", wildcard_servers, nil, true)
+	local ok, err = self.internalstore:set("plugin_letsencrypt_wildcard_servers", wildcard_servers, nil, true)
 	if not ok then
-		return self:ret(false, "error while setting wildcard servers into datastore : " .. err)
+		return self:ret(false, "error while setting wildcard servers into internalstore : " .. err)
 	end
 
 	return self:ret(ret_ok, ret_err)
@@ -193,21 +217,29 @@ function letsencrypt:ssl_certificate()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
-	local wildcard_servers, err = self.datastore:get("plugin_letsencrypt_wildcard_servers", true)
+	local wildcard_servers, err = self.internalstore:get("plugin_letsencrypt_wildcard_servers", true)
 	if not wildcard_servers then
 		return self:ret(false, "can't get wildcard servers : " .. err)
 	end
-	if wildcard_servers[server_name] then
+	local alias = wildcard_servers[server_name]
+	if alias == true then
 		local parts = {}
 		for part in server_name:gmatch("[^.]+") do
-			table.insert(parts, part)
+			insert(parts, part)
 		end
-		server_name = table.concat(parts, ".", 2)
+		if #parts > 2 then
+			server_name = table.concat(parts, ".", 2)
+		end
+	elseif type(alias) == "string" and alias ~= "" then
+		server_name = alias
 	end
 	local data
-	data, err = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
+	data, err = self.internalstore:get("plugin_letsencrypt_" .. server_name, true)
 	if not data and err ~= "not found" then
-		return self:ret(false, "error while getting plugin_letsencrypt_" .. server_name .. " from datastore : " .. err)
+		return self:ret(
+			false,
+			"error while getting plugin_letsencrypt_" .. server_name .. " from internalstore : " .. err
+		)
 	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end
@@ -230,9 +262,9 @@ function letsencrypt:load_data(data, server_name)
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_letsencrypt_" .. key
 		local ok
-		ok, err = self.datastore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
 		if not ok then
-			return false, "error while setting data into datastore : " .. err
+			return false, "error while setting data into internalstore : " .. err
 		end
 	end
 	return true

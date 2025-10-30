@@ -26,7 +26,7 @@ sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*.md
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" docs/*/*.md
 # README
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" README.md
-sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/*/README.md
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/core/*/README*.md
 # tests
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" tests/ui/docker-compose.yml
 shopt -s globstar
@@ -46,6 +46,8 @@ sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" .github/ISSUE_TEMPLATE/bug_report.yml
 # pyproject
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" pyproject.toml
 # Dockerfiles
+sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION\"@g" src/all-in-one/Dockerfile
+sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION\"@g" src/api/Dockerfile
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION\"@g" src/bw/Dockerfile
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION\"@g" src/scheduler/Dockerfile
 sed -i "s@LABEL version.*@LABEL version=\"$NEW_VERSION\"@g" src/ui/Dockerfile

@@ -42,8 +42,8 @@ chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/
 # Ensure temp dir enforces group inheritance and no access for others
 chmod 2770 /var/tmp/bunkerweb/
 chmod 550 -R /usr/share/bunkerweb/
-find . \( -path './scheduler' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
-find scheduler/ ui/ cli/ lua/ core/ db/ gen/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
+find . \( -path './api' -o -path './scheduler' -o -path './ui' -o -path './cli' -o -path './lua' -o -path './core' -o -path './db' -o -path './gen' -o -path './utils' -o -path './helpers' -o -path './scripts' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
+find api/ scheduler/ ui/ cli/ lua/ core/ db/ gen/ utils/ helpers/ scripts/ deps/ -type f ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440
 chmod 770 -R db/alembic/
 
 # Function to migrate files from old locations to new ones
@@ -73,6 +73,7 @@ function migrate_file() {
 migrate_file "/var/tmp/variables.env" "/etc/bunkerweb/variables.env"
 migrate_file "/var/tmp/scheduler.env" "/etc/bunkerweb/scheduler.env"
 migrate_file "/var/tmp/ui.env" "/etc/bunkerweb/ui.env"
+migrate_file "/var/tmp/api.env" "/etc/bunkerweb/api.env"
 migrate_file "/var/tmp/db.sqlite3" "/var/lib/bunkerweb/db.sqlite3"
 
 # Create /var/www/html if needed
@@ -218,6 +219,33 @@ elif systemctl is-active --quiet bunkerweb-ui; then
     do_and_check_cmd systemctl disable --now bunkerweb-ui
 else
     echo "ℹ️ BunkerWeb UI service is not enabled in the current configuration."
+fi
+
+# Manage the BunkerWeb API service
+echo "Configuring BunkerWeb API service..."
+
+# Enable API only when explicitly requested (via env or flag)
+if [ "${SERVICE_API:-no}" = "yes" ] || [ -f /var/tmp/bunkerweb_enable_api ]; then
+    # Fresh installation or explicit API enablement
+    if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
+        echo "🚀 Enabling and starting the BunkerWeb API service..."
+        do_and_check_cmd systemctl enable --now bunkerweb-api
+        # Clean up enable flag if present
+        if [ -f /var/tmp/bunkerweb_enable_api ]; then
+            rm -f /var/tmp/bunkerweb_enable_api
+        fi
+    else
+        # Restart API only if already running
+        if systemctl is-active --quiet bunkerweb-api; then
+            echo "📋 Restarting the BunkerWeb API service after upgrade..."
+            do_and_check_cmd systemctl restart bunkerweb-api
+        fi
+    fi
+elif systemctl is-active --quiet bunkerweb-api; then
+    echo "🛑 Disabling and stopping the BunkerWeb API service..."
+    do_and_check_cmd systemctl disable --now bunkerweb-api
+else
+    echo "ℹ️ BunkerWeb API service is not enabled in the current configuration."
 fi
 
 # Fetch CrowdSec config from /var/tmp/crowdsec.env and merge into variables.env if present

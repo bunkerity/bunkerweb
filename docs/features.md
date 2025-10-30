@@ -41,7 +41,7 @@ Some settings in BunkerWeb support multiple configurations for the same feature.
 
 This pattern allows you to manage multiple configurations for features like reverse proxies, ports, or other settings that require distinct values for different use cases.
 
-### Security Modes
+### Security Modes {#security-modes}
 
 The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on your specific needs:
 
@@ -68,12 +68,15 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.                                                |
     | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                                                           |
+    | `API_HTTPS_PORT`   | `5443`        | global  | No       | **API HTTPS Port:** Listen port number (TLS) for the API.                                               |
+    | `API_LISTEN_HTTP`  | `yes`         | global  | No       | **API Listen HTTP:** Enable HTTP listener for the API.                                                  |
+    | `API_LISTEN_HTTPS` | `no`          | global  | No       | **API Listen HTTPS:** Enable HTTPS (TLS) listener for the API.                                          |
     | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                                                       |
     | `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.                                            |
     | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API.                                    |
     | `API_TOKEN`        |               | global  | No       | **API Access Token (optional):** If set, all API requests must include `Authorization: Bearer <token>`. |
 
-    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth.
+    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth. You can expose the API over HTTPS by setting `API_LISTEN_HTTPS=yes` (port: `API_HTTPS_PORT`, default `5443`).
 
     Example test with curl (replace token and host):
 
@@ -81,6 +84,11 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          http://<bunkerweb-host>:5000/ping
+
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         --insecure \
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "Network & Port Settings"
@@ -123,11 +131,11 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Logging Settings"
 
-    | Setting            | Default                                                                                                                        | Context | Multiple | Description                                                                                                                   |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
-    | `LOG_LEVEL`        | `notice`                                                                                                                       | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                        | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
+    | Setting            | Default                                                                                                                                    | Context | Multiple | Description                                                                                                                   |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
 
     !!! tip "Logging Best Practices"
         - For production environments, use the `notice`, `warn`, or `error` log levels to minimize log volume.
@@ -1550,19 +1558,37 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
       3. **Lightweight Integration:** Minimal performance impact on your BunkerWeb instance.
       4. **Multi-Level Protection:** Combine perimeter defense (IP blocking) with application security for in-depth protection.
 
-### Setup
+### Prerequisites
+
+- A CrowdSec Local API that BunkerWeb can reach (typically the agent running on the same host or inside the same Docker network).
+- Access to BunkerWeb access logs (`/var/log/bunkerweb/access.log` by default) so the CrowdSec agent can analyse requests.
+- `cscli` access on the CrowdSec host to register the BunkerWeb bouncer key.
+
+### Integration workflow
+
+1. Prepare the CrowdSec agent so it ingests BunkerWeb logs.
+2. Configure BunkerWeb to query the CrowdSec Local API.
+3. Validate the link with the `/crowdsec/ping` API or the admin UI CrowdSec card.
+
+The detailed instructions below follow this sequence.
+
+### Step&nbsp;1 – Prepare CrowdSec to ingest BunkerWeb logs
+
+Follow one of the environment-specific guides below so the CrowdSec agent ingests BunkerWeb access, error, and ModSecurity audit logs. This is what drives the remediation decisions that the plugin will later enforce.
 
 === "Docker"
     **Acquisition file**
 
-    You will need to run a CrowdSec instance and configure it to parse BunkerWeb logs. Since BunkerWeb is based on NGINX, you can use the `nginx` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored as is without additional data):
+    You will need to run a CrowdSec instance and configure it to parse BunkerWeb logs. Use the dedicated `bunkerweb` value for the `type` parameter in your acquisition file (assuming that BunkerWeb logs are stored as is without additional data):
 
     ```yaml
     filenames:
       - /var/log/bunkerweb.log
     labels:
-      type: nginx
+      type: bunkerweb
     ```
+
+    If the collection is not visible from inside the CrowdSec container, execute `docker exec -it <crowdsec-container> cscli hub update` and then restart that container (`docker restart <crowdsec-container>`) so the new assets become available. Replace `<crowdsec-container>` with the name of your CrowdSec container.
 
     **Application Security Component (*optional*)**
 
@@ -1616,7 +1642,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1633,7 +1659,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -1667,7 +1693,7 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.0 # Use the latest version but always pin the version for a better stability/security
+        image: crowdsecurity/crowdsec:v1.7.3 # Use the latest version but always pin the version for a better stability/security
         volumes:
           - cs-data:/var/lib/crowdsec/data # To persist the CrowdSec data
           - bw-logs:/var/log:ro # The logs of BunkerWeb for CrowdSec to parse
@@ -1675,8 +1701,8 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
           - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # Comment if you don't want to use the AppSec Component
         environment:
           BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # Remember to set a stronger key for the bouncer
-          COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-          #   COLLECTIONS: "crowdsecurity/nginx" # If you don't want to use the AppSec Component use this line instead
+          COLLECTIONS: "bunkerity/bunkerweb crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          #   COLLECTIONS: "bunkerity/bunkerweb" # If you don't want to use the AppSec Component use this line instead
         networks:
           - bw-universe
 
@@ -1728,7 +1754,14 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
       - /var/log/bunkerweb/error.log
       - /var/log/bunkerweb/modsec_audit.log
     labels:
-        type: nginx
+        type: bunkerweb
+    ```
+
+    Update the CrowdSec hub and install the BunkerWeb collection:
+
+    ```shell
+    sudo cscli hub update
+    sudo cscli collections install bunkerity/bunkerweb
     ```
 
     Now, add your custom bouncer to the CrowdSec API using the `cscli` tool:
@@ -1795,7 +1828,9 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
     Refer to the [All-In-One (AIO) Image integration documentation](integrations.md#crowdsec-integration).
 
-### Configuration Settings
+### Step&nbsp;2 – Configure BunkerWeb settings
+
+Apply the following environment variables (or values via the scheduler UI/API) so the BunkerWeb instance can talk to the CrowdSec Local API. At a minimum you must set `USE_CROWDSEC`, `CROWDSEC_API`, and a valid `CROWDSEC_API_KEY` that you created with `cscli bouncers add`.
 
 | Setting                     | Default                | Context   | Multiple | Description                                                                                                      |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -1856,6 +1891,12 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
+
+### Step&nbsp;3 – Validate the integration
+
+- In the scheduler logs, look for `CrowdSec configuration successfully generated` and `CrowdSec bouncer denied request` entries to verify that the plugin is active.
+- On the CrowdSec side, monitor `cscli metrics show` or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.
+- In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.
 
 ## Custom SSL certificate
 
@@ -1987,10 +2028,19 @@ Follow these steps to configure and use the DNSBL feature:
 
 ### Configuration Settings
 
-| Setting      | Default                                             | Context   | Multiple | Description                                                                     |
-| ------------ | --------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------- |
-| `USE_DNSBL`  | `no`                                                | multisite | no       | **Enable DNSBL:** Set to `yes` to enable DNSBL checks for incoming connections. |
-| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | **DNSBL Servers:** List of DNSBL server domains to check, separated by spaces.  |
+**General**
+
+| Setting      | Default                                             | Context   | Multiple | Description                                                                 |
+| ------------ | --------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------- |
+| `USE_DNSBL`  | `no`                                                | multisite | no       | Enable DNSBL: set to `yes` to enable DNSBL checks for incoming connections. |
+| `DNSBL_LIST` | `bl.blocklist.de sbl.spamhaus.org xbl.spamhaus.org` | global    | no       | DNSBL servers: list of DNSBL server domains to check, separated by spaces.  |
+
+**Ignore Lists**
+
+| Setting                | Default | Context   | Multiple | Description                                                                                    |
+| ---------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `DNSBL_IGNORE_IP`      | ``      | multisite | yes      | Space-separated IPs/CIDRs to skip DNSBL checks for (whitelist).                                |
+| `DNSBL_IGNORE_IP_URLS` | ``      | multisite | yes      | Space-separated URLs providing IPs/CIDRs to skip. Supports `http(s)://` and `file://` schemes. |
 
 !!! tip "Choosing DNSBL Servers"
     Choose reputable DNSBL providers to minimize false positives. The default list includes well-established services that are suitable for most websites:
@@ -2029,6 +2079,43 @@ Follow these steps to configure and use the DNSBL feature:
 
     - **zen.spamhaus.org**: Spamhaus' combined list is often considered sufficient as a standalone solution due to its wide coverage and reputation for accuracy. It combines the SBL, XBL, and PBL lists in a single query, making it efficient and comprehensive.
 
+=== "Excluding Trusted IPs"
+
+    You can exclude specific clients from DNSBL checks using static values and/or remote files:
+
+    - `DNSBL_IGNORE_IP`: Add space-separated IPs and CIDR ranges. Example: `192.0.2.10 203.0.113.0/24 2001:db8::/32`.
+    - `DNSBL_IGNORE_IP_URLS`: Provide URLs whose contents list one IP/CIDR per line. Comments starting with `#` or `;` are ignored. Duplicate entries are de-duplicated.
+
+    When an incoming client IP matches the ignore list, BunkerWeb skips DNSBL lookups and caches the result as “ok” for faster subsequent requests.
+
+=== "Using Remote URLs"
+
+    The `dnsbl-download` job downloads and caches ignore IPs hourly:
+
+    - Protocols: `https://`, `http://`, and local `file://` paths.
+    - Per-URL cache with checksum prevents redundant downloads (1-hour grace).
+    - Per-service merged file: `/var/cache/bunkerweb/dnsbl/<service>/IGNORE_IP.list`.
+    - Loaded at startup and merged with `DNSBL_IGNORE_IP`.
+
+    Example combining static and URL sources:
+
+    ```yaml
+    USE_DNSBL: "yes"
+    DNSBL_LIST: "zen.spamhaus.org"
+    DNSBL_IGNORE_IP: "10.0.0.0/8 192.168.0.0/16 2001:db8::/32"
+    DNSBL_IGNORE_IP_URLS: "https://example.com/allow-cidrs.txt file:///etc/bunkerweb/dnsbl/ignore.txt"
+    ```
+
+=== "Using Local Files"
+
+    Load ignore IPs from local files using `file://` URLs:
+
+    ```yaml
+    USE_DNSBL: "yes"
+    DNSBL_LIST: "zen.spamhaus.org"
+    DNSBL_IGNORE_IP_URLS: "file:///etc/bunkerweb/dnsbl/ignore.txt file:///opt/data/allow-cidrs.txt"
+    ```
+
 ## Database
 
 STREAM support :white_check_mark:
@@ -2055,12 +2142,13 @@ Follow these steps to configure and use the Database feature:
 
 ### Configuration Settings
 
-| Setting                  | Default                                   | Context | Multiple | Description                                                                                                           |
-| ------------------------ | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URI`           | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
-| `DATABASE_URI_READONLY`  |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
-| `DATABASE_LOG_LEVEL`     | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
-| `DATABASE_MAX_JOBS_RUNS` | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
+| Setting                         | Default                                   | Context | Multiple | Description                                                                                                           |
+| ------------------------------- | ----------------------------------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URI`                  | `sqlite:////var/lib/bunkerweb/db.sqlite3` | global  | no       | **Database URI:** The primary database connection string in the SQLAlchemy format.                                    |
+| `DATABASE_URI_READONLY`         |                                           | global  | no       | **Read-Only Database URI:** Optional database for read-only operations or as a failover if the main database is down. |
+| `DATABASE_LOG_LEVEL`            | `warning`                                 | global  | no       | **Log Level:** The verbosity level for database logs. Options: `debug`, `info`, `warn`, `warning`, or `error`.        |
+| `DATABASE_MAX_JOBS_RUNS`        | `10000`                                   | global  | no       | **Maximum Job Runs:** The maximum number of job execution records to retain in the database before automatic cleanup. |
+| `DATABASE_MAX_SESSION_AGE_DAYS` | `14`                                      | global  | no       | **Session Retention:** The maximum age (in days) for UI user sessions before they are purged automatically.           |
 
 !!! tip "Database Selection"
     - **SQLite** (default): Ideal for single-node deployments or testing environments due to its simplicity and file-based nature.
@@ -2077,7 +2165,19 @@ Follow these steps to configure and use the Database feature:
     - Oracle: `oracle://username:password@hostname:port/database`
 
 !!! warning "Database Maintenance"
-    The plugin automatically runs a daily job that cleans up excess job runs based on the `DATABASE_MAX_JOBS_RUNS` setting. This prevents unbounded database growth while maintaining a useful history of job executions.
+    The plugin automatically runs daily maintenance jobs:
+
+    - **Cleanup Excess Job Runs:** Purges job execution history beyond the `DATABASE_MAX_JOBS_RUNS` limit.
+    - **Cleanup Expired UI Sessions:** Removes UI user sessions older than `DATABASE_MAX_SESSION_AGE_DAYS`.
+
+    Together, these jobs prevent unbounded database growth while preserving useful operational history.
+
+## Easy Resolve <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
+
+
+STREAM support :x:
+
+Provides a simpler way to fix false positives in reports.
 
 ## Errors
 
@@ -2961,6 +3061,8 @@ The Limit plugin in BunkerWeb provides robust capabilities to enforce limiting p
 ## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
 
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 STREAM support :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
@@ -2973,6 +3075,7 @@ Provides load balancing feature to group of upstreams with optional healthchecks
 | `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | yes      | Load balancing mode (round-robin or sticky).                       |
 | `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | yes      | Sticky session method (ip or cookie).                              |
 | `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | yes      | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | yes      | Number of keepalive connections to cache per worker.               |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | yes      | Keepalive timeout for upstream connections.                        |
 | `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | yes      | Keepalive time for upstream connections.                           |
 | `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global  | yes      | The healthcheck URL.                                               |
@@ -3507,7 +3610,7 @@ Follow these steps to configure and use ModSecurity:
 Select a CRS version to best match your security needs:
 
 - **`3`**: Stable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Stable [v4.18.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0) (**default**).
+- **`4`**: Stable [v4.19.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0) (**default**).
 - **`nightly`**: [Nightly build](https://github.com/coreruleset/coreruleset/releases/tag/nightly) offering the latest rule updates.
 
 !!! example "Nightly Build"
@@ -3523,7 +3626,7 @@ Select a CRS version to best match your security needs:
 
     You can set the paranoia level by adding a custom configuration file in `/etc/bunkerweb/configs/modsec-crs/`.
 
-### Custom Configurations
+### Custom Configurations {#custom-configurations}
 
 Tuning ModSecurity and the OWASP Core Rule Set (CRS) can be achieved through custom configurations. These configurations allow you to customize behavior at specific stages of the security rules processing:
 
@@ -5145,6 +5248,8 @@ Integrate easily the BunkerWeb UI.
 
 ## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
+
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='User Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
 
 STREAM support :x:
 

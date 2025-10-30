@@ -83,7 +83,7 @@ function badbehavior:log()
 	self:set_metric("counters", "ip_" .. self.ctx.bw.remote_addr, 1)
 	local request_uri = self.ctx.bw.request_uri or "-"
 	self:set_metric("counters", "url_" .. request_uri, 1)
-	self:set_metric("tables", "increments", {
+	self:set_metric("tables", "increments_" .. self.ctx.bw.remote_addr, {
 		date = self.ctx.bw.start_time,
 		id = self.ctx.bw.request_id,
 		ip = self.ctx.bw.remote_addr,
@@ -235,8 +235,16 @@ function badbehavior:timer()
 		if data.counter >= data.threshold then
 			if data.security_mode == "block" then
 				local ban_time = tonumber(data.ban_time) or 0
-				local ok, err =
-					add_ban(data.ip, "bad behavior", ban_time, data.server_name, data.country, data.ban_scope)
+				local reason_data = self:get_metric("tables", "increments_" .. data.ip) or {}
+				local ok, err = add_ban(
+					data.ip,
+					"bad behavior",
+					ban_time,
+					data.server_name,
+					data.country,
+					data.ban_scope,
+					reason_data
+				)
 				if not ok then
 					ret = false
 					ret_err = "can't save ban : " .. err
@@ -317,7 +325,7 @@ function badbehavior:increase(
 		counter = local_counter + 1
 	end
 	-- Store local counter
-	local ok, err = self.datastore:set("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
+	local ok, err = self.datastore:set_with_retries("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
 	if not ok then
 		self.logger:log(ERR, "(increase) can't save counts to the datastore : " .. err)
 		return false, err
@@ -375,7 +383,7 @@ function badbehavior:decrease(ip, count_time, threshold, use_redis, server_name,
 		counter = 0
 		self.datastore:delete("plugin_badbehavior_count_" .. key_suffix)
 	else
-		local ok, err = self.datastore:set("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
+		local ok, err = self.datastore:set_with_retries("plugin_badbehavior_count_" .. key_suffix, counter, count_time)
 		if not ok then
 			self.logger:log(ERR, "(decrease) can't save counts to the datastore : " .. err)
 			return false, err

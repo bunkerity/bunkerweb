@@ -1,4 +1,4 @@
-FROM ubuntu:jammy@sha256:1aa979d85661c488ce030ac292876cf6ed04535d3a237e49f61542d8e5de5ae0 AS builder
+FROM ubuntu:jammy@sha256:09506232a8004baa32c47d68f1e5c307d648fdd59f5e7eaa42aaf87914100db3 AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
@@ -32,6 +32,7 @@ RUN bash install.sh
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/scheduler/requirements.txt /tmp/req/requirements-scheduler.txt
 COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
+COPY src/api/requirements.txt /tmp/req/requirements-api.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
 
@@ -64,36 +65,56 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 COPY src/ui ui
+COPY src/api api
 
-# Minify JS files (can be skipped with SKIP_MINIFY_JS=yes)
+WORKDIR /tmp
+
+COPY src/deps/package.json package.json
+COPY src/deps/package-lock.json package-lock.json
+
+ARG NODE_MAJOR=22
+ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
-RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
-    apt-get install -y nodejs npm parallel && \
-    npm install -g uglify-js && \
-    find ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
-    | parallel -0 --no-run-if-empty 'uglifyjs {} --compress --mangle --output {}'; \
+ARG SKIP_MINIFY_CSS=no
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
+    set -eux; \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg; \
+    chmod 644 /usr/share/keyrings/nodesource.gpg; \
+    arch="$(dpkg --print-architecture)"; \
+    echo "deb [arch=${arch} signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_MAJOR}.x nodistro main" > /etc/apt/sources.list.d/nodesource.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends nodejs parallel; \
+    node --version; npm --version; \
+    cd /tmp; npm ci --ignore-scripts; \
+    apt-get purge -y --auto-remove gnupg || true; \
+    rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nodesource.list /usr/share/keyrings/nodesource.gpg; \
+    fi
+
+# Minify JS files
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
+    | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
     else \
     echo "Skipping JS minification"; \
     fi
 
-# Minify CSS files (can be skipped with SKIP_MINIFY_CSS=yes)
+# Minify CSS files
 ARG SKIP_MINIFY_CSS=no
-RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
-    apt-get install -y nodejs npm parallel && \
-    npm install -g clean-css-cli && \
-    find ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
-    | parallel -0 --no-run-if-empty 'cleancss -O2 -o {} {}'; \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+    find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
+    | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
     else \
     echo "Skipping CSS minification"; \
     fi
 
-# Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
+# Minify HTML files
 ARG SKIP_MINIFY_HTML=no
-RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
-    apt-get install -y nodejs npm parallel && \
-    npm install -g html-minifier-terser && \
-    find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
-    parallel 'html-minifier-terser \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+    find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
+    parallel 'npx html-minifier-terser \
     --collapse-whitespace \
     --remove-comments \
     --remove-optional-tags \
@@ -107,7 +128,7 @@ RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM ubuntu:jammy@sha256:1aa979d85661c488ce030ac292876cf6ed04535d3a237e49f61542d8e5de5ae0
+FROM ubuntu:jammy@sha256:09506232a8004baa32c47d68f1e5c307d648fdd59f5e7eaa42aaf87914100db3
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

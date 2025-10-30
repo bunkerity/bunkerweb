@@ -1,16 +1,16 @@
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from itertools import chain
-from threading import Thread
 from time import time
 from typing import Dict, List
 from flask import Blueprint, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
+from regex import sub
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 
 from app.routes.utils import CUSTOM_CONF_RX, handle_error, verify_data_in_form, wait_applying
-from app.utils import LOGGER, get_blacklisted_settings
+from app.utils import LOGGER, get_blacklisted_settings, is_editable_method
 
 services = Blueprint("services", __name__)
 
@@ -18,7 +18,7 @@ services = Blueprint("services", __name__)
 @services.route("/services", methods=["GET"])
 @login_required
 def services_page():
-    return render_template("services.html", services=DB.get_services(with_drafts=True))
+    return render_template("services.html", services=DB.get_services(with_drafts=True), templates=DB.get_templates())
 
 
 @services.route("/services/", methods=["GET"])
@@ -99,7 +99,7 @@ def services_convert():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    Thread(target=convert_services, args=(services, convert_to)).start()
+    CONFIG_TASKS_EXECUTOR.submit(convert_services, services, convert_to)
 
     return redirect(
         url_for(
@@ -170,7 +170,7 @@ def services_delete():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-    Thread(target=delete_services, args=(services,)).start()
+    CONFIG_TASKS_EXECUTOR.submit(delete_services, services)
 
     return redirect(
         url_for(
@@ -232,6 +232,9 @@ def services_service_page(service: str):
             else:
                 db_config = DB.get_config(global_only=True, methods=True)
 
+            service_method = db_config.get("SERVER_NAME", {}).get("method", "ui") if service != "new" else "ui"
+            override_method = service_method if is_editable_method(service_method) else "ui"
+
             was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
@@ -255,11 +258,16 @@ def services_service_page(service: str):
                         value = value.replace("\r\n", "\n").strip().encode("utf-8")
 
                         new_configs.add(key)
-                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": "ui"})
+                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method})
 
-                        if db_custom_config["method"] != "ui" and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
+                        if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
                             DATA["TO_FLASH"].append(
-                                {"content": f"The template Custom config {key} cannot be edited because it has not been created with the UI.", "type": "error"}
+                                {
+                                    "content": (
+                                        f"The template Custom config {key} cannot be edited because it has been created via the {db_custom_config['method']} method."
+                                    ),
+                                    "type": "error",
+                                }
                             )
                             continue
                         elif value == db_custom_config["data"].strip():
@@ -271,7 +279,7 @@ def services_service_page(service: str):
                             "type": conf_match["type"].lower(),
                             "name": conf_match["name"],
                             "data": value,
-                            "method": "ui",
+                            "method": override_method,
                         }
 
                 if service != "new":
@@ -337,15 +345,25 @@ def services_service_page(service: str):
             error = None
 
             if new_configs or configs_changed:
-                error = DB.save_custom_configs(db_custom_configs.values(), "ui", changed=service != "new" and (was_draft != is_draft or not is_draft))
+                error = DB.save_custom_configs(
+                    db_custom_configs.values(),
+                    override_method,
+                    changed=service != "new" and (was_draft != is_draft or not is_draft),
+                )
                 if error:
                     DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
 
             if service == "new":
                 old_server_name = variables["SERVER_NAME"]
-                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft)
+                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft, override_method=override_method)
             else:
-                operation, error = BW_CONFIG.edit_service(old_server_name, variables, check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
+                operation, error = BW_CONFIG.edit_service(
+                    old_server_name,
+                    variables,
+                    check_changes=(was_draft != is_draft or not is_draft),
+                    is_draft=is_draft,
+                    override_method=override_method,
+                )
 
             if operation.endswith("already exists."):
                 DATA["TO_FLASH"].append({"content": operation, "type": "warning"})
@@ -363,7 +381,7 @@ def services_service_page(service: str):
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=update_service, args=(service, variables.copy(), is_draft, mode, clone)).start()
+        CONFIG_TASKS_EXECUTOR.submit(update_service, service, variables.copy(), is_draft, mode, clone)
 
         new_service = False
         if service == "new":
@@ -398,6 +416,22 @@ def services_service_page(service: str):
     search_type = request.args.get("type", "all")
     template = request.args.get("template", "low")
     db_templates = DB.get_templates()
+    used_dom_ids = set()
+
+    for template_id, template_data in db_templates.items():
+        dom_id = sub(r"[^0-9A-Za-z_-]+", "-", template_id).strip("-")
+        if not dom_id:
+            dom_id = "template"
+
+        base_dom_id = dom_id
+        suffix = 2
+        while dom_id in used_dom_ids:
+            dom_id = f"{base_dom_id}-{suffix}"
+            suffix += 1
+
+        used_dom_ids.add(dom_id)
+        template_data["dom_id"] = dom_id
+
     db_custom_configs = DB.get_custom_configs(with_drafts=True, as_dict=True)
     clone = None
     if service == "new":

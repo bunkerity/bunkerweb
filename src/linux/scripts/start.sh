@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Enforce a restrictive default umask for all operations
-umask 027
-
 # Source the utils helper script
 # shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
 
+# Get the highest Python version available and export it
+PYTHON_BIN=$(get_python_bin)
+export PYTHON_BIN
+
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python
-
 # Display usage information
 function display_help() {
     echo "Usage: $(basename "$0") [start|stop|reload|restart]"
@@ -74,8 +74,11 @@ function start() {
     # Default values
     declare -A defaults=(
         [DNS_RESOLVERS]="9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4" # Quad9, Google
-        [API_LISTEN_IP]="127.0.0.1"
+        [API_LISTEN_HTTP]="yes"
+        [API_LISTEN_HTTPS]="no"
         [API_HTTP_PORT]="5000"
+        [API_HTTPS_PORT]="5443"
+        [API_LISTEN_IP]="127.0.0.1"
         [API_SERVER_NAME]="bwapi"
         [API_WHITELIST_IP]="127.0.0.0/8"
         [API_TOKEN]=""
@@ -113,21 +116,18 @@ function start() {
         fi
     done
 
-    echo -ne "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nAPI_TOKEN=${API_TOKEN}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n" > /var/tmp/bunkerweb/tmp.env
+    echo -ne "IS_LOADING=yes\nUSE_BUNKERNET=no\nSEND_ANONYMOUS_REPORT=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_LISTEN_HTTP=${API_LISTEN_HTTP}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_HTTPS=${API_LISTEN_HTTPS}\nAPI_HTTPS_PORT=${API_HTTPS_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nAPI_TOKEN=${API_TOKEN}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n" > /var/tmp/bunkerweb/tmp.env
     chown root:nginx /var/tmp/bunkerweb/tmp.env
     chmod 660 /var/tmp/bunkerweb/tmp.env
 
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env"
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
+    if ! run_as_nginx env PYTHONPATH="/usr/share/bunkerweb/deps/python" "$PYTHON_BIN" /usr/share/bunkerweb/gen/main.py \
+        --variables /var/tmp/bunkerweb/tmp.env; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
         exit 1
     fi
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
-    sudo -E -u nginx -g nginx /usr/sbin/nginx -e /var/log/bunkerweb/error.log
-    # shellcheck disable=SC2181
-    if [ $? -ne 0 ] ; then
+    if ! run_as_nginx /usr/sbin/nginx -e /var/log/bunkerweb/error.log; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
     fi

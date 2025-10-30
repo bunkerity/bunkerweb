@@ -29,17 +29,19 @@ jobs:
         if: matrix.language == 'python'
         run: |
           python -m pip install --no-cache-dir --require-hashes -r src/scheduler/requirements.txt
+          python -m pip install --no-cache-dir --require-hashes -r src/autoconf/requirements.txt
           python -m pip install --no-cache-dir --require-hashes -r src/ui/requirements.txt
+          python -m pip install --no-cache-dir --require-hashes -r src/api/requirements.txt
           python -m pip install --no-cache-dir --require-hashes -r src/common/gen/requirements.txt
           python -m pip install --no-cache-dir --require-hashes -r src/common/db/requirements.txt
           echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
+        uses: github/codeql-action/init@4e94bd11f71e507f7f87df81788dff88d1dacbfb # v4.31.0
         with:
           languages: ${{ matrix.language }}
           config-file: ./.github/codeql.yml
           setup-python-dependencies: false
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3.30.3
+        uses: github/codeql-action/analyze@4e94bd11f71e507f7f87df81788dff88d1dacbfb # v4.31.0
         with:
           category: "/language:${{matrix.language}}"

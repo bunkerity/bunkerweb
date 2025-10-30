@@ -129,6 +129,15 @@
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
+  "INTERNALSTORE_MEMORY_SIZE": {
+    "context": "global",
+    "default": "64m",
+    "help": "Size of the internal internalstore.",
+    "id": "internalstore-memory-size",
+    "label": "Internalstore memory size",
+    "regex": "^\\d+[kKmMgG]?$",
+    "type": "text"
+  },
   "DATASTORE_MEMORY_SIZE": {
     "context": "global",
     "default": "64m",
@@ -177,7 +186,7 @@
   "USE_API": {
     "context": "global",
     "default": "yes",
-    "help": "Activate the API to control BunkerWeb.",
+    "help": "Activate BunkerWeb internal API.",
     "id": "use-api",
     "label": "Activate API",
     "regex": "^(yes|no)$",
@@ -186,25 +195,52 @@
   "API_HTTP_PORT": {
     "context": "global",
     "default": "5000",
-    "help": "Listen port number for the API.",
+    "help": "Listen port number for BunkerWeb internal API.",
     "id": "api-http-listen",
     "label": "API port number",
+    "regex": "^\\d+$",
+    "type": "number"
+  },
+  "API_HTTPS_PORT": {
+    "context": "global",
+    "default": "5443",
+    "help": "Listen port number (TLS) for BunkerWeb internal API.",
+    "id": "api-https-listen",
+    "label": "API HTTPS port number",
     "regex": "^\\d+$",
     "type": "number"
   },
   "API_LISTEN_IP": {
     "context": "global",
     "default": "0.0.0.0",
-    "help": "Listen IP address for the API.",
+    "help": "Listen IP address for BunkerWeb internal API.",
     "id": "api-ip-listen",
     "label": "API listen IP",
     "regex": "^.*$",
     "type": "text"
   },
+  "API_LISTEN_HTTP": {
+    "context": "global",
+    "default": "yes",
+    "help": "Listen HTTP for BunkerWeb internal API.",
+    "id": "api-listen-http",
+    "label": "API listen HTTP",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "API_LISTEN_HTTPS": {
+    "context": "global",
+    "default": "no",
+    "help": "Listen HTTPS (SSL/TLS) for BunkerWeb internal API.",
+    "id": "api-listen-https",
+    "label": "API listen HTTPS",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
   "API_SERVER_NAME": {
     "context": "global",
     "default": "bwapi",
-    "help": "Server name (virtual host) for the API.",
+    "help": "Server name (virtual host) for BunkerWeb internal API.",
     "id": "api-server-name",
     "label": "API server name",
     "regex": "^[^ ]{1,255}$",
@@ -222,7 +258,7 @@
   "API_WHITELIST_IP": {
     "context": "global",
     "default": "127.0.0.0/8",
-    "help": "List of IP/network allowed to contact the API. (format: ip/netmask or ipv6/netmask, separated by space)",
+    "help": "List of IP/network allowed to contact BunkerWeb internal API. (format: ip/netmask or ipv6/netmask, separated by space)",
     "id": "api-whitelist-ip",
     "label": "API whitelist IP",
     "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",

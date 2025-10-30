@@ -1,7 +1,7 @@
 [Unit]
 Description=BunkerWeb Scheduler service
 Documentation=https://docs.bunkerweb.io
-After=bunkerweb.service
+After=network.target
 
 [Service]
 Restart=always

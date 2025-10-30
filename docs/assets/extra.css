@@ -1,3 +1,8 @@
+/* Enable smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
 /* zoom on image, custom z-index */
 .medium-zoom-overlay,
 .medium-zoom-image--opened {
@@ -12,6 +17,15 @@
 :root {
   --md-primary-fg-color: #125678;
   --md-text-font: "Roboto";
+}
+
+.md-header__inner {
+  max-width: none;
+  width: 100%;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 .md-footer {
@@ -40,6 +54,51 @@ nav.md-tabs ul li a {
   opacity: 0.9;
 }
 
+/* Make top navigation span full width with centered content */
+nav.md-tabs {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+nav.md-tabs .md-tabs__inner {
+  max-width: none;
+  width: 100%;
+  justify-content: center;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+nav.md-tabs .md-tabs__list {
+  width: 100%;
+  max-width: 95%;
+  margin: 0 auto;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+}
+
+nav.md-tabs .md-tabs__item {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav.md-tabs .md-tabs__item a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0;
+}
+
+nav.md-tabs .md-grid {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 /* active desktop tabs nav */
 nav.md-tabs ul li.md-tabs__item--active a {
   color: #36ce7a;
@@ -60,3 +119,50 @@ nav.md-tabs ul li.md-tabs__item--active a:hover {
 	src: "assets/font-title.woff";
 }
 */
+
+/* START: Custom styles for TOC dropdowns */
+.toc-dropdown > summary {
+  list-style: none; /* Remove default arrow */
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  outline: none; /* Remove focus outline */
+  transition: color 0.25s; /* Smooth color transition */
+}
+
+.toc-dropdown > summary::-webkit-details-marker {
+  display: none; /* Hide default arrow for Chrome/Safari */
+}
+
+/* Style the dropdown arrow */
+.toc-dropdown > summary::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 0.3em solid transparent;
+  border-bottom: 0.3em solid transparent;
+  border-left: 0.5em solid currentColor;
+  margin-right: 0.7rem;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease-in-out, color 0.25s;
+  opacity: 0.7;
+}
+
+/* Rotate arrow when dropdown is open */
+.toc-dropdown[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+/* Set a consistent default color for non-active TOC items */
+.md-nav--secondary .md-nav__item .md-nav__link:not(.md-nav__link--active) {
+  color: var(--md-default-fg-color);
+}
+
+/* Apply hover color to non-active items and open dropdowns */
+.md-nav--secondary .md-nav__item .md-nav__link:not(.md-nav__link--active):hover,
+.toc-dropdown[open] > summary:not(.md-nav__link--active) {
+  color: #2388bb;
+}
+/* END: Custom styles for TOC dropdowns */

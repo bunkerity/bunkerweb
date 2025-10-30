@@ -13,7 +13,7 @@
                         <!-- prettier-ignore -->
                         <div class="d-flex justify-content-between align-items-center mb-5">
                             {% include "breadcrumb.html" %}
-                            {% if current_endpoint == "global-config" or current_endpoint != "services" and "services" in request.path %}
+                            {% if current_endpoint == "global-config" or (current_endpoint != "services" and "services" in request.path) or (current_endpoint != "templates" and "templates" in request.path) %}
                                 <!-- Floating button to toggle the menu -->
                                 <div class="position-fixed bottom-0 start-0 m-3 d-lg-none"
                                      id="floating-modes-menu">
@@ -46,19 +46,21 @@
                                                     </button>
                                                 </li>
                                             {% endif %}
-                                            <li class="nav-item mb-1" role="presentation">
-                                                <button type="button"
-                                                        class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
-                                                        role="tab"
-                                                        data-bs-toggle="tab"
-                                                        data-bs-target="#navs-modes-advanced"
-                                                        aria-controls="navs-modes-advanced"
-                                                        {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
-                                                    <i class="bx bx-shield-quarter bx-sm"></i>
-                                                    &nbsp;
-                                                    <span class="don-jose" data-i18n="mode.advanced">Advanced</span>
-                                                </button>
-                                            </li>
+                                            {% if "templates" not in request.path %}
+                                                <li class="nav-item mb-1" role="presentation">
+                                                    <button type="button"
+                                                            class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
+                                                            role="tab"
+                                                            data-bs-toggle="tab"
+                                                            data-bs-target="#navs-modes-advanced"
+                                                            aria-controls="navs-modes-advanced"
+                                                            {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
+                                                        <i class="bx bx-shield-quarter bx-sm"></i>
+                                                        &nbsp;
+                                                        <span class="don-jose" data-i18n="mode.advanced">Advanced</span>
+                                                    </button>
+                                                </li>
+                                            {% endif %}
                                             <li class="nav-item" role="presentation">
                                                 <button type="button"
                                                         class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'raw' %} active{% endif %}"
@@ -92,19 +94,21 @@
                                             </button>
                                         </li>
                                     {% endif %}
-                                    <li class="nav-item me-0 me-sm-3" role="presentation">
-                                        <button type="button"
-                                                class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
-                                                role="tab"
-                                                data-bs-toggle="tab"
-                                                data-bs-target="#navs-modes-advanced"
-                                                aria-controls="navs-modes-advanced"
-                                                {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
-                                            <i class="bx bx-shield-quarter bx-xs"></i>
-                                            &nbsp;
-                                            <span class="d-none d-sm-inline don-jose" data-i18n="mode.advanced">Advanced</span>
-                                        </button>
-                                    </li>
+                                    {% if "templates" not in request.path %}
+                                        <li class="nav-item me-0 me-sm-3" role="presentation">
+                                            <button type="button"
+                                                    class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'advanced' %} active{% endif %}"
+                                                    role="tab"
+                                                    data-bs-toggle="tab"
+                                                    data-bs-target="#navs-modes-advanced"
+                                                    aria-controls="navs-modes-advanced"
+                                                    {% if mode == 'advanced' %}aria-selected="true"{% endif %}>
+                                                <i class="bx bx-shield-quarter bx-xs"></i>
+                                                &nbsp;
+                                                <span class="d-none d-sm-inline don-jose" data-i18n="mode.advanced">Advanced</span>
+                                            </button>
+                                        </li>
+                                    {% endif %}
                                     <li class="nav-item" role="presentation">
                                         <button type="button"
                                                 class="btn btn-sm rounded-pill nav-link d-flex align-items-center{% if mode == 'raw' %} active{% endif %}"

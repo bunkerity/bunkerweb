@@ -32,7 +32,7 @@ Some settings in BunkerWeb support multiple configurations for the same feature.
 
 This pattern allows you to manage multiple configurations for features like reverse proxies, ports, or other settings that require distinct values for different use cases.
 
-### Security Modes
+### Security Modes {#security-modes}
 
 The `SECURITY_MODE` setting determines how BunkerWeb handles detected threats. This flexible feature allows you to choose between monitoring or actively blocking suspicious activity, depending on your specific needs:
 
@@ -59,12 +59,15 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     | ------------------ | ------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------- |
     | `USE_API`          | `yes`         | global  | No       | **Activate API:** Activate the API to control BunkerWeb.                                                |
     | `API_HTTP_PORT`    | `5000`        | global  | No       | **API Port:** Listen port number for the API.                                                           |
+    | `API_HTTPS_PORT`   | `5443`        | global  | No       | **API HTTPS Port:** Listen port number (TLS) for the API.                                               |
+    | `API_LISTEN_HTTP`  | `yes`         | global  | No       | **API Listen HTTP:** Enable HTTP listener for the API.                                                  |
+    | `API_LISTEN_HTTPS` | `no`          | global  | No       | **API Listen HTTPS:** Enable HTTPS (TLS) listener for the API.                                          |
     | `API_LISTEN_IP`    | `0.0.0.0`     | global  | No       | **API Listen IP:** Listen IP address for the API.                                                       |
     | `API_SERVER_NAME`  | `bwapi`       | global  | No       | **API Server Name:** Server name (virtual host) for the API.                                            |
     | `API_WHITELIST_IP` | `127.0.0.0/8` | global  | No       | **API Whitelist IP:** List of IP/network allowed to contact the API.                                    |
     | `API_TOKEN`        |               | global  | No       | **API Access Token (optional):** If set, all API requests must include `Authorization: Bearer <token>`. |
 
-    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth.
+    Note: for bootstrap reasons, if you enable `API_TOKEN` you must set it in the environment of BOTH the BunkerWeb instance and the Scheduler. The Scheduler automatically includes the `Authorization` header when `API_TOKEN` is present in its environment. If not set, no header is sent and BunkerWeb will not enforce token auth. You can expose the API over HTTPS by setting `API_LISTEN_HTTPS=yes` (port: `API_HTTPS_PORT`, default `5443`).
 
     Example test with curl (replace token and host):
 
@@ -72,6 +75,11 @@ Switching to `detect` mode can help you identify and resolve potential false pos
     curl -H "Host: bwapi" \
          -H "Authorization: Bearer $API_TOKEN" \
          http://<bunkerweb-host>:5000/ping
+
+    curl -H "Host: bwapi" \
+         -H "Authorization: Bearer $API_TOKEN" \
+         --insecure \
+         https://<bunkerweb-host>:5443/ping
     ```
 
 === "Network & Port Settings"
@@ -114,11 +122,11 @@ Switching to `detect` mode can help you identify and resolve potential false pos
 
 === "Logging Settings"
 
-    | Setting            | Default                                                                                                                        | Context | Multiple | Description                                                                                                                   |
-    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-    | `LOG_FORMAT`       | `$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
-    | `LOG_LEVEL`        | `notice`                                                                                                                       | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
-    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                        | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
+    | Setting            | Default                                                                                                                                    | Context | Multiple | Description                                                                                                                   |
+    | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+    | `LOG_FORMAT`       | `$host $remote_addr - $request_id $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"` | global  | No       | **Log Format:** The format to use for access logs.                                                                            |
+    | `LOG_LEVEL`        | `notice`                                                                                                                                   | global  | No       | **Log Level:** Verbosity level for error logs. Options: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, `emerg`. |
+    | `TIMERS_LOG_LEVEL` | `debug`                                                                                                                                    | global  | No       | **Timers Log Level:** Log level for timers. Options: `debug`, `info`, `notice`, `warn`, `err`, `crit`, `alert`, `emerg`.      |
 
     !!! tip "Logging Best Practices"
         - For production environments, use the `notice`, `warn`, or `error` log levels to minimize log volume.

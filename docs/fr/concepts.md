@@ -67,7 +67,7 @@ Vous pouvez également utiliser la barre de recherche et spécifier directement 
 
     La liste complète des paramètres disponibles, avec leurs descriptions et valeurs possibles, est disponible dans la section [Fonctionnalités](features.md) de la documentation.
 
-## Mode multisite
+## Mode multisite {#multisite-mode}
 
 Comprendre le mode multisite est essentiel lors de l'utilisation de BunkerWeb. Comme notre objectif principal est la protection des applications web, notre solution est intimement liée au concept d'« hôtes virtuels » ou « vhosts » (plus d'informations [ici](https://en.wikipedia.org/wiki/Virtual_hosting)). Ces hôtes virtuels permettent de diffuser plusieurs applications Web à partir d'une seule instance ou d'un seul cluster.
 
@@ -105,9 +105,9 @@ Veuillez noter que le mode multisite est implicite lors de l'utilisation de l'in
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/examples) du dépôt.
+    Vous trouverez des exemples concrets du mode multisite dans la section [Utilisations avancées](advanced.md) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/examples) du dépôt.
 
-## Configurations personnalisées
+## Configurations personnalisées {#custom-configurations}
 
 Pour relever des défis uniques et répondre à des cas d'utilisation spécifiques, BunkerWeb offre la flexibilité de configurations personnalisées. Bien que les paramètres fournis et les [plug-ins externes](plugins.md) couvrent un large éventail de scénarios, il peut y avoir des situations qui nécessitent une personnalisation supplémentaire.
 
@@ -126,7 +126,7 @@ La gestion des configurations personnalisées à partir de l'interface utilisate
 
 !!! info "Aller plus loin"
 
-    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/examples) du dépôt.
+    Vous trouverez des exemples concrets de configurations personnalisées dans la section [Utilisations avancées](advanced.md#custom-configurations) de la documentation et dans le répertoire [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/examples) du dépôt.
 
 ## Base de données
 
@@ -144,6 +144,9 @@ BunkerWeb stocke en toute sécurité sa configuration actuelle dans une base de 
 
 Chaque fois que vous modifiez un paramètre ou ajoutez une nouvelle configuration, BunkerWeb stocke automatiquement les modifications dans la base de données, garantissant ainsi la persistance et la cohérence des données. BunkerWeb prend en charge plusieurs options de base de données backend, notamment SQLite, MariaDB, MySQL et PostgreSQL.
 
+!!! tip
+    Si vous utilisez l'interface Web pour l'administration quotidienne, nous recommandons de migrer vers un moteur de base de données externe (PostgreSQL ou MySQL/MariaDB) plutôt que de rester sur SQLite. Les moteurs externes gèrent mieux les requêtes simultanées et la croissance à long terme, en particulier dans les environnements multi-utilisateurs.
+
 La configuration de la base de données est simple à l'aide du `DATABASE_URI` paramètre, qui suit les formats spécifiés pour chaque base de données prise en charge:
 
 !!!avertissement
@@ -158,12 +161,33 @@ La configuration de la base de données est simple à l'aide du `DATABASE_URI` p
 
 En spécifiant l'URI de base de données appropriée dans la configuration, vous pouvez intégrer de manière transparente BunkerWeb à votre backend de base de données préféré, garantissant ainsi un stockage efficace et fiable de vos données de configuration.
 
+### Matrice de compatibilité des bases de données
+
+| Integration       | PostgreSQL                       | MariaDB                   | MySQL                     | SQLite           |
+| :---------------- | :------------------------------- | :------------------------ | :------------------------ | :--------------- |
+| **Docker**        | ✅ `v17` et antérieures (❌ `v18`) | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Kubernetes**    | ✅ `v17` et antérieures (❌ `v18`) | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Autoconf**      | ✅ `v17` et antérieures (❌ `v18`) | ✅ `v11` et antérieures    | ✅ `v9` et antérieures     | ✅ Pris en charge |
+| **Paquets Linux** | Voir les notes ci-dessous        | Voir les notes ci-dessous | Voir les notes ci-dessous | ✅ Pris en charge |
+
+!!! info "Remarques"
+    - **PostgreSQL** : `v18` n'est pas pris en charge car les images de base Alpine que nous livrons n'incluent que les paquets clients `v17`.
+    - **Linux** : La prise en charge dépend des paquets de votre distribution. Si nécessaire, vous pouvez installer les clients de base de données manuellement à partir des dépôts des fournisseurs (cela est généralement nécessaire pour RHEL).
+    - **SQLite** : Est livré avec les paquets et est prêt à l'emploi.
+
+Ressources externes utiles pour installer les clients de bases de données :
+
+- [Guide de téléchargement et de dépôt PostgreSQL](https://www.postgresql.org/download/)
+- [Outil de configuration du dépôt MariaDB](https://mariadb.org/download/?t=repo-config)
+- [Guide de configuration du dépôt MySQL](https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/)
+- [Page de téléchargement de SQLite](https://www.sqlite.org/download.html)
+
 <figure markdown>
   ![Vue d'ensemble](assets/img/bunkerweb_db.svg){ align=center, width="800" }
   <figcaption>Schéma de base de données</figcaption>
 </figure>
 
-## Programmateur
+## Programmateur {#scheduler}
 
 Pour une coordination et une automatisation sans faille, BunkerWeb utilise un service spécialisé connu sous le nom de planificateur. Le planificateur joue un rôle essentiel dans le bon fonctionnement en effectuant les tâches suivantes:
 
@@ -194,7 +218,7 @@ Depuis la version 1.6.0, le planificateur dispose d'un système de vérification
 
 L'intervalle de vérification de l'état est défini par la `HEALTHCHECK_INTERVAL` variable d'environnement, avec une valeur par défaut de `30`, ce qui signifie que le planificateur vérifiera l'état des instances toutes les 30 secondes.
 
-## Modèles
+## Modèles {#templates}
 
 BunkerWeb exploite la puissance des modèles pour simplifier le processus de configuration et améliorer la flexibilité. Les modèles offrent une approche structurée et standardisée de la définition des paramètres et des configurations personnalisées, garantissant ainsi la cohérence et la facilité d'utilisation.
 

@@ -1,4 +1,4 @@
-{-raw-}<!DOCTYPE html>
+{-raw-}<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -64,7 +64,8 @@
         width: 100%;
         background-color: var(--color-primary, #fff);
         color: var(--color-inverted, #202020);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
         font-size: 16px;
         word-break: keep-all;
@@ -147,7 +148,9 @@
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 1rem;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        transition:
+          border-color 0.3s ease,
+          box-shadow 0.3s ease;
       }
       article div.content form input[type="text"]:focus {
         outline: 0;
@@ -186,9 +189,13 @@
         color: var(--color-inverted, #202020);
         text-decoration: underline;
         font-weight: 700;
-        -webkit-transition: color 0.3s ease, text-decoration 0.3s ease,
+        -webkit-transition:
+          color 0.3s ease,
+          text-decoration 0.3s ease,
           font-style 0.3s ease;
-        transition: color 0.3s ease, text-decoration 0.3s ease,
+        transition:
+          color 0.3s ease,
+          text-decoration 0.3s ease,
           font-style 0.3s ease;
       }
       .subtitle a:focus,
@@ -331,11 +338,11 @@
     ></script>
     <script type="text/javascript" nonce="{*nonce_script*}">
       const isDarkMode = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        "(prefers-color-scheme: dark)",
       ).matches;
       var onSubmit = function (e) {
-          (document.getElementById("token").value = e),
-            document.getElementById("form").submit();
+          ((document.getElementById("token").value = e),
+            document.getElementById("form").submit());
         },
         onExpired = function () {
           location.reload();
@@ -345,7 +352,7 @@
           if ("invisible" !== usedVersion) {
             document.getElementById("recaptcha-verify").remove();
             var e = document.createElement("div");
-            (e.id = "recaptcha-v2-verify"),
+            ((e.id = "recaptcha-v2-verify"),
               (e.className = "g-recaptcha"),
               e.setAttribute("data-sitekey", "{*recaptcha_sitekey*}"),
               e.setAttribute("data-callback", "onSubmit"),
@@ -360,11 +367,11 @@
                   action: "submit",
                   theme: isDarkMode ? "dark" : "light",
                 });
-              });
+              }));
           }
         },
         onv3Callback = function () {
-          (usedVersion = "invisible"),
+          ((usedVersion = "invisible"),
             document
               .getElementById("recaptcha-verify")
               .classList.remove("hidden"),
@@ -374,7 +381,7 @@
                 .addEventListener("click", function () {
                   grecaptcha.execute();
                 });
-            });
+            }));
         };
     </script>
     {% else %}
@@ -388,7 +395,7 @@
     ></script>
     <script type="text/javascript" nonce="{*nonce_script*}">
       const isDarkMode = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        "(prefers-color-scheme: dark)",
       ).matches;
       var invisible = false;
       var verifyCallback = function (response) {
@@ -413,7 +420,7 @@
         grecaptcha.enterprise.ready(async () => {
           const token = await grecaptcha.enterprise.execute(
             "{*recaptcha_sitekey*}",
-            { action: "CAPTCHA" }
+            { action: "CAPTCHA" },
           );
           verifyCallback(token);
         });

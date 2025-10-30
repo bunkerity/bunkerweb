@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from contextlib import suppress
+from atexit import register
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from importlib.util import module_from_spec, spec_from_file_location
 from ipaddress import ip_address
@@ -10,14 +12,19 @@ from os import getenv, getpid, sep
 from os.path import abspath, join
 from secrets import token_urlsafe
 from signal import SIGINT, signal, SIGTERM
-from sys import path as sys_path
-from threading import Thread
+from sys import path as sys_path, modules as sys_modules
+from threading import Lock
 from time import time
 from traceback import format_exc
+from warnings import filterwarnings
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+# Suppress passlib's pkg_resources deprecation warning
+# This is a known issue in passlib that will be fixed in future versions
+filterwarnings("ignore", message=r".*pkg_resources is deprecated.*", category=UserWarning, module="passlib")
 
 from cachelib import FileSystemCache
 from flask import Blueprint, Flask, Response, flash as flask_flash, jsonify, make_response, redirect, render_template, request, session, url_for
@@ -70,6 +77,7 @@ from app.routes.services import services
 from app.routes.setup import setup
 from app.routes.totp import totp
 from app.routes.support import support
+from app.routes.templates import templates as templates_bp
 
 BLUEPRINTS = (
     about,
@@ -88,6 +96,7 @@ BLUEPRINTS = (
     logs,
     login,
     configs,
+    templates_bp,
     bans,
     setup,
     support,
@@ -130,6 +139,32 @@ HOOKS = {
         "log_prefix": "Styles",
     },
 }
+
+DB_CHECK_MIN_INTERVAL_SECONDS = 2.0
+DB_CHECK_STALE_INTERVAL_SECONDS = 30.0
+DB_CHECK_LAST_RUN_KEY = "DB_STATE_CHECK_LAST_RUN"
+DB_CHECK_RUNNING_KEY = "DB_STATE_CHECK_RUNNING"
+
+# Shared thread pool executors for background tasks to prevent thread spawning on every request
+_db_check_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-db-check")
+_periodic_tasks_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="bw-ui-periodic")
+_user_access_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bw-ui-access")
+_config_tasks_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-ui-config")
+
+_db_check_lock = Lock()
+_db_check_future = None
+_db_check_next_allowed = 0.0
+
+
+def _shutdown_executors():
+    """Shutdown all thread pool executors on application exit."""
+    _db_check_executor.shutdown(wait=False)
+    _periodic_tasks_executor.shutdown(wait=False)
+    _user_access_executor.shutdown(wait=False)
+    _config_tasks_executor.shutdown(wait=False)
+
+
+register(_shutdown_executors)
 
 
 class DynamicFlask(Flask):
@@ -221,13 +256,13 @@ def refresh_app_context():
     for hook_info in HOOKS.values():
         app.config[hook_info["key"]] = []
 
-    # Find all python files in ui directories
-    core_ui_py_files = list(CORE_PLUGINS_PATH.glob("*/ui/hooks.py"))
-    external_ui_py_files = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/hooks.py"))
-    pro_ui_py_files = list(PRO_PLUGINS_PATH.glob("*/ui/hooks.py"))
-    core_bp_dirs = list(CORE_PLUGINS_PATH.glob("*/ui/blueprints"))
-    external_bp_dirs = list(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
-    pro_bp_dirs = list(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
+    # Find all python files in ui directories (sorted for deterministic load order)
+    core_ui_py_files = sorted(CORE_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    external_ui_py_files = sorted(EXTERNAL_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    pro_ui_py_files = sorted(PRO_PLUGINS_PATH.glob("*/ui/hooks.py"))
+    core_bp_dirs = sorted(CORE_PLUGINS_PATH.glob("*/ui/blueprints"))
+    external_bp_dirs = sorted(EXTERNAL_PLUGINS_PATH.glob("*/ui/blueprints"))
+    pro_bp_dirs = sorted(PRO_PLUGINS_PATH.glob("*/ui/blueprints"))
 
     # Track active plugin paths and blueprints
     active_plugin_paths = set()
@@ -241,24 +276,36 @@ def refresh_app_context():
             continue
 
         active_plugin_paths.add(py_file.parent.parent.parent)
-        module_name = f"hooks_{py_file.parent.name}_{py_file.stem}"
+        # Namespace the module name with the plugin directory to avoid collisions
+        plugin_root = py_file.parents[2] if len(py_file.parents) >= 3 else py_file.parent
+        module_name = f"bw_ui_hooks_{plugin_root.name}_{py_file.stem}"
         active_hook_modules.add(module_name)
         hook_dir = str(py_file.parent)
 
         try:
-            # Check for a proxy file first
             proxy_file = py_file.parent / "hooks_proxy.py"
             target_file = proxy_file if proxy_file.exists() else py_file
 
-            # Add to sys.path if not already there
+            # Prepend plugin hook dir to sys.path for correct import resolution
+            added_to_path = False
             if hook_dir not in sys_path:
-                sys_path.append(hook_dir)
+                sys_path.insert(0, hook_dir)
+                added_to_path = True
                 app.hook_sys_paths[module_name] = hook_dir
 
-            # Load the module
+            # Ensure we don't keep stale modules with the same dynamic name around
+            if module_name in sys_modules:
+                del sys_modules[module_name]
+
+            # Also isolate a preloaded top-level "hooks" to avoid proxy importing the wrong one
+            prev_hooks_mod = sys_modules.pop("hooks", None)
+
             spec = spec_from_file_location(module_name, target_file)
             if not spec or not spec.loader:
                 LOGGER.warning(f"Could not load spec for file: {target_file}")
+                # Restore any prior 'hooks' module
+                if prev_hooks_mod is not None:
+                    sys_modules["hooks"] = prev_hooks_mod
                 continue
 
             hook_module = module_from_spec(spec)
@@ -266,7 +313,19 @@ def refresh_app_context():
                 spec.loader.exec_module(hook_module)
             except Exception as exec_err:
                 LOGGER.warning(f"Error executing module {target_file}: {exec_err}")
+                # Restore any prior 'hooks' module
+                if prev_hooks_mod is not None:
+                    sys_modules["hooks"] = prev_hooks_mod
+                else:
+                    # Ensure we don't keep a plugin-specific 'hooks' leaked
+                    sys_modules.pop("hooks", None)
                 continue
+
+            # Restore any prior 'hooks' module (avoid leaking current plugin 'hooks' globally)
+            if prev_hooks_mod is not None:
+                sys_modules["hooks"] = prev_hooks_mod
+            else:
+                sys_modules.pop("hooks", None)
 
             for hook_type, hook_info in HOOKS.items():
                 if hasattr(hook_module, hook_type) and callable(getattr(hook_module, hook_type)):
@@ -274,10 +333,16 @@ def refresh_app_context():
                     app.config.setdefault(hook_info["key"], []).append(hook_function)
                     LOGGER.debug(f"{hook_info['log_prefix']} hook '{hook_type}' from {py_file} loaded")
 
-            if hook_dir in sys_path:
+            # Remove the path we added
+            if added_to_path and hook_dir in sys_path:
                 sys_path.remove(hook_dir)
+                app.hook_sys_paths.pop(module_name, None)
         except Exception as exc:
             LOGGER.error(f"Error loading potential hooks from {py_file}: {exc}")
+            # Best-effort cleanup of 'hooks'
+            with suppress(Exception):
+                if "hooks" in sys_modules:
+                    del sys_modules["hooks"]
 
     # --- CLEAN UP OBSOLETE HOOK PATHS ---
     for module_name, hook_dir in list(app.hook_sys_paths.items()):
@@ -286,33 +351,54 @@ def refresh_app_context():
             del app.hook_sys_paths[module_name]
             LOGGER.debug(f"Removed {hook_dir} from sys.path for obsolete hook {module_name}")
 
+    # Dedupe all hook lists by (module, qualname) to avoid duplicates across refreshes
+    for hook_info in HOOKS.values():
+        key = hook_info["key"]
+        dedup, seen = [], set()
+        for fn in app.config.get(key, []):
+            ident = (getattr(fn, "__module__", ""), getattr(fn, "__qualname__", getattr(fn, "__name__", "")))
+            if ident in seen:
+                continue
+            seen.add(ident)
+            dedup.append(fn)
+        app.config[key] = dedup
+
     # --- LOAD BLUEPRINTS ---
+    base_pro = str(PRO_PLUGINS_PATH.resolve())
+    base_ext = str(EXTERNAL_PLUGINS_PATH.resolve())
+    # base_core not needed explicitly for detection, default priority is 0
+
     for bp_dir in chain(pro_bp_dirs, external_bp_dirs, core_bp_dirs):
         if not bp_dir.is_dir():
             continue
 
-        # Track plugin path
         active_plugin_paths.add(bp_dir.parent.parent.parent)
         blueprint_dir = str(bp_dir)
-        is_pro = bp_dir in (p.parent for p in pro_bp_dirs)
-        is_external = bp_dir in (p.parent for p in external_bp_dirs)
 
-        # Add directory to sys_path
+        # Compute priority based on directory location: pro (2) > external (1) > core (0)
+        dir_str = str(bp_dir.resolve())
+        priority = 2 if dir_str.startswith(base_pro) else (1 if dir_str.startswith(base_ext) else 0)
+
+        # Prepend for correct import precedence during this load
+        added_to_path = False
         if blueprint_dir not in sys_path:
-            sys_path.append(blueprint_dir)
+            sys_path.insert(0, blueprint_dir)
+            added_to_path = True
 
-        # Load blueprints from Python files
         for bp_file in bp_dir.glob("*.py"):
             if bp_file.name.endswith("_proxy.py"):
                 continue
 
             try:
-                # Check for a proxy file first
                 proxy_file = bp_file.parent / f"{bp_file.stem}_proxy.py"
-                module_name = f"blueprint_{bp_dir.parent.name}_{bp_file.stem}"
-
-                # Use the proxy file if it exists, otherwise use the original file
+                # Namespace module name with plugin directory to avoid collisions
+                plugin_root = bp_dir.parents[1] if len(bp_dir.parents) >= 2 else bp_dir.parent
+                module_name = f"bw_ui_blueprint_{plugin_root.name}_{bp_file.stem}"
                 target_file = proxy_file if proxy_file.exists() else bp_file
+
+                # Clear stale dynamic module if present
+                if module_name in sys_modules:
+                    del sys_modules[module_name]
 
                 spec = spec_from_file_location(module_name, target_file)
                 if not spec or not spec.loader:
@@ -321,11 +407,9 @@ def refresh_app_context():
                 bp_module = module_from_spec(spec)
                 spec.loader.exec_module(bp_module)
 
-                # Look for a blueprint object with the same name as the file
                 bp_name = bp_file.stem
                 if hasattr(bp_module, bp_name):
                     bp = getattr(bp_module, bp_name)
-                    # Verify it's a Blueprint or has blueprint-like characteristics
                     if isinstance(bp, Blueprint) or (
                         hasattr(bp, "name")
                         and hasattr(bp, "route")
@@ -335,16 +419,13 @@ def refresh_app_context():
                     ):
                         plugin_blueprints.add(bp_name)
 
-                        # Set plugin priority and path
-                        bp.plugin_priority = 2 if is_pro else (1 if is_external else 0)
+                        bp.plugin_priority = priority
                         bp.import_path = blueprint_dir
                         app.plugin_sys_paths[bp_name] = blueprint_dir
 
-                        # Make template folder absolute
                         if bp.template_folder:
                             bp.template_folder = abspath(bp.template_folder)
 
-                        # Register in our blueprint registry by priority
                         if bp_name not in blueprint_registry or bp.plugin_priority > getattr(blueprint_registry[bp_name], "plugin_priority", 0):
                             blueprint_registry[bp_name] = bp
                             LOGGER.debug(f"Blueprint '{bp_name}' from {bp_file} registered with priority {bp.plugin_priority}")
@@ -354,6 +435,10 @@ def refresh_app_context():
                     LOGGER.debug(f"No blueprint named '{bp_name}' found in {bp_file}")
             except Exception as exc:
                 LOGGER.error(f"Error loading blueprint from {bp_file}: {exc}")
+
+        # Remove the path we added
+        if added_to_path and blueprint_dir in sys_path:
+            sys_path.remove(blueprint_dir)
 
     # --- HANDLE BLUEPRINT CHANGES ---
     # Remove blueprints for deleted plugins
@@ -697,6 +782,63 @@ def check_database_state(request_method: str, request_path: str):
             DATA["LAST_DATABASE_RETRY"] = DB.last_connection_retry.isoformat() if DB.last_connection_retry else datetime.now().astimezone().isoformat()
 
 
+def schedule_database_state_check(request_method: str, request_path: str):
+    global _db_check_future, _db_check_next_allowed
+    now = time()
+    with _db_check_lock:
+        if now < _db_check_next_allowed:
+            return
+        if _db_check_future and not _db_check_future.done():
+            return
+
+        DATA.load_from_file()
+        last_run_raw = DATA.get(DB_CHECK_LAST_RUN_KEY)
+        last_run_ts = 0.0
+        if isinstance(last_run_raw, (int, float)):
+            last_run_ts = float(last_run_raw)
+        elif isinstance(last_run_raw, str):
+            with suppress(ValueError):
+                last_run_ts = datetime.fromisoformat(last_run_raw).timestamp()
+
+        running = bool(DATA.get(DB_CHECK_RUNNING_KEY, False))
+        if running:
+            if last_run_ts and now - last_run_ts >= DB_CHECK_STALE_INTERVAL_SECONDS:
+                DATA[DB_CHECK_RUNNING_KEY] = False
+                running = False
+            else:
+                return
+
+        if last_run_ts and now - last_run_ts < DB_CHECK_MIN_INTERVAL_SECONDS:
+            return
+
+        run_started_iso = datetime.now().astimezone().isoformat()
+        DATA.update(
+            {
+                DB_CHECK_RUNNING_KEY: True,
+                DB_CHECK_LAST_RUN_KEY: run_started_iso,
+            }
+        )
+
+        def _run_check():
+            try:
+                check_database_state(request_method, request_path)
+            except BaseException:
+                LOGGER.exception("Unexpected error while checking database state")
+            finally:
+                finished_iso = datetime.now().astimezone().isoformat()
+                with _db_check_lock:
+                    DATA.load_from_file()
+                    DATA.update(
+                        {
+                            DB_CHECK_RUNNING_KEY: False,
+                            DB_CHECK_LAST_RUN_KEY: finished_iso,
+                        }
+                    )
+
+        _db_check_future = _db_check_executor.submit(_run_check)
+        _db_check_next_allowed = now + DB_CHECK_MIN_INTERVAL_SECONDS
+
+
 @app.before_request
 def before_request():
     DATA.load_from_file()
@@ -727,13 +869,13 @@ def before_request():
         # Plugin reload trigger
         if not DATA.get("RELOADING", False) and metadata.get("reload_ui_plugins", False):
             safe_reload_plugins()
-            Thread(target=restart_workers).start()
+            _periodic_tasks_executor.submit(restart_workers)
 
         if datetime.now().astimezone() - datetime.fromisoformat(DATA.get("LATEST_VERSION_LAST_CHECK", "1970-01-01T00:00:00")).astimezone() > timedelta(hours=1):
             DATA["LATEST_VERSION_LAST_CHECK"] = datetime.now().astimezone().isoformat()
-            Thread(target=update_latest_stable_release).start()
+            _periodic_tasks_executor.submit(update_latest_stable_release)
 
-        Thread(target=check_database_state, args=(request.method, request.path)).start()
+        schedule_database_state_check(request.method, request.path)
 
         DB.readonly = DATA.get("READONLY_MODE", False)
 
@@ -743,6 +885,9 @@ def before_request():
         if current_user.is_authenticated:
             passed = True
 
+            # Ensure essential session fields are present for consistent UI behavior
+            if "creation_date" not in session:
+                session["creation_date"] = datetime.now().astimezone()
             if "ip" not in session:
                 session["ip"] = request.remote_addr
             if "user_agent" not in session:
@@ -929,7 +1074,7 @@ def teardown_request(teardown):
         and current_user.is_authenticated
         and "session_id" in session
     ):
-        Thread(target=mark_user_access, args=(current_user, session["session_id"])).start()
+        _user_access_executor.submit(mark_user_access, current_user, session["session_id"])
 
     for hook in app.config["TEARDOWN_REQUEST_HOOKS"]:
         try:

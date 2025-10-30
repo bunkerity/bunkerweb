@@ -1,3 +1,4 @@
+{% from 'macros/docs_link.html' import docs_url %}
 {% set plugins_settings = get_plugins_settings() %}
 <div class="card p-1 mb-4 sticky-card">
     <div class="d-flex flex-wrap justify-content-around align-items-center">
@@ -23,14 +24,17 @@
                            aria-label="Search..."
                            data-i18n="form.placeholder.search">
                 </div>
-                {% for template in templates if template != "ui" %}
+                {% for template, template_data in templates.items() if template != "ui" %}
                     <li class="nav-item">
                         <button type="button"
                                 class="dropdown-item{% if loop.index == 1 %} active{% endif %}"
                                 role="tab"
                                 data-bs-toggle="tab"
-                                data-bs-target="#navs-templates-{{ template }}"
-                                aria-controls="navs-templates-{{ template }}"
+                                id="navs-templates-{{ template_data['dom_id'] }}-tab"
+                                data-template-id="{{ template }}"
+                                data-template-dom-id="{{ template_data['dom_id'] }}"
+                                data-bs-target="#navs-templates-{{ template_data['dom_id'] }}"
+                                aria-controls="navs-templates-{{ template_data['dom_id'] }}"
                                 {% if loop.index == 1 %}aria-selected="true"{% endif %}>
                             {{ template|capitalize }}
                         </button>
@@ -62,9 +66,9 @@
         </span>
     </button>
     {% if current_endpoint != "global-config" %}
-        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+        <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                    class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
                 <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                 <span class="d-none d-md-inline">&nbsp;
                     {% if is_draft == 'yes' %}
@@ -89,11 +93,18 @@
 </div>
 <div class="card tab-content m-1 p-2 position-relative">
     {% for template, template_data in templates.items() if template != "ui" %}
-        {% set template_plugin = plugins[template_data['plugin_id']] %}
-        <div id="navs-templates-{{ template }}"
+        {% set template_plugin_id = template_data.get('plugin_id') %}
+        {% set plugin_dom_id = template_plugin_id if template_plugin_id else 'ui' %}
+        {% set template_plugin = plugins.get(template_plugin_id) %}
+        {% if template_plugin is none %}
+            {% set template_plugin = {'id': plugin_dom_id, 'type': 'ui', 'name': 'UI'} %}
+        {% endif %}
+        <div id="navs-templates-{{ template_data['dom_id'] }}"
              class="tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
              role="tabpanel"
-             aria-labelledby="navs-templates-{{ template }}-tab">
+             data-template-id="{{ template }}"
+             data-template-dom-id="{{ template_data['dom_id'] }}"
+             aria-labelledby="navs-templates-{{ template_data['dom_id'] }}-tab">
             <div class="card-header d-flex align-items-center mw-100">
                 <div class="pt-1">
                     <h5 class="card-title d-flex align-items-center don-jose{{ plugin_types[template_plugin['type']].get('text-class', '') }}{{ plugin_types[template_plugin['type']].get('title-class', '') }}">
@@ -107,7 +118,7 @@
                 </div>
             </div>
             <div class="card-body">
-                {% if template_method == "ui" or not selected_template or template == selected_template %}
+                {% if template_method in ['ui', 'api'] or not selected_template or template == selected_template %}
                     {% if template_data["steps"] %}
                         <div class="row">
                             <div class="col-12 col-lg-3 mb-3 mb-lg-0 ps-0 pe-1">
@@ -118,11 +129,11 @@
                                             {% for step in template_data["steps"] %}
                                                 <li class="list-group-item step-navigation-item d-flex align-items-center p-2 cursor-pointer{% if loop.index == 1 %} show active{% endif %}"
                                                     role="tab"
-                                                    id="step-nav-{{ template }}-{{ loop.index }}"
+                                                    id="step-nav-{{ template_data['dom_id'] }}-{{ loop.index }}"
                                                     data-step="{{ loop.index }}"
                                                     data-template="{{ template }}"
-                                                    data-step-id="navs-steps-{{ template }}-{{ loop.index }}"
-                                                    aria-controls="navs-steps-{{ template }}-{{ loop.index }}"
+                                                    data-step-id="navs-steps-{{ template_data['dom_id'] }}-{{ loop.index }}"
+                                                    aria-controls="navs-steps-{{ template_data['dom_id'] }}-{{ loop.index }}"
                                                     aria-selected="{% if loop.index == 1 %}true{% else %}false{% endif %}"
                                                     tabindex="{% if loop.index == 1 %}0{% else %}-1{% endif %}">
                                                     <div class="step-number-wrapper me-3">
@@ -162,25 +173,27 @@
                                     </div>
                                     <div class="step-content-wrapper">
                                         {% for step in template_data["steps"] %}
-                                            <div id="navs-steps-{{ template }}-{{ loop.index }}"
+                                            <div id="navs-steps-{{ template_data['dom_id'] }}-{{ loop.index }}"
                                                  class="ps-1 pe-1 tab-pane fade{% if loop.index == 1 %} show active{% endif %}"
                                                  role="tabpanel"
                                                  data-step="{{ loop.index }}"
-                                                 aria-labelledby="step-nav-{{ template }}-{{ loop.index }}">
+                                                 data-template-id="{{ template }}"
+                                                 data-template-dom-id="{{ template_data['dom_id'] }}"
+                                                 aria-labelledby="step-nav-{{ template_data['dom_id'] }}-{{ loop.index }}">
                                                 <div class="pt-1 pb-4">
                                                     <h5 class="mb-1 fw-bold{{ plugin_types[template_plugin['type']].get('text-class', '') }}">{{ step["title"] }}</h5>
                                                     <p class="card-subtitle text-muted">{{ step["subtitle"] }}</p>
                                                 </div>
                                                 <div class="row pb-0">
                                                     {% for setting in step["settings"] %}
-                                                        {% set setting_id_prefix = template + "-setting-" + template_data['plugin_id'] +"-" %}
+                                                        {% set setting_id_prefix = template + "-setting-" + plugin_dom_id +"-" %}
                                                         {% set setting_config = config.get(setting, {}) %}
                                                         {% set setting_data = plugins_settings.get(setting, {}) %}
                                                         {% set setting_default = setting_data.get("default", "") %}
                                                         {% set setting_value = setting_config.get("value", setting_default) %}
                                                         {% set setting_method = setting_config.get("method", "default") %}
                                                         {% set setting_template = setting_config.get("template", "") %}
-                                                        {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                                        {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
                                                         {% set required = setting == "SERVER_NAME" %}
                                                         {% if current_endpoint == "new" %}
                                                             {% set disabled = false %}
@@ -195,16 +208,18 @@
                                                         <div class="col-12 col-sm-6 col-lg-4 pb-3"
                                                              {% if disabled %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Disabled by {{ setting_method }}"{% endif %}>
                                                             <div class="d-flex justify-content-between align-items-center">
-                                                                <label id="label-{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
-                                                                       for="{{ template }}-setting-{{ template_data['plugin_id'] }}-{{ setting_data['id'] }}"
+                                                                <label id="label-{{ template }}-setting-{{ plugin_dom_id }}-{{ setting_data['id'] }}"
+                                                                       for="{{ template }}-setting-{{ plugin_dom_id }}-{{ setting_data['id'] }}"
                                                                        class="form-label fw-semibold text-truncate">
                                                                     {{ setting_data["label"] }}
                                                                 </label>
                                                                 <div class="d-flex align-items-center">
                                                                     {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
                                                                         <a role="badge"
-                                                                           href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
-                                                                           class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                           href='{{ docs_url("/concepts", "#multisite-mode") }}'
+                                                                           class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
+                                                                           data-endpoint="/concepts"
+                                                                           data-fragment="#multisite-mode"
                                                                            data-bs-toggle="tooltip"
                                                                            data-bs-placement="top"
                                                                            data-bs-original-title="Multisite setting"
@@ -212,6 +227,15 @@
                                                                            rel="noopener">
                                                                             <span class="bx bx-server bx-xs"></span>
                                                                         </a>
+                                                                    {% endif %}
+                                                                    {% if setting_method == "api" %}
+                                                                        <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="Managed via API"
+                                                                              data-i18n="badge.managed_via_api">
+                                                                            <span class="bx bx-code-curly bx-xs"></span>
+                                                                        </span>
                                                                     {% endif %}
                                                                     {% if setting_config.get("clone") %}
                                                                         <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
@@ -280,27 +304,28 @@
                                                         </h5>
                                                     </div>
                                                     {% for step_config in step_configs %}
-                                                        {% set step_config_id = template + "-config-" + template_data['plugin_id'] + "-" + step_config.replace("/", "-").replace(".conf", "") %}
+                                                        {% set step_config_id = template + "-config-" + plugin_dom_id + "-" + step_config.replace("/", "-").replace(".conf", "") %}
                                                         {% set step_config_value = configs.get(current_endpoint + "_" + step_config.replace(".conf", "").replace("/", "_")) %}
                                                         {% set step_config_method = "ui" %}
                                                         {% if step_config_value is none %}
                                                             {% set step_config_value = template_data["configs"].get(step_config, "") %}
                                                         {% else %}
-                                                            {% set step_config_value = step_config_value["data"].decode("utf-8") %}
                                                             {% set step_config_method = step_config_value["method"] %}
+                                                            {% set step_config_value = step_config_value["data"].decode("utf-8") %}
                                                         {% endif %}
                                                         <div class="mb-3 pb-6 position-relative h-vh-40"
                                                              {% if is_readonly %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title={% if user_readonly %}"Readonly mode enabled" data-i18n="tooltip.disabled_readonly"{% else %}"The database is in readonly, therefore the configuration is locked" data-i18n="tooltip.disabled_db_readonly"{% endif %}
                                                              {% endif %}>
                                                             <label for="{{ step_config_id }}" class="form-label fw-semibold fs-6">{{ step_config }}</label>
                                                             <textarea id="{{ step_config_id }}-default" class="visually-hidden">{{ template_data["configs"].get(step_config, "") }}</textarea>
+                                                            <textarea id="{{ step_config_id }}-value" class="visually-hidden">{{- step_config_value|safe -}}</textarea>
                                                             <div id="{{ step_config_id }}"
                                                                  aria-labelledby="label-{{ step_config_id }}"
                                                                  data-language="{% if step_config.startswith(('crs', 'modsec')) %}ModSecurity{% else %}NGINX{% endif %}"
                                                                  data-name="CUSTOM_CONF_{{ step_config.split("/")[0] |upper }}_{{ step_config.split("/")[1] .replace(".conf", "") }}"
                                                                  data-method="{% if is_readonly %}readonly{% else %}{{ step_config_method }}{% endif %}"
+                                                                 data-source="#{{ step_config_id }}-value"
                                                                  class="ace-editor border rounded position-absolute top-0 start-0 end-0 bottom-0 mt-6">
-                                                                {{ step_config_value }}
                                                             </div>
                                                         </div>
                                                     {% endfor %}

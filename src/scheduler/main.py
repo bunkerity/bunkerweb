@@ -2,12 +2,13 @@
 
 from argparse import ArgumentParser
 from contextlib import suppress
+from concurrent.futures import Future, ThreadPoolExecutor
 from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
 from json import load as json_load
 from logging import Logger
-from os import _exit, environ, getenv, getpid, sep
+from os import _exit, environ, getenv, getpid, sep, access, R_OK
 from os.path import join
 from pathlib import Path
 from shutil import copy, rmtree, copytree
@@ -16,10 +17,10 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
-from threading import Event, Lock, Thread
+from threading import Event, Lock
 from time import sleep
 from traceback import format_exc
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union, cast
 
 BUNKERWEB_PATH = Path(sep, "usr", "share", "bunkerweb")
 
@@ -29,11 +30,11 @@ for deps_path in [BUNKERWEB_PATH.joinpath(*paths).as_posix() for paths in (("dep
 
 from schedule import every as schedule_every, run_pending
 
-from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets  # type: ignore
+from common_utils import bytes_hash, dict_to_frozenset, handle_docker_secrets, add_dir_to_tar_safely, plugin_tar_exclude, plugin_tar_filter  # type: ignore
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
-from jobs import Job  # type: ignore
+from jobs import Job, _write_atomic  # type: ignore
 from API import API  # type: ignore
 
 from ApiCaller import ApiCaller  # type: ignore
@@ -97,6 +98,9 @@ HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 HEALTHCHECK_EVENT = Event()
 HEALTHCHECK_LOGGER = setup_logger("Scheduler.Healthcheck", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
 
+# Shared executor to reuse worker threads across scheduler tasks
+SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
+
 RELOAD_MIN_TIMEOUT = getenv("RELOAD_MIN_TIMEOUT", "5")
 
 if not RELOAD_MIN_TIMEOUT.isdigit():
@@ -119,6 +123,17 @@ IGNORE_REGEX_CHECK = getenv("IGNORE_REGEX_CHECK", "no").lower() == "yes"
 
 if IGNORE_REGEX_CHECK:
     LOGGER.warning("Ignoring regex check for settings (we hope you know what you're doing) ...")
+
+
+def _instance_endpoint(db_instance: Dict[str, Any]) -> str:
+    """Return full scheme://host:port for an instance based on HTTPS settings."""
+    listen_https = bool(db_instance.get("listen_https", False))
+    host = db_instance.get("hostname", "127.0.0.1")
+    http_port = int(db_instance.get("port", 5000) or 5000)
+    https_port = int(db_instance.get("https_port", 5443) or 5443)
+    scheme = "https" if listen_https else "http"
+    port = https_port if listen_https else http_port
+    return f"{scheme}://{host}:{port}"
 
 
 def handle_stop(signum, frame):
@@ -186,6 +201,7 @@ signal(SIGHUP, handle_reload)
 def stop(status):
     Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
     HEALTHY_PATH.unlink(missing_ok=True)
+    SCHEDULER_TASKS_EXECUTOR.shutdown(wait=False)
     _exit(status)
 
 
@@ -200,7 +216,7 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
             index = -1
             with SCHEDULER_LOCK:
                 for i, api in enumerate(SCHEDULER.apis):
-                    if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
+                    if api.endpoint == f"{_instance_endpoint(db_instance)}/":
                         index = i
                         break
 
@@ -214,11 +230,15 @@ def send_file_to_bunkerweb(file_path: Path, endpoint: str, logger: Logger = LOGG
                 if status == "success":
                     success = True
                     if index == -1:
-                        logger.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
-                        SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                        logger.debug(
+                            f"Adding {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} to the list of reachable instances"
+                        )
+                        SCHEDULER.apis.append(API.from_instance(db_instance))
                 elif index != -1:
-                    fails.append(f"{db_instance['hostname']}:{db_instance['port']}")
-                    logger.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
+                    fails.append(f"{db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']}")
+                    logger.debug(
+                        f"Removing {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} from the list of reachable instances"
+                    )
                     del SCHEDULER.apis[index]
 
     if not success:
@@ -259,7 +279,7 @@ def generate_custom_configs(configs: Optional[List[Dict[str, Any]]] = None, *, o
                         f"{Path(custom_config['name']).stem}.conf",
                     )
                     tmp_path.parent.mkdir(parents=True, exist_ok=True)
-                    tmp_path.write_bytes(custom_config["data"])
+                    _write_atomic(tmp_path, custom_config["data"])
                     desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
                     if tmp_path.stat().st_mode & 0o777 != desired_perms:
                         tmp_path.chmod(desired_perms)
@@ -298,7 +318,13 @@ def generate_external_plugins(original_path: Union[Path, str] = EXTERNAL_PLUGINS
 
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        tar.add(file, arcname=file.name, recursive=True)
+                        if file.is_dir():
+                            add_dir_to_tar_safely(tar, file, arc_root=file.name)
+                        elif file.is_file():
+                            if not plugin_tar_exclude(file.as_posix()) and access(file.as_posix(), R_OK):
+                                tar.add(file.as_posix(), arcname=file.name, recursive=False, filter=plugin_tar_filter)
+                            else:
+                                LOGGER.debug(f"Excluding file from tar: {file}")
                     plugin_content.seek(0, 0)
                     if bytes_hash(plugin_content, algorithm="sha256") == plugins[index]["checksum"]:
                         ignored_plugins.add(file.name)
@@ -381,8 +407,7 @@ def generate_caches():
                         LOGGER.error(f"Error extracting tar file: {e}")
                 LOGGER.debug(f"Restored cache directory {extract_path}")
                 continue
-            cache_path.parent.mkdir(parents=True, exist_ok=True)
-            cache_path.write_bytes(job_cache_file["data"])
+            _write_atomic(cache_path, job_cache_file["data"])
             desired_perms = S_IRUSR | S_IWUSR | S_IRGRP  # 0o640
             if cache_path.stat().st_mode & 0o777 != desired_perms:
                 cache_path.chmod(desired_perms)
@@ -465,7 +490,7 @@ def healthcheck_job():
     env = None
 
     for db_instance in SCHEDULER.db.get_instances():
-        bw_instance = API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"])
+        bw_instance = API.from_instance(db_instance)
         try:
             try:
                 sent, err, status, resp = bw_instance.request("GET", "health")
@@ -518,58 +543,45 @@ def healthcheck_job():
 
                 generate_configs(HEALTHCHECK_LOGGER)
 
-                tmp_threads = [
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            CUSTOM_CONFIGS_PATH,
-                            "/custom_configs",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                tmp_futures = [
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        CUSTOM_CONFIGS_PATH,
+                        "/custom_configs",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            EXTERNAL_PLUGINS_PATH,
-                            "/plugins",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        EXTERNAL_PLUGINS_PATH,
+                        "/plugins",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            PRO_PLUGINS_PATH,
-                            "/pro_plugins",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        PRO_PLUGINS_PATH,
+                        "/pro_plugins",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            CONFIG_PATH,
-                            "/confs",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        CONFIG_PATH,
+                        "/confs",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            CACHE_PATH,
-                            "/cache",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        CACHE_PATH,
+                        "/cache",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
                 ]
-                for thread in tmp_threads:
-                    thread.start()
-
-                for thread in tmp_threads:
-                    thread.join()
+                for future in tmp_futures:
+                    future.result()
 
                 if not api_caller.send_to_apis(
                     "POST",
@@ -728,12 +740,13 @@ if __name__ == "__main__":
         # Instantiate scheduler environment
         SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
 
-        threads = []
+        task_futures: List[Future] = []
 
         SCHEDULER.apis = []
         for db_instance in SCHEDULER.db.get_instances():
-            SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+            SCHEDULER.apis.append(API.from_instance(db_instance))
 
+        db_metadata = cast(Dict[str, Any], db_metadata)
         scheduler_first_start = db_metadata["scheduler_first_start"]
 
         LOGGER.info("Scheduler started ...")
@@ -792,7 +805,8 @@ if __name__ == "__main__":
             for file in plugin_path.glob("*/plugin.json"):
                 with BytesIO() as plugin_content:
                     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                        tar.add(file.parent, arcname=file.parent.name, recursive=True)
+                        # Safely pack the plugin directory while excluding caches/pyc and unreadable files
+                        add_dir_to_tar_safely(tar, file.parent, arc_root=file.parent.name)
                     plugin_content.seek(0, 0)
 
                     with file.open("r", encoding="utf-8") as f:
@@ -843,31 +857,34 @@ if __name__ == "__main__":
             generate_external_plugins(plugin_path)
 
         check_configs_changes()
-        threads.extend([Thread(target=check_plugin_changes, args=("external",)), Thread(target=check_plugin_changes, args=("pro",))])
+        task_futures.extend(
+            [
+                SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "external"),
+                SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "pro"),
+            ]
+        )
 
-        for thread in threads:
-            thread.start()
+        for future in task_futures:
+            future.result()
 
-        for thread in threads:
-            thread.join()
+        task_futures.clear()
 
         LOGGER.info("Running plugins download jobs ...")
-        SCHEDULER.run_once(("misc", "pro"))
+        SCHEDULER.run_once(["misc", "pro"])
 
         db_metadata = SCHEDULER.db.get_metadata()
         if db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]:
-            threads.clear()
+            task_futures.clear()
 
             if db_metadata["pro_plugins_changed"]:
-                threads.append(Thread(target=generate_external_plugins, args=(PRO_PLUGINS_PATH,)))
+                task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(generate_external_plugins, PRO_PLUGINS_PATH))
             if db_metadata["external_plugins_changed"]:
-                threads.append(Thread(target=generate_external_plugins))
+                task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(generate_external_plugins))
 
-            for thread in threads:
-                thread.start()
+            for future in task_futures:
+                future.result()
 
-            for thread in threads:
-                thread.join()
+            task_futures.clear()
 
             if SCHEDULER.db.readonly:
                 LOGGER.warning("The database is read-only, no need to look for changes in the plugins settings as they will not be saved")
@@ -918,6 +935,7 @@ if __name__ == "__main__":
                 env["TZ"] = tz
 
         LOGGER.info("Executing scheduler ...")
+        JOB.restore_cache(job_name="failover-backup", plugin_id="jobs")
 
         del dotenv_env
 
@@ -931,7 +949,7 @@ if __name__ == "__main__":
         healthcheck_job_run = False
 
         while True:
-            threads.clear()
+            task_futures.clear()
 
             while BACKING_UP_FAILOVER.is_set():
                 LOGGER.warning("Waiting for the failover backup to finish ...")
@@ -942,7 +960,7 @@ if __name__ == "__main__":
                 if not SCHEDULER.reload(
                     env | {"TZ": getenv("TZ", "UTC"), "RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)},
                     changed_plugins=changed_plugins,
-                    ignore_plugins=("misc", "pro") if FIRST_START else (),
+                    ignore_plugins=["misc", "pro"] if FIRST_START else None,
                 ):
                     LOGGER.error("At least one job in run_once() failed")
                 else:
@@ -955,8 +973,7 @@ if __name__ == "__main__":
                 ret = generate_configs()
                 if ret and SCHEDULER.apis:
                     # send nginx configs
-                    threads.append(Thread(target=send_file_to_bunkerweb, args=(CONFIG_PATH, "/confs")))
-                    threads[-1].start()
+                    task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"))
 
             failover_message = ""
             try:
@@ -964,11 +981,12 @@ if __name__ == "__main__":
                 reachable = True
                 if SCHEDULER.apis:
                     # send cache
-                    threads.append(Thread(target=send_file_to_bunkerweb, args=(CACHE_PATH, "/cache")))
-                    threads[-1].start()
+                    task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"))
 
-                    for thread in threads:
-                        thread.join()
+                    for future in task_futures:
+                        future.result()
+
+                    task_futures.clear()
 
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
@@ -993,7 +1011,8 @@ if __name__ == "__main__":
                             if "\n" in message:
                                 message = message.split("\n", 1)[1]
 
-                            failover_message += f"{db_instance['hostname']}:{db_instance['port']} - {message}\n"
+                            port_display = db_instance["https_port"] if db_instance.get("listen_https") else db_instance["port"]
+                            failover_message += f"{db_instance['hostname']}:{port_display} - {message}\n"
 
                         ret = SCHEDULER.db.update_instance(
                             db_instance["hostname"],
@@ -1011,23 +1030,28 @@ if __name__ == "__main__":
                         if status == "success":
                             found = False
                             for api in SCHEDULER.apis:
-                                if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
+                                if api.endpoint == f"{_instance_endpoint(db_instance)}/":
                                     found = True
                                     break
                             if not found:
-                                LOGGER.debug(f"Adding {db_instance['hostname']}:{db_instance['port']} to the list of reachable instances")
-                                SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                                LOGGER.debug(
+                                    f"Adding {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} to the list of reachable instances"
+                                )
+                                SCHEDULER.apis.append(API.from_instance(db_instance))
                             continue
 
                         for i, api in enumerate(SCHEDULER.apis):
-                            if api.endpoint == f"http://{db_instance['hostname']}:{db_instance['port']}/":
-                                LOGGER.debug(f"Removing {db_instance['hostname']}:{db_instance['port']} from the list of reachable instances")
+                            if api.endpoint == f"{_instance_endpoint(db_instance)}/":
+                                LOGGER.debug(
+                                    f"Removing {db_instance['hostname']}:{db_instance['https_port'] if db_instance.get('listen_https') else db_instance['port']} from the list of reachable instances"
+                                )
                                 del SCHEDULER.apis[i]
                                 break
                 else:
-                    for thread in threads:
-                        thread.join()
+                    for future in task_futures:
+                        future.result()
 
+                    task_futures.clear()
                     LOGGER.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
             except BaseException as e:
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")
@@ -1049,16 +1073,25 @@ if __name__ == "__main__":
                     else:
                         # Failover to last working configuration
                         if SCHEDULER.apis:
-                            tmp_threads = [
-                                Thread(target=send_file_to_bunkerweb, args=(FAILOVER_PATH.joinpath("config"), "/confs")),
-                                Thread(target=send_file_to_bunkerweb, args=(FAILOVER_PATH.joinpath("cache"), "/cache")),
-                                Thread(target=send_file_to_bunkerweb, args=(FAILOVER_PATH.joinpath("custom_configs"), "/custom_configs")),
+                            tmp_futures = [
+                                SCHEDULER_TASKS_EXECUTOR.submit(
+                                    send_file_to_bunkerweb,
+                                    FAILOVER_PATH.joinpath("config"),
+                                    "/confs",
+                                ),
+                                SCHEDULER_TASKS_EXECUTOR.submit(
+                                    send_file_to_bunkerweb,
+                                    FAILOVER_PATH.joinpath("cache"),
+                                    "/cache",
+                                ),
+                                SCHEDULER_TASKS_EXECUTOR.submit(
+                                    send_file_to_bunkerweb,
+                                    FAILOVER_PATH.joinpath("custom_configs"),
+                                    "/custom_configs",
+                                ),
                             ]
-                            for thread in tmp_threads:
-                                thread.start()
-
-                            for thread in tmp_threads:
-                                thread.join()
+                            for future in tmp_futures:
+                                future.result()
 
                         if not SCHEDULER.send_to_apis(
                             "POST",
@@ -1070,7 +1103,7 @@ if __name__ == "__main__":
                     LOGGER.warning("No BunkerWeb instance is reachable, skipping failover ...")
                 else:
                     LOGGER.info("Successfully reloaded bunkerweb")
-                    Thread(target=backup_failover).start()
+                    SCHEDULER_TASKS_EXECUTOR.submit(backup_failover)
             except BaseException as e:
                 LOGGER.error(f"Exception while executing failover logic : {e}")
 
@@ -1233,7 +1266,7 @@ if __name__ == "__main__":
                     CHANGES.append("instances")
                     SCHEDULER.apis = []
                     for db_instance in SCHEDULER.db.get_instances():
-                        SCHEDULER.apis.append(API(f"http://{db_instance['hostname']}:{db_instance['port']}", db_instance["server_name"]))
+                        SCHEDULER.apis.append(API.from_instance(db_instance))
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")

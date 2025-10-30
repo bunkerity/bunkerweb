@@ -1,13 +1,57 @@
 # Changelog
 
-## v1.6.5-rc3 - ????/??/??
+## v1.6.6-rc1 - ????/??/??
+
+- [BUGFIX] Update BunkerWeb integration to use dedicated CrowdSec collection so that CrowdSec now works with the log format used by BunkerWeb.
+- [FEATURE] Enhance plugin update process with per-plugin commit option and improved error handling
+- [FEATURE] Add retry operation in case of memory failure for metrics linked to the `METRICS_MEMORY_MAX_RETRIES`.
+- [FEATURE] Refactor wildcard certificate handling in certbot and letsencrypt plugin to improve reliability, performance and user experience
+- [FEATURE] Allow edition of API settings in the web UI and of UI settings from the API
+- [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
+- [UI] Add `RAW` mode when editing/creating templates
+- [UI] Enhanced the raw configuration editor with disabled settings highlighting and improved UI elements.
+- [UI] Implemented **Ctrl+S** / **Command+S** shortcuts for saving RAW global config / services / custom configurations.
+- [UI] Refactor threading to use a shared ThreadPoolExecutor for configuration tasks across routes, preventing gradual RAM growth over time
+- [UI] Fix UX issue when a flash message was too big we couldn't remove it.
+- [ALL-IN-ONE] Add Redis data directory creation in entrypoint script to fix redis not being able to start
+- [ALL-IN-ONE] Update CrowdSec version to 1.7.3
+- [API] fix API authorization to correctly handle root path prefixes in Biscuit guards
+- [AUTOCONF] Allow ConfigMap of type "settings" to be applied to services easier.
+- [AUTOCONF] Add the possibility to ignore services with a specific annotations when using the Kubernetes integration
+- [DOCS] Add documentation for persistent data storage in the all-in-one image
+- [DOCS] Add database compatibility matrix.
+- [DEPS] Updated lua-cjson version to v2.1.0.15
+- [DEPS] Update Mbed TLS version to v3.6.5
+
+## v1.6.5 - 2025/10/03
+
+- [BUGFIX] Fix wildcard certification handling when not using the MULTISITE mode in `Let's Encrypt` plugin
+- [BUGFIX] Fix suffix handling in `Database` module when dealing with template settings to ensure proper management of settings without suffixes
+- [FEATURE] Add the possibility use HTTPS with BunkerWeb's internal API
+- [FEATURE] Add reason data for bad behavior bans/reports
+- [FEATURE] Add session retention configuration via the `DATABASE_MAX_SESSION_AGE_DAYS` setting in the `Database` plugin and automatic cleanup job to purge old UI user sessions from the database
+- [API] Introduce a dedicated control‑plane service exposing a REST API to programmatically manage BunkerWeb: list/register instances, trigger reload/stop, and manage bans, plugins, jobs, and configurations.
+- [UI] Tweak the bad behavior details to look nice in the report page
+- [UI] Prevent renaming of template-based custom configs in update and edit functions for consistency
+- [UI] Fix template config not being editable in service easy mode
+- [UI] Introduce a `Templates` management page to create, edit, clone and delete service templates.
+- [UI] Add new `Template` column in the services page to display the template a service is based on (if any) and allow filtering by template.
+- [MISC] Update default value for Permissions-Policy header to include additional features and remove the deprecated ones
+- [DOCS] Add multi-language support to the documentation, including French, German, Spanish and Chinese (Mandarin) translations.
+- [DOCS] Add documentation about the possibility to extend bwcli via plugins commands
+- [DOCS] Add Docker logging best practices to advanced documentation
+- [DEPS] Updated luajit2 version to v2.1-20250826
+- [DEPS] Update coreruleset-v4 version to v4.19.0
+- [CONTRIBUTION] Thank you [Arakmar](https://github.com/Arakmar) for your contribution regarding the `Let's Encrypt` plugin.
+- [CONTRIBUTION] Thank you [tomkolp](https://github.com/tomkolp) for your contribution regarding the `Polish` translation of the web UI.
+
+## v1.6.5-rc3 - 2025/09/16
 
 - [BUGFIX] Fix lua session handling when using redis
 - [BUGFIX] Fix ctx error at startup with `DNSBL` plugin
 - [FEATURE] Introduce optional API token authentication to bolster security for BunkerWeb API calls, allowing users to enable token-based access control for enhanced protection against unauthorized requests
 - [FEATURE] Add the possibility to ignore IPs in `DNSBL` plugin
 - [LINUX] Improve nginx stop and reload handling in BunkerWeb service to use the pid file instead of the `pgrep` command
-- [DOCS] Add multi-language support to the documentation, including French
 - [UI] Fix incorrect key used when viewing service details
 - [UI] Fix 403 when changing IP address
 - [UI] Add the possibility to quickly ban IP addresses from the reports page

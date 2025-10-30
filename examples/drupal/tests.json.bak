@@ -1,0 +1,15 @@
+{
+  "name": "drupal",
+  "kinds": ["docker", "autoconf", "linux"],
+  "no_copy_container": true,
+  "timeout": 120,
+  "delay": 120,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "drupal",
+      "tls": "www.example.com"
+    }
+  ]
+}

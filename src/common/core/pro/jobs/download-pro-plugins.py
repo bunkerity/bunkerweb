@@ -23,9 +23,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from requests import get
 from requests.exceptions import ConnectionError
 
+from common_utils import bytes_hash, get_os_info, get_integration, get_version, add_dir_to_tar_safely  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from common_utils import bytes_hash, get_os_info, get_integration, get_version  # type: ignore
 
 API_ENDPOINT = "https://api.bunkerweb.io"
 PREVIEW_ENDPOINT = "https://assets.bunkerity.com/bw-pro/preview"
@@ -38,13 +38,26 @@ STATUS_MESSAGES = {
 }
 LOGGER = setup_logger("Jobs.download-pro-plugins")
 status = 0
+existing_pro_plugin_ids = set()
 
 
 def clean_pro_plugins(db) -> None:
     LOGGER.warning("Cleaning up Pro plugins...")
     # Clean Pro plugins
-    for plugin in PRO_PLUGINS_DIR.glob("*"):
-        rmtree(plugin, ignore_errors=True)
+    for plugin_dir in PRO_PLUGINS_DIR.glob("*"):
+        if plugin_dir.is_dir():
+            plugin_json = plugin_dir / "plugin.json"
+            if plugin_json.exists():
+                # Delete all files and subdirectories except plugin.json
+                for item in plugin_dir.iterdir():
+                    if item != plugin_json:
+                        if item.is_file():
+                            item.unlink()
+                        elif item.is_dir():
+                            rmtree(item, ignore_errors=True)
+            else:
+                # If no plugin.json, remove the entire directory
+                rmtree(plugin_dir, ignore_errors=True)
     # Update database
     db.update_external_plugins([], _type="pro", only_clear_metadata=True)
 
@@ -320,6 +333,8 @@ try:
         with ZipFile(plugin_content) as zf:
             zf.extractall(path=temp_dir)
 
+    existing_pro_plugin_ids = {plugin["id"] for plugin in db.get_plugins(_type="pro")}
+
     plugin_nbr = 0
 
     # Install plugins
@@ -350,7 +365,7 @@ try:
 
         with BytesIO() as plugin_content:
             with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                tar.add(plugin_path, arcname=plugin_path.name, recursive=True)
+                add_dir_to_tar_safely(tar, plugin_path, arc_root=plugin_path.name)
             plugin_content.seek(0, 0)
 
             with plugin_path.joinpath("plugin.json").open("r", encoding="utf-8") as f:
@@ -378,6 +393,18 @@ try:
 
     if err:
         LOGGER.error(f"Couldn't update Pro plugins to database: {err}")
+        # Only cleanup newly added plugins if the error suggests a database issue
+        if "max_allowed_packet" in err.lower() or "packet" in err.lower():
+            LOGGER.warning("Database packet size issue detected. Consider increasing max_allowed_packet in MariaDB/MySQL configuration.")
+
+        plugins_to_cleanup = [plugin_id for plugin_id in pro_plugins_ids if plugin_id not in existing_pro_plugin_ids]
+        if plugins_to_cleanup:
+            LOGGER.warning("Cleaning up Pro plugins that were not previously in the database due to the failed update.")
+            for plugin_id in plugins_to_cleanup:
+                plugin_dir = PRO_PLUGINS_DIR.joinpath(plugin_id)
+                if plugin_dir.exists():
+                    LOGGER.debug(f"Removing Pro plugin directory {plugin_dir} after database update failure.")
+                    rmtree(plugin_dir, ignore_errors=True)
         sys_exit(2)
 
     status = 1

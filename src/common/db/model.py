@@ -8,7 +8,7 @@ from sqlalchemy.schema import UniqueConstraint
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
 SETTINGS_TYPES_ENUM = Enum("password", "text", "number", "check", "select", "multiselect", "multivalue", name="settings_types_enum")
-METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum")
+METHODS_ENUM = Enum("api", "ui", "scheduler", "autoconf", "manual", "wizard", name="methods_enum")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "http",
@@ -235,6 +235,8 @@ class Instances(Base):
     hostname = Column(String(256), primary_key=True)
     name = Column(String(256), nullable=False, default="manual instance")
     port = Column(Integer, nullable=False)
+    listen_https = Column(Boolean, nullable=False, default=False)
+    https_port = Column(Integer, nullable=False, default=5443)
     server_name = Column(String(256), nullable=False)
     type = Column(INSTANCE_TYPE_ENUM, nullable=False, default="static")
     status = Column(INSTANCE_STATUS_ENUM, nullable=False, default="loading")
@@ -260,7 +262,10 @@ class Templates(Base):
 
     id = Column(String(256), primary_key=True)
     name = Column(String(256), unique=True, nullable=False)
-    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=False)
+    plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), nullable=True)
+    method = Column(METHODS_ENUM, nullable=False, default="manual")
+    creation_date = Column(DateTime(timezone=True), nullable=False)
+    last_update = Column(DateTime(timezone=True), nullable=False)
 
     plugin = relationship("Plugins", back_populates="templates")
     steps = relationship("Template_steps", back_populates="template", cascade="all")
@@ -346,7 +351,7 @@ class Metadata(Base):
     failover = Column(Boolean, default=None, nullable=True)
     failover_message = Column(Text, nullable=True, default="")
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.6.5-rc3", nullable=False)
+    version = Column(String(32), default="1.6.6-rc1", nullable=False)
 
 
 ## UI Models
@@ -481,3 +486,87 @@ class UserColumnsPreferences(Base):
     columns = Column(JSONText, nullable=False)
 
     user = relationship("Users", back_populates="columns_preferences")
+
+
+## API Models
+
+API_PERMISSION_ENUM = Enum(
+    # Instance permissions
+    "instances_create",
+    "instances_read",
+    "instances_update",
+    "instances_delete",
+    "instances_execute",
+    # Global config permissions
+    "global_config_read",
+    "global_config_update",
+    # Service permissions
+    "service_create",
+    "service_read",
+    "service_update",
+    "service_delete",
+    "service_convert",
+    "service_export",
+    # Config permissions
+    "config_create",
+    "configs_read",
+    "config_read",
+    "config_update",
+    "config_delete",
+    # Plugin permissions
+    "plugin_create",
+    "plugin_read",
+    "plugin_delete",
+    # Cache permissions
+    "cache_read",
+    "cache_delete",
+    # Ban permissions
+    "ban_created",
+    "ban_read",
+    "ban_update",
+    "ban_delete",
+    # Job permissions
+    "job_read",
+    "job_run",
+    name="api_permission_enum",
+)
+
+API_RESOURCE_ENUM = Enum(
+    "instances",
+    "global_config",
+    "services",
+    "configs",
+    "plugins",
+    "cache",
+    "bans",
+    "jobs",
+    name="api_resource_enum",
+)
+
+
+class API_users(Base):
+    __tablename__ = "bw_api_users"
+
+    username = Column(String(256), primary_key=True)
+    password = Column(String(60), nullable=False)
+    method = Column(METHODS_ENUM, nullable=False, default="manual")
+    admin = Column(Boolean, nullable=False, default=False)
+    creation_date = Column(DateTime(timezone=True), nullable=False)
+    update_date = Column(DateTime(timezone=True), nullable=False)
+
+    permissions = relationship("API_permissions", back_populates="user", cascade="all, delete-orphan")
+
+
+class API_permissions(Base):
+    __tablename__ = "bw_api_user_permissions"
+
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
+    api_user = Column(String(256), ForeignKey("bw_api_users.username", onupdate="cascade", ondelete="cascade"), nullable=False)
+    resource_type = Column(API_RESOURCE_ENUM, nullable=False)
+    resource_id = Column(String(256), nullable=True)
+    permission = Column(String(512), nullable=False)
+    granted = Column(Boolean, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+    user = relationship("API_users", back_populates="permissions")

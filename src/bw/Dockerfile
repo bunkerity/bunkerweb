@@ -1,4 +1,4 @@
-FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e AS builder
+FROM nginx:1.28-alpine-slim@sha256:ce2bd4775ed6859d35f47d65401ee9f35f1dd00b32ed05f0ce38b68aa1830195 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev
@@ -42,13 +42,20 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-# Minify HTML files (can be skipped with SKIP_MINIFY_HTML=yes)
+WORKDIR /tmp
+
+COPY src/deps/package.json package.json
+COPY src/deps/package-lock.json package-lock.json
+
+# Minify HTML files
+ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_HTML=no
-RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   apk add --no-cache nodejs npm parallel && \
-  npm install -g html-minifier-terser && \
-  find loading core/antibot/files core/errors/files core/misc/files -type f -name "*.html" | \
-  parallel 'html-minifier-terser \
+  cd /tmp && \
+  npm ci --ignore-scripts && \
+  find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
+  parallel 'npx html-minifier-terser \
   --collapse-whitespace \
   --remove-comments \
   --remove-optional-tags \
@@ -62,7 +69,7 @@ RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e
+FROM nginx:1.28-alpine-slim@sha256:ce2bd4775ed6859d35f47d65401ee9f35f1dd00b32ed05f0ce38b68aa1830195
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -71,7 +78,7 @@ RUN umask 027
 RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd curl tzdata
 
 # Fix CVEs
-RUN apk add --no-cache "sqlite-libs>=3.48.0-r4" # CVE-2025-29088
+# There are no CVEs for the following packages
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -89,8 +96,8 @@ RUN cp helpers/bwcli /usr/bin/ && \
   chown -R root:nginx /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /var/www/html /etc/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
   chmod 2770 /var/tmp/bunkerweb && \
-  find . \( -path './cli' -o -path './lua' -o -path './core' -o -path './gen' -o -path './helpers' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
-  find cli lua gen helpers deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+  find . \( -path './cli' -o -path './lua' -o -path './core' -o -path './gen' -o -path './helpers' -o -path './utils' -o -path './deps' \) -prune -o -type f -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
+  find cli lua gen helpers utils deps -type f ! -path 'deps/bin/*' ! -path 'deps/python/bin/*' ! -name '*.lua' ! -name '*.py' ! -name '*.pyc' ! -name '*.sh' ! -name '*.so' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
   find core -type f ! -name '*.lua' -print0 | xargs -0 -P "$(nproc)" -n 1024 chmod 440 && \
   chmod 550 entrypoint.sh && \
   rm -f /var/log/bunkerweb/* && \
@@ -99,7 +106,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.5-rc3"
+LABEL version="1.6.6-rc1"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="bunkerweb"
 LABEL bunkerweb.INSTANCE="bunkerweb"

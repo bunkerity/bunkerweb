@@ -67,7 +67,7 @@ You can also use the search bar and directly specify a setting name:
 
     The complete list of available settings with descriptions and possible values is available in the [feature section](features.md) of the documentation.
 
-## Multisite mode
+## Multisite mode {#multisite-mode}
 
 Understanding the multisite mode is essential when utilizing BunkerWeb. As our primary focus is safeguarding web applications, our solution is intricately linked to the concept of "virtual hosts" or "vhosts" (more info [here](https://en.wikipedia.org/wiki/Virtual_hosting)). These virtual hosts enable the serving of multiple web applications from a single instance or cluster.
 
@@ -105,9 +105,9 @@ Please note that multisite mode is implicit when using the web User Interface. Y
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [advanced usages](advanced.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/examples) directory of the repository.
 
-## Custom configurations
+## Custom configurations {#custom-configurations}
 
 To address unique challenges and cater to specific use cases, BunkerWeb offers the flexibility of custom configurations. While the provided settings and [external plugins](plugins.md) cover a wide range of scenarios, there may be situations that require additional customization.
 
@@ -126,7 +126,7 @@ Managing custom configurations from the web User Interface is done through the *
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [advanced usages](advanced.md#custom-configurations) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/examples) directory of the repository.
 
 ## Database
 
@@ -144,6 +144,9 @@ BunkerWeb securely stores its current configuration in a backend database, which
 
 Under the hood, whenever you edit a setting or add a new configuration, BunkerWeb automatically stores the changes in the database, ensuring data persistence and consistency. BunkerWeb supports multiple backend database options, including SQLite, MariaDB, MySQL, and PostgreSQL.
 
+!!! tip
+    When you rely on the web UI for day-to-day administration, we recommend switching to an external database engine (PostgreSQL or MySQL/MariaDB) instead of staying on SQLite. External engines handle concurrent requests and long-term growth more gracefully, especially in multi-user environments.
+
 Configuring the database is straightforward using the `DATABASE_URI` setting, which follows the specified formats for each supported database:
 
 !!! warning
@@ -158,12 +161,33 @@ Configuring the database is straightforward using the `DATABASE_URI` setting, wh
 
 By specifying the appropriate database URI in the configuration, you can seamlessly integrate BunkerWeb with your preferred database backend, ensuring efficient and reliable storage of your configuration data.
 
+### Database compatibility matrix
+
+| Integration        | PostgreSQL                    | MariaDB             | MySQL              | SQLite      |
+| :----------------- | :---------------------------- | :------------------ | :----------------- | :---------- |
+| **Docker**         | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Kubernetes**     | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Autoconf**       | ✅ `v17` and earlier (❌ `v18`) | ✅ `v11` and earlier | ✅ `v9` and earlier | ✅ Supported |
+| **Linux packages** | See notes below               | See notes below     | See notes below    | ✅ Supported |
+
+!!! info "Notes"
+    - **PostgreSQL**: `v18` is unsupported because the Alpine base images we ship only include `v17` client packages.
+    - **Linux**: Support depends on your distribution's packages. If needed, you can install database clients manually from vendor repositories (RHEL typically requires this).
+    - **SQLite**: Ships with the packages and is ready to use.
+
+Helpful external resources for installing database clients:
+
+- [PostgreSQL download and repository guide](https://www.postgresql.org/download/)
+- [MariaDB repository configuration tool](https://mariadb.org/download/?t=repo-config)
+- [MySQL repository setup guide](https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/)
+- [SQLite download page](https://www.sqlite.org/download.html)
+
 <figure markdown>
   ![Overview](assets/img/bunkerweb_db.svg){ align=center, width="800" }
   <figcaption>Database Schema</figcaption>
 </figure>
 
-## Scheduler
+## Scheduler {#scheduler}
 
 For seamless coordination and automation, BunkerWeb employs a specialized service known as the scheduler. The scheduler plays a vital role in ensuring smooth operation by performing the following tasks:
 
@@ -194,7 +218,7 @@ Since version 1.6.0, the scheduler possesses a built-in health check system that
 
 The health check interval is set by the `HEALTHCHECK_INTERVAL` environment variable, with a default value of `30`, meaning the scheduler will check the health of the instances every 30 seconds.
 
-## Templates
+## Templates {#templates}
 
 BunkerWeb leverages the power of templates to simplify the configuration process and enhance flexibility. Templates provide a structured and standardized approach to defining settings and custom configurations, ensuring consistency and ease of use.
 

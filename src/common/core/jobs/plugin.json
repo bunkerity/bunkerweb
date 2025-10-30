@@ -33,6 +33,13 @@
       "every": "once",
       "reload": false,
       "async": true
+    },
+    {
+      "name": "api-server-cert",
+      "file": "api-server-cert.py",
+      "every": "once",
+      "reload": false,
+      "async": true
     }
   ]
 }

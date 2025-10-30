@@ -18,11 +18,13 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       # Generate checksum for install script
       - name: Generate checksum for install script
-        run: sha256sum misc/install-bunkerweb.sh > install-bunkerweb.sh.sha256
+        run: |
+          cd misc
+          sha256sum install-bunkerweb.sh > install-bunkerweb.sh.sha256
       # Get PDF doc
       - name: Get documentation
         if: inputs.VERSION != 'testing'
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
       # Create tag
@@ -53,7 +55,7 @@ jobs:
       # Create release
       - name: Create release
         if: inputs.VERSION != 'testing'
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
           body: |
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
@@ -76,11 +78,11 @@ jobs:
           files: |
             BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
             misc/install-bunkerweb.sh
-            install-bunkerweb.sh.sha256
+            misc/install-bunkerweb.sh.sha256
       # Create release
       - name: Create release
         if: inputs.VERSION == 'testing'
-        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
           body: |
             **The testing version of BunkerWeb should not be used in production, please use the latest stable version instead.**
@@ -102,4 +104,4 @@ jobs:
           tag_name: ${{ inputs.VERSION }}
           files: |
             misc/install-bunkerweb.sh
-            install-bunkerweb.sh.sha256
+            misc/install-bunkerweb.sh.sha256

@@ -1,8 +1,8 @@
 # Advanced usages
 
-Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/examples) folder of the GitHub repository.
+Many real-world use case examples are available in the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/examples) folder of the GitHub repository.
 
-We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc3/misc/integrations) folder.
+We also provide numerous boilerplates, such as YAML files for various integrations and database types. These are available in the [misc/integrations](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/misc/integrations) folder.
 
 This section only focuses on advanced usages and security tuning, see the [features section](features.md) of the documentation to see all the available settings.
 
@@ -87,7 +87,7 @@ You will find more settings about real IP in the [features section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.6-rc1
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -98,7 +98,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc3
+          image: bunkerity/bunkerweb:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -106,7 +106,7 @@ You will find more settings about real IP in the [features section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -123,7 +123,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc3
+          image: bunkerity/bunkerweb:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -131,7 +131,7 @@ You will find more settings about real IP in the [features section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -178,7 +178,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc3
+          image: bunkerity/bunkerweb:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -186,7 +186,7 @@ You will find more settings about real IP in the [features section](features.md#
             REAL_IP_HEADER: "X-Forwarded-For"
           ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -251,7 +251,7 @@ You will find more settings about real IP in the [features section](features.md#
             -p 80:8080/tcp \
             -p 443:8443/tcp \
             -p 443:8443/udp \
-            bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+            bunkerity/bunkerweb-all-in-one:1.6.6-rc1
         ```
 
         Please note that if your container is already created, you will need to delete it and recreate it so the new environment variables will be updated.
@@ -262,7 +262,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc3
+          image: bunkerity/bunkerweb:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -272,7 +272,7 @@ You will find more settings about real IP in the [features section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -290,7 +290,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc3
+          image: bunkerity/bunkerweb:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -300,7 +300,7 @@ You will find more settings about real IP in the [features section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -352,7 +352,7 @@ You will find more settings about real IP in the [features section](features.md#
 
         ```yaml
         bunkerweb:
-          image: bunkerity/bunkerweb:1.6.5-rc3
+          image: bunkerity/bunkerweb:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -362,7 +362,7 @@ You will find more settings about real IP in the [features section](features.md#
           ...
         ...
         bw-scheduler:
-          image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+          image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
           ...
           environment:
             USE_REAL_IP: "yes"
@@ -514,7 +514,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.6-rc1
     ```
 
 === "Docker"
@@ -542,7 +542,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -553,7 +553,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
           - bw-dns
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         ...
         environment:
           DNS_RESOLVERS: "dnsmasq"
@@ -568,7 +568,7 @@ To enable systemd-resolved as your DNS resolver in BunkerWeb, set the `DNS_RESOL
         name: bw-dns
     ```
 
-### Custom configurations
+### Custom configurations {#custom-configurations}
 
 To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](features.md#custom-configurations).
 
@@ -667,7 +667,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
           }" \
         -p 80:8080/tcp \
         -p 443:8443/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.6-rc1
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -707,7 +707,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.6-rc1
     ```
 
 === "Docker"
@@ -730,7 +730,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     ```yaml
     ...
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
       environment:
         - |
           CUSTOM_CONF_SERVER_HTTP_hello-world=
@@ -773,7 +773,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -843,7 +843,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     ```yaml
     bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+      image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
       volumes:
         - ./bw-data:/data
       ...
@@ -851,14 +851,18 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
 === "Kubernetes"
 
-    When using the [Kubernetes integration](integrations.md#kubernetes), custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
+    When using the [Kubernetes integration](integrations.md#kubernetes),
+    custom configurations are managed using [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/).
 
-    To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.
+    You do not need to mount the ConfigMap inside a Pod (for example as an environment variable or volume).
+    The autoconf Pod watches ConfigMap events and updates the custom configuration whenever a change is detected.
 
-    When creating a ConfigMap, you will need to add special labels :
+    Annotate each ConfigMap you want the ingress controller to manage:
 
-    * **bunkerweb.io/CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream or server-stream)
-    * **bunkerweb.io/CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
+    - `bunkerweb.io/CONFIG_TYPE`: Required. Choose one of the supported custom configuration types (`http`, `server-http`,
+      `default-server-http`, `modsec`, `modsec-crs`, `crs-plugins-before`, `crs-plugins-after`, `stream`, `server-stream`, or `settings`).
+    - `bunkerweb.io/CONFIG_SITE`: Optional. Set to the primary server name (as exposed through your `Ingress`) to scope the configuration to that service;
+      omit it to apply the config globally.
 
     Here is the example :
 
@@ -879,8 +883,22 @@ Some integrations provide more convenient ways to apply configurations, such as 
       }
     ```
 
+    !!! info "How reconciliation works"
+        - The ingress controller continuously watches annotated ConfigMaps.
+        - If the `NAMESPACES` environment variable is set, only ConfigMaps from those namespaces are considered.
+        - Creating or updating a managed ConfigMap triggers an immediate configuration reload.
+        - Deleting the ConfigMap—or removing the `bunkerweb.io/CONFIG_TYPE` annotation—removes the associated custom configuration.
+        - If you set `bunkerweb.io/CONFIG_SITE`, the referenced service must already exist; otherwise, the ConfigMap is ignored until the service appears.
+
     !!! tip "Custom Extra Config"
-        Since the `1.6.0` version, you can add/override settings using the `bunkerweb.io/CONFIG_TYPE=settings` annotation. Here is an example :
+        Since version `1.6.0`, you can add or override settings by annotating a ConfigMap with `bunkerweb.io/CONFIG_TYPE=settings`.
+        The autoconf ingress controller reads each entry under `data` and applies it like an environment variable:
+
+        - Without `bunkerweb.io/CONFIG_SITE`, all keys are applied globally.
+        - When `bunkerweb.io/CONFIG_SITE` is set, the controller automatically prefixes each key with `<server-name>_` (every `/` replaced by `_`) if the key is not already scoped. Add the prefix yourself if you need to mix global and site-specific keys in the same ConfigMap.
+        - Invalid setting names or values are skipped and a warning is logged by the autoconf controller.
+
+        Here is an example :
 
         ```yaml
         apiVersion: v1
@@ -908,7 +926,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     When creating a Config, you will need to add special labels :
 
-    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream or server-stream)
+    * **bunkerweb.CONFIG_TYPE** : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream, server-stream or settings)
     * **bunkerweb.CONFIG_SITE** : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)
 
     Here is the example :
@@ -924,7 +942,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
 
     There is no update mechanism : the alternative is to remove an existing config using `docker config rm` and then recreate it.
 
-### Running many services in production
+### Running many services in production {#running-many-services-in-production}
 
 #### Global CRS
 
@@ -954,7 +972,7 @@ If you encounter errors like this, especially on the scheduler:
 
 You will need to increase the `max_allowed_packet` on your database server.
 
-### Persistence of bans and reports
+### Persistence of bans and reports {#persistence-of-bans-and-reports}
 
 By default, BunkerWeb stores bans and reports in a local Lua datastore. While simple and efficient, this setup means that data is lost when the instance is restarted. To ensure that bans and reports persist across restarts, you can configure BunkerWeb to use a remote [Redis](https://redis.io/) or [Valkey](https://valkey.io/) server.
 
@@ -1055,7 +1073,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
         -p 443:8443/udp \
         -p 10000:10000/tcp \
         -p 20000:20000/tcp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.6-rc1
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1078,7 +1096,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1093,7 +1111,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1144,7 +1162,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ports:
           - "80:8080" # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - "10000:10000" # app1
@@ -1374,7 +1392,7 @@ For complete list of settings regarding `stream` mode, please refer to the [feat
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ports:
           # Keep it if you want to use Let's Encrypt automation when using http challenge type
           - published: 80
@@ -1504,7 +1522,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         -p 80:8080/tcp \
         -p 443:8443/tcp \
         -p 443:8443/udp \
-        bunkerity/bunkerweb-all-in-one:1.6.5-rc3
+        bunkerity/bunkerweb-all-in-one:1.6.6-rc1
     ```
 
     Please note that if your container is already created, you will need to delete it and recreate it for the new environment variables to be applied.
@@ -1548,7 +1566,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1563,7 +1581,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "bunkerweb" # This setting is mandatory to specify the BunkerWeb instance
@@ -1657,7 +1675,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.6-rc1
         labels:
           - "bunkerweb.INSTANCE=yes"
         environment:
@@ -1670,7 +1688,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         environment:
           <<: *bw-api-env
           BUNKERWEB_INSTANCES: "" # We don't need to specify the BunkerWeb instance here as they are automatically detected by the autoconf service
@@ -1685,7 +1703,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.6-rc1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -1925,7 +1943,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     ```yaml
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5-rc3
+        image: bunkerity/bunkerweb:1.6.6-rc1
         volumes:
           - /shared/www:/var/www/html
     ...
@@ -2024,7 +2042,7 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     ```yaml
     services:
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         environment:
           USE_IPv6: "yes"
 
@@ -2070,7 +2088,53 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
     systemctl start bunkerweb
     ```
 
-## Security tuning
+### Docker logging best practices
+
+When using Docker, it's important to manage container logs to prevent them from consuming excessive disk space. By default, Docker uses the `json-file` logging driver, which can lead to very large log files if left unconfigured.
+
+To avoid this, you can configure log rotation. This can be done for specific services in your `docker-compose.yml` file, or globally for the Docker daemon.
+
+**Per-service configuration**
+
+You can configure the logging driver for your services in your `docker-compose.yml` file to automatically rotate the logs. Here is an example that keeps up to 10 log files of 20MB each:
+
+```yaml
+services:
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.6-rc1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+    ...
+```
+
+This configuration ensures that logs are rotated, preventing them from filling up your disk. You can apply this to any service in your Docker Compose setup.
+
+**Global configuration (daemon.json)**
+
+If you want to apply these logging settings to all containers on the host by default, you can configure the Docker daemon by editing (or creating) the `/etc/docker/daemon.json` file:
+
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "10"
+  }
+}
+```
+
+After modifying `daemon.json`, you need to restart the Docker daemon for the changes to take effect:
+
+```shell
+sudo systemctl restart docker
+```
+
+This global configuration will be inherited by all containers. However, any logging configuration defined on a per-service basis in a `docker-compose.yml` file will override the global settings in `daemon.json`.
+
+## Security tuning {#security-tuning}
 
 BunkerWeb offers many security features that you can configure with [features](features.md). Even if the default values of settings ensure a minimal "security by default", we strongly recommend you tune them. By doing so you will be able to ensure the security level of your choice but also manage false positives.
 
@@ -2520,6 +2584,10 @@ Customize the plugin behavior using the following settings:
 - **Monitoring:** Analyze logs and metrics periodically to fine-tune settings and improve overall protection.
 
 ## User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
 
 The User Management Plugin offers a robust interface for administering user accounts within your system.
 

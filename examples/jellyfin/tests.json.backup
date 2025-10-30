@@ -1,0 +1,15 @@
+{
+  "name": "jellyfin",
+  "kinds": ["docker", "autoconf", "kubernetes"],
+  "timeout": 120,
+  "delay": 60,
+  "no_copy_container": true,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "jellyfin",
+      "tls": "www.example.com"
+    }
+  ]
+}

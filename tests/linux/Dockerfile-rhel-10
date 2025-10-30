@@ -1,4 +1,4 @@
-FROM redhat/ubi10-init:10.0@sha256:689c8c45579d0d301cda6ca4ed36e1423ffe92a631886efbf693cf6d62fd0dea
+FROM redhat/ubi10-init:10.0@sha256:de5777c1a7506a228071ce01e0c40c25d6c330fbf2840779d9e1def72c08cd89
 
 ENV NGINX_VERSION=1.28.0
 

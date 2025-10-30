@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 from os import getenv
-from re import compile as re_compile
+from re import compile as re_compile, split as re_split
 from time import sleep
 from traceback import format_exc
 from typing import List, Optional, Tuple
@@ -20,6 +20,7 @@ class IngressController(Controller):
         self.__internal_lock = Lock()
         super().__init__("kubernetes")
         config.load_incluster_config()
+        self.__managed_configmaps = set()
 
         Configuration._default.verify_ssl = getenv("KUBERNETES_VERIFY_SSL", "yes").lower().strip() == "yes"
         self._logger.info(f"SSL verification is {'enabled' if Configuration._default.verify_ssl else 'disabled'}")
@@ -52,16 +53,52 @@ class IngressController(Controller):
         self.__service_name = getenv("BUNKERWEB_SERVICE_NAME", "bunkerweb")
         self.__namespace = getenv("BUNKERWEB_NAMESPACE", "bunkerweb")
 
+        self.__ignored_annotations_exact = set()
+        self.__ignored_annotation_suffixes = set()
+        ignore_annotations = getenv("KUBERNETES_IGNORE_ANNOTATIONS", "")
+        if ignore_annotations:
+            tokens = [token.strip() for token in re_split(r"[,\s]+", ignore_annotations) if token.strip()]
+            for token in tokens:
+                if "/" in token:
+                    self.__ignored_annotations_exact.add(token)
+                    if token.startswith("bunkerweb.io/"):
+                        suffix = token.split("/", 1)[1]
+                        if suffix:
+                            self.__ignored_annotation_suffixes.add(suffix)
+                else:
+                    self.__ignored_annotation_suffixes.add(token)
+                    self.__ignored_annotations_exact.add(f"bunkerweb.io/{token}")
+
+            self._logger.info("Ignoring annotations while collecting instances: " + ", ".join(sorted(self.__ignored_annotations_exact)))
+
+    def __should_ignore_annotation(self, annotation: str) -> bool:
+        if annotation in self.__ignored_annotations_exact:
+            return True
+        if annotation.removeprefix("bunkerweb.io/") in self.__ignored_annotation_suffixes:
+            return True
+        return False
+
     def _get_controller_instances(self) -> list:
         instances = []
         pods = self.__corev1.list_pod_for_all_namespaces(watch=False).items
         for pod in pods:
-            if (
-                pod.metadata.annotations
-                and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                and (pod.metadata.namespace in self._namespaces if self._namespaces else True)
-            ):
-                instances.append(pod)
+            metadata = pod.metadata
+            if not metadata:
+                continue
+
+            annotations = metadata.annotations or {}
+            if "bunkerweb.io/INSTANCE" not in annotations:
+                continue
+
+            if self._namespaces and metadata.namespace not in self._namespaces:
+                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because its namespace is not in the allowed namespaces")
+                continue
+
+            if any(self.__should_ignore_annotation(annotation) for annotation in annotations):
+                self._logger.info(f"Skipping pod {metadata.namespace}/{metadata.name} because of ignored annotations")
+                continue
+
+            instances.append(pod)
         return instances
 
     def _get_controller_services(self) -> list:
@@ -72,10 +109,18 @@ class IngressController(Controller):
             if self.__ingress_class:
                 ingress_class_name = getattr(ingress.spec, "ingress_class_name", None)
                 if ingress_class_name != self.__ingress_class:
+                    self._logger.info(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its ingress class is not allowed")
                     continue
 
             # Skip if the namespace is not in the allowed namespaces (when specified)
             if self._namespaces and ingress.metadata.namespace not in self._namespaces:
+                self._logger.info(
+                    f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because its namespace is not in the allowed namespaces"
+                )
+                continue
+
+            if ingress.metadata.annotations and any(self.__should_ignore_annotation(annotation) for annotation in ingress.metadata.annotations):
+                self._logger.info(f"Skipping ingress {ingress.metadata.namespace}/{ingress.metadata.name} because of ignored annotations")
                 continue
 
             # Add the ingress to services if it passes all checks
@@ -264,12 +309,19 @@ class IngressController(Controller):
     def get_configs(self) -> Tuple[dict, dict]:
         configs = {config_type: {} for config_type in self._supported_config_types}
         config = {}
+        managed_configmaps = set()
         for configmap in self.__corev1.list_config_map_for_all_namespaces(watch=False).items:
-            if (
-                not configmap.metadata.annotations
-                or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations
-                or not (configmap.metadata.namespace in self._namespaces if self._namespaces else True)
-            ):
+            if not configmap.metadata.annotations or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations:
+                continue
+
+            if self._namespaces and configmap.metadata.namespace not in self._namespaces:
+                self._logger.info(
+                    f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because its namespace is not in the allowed namespaces"
+                )
+                continue
+
+            if any(self.__should_ignore_annotation(annotation) for annotation in configmap.metadata.annotations):
+                self._logger.info(f"Skipping ConfigMap {configmap.metadata.namespace}/{configmap.metadata.name} because of ignored annotations")
                 continue
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
@@ -280,38 +332,60 @@ class IngressController(Controller):
                 self._logger.warning(f"Ignoring blank ConfigMap {configmap.metadata.name}")
                 continue
 
-            if config_type == "settings":
-                for config_name, config_data in configmap.data.items():
-                    if not self._db.is_valid_setting(config_name, value=config_data, accept_prefixed=False):
-                        self._logger.warning(
-                            f"Ignoring invalid setting {config_name} for ConfigMap {configmap.metadata.name} (the setting must exist and should not be prefixed)"
-                        )
+            config_site = ""
+            extra_services = []
+            if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
+                if not self._is_service_present(configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]):
+                    self._logger.warning(
+                        f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist"
+                    )
+                    continue
+                config_site = f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
+
+                for service in self._services:
+                    service_name = service.get("SERVER_NAME", "")
+                    if not service_name:
                         continue
+                    extra_services.append(service_name.strip().split(" ")[0])
+
+            managed_configmaps.add(f"{configmap.metadata.namespace}/{configmap.metadata.name}")
+
+            if config_type == "settings":
+                config_site = config_site.replace("/", "_")
+                for config_name, config_data in configmap.data.items():
+                    if config_site and not config_name.startswith(config_site):
+                        config_name = f"{config_site}{config_name}"
+
+                    if not self._db.is_valid_setting(config_name, value=config_data, multisite=bool(config_site), extra_services=extra_services)[0]:
+                        self._logger.warning(f"Ignoring invalid setting {config_name} for ConfigMap {configmap.metadata.name}")
+                        continue
+
                     config[config_name] = config_data
             else:
-                config_site = ""
-                if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
-                    if not self._is_service_present(configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]):
-                        self._logger.warning(
-                            f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist"
-                        )
-                        continue
-                    config_site = f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
-
                 for config_name, config_data in configmap.data.items():
                     configs[config_type][f"{config_site}{config_name}"] = config_data
+
+        self.__managed_configmaps = managed_configmaps
         return config, configs
 
     def __process_event(self, event):
+        if self._first_start:
+            return True
+
         obj = event["object"]
         if not obj:
             return False
 
         if obj.metadata and self._namespaces and obj.metadata.namespace not in self._namespaces:
+            self._logger.info(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because its namespace is not in the allowed namespaces")
             return False
 
         annotations = obj.metadata.annotations if obj.metadata else None
         data = getattr(obj, "data", None)
+
+        if annotations and any(self.__should_ignore_annotation(annotation) for annotation in annotations):
+            self._logger.info(f"Skipping {obj.kind} {obj.metadata.namespace}/{obj.metadata.name} because of ignored annotations")
+            return False
 
         ret = False
         if obj.kind == "Pod":
@@ -323,7 +397,15 @@ class IngressController(Controller):
             else:
                 ret = True
         elif obj.kind == "ConfigMap":
-            ret = annotations and "bunkerweb.io/CONFIG_TYPE" in annotations
+            cfg_name = ""
+            if obj.metadata and obj.metadata.namespace and obj.metadata.name:
+                cfg_name = f"{obj.metadata.namespace}/{obj.metadata.name}"
+            event_type = event.get("type")
+            is_managed = bool(cfg_name and cfg_name in self.__managed_configmaps)
+            if event_type == "DELETED":
+                ret = is_managed
+            else:
+                ret = bool((annotations and "bunkerweb.io/CONFIG_TYPE" in annotations) or is_managed)
         elif obj.kind == "Service":
             ret = True
         elif obj.kind == "Secret":
@@ -390,6 +472,7 @@ class IngressController(Controller):
                         self.__internal_lock.release()
                         locked = False
                         continue
+                    self._first_start = False
 
                     to_apply = False
                     while not applied:

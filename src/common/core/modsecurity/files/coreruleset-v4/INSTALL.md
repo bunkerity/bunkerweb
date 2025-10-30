@@ -106,7 +106,7 @@ echo 'IncludeOptional /etc/crs4/rules/*.conf' >> /etc/httpd/conf/httpd.conf
 echo 'IncludeOptional /etc/crs4/plugins/*-after.conf' >> /etc/httpd/conf/httpd.conf
 ```
 
-Now that everything has been configured, it should be possible to restart and being using the OWASP CRS. The CRS rules typically require a bit of tuning with rule exclusions, depending on the site and web applications in question. For more information on tuning, see [false positives and tuning](https://coreruleset.org/docs/concepts/false_positives_tuning/).
+Now that everything has been configured, it should be possible to restart and begin using the OWASP CRS. The CRS rules typically require a bit of tuning with rule exclusions, depending on the site and web applications in question. For more information on tuning, see [false positives and tuning](https://coreruleset.org/docs/concepts/false_positives_tuning/).
 
 ```bash
 systemctl restart httpd.service
@@ -158,13 +158,13 @@ Always verify that CRS is installed correctly by sending a 'malicious' request t
 curl 'https://www.example.com/?foo=/etc/passwd&bar=/bin/sh'
 ```
 
-Depending on your configurated thresholds, this should be detected as a malicious request. If you use blocking mode, you should receive an Error 403. The request should also be logged to the audit log, which is usually in `/var/log/modsec_audit.log`.
+Depending on your configured thresholds, this should be detected as a malicious request. If you use blocking mode, you should receive an Error 403. The request should also be logged to the audit log, which is usually in `/var/log/modsec_audit.log`.
 
 ## Upgrading
 
 ### Upgrading from CRS 3.x to CRS 4
 
-The most impactful change is the removal of application exclusion packages in favor of a plugin system. If you had activated the exclusion packages in CRS 3, you should download the plugins for them and place them in the plugins subdirectory. We maintain the list of plugins in our [Plugin Registry](https://github.com/coreruleset/plugin-registry). You can find detailed information on working with plugins in our [plugins documentation]()https://coreruleset.org/docs/concepts/plugins/.
+The most impactful change is the removal of application exclusion packages in favor of a plugin system. If you had activated the exclusion packages in CRS 3, you should download the plugins for them and place them in the plugins subdirectory. We maintain the list of plugins in our [Plugin Registry](https://github.com/coreruleset/plugin-registry). You can find detailed information on working with plugins in our [plugins documentation](https://coreruleset.org/docs/concepts/plugins/).
 
 In terms of changes to the detection rules, the amount of changes is smaller than in the CRS 2—3 changeover. Most rules have only evolved slightly, so it is recommended that you keep any existing custom exclusions that you have made under CRS 3.
 

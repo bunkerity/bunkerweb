@@ -1,3 +1,4 @@
+{% from 'macros/docs_link.html' import docs_url %}
 <input type="hidden"
        id="selected-type"
        name="selected_type"
@@ -39,9 +40,9 @@
         </div>
         <div class="justify-content-center d-none d-sm-flex">
             {% if current_endpoint != "global-config" %}
-                <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+                <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
                     <button type="button"
-                            class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                            class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
                         <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                         <span class="d-none d-md-inline">&nbsp;
                             {% if is_draft == 'yes' %}
@@ -67,9 +68,9 @@
 <div class="d-flex justify-content-center position-fixed m-3 d-sm-none"
      id="floating-settings-button">
     {% if current_endpoint != "global-config" %}
-        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+        <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                    class="btn btn-sm btn-outline-secondary toggle-draft p-1_5 me-1 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
                 <i class="bx bx-xs bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                 &nbsp;
                 {% if is_draft == 'yes' %}
@@ -167,17 +168,28 @@
                             <p class="card-subtitle text-muted text-truncate mt-1 courier-prime">{{ plugin_data["description"] }}</p>
                         </div>
                         <div class="d-flex flex-grow-0 flex-shrink-0 justify-content-end align-items-center">
-                            <a href="https://docs.bunkerweb.io/{{ bw_version }}/advanced/?utm_campaign=self&utm_source=ui#protect-udptcp-applications"
-                               class="btn btn-sm btn-outline-{% if plugin_data['stream'] == 'yes' %}bw-green{% elif plugin_data['stream'] == 'partial' %}warning{% else %}danger{% endif %} rounded-pill"
+                            <a href="{{ docs_url('/advanced', '#protect-udptcp-applications') }}"
+                               class="btn btn-sm btn-outline-{% if plugin_data['stream'] == 'yes' %}bw-green{% elif plugin_data['stream'] == 'partial' %}warning{% else %}danger{% endif %} rounded-pill docs-link"
                                target="_blank"
                                rel="noopener"
+                               data-endpoint="/advanced"
+                               data-fragment="#protect-udptcp-applications"
                                data-bs-toggle="tooltip"
                                data-bs-placement="top"
                                data-bs-original-title="{% if plugin_data['stream'] != 'no' %}Supports{% else %}Doesn't support{% endif %} STREAM mode{% if plugin_data['stream'] == 'partial' %} partially{% endif %}">
                                 <i class="bx bx-{% if plugin_data['stream'] == 'yes' %}badge-check{% elif plugin_data['stream'] == 'partial' %}message-square-detail{% else %}no-entry{% endif %}"></i><span class="d-none d-md-inline">&nbsp;STREAM</span>
                             </a>
-                            <a href="{% if plugin_data['type'] == 'core' %}https://docs.bunkerweb.io/{{ bw_version }}/features/?utm_campaign=self&utm_source=ui#{% if plugin == 'general' %}global-settings{% else %}{{ plugin }}{% endif %}{% else %}https://docs.bunkerweb.io/{{ bw_version }}/plugins/?utm_campaign=self&utm_source=ui{% endif %}"
-                               class="btn btn-sm btn-primary rounded-pill ms-2"
+                            {% if plugin_data['type'] == 'core' %}
+                                {% set plugin_endpoint = "/features" %}
+                                {% set plugin_fragment = '#' + ('global-settings' if plugin == 'general' else plugin) %}
+                            {% else %}
+                                {% set plugin_endpoint = "/plugins" %}
+                                {% set plugin_fragment = "" %}
+                            {% endif %}
+                            <a href="{{ docs_url(plugin_endpoint, plugin_fragment) }}"
+                               class="btn btn-sm btn-primary rounded-pill ms-2 docs-link"
+                               data-endpoint="{{ plugin_endpoint }}"
+                               data-fragment="{{ plugin_fragment }}"
                                target="_blank"
                                rel="noopener">
                                 <i class="bx bx-link"></i><span class="d-none d-md-inline">&nbsp;<span data-i18n="link.more_info">More info</span></span>
@@ -206,7 +218,7 @@
                                 {% set setting_value = setting_config.get("value", setting_default) %}
                                 {% set setting_method = setting_config.get("method", "default") %}
                                 {% set setting_template = setting_config.get("template", "") %}
-                                {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
                                 {% if current_endpoint == "new" or clone %}
                                     {% set setting_method = "default" %}
                                     {% set disabled = false %}
@@ -233,8 +245,10 @@
                                         <div class="d-flex align-items-center">
                                             {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
                                                 <a role="badge"
-                                                   href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
-                                                   class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                   href='{{ docs_url("/concepts", "#multisite-mode") }}'
+                                                   class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
+                                                   data-endpoint="/concepts"
+                                                   data-fragment="#multisite-mode"
                                                    data-bs-toggle="tooltip"
                                                    data-bs-placement="top"
                                                    data-bs-original-title="Multisite setting"
@@ -249,6 +263,15 @@
                                                       data-bs-placement="top"
                                                       data-bs-original-title="From template: {{ setting_template }}">
                                                     <span class="bx bx-spreadsheet bx-xs"></span>
+                                                </span>
+                                            {% endif %}
+                                            {% if setting_method == "api" %}
+                                                <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                      data-bs-toggle="tooltip"
+                                                      data-bs-placement="top"
+                                                      data-bs-original-title="Managed via API"
+                                                      data-i18n="badge.managed_via_api">
+                                                    <span class="bx bx-code-curly bx-xs"></span>
                                                 </span>
                                             {% endif %}
                                             {% if setting_config.get("clone") %}
@@ -355,7 +378,7 @@
                                                             {% set setting_value = setting_config.get("value", setting_default) %}
                                                             {% set setting_method = setting_config.get("method", "default") %}
                                                             {% set setting_template = setting_config.get("template", "") %}
-                                                            {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                                            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
                                                             {% if current_endpoint == "new" or clone %}
                                                                 {% set setting_method = "default" %}
                                                                 {% set disabled = false %}
@@ -379,8 +402,10 @@
                                                                     <div class="d-flex align-items-center">
                                                                         {% if current_endpoint == "global-config" and setting_data["context"] == "multisite" %}
                                                                             <a role="badge"
-                                                                               href='https://docs.bunkerweb.io/{{ bw_version }}/concepts/?utm_campaign=self&utm_source=ui#multisite-mode'
-                                                                               class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1"
+                                                                               href='{{ docs_url("/concepts", "#multisite-mode") }}'
+                                                                               class="badge badge-center rounded-pill bg-secondary d-flex align-items-center justify-content-center p-1 me-1 docs-link"
+                                                                               data-endpoint="/concepts"
+                                                                               data-fragment="#multisite-mode"
                                                                                data-bs-toggle="tooltip"
                                                                                data-bs-placement="top"
                                                                                data-bs-original-title="Multisite setting"
@@ -395,6 +420,15 @@
                                                                                   data-bs-placement="top"
                                                                                   data-bs-original-title="From template: {{ setting_template }}">
                                                                                 <span class="bx bx-spreadsheet bx-xs"></span>
+                                                                            </span>
+                                                                        {% endif %}
+                                                                        {% if setting_method == "api" %}
+                                                                            <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                                  data-bs-toggle="tooltip"
+                                                                                  data-bs-placement="top"
+                                                                                  data-bs-original-title="Managed via API"
+                                                                                  data-i18n="badge.managed_via_api">
+                                                                                <span class="bx bx-code-curly bx-xs"></span>
                                                                             </span>
                                                                         {% endif %}
                                                                         {% if setting_config.get("clone") %}

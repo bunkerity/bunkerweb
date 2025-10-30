@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Enforce a restrictive default umask for all operations
-umask 027
+# Source the utils helper script
+# shellcheck disable=SC1091
+source /usr/share/bunkerweb/helpers/utils.sh
+
+# Get the highest Python version available and export it
+PYTHON_BIN=$(get_python_bin)
+export PYTHON_BIN
 
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
@@ -52,10 +57,22 @@ start() {
     fi
 
     # Extract environment variables with fallback
-    LISTEN_ADDR=$(get_env_var "LISTEN_ADDR" "127.0.0.1")
+    LISTEN_ADDR=$(get_env_var "UI_LISTEN_ADDR" "")
+    if [ -z "$LISTEN_ADDR" ]; then
+        LISTEN_ADDR=$(get_env_var "LISTEN_ADDR" "127.0.0.1")
+    fi
     export LISTEN_ADDR
 
-    FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1")
+    LISTEN_PORT=$(get_env_var "UI_LISTEN_PORT" "")
+    if [ -z "$LISTEN_PORT" ]; then
+        LISTEN_PORT=$(get_env_var "LISTEN_PORT" "7000")
+    fi
+    export LISTEN_PORT
+
+    FORWARDED_ALLOW_IPS=$(get_env_var "UI_FORWARDED_ALLOW_IPS" "")
+    if [ -z "$FORWARDED_ALLOW_IPS" ]; then
+        FORWARDED_ALLOW_IPS=$(get_env_var "FORWARDED_ALLOW_IPS" "127.0.0.1")
+    fi
     export FORWARDED_ALLOW_IPS
 
     export CAPTURE_OUTPUT="yes"
@@ -95,8 +112,21 @@ start() {
         rm -f /var/tmp/bunkerweb/ui.error
     fi
 
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.TmpUiLogger --config /usr/share/bunkerweb/ui/utils/tmp-gunicorn.conf.py -D"
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=$PYTHONPATH python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --logger-class utils.logger.UiLogger --config /usr/share/bunkerweb/ui/utils/gunicorn.conf.py"
+    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m gunicorn \
+        --chdir /usr/share/bunkerweb/ui \
+        --logger-class utils.logger.TmpUiLogger \
+        --config /usr/share/bunkerweb/ui/utils/tmp-gunicorn.conf.py -D; then
+        echo "Failed to start temporary UI service (nginx user execution error)"
+        exit 1
+    fi
+
+    if ! run_as_nginx env PYTHONPATH="$PYTHONPATH" "$PYTHON_BIN" -m gunicorn \
+        --chdir /usr/share/bunkerweb/ui \
+        --logger-class utils.logger.UiLogger \
+        --config /usr/share/bunkerweb/ui/utils/gunicorn.conf.py; then
+        echo "Failed to start UI service (nginx user execution error)"
+        exit 1
+    fi
 }
 
 # Function to stop the UI

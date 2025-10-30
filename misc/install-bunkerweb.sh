@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.5-rc3"
+DEFAULT_BUNKERWEB_VERSION="1.6.6-rc1"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
@@ -211,6 +211,27 @@ ask_user_preferences() {
         else
             # CrowdSec not applicable for worker, scheduler-only, or ui-only installations
             CROWDSEC_INSTALL="no"
+        fi
+
+        # Ask about API service enablement
+        if [ -z "$SERVICE_API" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🧩 BunkerWeb API Service${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "The BunkerWeb API provides a programmatic interface (FastAPI) to manage instances,"
+            echo "perform actions (reload/stop), and integrate with external systems."
+            echo "It is optional and disabled by default on Linux installations."
+            echo
+            while true; do
+                echo -e "${YELLOW}Enable the API service? (y/N):${NC} "
+                read -p "" -r
+                case $REPLY in
+                    [Yy]*) SERVICE_API=yes; break ;;
+                    ""|[Nn]*) SERVICE_API=no; break ;;
+                    *) echo "Please answer yes (y) or no (n)." ;;
+                esac
+            done
         fi
 
         # Ask about AppSec installation if CrowdSec is chosen
@@ -457,7 +478,7 @@ install_bunkerweb_debian() {
     run_cmd rm -f /tmp/bunkerweb-repo.sh
 
     run_cmd apt update
-    run_cmd apt install -y "bunkerweb=$BUNKERWEB_VERSION"
+    run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
 
     # Hold BunkerWeb package to prevent upgrades
     run_cmd apt-mark hold bunkerweb
@@ -481,10 +502,10 @@ install_bunkerweb_rpm() {
 
     if [ "$DISTRO_ID" = "fedora" ]; then
         run_cmd dnf makecache
-        run_cmd dnf install -y "bunkerweb-$BUNKERWEB_VERSION"
+        run_cmd dnf install -y --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
     else
         dnf check-update || true  # Don't fail if no updates available
-        run_cmd dnf install -y "bunkerweb-$BUNKERWEB_VERSION"
+        run_cmd dnf install -y --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
     fi
 
     # Lock BunkerWeb version
@@ -509,7 +530,7 @@ install_crowdsec() {
             case "$DISTRO_ID" in
                 "debian"|"ubuntu")
                     run_cmd apt update
-                    run_cmd apt install -y $dep
+                    run_cmd apt install -y "$dep"
                     ;;
                 "fedora"|"rhel"|"rocky"|"almalinux")
                     run_cmd dnf install -y $dep
@@ -546,7 +567,7 @@ install_crowdsec() {
   - /var/log/bunkerweb/error.log
   - /var/log/bunkerweb/modsec_audit.log
 labels:
-  type: nginx
+  type: bunkerweb
 "
     if [ -f "$ACQ_FILE" ]; then
         cp "$ACQ_FILE" "${ACQ_FILE}.bak"
@@ -560,7 +581,7 @@ labels:
     echo -e "${YELLOW}--- Step 3: Update hub and install core collections/parsers ---${NC}"
     print_step "Updating hub and installing detection collections/parsers"
     cscli hub update
-    cscli collections install crowdsecurity/nginx
+    cscli collections install bunkerity/bunkerweb
     cscli parsers install crowdsecurity/geoip-enrich
 
     # AppSec installation if chosen
@@ -619,6 +640,10 @@ show_final_info() {
     echo "Services status:"
     systemctl status bunkerweb --no-pager -l || true
     systemctl status bunkerweb-scheduler --no-pager -l || true
+    # Show API service status if present on this system
+    if systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+        systemctl status bunkerweb-api --no-pager -l || true
+    fi
 
     if [ "$ENABLE_WIZARD" = "yes" ]; then
         systemctl status bunkerweb-ui --no-pager -l || true
@@ -633,6 +658,9 @@ show_final_info() {
     fi
 
     echo "  - Scheduler config: /etc/bunkerweb/scheduler.env"
+    if [ "${SERVICE_API:-no}" = "yes" ] || systemctl list-units --type=service --all | grep -q '^bunkerweb-api.service'; then
+        echo "  - API config: /etc/bunkerweb/api.env"
+    fi
     echo "  - Logs: /var/log/bunkerweb/"
     echo
 
@@ -685,6 +713,8 @@ usage() {
     echo "  -w, --enable-wizard      Enable the setup wizard (default in interactive mode)"
     echo "  -n, --no-wizard          Disable the setup wizard"
     echo "  -y, --yes                Non-interactive mode, use defaults"
+    echo "      --api, --enable-api  Enable the API service (disabled by default on Linux)"
+    echo "      --no-api             Explicitly disable the API service"
     echo "  -f, --force              Force installation on unsupported OS versions"
     echo "  -q, --quiet              Silent installation (suppress output)"
     echo "  -h, --help               Show this help message"
@@ -792,6 +822,14 @@ while [[ $# -gt 0 ]]; do
         --instances)
             BUNKERWEB_INSTANCES_INPUT="$2"
             shift 2
+            ;;
+        --api|--enable-api)
+            SERVICE_API=yes
+            shift
+            ;;
+        --no-api)
+            SERVICE_API=no
+            shift
             ;;
         --backup-dir)
             BACKUP_DIRECTORY="$2"; shift 2 ;;
@@ -972,7 +1010,7 @@ upgrade_only() {
     case "$DISTRO_ID" in
         debian|ubuntu)
             run_cmd apt update
-            run_cmd apt install -y "bunkerweb=$BUNKERWEB_VERSION"
+            run_cmd apt install -y --allow-downgrades "bunkerweb=$BUNKERWEB_VERSION"
             run_cmd apt-mark hold bunkerweb nginx
             ;;
         fedora|rhel|rocky|almalinux)
@@ -981,7 +1019,7 @@ upgrade_only() {
             else
                 dnf check-update || true
             fi
-            run_cmd dnf install -y --allowerasing "bunkerweb-$BUNKERWEB_VERSION"
+            run_cmd dnf install -y --allowerasing --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
             run_cmd dnf versionlock add bunkerweb nginx
             ;;
     esac
@@ -1017,6 +1055,11 @@ main() {
     if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
         # Use a temporary file to pass the setting to the postinstall script
         echo "BUNKERWEB_INSTANCES=$BUNKERWEB_INSTANCES_INPUT" > /var/tmp/bunkerweb_instances.env
+    fi
+
+    # Persist API enablement for postinstall if chosen
+    if [ "${SERVICE_API:-no}" = "yes" ]; then
+        touch /var/tmp/bunkerweb_enable_api
     fi
 
     # Set environment variables based on installation type

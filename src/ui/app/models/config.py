@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from concurrent.futures import ThreadPoolExecutor
-from copy import deepcopy
 from operator import itemgetter
 from os import getenv, sep
 from flask import flash
@@ -10,7 +9,7 @@ from pathlib import Path
 from re import error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
-from app.utils import get_blacklisted_settings
+from app.utils import get_blacklisted_settings, is_editable_method
 
 
 class Config:
@@ -164,7 +163,7 @@ class Config:
                 not new
                 and setting != "IS_DRAFT"
                 and key in config
-                and ((global_config or not config[key].get("global", False)) and config[key].get("method") not in ("default", "ui"))
+                and ((global_config or not config[key].get("global", False)) and not is_editable_method(config[key].get("method"), allow_default=True))
             ):
                 report_error(f"Variable {key} is not editable as it is managed by the {config[key]['method']}, ignoring it.")
                 variables.pop(key, None)
@@ -234,7 +233,8 @@ class Config:
         changed_server_name = old_server_name != variables["SERVER_NAME"]
         server_name_splitted = variables["SERVER_NAME"].split(" ")
         old_server_name_splitted = old_server_name.split(" ")
-        for i, service in enumerate(deepcopy(services)):
+        for i in range(len(services) - 1, -1, -1):
+            service = services[i]
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
                 if changed_server_name and service["SERVER_NAME"].split(" ")[0] != old_server_name_splitted[0]:
                     return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1

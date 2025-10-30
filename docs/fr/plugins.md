@@ -89,7 +89,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-      image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+      image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
       volumes:
         - ./bw-data:/data
     ...
@@ -125,7 +125,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         volumes:
           - ./bw-data:/data
     ...
@@ -168,7 +168,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -215,7 +215,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.6.5-rc1
+              image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -255,7 +255,7 @@ La première étape consiste à installer le plugin en plaçant ses fichiers dan
 
 !!! tip "Plugins existants"
 
-    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
+    Si la documentation n'est pas suffisante, vous pouvez consulter le code source existant des [plugins officiels](https://github.com/bunkerity/bunkerweb-plugins) et des [plugins core](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/src/common/core) (déjà inclus dans BunkerWeb mais ce sont des plugins, techniquement parlant).
 
 À quoi ressemble la structure d'un plugin :
 ```
@@ -344,6 +344,7 @@ Voici le détail des champs :
 |   `stream`    |     oui     | corde | Informations sur la prise en charge des flux : `no`, `yes` ou `partial`.                                                              |
 |  `settings`   |     oui     | Dict  | Liste des paramètres de votre plugin.                                                                                                 |
 |    `jobs`     |     Non     | liste | Liste des jobs de votre plugin.                                                                                                       |
+|    `bwcli`    |     Non     |  dict  | Associer les noms de commandes CLI aux fichiers stockés dans le répertoire 'bwcli' du plugin pour exposer les plugins CLI. |
 
 Chaque paramètre comporte les champs suivants (la clé est l'ID des paramètres utilisés dans une configuration) :
 
@@ -366,6 +367,24 @@ Chaque emploi comporte les champs suivants :
 | `name`  |     oui     | corde | Nom de l'emploi.                                                                                                                                             |
 | `file`  |     oui     | corde | Nom du fichier à l'intérieur du dossier jobs.                                                                                                                |
 | `every` |     oui     | corde | Fréquence de planification des tâches : `minute`, `hour`, `day` `week` , ou `once` (pas de fréquence, une seule fois avant de (ré)générer la configuration). |
+
+### Commandes CLI
+
+Les plugins peuvent étendre l'outil 'bwcli' avec des commandes personnalisées qui s'exécutent sous 'bwcli plugin <plugin_id> ...':
+
+1. Ajoutez un répertoire 'bwcli' dans votre plugin et déposez-y un fichier par commande (par exemple 'bwcli/list.py'). La CLI ajoute le chemin du plugin à 'sys.path' avant d'exécuter le fichier.
+2. Déclarez les commandes dans la section optionnelle 'bwcli' de 'plugin.json', en associant chaque nom de commande à son nom de fichier exécutable.
+
+```json
+{
+  "bwcli": {
+    "list": "list.py",
+    "save": "save.py"
+  }
+}
+```
+
+Le planificateur expose automatiquement les commandes déclarées une fois le plugin installé. Les plugins principaux, tels que 'backup' dans 'src/common/core/backup', suivent le même modèle.
 
 ### Configurations
 
@@ -541,7 +560,7 @@ end
 
 !!! tip "Plus d'exemples"
 
-    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.5-rc1/src/bw/lua/bunkerweb) du dépôt.
+    Si vous souhaitez voir la liste complète des fonctions disponibles, vous pouvez consulter les fichiers présents dans le [répertoire lua](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/src/bw/lua/bunkerweb) du dépôt.
 
 ### Emplois
 

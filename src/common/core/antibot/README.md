@@ -153,17 +153,17 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
     **Configuration Settings:**
 
-    | Setting                          | Default | Context   | Multiple | Description |
-    | -------------------------------- | ------- | --------- | -------- | ----------- |
-    | `USE_ANTIBOT`                    | `no`    | multisite | no       | Enable antibot; set to `recaptcha` to enable reCAPTCHA. |
-    | `ANTIBOT_RECAPTCHA_CLASSIC`      | `yes`   | multisite | no       | Use classic reCAPTCHA. Set to `no` to use the new Google Cloud-based version. |
-    | `ANTIBOT_RECAPTCHA_SITEKEY`      |         | multisite | no       | reCAPTCHA site key. Required for both classic and new versions. |
-    | `ANTIBOT_RECAPTCHA_SECRET`       |         | multisite | no       | reCAPTCHA secret key. Required for the classic version only. |
-    | `ANTIBOT_RECAPTCHA_PROJECT_ID`   |         | multisite | no       | Google Cloud Project ID. Required for the new version only. |
-    | `ANTIBOT_RECAPTCHA_API_KEY`      |         | multisite | no       | Google Cloud API key used to call the reCAPTCHA Enterprise API. Required for the new version only. |
-    | `ANTIBOT_RECAPTCHA_JA3`          |         | multisite | no       | Optional JA3 TLS fingerprint to include in Enterprise assessments. |
-    | `ANTIBOT_RECAPTCHA_JA4`          |         | multisite | no       | Optional JA4 TLS fingerprint to include in Enterprise assessments. |
-    | `ANTIBOT_RECAPTCHA_SCORE`        | `0.7`   | multisite | no       | Minimum score required to pass (applies to both classic v3 and the new version). |
+    | Setting                        | Default | Context   | Multiple | Description                                                                                        |
+    | ------------------------------ | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                  | `no`    | multisite | no       | Enable antibot; set to `recaptcha` to enable reCAPTCHA.                                            |
+    | `ANTIBOT_RECAPTCHA_CLASSIC`    | `yes`   | multisite | no       | Use classic reCAPTCHA. Set to `no` to use the new Google Cloud-based version.                      |
+    | `ANTIBOT_RECAPTCHA_SITEKEY`    |         | multisite | no       | reCAPTCHA site key. Required for both classic and new versions.                                    |
+    | `ANTIBOT_RECAPTCHA_SECRET`     |         | multisite | no       | reCAPTCHA secret key. Required for the classic version only.                                       |
+    | `ANTIBOT_RECAPTCHA_PROJECT_ID` |         | multisite | no       | Google Cloud Project ID. Required for the new version only.                                        |
+    | `ANTIBOT_RECAPTCHA_API_KEY`    |         | multisite | no       | Google Cloud API key used to call the reCAPTCHA Enterprise API. Required for the new version only. |
+    | `ANTIBOT_RECAPTCHA_JA3`        |         | multisite | no       | Optional JA3 TLS fingerprint to include in Enterprise assessments.                                 |
+    | `ANTIBOT_RECAPTCHA_JA4`        |         | multisite | no       | Optional JA4 TLS fingerprint to include in Enterprise assessments.                                 |
+    | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`   | multisite | no       | Minimum score required to pass (applies to both classic v3 and the new version).                   |
 
     Refer to the [Common Settings](#common-settings) for additional configuration options.
 
