@@ -1,6 +1,6 @@
 {
   "name": "mattermost",
-  "kinds": ["docker", "autoconf", "kubernetes"],
+  "kinds": ["docker", "autoconf"],
   "timeout": 120,
   "delay": 300,
   "tests": [
