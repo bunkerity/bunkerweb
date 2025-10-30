@@ -34,7 +34,7 @@ source tmp_venv/bin/activate || {
 }
 
 # Upgrade pip first for security
-pip install --upgrade pip setuptools wheel
+pip install --upgrade "pip<25.3" setuptools wheel
 
 pip install --force-reinstall --no-cache-dir --require-hashes -r requirements-deps.txt || {
     echo "Error: Failed to install dependencies"

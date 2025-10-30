@@ -39,13 +39,13 @@ beautifulsoup4==4.14.2 \
     --hash=sha256:2a98ab9f944a11acee9cc848508ec28d9228abfd522ef0fad6a02a72e0ded69e \
     --hash=sha256:5ef6fa3a8cbece8488d66985560f97ed091e22bbc4e9c2338508a9d5de6d4515
     # via dns-lexicon
-boto3==1.40.58 \
-    --hash=sha256:5a99c0bd2e282af4afde1af10d8838b397120722b6b685f0c0fa6b8cac351304 \
-    --hash=sha256:951515c1ea0ae9e99e56c3b6f408a2f59e1b57fab4d96dab737e73956f729177
+boto3==1.40.62 \
+    --hash=sha256:3dbe7e1e7dc9127a4b1f2020a14f38ffe64fad84df00623e8ab6a5d49a82ea28 \
+    --hash=sha256:f422d4ae3b278832ba807059aafa553164bce2c464cd65b24c9ea8fb8a6c4192
     # via certbot-dns-route53
-botocore==1.40.58 \
-    --hash=sha256:2571ca3aec8150e1b5a597794da6fd06284de72f29d3ea806804b798755f2e5a \
-    --hash=sha256:cf2de7f5538f23c8067408a984ed32221e8b196ce98e66945a479d06b2663c33
+botocore==1.40.62 \
+    --hash=sha256:1e8e57c131597dc234d67428bda1323e8f0a687ea13ea570253159ab9256fa28 \
+    --hash=sha256:780f1d476d4b530ce3b12fd9f7112156d97d99ebdbbd9ef60635b0432af9d3a5
     # via
     #   boto3
     #   s3transfer
@@ -470,17 +470,17 @@ filelock==3.20.0 \
     --hash=sha256:339b4732ffda5cd79b13f4e2711a31b0365ce445d95d243bb996273d072546a2 \
     --hash=sha256:711e943b4ec6be42e1d4e6690b48dc175c822967466bb31c0c293f34334c13f4
     # via tldextract
-google-api-core==2.27.0 \
-    --hash=sha256:779a380db4e21a4ee3d717cf8efbf324e53900bf37e1ffb273e5348a9916dd42 \
-    --hash=sha256:d32e2f5dd0517e91037169e75bf0a9783b255aff1d11730517c0b2b29e9db06a
+google-api-core==2.28.1 \
+    --hash=sha256:2b405df02d68e68ce0fbc138559e6036559e685159d148ae5861013dc201baf8 \
+    --hash=sha256:4021b0f8ceb77a6fb4de6fde4502cecab45062e66ff4f2895169e0b35bc9466c
     # via google-api-python-client
 google-api-python-client==2.185.0 \
     --hash=sha256:00fe173a4b346d2397fbe0d37ac15368170dfbed91a0395a66ef2558e22b93fc \
     --hash=sha256:aa1b338e4bb0f141c2df26743f6b46b11f38705aacd775b61971cbc51da089c3
     # via certbot-dns-google
-google-auth==2.41.1 \
-    --hash=sha256:754843be95575b9a19c604a848a41be03f7f2afd8c019f716dc1f51ee41c639d \
-    --hash=sha256:b76b7b1f9e61f0cb7e88870d14f6a94aeef248959ef6992670efee37709cbfd2
+google-auth==2.42.0 \
+    --hash=sha256:9bbbeef3442586effb124d1ca032cfb8fb7acd8754ab79b55facd2b8f3ab2802 \
+    --hash=sha256:f8f944bcb9723339b0ef58a73840f3c61bc91b69bf7368464906120b55804473
     # via
     #   certbot-dns-google
     #   google-api-core
