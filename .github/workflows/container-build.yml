@@ -59,107 +59,22 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
           chmod 600 ~/.ssh/id_rsa_arm
           echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
-          # Enhanced keepalive and timeout settings
+          # Enhanced keepalive and timeout settings for long-running builds
           cat >> ~/.ssh/config << 'EOF'
-          ServerAliveInterval 30
-          ServerAliveCountMax 3
+          ServerAliveInterval 15
+          ServerAliveCountMax 20
           TCPKeepAlive yes
-          ConnectTimeout 10
-          ConnectionAttempts 1
+          ConnectTimeout 30
+          ConnectionAttempts 3
+          ControlMaster auto
+          ControlPath ~/.ssh/control-%C
+          ControlPersist 1h
+          StrictHostKeyChecking no
           EOF
         env:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-      - name: Check ARM SSH connectivity
-        if: startsWith(inputs.CACHE_SUFFIX, 'arm')
-        run: |
-          echo "=== Starting enhanced SSH connectivity check ==="
-          SSH_HOST="root@$SSH_IP"
-          MAX_RETRIES=10
-          RETRY_COUNT=0
-          SUCCESS=false
-
-          # Enhanced SSH options for stability
-          SSH_OPTS="-o StrictHostKeyChecking=no \
-                    -o ConnectTimeout=10 \
-                    -o ConnectionAttempts=1 \
-                    -o ServerAliveInterval=30 \
-                    -o ServerAliveCountMax=3 \
-                    -o TCPKeepAlive=yes \
-                    -o BatchMode=yes \
-                    -i ~/.ssh/id_rsa_arm"
-
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            RETRY_COUNT=$((RETRY_COUNT + 1))
-            echo "----------------------------------------"
-            echo "Attempt $RETRY_COUNT of $MAX_RETRIES"
-            echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')"
-
-            # First check if SSH port is reachable
-            echo "→ Checking TCP port 22..."
-            if timeout 5 bash -c "cat < /dev/null > /dev/tcp/$SSH_IP/22" 2>/dev/null; then
-              echo "✓ Port 22 is open"
-
-              # Try SSH connection with comprehensive checks
-              echo "→ Testing SSH connection..."
-              if ssh $SSH_OPTS $SSH_HOST "echo '✓ SSH connection established' && \
-                                            echo '→ Checking Docker...' && \
-                                            docker info > /dev/null 2>&1 && \
-                                            echo '✓ Docker is running' && \
-                                            echo '→ Checking network...' && \
-                                            ping -c 1 9.9.9.9 > /dev/null 2>&1 && \
-                                            echo '✓ Network connectivity verified (Quad9)' && \
-                                            echo '→ System info:' && \
-                                            uptime && \
-                                            free -h | head -n 2" 2>&1; then
-                echo "✓✓✓ All connectivity checks passed! ✓✓✓"
-                SUCCESS=true
-                break
-              else
-                echo "✗ SSH command execution failed"
-              fi
-            else
-              echo "✗ Port 22 is not reachable"
-            fi
-
-            # Calculate backoff delay (exponential: 5, 10, 15, 20, 30, 30, ...)
-            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-              DELAY=$((5 * RETRY_COUNT))
-              [ $DELAY -gt 30 ] && DELAY=30
-              echo "⏳ Waiting ${DELAY}s before retry..."
-              sleep $DELAY
-            fi
-          done
-
-          if [ "$SUCCESS" = false ]; then
-            echo "========================================="
-            echo "✗✗✗ FATAL: All $MAX_RETRIES connection attempts failed ✗✗✗"
-            echo "This likely indicates:"
-            echo "  - ARM node is not accessible"
-            echo "  - Network connectivity issues"
-            echo "  - SSH service not running"
-            echo "  - Docker service not running"
-            echo "========================================="
-            exit 1
-          fi
-
-          # Final stabilization period
-          echo "========================================="
-          echo "⏳ Allowing connection to stabilize (10s)..."
-          sleep 10
-
-          # Final verification
-          echo "→ Final connectivity verification..."
-          if ssh $SSH_OPTS $SSH_HOST "echo '✓ Final check: SSH OK' && docker ps > /dev/null 2>&1 && echo '✓ Final check: Docker OK'"; then
-            echo "✓✓✓ SSH connectivity fully stable and ready ✓✓✓"
-            echo "========================================="
-          else
-            echo "✗✗✗ FATAL: Final verification failed ✗✗✗"
-            exit 1
-          fi
-        env:
-          SSH_IP: ${{ secrets.ARM_SSH_IP }}
       - name: Setup Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         if: startsWith(inputs.CACHE_SUFFIX, 'arm') == false
