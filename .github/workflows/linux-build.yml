@@ -100,7 +100,7 @@ jobs:
         if: startsWith(env.ARCH, 'arm') == true
         with:
           endpoint: ssh://root@arm
-          platforms: linux/arm64,linux/arm/v7
+          platforms: linux/arm64,linux/arm/v7,linux/arm/v6
       - name: Login to Docker Hub
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
