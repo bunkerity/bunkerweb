@@ -120,9 +120,6 @@ jobs:
               # Try SSH connection with comprehensive checks
               echo "→ Testing SSH connection..."
               if ssh $SSH_OPTS $SSH_HOST "echo '✓ SSH connection established' && \
-                                            echo '→ Checking Docker...' && \
-                                            docker info > /dev/null 2>&1 && \
-                                            echo '✓ Docker is running' && \
                                             echo '→ Checking network...' && \
                                             ping -c 1 9.9.9.9 > /dev/null 2>&1 && \
                                             echo '✓ Network connectivity verified (Quad9)' && \
@@ -155,7 +152,6 @@ jobs:
             echo "  - ARM node is not accessible"
             echo "  - Network connectivity issues"
             echo "  - SSH service not running"
-            echo "  - Docker service not running"
             echo "========================================="
             exit 1
           fi
@@ -167,7 +163,7 @@ jobs:
 
           # Final verification
           echo "→ Final connectivity verification..."
-          if ssh $SSH_OPTS $SSH_HOST "echo '✓ Final check: SSH OK' && docker ps > /dev/null 2>&1 && echo '✓ Final check: Docker OK'"; then
+          if ssh $SSH_OPTS $SSH_HOST "echo '✓ Final check: SSH OK'"; then
             echo "✓✓✓ SSH connectivity fully stable and ready ✓✓✓"
             echo "========================================="
           else
