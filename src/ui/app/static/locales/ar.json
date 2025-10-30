@@ -27,7 +27,7 @@
     "no_template": "لا يوجد قالب",
     "unread_news": "أخبار غير مقروءة",
     "unread_notifications": "إشعارات غير مقروءة",
-    "managed_via_api": "Managed via API"
+    "managed_via_api": "مُدار عبر API"
   },
   "banner": {
     "community": "كن جزءًا من مجتمع Bunker بالانضمام إلى <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">دردشة Discord</a> ومتابعتنا على <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",

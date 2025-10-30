@@ -27,7 +27,7 @@
     "no_template": "无模板",
     "unread_news": "未读新闻",
     "unread_notifications": "未读通知",
-    "managed_via_api": "Managed via API"
+    "managed_via_api": "通过 API 管理"
   },
   "banner": {
     "community": "加入 Bunker 社区，加入 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 聊天</a>并在 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> 上关注我们。",
