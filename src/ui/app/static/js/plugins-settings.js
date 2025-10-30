@@ -1947,7 +1947,7 @@ $(document).ready(() => {
       editor.setReadOnly(
         explicitReadOnly === true || explicitReadOnly === "true",
       );
-    } else if (method !== "ui" && method !== "default") {
+    } else if (method !== "ui" && method !== "api" && method !== "default") {
       editor.setReadOnly(true);
     }
 

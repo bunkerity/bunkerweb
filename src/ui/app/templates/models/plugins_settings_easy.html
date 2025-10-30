@@ -66,9 +66,9 @@
         </span>
     </button>
     {% if current_endpoint != "global-config" %}
-        <div {% if current_endpoint != 'new' and service_method != 'ui' %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
+        <div {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The draft mode can only be toggled on UI created services" data-i18n="tooltip.draft_toggle_disabled"{% endif %}>
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method != 'ui' %}disabled{% endif %}">
+                    class="btn btn-sm btn-outline-secondary toggle-draft me-3 {% if current_endpoint != 'new' and service_method not in ['ui', 'api'] %}disabled{% endif %}">
                 <i class="bx bx-sm bx-{% if is_draft == 'yes' %}file-blank{% else %}globe{% endif %}"></i>
                 <span class="d-none d-md-inline">&nbsp;
                     {% if is_draft == 'yes' %}
@@ -118,7 +118,7 @@
                 </div>
             </div>
             <div class="card-body">
-                {% if template_method == "ui" or not selected_template or template == selected_template %}
+                {% if template_method in ['ui', 'api'] or not selected_template or template == selected_template %}
                     {% if template_data["steps"] %}
                         <div class="row">
                             <div class="col-12 col-lg-3 mb-3 mb-lg-0 ps-0 pe-1">
@@ -193,7 +193,7 @@
                                                         {% set setting_value = setting_config.get("value", setting_default) %}
                                                         {% set setting_method = setting_config.get("method", "default") %}
                                                         {% set setting_template = setting_config.get("template", "") %}
-                                                        {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                                                        {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
                                                         {% set required = setting == "SERVER_NAME" %}
                                                         {% if current_endpoint == "new" %}
                                                             {% set disabled = false %}
@@ -227,6 +227,15 @@
                                                                            rel="noopener">
                                                                             <span class="bx bx-server bx-xs"></span>
                                                                         </a>
+                                                                    {% endif %}
+                                                                    {% if setting_method == "api" %}
+                                                                        <span class="badge badge-center rounded-pill bg-info-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"
+                                                                              data-bs-toggle="tooltip"
+                                                                              data-bs-placement="top"
+                                                                              data-bs-original-title="Managed via API"
+                                                                              data-i18n="badge.managed_via_api">
+                                                                            <span class="bx bx-code-curly bx-xs"></span>
+                                                                        </span>
                                                                     {% endif %}
                                                                     {% if setting_config.get("clone") %}
                                                                         <span class="badge badge-center rounded-pill bg-primary-subtle text-dark d-flex align-items-center justify-content-center p-1 me-1"

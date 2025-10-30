@@ -26,7 +26,8 @@
     "new_version": "新版本",
     "no_template": "無範本",
     "unread_news": "未讀新聞",
-    "unread_notifications": "未讀通知"
+    "unread_notifications": "未讀通知",
+    "managed_via_api": "透過 API 管理"
   },
   "banner": {
     "community": "加入 Bunker 社群，加入 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">Discord 聊天</a>並在 <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a> 上關注我們。",

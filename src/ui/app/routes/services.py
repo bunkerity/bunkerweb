@@ -10,7 +10,7 @@ from regex import sub
 from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 
 from app.routes.utils import CUSTOM_CONF_RX, handle_error, verify_data_in_form, wait_applying
-from app.utils import LOGGER, get_blacklisted_settings
+from app.utils import LOGGER, get_blacklisted_settings, is_editable_method
 
 services = Blueprint("services", __name__)
 
@@ -232,6 +232,9 @@ def services_service_page(service: str):
             else:
                 db_config = DB.get_config(global_only=True, methods=True)
 
+            service_method = db_config.get("SERVER_NAME", {}).get("method", "ui") if service != "new" else "ui"
+            override_method = service_method if is_editable_method(service_method) else "ui"
+
             was_draft = db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes"
 
             old_server_name = variables.pop("OLD_SERVER_NAME", "")
@@ -255,11 +258,16 @@ def services_service_page(service: str):
                         value = value.replace("\r\n", "\n").strip().encode("utf-8")
 
                         new_configs.add(key)
-                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": "ui"})
+                        db_custom_config = db_custom_configs.get(f"{service}_{key}", {"data": None, "method": override_method})
 
-                        if db_custom_config["method"] != "ui" and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
+                        if not is_editable_method(db_custom_config["method"]) and db_custom_config["template"] != variables.get("USE_TEMPLATE", ""):
                             DATA["TO_FLASH"].append(
-                                {"content": f"The template Custom config {key} cannot be edited because it has not been created with the UI.", "type": "error"}
+                                {
+                                    "content": (
+                                        f"The template Custom config {key} cannot be edited because it has been created via the {db_custom_config['method']} method."
+                                    ),
+                                    "type": "error",
+                                }
                             )
                             continue
                         elif value == db_custom_config["data"].strip():
@@ -271,7 +279,7 @@ def services_service_page(service: str):
                             "type": conf_match["type"].lower(),
                             "name": conf_match["name"],
                             "data": value,
-                            "method": "ui",
+                            "method": override_method,
                         }
 
                 if service != "new":
@@ -337,15 +345,25 @@ def services_service_page(service: str):
             error = None
 
             if new_configs or configs_changed:
-                error = DB.save_custom_configs(db_custom_configs.values(), "ui", changed=service != "new" and (was_draft != is_draft or not is_draft))
+                error = DB.save_custom_configs(
+                    db_custom_configs.values(),
+                    override_method,
+                    changed=service != "new" and (was_draft != is_draft or not is_draft),
+                )
                 if error:
                     DATA["TO_FLASH"].append({"content": f"An error occurred while saving the custom configs: {error}", "type": "error"})
 
             if service == "new":
                 old_server_name = variables["SERVER_NAME"]
-                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft)
+                operation, error = BW_CONFIG.new_service(variables, is_draft=is_draft, override_method=override_method)
             else:
-                operation, error = BW_CONFIG.edit_service(old_server_name, variables, check_changes=(was_draft != is_draft or not is_draft), is_draft=is_draft)
+                operation, error = BW_CONFIG.edit_service(
+                    old_server_name,
+                    variables,
+                    check_changes=(was_draft != is_draft or not is_draft),
+                    is_draft=is_draft,
+                    override_method=override_method,
+                )
 
             if operation.endswith("already exists."):
                 DATA["TO_FLASH"].append({"content": operation, "type": "warning"})

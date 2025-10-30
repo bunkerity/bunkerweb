@@ -26,7 +26,8 @@
     "new_version": "Nowa wersja",
     "no_template": "Brak szablonu",
     "unread_notifications": "Nieprzeczytane powiadomienia",
-    "unread_news": "Nieprzeczytane wiadomości"
+    "unread_news": "Nieprzeczytane wiadomości",
+    "managed_via_api": "Zarządzane przez API"
   },
   "banner": {
     "community": "Dołącz do społeczności Bunker, klikając <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://discord.bunkerweb.io/?utm_campaign=self&utm_source=banner\">czat Discord</a> i śledząc nas na <a class=\"light-href text-white-80\" target=\"_blank\" rel=\"noopener\" href=\"https://www.linkedin.com/company/bunkerity/\">LinkedIn</a>.",

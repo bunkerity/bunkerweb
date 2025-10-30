@@ -6,50 +6,50 @@
 {% set entire_config = config_lines|list %}
 {% set default_settings = ["IS_DRAFT=no"] if current_endpoint != "global-config" else [] %}
 {% set disabled_settings = namespace(items=[]) %}
-    {% for plugin_data in plugins.values() %}
-        {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
-        {% if filtered_settings %}
-            {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings %}
-                {% set setting_config = config.get(setting, {}) %}
-                {% set setting_default = setting_data.get("default", "") %}
-                {% set setting_method = setting_config.get("method", "default") %}
-                {% set setting_value = setting_config.get("value", setting_default) %}
-                {% if current_endpoint == "new" or clone %}
-                    {% set setting_method = "default" %}
-                    {% set disabled = false %}
-                    {% if setting == "SERVER_NAME" %}
-                        {% set setting_value = "" %}
-                    {% endif %}
+{% for plugin_data in plugins.values() %}
+    {% set filtered_settings = get_filtered_settings(plugin_data["settings"], current_endpoint == "global-config") %}
+    {% if filtered_settings %}
+        {% for setting, setting_data in filtered_settings.items() if not setting_data.get('multiple', false) and setting not in blacklisted_settings %}
+            {% set setting_config = config.get(setting, {}) %}
+            {% set setting_default = setting_data.get("default", "") %}
+            {% set setting_method = setting_config.get("method", "default") %}
+            {% set setting_value = setting_config.get("value", setting_default) %}
+            {% if current_endpoint == "new" or clone %}
+                {% set setting_method = "default" %}
+                {% set disabled = false %}
+                {% if setting == "SERVER_NAME" %}
+                    {% set setting_value = "" %}
                 {% endif %}
-                {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                {% if disabled %}
-                    {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
-                {% endif %}
-                {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
-                {% if setting_value != setting_default %}
-                    {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
-                    {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
-                {% endif %}
+            {% endif %}
+            {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+            {% if disabled %}
+                {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
+            {% endif %}
+            {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
+            {% if setting_value != setting_default %}
+                {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
+                {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
+            {% endif %}
         {% endfor %}
     {% endif %}
     {% set plugin_multiples = get_multiples(filtered_settings, config) %}
     {% if plugin_multiples %}
         {% for multiple, multiples in plugin_multiples.items() %}
-                {% for setting_suffix, settings in multiples.items() %}
-                    {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
-                        {% set setting_config = config.get(setting, {}) %}
-                        {% set setting_default = setting_data.get("default", "") %}
-                        {% set setting_method = setting_config.get("method", "default") %}
-                        {% set setting_value = setting_config.get("value", setting_default) %}
-                        {% set disabled = setting_method not in ('ui', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
-                        {% if disabled %}
-                            {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
-                        {% endif %}
-                        {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
-                        {% if setting_value != setting_default %}
-                            {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
-                            {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
-                        {% endif %}
+            {% for setting_suffix, settings in multiples.items() %}
+                {% for setting, setting_data in settings.items() if setting not in blacklisted_settings %}
+                    {% set setting_config = config.get(setting, {}) %}
+                    {% set setting_default = setting_data.get("default", "") %}
+                    {% set setting_method = setting_config.get("method", "default") %}
+                    {% set setting_value = setting_config.get("value", setting_default) %}
+                    {% set disabled = setting_method not in ('ui', 'api', 'default') and (current_endpoint == "global-config" or not setting_config.get("global")) %}
+                    {% if disabled %}
+                        {% set disabled_settings.items = disabled_settings.items + [setting ~ "::" ~ setting_method] %}
+                    {% endif %}
+                    {% if entire_config.append(setting + "=" + setting_value) %}{% endif %}
+                    {% if setting_value != setting_default %}
+                        {% if config_lines.append(setting + "=" + setting_value) %}{% endif %}
+                        {% if default_settings.append(setting + "=" + setting_default) %}{% endif %}
+                    {% endif %}
                 {% endfor %}
             {% endfor %}
         {% endfor %}

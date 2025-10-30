@@ -5,6 +5,7 @@
 - [BUGFIX] Update BunkerWeb integration to use dedicated CrowdSec collection so that CrowdSec now works with the log format used by BunkerWeb.
 - [FEATURE] Enhance plugin update process with per-plugin commit option and improved error handling
 - [FEATURE] Refactor wildcard certificate handling in certbot and letsencrypt plugin to improve reliability, performance and user experience
+- [FEATURE] Allow edition of API settings in the web UI and of UI settings from the API
 - [UI] Add [DB-IP](https://db-ip.com/) attribution in the web UI reports page footer
 - [UI] Add `RAW` mode when editing/creating templates
 - [UI] Enhanced the raw configuration editor with disabled settings highlighting and improved UI elements.

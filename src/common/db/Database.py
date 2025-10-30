@@ -309,6 +309,25 @@ class Database:
             return None
         return f"{cfg_type}/{cfg_name}.conf"
 
+    @staticmethod
+    def _methods_are_compatible(new_method: Optional[str], current_method: Optional[str]) -> bool:
+        """
+        Determine whether two configuration methods should be considered compatible for updates.
+
+        UI and API updates are treated as interchangeable, while autoconf keeps its special behavior.
+        """
+        if new_method is None:
+            return True
+        if current_method is None:
+            return True
+        if new_method == "autoconf":
+            return True
+        if current_method == "autoconf":
+            return new_method == "autoconf"
+        if {new_method, current_method} <= {"ui", "api"}:
+            return True
+        return new_method == current_method
+
     def test_read(self):
         """Test the read access to the database"""
         self.logger.debug("Testing read access to the database ...")
@@ -1498,7 +1517,7 @@ class Database:
                 services = [service for service in services if service]  # Clean up empty strings
 
                 if db_services:
-                    missing_ids = [service.id for service in db_services if service.method == method and service.id not in services]
+                    missing_ids = [service.id for service in db_services if self._methods_are_compatible(method, service.method) and service.id not in services]
 
                     if missing_ids:
                         self.logger.debug(f"Removing {len(missing_ids)} services that are no longer in the list")
@@ -1520,7 +1539,9 @@ class Database:
 
                 if db_drafts:
                     missing_drafts = [
-                        service.id for service in db_services if service.method == method and service.id not in drafts and service.id not in missing_ids
+                        service.id
+                        for service in db_services
+                        if self._methods_are_compatible(method, service.method) and service.id not in drafts and service.id not in missing_ids
                     ]
 
                     if missing_drafts:
@@ -1536,7 +1557,7 @@ class Database:
                             self.logger.debug(f"Adding draft {draft}")
                             to_put.append(Services(id=draft, method=method, is_draft=True, creation_date=current_time, last_update=current_time))
                             db_ids[draft] = {"method": method, "is_draft": True}
-                        elif method == db_ids[draft]["method"]:
+                        elif self._methods_are_compatible(method, db_ids[draft]["method"]):
                             self.logger.debug(f"Updating draft {draft}")
                             to_update.append({"model": Services, "filter": {"id": draft}, "values": {"is_draft": True, "last_update": current_time}})
                             changed_services = True
@@ -1640,7 +1661,7 @@ class Database:
                                 )
                                 if key == "SERVER_NAME":
                                     local_changed_services = True
-                            elif (service_setting["value"] != value and method in (service_setting["method"], "autoconf")) or (
+                            elif (service_setting["value"] != value and self._methods_are_compatible(method, service_setting["method"])) or (
                                 method == "autoconf" and service_setting["method"] != "autoconf"
                             ):
                                 local_changed_plugins.add(setting["plugin_id"])
@@ -1701,7 +1722,7 @@ class Database:
                                 self.logger.debug(f"Adding global setting {key}")
                                 local_changed_plugins.add(setting["plugin_id"])
                                 local_to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                            elif (global_value.value != value and method in (global_value.method, "autoconf")) or (
+                            elif (global_value.value != value and self._methods_are_compatible(method, global_value.method)) or (
                                 method == "autoconf" and global_value.method != "autoconf"
                             ):
                                 local_changed_plugins.add(setting["plugin_id"])
@@ -1808,7 +1829,7 @@ class Database:
                             self.logger.debug(f"Adding global setting {key}")
                             changed_plugins.add(setting.plugin_id)
                             to_put.append(Global_values(setting_id=key, value=value, suffix=suffix, method=method))
-                        elif method in (global_value.method, "autoconf") and global_value.value != value:
+                        elif self._methods_are_compatible(method, global_value.method) and global_value.value != value:
                             changed_plugins.add(setting.plugin_id)
 
                             if value == (template_setting.default if template_setting is not None else setting.default):
@@ -1939,7 +1960,7 @@ class Database:
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
-                elif custom_config["checksum"] != custom_conf.checksum and method in (custom_conf.method, "autoconf"):
+                elif custom_config["checksum"] != custom_conf.checksum and self._methods_are_compatible(method, custom_conf.method):
                     custom_conf.data = custom_config["data"]
                     custom_conf.checksum = custom_config["checksum"]
                     custom_conf.method = method
