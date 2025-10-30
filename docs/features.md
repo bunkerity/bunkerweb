@@ -1560,7 +1560,6 @@ CrowdSec is a modern, open-source security engine that detects and blocks malici
 
 ### Prerequisites
 
-- BunkerWeb `1.6.5` or newer with the CrowdSec plugin available on the instance (set `USE_CROWDSEC=yes` after completing the steps below).
 - A CrowdSec Local API that BunkerWeb can reach (typically the agent running on the same host or inside the same Docker network).
 - Access to BunkerWeb access logs (`/var/log/bunkerweb/access.log` by default) so the CrowdSec agent can analyse requests.
 - `cscli` access on the CrowdSec host to register the BunkerWeb bouncer key.
@@ -1643,7 +1642,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1660,7 +1659,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -1892,6 +1891,12 @@ Apply the following environment variables (or values via the scheduler UI/API) s
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
+
+### Step&nbsp;3 – Validate the integration
+
+- In the scheduler logs, look for `CrowdSec configuration successfully generated` and `CrowdSec bouncer denied request` entries to verify that the plugin is active.
+- On the CrowdSec side, monitor `cscli metrics show` or the CrowdSec Console to ensure BunkerWeb decisions appear as expected.
+- In the BunkerWeb UI, open the CrowdSec plugin page to see the status of the integration.
 
 ## Custom SSL certificate
 

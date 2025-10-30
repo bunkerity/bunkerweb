@@ -21,7 +21,21 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
       3. **Intégration légère :** Impact minimal sur les performances de votre instance BunkerWeb.
       4. **Protection multi-niveaux :** Combinez la défense périmétrique (blocage d'IP) avec la sécurité applicative pour une protection en profondeur.
 
-### Mise en place
+### Prérequis
+
+- Une API locale CrowdSec accessible par BunkerWeb (généralement l’agent exécuté sur la même machine ou dans le même réseau Docker).
+- L’accès aux journaux d’accès de BunkerWeb (`/var/log/bunkerweb/access.log` par défaut) pour que l’agent CrowdSec puisse analyser les requêtes.
+- L’accès à `cscli` sur l’hôte CrowdSec afin d’enregistrer la clé du bouncer BunkerWeb.
+
+### Parcours d’intégration
+
+1. Préparer l’agent CrowdSec pour ingérer les journaux BunkerWeb.
+2. Configurer BunkerWeb pour interroger l’API locale CrowdSec.
+3. Valider le lien via l’API `/crowdsec/ping` ou la carte CrowdSec dans l’interface d’administration.
+
+Les sections suivantes détaillent chacune de ces étapes.
+
+### Étape&nbsp;1 – Préparer CrowdSec à ingérer les journaux BunkerWeb
 
 === "Docker"
     **Fichier d'acquisition**
@@ -89,7 +103,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -106,7 +120,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance
@@ -140,7 +154,7 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.1 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
+        image: crowdsecurity/crowdsec:v1.7.3 # Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité
         volumes:
           - cs-data:/var/lib/crowdsec/data # Pour persister les données de CrowdSec
           - bw-logs:/var/log:ro # Les journaux de BunkerWeb à analyser par CrowdSec
@@ -275,7 +289,9 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
 
     Référez-vous à la [documentation d'intégration de l'image All-In-One (AIO)](integrations.md#crowdsec-integration).
 
-### Paramètres de configuration
+### Étape&nbsp;2 – Configurer les paramètres de BunkerWeb
+
+Appliquez les variables d’environnement suivantes (ou leurs équivalents via le scheduler) pour permettre à votre instance BunkerWeb de communiquer avec l’API locale CrowdSec. Au minimum, `USE_CROWDSEC`, `CROWDSEC_API` et une clé valide générée avec `cscli bouncers add` sont nécessaires.
 
 | Paramètre                   | Valeur par défaut      | Contexte  | Multiple | Description                                                                                                                                    |
 | --------------------------- | ---------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -334,3 +350,9 @@ CrowdSec est un moteur de sécurité moderne et open-source qui détecte et bloq
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
+
+### Étape&nbsp;3 – Valider l’intégration
+
+- Dans les journaux du planificateur, recherchez les entrées `CrowdSec configuration successfully generated` et `CrowdSec bouncer denied request` afin de vérifier que le plugin est actif.
+- Côté CrowdSec, surveillez `cscli metrics show` ou la console CrowdSec pour vous assurer que les décisions BunkerWeb apparaissent comme prévu.
+- Dans l’interface BunkerWeb, ouvrez la page du plugin CrowdSec pour voir l’état de l’intégration.
