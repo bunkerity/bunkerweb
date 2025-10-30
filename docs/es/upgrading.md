@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.5
+                    image: bunkerity/bunkerweb:1.6.6-rc1
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.5
+                    image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.5
+                    image: bunkerity/bunkerweb-autoconf:1.6.6-rc1
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.5
+                    image: bunkerity/bunkerweb-ui:1.6.6-rc1
                     ...
             ```
 
@@ -135,20 +135,20 @@
         Ejemplos:
 
         ```bash
-        # Actualizar a 1.6.5 interactivamente (pedirá confirmación para la copia de seguridad)
-        sudo ./install-bunkerweb.sh --version 1.6.5
+        # Actualizar a 1.6.6-rc1 interactivamente (pedirá confirmación para la copia de seguridad)
+        sudo ./install-bunkerweb.sh --version 1.6.6-rc1
 
         # Actualización no interactiva con copia de seguridad automática a un directorio personalizado
-        sudo ./install-bunkerweb.sh -v 1.6.5 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc1 --backup-dir /var/backups/bw-2025-01 -y
 
         # Actualización desatendida silenciosa (salida suprimida) – depende de la copia de seguridad automática predeterminada
-        sudo ./install-bunkerweb.sh -v 1.6.5 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc1 -y -q
 
         # Realizar una ejecución de prueba (plan) sin aplicar cambios
-        sudo ./install-bunkerweb.sh -v 1.6.5 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc1 --dry-run
 
         # Actualizar omitiendo la copia de seguridad automática (NO recomendado)
-        sudo ./install-bunkerweb.sh -v 1.6.5 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc1 --no-auto-backup -y
         ```
 
         !!! warning "Omitir copias de seguridad"
@@ -228,7 +228,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.6-rc1
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -254,7 +254,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.6-rc1
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `dnf upgrade`, puedes usar el siguiente comando:
@@ -651,16 +651,16 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.5
+                        image: bunkerity/bunkerweb:1.6.6-rc1
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.5
+                        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.5
+                        image: bunkerity/bunkerweb-autoconf:1.6.6-rc1
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.5
+                        image: bunkerity/bunkerweb-ui:1.6.6-rc1
                         ...
                 ```
 
@@ -695,7 +695,7 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.6-rc1
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -721,7 +721,7 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.6-rc1
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `dnf upgrade`, puedes usar el siguiente comando:

@@ -51,11 +51,12 @@ class Config:
                 continue
             config["SERVER_NAME"] += f" {server_name}"
 
+        db_services = []
         for db_service in self._db.get_services():
             server_name = db_service.get("id", "")
             if not server_name:
                 continue
-            config["SERVER_NAME"] += f" {server_name}"
+            db_services.append(server_name)
 
         for service in self.__services:
             server_name = service["SERVER_NAME"].split(" ")[0]
@@ -70,7 +71,7 @@ class Config:
                     variable,
                     value=value,
                     multisite=True,
-                    extra_services=config["SERVER_NAME"].split(" "),
+                    extra_services=config["SERVER_NAME"].split(" ") + db_services,
                 )
                 if not success:
                     if self._type == "kubernetes":

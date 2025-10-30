@@ -27,6 +27,22 @@ local match = string.match
 local decode = cjson.decode
 local execute = os.execute
 local remove = os.remove
+local insert = table.insert
+local ipairs = ipairs
+
+local function get_wildcard_cert_identifier(host)
+	if not host or host == "" then
+		return host
+	end
+	local parts = {}
+	for part in host:gmatch("[^.]+") do
+		insert(parts, part)
+	end
+	if #parts <= 2 then
+		return host
+	end
+	return table.concat(parts, ".", 2)
+end
 
 function letsencrypt:initialize(ctx)
 	-- Call parent initialize
@@ -83,22 +99,23 @@ function letsencrypt:init()
 					local data
 					local server_names = multisite_vars["SERVER_NAME"]
 					local cert_identifier = server_names:match("%S+")
+					local server_list = {}
+					for part in server_names:gmatch("%S+") do
+						insert(server_list, part)
+					end
 
 					if
 						multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 						and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 					then
-						for part in server_names:gmatch("%S+") do
-							wildcard_servers[part] = true
+						cert_identifier = get_wildcard_cert_identifier(cert_identifier)
+						for _, part in ipairs(server_list) do
+							wildcard_servers[part] = cert_identifier
 						end
-						local parts = {}
-						for part in cert_identifier:gmatch("[^.]+") do
-							table.insert(parts, part)
-						end
-						cert_identifier = table.concat(parts, ".", 2)
+						wildcard_servers[cert_identifier] = cert_identifier
 						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
 					else
-						for part in server_names:gmatch("%S+") do
+						for _, part in ipairs(server_list) do
 							wildcard_servers[part] = false
 						end
 					end
@@ -149,18 +166,19 @@ function letsencrypt:init()
 			end
 			local server_names = server_name
 			local cert_identifier = server_names:match("%S+")
+			local server_list = {}
+			for part in server_names:gmatch("%S+") do
+				insert(server_list, part)
+			end
 			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
 			if use_wildcard_mode then
-				for part in server_names:gmatch("%S+") do
-					wildcard_servers[part] = true
+				cert_identifier = get_wildcard_cert_identifier(cert_identifier)
+				for _, part in ipairs(server_list) do
+					wildcard_servers[part] = cert_identifier
 				end
-				local parts = {}
-				for part in cert_identifier:gmatch("[^.]+") do
-					table.insert(parts, part)
-				end
-				cert_identifier = table.concat(parts, ".", 2)
+				wildcard_servers[cert_identifier] = cert_identifier
 			else
-				for part in server_names:gmatch("%S+") do
+				for _, part in ipairs(server_list) do
 					wildcard_servers[part] = false
 				end
 			end
@@ -203,17 +221,25 @@ function letsencrypt:ssl_certificate()
 	if not wildcard_servers then
 		return self:ret(false, "can't get wildcard servers : " .. err)
 	end
-	if wildcard_servers[server_name] then
+	local alias = wildcard_servers[server_name]
+	if alias == true then
 		local parts = {}
 		for part in server_name:gmatch("[^.]+") do
-			table.insert(parts, part)
+			insert(parts, part)
 		end
-		server_name = table.concat(parts, ".", 2)
+		if #parts > 2 then
+			server_name = table.concat(parts, ".", 2)
+		end
+	elseif type(alias) == "string" and alias ~= "" then
+		server_name = alias
 	end
 	local data
 	data, err = self.internalstore:get("plugin_letsencrypt_" .. server_name, true)
 	if not data and err ~= "not found" then
-		return self:ret(false, "error while getting plugin_letsencrypt_" .. server_name .. " from internalstore : " .. err)
+		return self:ret(
+			false,
+			"error while getting plugin_letsencrypt_" .. server_name .. " from internalstore : " .. err
+		)
 	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end

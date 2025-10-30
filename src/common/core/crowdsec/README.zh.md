@@ -21,19 +21,35 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
       3. **轻量级集成：** 对您的 BunkerWeb 实例的性能影响最小。
       4. **多层次保护：** 结合边界防御（IP 阻止）和应用程序安全，实现深度保护。
 
-### 设置
+### 前置条件
+
+- CrowdSec 本地 API，BunkerWeb 可以访问（通常为运行在同一主机或同一 Docker 网络中的代理）。
+- 访问 BunkerWeb 访问日志（默认路径 `/var/log/bunkerweb/access.log`），以便 CrowdSec 代理分析请求。
+- 在 CrowdSec 主机上可使用 `cscli`，用于注册 BunkerWeb 的 bouncer 密钥。
+
+### 集成流程
+
+1. 准备 CrowdSec 代理，使其能够摄取 BunkerWeb 日志。
+2. 配置 BunkerWeb，以便查询 CrowdSec 本地 API。
+3. 通过 `/crowdsec/ping` API 或管理界面中的 CrowdSec 卡片验证连接。
+
+以下各节将依次说明这些步骤。
+
+### 第&nbsp;1&nbsp;步 – 准备 CrowdSec 摄取 BunkerWeb 日志
 
 === "Docker"
     **采集文件**
 
-    您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。由于 BunkerWeb 基于 NGINX，您可以在采集文件中为 `type` 参数使用 `nginx` 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：
+    您需要运行一个 CrowdSec 实例，并将其配置为解析 BunkerWeb 日志。请在采集文件中将 `type` 参数设置为专用的 `bunkerweb` 值（假设 BunkerWeb 日志按原样存储，没有附加数据）：
 
     ```yaml
     filenames:
       - /var/log/bunkerweb.log
     labels:
-      type: nginx
+      type: bunkerweb
     ```
+
+    如果在 CrowdSec 容器内仍然看不到该集合，请运行 `docker exec -it <crowdsec-container> cscli hub update`，然后重启该容器（`docker restart <crowdsec-container>`），以加载新的资源。请将 `<crowdsec-container>` 替换为 CrowdSec 容器的实际名称。
 
     **应用程序安全组件（*可选*）**
 
@@ -87,7 +103,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     services:
       bunkerweb:
         # 这是将用于在调度器中识别实例的名称
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6-rc1
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -104,7 +120,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
             syslog-address: "udp://10.20.30.254:514" # syslog 服务的 IP 地址
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # 确保设置正确的实例名称
@@ -138,7 +154,7 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - bw-db
 
       crowdsec:
-        image: crowdsecurity/crowdsec:v1.7.1 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
+        image: crowdsecurity/crowdsec:v1.7.3 # 使用最新版本，但为了更好的稳定性和安全性，请始终固定版本
         volumes:
           - cs-data:/var/lib/crowdsec/data # 持久化 CrowdSec 数据
           - bw-logs:/var/log:ro # BunkerWeb 的日志，供 CrowdSec 解析
@@ -146,8 +162,8 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
           - ./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml # 如果您不想使用 AppSec 组件，请注释掉此行
         environment:
           BOUNCER_KEY_bunkerweb: "s3cr3tb0unc3rk3y" # 记得为 bouncer 设置一个更强的密钥
-          COLLECTIONS: "crowdsecurity/nginx crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-          #   COLLECTIONS: "crowdsecurity/nginx" # 如果您不想使用 AppSec 组件，请改用此行
+          COLLECTIONS: "bunkerity/bunkerweb crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          #   COLLECTIONS: "bunkerity/bunkerweb" # 如果您不想使用 AppSec 组件，请改用此行
         networks:
           - bw-universe
 
@@ -199,7 +215,14 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
       - /var/log/bunkerweb/error.log
       - /var/log/bunkerweb/modsec_audit.log
     labels:
-        type: nginx
+        type: bunkerweb
+    ```
+
+    更新 CrowdSec hub 并安装 BunkerWeb 集合：
+
+    ```shell
+    sudo cscli hub update
+    sudo cscli collections install bunkerity/bunkerweb
     ```
 
     现在，使用 `cscli` 工具将您的自定义 bouncer 添加到 CrowdSec API：
@@ -266,7 +289,9 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
 
     请参阅[一体化 (AIO) 镜像集成文档](integrations.md#crowdsec-integration)。
 
-### 配置设置
+### 第&nbsp;2&nbsp;步 – 配置 BunkerWeb 参数
+
+应用以下环境变量（或通过调度器设置的值），让 BunkerWeb 实例能够与 CrowdSec 本地 API 通信。至少需要设置 `USE_CROWDSEC`、`CROWDSEC_API` 以及通过 `cscli bouncers add` 生成的有效密钥。
 
 | 设置                        | 默认值                 | 上下文    | 多个 | 描述                                                                                                  |
 | --------------------------- | ---------------------- | --------- | ---- | ----------------------------------------------------------------------------------------------------- |
@@ -325,3 +350,9 @@ CrowdSec 是一种现代的开源安全引擎，它基于行为分析和社区�
     CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
     CROWDSEC_APPSEC_SSL_VERIFY: "yes"
     ```
+
+### 第&nbsp;3&nbsp;步 – 验证集成
+
+- 在调度器日志中查找 `CrowdSec configuration successfully generated` 和 `CrowdSec bouncer denied request` 条目，以确认插件处于活动状态。
+- 在 CrowdSec 端监控 `cscli metrics show` 或 CrowdSec Console，确保 BunkerWeb 的决策按预期显示。
+- 在 BunkerWeb UI 中打开 CrowdSec 插件页面查看集成状态。

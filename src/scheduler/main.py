@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from contextlib import suppress
+from concurrent.futures import Future, ThreadPoolExecutor
 from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
@@ -16,7 +17,7 @@ from stat import S_IRGRP, S_IRUSR, S_IWUSR, S_IXGRP, S_IXUSR
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import TarFile, open as tar_open
-from threading import Event, Lock, Thread
+from threading import Event, Lock
 from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Union, cast
@@ -96,6 +97,9 @@ if not HEALTHCHECK_INTERVAL.isdigit():
 HEALTHCHECK_INTERVAL = int(HEALTHCHECK_INTERVAL)
 HEALTHCHECK_EVENT = Event()
 HEALTHCHECK_LOGGER = setup_logger("Scheduler.Healthcheck", getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "INFO")))
+
+# Shared executor to reuse worker threads across scheduler tasks
+SCHEDULER_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-scheduler-tasks")
 
 RELOAD_MIN_TIMEOUT = getenv("RELOAD_MIN_TIMEOUT", "5")
 
@@ -197,6 +201,7 @@ signal(SIGHUP, handle_reload)
 def stop(status):
     Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
     HEALTHY_PATH.unlink(missing_ok=True)
+    SCHEDULER_TASKS_EXECUTOR.shutdown(wait=False)
     _exit(status)
 
 
@@ -538,58 +543,45 @@ def healthcheck_job():
 
                 generate_configs(HEALTHCHECK_LOGGER)
 
-                tmp_threads = [
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            CUSTOM_CONFIGS_PATH,
-                            "/custom_configs",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                tmp_futures = [
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        CUSTOM_CONFIGS_PATH,
+                        "/custom_configs",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            EXTERNAL_PLUGINS_PATH,
-                            "/plugins",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        EXTERNAL_PLUGINS_PATH,
+                        "/plugins",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            PRO_PLUGINS_PATH,
-                            "/pro_plugins",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        PRO_PLUGINS_PATH,
+                        "/pro_plugins",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            CONFIG_PATH,
-                            "/confs",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        CONFIG_PATH,
+                        "/confs",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
-                    Thread(
-                        target=send_file_to_bunkerweb,
-                        args=(
-                            CACHE_PATH,
-                            "/cache",
-                            HEALTHCHECK_LOGGER,
-                        ),
-                        kwargs={"api_caller": api_caller},
+                    SCHEDULER_TASKS_EXECUTOR.submit(
+                        send_file_to_bunkerweb,
+                        CACHE_PATH,
+                        "/cache",
+                        HEALTHCHECK_LOGGER,
+                        api_caller=api_caller,
                     ),
                 ]
-                for thread in tmp_threads:
-                    thread.start()
-
-                for thread in tmp_threads:
-                    thread.join()
+                for future in tmp_futures:
+                    future.result()
 
                 if not api_caller.send_to_apis(
                     "POST",
@@ -748,7 +740,7 @@ if __name__ == "__main__":
         # Instantiate scheduler environment
         SCHEDULER.env = env | {"RELOAD_MIN_TIMEOUT": str(RELOAD_MIN_TIMEOUT)}
 
-        threads = []
+        task_futures: List[Future] = []
 
         SCHEDULER.apis = []
         for db_instance in SCHEDULER.db.get_instances():
@@ -865,31 +857,34 @@ if __name__ == "__main__":
             generate_external_plugins(plugin_path)
 
         check_configs_changes()
-        threads.extend([Thread(target=check_plugin_changes, args=("external",)), Thread(target=check_plugin_changes, args=("pro",))])
+        task_futures.extend(
+            [
+                SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "external"),
+                SCHEDULER_TASKS_EXECUTOR.submit(check_plugin_changes, "pro"),
+            ]
+        )
 
-        for thread in threads:
-            thread.start()
+        for future in task_futures:
+            future.result()
 
-        for thread in threads:
-            thread.join()
+        task_futures.clear()
 
         LOGGER.info("Running plugins download jobs ...")
         SCHEDULER.run_once(["misc", "pro"])
 
         db_metadata = SCHEDULER.db.get_metadata()
         if db_metadata["pro_plugins_changed"] or db_metadata["external_plugins_changed"]:
-            threads.clear()
+            task_futures.clear()
 
             if db_metadata["pro_plugins_changed"]:
-                threads.append(Thread(target=generate_external_plugins, args=(PRO_PLUGINS_PATH,)))
+                task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(generate_external_plugins, PRO_PLUGINS_PATH))
             if db_metadata["external_plugins_changed"]:
-                threads.append(Thread(target=generate_external_plugins))
+                task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(generate_external_plugins))
 
-            for thread in threads:
-                thread.start()
+            for future in task_futures:
+                future.result()
 
-            for thread in threads:
-                thread.join()
+            task_futures.clear()
 
             if SCHEDULER.db.readonly:
                 LOGGER.warning("The database is read-only, no need to look for changes in the plugins settings as they will not be saved")
@@ -954,7 +949,7 @@ if __name__ == "__main__":
         healthcheck_job_run = False
 
         while True:
-            threads.clear()
+            task_futures.clear()
 
             while BACKING_UP_FAILOVER.is_set():
                 LOGGER.warning("Waiting for the failover backup to finish ...")
@@ -978,8 +973,7 @@ if __name__ == "__main__":
                 ret = generate_configs()
                 if ret and SCHEDULER.apis:
                     # send nginx configs
-                    threads.append(Thread(target=send_file_to_bunkerweb, args=(CONFIG_PATH, "/confs")))
-                    threads[-1].start()
+                    task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CONFIG_PATH, "/confs"))
 
             failover_message = ""
             try:
@@ -987,11 +981,12 @@ if __name__ == "__main__":
                 reachable = True
                 if SCHEDULER.apis:
                     # send cache
-                    threads.append(Thread(target=send_file_to_bunkerweb, args=(CACHE_PATH, "/cache")))
-                    threads[-1].start()
+                    task_futures.append(SCHEDULER_TASKS_EXECUTOR.submit(send_file_to_bunkerweb, CACHE_PATH, "/cache"))
 
-                    for thread in threads:
-                        thread.join()
+                    for future in task_futures:
+                        future.result()
+
+                    task_futures.clear()
 
                     success, responses = SCHEDULER.send_to_apis(
                         "POST",
@@ -1053,9 +1048,10 @@ if __name__ == "__main__":
                                 del SCHEDULER.apis[i]
                                 break
                 else:
-                    for thread in threads:
-                        thread.join()
+                    for future in task_futures:
+                        future.result()
 
+                    task_futures.clear()
                     LOGGER.warning("No BunkerWeb instance found, skipping bunkerweb reload ...")
             except BaseException as e:
                 LOGGER.error(f"Exception while reloading after running jobs once scheduling : {e}")
@@ -1077,16 +1073,25 @@ if __name__ == "__main__":
                     else:
                         # Failover to last working configuration
                         if SCHEDULER.apis:
-                            tmp_threads = [
-                                Thread(target=send_file_to_bunkerweb, args=(FAILOVER_PATH.joinpath("config"), "/confs")),
-                                Thread(target=send_file_to_bunkerweb, args=(FAILOVER_PATH.joinpath("cache"), "/cache")),
-                                Thread(target=send_file_to_bunkerweb, args=(FAILOVER_PATH.joinpath("custom_configs"), "/custom_configs")),
+                            tmp_futures = [
+                                SCHEDULER_TASKS_EXECUTOR.submit(
+                                    send_file_to_bunkerweb,
+                                    FAILOVER_PATH.joinpath("config"),
+                                    "/confs",
+                                ),
+                                SCHEDULER_TASKS_EXECUTOR.submit(
+                                    send_file_to_bunkerweb,
+                                    FAILOVER_PATH.joinpath("cache"),
+                                    "/cache",
+                                ),
+                                SCHEDULER_TASKS_EXECUTOR.submit(
+                                    send_file_to_bunkerweb,
+                                    FAILOVER_PATH.joinpath("custom_configs"),
+                                    "/custom_configs",
+                                ),
                             ]
-                            for thread in tmp_threads:
-                                thread.start()
-
-                            for thread in tmp_threads:
-                                thread.join()
+                            for future in tmp_futures:
+                                future.result()
 
                         if not SCHEDULER.send_to_apis(
                             "POST",
@@ -1098,7 +1103,7 @@ if __name__ == "__main__":
                     LOGGER.warning("No BunkerWeb instance is reachable, skipping failover ...")
                 else:
                     LOGGER.info("Successfully reloaded bunkerweb")
-                    Thread(target=backup_failover).start()
+                    SCHEDULER_TASKS_EXECUTOR.submit(backup_failover)
             except BaseException as e:
                 LOGGER.error(f"Exception while executing failover logic : {e}")
 
