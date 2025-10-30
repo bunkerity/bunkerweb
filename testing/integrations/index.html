@@ -1603,7 +1603,49 @@
 <li><code>AUTOCONF_MODE=no</code> (default) - Enables the autoconf service</li>
 <li><code>USE_REDIS=yes</code> (default) - Enables the built-in <a href="#redis-integration">Redis</a> instance</li>
 <li><code>USE_CROWDSEC=no</code> (default) - <a href="#crowdsec-integration">CrowdSec</a> integration is disabled by default</li>
+<li><code>HIDE_SERVICE_LOGS=</code> (optional) - Comma-separated list of services to silence in container logs. Accepted values: <code>api</code>, <code>autoconf</code>, <code>bunkerweb</code>, <code>crowdsec</code>, <code>redis</code>, <code>scheduler</code>, <code>ui</code>, <code>nginx.access</code>, <code>nginx.error</code>, <code>modsec</code>. Logs still reach <code>/var/log/bunkerweb/&lt;service&gt;.log</code>.</li>
 </ul>
+<p>A named volume (or bind mount) is required to persist the SQLite database, cache, and backups stored under <code>/data</code> inside the container:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:testing</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-aio</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
+<span class="nn">...</span>
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Using a local folder for persistent data</p>
+<p>The All-In-One container runs services as an <strong>unprivileged user with UID 101 and GID 101</strong>. This improves security: even if a component is compromised, it does not gain root (UID/GID 0) on the host.</p>
+<p>If you bind mount a <strong>local folder</strong>, ensure the directory permissions allow that unprivileged user to write data:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Or, if the folder already exists:</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>When using <a href="https://docs.docker.com/engine/security/rootless">Docker in rootless mode</a> or <a href="https://podman.io/">Podman</a>, container UIDs/GIDs are remapped. Check your subuid/subgid ranges first:</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>For example, if the range starts at <strong>100000</strong>, the effective UID/GID becomes <strong>100100</strong> (100000 + 100):</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Or, if the folder already exists:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+</div>
 <h3 id="api-integration">API Integration</h3>
 <p>The All-In-One image embeds the BunkerWeb API. It is disabled by default and can be enabled by setting <code>SERVICE_API=yes</code>.</p>
 <div class="admonition warning">
@@ -1662,10 +1704,13 @@
 <p>Follow the next steps in the <a href="../quickstart-guide/#complete-the-setup-wizard">Quickstart guide</a> to set up the Web UI.</p>
 </blockquote>
 <h3 id="redis-integration">Redis Integration</h3>
-<p>The BunkerWeb <strong>All-In-One</strong> image includes Redis out-of-the-box for the <a href="../advanced/#persistence-of-bans-and-reports">persistence of bans and reports</a>. To manage Redis:</p>
+<p>The BunkerWeb <strong>All-In-One</strong> image includes Redis out-of-the-box for the <a href="../advanced/#persistence-of-bans-and-reports">persistence of bans and reports</a>. Keep in mind:</p>
 <ul>
-<li>To disable Redis, set <code>USE_REDIS=no</code> or point <code>REDIS_HOST</code> to an external host.</li>
-<li>Redis logs appear with <code>[REDIS]</code> prefix in Docker logs and <code>/var/log/bunkerweb/redis.log</code>.</li>
+<li>The embedded Redis service only starts when <code>USE_REDIS=yes</code> <strong>and</strong> <code>REDIS_HOST</code> is left at its default (<code>127.0.0.1</code>/<code>localhost</code>).</li>
+<li>It listens on the container loopback interface, so it is available to processes inside the container but not from other containers or the host.</li>
+<li>Override <code>REDIS_HOST</code> only when you have an external Redis/Valkey endpoint to connect to—doing so prevents the embedded instance from launching.</li>
+<li>To disable Redis entirely, set <code>USE_REDIS=no</code>.</li>
+<li>Redis logs appear with the <code>[REDIS]</code> prefix in Docker logs and in <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
 <h3 id="crowdsec-integration">CrowdSec Integration</h3>
 <p>The BunkerWeb <strong>All-In-One</strong> Docker image comes with CrowdSec fully integrated—no extra containers or manual setup required. Follow the steps below to enable, configure, and extend CrowdSec in your deployment.</p>
@@ -1703,7 +1748,7 @@
 <tbody>
 <tr>
 <td><strong>Collection</strong></td>
-<td><code>crowdsecurity/nginx</code></td>
+<td><code>bunkerity/bunkerweb</code></td>
 <td>Defend Nginx servers against a broad array of HTTP-based attacks, from brute-force to injection attempts.</td>
 </tr>
 <tr>
@@ -1728,7 +1773,8 @@
 
 The entrypoint script invokes:
 
-<div class="highlight"><pre><span></span><code>cscli<span class="w"> </span>install<span class="w"> </span>collection<span class="w"> </span>crowdsecurity/nginx
+<div class="highlight"><pre><span></span><code>cscli<span class="w"> </span>hub<span class="w"> </span>update
+cscli<span class="w"> </span>install<span class="w"> </span>collection<span class="w"> </span>bunkerity/bunkerweb
 cscli<span class="w"> </span>install<span class="w"> </span>collection<span class="w"> </span>crowdsecurity/appsec-virtual-patching
 cscli<span class="w"> </span>install<span class="w"> </span>collection<span class="w"> </span>crowdsecurity/appsec-generic-rules
 cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w">     </span>crowdsecurity/geoip-enrich
@@ -1736,6 +1782,10 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 
 </details>
 
+<div class="admonition info">
+<p class="admonition-title">Collection missing in Docker?</p>
+<p>If <code>cscli collections list</code> inside the container still does not show <code>bunkerity/bunkerweb</code>, run <code>docker exec -it bunkerweb-aio cscli hub update</code> and then restart the container (<code>docker restart bunkerweb-aio</code>) to refresh the local hub cache.</p>
+</div>
 <hr />
 <h4 id="adding-extra-collections">Adding Extra Collections</h4>
 <p>Need more coverage? Define <code>CROWDSEC_EXTRA_COLLECTIONS</code> with a space-separated list of Hubb collections:</p>
@@ -1847,6 +1897,10 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <div class="admonition info">
 <p class="admonition-title">Full list</p>
 <p>For the complete list of environment variables, see the <a href="../features/">settings section</a> of the documentation.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Skipping labelled containers</p>
+<p>When a container should be ignored by autoconf, set <code>DOCKER_IGNORE_LABELS</code> on the controller. Provide a space- or comma-separated list of label keys (for example <code>bunkerweb.SERVER_NAME</code>) or just the suffix (<code>SERVER_NAME</code>). Any container or custom-config source carrying a matching label is skipped during discovery, and the label is ignored when translating settings.</p>
 </div>
 <h3 id="using-docker-secrets">Using Docker secrets</h3>
 <p>Instead of passing sensitive settings via environment variables, you can store them as Docker secrets. For each setting you want to secure, create a Docker secret with the name matching the setting key (in uppercase). BunkerWeb's entrypoint scripts automatically load secrets from <code>/run/secrets</code> and export them as environment variables.</p>
@@ -2306,7 +2360,7 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 <ul>
 <li>It adds the official CrowdSec repository and installs the agent.</li>
 <li>It creates a new acquisition file to make CrowdSec parse BunkerWeb's logs (<code>access.log</code>, <code>error.log</code>, and <code>modsec_audit.log</code>).</li>
-<li>It installs essential collections (<code>crowdsecurity/nginx</code>) and parsers (<code>crowdsecurity/geoip-enrich</code>).</li>
+<li>It installs essential collections (<code>bunkerity/bunkerweb</code>) and parsers (<code>crowdsecurity/geoip-enrich</code>).</li>
 <li>It registers a bouncer for BunkerWeb and automatically configures the API key in <code>/etc/bunkerweb/variables.env</code>.</li>
 <li>If you also select the <strong>AppSec Component</strong>, it installs the <code>appsec-virtual-patching</code> and <code>appsec-generic-rules</code> collections and configures the AppSec endpoint for BunkerWeb.</li>
 </ul>
@@ -2703,15 +2757,38 @@ MY_SETTING_2=value2
   </p>
 <figcaption>Kubernetes integration</figcaption>
 </figure>
-<p>To automate the configuration of BunkerWeb instances in a Kubernetes environment, the autoconf service serves as an <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress controller</a>. It configures the BunkerWeb instances based on <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress resources</a> and also monitors other Kubernetes objects, such as <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>, for custom configurations.</p>
-<p>For an optimal setup, it is recommended to define BunkerWeb as a <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a></strong>, which ensures that a pod is created on all nodes, while the <strong>autoconf and scheduler</strong> are defined as <strong>single replicated <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a></strong>.</p>
-<p>Given the presence of multiple BunkerWeb instances, it is necessary to establish a shared data store implemented as a <a href="https://redis.io/">Redis</a> or <a href="https://valkey.io/">Valkey</a> service. This service will be utilized by the instances to cache and share data among themselves. Further information about the Redis/Valkey settings can be found <a href="../features/#redis">here</a>.</p>
+<p>To automate the configuration of BunkerWeb instances in a Kubernetes environment,
+the autoconf service serves as an <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress controller</a>.
+It configures the BunkerWeb instances based on <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress resources</a>
+and also monitors other Kubernetes objects, such as <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>, for custom configurations.</p>
+<div class="admonition info">
+<p class="admonition-title">ConfigMap reconciliation</p>
+<ul>
+<li>The ingress controller only manages ConfigMaps that carry the <code>bunkerweb.io/CONFIG_TYPE</code> annotation.</li>
+<li>Add <code>bunkerweb.io/CONFIG_SITE</code> when you want to scope the configuration to a single service (the server name must already exist);
+  omit it to apply the configuration globally.</li>
+<li>Removing the annotation or deleting the ConfigMap removes the related custom configuration from BunkerWeb.</li>
+</ul>
+</div>
+<p>For an optimal setup, it is recommended to define BunkerWeb as a <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a></strong>,
+which ensures that a pod is created on all nodes,
+while the <strong>autoconf and scheduler</strong> are defined as <strong>single replicated <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a></strong>.</p>
+<p>Given the presence of multiple BunkerWeb instances,
+it is necessary to establish a shared data store implemented as a <a href="https://redis.io/">Redis</a> or <a href="https://valkey.io/">Valkey</a> service.
+This service will be utilized by the instances to cache and share data among themselves.
+Further information about the Redis/Valkey settings can be found <a href="../features/#redis">here</a>.</p>
 <div class="admonition info">
 <p class="admonition-title">Database backend</p>
-<p>Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the <code>DATABASE_URI</code> setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a> of the repository for more information.</p>
+<p>Please be aware that our instructions assume you are using MariaDB as the default database backend,
+as configured by the <code>DATABASE_URI</code> setting.
+However, we understand that you may prefer to utilize alternative backends for your Docker integration.
+If that is the case, rest assured that other database backends are still possible.
+See docker-compose files in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations folder</a>
+of the repository for more information.</p>
 <p>Clustered database backends setup are out-of-the-scope of this documentation.</p>
 </div>
-<p>Please ensure that the autoconf services have access to the Kubernetes API. It is recommended to utilize <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">RBAC authorization</a> for this purpose.</p>
+<p>Please ensure that the autoconf services have access to the Kubernetes API.
+It is recommended to utilize <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">RBAC authorization</a> for this purpose.</p>
 <div class="admonition warning">
 <p class="admonition-title">Custom CA for Kubernetes API</p>
 <p>If you use a custom CA for your Kubernetes API, you can mount a bundle file containing your intermediate(s) and root certificates on the ingress controller and set the <code>KUBERNETES_SSL_CA_CERT</code> environment value to the path of the bundle inside the container. Alternatively, even if it's not recommended, you can disable certificate verification by setting the <code>KUBERNETES_SSL_VERIFY</code> environment variable of the ingress controller to <code>no</code> (default is <code>yes</code>).</p>
@@ -2731,6 +2808,10 @@ MY_SETTING_2=value2
 <h3 id="ingress-resources">Ingress resources</h3>
 <p>Once the BunkerWeb Kubernetes stack is successfully set up and operational (refer to the autoconf logs for detailed information), you can proceed with deploying web applications within the cluster and declaring your Ingress resource.</p>
 <p>It is important to note that the BunkerWeb settings need to be specified as annotations for the Ingress resource. For the domain part, please use the special value <strong><code>bunkerweb.io</code></strong>. By including the appropriate annotations, you can configure BunkerWeb accordingly for the Ingress resource.</p>
+<div class="admonition tip">
+<p class="admonition-title">Ignoring noisy annotations</p>
+<p>When some annotations should not impact autoconf, set <code>KUBERNETES_IGNORE_ANNOTATIONS</code> on the controller deployment. Provide a space- or comma-separated list of annotation keys (for example <code>bunkerweb.io/EXTRA_FOO</code>) or just the suffix (<code>EXTRA_FOO</code>). Matching annotations are stripped from ingress-derived settings, and pods carrying them are skipped entirely during instance discovery.</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">TLS support</p>
 <p>BunkerWeb ingress controller fully supports custom HTTPS certificates using the tls spec as shown in the example. Configuring solutions such as <code>cert-manager</code> to automatically generate tls secrets is out of the scope of this documentation.</p>
@@ -3187,6 +3268,10 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <p class="admonition-title">Swarm mandatory setting</p>
 <p>Please note that the <code>SWARM_MODE: "yes"</code> environment variable is mandatory when using the Swarm integration.</p>
 </div>
+<div class="admonition tip">
+<p class="admonition-title">Skipping labelled services</p>
+</div>
+<p>Need to exclude a Swarm service from autoconf? Set <code>SWARM_IGNORE_LABELS</code> on the controller. Supply a space- or comma-separated list of label keys (e.g. <code>bunkerweb.SERVER_NAME</code>) or suffixes (<code>SERVER_NAME</code>) and any service carrying those labels will be ignored during discovery.</p>
 <h3 id="swarm-services">Swarm services</h3>
 <p>Once the BunkerWeb Swarm stack is set up and running (see autoconf and scheduler logs for more information), you will be able to deploy web applications in the cluster and use labels to dynamically configure BunkerWeb:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>

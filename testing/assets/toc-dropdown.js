@@ -40,14 +40,21 @@ document.addEventListener("DOMContentLoaded", function() {
   // --- Step 2: Implement the accordion logic ---
   dropdowns.forEach(currentDropdown => {
     currentDropdown.addEventListener('toggle', () => {
-      // When a dropdown is opened, close all other dropdowns
-      if (currentDropdown.open) {
-        dropdowns.forEach(otherDropdown => {
-          if (otherDropdown !== currentDropdown) {
-            otherDropdown.open = false;
-          }
-        });
-      }
+      if (!currentDropdown.open) return;
+
+      const parentList = currentDropdown.parentElement?.parentElement;
+      if (!parentList) return;
+
+      Array.from(parentList.children).forEach(siblingItem => {
+        if (!(siblingItem instanceof HTMLElement)) return;
+
+        const siblingDropdown = siblingItem.querySelector('details.toc-dropdown');
+        const isDirectChild = siblingDropdown?.parentElement === siblingItem;
+
+        if (siblingDropdown && isDirectChild && siblingDropdown !== currentDropdown) {
+          siblingDropdown.open = false;
+        }
+      });
     });
   });
 

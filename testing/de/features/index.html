@@ -864,7 +864,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sicherheitsmodi" class="md-nav__link">
+  <a href="#security-modes" class="md-nav__link">
     <span class="md-ellipsis">
       Sicherheitsmodi
     </span>
@@ -1380,22 +1380,40 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#einrichtung" class="md-nav__link">
+  <a href="#voraussetzungen" class="md-nav__link">
     <span class="md-ellipsis">
-      Einrichtung
+      Voraussetzungen
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationsparameter" class="md-nav__link">
+  <a href="#integrationsablauf" class="md-nav__link">
     <span class="md-ellipsis">
-      Konfigurationsparameter
+      Integrationsablauf
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Konfigurationsparameter">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schritt-1-crowdsec-auf-das-einlesen-von-bunkerweb-protokollen-vorbereiten" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schritt&nbsp;1 – CrowdSec auf das Einlesen von BunkerWeb-Protokollen vorbereiten
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schritt-2-bunkerweb-einstellungen-konfigurieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schritt&nbsp;2 – BunkerWeb-Einstellungen konfigurieren
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schritt 2 – BunkerWeb-Einstellungen konfigurieren">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1416,6 +1434,15 @@
   <a href="#konfigurationsbeispiele_1" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationsbeispiele
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schritt-3-integration-validieren" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schritt&nbsp;3 – Integration validieren
     </span>
   </a>
   
@@ -2040,7 +2067,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#benutzerdefinierte-konfigurationen" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Benutzerdefinierte Konfigurationen
     </span>
@@ -2931,7 +2958,7 @@
 <li><code>REVERSE_PROXY_URL_2=/anotherdir</code> und <code>REVERSE_PROXY_HOST_2=http://myhost2</code> konfigurieren den zweiten Reverse-Proxy.</li>
 </ul>
 <p>Dieses Muster ermöglicht es Ihnen, mehrere Konfigurationen für Funktionen wie Reverse-Proxys, Ports oder andere Einstellungen zu verwalten, die für unterschiedliche Anwendungsfälle unterschiedliche Werte erfordern.</p>
-<h3 id="sicherheitsmodi">Sicherheitsmodi</h3>
+<h3 id="security-modes">Sicherheitsmodi</h3>
 <p>Die Einstellung <code>SECURITY_MODE</code> bestimmt, wie BunkerWeb erkannte Bedrohungen behandelt. Diese flexible Funktion ermöglicht es Ihnen, je nach Ihren spezifischen Bedürfnissen zwischen der Überwachung oder dem aktiven Blockieren verdächtiger Aktivitäten zu wählen:</p>
 <ul>
 <li><strong><code>detect</code></strong>: Protokolliert potenzielle Bedrohungen, ohne den Zugriff zu blockieren. Dieser Modus ist nützlich, um Falsch-Positive auf sichere und unterbrechungsfreie Weise zu identifizieren und zu analysieren.</li>
@@ -2939,11 +2966,9 @@
 </ul>
 <p>Das Umschalten in den <code>detect</code>-Modus kann Ihnen helfen, potenzielle Falsch-Positive zu identifizieren und zu beheben, ohne legitime Clients zu stören. Sobald diese Probleme behoben sind, können Sie für vollen Schutz getrost in den <code>block</code>-Modus zurückwechseln.</p>
 <h3 id="konfigurationseinstellungen">Konfigurationseinstellungen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Kerneinstellungen</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:9"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><input id="__tabbed_1_7" name="__tabbed_1" type="radio" /><input id="__tabbed_1_8" name="__tabbed_1" type="radio" /><input id="__tabbed_1_9" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Kerneinstellungen</label><label for="__tabbed_1_2">API-Einstellungen</label><label for="__tabbed_1_3">Netzwerk- &amp; Port-Einstellungen</label><label for="__tabbed_1_4">Stream-Server-Einstellungen</label><label for="__tabbed_1_5">Worker-Einstellungen</label><label for="__tabbed_1_6">Speichereinstellungen</label><label for="__tabbed_1_7">Protokollierungseinstellungen</label><label for="__tabbed_1_8">Integrationseinstellungen</label><label for="__tabbed_1_9">Nginx-Einstellungen</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block"></div>
-</div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -2992,11 +3017,8 @@
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">API-Einstellungen</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -3076,19 +3098,16 @@
 <p>Hinweis: Aus Bootstrap-Gründen müssen Sie, wenn Sie <code>API_TOKEN</code> aktivieren, es in der Umgebung SOWOHL der BunkerWeb-Instanz als auch des Schedulers setzen. Der Scheduler fügt den <code>Authorization</code>-Header automatisch hinzu, wenn <code>API_TOKEN</code> in seiner Umgebung vorhanden ist. Wenn es nicht gesetzt ist, wird kein Header gesendet und BunkerWeb erzwingt keine Token-Authentifizierung. Sie können die API über HTTPS bereitstellen, indem Sie <code>API_LISTEN_HTTPS=yes</code> setzen (Port: <code>API_HTTPS_PORT</code>, Standard <code>5443</code>).</p>
 <p>Beispieltest mit curl (Token und Host ersetzen):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>http://&lt;bunkerweb-host&gt;:5000/ping
+<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>http://&lt;bunkerweb-host&gt;:5000/ping
 
 curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: bwapi&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>--insecure<span class="w"> </span><span class="se">\</span>
-<span class="w">     </span>https://&lt;bunkerweb-host&gt;:5443/ping
+<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>--insecure<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>https://&lt;bunkerweb-host&gt;:5443/ping
 </code></pre></div>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Netzwerk- &amp; Port-Einstellungen</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -3130,11 +3149,8 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:1"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Stream-Server-Einstellungen</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -3183,11 +3199,8 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:1"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Worker-Einstellungen</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -3222,11 +3235,8 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Speichereinstellungen</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -3282,11 +3292,8 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Protokollierungseinstellungen</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -3328,11 +3335,8 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>Verwenden Sie für Produktionsumgebungen die Protokollstufen <code>notice</code>, <code>warn</code> oder <code>error</code>, um das Protokollvolumen zu minimieren.</li>
 <li>Setzen Sie zur Fehlersuche vorübergehend die Protokollstufe auf <code>debug</code>, um detailliertere Informationen zu erhalten.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:1"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Integrationseinstellungen</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -3374,11 +3378,8 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Nginx-Einstellungen</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -3406,8 +3407,11 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </tr>
 </tbody>
 </table>
+</div>
+</div>
+</div>
 <h3 id="beispielkonfigurationen">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:4"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Grundlegendes Produktions-Setup</label><label for="__tabbed_10_2">Entwicklungsmodus</label><label for="__tabbed_10_3">Multisite-Konfiguration</label><label for="__tabbed_10_4">Stream-Server-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Grundlegendes Produktions-Setup</label><label for="__tabbed_2_2">Entwicklungsmodus</label><label for="__tabbed_2_3">Multisite-Konfiguration</label><label for="__tabbed_2_4">Stream-Server-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Standardkonfiguration für eine Produktionswebsite mit strenger Sicherheit:</p>
@@ -3649,7 +3653,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 </li>
 </ul>
 <h3 id="herausforderungsmechanismen">Herausforderungsmechanismen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:7"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><input id="__tabbed_11_4" name="__tabbed_11" type="radio" /><input id="__tabbed_11_5" name="__tabbed_11" type="radio" /><input id="__tabbed_11_6" name="__tabbed_11" type="radio" /><input id="__tabbed_11_7" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Cookie</label><label for="__tabbed_11_2">JavaScript</label><label for="__tabbed_11_3">Captcha</label><label for="__tabbed_11_4">reCAPTCHA</label><label for="__tabbed_11_5">hCaptcha</label><label for="__tabbed_11_6">Turnstile</label><label for="__tabbed_11_7">mCaptcha</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:7"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><input id="__tabbed_3_5" name="__tabbed_3" type="radio" /><input id="__tabbed_3_6" name="__tabbed_3" type="radio" /><input id="__tabbed_3_7" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Cookie</label><label for="__tabbed_3_2">JavaScript</label><label for="__tabbed_3_3">Captcha</label><label for="__tabbed_3_4">reCAPTCHA</label><label for="__tabbed_3_5">hCaptcha</label><label for="__tabbed_3_6">Turnstile</label><label for="__tabbed_3_7">mCaptcha</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Die Cookie-Herausforderung ist ein leichter Mechanismus, der auf der Installation eines Cookies im Browser des Benutzers basiert. Wenn ein Benutzer auf die Website zugreift, sendet der Server ein Cookie an den Client. Bei nachfolgenden Anfragen überprüft der Server das Vorhandensein dieses Cookies, um zu bestätigen, dass der Benutzer legitim ist. Diese Methode ist einfach und effektiv für einen grundlegenden Schutz vor Bots, ohne zusätzliche Benutzerinteraktion zu erfordern.</p>
@@ -3981,7 +3985,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 </div>
 </div>
 <h3 id="konfigurationsbeispiele">Konfigurationsbeispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:8"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><input id="__tabbed_12_4" name="__tabbed_12" type="radio" /><input id="__tabbed_12_5" name="__tabbed_12" type="radio" /><input id="__tabbed_12_6" name="__tabbed_12" type="radio" /><input id="__tabbed_12_7" name="__tabbed_12" type="radio" /><input id="__tabbed_12_8" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Cookie-Herausforderung</label><label for="__tabbed_12_2">JavaScript-Herausforderung</label><label for="__tabbed_12_3">Captcha-Herausforderung</label><label for="__tabbed_12_4">Klassische reCAPTCHA-Herausforderung</label><label for="__tabbed_12_5">reCAPTCHA-Herausforderung (neu)</label><label for="__tabbed_12_6">hCaptcha-Herausforderung</label><label for="__tabbed_12_7">Turnstile-Herausforderung</label><label for="__tabbed_12_8">mCaptcha-Herausforderung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:8"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><input id="__tabbed_4_6" name="__tabbed_4" type="radio" /><input id="__tabbed_4_7" name="__tabbed_4" type="radio" /><input id="__tabbed_4_8" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Cookie-Herausforderung</label><label for="__tabbed_4_2">JavaScript-Herausforderung</label><label for="__tabbed_4_3">Captcha-Herausforderung</label><label for="__tabbed_4_4">Klassische reCAPTCHA-Herausforderung</label><label for="__tabbed_4_5">reCAPTCHA-Herausforderung (neu)</label><label for="__tabbed_4_6">hCaptcha-Herausforderung</label><label for="__tabbed_4_7">Turnstile-Herausforderung</label><label for="__tabbed_4_8">mCaptcha-Herausforderung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_ANTIBOT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;cookie&quot;</span>
@@ -4141,7 +4145,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 <p>Sie können mehrere Paare aus Benutzername/Passwort für den Zugriff konfigurieren. Jede <code>AUTH_BASIC_USER</code>-Einstellung sollte eine entsprechende <code>AUTH_BASIC_PASSWORD</code>-Einstellung haben.</p>
 </div>
 <h3 id="beispielkonfigurationen_1">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Schutz der gesamten Website</label><label for="__tabbed_13_2">Schutz bestimmter Bereiche</label><label for="__tabbed_13_3">Mehrere Benutzer</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Schutz der gesamten Website</label><label for="__tabbed_5_2">Schutz bestimmter Bereiche</label><label for="__tabbed_5_3">Mehrere Benutzer</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>So schützen Sie Ihre gesamte Website mit einem einzigen Satz von Anmeldeinformationen:</p>
@@ -4270,7 +4274,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p>Das Backup-Plugin unterstützt SQLite, MySQL/MariaDB und PostgreSQL-Datenbanken. Oracle-Datenbanken werden derzeit für Backup- und Wiederherstellungsvorgänge nicht unterstützt.</p>
 </div>
 <h3 id="beispielkonfigurationen_2">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Tägliche Backups mit 7-tägiger Aufbewahrung</label><label for="__tabbed_14_2">Wöchentliche Backups mit erweiterter Aufbewahrung</label><label for="__tabbed_14_3">Monatliche Backups an einem benutzerdefinierten Speicherort</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Tägliche Backups mit 7-tägiger Aufbewahrung</label><label for="__tabbed_6_2">Wöchentliche Backups mit erweiterter Aufbewahrung</label><label for="__tabbed_6_3">Monatliche Backups an einem benutzerdefinierten Speicherort</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Standardkonfiguration, die tägliche Backups erstellt und die letzten 7 Dateien aufbewahrt:</p>
@@ -4484,7 +4488,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 <p>Beginnen Sie mit konservativen Einstellungen (höherer Schwellenwert, kürzere Sperrzeit) und passen Sie diese je nach Ihren spezifischen Bedürfnissen und Verkehrsmustern an. Überwachen Sie Ihre Protokolle, um sicherzustellen, dass legitime Benutzer nicht fälschlicherweise gesperrt werden.</p>
 </div>
 <h3 id="beispielkonfigurationen_3">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:4"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Standardkonfiguration</label><label for="__tabbed_15_2">Strikte Konfiguration</label><label for="__tabbed_15_3">Nachsichtige Konfiguration</label><label for="__tabbed_15_4">Konfiguration für permanente Sperren</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:4"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Standardkonfiguration</label><label for="__tabbed_7_2">Strikte Konfiguration</label><label for="__tabbed_7_3">Nachsichtige Konfiguration</label><label for="__tabbed_7_4">Konfiguration für permanente Sperren</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Die Standardkonfiguration bietet einen ausgewogenen Ansatz, der für die meisten Websites geeignet ist:</p>
@@ -4581,7 +4585,7 @@ bwcli<span class="w"> </span>plugin<span class="w"> </span>backup<span class="w"
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Community-Blacklists</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:1"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Community-Blacklists</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was es bewirkt:</strong> Ermöglicht Ihnen, schnell gut gepflegte und von der Community stammende Blacklists hinzuzufügen, ohne die URLs manuell konfigurieren zu müssen.</p>
@@ -4645,7 +4649,7 @@ Der Standardparameter `BLACKLIST_IP_URLS` enthält eine URL, die eine **Liste be
 
 Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
 </code></pre>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:1"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">ASN</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">ASN</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was es bewirkt:</strong> Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.</p>
@@ -4720,7 +4724,7 @@ Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **
 <p>!!! tip "Regelmäßige Updates"[4][5][6][7][8]
     Blacklists von URLs werden automatisch stündlich heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz gegen die neuesten Bedrohungen auf dem neuesten Stand bleibt.</p>
 <h3 id="konfigurationsbeispiele38">Konfigurationsbeispiele[38]</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:3"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Grundlegender Schutz durch IP und User-Agent</label><label for="__tabbed_18_2">Erweiterter Schutz mit benutzerdefinierten Regeln</label><label for="__tabbed_18_3">Verwendung lokaler Dateien</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Grundlegender Schutz durch IP und User-Agent</label><label for="__tabbed_10_2">Erweiterter Schutz mit benutzerdefinierten Regeln</label><label for="__tabbed_10_3">Verwendung lokaler Dateien</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die bekannte Tor-Exit-Nodes und gängige bösartige User-Agents mithilfe der Community-Blacklists blockiert:</p>
@@ -4830,7 +4834,7 @@ Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **
 <p><code>6</code> bietet einen guten Kompromiss. Für statische Inhalte and verfügbare CPU: 9–11. Für dynamische Inhalte oder bei CPU-Einschränkungen: 4–5.</p>
 </div>
 <h3 id="beispiele">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Basis</label><label for="__tabbed_19_2">Maximale Komprimierung</label><label for="__tabbed_19_3">Ausgewogene Leistung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Basis</label><label for="__tabbed_11_2">Maximale Komprimierung</label><label for="__tabbed_11_3">Ausgewogene Leistung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_BROTLI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -4922,7 +4926,7 @@ Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **
 <p>Bei der Meldung von Bedrohungsinformationen an BunkerNet teilt Ihre Instanz nur die zur Identifizierung der Bedrohung erforderlichen Daten: die IP-Adresse, den Grund für die Sperrung und minimale kontextbezogene Daten. Es werden keine persönlichen Informationen über Ihre Benutzer oder sensible Details über Ihre Website weitergegeben.</p>
 </div>
 <h3 id="beispielkonfigurationen_4">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Standardkonfiguration (empfohlen)</label><label for="__tabbed_20_2">Deaktivierte Konfiguration</label><label for="__tabbed_20_3">Benutzerdefinierte Serverkonfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Standardkonfiguration (empfohlen)</label><label for="__tabbed_12_2">Deaktivierte Konfiguration</label><label for="__tabbed_12_3">Benutzerdefinierte Serverkonfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Die Standardkonfiguration aktiviert BunkerNet mit dem offiziellen BunkerWeb-API-Server:</p>
@@ -5113,7 +5117,7 @@ Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **
 <li><strong><code>^https://(www\.example1\.com|www\.example2\.com)$</code></strong>: Erlaubt Anfragen entweder von <code>https://www.example1.com</code> oder <code>https://www.example2.com</code>.</li>
 <li><strong><code>^https?://www\.example\.com$</code></strong>: Erlaubt Anfragen sowohl von <code>https://www.example.com</code> als auch von <code>http://www.example.com</code>.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:5"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><input id="__tabbed_21_5" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Grundlegende Konfiguration</label><label for="__tabbed_21_2">Konfiguration für öffentliche API</label><label for="__tabbed_21_3">Mehrere vertrauenswürdige Domains</label><label for="__tabbed_21_4">Subdomain-Platzhalter</label><label for="__tabbed_21_5">Mehrere Domain-Muster</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:5"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><input id="__tabbed_13_4" name="__tabbed_13" type="radio" /><input id="__tabbed_13_5" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Grundlegende Konfiguration</label><label for="__tabbed_13_2">Konfiguration für öffentliche API</label><label for="__tabbed_13_3">Mehrere vertrauenswürdige Domains</label><label for="__tabbed_13_4">Subdomain-Platzhalter</label><label for="__tabbed_13_5">Mehrere Domain-Muster</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die Cross-Origin-Anfragen von derselben Domain erlaubt:</p>
@@ -5208,7 +5212,7 @@ Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **
 <p>Unterschiedliche Browser implementieren Caching geringfügig anders, aber alle modernen Browser respektieren die Standard-Cache-Control-Anweisungen. ETags bieten einen zusätzlichen Validierungsmechanismus, der Browsern hilft festzustellen, ob zwischengespeicherte Inhalte noch gültig sind.</p>
 </div>
 <h3 id="beispielkonfigurationen_6">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:3"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Grundlegende Konfiguration</label><label for="__tabbed_22_2">Aggressives Caching</label><label for="__tabbed_22_3">Strategie für gemischte Inhalte</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Grundlegende Konfiguration</label><label for="__tabbed_14_2">Aggressives Caching</label><label for="__tabbed_14_3">Strategie für gemischte Inhalte</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die das Caching für gängige statische Assets aktiviert:</p>
@@ -5295,7 +5299,7 @@ Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **
 <p>BunkerWeb verwendet die mmdb-Datenbank <a href="https://db-ip.com/db/download/ip-to-country-lite">db-ip lite</a>.</p>
 </div>
 <h3 id="beispiele_1">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Nur Whitelist</label><label for="__tabbed_23_2">Nur Blacklist</label><label for="__tabbed_23_3">Nur EU</label><label for="__tabbed_23_4">Blockierung von Risikoländern</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:4"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Nur Whitelist</label><label for="__tabbed_15_2">Nur Blacklist</label><label for="__tabbed_15_3">Nur EU</label><label for="__tabbed_15_4">Blockierung von Risikoländern</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">WHITELIST_COUNTRY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;US</span><span class="nv"> </span><span class="s">CA</span><span class="nv"> </span><span class="s">GB&quot;</span>
@@ -5339,17 +5343,31 @@ Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **
 <li><strong>Mehrstufiger Schutz:</strong> Kombinieren Sie Perimeterverteidigung (IP-Blockierung) mit Anwendungssicherheit für einen umfassenden Schutz.</li>
 </ol>
 </div>
-<h3 id="einrichtung">Einrichtung</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:3"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Docker</label><label for="__tabbed_24_2">Linux</label><label for="__tabbed_24_3">All-in-one</label></div>
+<h3 id="voraussetzungen">Voraussetzungen</h3>
+<ul>
+<li>Eine CrowdSec Local API, die von BunkerWeb erreicht werden kann (typischerweise der Agent auf demselben Host oder im selben Docker-Netzwerk).</li>
+<li>Zugriff auf die BunkerWeb-Zugriffsprotokolle (<code>/var/log/bunkerweb/access.log</code> standardmäßig), damit der CrowdSec-Agent Anfragen analysieren kann.</li>
+<li>Zugriff auf <code>cscli</code> auf dem CrowdSec-Host, um den BunkerWeb-Bouncer-Schlüssel zu registrieren.</li>
+</ul>
+<h3 id="integrationsablauf">Integrationsablauf</h3>
+<ol>
+<li>CrowdSec so vorbereiten, dass der Agent die BunkerWeb-Protokolle einliest.</li>
+<li>BunkerWeb konfigurieren, damit die CrowdSec Local API abgefragt wird.</li>
+<li>Den Link über die API <code>/crowdsec/ping</code> oder die CrowdSec-Kachel im Admin-UI validieren.</li>
+</ol>
+<p>Die folgenden Abschnitte führen diese Schritte im Detail durch.</p>
+<h3 id="schritt-1-crowdsec-auf-das-einlesen-von-bunkerweb-protokollen-vorbereiten">Schritt&nbsp;1 – CrowdSec auf das Einlesen von BunkerWeb-Protokollen vorbereiten</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Docker</label><label for="__tabbed_16_2">Linux</label><label for="__tabbed_16_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Akquisitionsdatei</strong></p>
-<p>Sie müssen eine CrowdSec-Instanz ausführen und diese so konfigurieren, dass sie die BunkerWeb-Protokolle analysiert. Da BunkerWeb auf NGINX basiert, können Sie den Wert <code>nginx</code> für den Parameter <code>type</code> in Ihrer Akquisitionsdatei verwenden (vorausgesetzt, die BunkerWeb-Protokolle werden unverändert ohne zusätzliche Daten gespeichert):</p>
+<p>Sie müssen eine CrowdSec-Instanz ausführen und diese so konfigurieren, dass sie die BunkerWeb-Protokolle analysiert. Verwenden Sie den dedizierten Wert <code>bunkerweb</code> für den Parameter <code>type</code> in Ihrer Akquisitionsdatei (vorausgesetzt, die BunkerWeb-Protokolle werden unverändert ohne zusätzliche Daten gespeichert):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb.log</span>
 <span class="nt">labels</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 </code></pre></div>
+<p>Wenn die Sammlung im CrowdSec-Container nicht angezeigt wird, führen Sie <code>docker exec -it &lt;crowdsec-container&gt; cscli hub update</code> aus und starten Sie anschließend diesen Container neu (<code>docker restart &lt;crowdsec-container&gt;</code>), damit die neuen Assets verfügbar werden. Ersetzen Sie <code>&lt;crowdsec-container&gt;</code> durch den Namen Ihres CrowdSec-Containers.</p>
 <p><strong>Anwendungssicherheitskomponente (<em>optional</em>)</strong></p>
 <p>CrowdSec bietet auch eine <a href="https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">Anwendungssicherheitskomponente</a>, die zum Schutz Ihrer Anwendung vor Angriffen verwendet werden kann. Wenn Sie diese verwenden möchten, müssen Sie eine weitere Akquisitionsdatei für die AppSec-Komponente erstellen:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
@@ -5391,7 +5409,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Dies ist der Name, der zur Identifizierung der Instanz im Scheduler verwendet wird</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5408,7 +5426,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># Die IP-Adresse des syslog-Dienstes</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Stellen Sie sicher, dass Sie den richtigen Instanznamen festlegen</span>
@@ -5442,7 +5460,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.0</span><span class="w"> </span><span class="c1"># Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.3</span><span class="w"> </span><span class="c1"># Verwenden Sie die neueste Version, aber pinnen Sie immer die Version für bessere Stabilität/Sicherheit</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># Zum Persistieren der CrowdSec-Daten</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># Die BunkerWeb-Protokolle, die von CrowdSec analysiert werden sollen</span>
@@ -5450,8 +5468,8 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml</span><span class="w"> </span><span class="c1"># Auskommentieren, wenn Sie die AppSec-Komponente nicht verwenden möchten</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">BOUNCER_KEY_bunkerweb</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># Vergessen Sie nicht, einen stärkeren Schlüssel für den Bouncer festzulegen</span>
-<span class="w">      </span><span class="nt">COLLECTIONS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;crowdsecurity/nginx</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-virtual-patching</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-generic-rules&quot;</span>
-<span class="w">      </span><span class="c1">#   COLLECTIONS: &quot;crowdsecurity/nginx&quot; # Wenn Sie die AppSec-Komponente nicht verwenden möchten, verwenden Sie stattdessen diese Zeile</span>
+<span class="w">      </span><span class="nt">COLLECTIONS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerity/bunkerweb</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-virtual-patching</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-generic-rules&quot;</span>
+<span class="w">      </span><span class="c1">#   COLLECTIONS: &quot;bunkerity/bunkerweb&quot; # Wenn Sie die AppSec-Komponente nicht verwenden möchten, verwenden Sie stattdessen diese Zeile</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
@@ -5499,7 +5517,11 @@ log {
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb/error.log</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb/modsec_audit.log</span>
 <span class="nt">labels</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+</code></pre></div>
+<p>Aktualisieren Sie den CrowdSec-Hub und installieren Sie die BunkerWeb-Sammlung:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>hub<span class="w"> </span>update
+sudo<span class="w"> </span>cscli<span class="w"> </span>collections<span class="w"> </span>install<span class="w"> </span>bunkerity/bunkerweb
 </code></pre></div>
 <p>Fügen Sie nun Ihren benutzerdefinierten Bouncer zur CrowdSec-API hinzu, indem Sie das Tool <code>cscli</code> verwenden:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>bouncers<span class="w"> </span>add<span class="w"> </span>crowdsec-bunkerweb-bouncer/v1.6
@@ -5544,7 +5566,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h3 id="konfigurationsparameter">Konfigurationsparameter</h3>
+<h3 id="schritt-2-bunkerweb-einstellungen-konfigurieren">Schritt&nbsp;2 – BunkerWeb-Einstellungen konfigurieren</h3>
+<p>Wenden Sie die folgenden Umgebungsvariablen (oder Scheduler-Werte) an, damit die BunkerWeb-Instanz mit der CrowdSec Local API kommunizieren kann. Mindestens <code>USE_CROWDSEC</code>, <code>CROWDSEC_API</code> und ein gültiger mit <code>cscli bouncers add</code> erzeugter Schlüssel werden benötigt.</p>
 <table>
 <thead>
 <tr>
@@ -5686,7 +5709,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </table>
 <p>!!! info "Über die Betriebsmodi" - Der <strong>Live-Modus</strong> fragt die CrowdSec-API für jede eingehende Anfrage ab und bietet Echtzeitschutz auf Kosten einer höheren Latenz. - Der <strong>Stream-Modus</strong> lädt periodisch alle Entscheidungen von der CrowdSec-API herunter und speichert sie lokal im Cache, wodurch die Latenz mit einer leichten Verzögerung bei der Anwendung neuer Entscheidungen reduziert wird.</p>
 <h3 id="konfigurationsbeispiele_1">Konfigurationsbeispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Basiskonfiguration</label><label for="__tabbed_25_2">Erweiterte Konfiguration mit AppSec</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Basiskonfiguration</label><label for="__tabbed_17_2">Erweiterte Konfiguration mit AppSec</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Dies ist eine einfache Konfiguration, wenn CrowdSec auf demselben Host ausgeführt wird:</p>
@@ -5698,7 +5721,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 <div class="tabbed-block">
 <p>Eine umfassendere Konfiguration, einschließlich der Anwendungssicherheitskomponente:</p>
-<p><div class="highlight"><pre><span></span><code><span class="nt">USE_CROWDSEC</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_CROWDSEC</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">CROWDSEC_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://crowdsec:8080&quot;</span>
 <span class="nt">CROWDSEC_API_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-api-key-here&quot;</span>
 <span class="nt">CROWDSEC_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;stream&quot;</span>
@@ -5711,14 +5734,20 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <span class="nt">CROWDSEC_ALWAYS_SEND_TO_APPSEC</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="nt">CROWDSEC_APPSEC_SSL_VERIFY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 </code></pre></div>
-CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
-CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
-CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
-CROWDSEC_APPSEC_SSL_VERIFY: "yes"
-```</p>
 </div>
 </div>
 </div>
+<h3 id="schritt-3-integration-validieren">Schritt&nbsp;3 – Integration validieren</h3>
+<ul>
+<li>Suchen Sie in den Scheduler-Protokollen nach den Einträgen <code>CrowdSec configuration successfully generated</code> und <code>CrowdSec bouncer denied request</code>, um zu überprüfen, dass das Plugin aktiv ist.</li>
+<li>Überwachen Sie auf CrowdSec-Seite <code>cscli metrics show</code> oder die CrowdSec-Konsole, um sicherzugehen, dass BunkerWeb-Entscheidungen wie erwartet erscheinen.</li>
+<li>Öffnen Sie in der BunkerWeb-Oberfläche die CrowdSec-Plugin-Seite, um den Status der Integration zu sehen.
+    CROWDSEC_APPSEC_URL: "http://crowdsec:7422"
+    CROWDSEC_APPSEC_FAILURE_ACTION: "deny"
+    CROWDSEC_ALWAYS_SEND_TO_APPSEC: "yes"
+    CROWDSEC_APPSEC_SSL_VERIFY: "yes"
+    ```</li>
+</ul>
 <h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
 <p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Das Plugin für benutzerdefinierte SSL-Zertifikate ermöglicht die Verwendung Ihrer eigenen SSL/TLS-Zertifikate mit BunkerWeb, anstelle der automatisch generierten. Dies ist nützlich, wenn Sie bereits Zertifikate von einer vertrauenswürdigen CA besitzen, spezifische Anforderungen haben oder die Zertifikatsverwaltung zentralisieren.</p>
@@ -5814,7 +5843,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <p>Wenn eine Zwischenkette erforderlich ist, stellen Sie das vollständige Bundle in der richtigen Reihenfolge bereit (Zertifikat, dann Zwischenzertifikate).</p>
 </div>
 <h3 id="beispiele_2">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:4"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Dateien</label><label for="__tabbed_26_2">Base64-Daten</label><label for="__tabbed_26_3">Klartext-PEM</label><label for="__tabbed_26_4">Fallback</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:4"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><input id="__tabbed_18_4" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Dateien</label><label for="__tabbed_18_2">Base64-Daten</label><label for="__tabbed_18_3">Klartext-PEM</label><label for="__tabbed_18_4">Fallback</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_CUSTOM_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -5948,7 +5977,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <p>Obwohl BunkerWeb DNSBL-Abfragen auf Leistung optimiert, könnte das Hinzufügen einer großen Anzahl von DNSBL-Servern potenziell die Antwortzeiten beeinträchtigen. Beginnen Sie mit einigen seriösen DNSBL-Servern und überwachen Sie die Leistung, bevor Sie weitere hinzufügen.</p>
 </div>
 <h3 id="beispielkonfigurationen_7">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:5"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><input id="__tabbed_27_3" name="__tabbed_27" type="radio" /><input id="__tabbed_27_4" name="__tabbed_27" type="radio" /><input id="__tabbed_27_5" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Grundlegende Konfiguration</label><label for="__tabbed_27_2">Minimale Konfiguration</label><label for="__tabbed_27_3">Ausschluss vertrauenswürdiger IPs</label><label for="__tabbed_27_4">Verwendung von Remote-URLs</label><label for="__tabbed_27_5">Verwendung lokaler Dateien</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:5"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><input id="__tabbed_19_5" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Grundlegende Konfiguration</label><label for="__tabbed_19_2">Minimale Konfiguration</label><label for="__tabbed_19_3">Ausschluss vertrauenswürdiger IPs</label><label for="__tabbed_19_4">Verwendung von Remote-URLs</label><label for="__tabbed_19_5">Verwendung lokaler Dateien</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration mit den Standard-DNSBL-Servern:</p>
@@ -6150,7 +6179,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <li>5xx (Server-seitig): Unmöglichkeit, eine gültige Anfrage zu bearbeiten (interner Fehler, vorübergehende Nichtverfügbarkeit…).</li>
 </ul>
 <h3 id="beispiele_3">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Standardverwaltung</label><label for="__tabbed_28_2">Benutzerdefinierte Seiten</label><label for="__tabbed_28_3">Selektive Verwaltung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Standardverwaltung</label><label for="__tabbed_20_2">Benutzerdefinierte Seiten</label><label for="__tabbed_20_3">Selektive Verwaltung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">INTERCEPTED_ERROR_CODES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;400</span><span class="nv"> </span><span class="s">401</span><span class="nv"> </span><span class="s">403</span><span class="nv"> </span><span class="s">404</span><span class="nv"> </span><span class="s">405</span><span class="nv"> </span><span class="s">413</span><span class="nv"> </span><span class="s">429</span><span class="nv"> </span><span class="s">500</span><span class="nv"> </span><span class="s">501</span><span class="nv"> </span><span class="s">502</span><span class="nv"> </span><span class="s">503</span><span class="nv"> </span><span class="s">504&quot;</span>
@@ -6220,7 +6249,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:5"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><input id="__tabbed_29_4" name="__tabbed_29" type="radio" /><input id="__tabbed_29_5" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">IP-Adresse</label><label for="__tabbed_29_2">Reverse DNS</label><label for="__tabbed_29_3">ASN</label><label for="__tabbed_29_4">User-Agent</label><label for="__tabbed_29_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:5"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><input id="__tabbed_21_5" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">IP-Adresse</label><label for="__tabbed_21_2">Reverse DNS</label><label for="__tabbed_21_3">ASN</label><label for="__tabbed_21_4">User-Agent</label><label for="__tabbed_21_5">URI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Greylist. Diese Besucher erhalten Zugriff, unterliegen aber weiterhin den Sicherheitsprüfungen.</p>
@@ -6390,7 +6419,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <p>Greylists von URLs werden stündlich automatisch heruntergeladen und aktualisiert, um sicherzustellen, dass Ihr Schutz mit den neuesten vertrauenswürdigen Quellen auf dem neuesten Stand bleibt.</p>
 </div>
 <h3 id="beispielkonfigurationen_8">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Grundlegende Konfiguration</label><label for="__tabbed_30_2">Erweiterte Konfiguration</label><label for="__tabbed_30_3">Verwendung lokaler Dateien</label><label for="__tabbed_30_4">Selektiver API-Zugriff</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:4"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Grundlegende Konfiguration</label><label for="__tabbed_22_2">Erweiterte Konfiguration</label><label for="__tabbed_22_3">Verwendung lokaler Dateien</label><label for="__tabbed_22_4">Selektiver API-Zugriff</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die Greylisting auf das interne Netzwerk eines Unternehmens und einen Crawler anwendet:</p>
@@ -6506,7 +6535,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <p><code>5</code> ist ein guter Kompromiss. Statisch/CPU verfügbar: 7–9. Dynamisch/CPU begrenzt: 1–3.</p>
 </div>
 <h3 id="beispiele_4">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:4"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Standard</label><label for="__tabbed_31_2">Maximale Kompression</label><label for="__tabbed_31_3">Ausgewogene Leistung</label><label for="__tabbed_31_4">Proxied-Inhalt</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Standard</label><label for="__tabbed_23_2">Maximale Kompression</label><label for="__tabbed_23_3">Ausgewogene Leistung</label><label for="__tabbed_23_4">Proxied-Inhalt</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_GZIP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -6591,7 +6620,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <p>!!! tip "Bewährte Praktiken" - Aus Leistungsgründen sollten Sie JavaScript-Dateien am Ende des Body platzieren, um das Rendern nicht zu blockieren. - Platzieren Sie CSS und kritisches JavaScript im Head-Bereich, um ein Aufblitzen von ungestyltem Inhalt zu vermeiden. - Seien Sie vorsichtig mit eingefügtem Inhalt, der die Funktionalität Ihrer Website beeinträchtigen könnte.</p>
 <p>!!! info "Häufige Anwendungsfälle" - Hinzufügen von Analyses-Skripten (wie Google Analytics, Matomo) - Integration von Chat-Widgets oder Kundensupport-Tools - Einbinden von Tracking-Pixeln für Marketingkampagnen - Hinzufügen von benutzerdefinierten CSS-Stilen oder JavaScript-Funktionen - Einbinden von Bibliotheken von Drittanbietern, ohne den Anwendungscode zu ändern</p>
 <h3 id="beispielkonfigurationen_9">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="32:4"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><input id="__tabbed_32_4" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Google Analytics</label><label for="__tabbed_32_2">Benutzerdefinierte Stile</label><label for="__tabbed_32_3">Mehrere Integrationen</label><label for="__tabbed_32_4">Cookie-Einwilligungsbanner</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:4"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><input id="__tabbed_24_3" name="__tabbed_24" type="radio" /><input id="__tabbed_24_4" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Google Analytics</label><label for="__tabbed_24_2">Benutzerdefinierte Stile</label><label for="__tabbed_24_3">Mehrere Integrationen</label><label for="__tabbed_24_4">Cookie-Einwilligungsbanner</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Hinzufügen von Google-Analytics-Tracking zu Ihrer Website:</p>
@@ -6642,7 +6671,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <li><strong>Bedingte Header-Anwendung nutzen:</strong> Wenn Sie Richtlinien ohne Unterbrechung testen möchten, aktivieren Sie den <a href="https://developer.mozilla.org/de/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only">CSP Report-Only-Modus</a> über <code>CONTENT_SECURITY_POLICY_REPORT_ONLY</code>.</li>
 </ol>
 <h3 id="konfigurationsleitfaden">Konfigurationsleitfaden</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="33:3"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Sicherheits-Header</label><label for="__tabbed_33_2">Cookie-Einstellungen</label><label for="__tabbed_33_3">Benutzerdefinierte Header</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:3"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><input id="__tabbed_25_3" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">Sicherheits-Header</label><label for="__tabbed_25_2">Cookie-Einstellungen</label><label for="__tabbed_25_3">Benutzerdefinierte Header</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Überblick</strong></p>
@@ -6843,7 +6872,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 </div>
 </div>
 <h3 id="beispielkonfigurationen_10">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:4"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><input id="__tabbed_34_4" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Grundlegende Sicherheits-Header</label><label for="__tabbed_34_2">Verbesserte Cookie-Sicherheit</label><label for="__tabbed_34_3">Benutzerdefinierte Header für API</label><label for="__tabbed_34_4">Content Security Policy - Berichtsmodus</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:4"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><input id="__tabbed_26_3" name="__tabbed_26" type="radio" /><input id="__tabbed_26_4" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">Grundlegende Sicherheits-Header</label><label for="__tabbed_26_2">Verbesserte Cookie-Sicherheit</label><label for="__tabbed_26_3">Benutzerdefinierte Header für API</label><label for="__tabbed_26_4">Content Security Policy - Berichtsmodus</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Standardkonfiguration mit wesentlichen Sicherheits-Headern:</p>
@@ -7206,7 +7235,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 </tbody>
 </table>
 <h3 id="beispielkonfigurationen_11">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:6"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><input id="__tabbed_35_5" name="__tabbed_35" type="radio" /><input id="__tabbed_35_6" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Grundlegende HTTP-Challenge</label><label for="__tabbed_35_2">Cloudflare DNS mit Wildcard</label><label for="__tabbed_35_3">AWS Route53-Konfiguration</label><label for="__tabbed_35_4">Testen mit Staging-Umgebung und Wiederholungen</label><label for="__tabbed_35_5">DigitalOcean mit benutzerdefinierter Propagationszeit</label><label for="__tabbed_35_6">Google Cloud DNS</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:6"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><input id="__tabbed_27_3" name="__tabbed_27" type="radio" /><input id="__tabbed_27_4" name="__tabbed_27" type="radio" /><input id="__tabbed_27_5" name="__tabbed_27" type="radio" /><input id="__tabbed_27_6" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Grundlegende HTTP-Challenge</label><label for="__tabbed_27_2">Cloudflare DNS mit Wildcard</label><label for="__tabbed_27_3">AWS Route53-Konfiguration</label><label for="__tabbed_27_4">Testen mit Staging-Umgebung und Wiederholungen</label><label for="__tabbed_27_5">DigitalOcean mit benutzerdefinierter Propagationszeit</label><label for="__tabbed_27_6">Google Cloud DNS</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Einfache Konfiguration mit HTTP-Challenges für eine einzelne Domain:</p>
@@ -7291,7 +7320,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <li><strong>Wirksamkeit überwachen:</strong> Verwenden Sie die <a href="../web-ui/">Web-Benutzeroberfläche</a>, um Statistiken über begrenzte Anfragen und Verbindungen anzuzeigen.</li>
 </ol>
 <h3 id="konfigurationseinstellungen_12">Konfigurationseinstellungen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:1"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Anforderungsratenbegrenzung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:1"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Anforderungsratenbegrenzung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -7342,7 +7371,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 </ul>
 <p>Zum Beispiel bedeutet <code>5r/m</code>, dass 5 Anfragen pro Minute von jeder IP-Adresse erlaubt sind.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="37:1"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Verbindungsbegrenzung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">Verbindungsbegrenzung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>
@@ -7409,7 +7438,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <p>Zu restriktive Grenzwerte können legitime Benutzer beeinträchtigen, insbesondere bei HTTP/2 und HTTP/3, wo Browser oft mehrere Streams verwenden. Die Standardwerte sind für die meisten Anwendungsfälle ausgewogen, aber erwägen Sie, sie je nach den Bedürfnissen Ihrer Anwendung und dem Benutzerverhalten anzupassen.</p>
 </div>
 <h3 id="beispielkonfigurationen_12">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:4"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Grundschutz</label><label for="__tabbed_38_2">Schutz spezifischer Endpunkte</label><label for="__tabbed_38_3">Konfiguration für eine Website mit hohem Verkehrsaufkommen</label><label for="__tabbed_38_4">Konfiguration für einen API-Server</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">Grundschutz</label><label for="__tabbed_30_2">Schutz spezifischer Endpunkte</label><label for="__tabbed_30_3">Konfiguration für eine Website mit hohem Verkehrsaufkommen</label><label for="__tabbed_30_4">Konfiguration für einen API-Server</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration mit Standardeinstellungen zum Schutz Ihrer gesamten Website:</p>
@@ -7492,6 +7521,8 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 </div>
 </div>
 <h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Load Balancer' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
 <table>
@@ -7789,7 +7820,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <p>Jeder NGINX-Worker verwaltet seine eigenen Metriken im Speicher. Beim Zugriff auf Metriken über die API werden die Daten aller Worker automatisch aggregiert, um eine vollständige Ansicht zu erhalten.</p>
 </div>
 <h3 id="beispielkonfigurationen_13">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="39:4"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Grundlegende Konfiguration</label><label for="__tabbed_39_2">Umgebung mit geringen Ressourcen</label><label for="__tabbed_39_3">Umgebung mit hohem Verkehrsaufkommen</label><label for="__tabbed_39_4">Metriken deaktiviert</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:4"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><input id="__tabbed_31_3" name="__tabbed_31" type="radio" /><input id="__tabbed_31_4" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">Grundlegende Konfiguration</label><label for="__tabbed_31_2">Umgebung mit geringen Ressourcen</label><label for="__tabbed_31_3">Umgebung mit hohem Verkehrsaufkommen</label><label for="__tabbed_31_4">Metriken deaktiviert</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Standardkonfiguration, die für die meisten Bereitstellungen geeignet ist:</p>
@@ -7887,7 +7918,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 </tbody>
 </table>
 <h3 id="konfigurationsanleitung">Konfigurationsanleitung</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="40:8"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><input id="__tabbed_40_7" name="__tabbed_40" type="radio" /><input id="__tabbed_40_8" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Sicherheit des Standardservers</label><label for="__tabbed_40_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_40_3">HTTP-Methoden</label><label for="__tabbed_40_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_40_5">Protokollunterstützung</label><label for="__tabbed_40_6">Bereitstellung statischer Dateien</label><label for="__tabbed_40_7">Systemeinstellungen</label><label for="__tabbed_40_8">Datei-Caching</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:8"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><input id="__tabbed_32_3" name="__tabbed_32" type="radio" /><input id="__tabbed_32_4" name="__tabbed_32" type="radio" /><input id="__tabbed_32_5" name="__tabbed_32" type="radio" /><input id="__tabbed_32_6" name="__tabbed_32" type="radio" /><input id="__tabbed_32_7" name="__tabbed_32" type="radio" /><input id="__tabbed_32_8" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">Sicherheit des Standardservers</label><label for="__tabbed_32_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_32_3">HTTP-Methoden</label><label for="__tabbed_32_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_32_5">Protokollunterstützung</label><label for="__tabbed_32_6">Bereitstellung statischer Dateien</label><label for="__tabbed_32_7">Systemeinstellungen</label><label for="__tabbed_32_8">Datei-Caching</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Steuerung des Standardservers</strong></p>
@@ -8286,7 +8317,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 </div>
 </div>
 <h3 id="beispielkonfigurationen_14">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="41:7"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><input id="__tabbed_41_5" name="__tabbed_41" type="radio" /><input id="__tabbed_41_6" name="__tabbed_41" type="radio" /><input id="__tabbed_41_7" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Sicherheit des Standardservers</label><label for="__tabbed_41_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_41_3">HTTP-Methoden</label><label for="__tabbed_41_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_41_5">Protokollunterstützung</label><label for="__tabbed_41_6">Bereitstellung statischer Dateien</label><label for="__tabbed_41_7">Datei-Caching</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:7"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><input id="__tabbed_33_4" name="__tabbed_33" type="radio" /><input id="__tabbed_33_5" name="__tabbed_33" type="radio" /><input id="__tabbed_33_6" name="__tabbed_33" type="radio" /><input id="__tabbed_33_7" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Sicherheit des Standardservers</label><label for="__tabbed_33_2">HTTP-Status bei Ablehnung</label><label for="__tabbed_33_3">HTTP-Methoden</label><label for="__tabbed_33_4">Größenbeschränkungen für Anfragen</label><label for="__tabbed_33_5">Protokollunterstützung</label><label for="__tabbed_33_6">Bereitstellung statischer Dateien</label><label for="__tabbed_33_7">Datei-Caching</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Beispielkonfiguration zum Deaktivieren des Standardservers und Erzwingen von striktem SNI:</p>
@@ -8455,7 +8486,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 <p>Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0">v4.18.0</a> (<strong>Standard</strong>).</li>
+<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0">v4.19.0</a> (<strong>Standard</strong>).</li>
 <li><strong><code>nightly</code></strong>: <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Nightly-Build</a> mit den neuesten Regel-Updates.</li>
 </ul>
 <div class="admonition example">
@@ -8473,7 +8504,7 @@ CROWDSEC_APPSEC_SSL_VERIFY: "yes"
 </ul>
 <p>Sie können die Paranoia-Stufe festlegen, indem Sie eine benutzerdefinierte Konfigurationsdatei in <code>/etc/bunkerweb/configs/modsec-crs/</code> hinzufügen.</p>
 </div>
-<h3 id="benutzerdefinierte-konfigurationen">Benutzerdefinierte Konfigurationen</h3>
+<h3 id="custom-configurations">Benutzerdefinierte Konfigurationen</h3>
 <p>Die Feinabstimmung von ModSecurity und dem OWASP Core Rule Set (CRS) kann durch benutzerdefinierte Konfigurationen erreicht werden. Diese Konfigurationen ermöglichen es Ihnen, das Verhalten in bestimmten Phasen der Verarbeitung von Sicherheitsregeln anzupassen:</p>
 <ul>
 <li><strong><code>modsec-crs</code></strong>: Wird <strong>vor</strong> dem Laden des OWASP Core Rule Set angewendet.</li>
@@ -8548,7 +8579,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Höhere Sicherheitseinstellungen können legitimen Verkehr blockieren. Beginnen Sie mit den Standardeinstellungen und überwachen Sie die Protokolle, bevor Sie die Sicherheitsstufen erhöhen. Seien Sie bereit, Ausnahmeregeln für die spezifischen Anforderungen Ihrer Anwendung hinzuzufügen.</p>
 </div>
 <h3 id="beispielkonfigurationen_15">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="42:6"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><input id="__tabbed_42_4" name="__tabbed_42" type="radio" /><input id="__tabbed_42_5" name="__tabbed_42" type="radio" /><input id="__tabbed_42_6" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Grundlegende Konfiguration</label><label for="__tabbed_42_2">Nur-Erkennungsmodus</label><label for="__tabbed_42_3">Erweiterte Konfiguration mit Plugins</label><label for="__tabbed_42_4">Legacy-Konfiguration</label><label for="__tabbed_42_5">Globales ModSecurity</label><label for="__tabbed_42_6">Nightly-Build mit benutzerdefinierten Plugins</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:6"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><input id="__tabbed_34_4" name="__tabbed_34" type="radio" /><input id="__tabbed_34_5" name="__tabbed_34" type="radio" /><input id="__tabbed_34_6" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Grundlegende Konfiguration</label><label for="__tabbed_34_2">Nur-Erkennungsmodus</label><label for="__tabbed_34_3">Erweiterte Konfiguration mit Plugins</label><label for="__tabbed_34_4">Legacy-Konfiguration</label><label for="__tabbed_34_5">Globales ModSecurity</label><label for="__tabbed_34_6">Nightly-Build mit benutzerdefinierten Plugins</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Standardkonfiguration mit aktiviertem ModSecurity und CRS v4:</p>
@@ -8732,7 +8763,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Das PHP-Plugin konfiguriert automatisch die URL-Umschreibung, um moderne PHP-Anwendungen zu unterstützen. Anfragen für nicht existierende Dateien werden an <code>index.php</code> weitergeleitet, wobei die ursprüngliche Anfrage-URI als Abfrageparameter verfügbar ist.</p>
 </div>
 <h3 id="beispielkonfigurationen_16">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="43:4"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><input id="__tabbed_43_4" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Lokale PHP-FPM-Konfiguration</label><label for="__tabbed_43_2">Entfernte PHP-FPM-Konfiguration</label><label for="__tabbed_43_3">Konfiguration mit benutzerdefiniertem Port</label><label for="__tabbed_43_4">WordPress-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:4"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Lokale PHP-FPM-Konfiguration</label><label for="__tabbed_35_2">Entfernte PHP-FPM-Konfiguration</label><label for="__tabbed_35_3">Konfiguration mit benutzerdefiniertem Port</label><label for="__tabbed_35_4">WordPress-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Konfiguration für die Verwendung einer lokalen PHP-FPM-Instanz:</p>
@@ -8981,7 +9012,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Mit <code>REAL_IP_RECURSIVE</code> wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.</p>
 </div>
 <h3 id="beispiele_5">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="44:1"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Basis (hinter Reverse Proxy)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:1"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Basis (hinter Reverse Proxy)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -9065,7 +9096,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Wenn <code>REDIRECT_TO_REQUEST_URI</code> auf <code>yes</code> gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise <code>https://old-domain.com/blog/post-1</code> besucht und Sie eine Umleitung zu <code>https://new-domain.com</code> eingerichtet haben, wird er zu <code>https://new-domain.com/blog/post-1</code> umgeleitet.</p>
 </div>
 <h3 id="beispielkonfigurationen_17">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="45:5"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><input id="__tabbed_45_5" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Umleitung mehrerer Pfade</label><label for="__tabbed_45_2">Einfache Domain-Umleitung</label><label for="__tabbed_45_3">Pfadbeibehaltende Umleitung</label><label for="__tabbed_45_4">Temporäre Umleitung</label><label for="__tabbed_45_5">Subdomain-Konsolidierung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="37:5"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><input id="__tabbed_37_3" name="__tabbed_37" type="radio" /><input id="__tabbed_37_4" name="__tabbed_37" type="radio" /><input id="__tabbed_37_5" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Umleitung mehrerer Pfade</label><label for="__tabbed_37_2">Einfache Domain-Umleitung</label><label for="__tabbed_37_3">Pfadbeibehaltende Umleitung</label><label for="__tabbed_37_4">Temporäre Umleitung</label><label for="__tabbed_37_5">Subdomain-Konsolidierung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Konfiguration, die mehrere Pfade an verschiedene Ziele umleitet:</p>
@@ -9270,7 +9301,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>Beschränken Sie den Zugriff auf den Redis-Port (Firewall, Segmentierung).</li>
 </ul>
 <h3 id="beispiele_6">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="46:4"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">Basiskonfiguration</label><label for="__tabbed_46_2">Sichere Konfiguration</label><label for="__tabbed_46_3">Redis Sentinel</label><label for="__tabbed_46_4">Erweitertes Tuning</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:4"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Basiskonfiguration</label><label for="__tabbed_38_2">Sichere Konfiguration</label><label for="__tabbed_38_3">Redis Sentinel</label><label for="__tabbed_38_4">Erweitertes Tuning</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -9429,7 +9460,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Caching einrichten (optional):</strong> Aktivieren und konfigurieren Sie das Proxy-Caching, um die Leistung für häufig aufgerufene Inhalte zu verbessern.</li>
 </ol>
 <h3 id="konfigurationsanleitung_1">Konfigurationsanleitung</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="47:8"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><input id="__tabbed_47_6" name="__tabbed_47" type="radio" /><input id="__tabbed_47_7" name="__tabbed_47" type="radio" /><input id="__tabbed_47_8" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">Grundlegende Konfiguration</label><label for="__tabbed_47_2">Verbindungseinstellungen</label><label for="__tabbed_47_3">SSL/TLS-Konfiguration</label><label for="__tabbed_47_4">Protokollunterstützung</label><label for="__tabbed_47_5">Header-Verwaltung</label><label for="__tabbed_47_6">Authentifizierung</label><label for="__tabbed_47_7">Erweiterte Konfiguration</label><label for="__tabbed_47_8">Caching-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:8"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><input id="__tabbed_39_5" name="__tabbed_39" type="radio" /><input id="__tabbed_39_6" name="__tabbed_39" type="radio" /><input id="__tabbed_39_7" name="__tabbed_39" type="radio" /><input id="__tabbed_39_8" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Grundlegende Konfiguration</label><label for="__tabbed_39_2">Verbindungseinstellungen</label><label for="__tabbed_39_3">SSL/TLS-Konfiguration</label><label for="__tabbed_39_4">Protokollunterstützung</label><label for="__tabbed_39_5">Header-Verwaltung</label><label for="__tabbed_39_6">Authentifizierung</label><label for="__tabbed_39_7">Erweiterte Konfiguration</label><label for="__tabbed_39_8">Caching-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Kerneinstellungen</strong></p>
@@ -9951,7 +9982,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Ohne diese Maskierung versucht Docker Compose, diese Variablen durch Umgebungsvariablen zu ersetzen, die normalerweise nicht existieren, was zu leeren Werten in Ihrer NGINX-Konfiguration führt.</p>
 </div>
 <h3 id="beispielkonfigurationen_18">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="48:6"><input checked="checked" id="__tabbed_48_1" name="__tabbed_48" type="radio" /><input id="__tabbed_48_2" name="__tabbed_48" type="radio" /><input id="__tabbed_48_3" name="__tabbed_48" type="radio" /><input id="__tabbed_48_4" name="__tabbed_48" type="radio" /><input id="__tabbed_48_5" name="__tabbed_48" type="radio" /><input id="__tabbed_48_6" name="__tabbed_48" type="radio" /><div class="tabbed-labels"><label for="__tabbed_48_1">Grundlegender HTTP-Proxy</label><label for="__tabbed_48_2">WebSocket-Anwendung</label><label for="__tabbed_48_3">Mehrere Standorte</label><label for="__tabbed_48_4">Caching-Konfiguration</label><label for="__tabbed_48_5">Erweiterte Header-Verwaltung</label><label for="__tabbed_48_6">Authentifizierungsintegration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="40:6"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Grundlegender HTTP-Proxy</label><label for="__tabbed_40_2">WebSocket-Anwendung</label><label for="__tabbed_40_3">Mehrere Standorte</label><label for="__tabbed_40_4">Caching-Konfiguration</label><label for="__tabbed_40_5">Erweiterte Header-Verwaltung</label><label for="__tabbed_40_6">Authentifizierungsintegration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration zum Weiterleiten von HTTP-Anfragen an einen Backend-Anwendungsserver:</p>
@@ -10105,7 +10136,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Die Standardkonfiguration umfasst gängige Ports, die von Proxyservern (80, 443, 8080, 3128) und SSH (22) verwendet werden. Sie können diese Liste basierend auf Ihrem Bedrohungsmodell anpassen.</p>
 </div>
 <h3 id="beispielkonfigurationen_19">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="49:4"><input checked="checked" id="__tabbed_49_1" name="__tabbed_49" type="radio" /><input id="__tabbed_49_2" name="__tabbed_49" type="radio" /><input id="__tabbed_49_3" name="__tabbed_49" type="radio" /><input id="__tabbed_49_4" name="__tabbed_49" type="radio" /><div class="tabbed-labels"><label for="__tabbed_49_1">Grundlegende Konfiguration</label><label for="__tabbed_49_2">Umfassendes Scannen</label><label for="__tabbed_49_3">Leistungsoptimierte Konfiguration</label><label for="__tabbed_49_4">Hochsicherheitskonfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="41:4"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Grundlegende Konfiguration</label><label for="__tabbed_41_2">Umfassendes Scannen</label><label for="__tabbed_41_3">Leistungsoptimierte Konfiguration</label><label for="__tabbed_41_4">Hochsicherheitskonfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration zum Aktivieren des Client-Port-Scannens:</p>
@@ -10367,7 +10398,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachstellen). Aktivieren Sie diese nur bei Bedarf für ältere Clients.</p>
 </div>
 <h3 id="beispiele_7">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="50:4"><input checked="checked" id="__tabbed_50_1" name="__tabbed_50" type="radio" /><input id="__tabbed_50_2" name="__tabbed_50" type="radio" /><input id="__tabbed_50_3" name="__tabbed_50" type="radio" /><input id="__tabbed_50_4" name="__tabbed_50" type="radio" /><div class="tabbed-labels"><label for="__tabbed_50_1">Moderne Sicherheit (Standard)</label><label for="__tabbed_50_2">Maximale Sicherheit</label><label for="__tabbed_50_3">Legacy-Kompatibilität</label><label for="__tabbed_50_4">Benutzerdefinierte Suiten</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="42:4"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><input id="__tabbed_42_4" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Moderne Sicherheit (Standard)</label><label for="__tabbed_42_2">Maximale Sicherheit</label><label for="__tabbed_42_3">Legacy-Kompatibilität</label><label for="__tabbed_42_4">Benutzerdefinierte Suiten</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">LISTEN_HTTPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10524,7 +10555,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Gemäß RFC 9116 MÜSSEN alle URLs in der security.txt-Datei (außer <code>mailto:</code>- und <code>tel:</code>-Links) HTTPS verwenden. Nicht-HTTPS-URLs werden von BunkerWeb automatisch in HTTPS konvertiert, um die Einhaltung des Standards zu gewährleisten.</p>
 </div>
 <h3 id="beispielkonfigurationen_21">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="51:3"><input checked="checked" id="__tabbed_51_1" name="__tabbed_51" type="radio" /><input id="__tabbed_51_2" name="__tabbed_51" type="radio" /><input id="__tabbed_51_3" name="__tabbed_51" type="radio" /><div class="tabbed-labels"><label for="__tabbed_51_1">Grundlegende Konfiguration</label><label for="__tabbed_51_2">Umfassende Konfiguration</label><label for="__tabbed_51_3">Konfiguration mit mehreren Kontakten</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="43:3"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Grundlegende Konfiguration</label><label for="__tabbed_43_2">Umfassende Konfiguration</label><label for="__tabbed_43_3">Konfiguration mit mehreren Kontakten</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine minimale Konfiguration mit nur Kontaktinformationen:</p>
@@ -10628,7 +10659,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h3 id="beispiele_8">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="52:3"><input checked="checked" id="__tabbed_52_1" name="__tabbed_52" type="radio" /><input id="__tabbed_52_2" name="__tabbed_52" type="radio" /><input id="__tabbed_52_3" name="__tabbed_52" type="radio" /><div class="tabbed-labels"><label for="__tabbed_52_1">Standard</label><label for="__tabbed_52_2">Kurzzeit-Zertifikate</label><label for="__tabbed_52_3">Test in RSA</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="44:3"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Standard</label><label for="__tabbed_44_2">Kurzzeit-Zertifikate</label><label for="__tabbed_44_3">Test in RSA</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10758,7 +10789,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ol>
 </div>
 <h3 id="beispielkonfigurationen_22">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="53:4"><input checked="checked" id="__tabbed_53_1" name="__tabbed_53" type="radio" /><input id="__tabbed_53_2" name="__tabbed_53" type="radio" /><input id="__tabbed_53_3" name="__tabbed_53" type="radio" /><input id="__tabbed_53_4" name="__tabbed_53" type="radio" /><div class="tabbed-labels"><label for="__tabbed_53_1">Grundlegende Konfiguration</label><label for="__tabbed_53_2">Erhöhte Sicherheit</label><label for="__tabbed_53_3">Cluster-Umgebung mit Redis</label><label for="__tabbed_53_4">Langlebige Sitzungen</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="45:4"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Grundlegende Konfiguration</label><label for="__tabbed_45_2">Erhöhte Sicherheit</label><label for="__tabbed_45_3">Cluster-Umgebung mit Redis</label><label for="__tabbed_45_4">Langlebige Sitzungen</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration für eine einzelne BunkerWeb-Instanz:</p>
@@ -10833,6 +10864,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='Benutzer-Manager' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>
@@ -10903,7 +10936,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="54:5"><input checked="checked" id="__tabbed_54_1" name="__tabbed_54" type="radio" /><input id="__tabbed_54_2" name="__tabbed_54" type="radio" /><input id="__tabbed_54_3" name="__tabbed_54" type="radio" /><input id="__tabbed_54_4" name="__tabbed_54" type="radio" /><input id="__tabbed_54_5" name="__tabbed_54" type="radio" /><div class="tabbed-labels"><label for="__tabbed_54_1">IP-Adresse</label><label for="__tabbed_54_2">Reverse DNS</label><label for="__tabbed_54_3">ASN</label><label for="__tabbed_54_4">User-Agent</label><label for="__tabbed_54_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="46:5"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><input id="__tabbed_46_5" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">IP-Adresse</label><label for="__tabbed_46_2">Reverse DNS</label><label for="__tabbed_46_3">ASN</label><label for="__tabbed_46_4">User-Agent</label><label for="__tabbed_46_5">URI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.</p>
@@ -11147,7 +11180,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <p>Auf der Whitelist stehende Besucher <strong>umgehen vollständig alle anderen Sicherheitsprüfungen</strong> in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.</p>
 </div>
 <h3 id="beispielkonfigurationen_23">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="55:5"><input checked="checked" id="__tabbed_55_1" name="__tabbed_55" type="radio" /><input id="__tabbed_55_2" name="__tabbed_55" type="radio" /><input id="__tabbed_55_3" name="__tabbed_55" type="radio" /><input id="__tabbed_55_4" name="__tabbed_55" type="radio" /><input id="__tabbed_55_5" name="__tabbed_55" type="radio" /><div class="tabbed-labels"><label for="__tabbed_55_1">Grundlegender Organisationszugriff</label><label for="__tabbed_55_2">Erweiterte Konfiguration</label><label for="__tabbed_55_3">Verwendung lokaler Dateien</label><label for="__tabbed_55_4">API-Zugriffsmuster</label><label for="__tabbed_55_5">Bekannte Crawler</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="47:5"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">Grundlegender Organisationszugriff</label><label for="__tabbed_47_2">Erweiterte Konfiguration</label><label for="__tabbed_47_3">Verwendung lokaler Dateien</label><label for="__tabbed_47_4">API-Zugriffsmuster</label><label for="__tabbed_47_5">Bekannte Crawler</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die die IP-Adressen des Unternehmensbüros auf die Whitelist setzt:</p>

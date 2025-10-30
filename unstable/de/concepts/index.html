@@ -797,7 +797,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#multisite-modus" class="md-nav__link">
+  <a href="#multisite-mode" class="md-nav__link">
     <span class="md-ellipsis">
       Multisite-Modus
     </span>
@@ -806,7 +806,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#benutzerdefinierte-konfigurationen" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Benutzerdefinierte Konfigurationen
     </span>
@@ -820,6 +820,21 @@
       Datenbank
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Datenbank">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#datenbank-kompatibilitatsmatrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Datenbank-Kompatibilitätsmatrix
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -848,7 +863,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vorlagen" class="md-nav__link">
+  <a href="#templates" class="md-nav__link">
     <span class="md-ellipsis">
       Vorlagen
     </span>
@@ -1179,7 +1194,7 @@ USE_BROTLI=no
 <p class="admonition-title">Weiterführende Informationen</p>
 <p>Die vollständige Liste der verfügbaren Einstellungen mit Beschreibungen und möglichen Werten ist im <a href="../features/">Feature-Abschnitt</a> der Dokumentation verfügbar.</p>
 </div>
-<h2 id="multisite-modus">Multisite-Modus</h2>
+<h2 id="multisite-mode">Multisite-Modus</h2>
 <p>Das Verständnis des Multisite-Modus ist bei der Nutzung von BunkerWeb unerlässlich. Da unser Hauptaugenmerk auf dem Schutz von Webanwendungen liegt, ist unsere Lösung eng mit dem Konzept der "virtuellen Hosts" oder "vhosts" verbunden (weitere Informationen <a href="https://en.wikipedia.org/wiki/Virtual_hosting">hier</a>). Diese virtuellen Hosts ermöglichen die Bereitstellung mehrerer Webanwendungen von einer einzigen Instanz oder einem Cluster aus.</p>
 <p>Standardmäßig ist der Multisite-Modus in BunkerWeb deaktiviert. Das bedeutet, dass nur eine Webanwendung bereitgestellt wird und alle Einstellungen darauf angewendet werden. Diese Einrichtung ist ideal, wenn Sie eine einzelne Anwendung zu schützen haben, da Sie sich nicht um Multisite-Konfigurationen kümmern müssen.</p>
 <p>Wenn der Multisite-Modus jedoch aktiviert ist, kann BunkerWeb mehrere Webanwendungen bereitstellen und schützen. Jede Webanwendung wird durch einen eindeutigen Servernamen identifiziert und hat ihre eigenen Einstellungen. Dieser Modus ist vorteilhaft, wenn Sie mehrere Anwendungen zu sichern haben und eine einzige Instanz (oder einen Cluster) von BunkerWeb verwenden möchten.</p>
@@ -1208,7 +1223,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <p class="admonition-title">Weiterführende Informationen</p>
 <p>Konkrete Beispiele für den Multisite-Modus finden Sie in den <a href="../advanced/">fortgeschrittenen Nutzungen</a> der Dokumentation und im <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">Beispiele</a>-Verzeichnis des Repositorys.</p>
 </div>
-<h2 id="benutzerdefinierte-konfigurationen">Benutzerdefinierte Konfigurationen</h2>
+<h2 id="custom-configurations">Benutzerdefinierte Konfigurationen</h2>
 <p>Um einzigartige Herausforderungen zu bewältigen und spezifische Anwendungsfälle zu bedienen, bietet BunkerWeb die Flexibilität von benutzerdefinierten Konfigurationen. Während die bereitgestellten Einstellungen und <a href="../plugins/">externen Plugins</a> eine breite Palette von Szenarien abdecken, kann es Situationen geben, die zusätzliche Anpassungen erfordern.</p>
 <p>BunkerWeb basiert auf dem renommierten NGINX-Webserver, der ein leistungsstarkes Konfigurationssystem bietet. Das bedeutet, dass Sie die Konfigurationsmöglichkeiten von NGINX nutzen können, um Ihre spezifischen Anforderungen zu erfüllen. Benutzerdefinierte NGINX-Konfigurationen können in verschiedenen <a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">Kontexten</a> wie HTTP oder Server eingebunden werden, sodass Sie das Verhalten von BunkerWeb entsprechend Ihren Anforderungen feinabstimmen können. Ob Sie globale Einstellungen anpassen oder Konfigurationen auf bestimmte Serverblöcke anwenden müssen, BunkerWeb ermöglicht es Ihnen, sein Verhalten zu optimieren, um es perfekt auf Ihren Anwendungsfall abzustimmen.</p>
 <p>Ein weiterer integraler Bestandteil von BunkerWeb ist die ModSecurity Web Application Firewall. Mit benutzerdefinierten Konfigurationen haben Sie die Flexibilität, auf Fehlalarme zu reagieren oder benutzerdefinierte Regeln hinzuzufügen, um den von ModSecurity bereitgestellten Schutz weiter zu verbessern. Diese benutzerdefinierten Konfigurationen ermöglichen es Ihnen, das Verhalten der Firewall feinabzustimmen und sicherzustellen, dass es den spezifischen Anforderungen Ihrer Webanwendungen entspricht.</p>
@@ -1243,6 +1258,10 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 </li>
 </ul>
 <p>Im Hintergrund speichert BunkerWeb bei jeder Bearbeitung einer Einstellung oder Hinzufügung einer neuen Konfiguration die Änderungen automatisch in der Datenbank und gewährleistet so Datenpersistenz und -konsistenz. BunkerWeb unterstützt mehrere Backend-Datenbankoptionen, darunter SQLite, MariaDB, MySQL und PostgreSQL.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Wenn Sie die Weboberfläche für die tägliche Administration nutzen, empfehlen wir den Wechsel zu einer externen Datenbank-Engine (PostgreSQL oder MySQL/MariaDB) anstatt bei SQLite zu bleiben. Externe Engines verarbeiten gleichzeitige Anfragen und langfristiges Datenwachstum deutlich robuster, insbesondere in Mehrbenutzer-Umgebungen.</p>
+</div>
 <p>Die Konfiguration der Datenbank ist einfach über die Einstellung <code>DATABASE_URI</code> möglich, die den angegebenen Formaten für jede unterstützte Datenbank folgt:</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -1256,6 +1275,63 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <li><strong>PostgreSQL</strong>: <code>postgresql://bunkerweb:changeme@bw-db:5432/db</code></li>
 </ul>
 <p>Durch Angabe des entsprechenden Datenbank-URI in der Konfiguration können Sie BunkerWeb nahtlos in Ihr bevorzugtes Datenbank-Backend integrieren und so eine effiziente und zuverlässige Speicherung Ihrer Konfigurationsdaten gewährleisten.</p>
+<h3 id="datenbank-kompatibilitatsmatrix">Datenbank-Kompatibilitätsmatrix</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Integration</th>
+<th style="text-align: left;">PostgreSQL</th>
+<th style="text-align: left;">MariaDB</th>
+<th style="text-align: left;">MySQL</th>
+<th style="text-align: left;">SQLite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Docker</strong></td>
+<td style="text-align: left;">✅ <code>v17</code> und früher (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v11</code> und früher</td>
+<td style="text-align: left;">✅ <code>v9</code> und früher</td>
+<td style="text-align: left;">✅ Unterstützt</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kubernetes</strong></td>
+<td style="text-align: left;">✅ <code>v17</code> und früher (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v11</code> und früher</td>
+<td style="text-align: left;">✅ <code>v9</code> und früher</td>
+<td style="text-align: left;">✅ Unterstützt</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Autoconf</strong></td>
+<td style="text-align: left;">✅ <code>v17</code> und früher (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v11</code> und früher</td>
+<td style="text-align: left;">✅ <code>v9</code> und früher</td>
+<td style="text-align: left;">✅ Unterstützt</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Linux-Pakete</strong></td>
+<td style="text-align: left;">Siehe Hinweise unten</td>
+<td style="text-align: left;">Siehe Hinweise unten</td>
+<td style="text-align: left;">Siehe Hinweise unten</td>
+<td style="text-align: left;">✅ Unterstützt</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Hinweise</p>
+<ul>
+<li><strong>PostgreSQL</strong>: <code>v18</code> wird nicht unterstützt, da die von uns bereitgestellten Alpine-Basis-Images nur die <code>v17</code>-Client-Pakete enthalten.</li>
+<li><strong>Linux</strong>: Die Unterstützung hängt von den Paketen Ihrer Distribution ab. Bei Bedarf können Sie Datenbank-Clients manuell aus den Hersteller-Repositorys installieren (dies ist bei RHEL normalerweise erforderlich).</li>
+<li><strong>SQLite</strong>: Wird mit den Paketen ausgeliefert und ist sofort einsatzbereit.</li>
+</ul>
+</div>
+<p>Hilfreiche externe Ressourcen zur Installation von Datenbankclients:</p>
+<ul>
+<li><a href="https://www.postgresql.org/download/">PostgreSQL Download- und Repository-Anleitung</a></li>
+<li><a href="https://mariadb.org/download/?t=repo-config">MariaDB Repository-Konfiguration</a></li>
+<li><a href="https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/">MySQL Repository-Setup</a></li>
+<li><a href="https://www.sqlite.org/download.html">SQLite Download-Seite</a></li>
+</ul>
 <figure>
 <p><img align="center," alt="Übersicht" src="../../assets/img/bunkerweb_db.svg" width="800" />
   </p>
@@ -1289,7 +1365,7 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 <h3 id="zustandsprufung-der-instanzen">Zustandsprüfung der Instanzen</h3>
 <p>Seit Version 1.6.0 verfügt der Scheduler über ein integriertes System zur Zustandsprüfung, das den Zustand der Instanzen überwacht. Wenn eine Instanz ungesund wird, sendet der Scheduler die Konfiguration nicht mehr an sie. Wenn die Instanz wieder gesund wird, sendet der Scheduler die Konfiguration wieder.</p>
 <p>Das Intervall für die Zustandsprüfung wird durch die Umgebungsvariable <code>HEALTHCHECK_INTERVAL</code> festgelegt, mit einem Standardwert von <code>30</code>, was bedeutet, dass der Scheduler den Zustand der Instanzen alle 30 Sekunden überprüft.</p>
-<h2 id="vorlagen">Vorlagen</h2>
+<h2 id="templates">Vorlagen</h2>
 <p>BunkerWeb nutzt die Leistungsfähigkeit von Vorlagen, um den Konfigurationsprozess zu vereinfachen und die Flexibilität zu erhöhen. Vorlagen bieten einen strukturierten und standardisierten Ansatz zur Definition von Einstellungen und benutzerdefinierten Konfigurationen, der Konsistenz und Benutzerfreundlichkeit gewährleistet.</p>
 <ul>
 <li>

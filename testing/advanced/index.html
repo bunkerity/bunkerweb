@@ -2108,12 +2108,16 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>When using the <a href="../integrations/#kubernetes">Kubernetes integration</a>, custom configurations are managed using <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
-<p>To keep it simple, you don't even need to use the ConfigMap with a Pod (e.g. as environment variable or volume) : the autoconf Pod is listening for ConfigMap events and will update the custom configurations when needed.</p>
-<p>When creating a ConfigMap, you will need to add special labels :</p>
+<p>When using the <a href="../integrations/#kubernetes">Kubernetes integration</a>,
+custom configurations are managed using <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
+<p>You do not need to mount the ConfigMap inside a Pod (for example as an environment variable or volume).
+The autoconf Pod watches ConfigMap events and updates the custom configuration whenever a change is detected.</p>
+<p>Annotate each ConfigMap you want the ingress controller to manage:</p>
 <ul>
-<li><strong>bunkerweb.io/CONFIG_TYPE</strong> : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream or server-stream)</li>
-<li><strong>bunkerweb.io/CONFIG_SITE</strong> : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)</li>
+<li><code>bunkerweb.io/CONFIG_TYPE</code>: Required. Choose one of the supported custom configuration types (<code>http</code>, <code>server-http</code>,
+  <code>default-server-http</code>, <code>modsec</code>, <code>modsec-crs</code>, <code>crs-plugins-before</code>, <code>crs-plugins-after</code>, <code>stream</code>, <code>server-stream</code>, or <code>settings</code>).</li>
+<li><code>bunkerweb.io/CONFIG_SITE</code>: Optional. Set to the primary server name (as exposed through your <code>Ingress</code>) to scope the configuration to that service;
+  omit it to apply the config globally.</li>
 </ul>
 <p>Here is the example :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -2131,9 +2135,26 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">}</span>
 <span class="w">  </span><span class="err">}</span>
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">How reconciliation works</p>
+<ul>
+<li>The ingress controller continuously watches annotated ConfigMaps.</li>
+<li>If the <code>NAMESPACES</code> environment variable is set, only ConfigMaps from those namespaces are considered.</li>
+<li>Creating or updating a managed ConfigMap triggers an immediate configuration reload.</li>
+<li>Deleting the ConfigMap—or removing the <code>bunkerweb.io/CONFIG_TYPE</code> annotation—removes the associated custom configuration.</li>
+<li>If you set <code>bunkerweb.io/CONFIG_SITE</code>, the referenced service must already exist; otherwise, the ConfigMap is ignored until the service appears.</li>
+</ul>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Custom Extra Config</p>
-<p>Since the <code>1.6.0</code> version, you can add/override settings using the <code>bunkerweb.io/CONFIG_TYPE=settings</code> annotation. Here is an example :</p>
+<p>Since version <code>1.6.0</code>, you can add or override settings by annotating a ConfigMap with <code>bunkerweb.io/CONFIG_TYPE=settings</code>.
+The autoconf ingress controller reads each entry under <code>data</code> and applies it like an environment variable:</p>
+<ul>
+<li>Without <code>bunkerweb.io/CONFIG_SITE</code>, all keys are applied globally.</li>
+<li>When <code>bunkerweb.io/CONFIG_SITE</code> is set, the controller automatically prefixes each key with <code>&lt;server-name&gt;_</code> (every <code>/</code> replaced by <code>_</code>) if the key is not already scoped. Add the prefix yourself if you need to mix global and site-specific keys in the same ConfigMap.</li>
+<li>Invalid setting names or values are skipped and a warning is logged by the autoconf controller.</li>
+</ul>
+<p>Here is an example :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2157,7 +2178,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>To keep it simple, you don't even need to attach the Config to a service : the autoconf service is listening for Config events and will update the custom configurations when needed.</p>
 <p>When creating a Config, you will need to add special labels :</p>
 <ul>
-<li><strong>bunkerweb.CONFIG_TYPE</strong> : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream or server-stream)</li>
+<li><strong>bunkerweb.CONFIG_TYPE</strong> : must be set to a valid custom configuration type (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream, server-stream or settings)</li>
 <li><strong>bunkerweb.CONFIG_SITE</strong> : set to a server name to apply configuration to that specific server (optional, will be applied globally if unset)</li>
 </ul>
 <p>Here is the example :</p>
@@ -3844,6 +3865,10 @@ USE_IPV6=yes
 <li><strong>Monitoring:</strong> Analyze logs and metrics periodically to fine-tune settings and improve overall protection.</li>
 </ul>
 <h2 id="user-manager-pro">User Manager <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="User Manager" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <p>The User Management Plugin offers a robust interface for administering user accounts within your system.</p>
 <p>With this plugin, administrators can effortlessly create, update, and disable user accounts, manage user roles, toggle two-factor authentication (2FA), and view detailed user information such as last login timestamps and account statuses (active or inactive). Designed with security and ease-of-use in mind, this plugin simplifies routine user management tasks while ensuring compliance and auditability.</p>
 <h4 id="features_1">Features</h4>

@@ -897,7 +897,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       先决条件
     </span>
@@ -906,7 +906,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pro" class="md-nav__link">
+  <a href="#upgrade-to-pro" class="md-nav__link">
     <span class="md-ellipsis">
       升级到 PRO
     </span>
@@ -915,7 +915,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       访问日志
     </span>
@@ -948,7 +948,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       帐户管理
     </span>
@@ -958,7 +958,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       用户名/密码
     </span>
@@ -967,7 +967,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       双因素认证
     </span>
@@ -976,7 +976,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       当前会话
     </span>
@@ -990,7 +990,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       高级安装
     </span>
@@ -999,7 +999,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       语言支持与本地化
     </span>
@@ -1009,7 +1009,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       贡献翻译
     </span>
@@ -1199,7 +1199,7 @@
 <li>监控作业执行并根据需要重新启动它们</li>
 <li>查看日志并搜索模式</li>
 </ul>
-<h2 id="_2">先决条件</h2>
+<h2 id="prerequisites">先决条件</h2>
 <p>由于 Web UI 是一个 Web 应用程序，推荐的架构是在其前面运行 BunkerWeb 作为反向代理。推荐的安装过程是使用设置向导，它将按照<a href="../quickstart-guide/">快速入门指南</a>中的描述一步一步地指导您。</p>
 <div class="admonition warning">
 <p class="admonition-title">安全注意事项</p>
@@ -1212,7 +1212,7 @@
 <li>根据您的用例，应用文档的<a href="../advanced/#security-tuning">高级用法部分</a>中列出的最佳实践</li>
 </ul>
 </div>
-<h2 id="pro">升级到 PRO</h2>
+<h2 id="upgrade-to-pro">升级到 PRO</h2>
 <div class="admonition tip">
 <p class="admonition-title">BunkerWeb PRO 免费试用</p>
 <p>想要快速试用 BunkerWeb PRO 一个月吗？在 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>下单时使用代码 <code>freetrial</code>，或者点击<a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">这里</a>直接应用促销代码（将在结账时生效）。</p>
@@ -1233,7 +1233,7 @@
   </p>
 <figcaption>PRO 许可证信息</figcaption>
 </figure>
-<h2 id="_3">访问日志</h2>
+<h2 id="_2">访问日志</h2>
 <p>从 <code>1.6</code> 版本开始，访问日志的方法发生了变化。此更新特别影响基于容器的集成：Web UI 现在将从 <code>/var/log/bunkerweb</code> 目录读取日志文件。</p>
 <p>为了使日志可以从 Web UI 访问，我们建议您使用一个 syslog 服务器，例如 <code>syslog-ng</code>，来读取日志并在 <code>/var/log/bunkerweb</code> 目录中创建相应的文件。</p>
 <div class="admonition warning">
@@ -1583,14 +1583,14 @@ log {
   destination(d_dyna_file);
 };
 </code></pre></div>
-<h2 id="_4">帐户管理</h2>
+<h2 id="_3">帐户管理</h2>
 <p>您可以通过点击右上角的个人资料图片来访问帐户管理页面：</p>
 <figure>
 <p><img align="center," alt="概述" src="../../assets/img/manage-account.png" width="400" />
   </p>
 <figcaption>从右上角访问帐户页面</figcaption>
 </figure>
-<h3 id="_5">用户名/密码</h3>
+<h3 id="_4">用户名/密码</h3>
 <div class="admonition warning">
 <p class="admonition-title">忘记密码/用户名</p>
 <p>如果您忘记了 UI 凭据，您可以按照<a href="../troubleshooting/#web-ui">故障排除部分中描述的步骤</a>从 CLI 重置它们。</p>
@@ -1602,7 +1602,7 @@ log {
   </p>
 <figcaption>用户名/密码表单</figcaption>
 </figure>
-<h3 id="_6">双因素认证</h3>
+<h3 id="_5">双因素认证</h3>
 <div class="admonition tip">
 <p class="admonition-title">强制性加密密钥</p>
 <p>当启用 2FA 时，您必须提供至少一个加密密钥。此密钥将用于加密您的 TOTP 密钥。</p>
@@ -1649,14 +1649,14 @@ log {
   </p>
 <figcaption>登录页面上的 2FA</figcaption>
 </figure>
-<h3 id="_7">当前会话</h3>
+<h3 id="_6">当前会话</h3>
 <p>在<strong>会话</strong>选项卡中，您将能够列出和撤销当前会话：</p>
 <figure>
 <p><img align="center" alt="概述" src="../../assets/img/sessions.png" />
   </p>
 <figcaption>管理会话</figcaption>
 </figure>
-<h2 id="_8">高级安装</h2>
+<h2 id="_7">高级安装</h2>
 <p>Web UI 可以不通过设置向导过程进行部署和配置：配置是通过环境变量完成的，这些变量可以直接添加到容器中，或者在 Linux 集成的情况下添加到 <code>/etc/bunkerweb/ui.env</code> 文件中。</p>
 <div class="admonition tip">
 <p class="admonition-title">Web UI 特定环境变量</p>
@@ -2135,7 +2135,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 </div>
 </div>
 </div>
-<h2 id="_9">语言支持与本地化</h2>
+<h2 id="_8">语言支持与本地化</h2>
 <p>BunkerWeb UI 支持多种语言。翻译文件在 <code>src/ui/app/static/locales</code> 目录中管理。目前支持以下语言：</p>
 <ul>
 <li>英语 (en)</li>
@@ -2152,7 +2152,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <li>意大利语 (it)</li>
 </ul>
 <p>有关翻译来源和审核状态的详细信息，请参阅 <a href="https://github.com/bunkerity/bunkerweb/raw/vtesting/src/ui/app/static/locales/README.md">locales/README.md</a>。</p>
-<h3 id="_10">贡献翻译</h3>
+<h3 id="_9">贡献翻译</h3>
 <p>我们欢迎您为改进或添加新的语言文件做出贡献！</p>
 <p><strong>如何贡献翻译：</strong></p>
 <ol>

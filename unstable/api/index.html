@@ -1640,7 +1640,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <h3 id="custom-configuration-snippets">Custom configuration snippets</h3>
 <ul>
 <li><code>GET /configs</code>: list custom config fragments (HTTP/server/stream/ModSecurity/CRS hooks) for a service (<code>service=global</code> by default). <code>with_data=true</code> embeds UTF-8 content when printable.</li>
-<li><code>POST /configs</code> and <code>POST /configs/upload</code>: create new snippets from JSON payloads or uploaded files. Accepted types include <code>http</code>, <code>server_http</code>, <code>default_server_http</code>, <code>modsec</code>, <code>modsec_crs</code>, <code>stream</code>, <code>server_stream</code>, and CRS plugin hooks. Names must match <code>^[\w_-]{1,64}$</code>.</li>
+<li><code>POST /configs</code> and <code>POST /configs/upload</code>: create new snippets from JSON payloads or uploaded files. Accepted types include <code>http</code>, <code>server_http</code>, <code>default_server_http</code>, <code>modsec</code>, <code>modsec_crs</code>, <code>stream</code>, <code>server_stream</code>, and CRS plugin hooks. Names must match <code>^[\w_-]{1,255}$</code>.</li>
 <li><code>GET /configs/{service}/{type}/{name}</code>: retrieve a snippet with optional content (<code>with_data=true</code>).</li>
 <li><code>PATCH /configs/{service}/{type}/{name}</code> and <code>PATCH .../upload</code>: update or move API-managed snippets; template- or file-managed entries stay read-only.</li>
 <li><code>DELETE /configs</code> and <code>DELETE /configs/{service}/{type}/{name}</code>: prune API-managed snippets while preserving template-managed ones, returning a <code>skipped</code> list for ignored entries.</li>

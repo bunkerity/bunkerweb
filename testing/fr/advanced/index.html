@@ -906,7 +906,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#configurations-personnalisees" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Configurations personnalisées
     </span>
@@ -915,7 +915,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#execution-de-nombreux-services-en-production" class="md-nav__link">
+  <a href="#running-many-services-in-production" class="md-nav__link">
     <span class="md-ellipsis">
       Exécution de nombreux services en production
     </span>
@@ -948,7 +948,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#persistance-des-interdictions-et-des-signalements" class="md-nav__link">
+  <a href="#persistence-of-bans-and-reports" class="md-nav__link">
     <span class="md-ellipsis">
       Persistance des interdictions et des signalements
     </span>
@@ -998,7 +998,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reglage-de-la-securite" class="md-nav__link">
+  <a href="#security-tuning" class="md-nav__link">
     <span class="md-ellipsis">
       Réglage de la sécurité
     </span>
@@ -1903,7 +1903,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 </div>
 </div>
 </div>
-<h3 id="configurations-personnalisees">Configurations personnalisées</h3>
+<h3 id="custom-configurations">Configurations personnalisées</h3>
 <p>Pour personnaliser et ajouter des configurations personnalisées à BunkerWeb, vous pouvez profiter de sa base NGINX. Des configurations NGINX personnalisées peuvent être ajoutées dans différents contextes NGINX, y compris des configurations pour le pare-feu d'applications Web (WAF) ModSecurity, qui est un composant central de BunkerWeb. Vous trouverez plus de détails sur les configurations de ModSecurity <a href="../features/#custom-configurations">ici</a>.</p>
 <p>Voici les types de configurations personnalisées disponibles :</p>
 <ul>
@@ -2112,12 +2112,16 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<p>Lors de l'utilisation de l'<a href="../integrations/#kubernetes">intégration Kubernetes</a>, les configurations personnalisées sont gérées à l'aide de <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
-<p>Pour simplifier, vous n'avez même pas besoin d'attacher le ConfigMap à un Pod (par ex. comme variable d'environnement ou volume) : le Pod d'autoconf écoute les événements ConfigMap et mettra à jour les configurations personnalisées lorsque nécessaire.</p>
-<p>Lors de la création d'un ConfigMap, vous devrez ajouter des labels spéciaux :</p>
+<p>Lors de l'utilisation de l'<a href="../integrations/#kubernetes">intégration Kubernetes</a>,
+les configurations personnalisées sont gérées à l'aide de <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>.</p>
+<p>Vous n'avez pas besoin de monter la ConfigMap dans un Pod (par exemple en variable d'environnement ou en volume).
+Le pod autoconf surveille les événements ConfigMap et applique automatiquement la configuration dès qu'une modification est détectée.</p>
+<p>Annotez chaque ConfigMap que le contrôleur Ingress doit gérer :</p>
 <ul>
-<li><strong>bunkerweb.io/CONFIG_TYPE</strong> : doit être défini sur un type de configuration personnalisé valide (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream ou server-stream)</li>
-<li><strong>bunkerweb.io/CONFIG_SITE</strong> : défini sur un nom de serveur pour appliquer la configuration à ce serveur spécifique (facultatif, sera appliqué globalement s'il n'est pas défini)</li>
+<li><code>bunkerweb.io/CONFIG_TYPE</code> : obligatoire. Choisissez un type pris en charge (<code>http</code>, <code>server-http</code>, <code>default-server-http</code>, <code>modsec</code>,
+  <code>modsec-crs</code>, <code>crs-plugins-before</code>, <code>crs-plugins-after</code>, <code>stream</code>, <code>server-stream</code> ou <code>settings</code>).</li>
+<li><code>bunkerweb.io/CONFIG_SITE</code> : optionnel. Indiquez le nom de serveur principal (tel qu'exposé via votre <code>Ingress</code>)
+  pour limiter la configuration à ce service ; laissez vide pour l'appliquer globalement.</li>
 </ul>
 <p>Voici l'exemple :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -2135,9 +2139,26 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">}</span>
 <span class="w">  </span><span class="err">}</span>
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Fonctionnement de la synchronisation</p>
+<ul>
+<li>Le contrôleur Ingress surveille en continu les ConfigMap annotées.</li>
+<li>Si la variable d'environnement <code>NAMESPACES</code> est définie, seules les ConfigMap de ces espaces de noms sont prises en compte.</li>
+<li>La création ou la mise à jour d'une ConfigMap gérée déclenche immédiatement un rechargement de la configuration.</li>
+<li>La suppression de la ConfigMap – ou de l'annotation <code>bunkerweb.io/CONFIG_TYPE</code> – supprime la configuration personnalisée associée.</li>
+<li>Si vous définissez <code>bunkerweb.io/CONFIG_SITE</code>, le service référencé doit déjà exister ; sinon, la ConfigMap est ignorée jusqu'à son apparition.</li>
+</ul>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Custom Extra Config</p>
-<p>Depuis la version <code>1.6.0</code>, vous pouvez ajouter/remplacer des paramètres à l'aide de l'annotation <code>bunkerweb.io/CONFIG_TYPE=settings</code>. En voici un exemple :</p>
+<p>Depuis la version <code>1.6.0</code>, vous pouvez ajouter ou remplacer des paramètres en annotant une ConfigMap avec <code>bunkerweb.io/CONFIG_TYPE=settings</code>.
+Le contrôleur Ingress d'autoconf lit chaque entrée de <code>data</code> et l'applique comme une variable d'environnement :</p>
+<ul>
+<li>Sans <code>bunkerweb.io/CONFIG_SITE</code>, toutes les clés sont appliquées globalement.</li>
+<li>Lorsque <code>bunkerweb.io/CONFIG_SITE</code> est défini, le contrôleur ajoute automatiquement le préfixe <code>&lt;nom-de-serveur&gt;_</code> (chaque <code>/</code> est remplacé par <code>_</code>) aux clés qui ne sont pas déjà spécifiques. Ajoutez ce préfixe vous-même si vous devez mélanger des clés globales et spécifiques dans la même ConfigMap.</li>
+<li>Les noms ou valeurs invalides sont ignorés et un avertissement est enregistré dans les journaux du contrôleur autoconf.</li>
+</ul>
+<p>Exemple :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -2161,7 +2182,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>Pour simplifier, vous n'avez même pas besoin d'attacher le Config à un service : le service d'autoconf écoute les événements Config et mettra à jour les configurations personnalisées lorsque nécessaire.</p>
 <p>Lors de la création d'un Config, vous devrez ajouter des labels spéciaux :</p>
 <ul>
-<li><strong>bunkerweb.CONFIG_TYPE</strong> : doit être défini sur un type de configuration personnalisé valide (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream ou server-stream)</li>
+<li><strong>bunkerweb.CONFIG_TYPE</strong> : doit être défini sur un type de configuration personnalisé valide (http, server-http, default-server-http, modsec, modsec-crs, crs-plugins-before, crs-plugins-after, stream, server-stream ou settings)</li>
 <li><strong>bunkerweb.CONFIG_SITE</strong> : défini sur un nom de serveur pour appliquer la configuration à ce serveur spécifique (facultatif, sera appliqué globalement s'il n'est pas défini)</li>
 </ul>
 <p>Voici l'exemple :</p>
@@ -2176,7 +2197,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 </div>
 </div>
 </div>
-<h3 id="execution-de-nombreux-services-en-production">Exécution de nombreux services en production</h3>
+<h3 id="running-many-services-in-production">Exécution de nombreux services en production</h3>
 <h4 id="crs-mondial">CRS mondial</h4>
 <div class="admonition warning">
 <p class="admonition-title">Plugins CRS</p>
@@ -2194,7 +2215,7 @@ SecRule REQUEST_HEADERS:Host &quot;@rx ^app1\.example\.com$&quot; &quot;nolog&qu
 <div class="highlight"><pre><span></span><code>[Warning] Aborted connection 5 to db: &#39;db&#39; user: &#39;bunkerweb&#39; host: &#39;172.20.0.4&#39; (Got a packet bigger than &#39;max_allowed_packet&#39; bytes)
 </code></pre></div>
 <p>Vous devrez augmenter le <code>max_allowed_packet</code> sur votre serveur de base de données.</p>
-<h3 id="persistance-des-interdictions-et-des-signalements">Persistance des interdictions et des signalements</h3>
+<h3 id="persistence-of-bans-and-reports">Persistance des interdictions et des signalements</h3>
 <p>Par défaut, BunkerWeb stocke les bannissements et les rapports dans un magasin de données Lua local. Bien que simple et efficace, cette configuration signifie que des données sont perdues lors du redémarrage de l'instance. Pour vous assurer que les bannissements et les rapports persistent lors des redémarrages, vous pouvez configurer BunkerWeb pour utiliser un <a href="https://redis.io/"> serveur Redis</a> ou <a href="https://valkey.io/">Valkey</a> distant  .</p>
 <p><strong>Pourquoi utiliser Redis/Valkey ?</strong></p>
 <p>Redis et Valkey sont de puissants magasins de données en mémoire couramment utilisés comme bases de données, caches et courtiers de messages. Ils sont hautement évolutifs et prennent en charge une variété de structures de données, notamment :</p>
@@ -3207,7 +3228,7 @@ USE_IPV6=yes
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
 </code></pre></div>
 <p>Cette configuration globale sera héritée par tous les conteneurs. Cependant, toute configuration de journalisation définie par service dans un fichier <code>docker-compose.yml</code> remplacera les paramètres globaux dans <code>daemon.json</code>.</p>
-<h2 id="reglage-de-la-securite">Réglage de la sécurité</h2>
+<h2 id="security-tuning">Réglage de la sécurité</h2>
 <p>BunkerWeb offre de nombreuses fonctionnalités de sécurité que vous pouvez configurer avec les <a href="../features/">fonctionnalités</a>. Même si les valeurs par défaut des paramètres assurent une "sécurité par défaut" minimale, nous vous recommandons vivement de les régler. Ce faisant, vous serez en mesure de vous assurer du niveau de sécurité de votre choix, mais aussi de gérer les faux positifs.</p>
 <div class="admonition tip">
 <p class="admonition-title">Autres fonctionnalités</p>
@@ -3844,6 +3865,10 @@ USE_IPV6=yes
 <li><strong>Surveillance :</strong> analysez régulièrement les journaux et les métriques pour affiner les paramètres et améliorer la protection globale.</li>
 </ul>
 <h2 id="gestionnaire-dutilisateurs-pro">Gestionnaire d'utilisateurs <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/EIohiUf9Fg4" title="Gestionnaire d'utilisateurs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
 <p>Le plug-in de gestion des utilisateurs offre une interface robuste pour l'administration des comptes d'utilisateurs au sein de votre système.</p>
 <p>Avec ce plugin, les administrateurs peuvent sans effort créer, mettre à jour et désactiver des comptes utilisateurs, gérer les rôles des utilisateurs, basculer l'authentification à deux facteurs (2FA) et afficher des informations détaillées sur les utilisateurs telles que les horodatages de la dernière connexion et les statuts des comptes (actif ou inactif). Conçu dans un souci de sécurité et de facilité d'utilisation, ce plug-in simplifie les tâches de gestion des utilisateurs tout en garantissant la conformité et l'auditabilité.</p>
 <h4 id="fonctionnalites_1">Fonctionnalités</h4>

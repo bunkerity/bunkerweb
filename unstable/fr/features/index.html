@@ -860,7 +860,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#modes-de-securite" class="md-nav__link">
+  <a href="#security-modes" class="md-nav__link">
     <span class="md-ellipsis">
       Modes de sécurité
     </span>
@@ -1376,22 +1376,40 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mise-en-place" class="md-nav__link">
+  <a href="#prerequis" class="md-nav__link">
     <span class="md-ellipsis">
-      Mise en place
+      Prérequis
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#parametres-de-configuration_2" class="md-nav__link">
+  <a href="#parcours-dintegration" class="md-nav__link">
     <span class="md-ellipsis">
-      Paramètres de configuration
+      Parcours d’intégration
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Paramètres de configuration">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etape-1-preparer-crowdsec-a-ingerer-les-journaux-bunkerweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Étape&nbsp;1 – Préparer CrowdSec à ingérer les journaux BunkerWeb
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etape-2-configurer-les-parametres-de-bunkerweb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Étape&nbsp;2 – Configurer les paramètres de BunkerWeb
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Étape 2 – Configurer les paramètres de BunkerWeb">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1412,6 +1430,15 @@
   <a href="#exemples-de-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Exemples de configurations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etape-3-valider-lintegration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Étape&nbsp;3 – Valider l’intégration
     </span>
   </a>
   
@@ -1484,7 +1511,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#parametres-de-configuration_3" class="md-nav__link">
+  <a href="#parametres-de-configuration_2" class="md-nav__link">
     <span class="md-ellipsis">
       Paramètres de configuration
     </span>
@@ -1778,7 +1805,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#parametres-de-configuration_4" class="md-nav__link">
+  <a href="#parametres-de-configuration_3" class="md-nav__link">
     <span class="md-ellipsis">
       Paramètres de configuration
     </span>
@@ -1973,7 +2000,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#parametres-de-configuration_5" class="md-nav__link">
+  <a href="#parametres-de-configuration_4" class="md-nav__link">
     <span class="md-ellipsis">
       Paramètres de configuration
     </span>
@@ -1991,7 +2018,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#configurations-personnalisees" class="md-nav__link">
+  <a href="#custom-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       Configurations personnalisées
     </span>
@@ -2864,7 +2891,7 @@
 <li><code>REVERSE_PROXY_URL_2=/anotherdir</code> et <code>REVERSE_PROXY_HOST_2=http://myhost2</code> définissent le second reverse proxy.</li>
 </ul>
 <p>Ce modèle permet de gérer plusieurs configurations pour des fonctionnalités comme les reverse proxies, les ports, ou d’autres paramètres nécessitant des valeurs distinctes selon les cas d’usage.</p>
-<h3 id="modes-de-securite">Modes de sécurité</h3>
+<h3 id="security-modes">Modes de sécurité</h3>
 <p>Le paramètre <code>SECURITY_MODE</code> détermine la façon dont BunkerWeb gère les menaces détectées. Ce mécanisme flexible vous permet de choisir entre la surveillance et le blocage actif des activités suspectes, selon vos besoins :</p>
 <ul>
 <li><code>detect</code> : Enregistre les menaces potentielles sans les bloquer. Utile pour analyser les faux positifs sans perturber les utilisateurs légitimes.</li>
@@ -5279,17 +5306,31 @@ BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
 <li><strong>Protection multi-niveaux :</strong> Combinez la défense périmétrique (blocage d'IP) avec la sécurité applicative pour une protection en profondeur.</li>
 </ol>
 </div>
-<h3 id="mise-en-place">Mise en place</h3>
+<h3 id="prerequis">Prérequis</h3>
+<ul>
+<li>Une API locale CrowdSec accessible par BunkerWeb (généralement l’agent exécuté sur la même machine ou dans le même réseau Docker).</li>
+<li>L’accès aux journaux d’accès de BunkerWeb (<code>/var/log/bunkerweb/access.log</code> par défaut) pour que l’agent CrowdSec puisse analyser les requêtes.</li>
+<li>L’accès à <code>cscli</code> sur l’hôte CrowdSec afin d’enregistrer la clé du bouncer BunkerWeb.</li>
+</ul>
+<h3 id="parcours-dintegration">Parcours d’intégration</h3>
+<ol>
+<li>Préparer l’agent CrowdSec pour ingérer les journaux BunkerWeb.</li>
+<li>Configurer BunkerWeb pour interroger l’API locale CrowdSec.</li>
+<li>Valider le lien via l’API <code>/crowdsec/ping</code> ou la carte CrowdSec dans l’interface d’administration.</li>
+</ol>
+<p>Les sections suivantes détaillent chacune de ces étapes.</p>
+<h3 id="etape-1-preparer-crowdsec-a-ingerer-les-journaux-bunkerweb">Étape&nbsp;1 – Préparer CrowdSec à ingérer les journaux BunkerWeb</h3>
 <div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Docker</label><label for="__tabbed_15_2">Linux</label><label for="__tabbed_15_3">All-in-one</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Fichier d'acquisition</strong></p>
-<p>Vous devrez exécuter une instance de CrowdSec et la configurer pour analyser les journaux de BunkerWeb. Comme BunkerWeb est basé sur NGINX, vous pouvez utiliser la valeur <code>nginx</code> pour le paramètre <code>type</code> dans votre fichier d'acquisition (en supposant que les journaux de BunkerWeb sont stockés tels quels sans données supplémentaires) :</p>
+<p>Vous devrez exécuter une instance de CrowdSec et la configurer pour analyser les journaux de BunkerWeb. Utilisez la valeur dédiée <code>bunkerweb</code> pour le paramètre <code>type</code> dans votre fichier d'acquisition (en supposant que les journaux de BunkerWeb sont stockés tels quels sans données supplémentaires) :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">filenames</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb.log</span>
 <span class="nt">labels</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
 </code></pre></div>
+<p>Si la collection n'apparaît pas dans le conteneur CrowdSec, exécutez <code>docker exec -it &lt;crowdsec-container&gt; cscli hub update</code>, puis redémarrez ce conteneur (<code>docker restart &lt;crowdsec-container&gt;</code>) afin que les nouveaux artefacts soient disponibles. Remplacez <code>&lt;crowdsec-container&gt;</code> par le nom de votre conteneur CrowdSec.</p>
 <p><strong>Composant de sécurité applicative (<em>optionnel</em>)</strong></p>
 <p>CrowdSec fournit également un <a href="https://docs.crowdsec.net/docs/appsec/intro?utm_source=external-docs&amp;utm_medium=cta&amp;utm_campaign=bunker-web-docs">Composant de sécurité applicative</a> qui peut être utilisé pour protéger votre application contre les attaques. Si vous souhaitez l'utiliser, vous devez créer un autre fichier d'acquisition pour le composant AppSec :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">appsec_config</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/appsec-default</span>
@@ -5331,7 +5372,7 @@ log {
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># C&#39;est le nom qui sera utilisé pour identifier l&#39;instance dans le planificateur</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
@@ -5348,7 +5389,7 @@ log {
 <span class="w">        </span><span class="nt">syslog-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;udp://10.20.30.254:514&quot;</span><span class="w"> </span><span class="c1"># L&#39;adresse IP du service syslog</span>
 
 <span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing-rc3</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
 <span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># Assurez-vous de définir le nom correct de l&#39;instance</span>
@@ -5382,7 +5423,7 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
 
 <span class="w">  </span><span class="nt">crowdsec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.0</span><span class="w"> </span><span class="c1"># Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">crowdsecurity/crowdsec:v1.7.3</span><span class="w"> </span><span class="c1"># Utilisez la dernière version mais épinglez toujours la version pour une meilleure stabilité/sécurité</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cs-data:/var/lib/crowdsec/data</span><span class="w"> </span><span class="c1"># Pour persister les données de CrowdSec</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-logs:/var/log:ro</span><span class="w"> </span><span class="c1"># Les journaux de BunkerWeb à analyser par CrowdSec</span>
@@ -5390,8 +5431,8 @@ log {
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml</span><span class="w"> </span><span class="c1"># Commentez si vous ne voulez pas utiliser le composant AppSec</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">BOUNCER_KEY_bunkerweb</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;s3cr3tb0unc3rk3y&quot;</span><span class="w"> </span><span class="c1"># N&#39;oubliez pas de définir une clé plus forte pour le bouncer</span>
-<span class="w">      </span><span class="nt">COLLECTIONS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;crowdsecurity/nginx</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-virtual-patching</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-generic-rules&quot;</span>
-<span class="w">      </span><span class="c1">#   COLLECTIONS: &quot;crowdsecurity/nginx&quot; # Si vous ne voulez pas utiliser le composant AppSec, utilisez plutôt cette ligne</span>
+<span class="w">      </span><span class="nt">COLLECTIONS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerity/bunkerweb</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-virtual-patching</span><span class="nv"> </span><span class="s">crowdsecurity/appsec-generic-rules&quot;</span>
+<span class="w">      </span><span class="c1">#   COLLECTIONS: &quot;bunkerity/bunkerweb&quot; # Si vous ne voulez pas utiliser le composant AppSec, utilisez plutôt cette ligne</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
 
@@ -5439,7 +5480,11 @@ log {
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb/error.log</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/log/bunkerweb/modsec_audit.log</span>
 <span class="nt">labels</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+</code></pre></div>
+<p>Mettez à jour le hub CrowdSec et installez la collection BunkerWeb :</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>hub<span class="w"> </span>update
+sudo<span class="w"> </span>cscli<span class="w"> </span>collections<span class="w"> </span>install<span class="w"> </span>bunkerity/bunkerweb
 </code></pre></div>
 <p>Maintenant, ajoutez votre bouncer personnalisé à l'API CrowdSec en utilisant l'outil <code>cscli</code> :</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cscli<span class="w"> </span>bouncers<span class="w"> </span>add<span class="w"> </span>crowdsec-bunkerweb-bouncer/v1.6
@@ -5484,7 +5529,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
-<h3 id="parametres-de-configuration_2">Paramètres de configuration</h3>
+<h3 id="etape-2-configurer-les-parametres-de-bunkerweb">Étape&nbsp;2 – Configurer les paramètres de BunkerWeb</h3>
+<p>Appliquez les variables d’environnement suivantes (ou leurs équivalents via le scheduler) pour permettre à votre instance BunkerWeb de communiquer avec l’API locale CrowdSec. Au minimum, <code>USE_CROWDSEC</code>, <code>CROWDSEC_API</code> et une clé valide générée avec <code>cscli bouncers add</code> sont nécessaires.</p>
 <table>
 <thead>
 <tr>
@@ -5654,6 +5700,12 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
+<h3 id="etape-3-valider-lintegration">Étape&nbsp;3 – Valider l’intégration</h3>
+<ul>
+<li>Dans les journaux du planificateur, recherchez les entrées <code>CrowdSec configuration successfully generated</code> et <code>CrowdSec bouncer denied request</code> afin de vérifier que le plugin est actif.</li>
+<li>Côté CrowdSec, surveillez <code>cscli metrics show</code> ou la console CrowdSec pour vous assurer que les décisions BunkerWeb apparaissent comme prévu.</li>
+<li>Dans l’interface BunkerWeb, ouvrez la page du plugin CrowdSec pour voir l’état de l’intégration.</li>
+</ul>
 <h2 id="custom-ssl-certificate">Custom SSL certificate</h2>
 <p>Prise en charge STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
 <p>Le plugin Certificat SSL personnalisé permet d’utiliser vos propres certificats SSL/TLS avec BunkerWeb, au lieu de ceux générés automatiquement. Utile si vous possédez déjà des certificats d’une AC de confiance, avez des besoins spécifiques ou centralisez la gestion des certificats.</p>
@@ -5808,7 +5860,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <li><strong>Appliquer les paramètres :</strong> Une fois configuré, BunkerWeb vérifiera automatiquement les connexions entrantes auprès des serveurs DNSBL spécifiés.</li>
 <li><strong>Surveiller l'efficacité :</strong> Consultez la <a href="../web-ui/">web UI</a> pour voir les statistiques des requêtes bloquées par les vérifications DNSBL.</li>
 </ol>
-<h3 id="parametres-de-configuration_3">Paramètres de configuration</h3>
+<h3 id="parametres-de-configuration_2">Paramètres de configuration</h3>
 <p><strong>Général</strong></p>
 <table>
 <thead>
@@ -6764,7 +6816,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">Disponibilité des profils</p>
 <p>Notez que les profils <code>tlsserver</code> et <code>shortlived</code> peuvent ne pas être disponibles dans tous les environnements ou avec tous les clients ACME pour le moment. Le profil <code>classic</code> a la compatibilité la plus large et est recommandé pour la plupart des utilisateurs. Si un profil sélectionné n'est pas disponible, le système basculera automatiquement sur le profil <code>classic</code>.</p>
 </div>
-<h3 id="parametres-de-configuration_4">Paramètres de configuration</h3>
+<h3 id="parametres-de-configuration_3">Paramètres de configuration</h3>
 <table>
 <thead>
 <tr>
@@ -7338,6 +7390,8 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 <h2 id="load-balancer-pro">Load Balancer <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/cOVp0rAt5nw' title='Équilibreur de charge' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Provides load balancing feature to group of upstreams with optional healthchecks.</p>
 <table>
@@ -8128,7 +8182,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <li><strong>Ajouter des plugins :</strong> Activez optionnellement des plugins CRS pour améliorer la couverture des règles.</li>
 <li><strong>Surveiller et ajuster :</strong> Utilisez les journaux et l'<a href="../web-ui/">interface web</a> pour identifier les faux positifs et ajuster les paramètres.</li>
 </ol>
-<h3 id="parametres-de-configuration_5">Paramètres de configuration</h3>
+<h3 id="parametres-de-configuration_4">Paramètres de configuration</h3>
 <table>
 <thead>
 <tr>
@@ -8221,7 +8275,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <p>Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :</p>
 <ul>
 <li><strong><code>3</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.18.0">v4.18.0</a> (<strong>par défaut</strong>).</li>
+<li><strong><code>4</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0">v4.19.0</a> (<strong>par défaut</strong>).</li>
 <li><strong><code>nightly</code></strong> : <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Version de nuit</a> offrant les dernières mises à jour de règles.</li>
 </ul>
 <div class="admonition example">
@@ -8239,7 +8293,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 </ul>
 <p>Vous pouvez définir le niveau de paranoïa en ajoutant un fichier de configuration personnalisé dans <code>/etc/bunkerweb/configs/modsec-crs/</code>.</p>
 </div>
-<h3 id="configurations-personnalisees">Configurations personnalisées</h3>
+<h3 id="custom-configurations">Configurations personnalisées</h3>
 <p>L'ajustement de ModSecurity et du Jeu de Règles de Base OWASP (CRS) peut être réalisé grâce à des configurations personnalisées. Celles-ci vous permettent de personnaliser le comportement à des étapes spécifiques du traitement des règles de sécurité :</p>
 <ul>
 <li><strong><code>modsec-crs</code></strong> : Appliqué <strong>avant</strong> le chargement du Jeu de Règles de Base OWASP.</li>
@@ -10512,6 +10566,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h2 id="user-manager-pro">User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)</h2>
+<p align='center'><iframe style='display: block;' width='560' height='315' data-src='https://www.youtube-nocookie.com/embed/EIohiUf9Fg4' title='Gestionnaire d'utilisateurs' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen></iframe></p>
+
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Add the possibility to manage users on the web interface</p>
 <table>

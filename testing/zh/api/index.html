@@ -1656,7 +1656,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <h3 id="_10">自定义配置片段</h3>
 <ul>
 <li><code>GET /configs</code>：列出服务的自定义配置片段（HTTP/服务器/流/ModSecurity/CRS 挂钩）（默认为 <code>service=global</code>）。<code>with_data=true</code> 在可打印时嵌入 UTF-8 内容。</li>
-<li><code>POST /configs</code> 和 <code>POST /configs/upload</code>：从 JSON 负载或上传的文件创建新片段。接受的类型包括 <code>http</code>、<code>server_http</code>、<code>default_server_http</code>、<code>modsec</code>、<code>modsec_crs</code>、<code>stream</code>、<code>server_stream</code> 和 CRS 插件挂钩。名称必须匹配 <code>^[\w_-]{1,64}$</code>。</li>
+<li><code>POST /configs</code> 和 <code>POST /configs/upload</code>：从 JSON 负载或上传的文件创建新片段。接受的类型包括 <code>http</code>、<code>server_http</code>、<code>default_server_http</code>、<code>modsec</code>、<code>modsec_crs</code>、<code>stream</code>、<code>server_stream</code> 和 CRS 插件挂钩。名称必须匹配 <code>^[\w_-]{1,255}$</code>。</li>
 <li><code>GET /configs/{service}/{type}/{name}</code>：检索带有可选内容的片段（<code>with_data=true</code>）。</li>
 <li><code>PATCH /configs/{service}/{type}/{name}</code> 和 <code>PATCH .../upload</code>：更新或移动 API 管理的片段；模板或文件管理的条目保持只读。</li>
 <li><code>DELETE /configs</code> 和 <code>DELETE /configs/{service}/{type}/{name}</code>：修剪 API 管理的片段，同时保留模板管理的片段，并为被忽略的条目返回一个 <code>skipped</code> 列表。</li>

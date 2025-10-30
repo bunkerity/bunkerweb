@@ -811,7 +811,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#bereitstellung" class="md-nav__link">
+  <a href="#deployment" class="md-nav__link">
     <span class="md-ellipsis">
       Bereitstellung
     </span>
@@ -1028,7 +1028,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#crowdsec-integration-mit-dem-skript" class="md-nav__link">
+  <a href="#crowdsec-integration-with-the-script" class="md-nav__link">
     <span class="md-ellipsis">
       CrowdSec-Integration mit dem Skript
     </span>
@@ -1558,7 +1558,7 @@
   </p>
 <figcaption>BunkerWeb All-In-One Architektur (AIO)</figcaption>
 </figure>
-<h3 id="bereitstellung">Bereitstellung</h3>
+<h3 id="deployment">Bereitstellung</h3>
 <p>Um den All-in-One-Container bereitzustellen, müssen Sie nur den folgenden Befehl ausführen:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
@@ -1576,6 +1576,42 @@
 <li>7000/tcp für den Zugriff auf die Web-UI ohne BunkerWeb davor (nicht für die Produktion empfohlen)</li>
 <li>8888/tcp für die API, wenn <code>SERVICE_API=yes</code> (interne Verwendung; vorzugsweise über BunkerWeb als Reverse-Proxy bereitstellen, anstatt direkt zu veröffentlichen)</li>
 </ul>
+<p>Ein benanntes Volume (oder Bind-Mount) ist erforderlich, um die unter <code>/data</code> gespeicherten SQLite-Datenbanken, Caches und Backups zu persistieren:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:testing</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
+<span class="nn">...</span>
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Verwendung eines lokalen Ordners für persistente Daten</p>
+<p>Der All-In-One-Container führt seine Dienste als <strong>unprivilegierter Benutzer mit der UID 101 und GID 101</strong> aus. Das erhöht die Sicherheit: Selbst wenn eine Komponente kompromittiert wird, erhält sie keine Root-Rechte (UID/GID 0) auf dem Host.</p>
+<p>Wenn Sie einen <strong>lokalen Ordner</strong> einbinden, stellen Sie sicher, dass die Verzeichnisberechtigungen es diesem unprivilegierten Benutzer erlauben, darin zu schreiben:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Oder, falls der Ordner bereits existiert:</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Bei Verwendung von <a href="https://docs.docker.com/engine/security/rootless">Docker im rootless-Modus</a> oder <a href="https://podman.io/">Podman</a> werden Container-UIDs/GIDs auf andere Werte des Hosts abgebildet. Prüfen Sie daher zuerst Ihre subuid-/subgid-Bereiche:</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>Beginnt der Bereich beispielsweise bei <strong>100000</strong>, lautet die zugeordnete UID/GID <strong>100100</strong> (100000 + 100):</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>Oder, wenn der Ordner bereits existiert:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+</div>
 <p>Das All-In-One-Image enthält mehrere integrierte Dienste, die über Umgebungsvariablen gesteuert werden können:</p>
 <ul>
 <li><code>SERVICE_UI=yes</code> (Standard) - Aktiviert den Web-UI-Dienst</li>
@@ -1584,6 +1620,7 @@
 <li><code>AUTOCONF_MODE=no</code> (Standard) - Aktiviert den Autoconf-Dienst</li>
 <li><code>USE_REDIS=yes</code> (Standard) - Aktiviert die integrierte <a href="#redis-integration">Redis-Instanz</a></li>
 <li><code>USE_CROWDSEC=no</code> (Standard) - Die <a href="#crowdsec-integration">CrowdSec-Integration</a> ist standardmäßig deaktiviert</li>
+<li><code>HIDE_SERVICE_LOGS=</code> (optional) - Kommagetrennte Liste von Diensten, deren Ausgaben in den Container-Logs unterdrückt werden. Unterstützte Werte: <code>api</code>, <code>autoconf</code>, <code>bunkerweb</code>, <code>crowdsec</code>, <code>redis</code>, <code>scheduler</code>, <code>ui</code>, <code>nginx.access</code>, <code>nginx.error</code>, <code>modsec</code>. Die Dateien in <code>/var/log/bunkerweb/&lt;service&gt;.log</code> werden weiterhin beschrieben.</li>
 </ul>
 <h3 id="api-integration">API-Integration</h3>
 <p>Das All-In-One-Image enthält die BunkerWeb-API. Sie ist standardmäßig deaktiviert und kann durch Setzen von <code>SERVICE_API=yes</code> aktiviert werden.</p>
@@ -1643,10 +1680,13 @@
 <p>Folgen Sie den nächsten Schritten im <a href="../quickstart-guide/#complete-the-setup-wizard">Schnellstart-Leitfaden</a>, um die Web-UI einzurichten.</p>
 </blockquote>
 <h3 id="redis-integration">Redis-Integration</h3>
-<p>Das BunkerWeb <strong>All-In-One</strong>-Image enthält standardmäßig Redis für die <a href="../advanced/#persistence-of-bans-and-reports">Persistenz von Sperren und Berichten</a>. Um Redis zu verwalten:</p>
+<p>Das BunkerWeb <strong>All-In-One</strong>-Image enthält standardmäßig Redis für die <a href="../advanced/#persistence-of-bans-and-reports">Persistenz von Sperren und Berichten</a>. Beachten Sie dabei:</p>
 <ul>
-<li>Um Redis zu deaktivieren, setzen Sie <code>USE_REDIS=no</code> oder verweisen Sie <code>REDIS_HOST</code> auf einen externen Host.</li>
-<li>Redis-Protokolle werden mit dem Präfix <code>[REDIS]</code> in den Docker-Protokollen und in <code>/var/log/bunkerweb/redis.log</code> angezeigt.</li>
+<li>Der eingebettete Redis-Dienst startet nur, wenn <code>USE_REDIS=yes</code> <strong>und</strong> <code>REDIS_HOST</code> auf dem Standardwert (<code>127.0.0.1</code>/<code>localhost</code>) bleibt.</li>
+<li>Er lauscht auf dem Loopback-Interface des Containers und ist daher nur aus dem Container heraus erreichbar – nicht von anderen Containern oder vom Host.</li>
+<li>Überschreiben Sie <code>REDIS_HOST</code> nur, wenn ein externer Redis-/Valkey-Endpunkt verfügbar ist; andernfalls wird die eingebettete Instanz nicht gestartet.</li>
+<li>Um Redis vollständig zu deaktivieren, setzen Sie <code>USE_REDIS=no</code>.</li>
+<li>Redis-Protokolle erscheinen mit dem Präfix <code>[REDIS]</code> in den Docker-Protokollen sowie in <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
 <h3 id="crowdsec-integration">CrowdSec-Integration</h3>
 <p>Das BunkerWeb <strong>All-In-One</strong>-Docker-Image wird mit vollständig integriertem CrowdSec geliefert – keine zusätzlichen Container oder manuelle Einrichtung erforderlich. Befolgen Sie die nachstehenden Schritte, um CrowdSec in Ihrer Bereitstellung zu aktivieren, zu konfigurieren und zu erweitern.</p>
@@ -1674,7 +1714,7 @@ Beim<span class="w"> </span>ersten<span class="w"> </span>Start<span class="w"> 
 
 <span class="p">|</span><span class="w"> </span>Typ<span class="w">          </span><span class="p">|</span><span class="w"> </span>Name<span class="w">                                    </span><span class="p">|</span><span class="w"> </span>Zweck<span class="w">                                                                                                                                                                                                                                              </span><span class="p">|</span>
 <span class="p">|</span><span class="w"> </span>------------<span class="w"> </span><span class="p">|</span><span class="w"> </span>---------------------------------------<span class="w"> </span><span class="p">|</span><span class="w"> </span>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------<span class="w"> </span><span class="p">|</span>
-<span class="p">|</span><span class="w"> </span>**Sammlung**<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="sb">`</span>crowdsecurity/nginx<span class="sb">`</span><span class="w">                   </span><span class="p">|</span><span class="w"> </span>Verteidigt<span class="w"> </span>Nginx-Server<span class="w"> </span>gegen<span class="w"> </span>eine<span class="w"> </span>breite<span class="w"> </span>Palette<span class="w"> </span>von<span class="w"> </span>HTTP-basierten<span class="w"> </span>Angriffen,<span class="w"> </span>von<span class="w"> </span>Brute-Force-<span class="w"> </span>bis<span class="w"> </span>zu<span class="w"> </span>Injektionsversuchen.<span class="w">                                                                                                                       </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>**Sammlung**<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="sb">`</span>bunkerity/bunkerweb<span class="sb">`</span><span class="w">                   </span><span class="p">|</span><span class="w"> </span>Verteidigt<span class="w"> </span>Nginx-Server<span class="w"> </span>gegen<span class="w"> </span>eine<span class="w"> </span>breite<span class="w"> </span>Palette<span class="w"> </span>von<span class="w"> </span>HTTP-basierten<span class="w"> </span>Angriffen,<span class="w"> </span>von<span class="w"> </span>Brute-Force-<span class="w"> </span>bis<span class="w"> </span>zu<span class="w"> </span>Injektionsversuchen.<span class="w">                                                                                                                       </span><span class="p">|</span>
 <span class="p">|</span><span class="w"> </span>**Sammlung**<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="sb">`</span>crowdsecurity/appsec-virtual-patching<span class="sb">`</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>Liefert<span class="w"> </span>einen<span class="w"> </span>dynamisch<span class="w"> </span>aktualisierten<span class="w"> </span>WAF-artigen<span class="w"> </span>Regelsatz,<span class="w"> </span>der<span class="w"> </span>auf<span class="w"> </span>bekannte<span class="w"> </span>CVEs<span class="w"> </span>abzielt<span class="w"> </span>und<span class="w"> </span>täglich<span class="w"> </span>automatisch<span class="w"> </span>gepatcht<span class="w"> </span>wird,<span class="w"> </span>um<span class="w"> </span>Webanwendungen<span class="w"> </span>vor<span class="w"> </span>neu<span class="w"> </span>entdeckten<span class="w"> </span>Schwachstellen<span class="w"> </span>zu<span class="w"> </span>schützen.<span class="w">                                                </span><span class="p">|</span>
 <span class="p">|</span><span class="w"> </span>**Sammlung**<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="sb">`</span>crowdsecurity/appsec-generic-rules<span class="sb">`</span><span class="w">    </span><span class="p">|</span><span class="w"> </span>Ergänzt<span class="w"> </span><span class="sb">`</span>crowdsecurity/appsec-virtual-patching<span class="sb">`</span><span class="w"> </span>mit<span class="w"> </span>Heuristiken<span class="w"> </span>für<span class="w"> </span>generische<span class="w"> </span>Angriffsmuster<span class="w"> </span>auf<span class="w"> </span>Anwendungsebene<span class="w"> </span>–<span class="w"> </span>wie<span class="w"> </span>Enumeration,<span class="w"> </span>Pfad-Traversal<span class="w"> </span>und<span class="w"> </span>automatisierte<span class="w"> </span>Sonden<span class="w"> </span>–<span class="w"> </span>und<span class="w"> </span>füllt<span class="w"> </span>Lücken,<span class="w"> </span>wo<span class="w"> </span>CVE-spezifische<span class="w"> </span>Regeln<span class="w"> </span>noch<span class="w"> </span>nicht<span class="w"> </span>existieren.<span class="w"> </span><span class="p">|</span>
 <span class="p">|</span><span class="w"> </span>**Parser**<span class="w">   </span><span class="p">|</span><span class="w"> </span><span class="sb">`</span>crowdsecurity/geoip-enrich<span class="sb">`</span><span class="w">            </span><span class="p">|</span><span class="w"> </span>Bereichert<span class="w"> </span>Ereignisse<span class="w"> </span>mit<span class="w"> </span>GeoIP-Kontext<span class="w">                                                                                                                                                                                                            </span><span class="p">|</span>
@@ -1685,12 +1725,17 @@ Beim<span class="w"> </span>ersten<span class="w"> </span>Start<span class="w"> 
 Das<span class="w"> </span>Einstiegsskript<span class="w"> </span>ruft<span class="w"> </span>auf:
 
 <span class="sb">```</span>bash
-cscli<span class="w"> </span>install<span class="w"> </span>collection<span class="w"> </span>crowdsecurity/nginx
+cscli<span class="w"> </span>hub<span class="w"> </span>update
+cscli<span class="w"> </span>install<span class="w"> </span>collection<span class="w"> </span>bunkerity/bunkerweb
 cscli<span class="w"> </span>install<span class="w"> </span>collection<span class="w"> </span>crowdsecurity/appsec-virtual-patching
 cscli<span class="w"> </span>install<span class="w"> </span>collection<span class="w"> </span>crowdsecurity/appsec-generic-rules
 cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w">     </span>crowdsecurity/geoip-enrich
 </code></pre></div>
 </details>
+<div class="admonition info">
+<p class="admonition-title">Sammlung fehlt in Docker?</p>
+<p>Wenn <code>cscli collections list</code> im Container <code>bunkerity/bunkerweb</code> weiterhin nicht anzeigt, führen Sie <code>docker exec -it bunkerweb-aio cscli hub update</code> aus und starten Sie anschließend den Container neu (<code>docker restart bunkerweb-aio</code>), um den lokalen Hub-Cache zu aktualisieren.</p>
+</div>
 <hr />
 <h4 id="hinzufugen-zusatzlicher-sammlungen">Hinzufügen zusätzlicher Sammlungen</h4>
 <p>Benötigen Sie mehr Abdeckung? Definieren Sie <code>CROWDSEC_EXTRA_COLLECTIONS</code> mit einer durch Leerzeichen getrennten Liste von Hub-Sammlungen:</p>
@@ -1801,6 +1846,10 @@ cscli<span class="w"> </span>install<span class="w"> </span>parser<span class="w
 <div class="admonition info">
 <p class="admonition-title">Vollständige Liste</p>
 <p>Die vollständige Liste der Umgebungsvariablen finden Sie im <a href="../features/">Einstellungsbereich</a> der Dokumentation.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Beschriftete Container überspringen</p>
+<p>Wenn ein Container von autoconf ignoriert werden soll, setzen Sie <code>DOCKER_IGNORE_LABELS</code> auf dem Controller. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Label-Schlüsseln an (zum Beispiel <code>bunkerweb.SERVER_NAME</code>) oder nur das Suffix (<code>SERVER_NAME</code>). Jeder Container oder jede benutzerdefinierte Konfigurationsquelle mit einem übereinstimmenden Label wird bei der Erkennung übersprungen, und das Label wird bei der Übersetzung der Einstellungen ignoriert.</p>
 </div>
 <h3 id="verwendung-von-docker-secrets">Verwendung von Docker-Secrets</h3>
 <p>Anstatt sensible Einstellungen über Umgebungsvariablen zu übergeben, können Sie sie als Docker-Secrets speichern. Erstellen Sie für jede Einstellung, die Sie sichern möchten, ein Docker-Secret mit dem Namen, der dem Einstellungsschlüssel entspricht (in Großbuchstaben). Die Einstiegsskripte von BunkerWeb laden Secrets automatisch aus <code>/run/secrets</code> und exportieren sie als Umgebungsvariablen.</p>
@@ -2255,12 +2304,12 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--yes<
 - Der interaktive Modus (Standard) fordert zur Eingabe fehlender erforderlicher Werte auf
 - Der nicht-interaktive Modus (<code>--yes</code>) erfordert, dass alle erforderlichen Optionen über die Befehlszeile bereitgestellt werden</p>
 </div>
-<h4 id="crowdsec-integration-mit-dem-skript">CrowdSec-Integration mit dem Skript</h4>
+<h4 id="crowdsec-integration-with-the-script">CrowdSec-Integration mit dem Skript</h4>
 <p>Wenn Sie sich für die Installation von CrowdSec während der interaktiven Einrichtung entscheiden, automatisiert das Skript die Integration mit BunkerWeb vollständig:</p>
 <ul>
 <li>Es fügt das offizielle CrowdSec-Repository hinzu und installiert den Agenten.</li>
 <li>Es erstellt eine neue Erfassungsdatei, damit CrowdSec die Protokolle von BunkerWeb (<code>access.log</code>, <code>error.log</code> und <code>modsec_audit.log</code>) parsen kann.</li>
-<li>Es installiert wesentliche Sammlungen (<code>crowdsecurity/nginx</code>) und Parser (<code>crowdsecurity/geoip-enrich</code>).</li>
+<li>Es installiert wesentliche Sammlungen (<code>bunkerity/bunkerweb</code>) und Parser (<code>crowdsecurity/geoip-enrich</code>).</li>
 <li>Es registriert einen Bouncer für BunkerWeb und konfiguriert den API-Schlüssel automatisch in <code>/etc/bunkerweb/variables.env</code>.</li>
 <li>Wenn Sie auch die <strong>AppSec-Komponente</strong> auswählen, installiert es die Sammlungen <code>appsec-virtual-patching</code> und <code>appsec-generic-rules</code> und konfiguriert den AppSec-Endpunkt für BunkerWeb.</li>
 </ul>
@@ -2664,7 +2713,20 @@ export UI_WIZARD=no
   </p>
 <figcaption>Kubernetes-Integration</figcaption>
 </figure>
-<p>Um die Konfiguration von BunkerWeb-Instanzen in einer Kubernetes-Umgebung zu automatisieren, dient der Autoconf-Dienst als <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress-Controller</a>. Er konfiguriert die BunkerWeb-Instanzen basierend auf <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress-Ressourcen</a> und überwacht auch andere Kubernetes-Objekte wie <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a> für benutzerdefinierte Konfigurationen.</p>
+<p>Um die Konfiguration von BunkerWeb-Instanzen in einer Kubernetes-Umgebung zu automatisieren,
+dient der Autoconf-Dienst als <a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress-Controller</a>.
+Er konfiguriert die BunkerWeb-Instanzen basierend auf <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Ingress-Ressourcen</a>
+und überwacht auch andere Kubernetes-Objekte wie <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>
+für benutzerdefinierte Konfigurationen.</p>
+<div class="admonition info">
+<p class="admonition-title">ConfigMap-Abgleich</p>
+<ul>
+<li>Der Ingress-Controller verwaltet nur ConfigMaps, die die Annotation <code>bunkerweb.io/CONFIG_TYPE</code> enthalten.</li>
+<li>Ergänzen Sie <code>bunkerweb.io/CONFIG_SITE</code>, wenn die Konfiguration auf einen einzelnen Dienst eingeschränkt werden soll
+  (der Servername muss bereits existieren); lassen Sie die Annotation weg, um sie global anzuwenden.</li>
+<li>Wird die Annotation entfernt oder die ConfigMap gelöscht, verschwindet die zugehörige benutzerdefinierte Konfiguration in BunkerWeb.</li>
+</ul>
+</div>
 <p>Für eine optimale Einrichtung wird empfohlen, BunkerWeb als <strong><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a></strong> zu definieren, was sicherstellt, dass auf allen Knoten ein Pod erstellt wird, während <strong>Autoconf und Scheduler</strong> als <strong>einzeln repliziertes <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a></strong> definiert werden.</p>
 <p>Angesichts des Vorhandenseins mehrerer BunkerWeb-Instanzen ist es erforderlich, einen gemeinsamen Datenspeicher zu implementieren, der als <a href="https://redis.io/">Redis</a>- oder <a href="https://valkey.io/">Valkey</a>-Dienst realisiert wird. Dieser Dienst wird von den Instanzen genutzt, um Daten zwischen ihnen zu cachen und zu teilen. Weitere Informationen zu den Redis/Valkey-Einstellungen finden Sie <a href="../features/#redis">hier</a>.</p>
 <div class="admonition info">
@@ -2692,6 +2754,10 @@ export UI_WIZARD=no
 <h3 id="ingress-ressourcen">Ingress-Ressourcen</h3>
 <p>Sobald der BunkerWeb-Kubernetes-Stack erfolgreich eingerichtet und betriebsbereit ist (weitere Informationen finden Sie in den Autoconf-Protokollen), können Sie mit der Bereitstellung von Webanwendungen im Cluster fortfahren und Ihre Ingress-Ressource deklarieren.</p>
 <p>Es ist wichtig zu beachten, dass die BunkerWeb-Einstellungen als Annotationen für die Ingress-Ressource angegeben werden müssen. Für den Domain-Teil verwenden Sie bitte den speziellen Wert <strong><code>bunkerweb.io</code></strong>. Durch das Einfügen der entsprechenden Annotationen können Sie BunkerWeb entsprechend für die Ingress-Ressource konfigurieren.</p>
+<div class="admonition tip">
+<p class="admonition-title">Störende Annotationen ignorieren</p>
+<p>Wenn einige Annotationen autoconf nicht beeinflussen sollen, setzen Sie <code>KUBERNETES_IGNORE_ANNOTATIONS</code> auf dem Controller-Deployment. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Annotationsschlüsseln an (zum Beispiel <code>bunkerweb.io/EXTRA_FOO</code>) oder nur das Suffix (<code>EXTRA_FOO</code>). Übereinstimmende Annotationen werden aus den vom Ingress abgeleiteten Einstellungen entfernt, und Pods, die sie tragen, werden bei der Instanzerkennung vollständig übersprungen.</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">TLS-Unterstützung</p>
 <p>Der BunkerWeb-Ingress-Controller unterstützt vollständig benutzerdefinierte HTTPS-Zertifikate unter Verwendung der TLS-Spezifikation, wie im Beispiel gezeigt. Die Konfiguration von Lösungen wie <code>cert-manager</code> zur automatischen Generierung von TLS-Secrets liegt außerhalb des Geltungsbereichs dieser Dokumentation.</p>
@@ -3147,6 +3213,10 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <div class="admonition info">
 <p class="admonition-title">Obligatorische Swarm-Einstellung</p>
 <p>Bitte beachten Sie, dass die Umgebungsvariable <code>SWARM_MODE: "yes"</code> bei Verwendung der Swarm-Integration obligatorisch ist.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Beschriftete Dienste überspringen</p>
+<p>Müssen Sie einen Swarm-Dienst von autoconf ausschließen? Setzen Sie <code>SWARM_IGNORE_LABELS</code> auf dem Controller. Geben Sie eine durch Leerzeichen oder Kommas getrennte Liste von Label-Schlüsseln an (z.B. <code>bunkerweb.SERVER_NAME</code>) oder Suffixen (<code>SERVER_NAME</code>), und jeder Dienst mit diesen Labels wird bei der Erkennung ignoriert.</p>
 </div>
 <h3 id="swarm-dienste">Swarm-Dienste</h3>
 <p>Sobald der BunkerWeb-Swarm-Stack eingerichtet ist und läuft (weitere Informationen finden Sie in den Autoconf- und Scheduler-Protokollen), können Sie Webanwendungen im Cluster bereitstellen und Labels verwenden, um BunkerWeb dynamisch zu konfigurieren:</p>
