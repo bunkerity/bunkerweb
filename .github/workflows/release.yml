@@ -74,9 +74,6 @@ jobs:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         arch: [linux/arm64, linux/arm/v7, linux/arm/v6]
-        exclude:
-          - image: all-in-one
-            arch: linux/arm/v6
         include:
           - release: latest
             cache: false
@@ -221,14 +218,12 @@ jobs:
           - image: bunkerweb-all-in-one
             cache_from: all-in-one
             dockerfile: src/all-in-one/Dockerfile
-            platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
     uses: ./.github/workflows/push-docker.yml
     with:
       IMAGE: ${{ matrix.image }}
       TAGS: bunkerity/${{ matrix.image }}:${{ matrix.release }},bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ matrix.release }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }}
       CACHE_FROM: ${{ matrix.cache_from }}-${{ matrix.release }}
       DOCKERFILE: ${{ matrix.dockerfile }}
-      PLATFORMS: ${{ matrix.platforms || 'linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v6' }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}

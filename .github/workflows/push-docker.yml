@@ -15,10 +15,6 @@ on:
       DOCKERFILE:
         required: true
         type: string
-      PLATFORMS:
-        required: false
-        type: string
-        default: linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v6
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -71,57 +67,11 @@ jobs:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-      - name: Prepare build configuration
-        id: build-config
-        run: |
-          set -euo pipefail
-
-          platforms="${PLATFORMS//[[:space:]]/}"
-          if [ -z "$platforms" ]; then
-            echo "Platform list is empty" >&2
-            exit 1
-          fi
-
-          echo "platforms=$platforms" >> "$GITHUB_OUTPUT"
-
-          arm_platforms=""
-          echo "cache_from<<EOF" >> "$GITHUB_OUTPUT"
-          IFS=',' read -r -a entries <<< "$platforms"
-          for platform in "${entries[@]}"; do
-            case "$platform" in
-              linux/amd64) suffix=amd64 ;;
-              linux/386) suffix=386 ;;
-              linux/arm64) suffix=arm64 ;;
-              linux/arm/v7) suffix=armv7 ;;
-              linux/arm/v6) suffix=armv6 ;;
-              *) echo "Unsupported platform $platform" >&2; exit 1 ;;
-            esac
-
-            if [[ "$platform" == linux/arm* ]]; then
-              if [ -z "$arm_platforms" ]; then
-                arm_platforms="$platform"
-              else
-                arm_platforms="$arm_platforms,$platform"
-              fi
-            fi
-
-            echo "type=registry,ref=docker.io/bunkerity/bw-images-cache:${CACHE_FROM_BASE}-${suffix}" >> "$GITHUB_OUTPUT"
-          done
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-          if [ -z "$arm_platforms" ]; then
-            arm_platforms="linux/arm64"
-          fi
-
-          echo "arm_platforms=$arm_platforms" >> "$GITHUB_OUTPUT"
-        env:
-          PLATFORMS: ${{ inputs.PLATFORMS }}
-          CACHE_FROM_BASE: ${{ inputs.CACHE_FROM }}
       - name: Setup Buildx (ARM)
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         with:
           endpoint: ssh://root@arm
-          platforms: ${{ steps.build-config.outputs.arm_platforms }}
+          platforms: linux/arm64,linux/arm/v7,linux/arm/v6
           buildkitd-flags: --debug
       # Compute metadata
       - name: Extract metadata
@@ -135,11 +85,16 @@ jobs:
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
-          platforms: ${{ steps.build-config.outputs.platforms }}
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v6
           push: true
           tags: ${{ inputs.TAGS }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: ${{ steps.build-config.outputs.cache_from }}
+          cache-from: |
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-amd64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-386
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-arm64
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv7
+            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv6
           outputs: type=registry,oci-mediatypes=true,compression=zstd
           provenance: true
           sbom: true
