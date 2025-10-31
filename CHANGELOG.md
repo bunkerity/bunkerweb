@@ -3,6 +3,7 @@
 ## v1.6.6-rc2 - ????/??/??
 
 - [FEATURE] Refactor `Let's Encrypt` mail handling: validate the configured email and warn if missing/invalid. Use normal registration when valid; otherwise add **--register-unsafely-without-email** to Certbot and log that choice.
+- [FEATURE] Add `DuckDNS` as a DNS provider in the `letsencrypt` plugin
 
 ## v1.6.6-rc1 - 2025/10/31
 

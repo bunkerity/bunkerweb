@@ -215,14 +215,14 @@ Compatibilidad con STREAM :x:
 
 Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.
 
-| Parámetro                    | Valor predeterminado | Contexto | Múltiple | Descripción                                                             |
-| ---------------------------- | -------------------- | -------- | -------- | ----------------------------------------------------------------------- |
-| `USE_ANTIDDOS`               | `no`                 | global   | no       | Enable or disable anti DDoS protection to mitigate high traffic spikes. |
-| `ANTIDDOS_METRICS_DICT_SIZE` | `10M`                | global   | no       | Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).           |
-| `ANTIDDOS_THRESHOLD`         | `100`                | global   | no       | Maximum suspicious requests allowed from a single IP before blocking.   |
-| `ANTIDDOS_WINDOW_TIME`       | `10`                 | global   | no       | Time window (seconds) to detect abnormal request patterns.              |
-| `ANTIDDOS_STATUS_CODES`      | `429 403 444`        | global   | no       | HTTP status codes treated as suspicious for DDoS analysis.              |
-| `ANTIDDOS_DISTINCT_IP`       | `5`                  | global   | no       | Minimum distinct IP count before enabling anti DDoS measures.           |
+|         Parámetro          |Valor predeterminado|Contexto|Múltiple|                              Descripción                              |
+|----------------------------|--------------------|--------|--------|-----------------------------------------------------------------------|
+|`USE_ANTIDDOS`              |`no`                |global  |no      |Enable or disable anti DDoS protection to mitigate high traffic spikes.|
+|`ANTIDDOS_METRICS_DICT_SIZE`|`10M`               |global  |no      |Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).          |
+|`ANTIDDOS_THRESHOLD`        |`100`               |global  |no      |Maximum suspicious requests allowed from a single IP before blocking.  |
+|`ANTIDDOS_WINDOW_TIME`      |`10`                |global  |no      |Time window (seconds) to detect abnormal request patterns.             |
+|`ANTIDDOS_STATUS_CODES`     |`429 403 444`       |global  |no      |HTTP status codes treated as suspicious for DDoS analysis.             |
+|`ANTIDDOS_DISTINCT_IP`      |`5`                 |global  |no      |Minimum distinct IP count before enabling anti DDoS measures.          |
 
 ## Antibot
 
@@ -745,18 +745,18 @@ Compatibilidad con STREAM :white_check_mark:
 
 Automatically backup your data to an S3 bucket
 
-| Parámetro                     | Valor predeterminado | Contexto | Múltiple | Descripción                                  |
-| ----------------------------- | -------------------- | -------- | -------- | -------------------------------------------- |
-| `USE_BACKUP_S3`               | `no`                 | global   | no       | Enable or disable the S3 backup feature      |
-| `BACKUP_S3_SCHEDULE`          | `daily`              | global   | no       | The frequency of the backup                  |
-| `BACKUP_S3_ROTATION`          | `7`                  | global   | no       | The number of backups to keep                |
-| `BACKUP_S3_ENDPOINT`          |                      | global   | no       | The S3 endpoint                              |
-| `BACKUP_S3_BUCKET`            |                      | global   | no       | The S3 bucket                                |
-| `BACKUP_S3_DIR`               |                      | global   | no       | The S3 directory                             |
-| `BACKUP_S3_REGION`            |                      | global   | no       | The S3 region                                |
-| `BACKUP_S3_ACCESS_KEY_ID`     |                      | global   | no       | The S3 access key ID                         |
-| `BACKUP_S3_ACCESS_KEY_SECRET` |                      | global   | no       | The S3 access key secret                     |
-| `BACKUP_S3_COMP_LEVEL`        | `6`                  | global   | no       | The compression level of the backup zip file |
+|          Parámetro          |Valor predeterminado|Contexto|Múltiple|                Descripción                 |
+|-----------------------------|--------------------|--------|--------|--------------------------------------------|
+|`USE_BACKUP_S3`              |`no`                |global  |no      |Enable or disable the S3 backup feature     |
+|`BACKUP_S3_SCHEDULE`         |`daily`             |global  |no      |The frequency of the backup                 |
+|`BACKUP_S3_ROTATION`         |`7`                 |global  |no      |The number of backups to keep               |
+|`BACKUP_S3_ENDPOINT`         |                    |global  |no      |The S3 endpoint                             |
+|`BACKUP_S3_BUCKET`           |                    |global  |no      |The S3 bucket                               |
+|`BACKUP_S3_DIR`              |                    |global  |no      |The S3 directory                            |
+|`BACKUP_S3_REGION`           |                    |global  |no      |The S3 region                               |
+|`BACKUP_S3_ACCESS_KEY_ID`    |                    |global  |no      |The S3 access key ID                        |
+|`BACKUP_S3_ACCESS_KEY_SECRET`|                    |global  |no      |The S3 access key secret                    |
+|`BACKUP_S3_COMP_LEVEL`       |`6`                 |global  |no      |The compression level of the backup zip file|
 
 ## Bad behavior
 
@@ -1403,12 +1403,12 @@ Siga estos pasos para configurar y usar la función de Caché del Cliente:
 
 ### Ajustes de Configuración
 
-| Ajuste                    | Valor por defecto          | Contexto  | Múltiple | Descripción                                                                                                                                    |
-| ------------------------- | -------------------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_CLIENT_CACHE`        | `no`                       | multisite | no       | **Habilitar Caché del Cliente:** Establezca en `yes` para habilitar el almacenamiento en caché del lado del cliente de los archivos estáticos. |
-| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png      | bmp                                                                                                                                            | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | global | no | **Extensiones Cacheadas:** Lista de extensiones de archivo (separadas por barras verticales) que deben ser almacenadas en caché por el cliente. |
-| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | no       | **Encabezado Cache-Control:** Valor para el encabezado HTTP Cache-Control para controlar el comportamiento del almacenamiento en caché.        |
-| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | no       | **Habilitar ETags:** Establezca en `yes` para enviar el encabezado HTTP ETag para los recursos estáticos.                                      |
+| Ajuste                    | Valor por defecto                                                         | Contexto  | Múltiple | Descripción                                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_CLIENT_CACHE`        | `no`                                                                      | multisite | no       | **Habilitar Caché del Cliente:** Establezca en `yes` para habilitar el almacenamiento en caché del lado del cliente de los archivos estáticos.  |
+| `CLIENT_CACHE_EXTENSIONS` | `jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2` | global    | no       | **Extensiones Cacheadas:** Lista de extensiones de archivo (separadas por barras verticales) que deben ser almacenadas en caché por el cliente. |
+| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000`                                                | multisite | no       | **Encabezado Cache-Control:** Valor para el encabezado HTTP Cache-Control para controlar el comportamiento del almacenamiento en caché.         |
+| `CLIENT_CACHE_ETAG`       | `yes`                                                                     | multisite | no       | **Habilitar ETags:** Establezca en `yes` para enviar el encabezado HTTP ETag para los recursos estáticos.                                       |
 
 !!! tip "Optimizando los Ajustes de Caché"
     Para contenido que se actualiza con frecuencia, considere usar valores de `max-age` más cortos. Para contenido que cambia raramente (como bibliotecas de JavaScript versionadas o logotipos), use tiempos de caché más largos. El valor por defecto de 15552000 segundos (180 días) es apropiado para la mayoría de los activos estáticos.
@@ -2779,6 +2779,7 @@ El complemento de Let's Encrypt admite una amplia gama de proveedores de DNS par
 | `domainoffensive` | Domain-Offensive | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md) |
 | `dnsimple`        | DNSimple         | `token`                                                                                                      |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                               |
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
+| `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (predeterminado: `service_account`)<br>`auth_uri` (predeterminado: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (predeterminado: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (predeterminado: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentación](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
@@ -3034,27 +3035,27 @@ Compatibilidad con STREAM :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
 
-| Parámetro                                 | Valor predeterminado | Contexto | Múltiple | Descripción                                                        |
-| ----------------------------------------- | -------------------- | -------- | -------- | ------------------------------------------------------------------ |
-| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`                | global   | no       | Shared dict size (datastore for all healthchecks).                 |
-| `LOADBALANCER_UPSTREAM_NAME`              |                      | global   | sí       | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
-| `LOADBALANCER_UPSTREAM_SERVERS`           |                      | global   | sí       | List of servers/IPs in the server group.                           |
-| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin`        | global   | sí       | Load balancing mode (round-robin or sticky).                       |
-| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`                 | global   | sí       | Sticky session method (ip or cookie).                              |
-| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`                 | global   | sí       | Dynamically resolve upstream hostnames.                            |
-| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |                      | global   | sí       | Number of keepalive connections to cache per worker.               |
-| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`                | global   | sí       | Keepalive timeout for upstream connections.                        |
-| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`                 | global   | sí       | Keepalive time for upstream connections.                           |
-| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`            | global   | sí       | The healthcheck URL.                                               |
-| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`               | global   | sí       | Healthcheck interval in milliseconds.                              |
-| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`               | global   | sí       | Healthcheck timeout in milliseconds.                               |
-| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`                  | global   | sí       | Number of failed healthchecks before marking the server as down.   |
-| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`                  | global   | sí       | Number of successful healthchecks before marking the server as up. |
-| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`                | global   | sí       | HTTP status considered valid in healthchecks.                      |
-| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`                 | global   | sí       | Maximum number of concurrent healthchecks.                         |
-| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`               | global   | sí       | Type of healthcheck (http or https).                               |
-| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`                | global   | sí       | Verify SSL certificate in healthchecks.                            |
-| `LOADBALANCER_HEALTHCHECK_HOST`           |                      | global   | sí       | Host header for healthchecks (useful for HTTPS).                   |
+|                Parámetro                |Valor predeterminado|Contexto|Múltiple|                           Descripción                            |
+|-----------------------------------------|--------------------|--------|--------|------------------------------------------------------------------|
+|`LOADBALANCER_HEALTHCHECK_DICT_SIZE`     |`10m`               |global  |no      |Shared dict size (datastore for all healthchecks).                |
+|`LOADBALANCER_UPSTREAM_NAME`             |                    |global  |sí      |Name of the upstream (used in REVERSE_PROXY_HOST).                |
+|`LOADBALANCER_UPSTREAM_SERVERS`          |                    |global  |sí      |List of servers/IPs in the server group.                          |
+|`LOADBALANCER_UPSTREAM_MODE`             |`round-robin`       |global  |sí      |Load balancing mode (round-robin or sticky).                      |
+|`LOADBALANCER_UPSTREAM_STICKY_METHOD`    |`ip`                |global  |sí      |Sticky session method (ip or cookie).                             |
+|`LOADBALANCER_UPSTREAM_RESOLVE`          |`no`                |global  |sí      |Dynamically resolve upstream hostnames.                           |
+|`LOADBALANCER_UPSTREAM_KEEPALIVE`        |                    |global  |sí      |Number of keepalive connections to cache per worker.              |
+|`LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT`|`60s`               |global  |sí      |Keepalive timeout for upstream connections.                       |
+|`LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`   |`1h`                |global  |sí      |Keepalive time for upstream connections.                          |
+|`LOADBALANCER_HEALTHCHECK_URL`           |`/status`           |global  |sí      |The healthcheck URL.                                              |
+|`LOADBALANCER_HEALTHCHECK_INTERVAL`      |`2000`              |global  |sí      |Healthcheck interval in milliseconds.                             |
+|`LOADBALANCER_HEALTHCHECK_TIMEOUT`       |`1000`              |global  |sí      |Healthcheck timeout in milliseconds.                              |
+|`LOADBALANCER_HEALTHCHECK_FALL`          |`3`                 |global  |sí      |Number of failed healthchecks before marking the server as down.  |
+|`LOADBALANCER_HEALTHCHECK_RISE`          |`1`                 |global  |sí      |Number of successful healthchecks before marking the server as up.|
+|`LOADBALANCER_HEALTHCHECK_VALID_STATUSES`|`200`               |global  |sí      |HTTP status considered valid in healthchecks.                     |
+|`LOADBALANCER_HEALTHCHECK_CONCURRENCY`   |`10`                |global  |sí      |Maximum number of concurrent healthchecks.                        |
+|`LOADBALANCER_HEALTHCHECK_TYPE`          |`http`              |global  |sí      |Type of healthcheck (http or https).                              |
+|`LOADBALANCER_HEALTHCHECK_SSL_VERIFY`    |`yes`               |global  |sí      |Verify SSL certificate in healthchecks.                           |
+|`LOADBALANCER_HEALTHCHECK_HOST`          |                    |global  |sí      |Host header for healthchecks (useful for HTTPS).                  |
 
 ## Metrics
 
@@ -3309,9 +3310,9 @@ Ya sea que necesite restringir los métodos HTTP, gestionar los tamaños de las 
         -   Reduce la superficie de ataque al deshabilitar métodos potencialmente dañinos
         -   Bloquea las técnicas de enumeración de métodos HTTP utilizadas por los atacantes
 
-| Ajuste            | Valor por defecto | Contexto | Múltiple | Descripción |
-| ----------------- | ----------------- | -------- | -------- | ----------- |
-| `ALLOWED_METHODS` | `GET              | POST     | HEAD`    | multisite   | no | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. |
+| Ajuste            | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                     |
+| ----------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `ALLOWED_METHODS` | `GET|POST|HEAD` | multisite | no       | **Métodos HTTP:** Lista de métodos HTTP permitidos, separados por caracteres de barra vertical. |
 
     !!! abstract "CORS y Solicitudes de Pre-vuelo"
         Si su aplicación admite [Intercambio de Recursos de Origen Cruzado (CORS)](#cors), debe incluir el método `OPTIONS` en el ajuste `ALLOWED_METHODS` para manejar las solicitudes de pre-vuelo. Esto garantiza la funcionalidad adecuada para los navegadores que realizan solicitudes de origen cruzado.
@@ -3760,11 +3761,11 @@ Compatibilidad con STREAM :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-| Parámetro                      | Valor predeterminado | Contexto | Múltiple | Descripción                                                                 |
-| ------------------------------ | -------------------- | -------- | -------- | --------------------------------------------------------------------------- |
-| `USE_MONITORING`               | `yes`                | global   | no       | Enable monitoring of BunkerWeb.                                             |
-| `MONITORING_METRICS_DICT_SIZE` | `10M`                | global   | no       | Size of the dict to store monitoring metrics.                               |
-| `MONITORING_IGNORE_URLS`       |                      | global   | no       | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
+|          Parámetro           |Valor predeterminado|Contexto|Múltiple|                                Descripción                                |
+|------------------------------|--------------------|--------|--------|---------------------------------------------------------------------------|
+|`USE_MONITORING`              |`yes`               |global  |no      |Enable monitoring of BunkerWeb.                                            |
+|`MONITORING_METRICS_DICT_SIZE`|`10M`               |global  |no      |Size of the dict to store monitoring metrics.                              |
+|`MONITORING_IGNORE_URLS`      |                    |global  |no      |List of URLs to ignore when monitoring separated with spaces (e.g. /health)|
 
 ## PHP
 
@@ -3923,13 +3924,13 @@ Compatibilidad con STREAM :x:
 
 Prometheus exporter for BunkerWeb internal metrics.
 
-| Parámetro                      | Valor predeterminado                                  | Contexto | Múltiple | Descripción                                                              |
-| ------------------------------ | ----------------------------------------------------- | -------- | -------- | ------------------------------------------------------------------------ |
-| `USE_PROMETHEUS_EXPORTER`      | `no`                                                  | global   | no       | Enable the Prometheus export.                                            |
-| `PROMETHEUS_EXPORTER_IP`       | `0.0.0.0`                                             | global   | no       | Listening IP of the Prometheus exporter.                                 |
-| `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global   | no       | Listening port of the Prometheus exporter.                               |
-| `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global   | no       | HTTP URL of the Prometheus exporter.                                     |
-| `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global   | no       | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
+|          Parámetro           |                Valor predeterminado                 |Contexto|Múltiple|                              Descripción                               |
+|------------------------------|-----------------------------------------------------|--------|--------|------------------------------------------------------------------------|
+|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global  |no      |Enable the Prometheus export.                                           |
+|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global  |no      |Listening IP of the Prometheus exporter.                                |
+|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global  |no      |Listening port of the Prometheus exporter.                              |
+|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global  |no      |HTTP URL of the Prometheus exporter.                                    |
+|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global  |no      |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
 
 ## Real IP
 
@@ -4306,20 +4307,20 @@ Compatibilidad con STREAM :x:
 
 Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
 
-| Parámetro                      | Valor predeterminado | Contexto | Múltiple | Descripción                                                                                                                        |
-| ------------------------------ | -------------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`                 | global   | no       | Enable sending the report via email.                                                                                               |
-| `USE_REPORTING_WEBHOOK`        | `no`                 | global   | no       | Enable sending the report via webhook.                                                                                             |
-| `REPORTING_SCHEDULE`           | `weekly`             | global   | no       | The frequency at which reports are sent.                                                                                           |
-| `REPORTING_WEBHOOK_URLS`       |                      | global   | no       | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
-| `REPORTING_SMTP_EMAILS`        |                      | global   | no       | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
-| `REPORTING_SMTP_HOST`          |                      | global   | no       | The host server used for SMTP sending.                                                                                             |
-| `REPORTING_SMTP_PORT`          | `465`                | global   | no       | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
-| `REPORTING_SMTP_FROM_EMAIL`    |                      | global   | no       | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
-| `REPORTING_SMTP_FROM_USER`     |                      | global   | no       | The user authentication value for sending via the from email address.                                                              |
-| `REPORTING_SMTP_FROM_PASSWORD` |                      | global   | no       | The password authentication value for sending via the from email address.                                                          |
-| `REPORTING_SMTP_SSL`           | `SSL`                | global   | no       | Determine whether or not to use a secure connection for SMTP.                                                                      |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report`   | global   | no       | The subject line of the email.                                                                                                     |
+|          Parámetro           |Valor predeterminado|Contexto|Múltiple|                                                           Descripción                                                            |
+|------------------------------|--------------------|--------|--------|----------------------------------------------------------------------------------------------------------------------------------|
+|`USE_REPORTING_SMTP`          |`no`                |global  |no      |Enable sending the report via email.                                                                                              |
+|`USE_REPORTING_WEBHOOK`       |`no`                |global  |no      |Enable sending the report via webhook.                                                                                            |
+|`REPORTING_SCHEDULE`          |`weekly`            |global  |no      |The frequency at which reports are sent.                                                                                          |
+|`REPORTING_WEBHOOK_URLS`      |                    |global  |no      |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
+|`REPORTING_SMTP_EMAILS`       |                    |global  |no      |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
+|`REPORTING_SMTP_HOST`         |                    |global  |no      |The host server used for SMTP sending.                                                                                            |
+|`REPORTING_SMTP_PORT`         |`465`               |global  |no      |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
+|`REPORTING_SMTP_FROM_EMAIL`   |                    |global  |no      |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
+|`REPORTING_SMTP_FROM_USER`    |                    |global  |no      |The user authentication value for sending via the from email address.                                                             |
+|`REPORTING_SMTP_FROM_PASSWORD`|                    |global  |no      |The password authentication value for sending via the from email address.                                                         |
+|`REPORTING_SMTP_SSL`          |`SSL`               |global  |no      |Determine whether or not to use a secure connection for SMTP.                                                                     |
+|`REPORTING_SMTP_SUBJECT`      |`BunkerWeb Report`  |global  |no      |The subject line of the email.                                                                                                    |
 
 ## Reverse proxy
 
@@ -5205,10 +5206,10 @@ Compatibilidad con STREAM :x:
 
 Integrate easily the BunkerWeb UI.
 
-| Parámetro | Valor predeterminado | Contexto  | Múltiple | Descripción                                  |
-| --------- | -------------------- | --------- | -------- | -------------------------------------------- |
-| `USE_UI`  | `no`                 | multisite | no       | Use UI                                       |
-| `UI_HOST` |                      | global    | no       | Address of the web UI used for initial setup |
+|Parámetro|Valor predeterminado|Contexto |Múltiple|                Descripción                 |
+|---------|--------------------|---------|--------|--------------------------------------------|
+|`USE_UI` |`no`                |multisite|no      |Use UI                                      |
+|`UI_HOST`|                    |global   |no      |Address of the web UI used for initial setup|
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5219,9 +5220,9 @@ Compatibilidad con STREAM :x:
 
 Add the possibility to manage users on the web interface
 
-| Parámetro           | Valor predeterminado | Contexto | Múltiple | Descripción                                     |
-| ------------------- | -------------------- | -------- | -------- | ----------------------------------------------- |
-| `USERS_REQUIRE_2FA` | `no`                 | global   | no       | Require two-factor authentication for all users |
+|     Parámetro     |Valor predeterminado|Contexto|Múltiple|                  Descripción                  |
+|-------------------|--------------------|--------|--------|-----------------------------------------------|
+|`USERS_REQUIRE_2FA`|`no`                |global  |no      |Require two-factor authentication for all users|
 
 ## Whitelist
 
