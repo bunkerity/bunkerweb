@@ -1,0 +1,1907 @@
+
+<!doctype html>
+<html lang="de" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation of BunkerWeb, the open source and next generation WAF.">
+      
+      
+      
+        <link rel="canonical" href="https://docs.bunkerweb.io/latest/de/api/">
+      
+      
+        <link rel="prev" href="../web-ui/">
+      
+      
+        <link rel="next" href="../upgrading/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>API - BunkerWeb Dokumentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+      
+
+
+    
+    
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+
+    <script defer>
+  // Lazy load images and embed youtube videos
+  window.addEventListener("load", () => {
+    document.querySelectorAll("[data-src]").forEach((el) => {
+      el.setAttribute("src", el.getAttribute("data-src"));
+    });
+  });
+  // Add missing label
+  try {
+    document
+      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
+      .setAttribute("aria-label", "Search in documentation");
+  } catch (err) {}
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        startBannerLoop();
+        // Try to get dynamic content
+        // Else keep static ones
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
+
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="API - BunkerWeb Dokumentation" >
+      
+        <meta  property="og:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  property="og:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/de/api.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://docs.bunkerweb.io/latest/de/api/" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="API - BunkerWeb Dokumentation" >
+      
+        <meta  name="twitter:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  name="twitter:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/de/api.png" >
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api" class="md-skip">
+          Zum Inhalt
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../../..">
+        <strong>Click here to view latest.</strong>
+    </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Kopfzeile">
+    <a href="../" title="BunkerWeb Dokumentation" class="md-header__button md-logo" aria-label="BunkerWeb Dokumentation" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BunkerWeb Dokumentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Sprache wechseln">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../api/" hreflang="en" class="md-select__link">
+              English - 🇬🇧
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../fr/api/" hreflang="fr" class="md-select__link">
+              Français - 🇫🇷
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="de" class="md-select__link">
+              Deutsch - 🇩🇪
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../es/api/" hreflang="es" class="md-select__link">
+              Español - 🇪🇸
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../zh/api/" hreflang="zh" class="md-select__link">
+              中文 - 🇨🇳
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Suche" placeholder="Suche" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Suche">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Zurücksetzen" aria-label="Zurücksetzen" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Suche wird initialisiert
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bunkerity/bunkerweb" title="Zum Repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Hauptnavigation" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Einführung
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Konzepte
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../integrations/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Integrationen
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart-guide/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Schnellstart
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../features/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Funktionen
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../advanced/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Erweiterte Nutzung
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../web-ui/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Weboberfläche
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../upgrading/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Aktualisierung
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../troubleshooting/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Fehlerbehebung
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../plugins/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Plugins
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../professional-services/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Professionelle Dienste
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../about/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Über
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="BunkerWeb Dokumentation" class="md-nav__button md-logo" aria-label="BunkerWeb Dokumentation" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    BunkerWeb Dokumentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bunkerity/bunkerweb" title="Zum Repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Einführung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Konzepte
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Integrationen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Schnellstart
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Funktionen
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Erweiterte Nutzung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Weboberfläche
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Inhaltsverzeichnis">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Inhaltsverzeichnis
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ubersicht" class="md-nav__link">
+    <span class="md-ellipsis">
+      Übersicht
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#voraussetzungen" class="md-nav__link">
+    <span class="md-ellipsis">
+      Voraussetzungen
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#highlights" class="md-nav__link">
+    <span class="md-ellipsis">
+      Highlights
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compose-vorlagen" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compose-Vorlagen
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Compose-Vorlagen">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#all-in-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      All-in-One
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentifizierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentifizierung
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentifizierung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#biscuit-fakten-und-prufungen" class="md-nav__link">
+    <span class="md-ellipsis">
+      Biscuit Fakten und Prüfungen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#berechtigungen-acl" class="md-nav__link">
+    <span class="md-ellipsis">
+      Berechtigungen (ACL)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#funktionsreferenz" class="md-nav__link">
+    <span class="md-ellipsis">
+      Funktionsreferenz
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Funktionsreferenz">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kern-und-authentifizierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kern und Authentifizierung
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instanzen-steuerungsebene" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instanzen-Steuerungsebene
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#globale-konfiguration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Globale Konfiguration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dienstlebenszyklus" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dienstlebenszyklus
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benutzerdefinierte-konfigurations-snippets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benutzerdefinierte Konfigurations-Snippets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sperren-orchestrierung" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sperren-Orchestrierung
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugin-verwaltung" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin-Verwaltung
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#job-cache-und-ausfuhrung" class="md-nav__link">
+    <span class="md-ellipsis">
+      Job-Cache und Ausführung
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#betriebshinweise" class="md-nav__link">
+    <span class="md-ellipsis">
+      Betriebshinweise
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ratenbegrenzung" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ratenbegrenzung
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#konfiguration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Konfiguration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Konfiguration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wie-die-konfiguration-geladen-wird" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wie die Konfiguration geladen wird
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentifizierung-und-benutzer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentifizierung und Benutzer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tls-und-netzwerk" class="md-nav__link">
+    <span class="md-ellipsis">
+      TLS und Netzwerk
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schnelle-rezepte-zur-ratenbegrenzung" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schnelle Rezepte zur Ratenbegrenzung
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#betrieb" class="md-nav__link">
+    <span class="md-ellipsis">
+      Betrieb
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Aktualisierung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Fehlerbehebung
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugins
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../professional-services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Professionelle Dienste
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Über
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="api">API</h1>
+<h2 id="ubersicht">Übersicht</h2>
+<p>Die BunkerWeb API ist die Steuerungsebene, die zur programmatischen Verwaltung von BunkerWeb-Instanzen verwendet wird: Auflisten und Verwalten von Instanzen, Neuladen/Stoppen, Handhabung von Sperren, Plugins, Jobs, Konfigurationen und mehr. Sie stellt eine dokumentierte FastAPI-Anwendung mit starker Authentifizierung, Autorisierung und Ratenbegrenzung bereit.</p>
+<p>Öffnen Sie die interaktive Dokumentation unter <code>/docs</code> (oder <code>&lt;root_path&gt;/docs</code>, wenn Sie <code>API_ROOT_PATH</code> gesetzt haben). Das OpenAPI-Schema ist unter <code>/openapi.json</code> verfügbar.</p>
+<div class="admonition warning">
+<p class="admonition-title">Sicherheit</p>
+<p>Die API ist eine privilegierte Steuerungsebene. Setzen Sie sie nicht ohne zusätzliche Schutzmaßnahmen im öffentlichen Internet aus.</p>
+<p>Beschränken Sie mindestens die Quell-IPs (<code>API_WHITELIST_IPS</code>), aktivieren Sie die Authentifizierung (<code>API_TOKEN</code> oder API-Benutzer + Biscuit) und erwägen Sie, sie hinter BunkerWeb mit einem nicht erratbaren Pfad und zusätzlichen Zugriffskontrollen zu platzieren.</p>
+</div>
+<h2 id="voraussetzungen">Voraussetzungen</h2>
+<p>Der API-Dienst benötigt Zugriff auf die BunkerWeb-Datenbank (<code>DATABASE_URI</code>). Er wird in der Regel zusammen mit dem Scheduler und optional der Web-UI bereitgestellt. Die empfohlene Einrichtung besteht darin, BunkerWeb als Reverse-Proxy davor zu schalten und die API in einem internen Netzwerk zu isolieren.</p>
+<p>Siehe den Schnellstart-Assistenten und die Architekturhinweise im <a href="../quickstart-guide/">Schnellstart-Leitfaden</a>.</p>
+<h2 id="highlights">Highlights</h2>
+<ul>
+<li>Instanz-bewusst: sendet operative Aktionen an entdeckte Instanzen.</li>
+<li>Starke Authentifizierung: Basic für Admins, Bearer-Admin-Überschreibung oder Biscuit-ACL für feingranulare Berechtigungen.</li>
+<li>IP-Zulassungsliste und flexible Ratenbegrenzung pro Route.</li>
+<li>Standardmäßige Zustands-/Bereitschaftssignale und Sicherheitsprüfungen beim Start.</li>
+</ul>
+<h2 id="compose-vorlagen">Compose-Vorlagen</h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker Autoconf</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Reverse-Proxy der API unter <code>/api</code> mit BunkerWeb.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
+<span class="w">  </span><span class="c1"># Geteilte Zulassungsliste der Instanz-Steuerungsebene für BunkerWeb/Scheduler</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w">  </span><span class="c1"># QUIC</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w">  </span><span class="c1"># Entspricht dem Dienstnamen der Instanz</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www.example.com&quot;</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span>
+<span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="c1"># Reverse-Proxy der API auf /api</span>
+<span class="w">      </span><span class="nt">www.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api&quot;</span>
+<span class="w">      </span><span class="nt">www.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-api:8888&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w">  </span><span class="c1"># Verwenden Sie ein starkes Passwort</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w">                      </span><span class="c1"># API-Zulassungsliste</span>
+<span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;secret&quot;</span><span class="w">                                                 </span><span class="c1"># Optionaler Admin-Überschreibungstoken</span>
+<span class="w">      </span><span class="nt">API_ROOT_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api&quot;</span><span class="w">                                               </span><span class="c1"># Entspricht dem Reverse-Proxy-Pfad</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># Probleme mit großen Abfragen vermeiden</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w">  </span><span class="c1"># Verwenden Sie ein starkes Passwort</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Dasselbe wie oben, aber unter Nutzung des Autoconf-Dienstes, um Dienste automatisch zu entdecken und zu konfigurieren. Die API wird unter <code>/api</code> über Labels auf dem API-Container bereitgestellt.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-api-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;api-env</span>
+<span class="w">  </span><span class="nt">AUTOCONF_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w">  </span><span class="c1"># Verwenden Sie ein starkes Passwort</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w">  </span><span class="c1"># QUIC</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">AUTOCONF_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*api-env</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">    </span><span class="c1"># Von Autoconf entdeckt</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">            </span><span class="c1"># Über Labels gefüllt</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="w">           </span><span class="c1"># Mit Autoconf obligatorisch</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*api-env</span>
+<span class="w">      </span><span class="nt">DOCKER_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;tcp://bw-docker:2375&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*api-env</span>
+<span class="w">      </span><span class="nt">API_WHITELIST_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
+<span class="w">      </span><span class="nt">API_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;secret&quot;</span>
+<span class="w">      </span><span class="nt">API_ROOT_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api&quot;</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.SERVER_NAME=www.example.com&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.USE_REVERSE_PROXY=yes&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_URL=/api&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.REVERSE_PROXY_HOST=http://bw-api:8888&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-docker</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tecnativa/docker-socket-proxy:nightly</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">CONTAINERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+<span class="w">      </span><span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;warning&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/run/docker.sock:/var/run/docker.sock:ro</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+<span class="w">  </span><span class="nt">bw-docker</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-docker</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Reverse-Proxy-Pfad</p>
+<p>Halten Sie den API-Pfad unerratbar und kombinieren Sie ihn mit der API-Zulassungsliste und Authentifizierung.</p>
+<p>Wenn Sie bereits eine andere App auf demselben Servernamen mit einer Vorlage (z. B. <code>USE_TEMPLATE</code>) bereitstellen, bevorzugen Sie einen separaten Hostnamen für die API, um Konflikte zu vermeiden.</p>
+</div>
+<h3 id="all-in-one">All-in-One</h3>
+<p>Wenn Sie das All-in-One-Image verwenden, kann die API durch Setzen von <code>SERVICE_API=yes</code> aktiviert werden:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">SERVICE_API</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">API_WHITELIST_IPS</span><span class="o">=</span><span class="s2">&quot;127.0.0.0/8&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:1.6.6-rc1
+</code></pre></div>
+<h2 id="authentifizierung">Authentifizierung</h2>
+<p>Unterstützte Wege zur Authentifizierung von Anfragen:</p>
+<ul>
+<li>Basic admin: Wenn Anmeldeinformationen zu einem Admin-API-Benutzer gehören, akzeptieren geschützte Endpunkte <code>Authorization: Basic &lt;base64(username:password)&gt;</code>.</li>
+<li>Admin Bearer override: Wenn <code>API_TOKEN</code> konfiguriert ist, gewährt <code>Authorization: Bearer &lt;API_TOKEN&gt;</code> vollen Zugriff.</li>
+<li>Biscuit-Token (empfohlen): Erhalten Sie ein Token von <code>POST /auth</code> unter Verwendung von Basic-Anmeldeinformationen oder einem JSON-/Formular-Body, der <code>username</code> und <code>password</code> enthält. Verwenden Sie das zurückgegebene Token als <code>Authorization: Bearer &lt;token&gt;</code> bei nachfolgenden Aufrufen.</li>
+</ul>
+<p>Beispiel: Holen Sie sich ein Biscuit, listen Sie Instanzen auf und laden Sie dann alle Instanzen neu.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1) Holen Sie sich ein Biscuit-Token mit Admin-Anmeldeinformationen</span>
+<span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-u<span class="w"> </span>admin:changeme<span class="w"> </span>http://api.example.com/auth<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.token<span class="k">)</span>
+
+<span class="c1"># 2) Instanzen auflisten</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>http://api.example.com/instances
+
+<span class="c1"># 3) Konfiguration über alle Instanzen hinweg neu laden (kein Test)</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span><span class="s2">&quot;http://api.example.com/instances/reload?test=no&quot;</span>
+</code></pre></div>
+<h3 id="biscuit-fakten-und-prufungen">Biscuit Fakten und Prüfungen</h3>
+<p>Tokens enthalten Fakten wie <code>user(&lt;username&gt;)</code>, <code>client_ip(&lt;ip&gt;)</code>, <code>domain(&lt;host&gt;)</code> und eine grobe Rolle <code>role("api_user", ["read", "write"])</code>, die von den DB-Berechtigungen abgeleitet ist. Admins enthalten <code>admin(true)</code>, während Nicht-Admins feingranulare Fakten wie <code>api_perm(&lt;resource_type&gt;, &lt;resource_id|*&gt;, &lt;permission&gt;)</code> tragen.</p>
+<p>Die Autorisierung ordnet die Route/Methode den erforderlichen Berechtigungen zu; <code>admin(true)</code> wird immer akzeptiert. Wenn feingranulare Fakten fehlen, greift der Wächter auf die grobe Rolle zurück: GET/HEAD/OPTIONS erfordern <code>read</code>; Schreibverben erfordern <code>write</code>.</p>
+<p>Schlüssel werden unter <code>/var/lib/bunkerweb/.api_biscuit_private_key</code> und <code>/var/lib/bunkerweb/.api_biscuit_public_key</code> gespeichert. Sie können <code>BISCUIT_PUBLIC_KEY</code>/<code>BISCUIT_PRIVATE_KEY</code> auch über Umgebungsvariablen bereitstellen; wenn weder Dateien noch Umgebungsvariablen gesetzt sind, generiert die API beim Start ein Schlüsselpaar und speichert es sicher.</p>
+<h2 id="berechtigungen-acl">Berechtigungen (ACL)</h2>
+<p>Diese API unterstützt zwei Autorisierungsebenen:</p>
+<ul>
+<li>Grobe Rolle: Tokens tragen <code>role("api_user", ["read"[, "write"]])</code> für Endpunkte ohne feingranulare Zuordnung. Lesen wird auf GET/HEAD/OPTIONS abgebildet; Schreiben wird auf POST/PUT/PATCH/DELETE abgebildet.</li>
+<li>Feingranulare ACL: Tokens enthalten <code>api_perm(&lt;resource_type&gt;, &lt;resource_id|*&gt;, &lt;permission&gt;)</code> und Routen deklarieren, was sie benötigen. <code>admin(true)</code> umgeht alle Prüfungen.</li>
+</ul>
+<p>Unterstützte Ressourcentypen: <code>instances</code>, <code>global_config</code>, <code>services</code>, <code>configs</code>, <code>plugins</code>, <code>cache</code>, <code>bans</code>, <code>jobs</code>.</p>
+<p>Berechtigungsnamen nach Ressourcentyp:</p>
+<ul>
+<li>instances: <code>instances_read</code>, <code>instances_update</code>, <code>instances_delete</code>, <code>instances_create</code>, <code>instances_execute</code></li>
+<li>global_config: <code>global_config_read</code>, <code>global_config_update</code></li>
+<li>services: <code>service_read</code>, <code>service_create</code>, <code>service_update</code>, <code>service_delete</code>, <code>service_convert</code>, <code>service_export</code></li>
+<li>configs: <code>configs_read</code>, <code>config_read</code>, <code>config_create</code>, <code>config_update</code>, <code>config_delete</code></li>
+<li>plugins: <code>plugin_read</code>, <code>plugin_create</code>, <code>plugin_delete</code></li>
+<li>cache: <code>cache_read</code>, <code>cache_delete</code></li>
+<li>bans: <code>ban_read</code>, <code>ban_update</code>, <code>ban_delete</code>, <code>ban_created</code></li>
+<li>jobs: <code>job_read</code>, <code>job_run</code></li>
+</ul>
+<p>Ressourcen-IDs: Für feingranulare Prüfungen wird das zweite Pfadsegment als <code>resource_id</code> behandelt, wenn es sinnvoll ist. Beispiele: <code>/services/{service}</code> -&gt; <code>{service}</code>; <code>/configs/{service}/...</code> -&gt; <code>{service}</code>. Verwenden Sie <code>"*"</code> (oder lassen Sie es weg), um global für einen Ressourcentyp zu gewähren.</p>
+<p>Benutzer- und ACL-Konfiguration:</p>
+<ul>
+<li>Admin-Benutzer: Setzen Sie <code>API_USERNAME</code> und <code>API_PASSWORD</code>, um den ersten Admin beim Start zu erstellen. Um Anmeldeinformationen später zu rotieren, setzen Sie <code>OVERRIDE_API_CREDS=yes</code> (oder stellen Sie sicher, dass der Admin mit der Methode <code>manual</code> erstellt wurde). Es gibt nur einen Admin; zusätzliche Versuche fallen auf die Erstellung von Nicht-Admin-Benutzern zurück.</li>
+<li>Nicht-Admin-Benutzer und Berechtigungen: Geben Sie <code>API_ACL_BOOTSTRAP_FILE</code> an, das auf eine JSON-Datei verweist, oder mounten Sie <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code>. Die API liest sie beim Start, um Benutzer und Berechtigungen zu erstellen/aktualisieren.</li>
+<li>ACL-Cache-Datei: Eine schreibgeschützte Zusammenfassung wird beim Start unter <code>/var/lib/bunkerweb/api_acl.json</code> zur Introspektion geschrieben; die Autorisierung wertet DB-gestützte Berechtigungen aus, die in das Biscuit-Token eingebettet sind.</li>
+</ul>
+<p>Bootstrap-JSON-Beispiele (beide Formen werden unterstützt):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;users&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ci&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;admin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Str0ng&amp;P@ss!&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;services&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;*&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;service_read&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="nt">&quot;app-frontend&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;service_update&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;service_delete&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;app-frontend&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;config_read&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;config_update&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;ops&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;admin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;password_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$2b$13$...bcrypt-hash...&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;instances&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;*&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;instances_execute&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;jobs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;*&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;job_run&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Oder Listenform:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;users&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ci&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Str0ng&amp;P@ss!&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;permissions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;resource_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;services&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;resource_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;permission&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;service_read&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;resource_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;services&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;resource_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app-frontend&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;permission&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;service_update&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Hinweise:</p>
+<ul>
+<li>Passwörter können im Klartext (<code>password</code>) oder bcrypt (<code>password_hash</code> / <code>password_bcrypt</code>) sein. Schwache Klartext-Passwörter werden in Nicht-Debug-Builds abgelehnt; wenn sie fehlen, wird ein zufälliges generiert und eine Warnung protokolliert.</li>
+<li><code>resource_id: "*"</code> (oder null/leer) gewährt global für diesen Ressourcentyp.</li>
+<li>Bestehende Benutzer können Passwörter aktualisieren und zusätzliche Berechtigungen über Bootstrap erhalten.</li>
+</ul>
+<h2 id="funktionsreferenz">Funktionsreferenz</h2>
+<p>Die API ist nach ressourcenorientierten Routern organisiert. Verwenden Sie die folgenden Abschnitte als Fähigkeitskarte; das interaktive Schema unter <code>/docs</code> dokumentiert Anfrage-/Antwortmodelle im Detail.</p>
+<h3 id="kern-und-authentifizierung">Kern und Authentifizierung</h3>
+<ul>
+<li><code>GET /ping</code>, <code>GET /health</code>: leichtgewichtige Liveness-Probes für den API-Dienst selbst.</li>
+<li><code>POST /auth</code>: tauschen Sie Basic-Anmeldeinformationen (oder den Admin-Überschreibungstoken) gegen ein Biscuit. Akzeptiert JSON-, Formular- oder <code>Authorization</code>-Header. Admins können bei Bedarf auch weiterhin HTTP Basic direkt auf geschützten Routen verwenden.</li>
+</ul>
+<h3 id="instanzen-steuerungsebene">Instanzen-Steuerungsebene</h3>
+<ul>
+<li><code>GET /instances</code>: listet registrierte Instanzen auf, einschließlich Erstellungs-/Zuletzt-gesehen-Zeitstempel, Registrierungsmethode und Metadaten.</li>
+<li><code>POST /instances</code>: registriert eine neue API-verwaltete Instanz (Hostname, optionaler Port, Servername, Anzeigename, Methode).</li>
+<li><code>GET /instances/{hostname}</code> / <code>PATCH /instances/{hostname}</code> / <code>DELETE /instances/{hostname}</code>: inspizieren, aktualisieren Sie veränderbare Felder oder entfernen Sie API-verwaltete Instanzen.</li>
+<li><code>DELETE /instances</code>: Massenentfernung; überspringt Nicht-API-Instanzen und meldet sie in <code>skipped</code>.</li>
+<li><code>GET /instances/ping</code> und <code>GET /instances/{hostname}/ping</code>: Zustandsprüfungen über alle oder einzelne Instanzen hinweg.</li>
+<li><code>POST /instances/reload?test=yes|no</code>, <code>POST /instances/{hostname}/reload</code>: löst Konfigurationsneuladungen aus (Testmodus führt eine Trockenlaufvalidierung durch).</li>
+<li><code>POST /instances/stop</code>, <code>POST /instances/{hostname}/stop</code>: leitet Stopp-Befehle an Instanzen weiter.</li>
+</ul>
+<h3 id="globale-konfiguration">Globale Konfiguration</h3>
+<ul>
+<li><code>GET /global_config</code>: ruft nicht standardmäßige Einstellungen ab (verwenden Sie <code>full=true</code> für die gesamte Konfiguration, <code>methods=true</code>, um die Herkunft einzuschließen).</li>
+<li><code>PATCH /global_config</code>: aktualisiert oder fügt API-eigene (<code>method="api"</code>) globale Einstellungen ein; Validierungsfehler weisen auf unbekannte oder schreibgeschützte Schlüssel hin.</li>
+</ul>
+<h3 id="dienstlebenszyklus">Dienstlebenszyklus</h3>
+<ul>
+<li><code>GET /services</code>: listet Dienste mit Metadaten auf, einschließlich Entwurfsstatus und Zeitstempeln.</li>
+<li><code>GET /services/{service}</code>: ruft nicht standardmäßige Overlays (<code>full=false</code>) oder den vollständigen Konfigurations-Snapshot (<code>full=true</code>) für einen Dienst ab.</li>
+<li><code>POST /services</code>: erstellt Dienste, optional als Entwurf, und initialisiert präfixierte Variablen (<code>{service}_{KEY}</code>). Aktualisiert die <code>SERVER_NAME</code>-Liste atomar.</li>
+<li><code>PATCH /services/{service}</code>: benennt Dienste um, schaltet Entwurfs-Flags um und aktualisiert präfixierte Variablen. Ignoriert aus Sicherheitsgründen direkte Bearbeitungen von <code>SERVER_NAME</code> innerhalb von <code>variables</code>.</li>
+<li><code>DELETE /services/{service}</code>: entfernt einen Dienst und seine abgeleiteten Konfigurationsschlüssel.</li>
+<li><code>POST /services/{service}/convert?convert_to=online|draft</code>: wechselt schnell zwischen Entwurfs-/Online-Status, ohne andere Variablen zu ändern.</li>
+</ul>
+<h3 id="benutzerdefinierte-konfigurations-snippets">Benutzerdefinierte Konfigurations-Snippets</h3>
+<ul>
+<li><code>GET /configs</code>: listet benutzerdefinierte Konfigurationsfragmente (HTTP/Server/Stream/ModSecurity/CRS-Hooks) für einen Dienst auf (<code>service=global</code> standardmäßig). <code>with_data=true</code> bettet UTF-8-Inhalt ein, wenn er druckbar ist.</li>
+<li><code>POST /configs</code> und <code>POST /configs/upload</code>: erstellt neue Snippets aus JSON-Payloads oder hochgeladenen Dateien. Akzeptierte Typen sind <code>http</code>, <code>server_http</code>, <code>default_server_http</code>, <code>modsec</code>, <code>modsec_crs</code>, <code>stream</code>, <code>server_stream</code> und CRS-Plugin-Hooks. Namen müssen mit <code>^[\w_-]{1,255}$</code> übereinstimmen.</li>
+<li><code>GET /configs/{service}/{type}/{name}</code>: ruft ein Snippet mit optionalem Inhalt ab (<code>with_data=true</code>).</li>
+<li><code>PATCH /configs/{service}/{type}/{name}</code> und <code>PATCH .../upload</code>: aktualisiert oder verschiebt API-verwaltete Snippets; vorlagen- oder dateiverwaltete Einträge bleiben schreibgeschützt.</li>
+<li><code>DELETE /configs</code> und <code>DELETE /configs/{service}/{type}/{name}</code>: entfernt API-verwaltete Snippets unter Beibehaltung von vorlagenverwalteten, wobei eine <code>skipped</code>-Liste für ignorierte Einträge zurückgegeben wird.</li>
+</ul>
+<h3 id="sperren-orchestrierung">Sperren-Orchestrierung</h3>
+<ul>
+<li><code>GET /bans</code>: aggregiert aktive Sperren, die von allen Instanzen gemeldet werden.</li>
+<li><code>POST /bans</code> oder <code>POST /bans/ban</code>: wendet eine oder mehrere Sperren an. Payloads können JSON-Objekte, Arrays oder stringifizierte JSON sein. <code>service</code> ist optional; wenn es weggelassen wird, ist die Sperre global.</li>
+<li><code>POST /bans/unban</code> oder <code>DELETE /bans</code>: entfernt Sperren global oder pro Dienst unter Verwendung derselben flexiblen Payloads.</li>
+</ul>
+<h3 id="plugin-verwaltung">Plugin-Verwaltung</h3>
+<ul>
+<li><code>GET /plugins?type=all|external|ui|pro</code>: listet Plugins mit Metadaten auf; <code>with_data=true</code> schließt verpackte Bytes ein, wenn verfügbar.</li>
+<li><code>POST /plugins/upload</code>: installiert UI-Plugins aus <code>.zip</code>, <code>.tar.gz</code> oder <code>.tar.xz</code> Archiven. Archive können mehrere Plugins bündeln, solange jedes eine <code>plugin.json</code> enthält.</li>
+<li><code>DELETE /plugins/{id}</code>: entfernt ein UI-Plugin nach ID (<code>^[\w.-]{4,64}$</code>).</li>
+</ul>
+<h3 id="job-cache-und-ausfuhrung">Job-Cache und Ausführung</h3>
+<ul>
+<li><code>GET /cache</code>: listet gecachte Artefakte auf, die von Scheduler-Jobs erstellt wurden, gefiltert nach Dienst, Plugin-ID oder Job-Namen. <code>with_data=true</code> schließt druckbaren Dateiinhalt ein.</li>
+<li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>: ruft eine bestimmte Cache-Datei ab (<code>download=true</code> streamt einen Anhang).</li>
+<li><code>DELETE /cache</code> oder <code>DELETE /cache/{service}/{plugin}/{job}/{file}</code>: löscht Cache-Dateien und benachrichtigt den Scheduler über betroffene Plugins.</li>
+<li><code>GET /jobs</code>: inspiziert bekannte Jobs, ihre Zeitplan-Metadaten und Cache-Zusammenfassungen.</li>
+<li><code>POST /jobs/run</code>: fordert die Ausführung eines Jobs an, indem die zugehörigen Plugins als geändert markiert werden.</li>
+</ul>
+<h3 id="betriebshinweise">Betriebshinweise</h3>
+<ul>
+<li>Schreibendpunkte persistieren in der gemeinsamen Datenbank; Instanzen übernehmen Änderungen über Scheduler-Sync oder nach einem <code>/instances/reload</code>.</li>
+<li>Fehler werden auf <code>{ "status": "error", "message": "..." }</code> normalisiert mit entsprechenden HTTP-Statuscodes (422 Validierung, 404 nicht gefunden, 403 ACL, 5xx Upstream-Fehler).</li>
+</ul>
+<h2 id="ratenbegrenzung">Ratenbegrenzung</h2>
+<p>Die Ratenbegrenzung pro Client wird von SlowAPI gehandhabt. Aktivieren/deaktivieren Sie sie und gestalten Sie die Limits über Umgebungsvariablen oder <code>/etc/bunkerweb/api.yml</code>.</p>
+<ul>
+<li><code>API_RATE_LIMIT_ENABLED</code> (Standard: <code>yes</code>)</li>
+<li>Standardlimit: <code>API_RATE_LIMIT_TIMES</code> pro <code>API_RATE_LIMIT_SECONDS</code> (z. B. <code>100</code> pro <code>60</code>)</li>
+<li><code>API_RATE_LIMIT_RULES</code>: inline JSON/CSV oder ein Pfad zu einer YAML/JSON-Datei mit Regeln pro Route</li>
+<li>Speicher-Backend: In-Memory oder Redis/Valkey, wenn <code>USE_REDIS=yes</code> und <code>REDIS_*</code>-Variablen bereitgestellt werden (Sentinel unterstützt)</li>
+<li>Header: <code>API_RATE_LIMIT_HEADERS_ENABLED</code> (Standard: <code>yes</code>)</li>
+</ul>
+<p>Beispiel YAML (gemountet unter <code>/etc/bunkerweb/api.yml</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">API_RATE_LIMIT_ENABLED</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
+<span class="nt">API_RATE_LIMIT_DEFAULTS</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;200/minute&quot;</span><span class="p p-Indicator">]</span>
+<span class="nt">API_RATE_LIMIT_RULES</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/auth&quot;</span>
+<span class="w">    </span><span class="nt">methods</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;POST&quot;</span>
+<span class="w">    </span><span class="nt">times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">    </span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/instances*&quot;</span>
+<span class="w">    </span><span class="nt">methods</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;GET|POST&quot;</span>
+<span class="w">    </span><span class="nt">times</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span>
+</code></pre></div>
+<h2 id="konfiguration">Konfiguration</h2>
+<p>Sie können die API über Umgebungsvariablen, Docker-Secrets und die optionalen Dateien <code>/etc/bunkerweb/api.yml</code> oder <code>/etc/bunkerweb/api.env</code> konfigurieren. Wichtige Einstellungen:</p>
+<ul>
+<li>Dokumentation &amp; Schema: <code>API_DOCS_URL</code>, <code>API_REDOC_URL</code>, <code>API_OPENAPI_URL</code>, <code>API_ROOT_PATH</code>.</li>
+<li>Grundlagen der Authentifizierung: <code>API_TOKEN</code> (Admin-Überschreibung Bearer), <code>API_USERNAME</code>/<code>API_PASSWORD</code> (Admin erstellen/aktualisieren), <code>OVERRIDE_API_CREDS</code>.</li>
+<li>ACL und Benutzer: <code>API_ACL_BOOTSTRAP_FILE</code> (JSON-Pfad).</li>
+<li>Biscuit-Richtlinie: <code>API_BISCUIT_TTL_SECONDS</code> (0/off deaktiviert TTL), <code>CHECK_PRIVATE_IP</code> (bindet Token an Client-IP, es sei denn, es ist privat).</li>
+<li>IP-Zulassungsliste: <code>API_WHITELIST_ENABLED</code>, <code>API_WHITELIST_IPS</code>.</li>
+<li>Ratenbegrenzung (Kern): <code>API_RATE_LIMIT_ENABLED</code>, <code>API_RATE_LIMIT_TIMES</code>, <code>API_RATE_LIMIT_SECONDS</code>, <code>API_RATE_LIMIT_HEADERS_ENABLED</code>.</li>
+<li>Ratenbegrenzung (fortgeschritten): <code>API_RATE_LIMIT_AUTH_TIMES</code>, <code>API_RATE_LIMIT_AUTH_SECONDS</code>, <code>API_RATE_LIMIT_RULES</code>, <code>API_RATE_LIMIT_DEFAULTS</code>, <code>API_RATE_LIMIT_APPLICATION_LIMITS</code>, <code>API_RATE_LIMIT_STRATEGY</code>, <code>API_RATE_LIMIT_KEY</code>, <code>API_RATE_LIMIT_EXEMPT_IPS</code>, <code>API_RATE_LIMIT_STORAGE_OPTIONS</code>.</li>
+<li>Speicher für Ratenbegrenzung: In-Memory oder Redis/Valkey, wenn <code>USE_REDIS=yes</code> und Redis-Einstellungen wie <code>REDIS_HOST</code>, <code>REDIS_PORT</code>, <code>REDIS_PASSWORD</code>, <code>REDIS_DATABASE</code>, <code>REDIS_SSL</code> oder Sentinel-Variablen gesetzt sind. Siehe die Redis-Einstellungstabelle in <code>docs/features.md</code>.</li>
+<li>Netzwerk/TLS: <code>API_LISTEN_ADDR</code>, <code>API_LISTEN_PORT</code>, <code>API_FORWARDED_ALLOW_IPS</code>, <code>API_SSL_ENABLED</code>, <code>API_SSL_CERTFILE</code>, <code>API_SSL_KEYFILE</code>, <code>API_SSL_CA_CERTS</code>.</li>
+</ul>
+<h3 id="wie-die-konfiguration-geladen-wird">Wie die Konfiguration geladen wird</h3>
+<p>Priorität von höchster zu niedrigster:</p>
+<ul>
+<li>Umgebungsvariablen (z. B. <code>environment:</code> im Container oder exportierte Shell-Variablen)</li>
+<li>Secrets-Dateien unter <code>/run/secrets</code> (Docker/K8s-Secrets; Dateinamen entsprechen Variablennamen)</li>
+<li>YAML-Datei unter <code>/etc/bunkerweb/api.yml</code></li>
+<li>Env-Datei unter <code>/etc/bunkerweb/api.env</code> (key=value Zeilen)</li>
+<li>Eingebaute Standardwerte</li>
+</ul>
+<p>Hinweise:</p>
+<ul>
+<li>YAML unterstützt das Einbetten von Secret-Dateien mit <code>&lt;file:relative/path&gt;</code>; der Pfad wird relativ zu <code>/run/secrets</code> aufgelöst.</li>
+<li>Setzen Sie Doc-URLs auf <code>off</code>/<code>disabled</code>/<code>none</code>, um Endpunkte zu deaktivieren (z. B. <code>API_DOCS_URL=off</code>).</li>
+<li>Wenn <code>API_SSL_ENABLED=yes</code>, müssen Sie auch <code>API_SSL_CERTFILE</code> und <code>API_SSL_KEYFILE</code> setzen.</li>
+<li>Wenn Redis aktiviert ist (<code>USE_REDIS=yes</code>), geben Sie Redis-Details an; siehe Redis-Abschnitt in <code>docs/features.md</code>.</li>
+</ul>
+<h3 id="authentifizierung-und-benutzer">Authentifizierung und Benutzer</h3>
+<ul>
+<li>Admin-Bootstrap: Setzen Sie <code>API_USERNAME</code> und <code>API_PASSWORD</code>, um den ersten Admin zu erstellen. Um später erneut anzuwenden, setzen Sie <code>OVERRIDE_API_CREDS=yes</code>.</li>
+<li>Nicht-Admins und Berechtigungen: Geben Sie <code>API_ACL_BOOTSTRAP_FILE</code> mit einem JSON-Pfad an (oder mounten Sie auf <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code>). Die Datei kann Benutzer und feingranulare Berechtigungen auflisten.</li>
+<li>Biscuit-Schlüssel: Setzen Sie entweder <code>BISCUIT_PUBLIC_KEY</code>/<code>BISCUIT_PRIVATE_KEY</code> oder mounten Sie Dateien unter <code>/var/lib/bunkerweb/.api_biscuit_public_key</code> und <code>/var/lib/bunkerweb/.api_biscuit_private_key</code>. Wenn keine bereitgestellt werden, generiert und speichert die API beim Start ein Schlüsselpaar.</li>
+</ul>
+<h3 id="tls-und-netzwerk">TLS und Netzwerk</h3>
+<ul>
+<li>Bindungsadresse/-port: <code>API_LISTEN_ADDR</code> (Standard <code>0.0.0.0</code>), <code>API_LISTEN_PORT</code> (Standard <code>8888</code>).</li>
+<li>Reverse-Proxys: Setzen Sie <code>API_FORWARDED_ALLOW_IPS</code> auf die Proxy-IPs, damit Gunicorn <code>X-Forwarded-*</code>-Headern vertraut.</li>
+<li>TLS-Terminierung in der API: <code>API_SSL_ENABLED=yes</code> plus <code>API_SSL_CERTFILE</code> und <code>API_SSL_KEYFILE</code>; optional <code>API_SSL_CA_CERTS</code></li>
+</ul>
+<h3 id="schnelle-rezepte-zur-ratenbegrenzung">Schnelle Rezepte zur Ratenbegrenzung</h3>
+<ul>
+<li>Global deaktivieren: <code>API_RATE_LIMIT_ENABLED=no</code></li>
+<li>Einfaches globales Limit setzen: <code>API_RATE_LIMIT_TIMES=100</code>, <code>API_RATE_LIMIT_SECONDS=60</code></li>
+<li>Regeln pro Route: Setzen Sie <code>API_RATE_LIMIT_RULES</code> auf einen JSON/YAML-Dateipfad oder inline YAML in <code>/etc/bunkerweb/api.yml</code>.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Startsicherheit</p>
+<p>Die API wird beendet, wenn kein Authentifizierungspfad konfiguriert ist (keine Biscuit-Schlüssel, kein Admin-Benutzer und kein <code>API_TOKEN</code>). Stellen Sie sicher, dass mindestens eine Methode vor dem Start festgelegt ist.</p>
+</div>
+<p>Startsicherheit: Die API wird beendet, wenn kein Authentifizierungspfad verfügbar ist (keine Biscuit-Schlüssel, kein Admin-API-Benutzer und kein <code>API_TOKEN</code>). Stellen Sie sicher, dass mindestens einer konfiguriert ist.</p>
+<div class="admonition info">
+<p class="admonition-title">Root-Pfad und Proxys</p>
+<p>Wenn Sie die API hinter BunkerWeb auf einem Unterpfad bereitstellen, setzen Sie <code>API_ROOT_PATH</code> auf diesen Pfad, damit <code>/docs</code> und relative Routen bei der Proxy-Weiterleitung korrekt funktionieren.</p>
+</div>
+<h2 id="betrieb">Betrieb</h2>
+<ul>
+<li>Zustand: <code>GET /health</code> gibt <code>{"status":"ok"}</code> zurück, wenn der Dienst betriebsbereit ist.</li>
+<li>Linux-Dienst: eine <code>systemd</code>-Einheit namens <code>bunkerweb-api.service</code> ist enthalten. Passen Sie sie über <code>/etc/bunkerweb/api.env</code> an und verwalten Sie sie mit <code>systemctl</code>.</li>
+<li>Startsicherheit: Die API schlägt schnell fehl, wenn kein Authentifizierungspfad verfügbar ist (keine Biscuit-Schlüssel, kein Admin-Benutzer, kein <code>API_TOKEN</code>). Fehler werden nach <code>/var/tmp/bunkerweb/api.error</code> geschrieben.</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.com/invite/fTf46FmtyD" target="_blank" rel="noopener" title="discord.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/bunkerity" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/bunkerity/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.reddit.com/r/BunkerWeb/" target="_blank" rel="noopener" title="www.reddit.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M0 256C0 114.6 114.6 0 256 0s256 114.6 256 256-114.6 256-256 256H37.1c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256m349.6-102.4c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34-34.5 3.7-61.4 33-61.4 68.4v.2c-37.5 1.6-71.8 12.3-99 29.1-10.1-7.8-22.8-12.5-36.5-12.5-33 0-59.8 26.8-59.8 59.8 0 24 14.1 44.6 34.4 54.1 2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54 0-33-26.8-59.8-59.8-59.8-13.7 0-26.3 4.6-36.4 12.4-27.4-17-62.1-27.7-100-29.1v-.2c0-25.4 18.9-46.5 43.4-49.9 4.4 18.8 21.3 32.8 41.5 32.8zm-172.5 93.3c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6-31.4-8.8-30.4-30.5S160.3 247 177 247zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6 11.8-39.3 28.5-39.3 31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9.8-6.2 3.9-6.5 18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1.3 5.1 3.6 3.9 6.5"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.instagram.com/bunkerweb/" target="_blank" rel="noopener" title="www.instagram.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224.3 141a115 115 0 1 0-.6 230 115 115 0 1 0 .6-230m-.6 40.4a74.6 74.6 0 1 1 .6 149.2 74.6 74.6 0 1 1-.6-149.2m93.4-45.1a26.8 26.8 0 1 1 53.6 0 26.8 26.8 0 1 1-53.6 0m129.7 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8M399 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/bunkerity" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "In Zwischenablage kopiert", "clipboard.copy": "In Zwischenablage kopieren", "search.result.more.one": "1 weiteres Suchergebnis auf dieser Seite", "search.result.more.other": "# weitere Suchergebnisse auf dieser Seite", "search.result.none": "Keine Suchergebnisse", "search.result.one": "1 Suchergebnis", "search.result.other": "# Suchergebnisse", "search.result.placeholder": "Suchbegriff eingeben", "search.result.term.missing": "Es fehlt", "select.version": "Version ausw\u00e4hlen"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../assets/extra.js"></script>
+      
+        <script src="https://chatbot.bunkerweb.io/static/js/chatbot.js"></script>
+      
+        <script src="../../assets/preserve-version-on-language-switch.js"></script>
+      
+        <script src="../../assets/toc-dropdown.js"></script>
+      
+    
+  </body>
+</html>

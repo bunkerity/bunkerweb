@@ -1,0 +1,1618 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation of BunkerWeb, the open source and next generation WAF.">
+      
+      
+      
+        <link rel="canonical" href="https://docs.bunkerweb.io/latest/zh/concepts/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../integrations/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>概念 - BunkerWeb 文档</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+      
+
+
+    
+    
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+
+    <script defer>
+  // Lazy load images and embed youtube videos
+  window.addEventListener("load", () => {
+    document.querySelectorAll("[data-src]").forEach((el) => {
+      el.setAttribute("src", el.getAttribute("data-src"));
+    });
+  });
+  // Add missing label
+  try {
+    document
+      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
+      .setAttribute("aria-label", "Search in documentation");
+  } catch (err) {}
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        startBannerLoop();
+        // Try to get dynamic content
+        // Else keep static ones
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
+
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="概念 - BunkerWeb 文档" >
+      
+        <meta  property="og:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  property="og:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/zh/concepts.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://docs.bunkerweb.io/latest/zh/concepts/" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="概念 - BunkerWeb 文档" >
+      
+        <meta  name="twitter:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  name="twitter:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/zh/concepts.png" >
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../../..">
+        <strong>Click here to view latest.</strong>
+    </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../" title="BunkerWeb 文档" class="md-header__button md-logo" aria-label="BunkerWeb 文档" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BunkerWeb 文档
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              概念
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../concepts/" hreflang="en" class="md-select__link">
+              English - 🇬🇧
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../fr/concepts/" hreflang="fr" class="md-select__link">
+              Français - 🇫🇷
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../de/concepts/" hreflang="de" class="md-select__link">
+              Deutsch - 🇩🇪
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../es/concepts/" hreflang="es" class="md-select__link">
+              Español - 🇪🇸
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="zh" class="md-select__link">
+              中文 - 🇨🇳
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bunkerity/bunkerweb" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  介绍
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  概念
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../integrations/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  集成
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart-guide/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  快速入门指南
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../features/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  功能
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../advanced/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  高级用法
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../web-ui/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Web 界面
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../upgrading/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  升级
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../troubleshooting/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  故障排除
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../plugins/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  插件
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../professional-services/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  专业服务
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../about/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  关于
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="BunkerWeb 文档" class="md-nav__button md-logo" aria-label="BunkerWeb 文档" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    BunkerWeb 文档
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bunkerity/bunkerweb" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    介绍
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    概念
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    概念
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      架构
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      集成
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      设置
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multisite-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      多站点模式
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      自定义配置
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据库
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="数据库">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据库兼容性矩阵
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      调度器
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="调度器">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      实例健康检查
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      模板
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    集成
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    快速入门指南
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    功能
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    高级用法
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Web 界面
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    升级
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    故障排除
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    插件
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../professional-services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    专业服务
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    关于
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">概念</h1>
+<h2 id="_2">架构</h2>
+<figure>
+<p><img align="center," alt="概述" src="../../assets/img/concepts.svg" width="600" /></p>
+</figure>
+<p>在您的基础设施中，BunkerWeb 扮演着位于您 Web 服务之前的反向代理的角色。典型的架构是从互联网访问 BunkerWeb，然后 BunkerWeb 将请求转发到安全网络上的相应应用程序服务。</p>
+<p>以这种方式（经典的反向代理架构）使用 BunkerWeb，通过 TLS 卸载和集中式安全策略，可以降低后端服务器的加密开销，从而提高性能，同时确保所有服务的一致访问控制、威胁缓解和合规性强制执行。</p>
+<h2 id="_3">集成</h2>
+<p>第一个概念是将 BunkerWeb 集成到目标环境中。我们更喜欢使用“集成”这个词而不是“安装”，因为 BunkerWeb 的目标之一是无缝地集成到现有环境中。</p>
+<p>官方支持以下集成：</p>
+<ul>
+<li><a href="../integrations/#docker">Docker</a></li>
+<li><a href="../integrations/#linux">Linux</a></li>
+<li><a href="../integrations/#docker-autoconf">Docker autoconf</a></li>
+<li><a href="../integrations/#kubernetes">Kubernetes</a></li>
+<li><a href="../integrations/#swarm">Swarm</a></li>
+</ul>
+<p>如果您认为应该支持新的集成，请不要犹豫，在 GitHub 仓库上开启一个 <a href="https://github.com/bunkerity/bunkerweb/issues">新问题</a>。</p>
+<div class="admonition info">
+<p class="admonition-title">更进一步</p>
+<p>所有 BunkerWeb 集成的技术细节都可以在文档的<a href="../integrations/">集成部分</a>中找到。</p>
+</div>
+<h2 id="_4">设置</h2>
+<div class="admonition tip">
+<p class="admonition-title">BunkerWeb PRO 设置</p>
+<p>某些插件是为 <strong>PRO 版本</strong>保留的。想快速测试 BunkerWeb PRO 一个月吗？在 <a href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&amp;utm_source=doc">BunkerWeb 面板</a>下单时使用代码 <code>freetrial</code>，或者点击<a href="https://panel.bunkerweb.io/cart.php?a=add&amp;pid=19&amp;promocode=freetrial&amp;utm_campaign=self&amp;utm_source=doc">这里</a>直接应用促销代码（将在结账时生效）。</p>
+</div>
+<p>一旦 BunkerWeb 集成到您的环境中，您将需要配置它来服务和保护您的 Web 应用程序。</p>
+<p>BunkerWeb 的配置是通过我们称之为“设置”或“变量”的东西来完成的。每个设置都由一个名称来标识，例如 <code>AUTO_LETS_ENCRYPT</code> 或 <code>USE_ANTIBOT</code>。您可以为这些设置分配值来配置 BunkerWeb。</p>
+<p>这是一个 BunkerWeb 配置的示例：</p>
+<div class="highlight"><pre><span></span><code>SERVER_NAME=www.example.com
+AUTO_LETS_ENCRYPT=yes
+USE_ANTIBOT=captcha
+REFERRER_POLICY=no-referrer
+USE_MODSECURITY=no
+USE_GZIP=yes
+USE_BROTLI=no
+</code></pre></div>
+<p>请注意，如果您正在使用 Web 用户界面，除了“人性化”的标签外，还会显示设置名称：</p>
+<figure>
+<p><img align="center," alt="概述" src="../../assets/img/settings-ui1.png" width="800" />
+  </p>
+<figcaption>Web UI 中的设置名称</figcaption>
+</figure>
+<p>您还可以使用搜索栏并直接指定一个设置名称：</p>
+<figure>
+<p><img align="center," alt="概述" src="../../assets/img/settings-ui2.png" width="600" />
+  </p>
+<figcaption>Web UI 中的设置搜索</figcaption>
+</figure>
+<div class="admonition info">
+<p class="admonition-title">更进一步</p>
+<p>包含描述和可能值的可用设置的完整列表可在文档的<a href="../features/">功能部分</a>中找到。</p>
+</div>
+<h2 id="multisite-mode">多站点模式</h2>
+<p>在使用 BunkerWeb 时，理解多站点模式至关重要。由于我们的主要重点是保护 Web 应用程序，我们的解决方案与“虚拟主机”或“vhosts”的概念紧密相连（更多信息请参见<a href="https://en.wikipedia.org/wiki/Virtual_hosting">此处</a>）。这些虚拟主机使得可以从单个实例或集群中提供多个 Web 应用程序。</p>
+<p>默认情况下，BunkerWeb 禁用多站点模式。这意味着只提供一个 Web 应用程序，并且所有设置都将应用于它。当您只有一个应用程序需要保护时，这种设置是理想的，因为您不需要关心多站点配置。</p>
+<p>然而，当启用多站点模式时，BunkerWeb 能够提供和保护多个 Web 应用程序。每个 Web 应用程序由一个唯一的服务器名称标识，并有自己的一组设置。当您有多个应用程序需要保护，并且您更喜欢使用单个实例（或集群）的 BunkerWeb 时，此模式被证明是有益的。</p>
+<p>多站点模式的激活由 <code>MULTISITE</code> 设置控制，可以将其设置为 <code>yes</code> 来启用它，或者设置为 <code>no</code> 来禁用它（默认值）。</p>
+<p>BunkerWeb 中的每个设置都有一个特定的上下文，决定了它可以应用在哪里。如果上下文设置为“global”，则该设置不能按服务器或站点应用，而是应用于整个配置。另一方面，如果上下文是“multisite”，则该设置可以全局和按服务器应用。要为特定服务器定义一个多站点设置，只需将服务器名称作为前缀添加到设置名称中。例如，<code>app1.example.com_AUTO_LETS_ENCRYPT</code> 或 <code>app2.example.com_USE_ANTIBOT</code> 是带有服务器名称前缀的设置名称示例。当一个多站点设置在没有服务器前缀的情况下全局定义时，所有服务器都会继承该设置。但是，如果为单个服务器定义了带有服务器名称前缀的相同设置，则该服务器仍然可以覆盖该设置。</p>
+<p>理解多站点模式及其相关设置的复杂性，可以使您根据自己的特定要求定制 BunkerWeb 的行为，从而确保为您的 Web 应用程序提供最佳保护。</p>
+<p>这是一个多站点 BunkerWeb 配置的示例：</p>
+<div class="highlight"><pre><span></span><code>MULTISITE=yes
+SERVER_NAME=app1.example.com app2.example.com app3.example.com
+AUTO_LETS_ENCRYPT=yes
+USE_GZIP=yes
+USE_BROTLI=yes
+app1.example.com_USE_ANTIBOT=javascript
+app1.example.com_USE_MODSECURITY=no
+app2.example.com_USE_ANTIBOT=cookie
+app2.example.com_WHITELIST_COUNTRY=FR
+app3.example.com_USE_BAD_BEHAVIOR=no
+</code></pre></div>
+<p>请注意，在使用 Web 用户界面时，多站点模式是隐式的。您可以选择直接将配置应用于您的服务，也可以设置一个全局配置，该配置将应用于所有服务（您仍然可以对特定服务直接应用例外）：</p>
+<figure>
+<p><img align="center," alt="概述" src="../../assets/img/ui-multisite.png" width="600" />
+  </p>
+<figcaption>从 Web UI 将设置应用于所有服务</figcaption>
+</figure>
+<div class="admonition info">
+<p class="admonition-title">更进一步</p>
+<p>您将在文档的<a href="../advanced/">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/examples">examples</a> 目录中找到多站点模式的具体示例。</p>
+</div>
+<h2 id="custom-configurations">自定义配置</h2>
+<p>为了应对独特的挑战并满足特定的用例，BunkerWeb 提供了自定义配置的灵活性。虽然提供的设置和<a href="../plugins/">外部插件</a>涵盖了广泛的场景，但可能存在需要额外定制的情况。</p>
+<p>BunkerWeb 基于著名的 NGINX Web 服务器构建，该服务器提供了一个强大的配置系统。这意味着您可以利用 NGINX 的配置功能来满足您的特定需求。自定义 NGINX 配置可以包含在各种<a href="https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts">上下文</a>中，例如 HTTP 或服务器，从而允许您根据您的要求微调 BunkerWeb 的行为。无论您需要自定义全局设置还是将配置应用于特定的服务器块，BunkerWeb 都能让您优化其行为，使其与您的用例完美对齐。</p>
+<p>BunkerWeb 的另一个不可或缺的组件是 ModSecurity Web 应用程序防火墙。通过自定义配置，您可以灵活地处理误报或添加自定义规则，以进一步增强 ModSecurity 提供的保护。这些自定义配置允许您微调防火墙的行为，并确保其与您的 Web 应用程序的特定要求保持一致。</p>
+<p>通过利用自定义配置，您可以解锁一个充满可能性的世界，从而根据您的需求精确地定制 BunkerWeb 的行为和安全措施。无论是调整 NGINX 配置还是微调 ModSecurity，BunkerWeb 都提供了灵活性，以有效地应对您的独特挑战。</p>
+<p>通过 Web 用户界面管理自定义配置是通过<strong>配置</strong>菜单完成的：</p>
+<figure>
+<p><img align="center," alt="概述" src="../../assets/img/configs-ui.png" width="800" />
+  </p>
+<figcaption>从 Web UI 管理自定义配置</figcaption>
+</figure>
+<div class="admonition info">
+<p class="admonition-title">更进一步</p>
+<p>您将在文档的<a href="../advanced/#custom-configurations">高级用法</a>和仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/examples">examples</a> 目录中找到自定义配置的具体示例。</p>
+</div>
+<h2 id="_5">数据库</h2>
+<p>BunkerWeb 将其当前配置安全地存储在后端数据库中，该数据库包含平稳运行所需的基本数据。数据库中存储了以下信息：</p>
+<ul>
+<li>
+<p><strong>所有服务的设置</strong>：数据库保存了 BunkerWeb 提供的所有服务的已定义设置。这确保了您的配置和首选项得以保留并随时可用。</p>
+</li>
+<li>
+<p><strong>自定义配置</strong>：您创建的任何自定义配置也存储在后端数据库中。这包括根据您的特定要求量身定制的个性化设置和修改。</p>
+</li>
+<li>
+<p><strong>BunkerWeb 实例</strong>：有关 BunkerWeb 实例的信息，包括其设置和相关详细信息，都存储在数据库中。这便于在适用时轻松管理和监控多个实例。</p>
+</li>
+<li>
+<p><strong>关于作业执行的元数据</strong>：数据库存储与 BunkerWeb 中各种作业执行相关的元数据。这包括有关计划任务、维护过程和其他自动化活动的信息。</p>
+</li>
+<li>
+<p><strong>缓存的文件</strong>：BunkerWeb 利用缓存机制来提高性能。数据库保存缓存的文件，确保高效检索和交付频繁访问的资源。</p>
+</li>
+</ul>
+<p>在底层，每当您编辑设置或添加新配置时，BunkerWeb 都会自动将更改存储在数据库中，从而确保数据的持久性和一致性。BunkerWeb 支持多种后端数据库选项，包括 SQLite、MariaDB、MySQL 和 PostgreSQL。</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>如果您使用 Web UI 进行日常管理，我们建议迁移到外部数据库引擎（PostgreSQL 或 MySQL/MariaDB），而不是继续使用 SQLite。外部数据库在多用户环境下处理并发请求和长期增长更加稳定。</p>
+</div>
+<p>使用 <code>DATABASE_URI</code> 设置配置数据库非常简单，该设置遵循每种支持的数据库的指定格式：</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>当使用 Docker 集成时，您必须在所有 BunkerWeb 容器（除了 BunkerWeb 容器本身）中设置 <code>DATABASE_URI</code> 环境变量，以确保所有组件都能正确访问数据库。这对于维护系统的完整性和功能至关重要。</p>
+<p>在任何情况下，请确保在启动 BunkerWeb 之前设置 <code>DATABASE_URI</code>，因为这是正常运行所必需的。</p>
+</div>
+<ul>
+<li><strong>SQLite</strong>: <code>sqlite:///var/lib/bunkerweb/db.sqlite3</code></li>
+<li><strong>MariaDB</strong>: <code>mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db</code></li>
+<li><strong>MySQL</strong>: <code>mysql+pymysql://bunkerweb:changeme@bw-db:3306/db</code></li>
+<li><strong>PostgreSQL</strong>: <code>postgresql://bunkerweb:changeme@bw-db:5432/db</code></li>
+</ul>
+<p>通过在配置中指定适当的数据库 URI，您可以将 BunkerWeb 与您首选的数据库后端无缝集成，从而确保高效可靠地存储您的配置数据。</p>
+<h3 id="_6">数据库兼容性矩阵</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">集成</th>
+<th style="text-align: left;">PostgreSQL</th>
+<th style="text-align: left;">MariaDB</th>
+<th style="text-align: left;">MySQL</th>
+<th style="text-align: left;">SQLite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Docker</strong></td>
+<td style="text-align: left;">✅ <code>v17</code> 及更早版本 (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
+<td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
+<td style="text-align: left;">✅ 支持</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Kubernetes</strong></td>
+<td style="text-align: left;">✅ <code>v17</code> 及更早版本 (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
+<td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
+<td style="text-align: left;">✅ 支持</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Autoconf</strong></td>
+<td style="text-align: left;">✅ <code>v17</code> 及更早版本 (❌ <code>v18</code>)</td>
+<td style="text-align: left;">✅ <code>v11</code> 及更早版本</td>
+<td style="text-align: left;">✅ <code>v9</code> 及更早版本</td>
+<td style="text-align: left;">✅ 支持</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Linux 软件包</strong></td>
+<td style="text-align: left;">见下方说明</td>
+<td style="text-align: left;">见下方说明</td>
+<td style="text-align: left;">见下方说明</td>
+<td style="text-align: left;">✅ 支持</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">说明</p>
+<ul>
+<li><strong>PostgreSQL</strong>: 不支持 <code>v18</code>，因为我们提供的 Alpine 基础镜像仅包含 <code>v17</code> 客户端软件包。</li>
+<li><strong>Linux</strong>: 支持情况取决于您的发行版软件包。如果需要，您可以从供应商仓库手动安装数据库客户端（RHEL 通常需要这样做）。</li>
+<li><strong>SQLite</strong>: 随软件包一起提供，可立即使用。</li>
+</ul>
+</div>
+<p>有助于安装数据库客户端的外部资源：</p>
+<ul>
+<li><a href="https://www.postgresql.org/download/">PostgreSQL 下载与仓库指南</a></li>
+<li><a href="https://mariadb.org/download/?t=repo-config">MariaDB 仓库配置工具</a></li>
+<li><a href="https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/">MySQL 仓库配置指南</a></li>
+<li><a href="https://www.sqlite.org/download.html">SQLite 下载页面</a></li>
+</ul>
+<figure>
+<p><img align="center," alt="概述" src="../../assets/img/bunkerweb_db.svg" width="800" />
+  </p>
+<figcaption>数据库模式</figcaption>
+</figure>
+<h2 id="scheduler">调度器</h2>
+<p>为了实现无缝协调和自动化，BunkerWeb 采用了一个名为调度器的专门服务。调度器通过执行以下任务，在确保平稳运行方面发挥着至关重要的作用：</p>
+<ul>
+<li>
+<p><strong>存储设置和自定义配置</strong>：调度器负责在后端数据库中存储所有设置和自定义配置。这将配置数据集中起来，使其易于访问和管理。</p>
+</li>
+<li>
+<p><strong>执行各种任务（作业）</strong>：调度器处理各种任务的执行，这些任务被称为作业。这些作业涵盖了一系列活动，例如定期维护、计划更新或 BunkerWeb 所需的任何其他自动化任务。</p>
+</li>
+<li>
+<p><strong>生成 BunkerWeb 配置</strong>：调度器生成一个 BunkerWeb 易于理解的配置。该配置源自存储的设置和自定义配置，确保整个系统协调一致地运行。</p>
+</li>
+<li>
+<p><strong>充当其他服务的中介</strong>：调度器充当中介，促进 BunkerWeb 不同组件之间的通信和协调。它与 Web UI 或 autoconf 等服务接口，确保信息和数据交换的无缝流动。</p>
+</li>
+</ul>
+<p>从本质上讲，调度器是 BunkerWeb 的大脑，负责协调各种操作并确保系统的平稳运行。</p>
+<p>根据集成方法的不同，调度器的执行环境可能会有所不同。在基于容器的集成中，调度器在其专用容器中执行，提供了隔离性和灵活性。另一方面，对于基于 Linux 的集成，调度器自包含在 bunkerweb 服务中，简化了部署和管理过程。</p>
+<p>通过使用调度器，BunkerWeb 简化了基本任务的自动化和协调，从而实现了整个系统的高效可靠运行。</p>
+<p>如果您正在使用 Web 用户界面，您可以通过单击菜单中的<strong>作业</strong>来管理调度器作业：</p>
+<figure>
+<p><img align="center," alt="概述" src="../../assets/img/jobs-ui.png" width="800" />
+  </p>
+<figcaption>从 Web UI 管理作业</figcaption>
+</figure>
+<h3 id="_7">实例健康检查</h3>
+<p>自 1.6.0 版本起，调度器内置了一个健康检查系统，用于监控实例的健康状况。如果一个实例变得不健康，调度器将停止向其发送配置。如果该实例恢复健康，调度器将恢复发送配置。</p>
+<p>健康检查间隔由 <code>HEALTHCHECK_INTERVAL</code> 环境变量设置，默认值为 <code>30</code>，这意味着调度器将每 30 秒检查一次实例的健康状况。</p>
+<h2 id="templates">模板</h2>
+<p>BunkerWeb 利用模板的强大功能来简化配置过程并增强灵活性。模板提供了一种结构化和标准化的方法来定义设置和自定义配置，确保了一致性和易用性。</p>
+<ul>
+<li>
+<p><strong>预定义模板</strong>：社区版提供了三个预定义模板，其中封装了常见的自定义配置和设置。这些模板可作为配置 BunkerWeb 的起点，实现快速设置和部署。预定义的模板如下：</p>
+<ul>
+<li><strong>low</strong>：一个基本模板，提供 Web 应用程序保护的基本设置。</li>
+<li><strong>medium</strong>：一个平衡的模板，提供安全功能和性能优化的组合。</li>
+<li><strong>high</strong>：一个高级模板，专注于强大的安全措施和全面的保护。</li>
+</ul>
+</li>
+<li>
+<p><strong>自定义模板</strong>：除了预定义模板外，BunkerWeb 还允许用户创建根据其特定要求量身定制的自定义模板。自定义模板可以对设置和自定义配置进行微调，确保 BunkerWeb 与用户的需求完美契合。</p>
+</li>
+</ul>
+<p>使用 Web 用户界面时，当您添加或编辑服务时，可以通过<strong>简单模式</strong>使用模板：</p>
+<figure>
+<p><img align="center," alt="概述" src="../../assets/img/templates-ui.png" width="800" />
+  </p>
+<figcaption>从 Web UI 使用模板</figcaption>
+</figure>
+<p><strong>创建自定义模板</strong></p>
+<p>创建一个自定义模板是一个简单的过程，涉及以结构化格式定义所需的设置、自定义配置和步骤。</p>
+<ul>
+<li><strong>模板结构</strong>：自定义模板由一个名称、一系列设置、自定义配置和可选步骤组成。模板结构在符合指定格式的 JSON 文件中定义。自定义模板的关键组件包括：<ul>
+<li><strong>设置</strong>：设置由一个名称和相应的值定义。此值将覆盖设置的默认值。<strong>仅支持多站点设置。</strong></li>
+<li><strong>配置</strong>：自定义配置是 NGINX 配置文件的路径，该文件将作为自定义配置包含在内。要知道将自定义配置文件放置在何处，请参阅下面插件树的示例。<strong>仅支持多站点配置类型。</strong></li>
+<li><strong>步骤</strong>：一个步骤包含一个标题、副标题、设置和自定义配置。每个步骤代表一个配置步骤，用户可以按照该步骤在 Web UI 中根据自定义模板设置 BunkerWeb。</li>
+</ul>
+</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">关于步骤的说明</p>
+<p>如果声明了步骤，<strong>则不必在设置和配置部分中包含所有设置和自定义配置</strong>。请记住，当在步骤中声明了设置或自定义配置时，将允许用户在 Web UI 中对其进行编辑。</p>
+</div>
+<ul>
+<li>
+<p><strong>模板文件</strong>：自定义模板在插件目录内的 <code>templates</code> 文件夹中的一个符合指定结构的 JSON 文件中定义。模板文件包含一个名称、设置、自定义配置以及根据用户偏好配置 BunkerWeb 所需的步骤。</p>
+</li>
+<li>
+<p><strong>选择模板</strong>：一旦定义了自定义模板，用户就可以在 Web UI 中服务的简单模式配置过程中选择它。也可以使用配置中的 <code>USE_TEMPLATE</code> 设置来选择模板。模板文件的名称（不带 <code>.json</code> 扩展名）应指定为 <code>USE_TEMPLATE</code> 设置的值。</p>
+</li>
+</ul>
+<p>自定义模板文件示例：
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;模板名称&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="c1">// 可选</span>
+<span class="w">    </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;SETTING_1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;值&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;SETTING_2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;值&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="c1">// 可选</span>
+<span class="w">    </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;modsec/false_positives.conf&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;modsec/non_editable.conf&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;modsec-crs/custom_rules.conf&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="c1">// 可选</span>
+<span class="w">    </span><span class="nt">&quot;steps&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;标题 1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;subtitle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;副标题 1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;SETTING_1&quot;</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;modsec-crs/custom_rules.conf&quot;</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;标题 2&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;subtitle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;副标题 2&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;SETTING_2&quot;</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;configs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;modsec/false_positives.conf&quot;</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<p>包含自定义模板的插件树示例：
+<div class="highlight"><pre><span></span><code>.
+├── plugin.json
+└── templates
+    ├── my_other_template.json
+    ├── my_template
+    │   └── configs
+    │       ├── modsec
+    │       │   ├── false_positives.conf
+    │       │   └── non_editable.conf
+    │       └── modsec-crs
+    │           └── custom_rules.conf
+    └── my_template.json
+</code></pre></div></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.com/invite/fTf46FmtyD" target="_blank" rel="noopener" title="discord.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/bunkerity" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/bunkerity/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.reddit.com/r/BunkerWeb/" target="_blank" rel="noopener" title="www.reddit.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M0 256C0 114.6 114.6 0 256 0s256 114.6 256 256-114.6 256-256 256H37.1c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256m349.6-102.4c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34-34.5 3.7-61.4 33-61.4 68.4v.2c-37.5 1.6-71.8 12.3-99 29.1-10.1-7.8-22.8-12.5-36.5-12.5-33 0-59.8 26.8-59.8 59.8 0 24 14.1 44.6 34.4 54.1 2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54 0-33-26.8-59.8-59.8-59.8-13.7 0-26.3 4.6-36.4 12.4-27.4-17-62.1-27.7-100-29.1v-.2c0-25.4 18.9-46.5 43.4-49.9 4.4 18.8 21.3 32.8 41.5 32.8zm-172.5 93.3c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6-31.4-8.8-30.4-30.5S160.3 247 177 247zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6 11.8-39.3 28.5-39.3 31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9.8-6.2 3.9-6.5 18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1.3 5.1 3.6 3.9 6.5"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.instagram.com/bunkerweb/" target="_blank" rel="noopener" title="www.instagram.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224.3 141a115 115 0 1 0-.6 230 115 115 0 1 0 .6-230m-.6 40.4a74.6 74.6 0 1 1 .6 149.2 74.6 74.6 0 1 1-.6-149.2m93.4-45.1a26.8 26.8 0 1 1 53.6 0 26.8 26.8 0 1 1-53.6 0m129.7 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8M399 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/bunkerity" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../assets/extra.js"></script>
+      
+        <script src="https://chatbot.bunkerweb.io/static/js/chatbot.js"></script>
+      
+        <script src="../../assets/preserve-version-on-language-switch.js"></script>
+      
+        <script src="../../assets/toc-dropdown.js"></script>
+      
+    
+  </body>
+</html>

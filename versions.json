@@ -7,6 +7,13 @@
     ]
   },
   {
+    "version": "1.6.6-rc1",
+    "title": "1.6.6-rc1",
+    "aliases": [
+      "rc"
+    ]
+  },
+  {
     "version": "1.6.5",
     "title": "1.6.5",
     "aliases": [
@@ -16,9 +23,7 @@
   {
     "version": "1.6.5-rc3",
     "title": "1.6.5-rc3",
-    "aliases": [
-      "rc"
-    ],
+    "aliases": [],
     "properties": {
       "hidden": true
     }

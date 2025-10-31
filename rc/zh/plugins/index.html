@@ -1,0 +1,2360 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation of BunkerWeb, the open source and next generation WAF.">
+      
+      
+      
+        <link rel="canonical" href="https://docs.bunkerweb.io/latest/zh/plugins/">
+      
+      
+        <link rel="prev" href="../troubleshooting/">
+      
+      
+        <link rel="next" href="../professional-services/">
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>插件 - BunkerWeb 文档</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+      
+
+
+    
+    
+    <script async
+            defer
+            data-domain="docs.bunkerweb.io"
+            src="https://data.bunkerity.com/js/script.js"></script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', (e) => {
+
+        const customHeaders = document.querySelectorAll('[data-custom-header]')
+        customHeaders.forEach(header => {
+          const getHeaders = document.querySelectorAll(`#${header.getAttribute('id')}`);
+          getHeaders.forEach(el => {
+
+            if(!el.hasAttribute('data-custom-header')) el.remove()
+        })})
+      })
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/medium-zoom/dist/medium-zoom.min.js"></script>
+
+    <script defer>
+  // Lazy load images and embed youtube videos
+  window.addEventListener("load", () => {
+    document.querySelectorAll("[data-src]").forEach((el) => {
+      el.setAttribute("src", el.getAttribute("data-src"));
+    });
+  });
+  // Add missing label
+  try {
+    document
+      .querySelector('div.md-search[data-md-component="search"][role="dialog"]')
+      .setAttribute("aria-label", "Search in documentation");
+  } catch (err) {}
+    </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : '<p>Get the most of BunkerWeb by upgrading to the PRO version. Click <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/store/bunkerweb-pro?utm_campaign=self&utm_source=doc">here</a> and use the <strong>freetrial</strong> promo code to get started.</p>'},
+        { "content" : '<p>Need premium support or tailored consulting around BunkerWeb ? Check out our <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#services">professional services</a>.</p>'},
+        { "content" : '<p>Be part of the Bunker community by joining the <a style="text-decoration:underline; color: white;" href="https://discord.bunkerweb.io">Discord chat</a> and following us on <a style="text-decoration:underline; color: white;" href="https://www.linkedin.com/company/bunkerity/">LinkedIn</a>.</p>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#2eac68";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[0]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        startBannerLoop();
+        // Try to get dynamic content
+        // Else keep static ones
+        // fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        // .then((res) => {
+        //   return res.json();
+        // })
+        // .then((res) => {
+        //   defaultContent = res.data[0].data;
+        //   startBannerLoop();
+        // })
+        // .catch((e) => {
+        //   startBannerLoop();
+        // });
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
+
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../css/print-site.css">
+    
+      <link rel="stylesheet" href="../../css/print-site-material.css">
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="插件 - BunkerWeb 文档" >
+      
+        <meta  property="og:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  property="og:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/zh/plugins.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://docs.bunkerweb.io/latest/zh/plugins/" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="插件 - BunkerWeb 文档" >
+      
+        <meta  name="twitter:description"  content="Documentation of BunkerWeb, the open source and next generation WAF." >
+      
+        <meta  name="twitter:image"  content="https://docs.bunkerweb.io/latest/assets/images/social/zh/plugins.png" >
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+    📢 Looking for BunkerWeb CLOUD, PRO version, technical support or tailored services ? Visit the
+    <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc"
+       style="color: #3f6ec6;
+              text-decoration: underline">BunkerWeb Panel</a>
+    for more information on our enterprise offers.
+
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+    You're not viewing the
+    documentation of the latest version.
+    <a href="../../..">
+        <strong>Click here to view latest.</strong>
+    </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../" title="BunkerWeb 文档" class="md-header__button md-logo" aria-label="BunkerWeb 文档" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BunkerWeb 文档
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              插件
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../plugins/" hreflang="en" class="md-select__link">
+              English - 🇬🇧
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../fr/plugins/" hreflang="fr" class="md-select__link">
+              Français - 🇫🇷
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../de/plugins/" hreflang="de" class="md-select__link">
+              Deutsch - 🇩🇪
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../es/plugins/" hreflang="es" class="md-select__link">
+              Español - 🇪🇸
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="zh" class="md-select__link">
+              中文 - 🇨🇳
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bunkerity/bunkerweb" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  介绍
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  概念
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../integrations/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  集成
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart-guide/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  快速入门指南
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../features/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  功能
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../advanced/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  高级用法
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../web-ui/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Web 界面
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../upgrading/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  升级
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../troubleshooting/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  故障排除
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  插件
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../professional-services/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  专业服务
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../about/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  关于
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="BunkerWeb 文档" class="md-nav__button md-logo" aria-label="BunkerWeb 文档" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    BunkerWeb 文档
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bunkerity/bunkerweb" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    介绍
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    概念
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    集成
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    快速入门指南
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    功能
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    高级用法
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Web 界面
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    升级
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    故障排除
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    插件
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    插件
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      官方插件
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      如何使用插件
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="如何使用插件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      自动
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      手动
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      编写插件
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="编写插件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      结构
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      开始
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      元数据
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI 命令
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      配置
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      模板
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lua" class="md-nav__link">
+    <span class="md-ellipsis">
+      LUA
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LUA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      主脚本
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      库
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      助手
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      作业
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      插件页面
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="插件页面">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      先决条件
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      基本示例
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hookspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hooks.py
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      蓝图
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="蓝图">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      创建一个蓝图
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      覆盖现有蓝图
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      命名约定
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../professional-services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    专业服务
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    关于
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">插件</h1>
+<p>BunkerWeb 附带一个插件系统，可以轻松添加新功能。安装插件后，您可以使用插件定义的其他设置来管理它。</p>
+<h2 id="_2">官方插件</h2>
+<p>以下是我们维护的“官方”插件列表（更多信息请参阅 <a href="https://github.com/bunkerity/bunkerweb-plugins">bunkerweb-plugins</a> 仓库）：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">名称</th>
+<th style="text-align: center;">版本</th>
+<th style="text-align: left;">描述</th>
+<th style="text-align: center;">链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>ClamAV</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">使用 ClamAV 杀毒引擎自动扫描上传的文件，并在检测到文件为恶意时拒绝请求。</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Coraza</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">使用 Coraza WAF（ModSecurity 的替代品）检查请求。</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Discord</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">使用 Webhook 将安全通知发送到 Discord 频道。</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Slack</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">使用 Webhook 将安全通知发送到 Slack 频道。</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>VirusTotal</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">使用 VirusTotal API 自动扫描上传的文件，并在检测到文件为恶意时拒绝请求。</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>WebHook</strong></td>
+<td style="text-align: center;">1.9</td>
+<td style="text-align: left;">使用 Webhook 将安全通知发送到自定义 HTTP 端点。</td>
+<td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_3">如何使用插件</h2>
+<h3 id="_4">自动</h3>
+<p>如果您想快速安装外部插件，可以使用 <code>EXTERNAL_PLUGIN_URLS</code> 设置。它接受一个以空格分隔的 URL 列表，每个 URL 指向一个包含一个或多个插件的压缩（zip 格式）存档。</p>
+<p>如果您想自动安装官方插件，可以使用以下值：<code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.9.zip</code></p>
+<h3 id="_5">手动</h3>
+<p>第一步是通过将其文件放置在相应的 <code>plugins</code> 数据文件夹中来安装插件。该过程取决于您的集成：</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Docker</label><label for="__tabbed_1_2">Docker autoconf</label><label for="__tabbed_1_3">Swarm</label><label for="__tabbed_1_4">Kubernetes</label><label for="__tabbed_1_5">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>当使用 <a href="../integrations/#docker">Docker 集成</a>时，插件必须放置在调度器容器中挂载在 <code>/data/plugins</code> 的卷中。</p>
+<p>首先要做的是创建 plugins 文件夹：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>./bw-data/plugins
+</code></pre></div>
+<p>然后，您可以将您选择的插件放入该文件夹中：</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>./bw-data/plugins
+</code></pre></div>
+<details class="warning">
+<summary>为持久化数据使用本地文件夹</summary>
+<p>调度器在容器内以<strong>UID 101 和 GID 101 的非特权用户</strong>身份运行。这背后的原因是安全性：万一漏洞被利用，攻击者将不会拥有完全的 root (UID/GID 0) 权限。
+但有一个缺点：如果您为持久化数据使用<strong>本地文件夹</strong>，您将需要<strong>设置正确的权限</strong>，以便非特权用户可以向其中写入数据。类似这样的操作应该可以解决问题：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>或者，如果文件夹已经存在：</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span>root:101<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>如果您正在使用<a href="https://docs.docker.com/engine/security/rootless">无根模式的 Docker</a> 或 <a href="https://podman.io/">podman</a>，容器中的 UID 和 GID 将映射到主机上不同的 UID 和 GID。您首先需要检查您的初始 subuid 和 subgid：</p>
+<div class="highlight"><pre><span></span><code>grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subuid<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+grep<span class="w"> </span>^<span class="k">$(</span>whoami<span class="k">)</span>:<span class="w"> </span>/etc/subgid
+</code></pre></div>
+<p>例如，如果您的值为 <strong>100000</strong>，则映射的 UID/GID 将为 <strong>100100</strong> (100000 + 100)：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chgrp<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chmod<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+<p>或者如果文件夹已经存在：</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>chgrp<span class="w"> </span>-R<span class="w"> </span><span class="m">100100</span><span class="w"> </span>bw-data<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
+</code></pre></div>
+</details>
+<p>然后，您可以在启动 Docker 堆栈时挂载该卷：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="nn">...</span>
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
+<span class="nn">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>当使用 <a href="../integrations/#docker-autoconf">Docker autoconf 集成</a>时，插件必须放置在调度器容器中挂载在 <code>/data/plugins</code> 的卷中。</p>
+<p>首先要做的是创建 plugins 文件夹：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>./bw-data/plugins
+</code></pre></div>
+<p>然后，您可以将您选择的插件放入该文件夹中：</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>./bw-data/plugins
+</code></pre></div>
+<p>因为调度器以 UID 和 GID 101 的非特权用户运行，您需要编辑权限：</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">101</span>:101<span class="w"> </span>./bw-data
+</code></pre></div>
+<p>然后您可以在启动 Docker 堆栈时挂载该卷：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="nn">...</span>
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
+<span class="nn">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="admonition warning">
+<p class="admonition-title">已弃用</p>
+<p>Swarm 集成已弃用，并将在未来版本中删除。请考虑改用 <a href="../integrations/#kubernetes">Kubernetes 集成</a>。</p>
+<p><strong>更多信息可以在 <a href="../integrations/#swarm">Swarm 集成文档</a>中找到。</strong></p>
+</div>
+<p>当使用 <a href="../integrations/#swarm">Swarm 集成</a>时，插件必须放置在调度器容器中挂载在 <code>/data/plugins</code> 的卷中。</p>
+<div class="admonition info">
+<p class="admonition-title">Swarm 卷</p>
+<p>本文档不涉及配置一个当调度器服务在不同节点上运行时将持久化的 Swarm 卷。我们将假设您在所有节点上都有一个挂载在 <code>/shared</code> 的共享文件夹。</p>
+</div>
+<p>首先要做的是创建 plugins 文件夹：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/shared/bw-plugins
+</code></pre></div>
+<p>然后，您可以将您选择的插件放入该文件夹中：</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>/shared/bw-plugins
+</code></pre></div>
+<p>因为调度器以 UID 和 GID 101 的非特权用户运行，您需要编辑权限：</p>
+<div class="highlight"><pre><span></span><code>chown<span class="w"> </span>-R<span class="w"> </span><span class="m">101</span>:101<span class="w"> </span>/shared/bw-plugins
+</code></pre></div>
+<p>然后您可以在启动 Swarm 堆栈时挂载该卷：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="nn">...</span>
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc1</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/shared/bw-plugins:/data/plugins</span>
+<span class="nn">...</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>当使用 <a href="../integrations/#kubernetes">Kubernetes 集成</a>时，插件必须放置在调度器容器中挂载在 <code>/data/plugins</code> 的卷中。</p>
+<p>首先要做的是声明一个将包含我们插件数据的 <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">PersistentVolumeClaim</a>：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolumeClaim</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb-plugins</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span>
+<span class="nt">resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5Gi</span>
+</code></pre></div>
+<p>您现在可以添加卷挂载和一个 init 容器来自动配置该卷：</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Recreate</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sa-bunkerweb</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:1.6.6-rc1</span>
+<span class="w">          </span><span class="nt">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Always</span>
+<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;DATABASE_URI&quot;</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db&quot;</span>
+<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/data/plugins&quot;</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
+<span class="w">      </span><span class="nt">initContainers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-scheduler-init</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpine/git</span>
+<span class="w">          </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;git</span><span class="nv"> </span><span class="s">clone</span><span class="nv"> </span><span class="s">https://github.com/bunkerity/bunkerweb-plugins</span><span class="nv"> </span><span class="s">/data/plugins</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">chown</span><span class="nv"> </span><span class="s">-R</span><span class="nv"> </span><span class="s">101:101</span><span class="nv"> </span><span class="s">/data/plugins&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/data/plugins&quot;</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
+<span class="w">      </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vol-plugins</span>
+<span class="w">          </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pvc-bunkerweb-plugins</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>当使用 <a href="../integrations/#linux">Linux 集成</a>时，插件必须写入 <code>/etc/bunkerweb/plugins</code> 文件夹：</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/bunkerity/bunkerweb-plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span class="w"> </span>/etc/bunkerweb/plugins<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+chown<span class="w"> </span>-R<span class="w"> </span>nginx:nginx<span class="w"> </span>/etc/bunkerweb/plugins
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="_6">编写插件</h2>
+<h3 id="structure">结构</h3>
+<div class="admonition tip">
+<p class="admonition-title">现有插件</p>
+<p>如果文档不够，您可以查看<a href="https://github.com/bunkerity/bunkerweb-plugins">官方插件</a>和<a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/src/common/core">核心插件</a>的现有源代码（已包含在 BunkerWeb 中，但从技术上讲它们是插件）。</p>
+</div>
+<p>插件结构如下所示：
+<div class="highlight"><pre><span></span><code>plugin /
+    confs / conf_type / conf_name.conf
+    ui / actions.py
+         hooks.py
+         template.html
+         blueprints / &lt;blueprint_file(s)&gt;
+              templates / &lt;blueprint_template(s)&gt;
+    jobs / my-job.py
+    templates / my-template.json
+          my-template / configs / conf_type / conf_name.conf
+    plugin.lua
+    plugin.json
+</code></pre></div></p>
+<ul>
+<li>
+<p><strong>conf_name.conf</strong>：添加<a href="../advanced/#custom-configurations">自定义 NGINX 配置</a>（作为 Jinja2 模板）。</p>
+</li>
+<li>
+<p><strong>actions.py</strong>：在 Flask 服务器上执行的脚本。此脚本在 Flask 上下文中运行，使您可以访问 <code>jinja2</code> 和 <code>requests</code> 等库和实用程序。</p>
+</li>
+<li>
+<p><strong>hooks.py</strong>：包含 flask 钩子的自定义 Python 文件，将在加载插件时执行。</p>
+</li>
+<li>
+<p><strong>template.html</strong>：通过 UI 访问的自定义插件页面。</p>
+</li>
+<li>
+<p><strong>blueprints 文件夹（在 ui 内）</strong>：
+  此文件夹用于覆盖现有的 Flask 蓝图或创建新的蓝图。在内部，您可以包含蓝图文件和一个可选的 <strong>templates</strong> 子文件夹，用于蓝图特定的模板。</p>
+</li>
+<li>
+<p><strong>jobs py 文件</strong>：由调度器作为作业执行的自定义 Python 文件。</p>
+</li>
+<li>
+<p><strong>my-template.json</strong>：添加<a href="../concepts/#templates">自定义模板</a>以覆盖设置的默认值并轻松应用自定义配置。</p>
+</li>
+<li>
+<p><strong>plugin.lua</strong>：使用 <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA 模块</a>在 NGINX 上执行的代码。</p>
+</li>
+<li>
+<p><strong>plugin.json</strong>：您的插件的元数据、设置和作业定义。</p>
+</li>
+</ul>
+<h3 id="_7">开始</h3>
+<p>第一步是创建一个将包含插件的文件夹：</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>myplugin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="nb">cd</span><span class="w"> </span>myplugin
+</code></pre></div>
+<h3 id="_8">元数据</h3>
+<p>一个名为 <strong>plugin.json</strong> 的文件，写在插件文件夹的根目录下，必须包含有关插件的元数据。这是一个示例：</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;My Plugin&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Just an example plugin.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;stream&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;partial&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;DUMMY_SETTING&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;multisite&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;default&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;help&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Here is the help of the setting.&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dummy-id&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dummy setting&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^.*$&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;jobs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job.py&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;every&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hour&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>以下是字段的详细信息：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">字段</th>
+<th style="text-align: center;">强制</th>
+<th style="text-align: center;">类型</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>id</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">插件的内部 ID：必须在其他插件（包括“核心”插件）中唯一，并且只包含小写字符。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>name</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">您的插件的名称。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>description</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">您的插件的描述。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>version</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">您的插件的版本。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>stream</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">关于流支持的信息：<code>no</code>、<code>yes</code> 或 <code>partial</code>。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>settings</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字典</td>
+<td style="text-align: left;">您的插件的设置列表。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>jobs</code></td>
+<td style="text-align: center;">否</td>
+<td style="text-align: center;">列表</td>
+<td style="text-align: left;">您的插件的作业列表。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>bwcli</code></td>
+<td style="text-align: center;">否</td>
+<td style="text-align: center;">字典</td>
+<td style="text-align: left;">将 CLI 命令名称映射到存储在插件 'bwcli' 目录中的文件，以公开 CLI 插件。</td>
+</tr>
+</tbody>
+</table>
+<p>每个设置都有以下字段（键是在配置中使用的设置的 ID）：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">字段</th>
+<th style="text-align: center;">强制</th>
+<th style="text-align: center;">类型</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>context</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">设置的上下文：<code>multisite</code> 或 <code>global</code>。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>default</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">设置的默认值。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>help</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">关于插件的帮助文本（在 Web UI 中显示）。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>id</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">Web UI 用于 HTML 元素的内部 ID。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>label</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">Web UI 显示的标签。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>regex</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">用于验证用户提供的值的正则表达式。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>type</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">字段的类型：<code>text</code>、<code>check</code>、<code>select</code> 或 <code>password</code>。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>multiple</code></td>
+<td style="text-align: center;">否</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">用于将多个带有数字后缀的设置分组的唯一 ID。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>select</code></td>
+<td style="text-align: center;">否</td>
+<td style="text-align: center;">列表</td>
+<td style="text-align: left;">当 <code>type</code> 为 <code>select</code> 时，可能的字符串值列表。</td>
+</tr>
+</tbody>
+</table>
+<p>每个作业都有以下字段：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">字段</th>
+<th style="text-align: center;">强制</th>
+<th style="text-align: center;">类型</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>name</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">作业的名称。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>file</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">作业文件夹内的文件名。</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>every</code></td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">字符串</td>
+<td style="text-align: left;">作业调度频率：<code>minute</code>、<code>hour</code>、<code>day</code>、<code>week</code> 或 <code>once</code>（无频率，仅在（重新）生成配置之前一次）。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cli">CLI 命令</h3>
+<p>插件可以使用在 <code>bwcli plugin &lt;plugin_id&gt; ...</code> 下运行的自定义命令扩展 <code>bwcli</code> 工具：</p>
+<ol>
+<li>在您的插件中添加一个 <code>bwcli</code> 目录，并为每个命令放置一个文件（例如 <code>bwcli/list.py</code>）。CLI 在执行文件之前将插件路径添加到 <code>sys.path</code>。</li>
+<li>在 <code>plugin.json</code> 的可选 <code>bwcli</code> 部分中声明命令，将每个命令名称映射到其可执行文件名。</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;bwcli&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;list&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;list.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;save&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;save.py&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>一旦安装了插件，调度程序就会自动公开声明的命令。核心插件（例如 <code>src/common/core/backup</code> 中的 <code>backup</code>）也遵循相同的模式。</p>
+<h3 id="_9">配置</h3>
+<p>您可以通过添加一个名为 <strong>confs</strong> 的文件夹来添加自定义 NGINX 配置，其内容类似于<a href="../advanced/#custom-configurations">自定义配置</a>。<strong>confs</strong> 内的每个子文件夹将包含 <a href="https://jinja.palletsprojects.com">jinja2</a> 模板，这些模板将在相应的上下文（<code>http</code>、<code>server-http</code>、<code>default-server-http</code>、<code>stream</code>、<code>server-stream</code>、<code>modsec</code>、<code>modsec-crs</code>、<code>crs-plugins-before</code> 和 <code>crs-plugins-after</code>）下生成和加载。</p>
+<p>这是一个名为 <strong>example.conf</strong> 的 <strong>confs/server-http</strong> 文件夹内的配置模板文件示例：</p>
+<div class="highlight"><pre><span></span><code><span class="k">location</span><span class="w"> </span><span class="s">/setting</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kn">default_type</span><span class="w"> </span><span class="s">&#39;text/plain&#39;</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">content_by_lua_block</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">ngx.say(&#39;{{</span><span class="w"> </span><span class="s">DUMMY_SETTING</span><span class="w"> </span><span class="err">}}</span><span class="s">&#39;)</span>
+<span class="w">    </span><span class="err">}</span>
+<span class="err">}</span>
+</code></pre></div>
+<p><code>{{ DUMMY_SETTING }}</code> 将被插件用户选择的 <code>DUMMY_SETTING</code> 的值替换。</p>
+<h3 id="_10">模板</h3>
+<p>有关更多信息，请查看<a href="../concepts/#templates">模板文档</a>。</p>
+<h3 id="lua">LUA</h3>
+<h4 id="_11">主脚本</h4>
+<p>在底层，BunkerWeb 使用 <a href="https://github.com/openresty/lua-nginx-module">NGINX LUA 模块</a>在 NGINX 内部执行代码。需要执行代码的插件必须在插件文件夹的根目录下提供一个 lua 文件，使用 <strong>plugin.json</strong> 的 <code>id</code> 值作为其名称。这是一个名为 <strong>myplugin.lua</strong> 的示例：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">class</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;middleclass&quot;</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">plugin</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.plugin&quot;</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">utils</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.utils&quot;</span>
+
+
+<span class="kd">local</span><span class="w"> </span><span class="nv">myplugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">class</span><span class="p">(</span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">plugin</span><span class="p">)</span>
+
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">ctx</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">plugin</span><span class="p">.</span><span class="nf">initialize</span><span class="p">(</span><span class="nv">self</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;myplugin&quot;</span><span class="p">,</span><span class="w"> </span><span class="nv">ctx</span><span class="p">)</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">dummy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;dummy&quot;</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">init</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;init called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">set</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;set called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">access</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;access called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log_default</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log_default called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">preread</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;preread called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span><span class="w"> </span><span class="nc">myplugin</span><span class="p">:</span><span class="nf">log_stream</span><span class="p">()</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log_stream called&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="nv">self</span><span class="p">:</span><span class="nf">ret</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;success&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+
+<span class="kr">return</span><span class="w"> </span><span class="nv">myplugin</span>
+</code></pre></div>
+<p>声明的函数会在特定的上下文中自动调用。以下是每个函数的详细信息：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">函数</th>
+<th style="text-align: center;">上下文</th>
+<th style="text-align: left;">描述</th>
+<th style="text-align: left;">返回值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>init</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#init_by_lua">init_by_lua</a></td>
+<td style="text-align: left;">当 NGINX 刚启动或收到重新加载命令时调用。典型的用例是准备插件将使用的任何数据。</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (布尔值)：如果没有错误则为 true，否则为 false</li><li><code>msg</code> (字符串)：成功或错误消息</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>set</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#set_by_lua">set_by_lua</a></td>
+<td style="text-align: left;">在服务器接收到每个请求之前调用。典型的用例是在访问阶段之前进行计算。</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (布尔值)：如果没有错误则为 true，否则为 false</li><li><code>msg</code> (字符串)：成功或错误消息</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>access</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#access_by_lua">access_by_lua</a></td>
+<td style="text-align: left;">在服务器接收到每个请求时调用。典型的用例是在这里进行安全检查，并在需要时拒绝请求。</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code>,<code>status</code>,<code>redirect</code><ul><li><code>ret</code> (布尔值)：如果没有错误则为 true，否则为 false</li><li><code>msg</code> (字符串)：成功或错误消息</li><li><code>status</code> (数字)：中断当前进程并返回 <a href="https://github.com/openresty/lua-nginx-module#http-status-constants">HTTP 状态</a></li><li><code>redirect</code> (URL)：如果设置，将重定向到给定的 URL</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>log</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
+<td style="text-align: left;">当请求完成时（在它被记录到访问日志之前）调用。典型的用例是例如进行统计或计算计数器。</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (布尔值)：如果没有错误则为 true，否则为 false</li><li><code>msg</code> (字符串)：成功或错误消息</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>log_default</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/lua-nginx-module#log_by_lua">log_by_lua</a></td>
+<td style="text-align: left;">与 <code>log</code> 相同，但仅在默认服务器上调用。</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (布尔值)：如果没有错误则为 true，否则为 false</li><li><code>msg</code> (字符串)：成功或错误消息</li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>preread</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/stream-lua-nginx-module#preread_by_lua_block">preread_by_lua</a></td>
+<td style="text-align: left;">与 <code>access</code> 函数类似，但用于流模式。</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code>,<code>status</code><ul><li><code>ret</code> (布尔值)：如果没有错误则为 true，否则为 false</li><li><code>msg</code> (字符串)：成功或错误消息</li><li><code>status</code> (数字)：中断当前进程并返回 <a href="https://github.com/openresty/lua-nginx-module#http-status-constants">status</a></li></ul></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>log_stream</code></td>
+<td style="text-align: center;"><a href="https://github.com/openresty/stream-lua-nginx-module#log_by_lua_block">log_by_lua</a></td>
+<td style="text-align: left;">与 <code>log</code> 函数类似，但用于流模式。</td>
+<td style="text-align: left;"><code>ret</code>, <code>msg</code><ul><li><code>ret</code> (布尔值)：如果没有错误则为 true，否则为 false</li><li><code>msg</code> (字符串)：成功或错误消息</li></ul></td>
+</tr>
+</tbody>
+</table>
+<h4 id="_12">库</h4>
+<p><a href="https://github.com/openresty/lua-nginx-module">NGINX LUA 模块</a>和 <a href="https://github.com/openresty/stream-lua-nginx-module">NGINX stream LUA 模块</a>的所有指令都可用。此外，您可以使用 BunkerWeb 中包含的 LUA 库：有关完整列表，请参见<a href="https://github.com/bunkerity/bunkerweb/blobsrc/deps/clone.sh">此脚本</a>。</p>
+<p>如果您需要其他库，可以将它们放在插件的根文件夹中，并通过在它们前面加上您的插件 ID 来访问它们。这是一个名为 <strong>mylibrary.lua</strong> 的示例文件：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">_M</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="nv">_M</span><span class="p">.</span><span class="py">dummy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">function</span><span class="w"> </span><span class="p">()</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="s2">&quot;dummy&quot;</span>
+<span class="kr">end</span>
+
+<span class="kr">return</span><span class="w"> </span><span class="nv">_M</span>
+</code></pre></div>
+<p>这是您如何从 <strong>myplugin.lua</strong> 文件中使用它的方法：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">mylibrary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;myplugin.mylibrary&quot;</span>
+
+<span class="p">...</span>
+
+<span class="nv">mylibrary</span><span class="p">.</span><span class="nf">dummy</span><span class="p">()</span>
+
+<span class="p">...</span>
+</code></pre></div>
+<h4 id="_13">助手</h4>
+<p>一些助手模块提供了常见的有用助手：</p>
+<ul>
+<li><code>self.variables</code>：允许访问和存储插件的属性</li>
+<li><code>self.logger</code>：打印日志</li>
+<li><code>bunkerweb.utils</code>：各种有用的函数</li>
+<li><code>bunkerweb.datastore</code>：访问一个实例上的全局共享数据（键/值存储）</li>
+<li><code>bunkerweb.clusterstore</code>：访问 BunkerWeb 实例之间共享的 Redis 数据存储（键/值存储）</li>
+</ul>
+<p>要访问这些函数，您首先需要<strong>引用</strong>这些模块：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">utils</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.utils&quot;</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">datastore</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.datastore&quot;</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">clustestore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">require</span><span class="w"> </span><span class="s2">&quot;bunkerweb.clustertore&quot;</span>
+</code></pre></div>
+<p>检索一个设置值：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">myvar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">self</span><span class="p">.</span><span class="py">variables</span><span class="p">[</span><span class="s2">&quot;DUMMY_SETTING&quot;</span><span class="p">]</span>
+<span class="kr">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">myvar</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;can&#39;t retrieve setting DUMMY_SETTING&quot;</span><span class="p">)</span>
+<span class="kr">else</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;DUMMY_SETTING = &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">value</span><span class="p">)</span>
+<span class="kr">end</span>
+</code></pre></div>
+<p>在本地缓存中存储一些东西：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">ok</span><span class="p">,</span><span class="w"> </span><span class="nv">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">self</span><span class="p">.</span><span class="py">datastore</span><span class="p">:</span><span class="nf">set</span><span class="p">(</span><span class="s2">&quot;plugin_myplugin_something&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;somevalue&quot;</span><span class="p">)</span>
+<span class="kr">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">ok</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;can&#39;t save plugin_myplugin_something into datastore : &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">err</span><span class="p">)</span>
+<span class="kr">else</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;successfully saved plugin_myplugin_something into datastore&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+</code></pre></div>
+<p>检查一个 IP 地址是否是全局的：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">ret</span><span class="p">,</span><span class="w"> </span><span class="nv">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">utils</span><span class="p">.</span><span class="nf">ip_is_global</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="p">)</span>
+<span class="kr">if</span><span class="w"> </span><span class="nv">ret</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">ERR</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;error while checking if IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; is global or not : &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">err</span><span class="p">)</span>
+<span class="kr">elseif</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">ret</span><span class="w"> </span><span class="kr">then</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; is not global&quot;</span><span class="p">)</span>
+<span class="kr">else</span>
+<span class="w">    </span><span class="nv">self</span><span class="p">.</span><span class="py">logger</span><span class="p">:</span><span class="nf">log</span><span class="p">(</span><span class="nv">ngx</span><span class="p">.</span><span class="py">NOTICE</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;IP &quot;</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="nv">ngx</span><span class="p">.</span><span class="py">ctx</span><span class="p">.</span><span class="py">bw</span><span class="p">.</span><span class="py">remote_addr</span><span class="w"> </span><span class="o">..</span><span class="w"> </span><span class="s2">&quot; is global&quot;</span><span class="p">)</span>
+<span class="kr">end</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">更多示例</p>
+<p>如果您想查看可用函数的完整列表，可以查看仓库的 <a href="https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc1/src/bw/lua/bunkerweb">lua 目录</a>中存在的文件。</p>
+</div>
+<h3 id="_14">作业</h3>
+<p>BunkerWeb 使用内部作业调度器来执行定期任务，例如使用 certbot 续订证书、下载黑名单、下载 MMDB 文件等。您可以通过将任务放入名为 <strong>jobs</strong> 的子文件夹中，并在 <strong>plugin.json</strong> 元数据文件中列出它们来添加您选择的任务。不要忘记为每个人添加执行权限，以避免用户克隆和安装您的插件时出现任何问题。</p>
+<h3 id="_15">插件页面</h3>
+<p>与 Web UI 相关的所有内容都位于 <strong>ui</strong> 子文件夹中，正如我们在<a href="#structure">之前的结构部分</a>中看到的那样。</p>
+<h4 id="_16">先决条件</h4>
+<p>当您想要创建一个插件页面时，您需要两个文件：</p>
+<ul>
+<li>
+<p><strong>template.html</strong>，可以通过 <strong>GET /plugins/&lt;<em>plugin_id</em>&gt;</strong> 访问。</p>
+</li>
+<li>
+<p><strong>actions.py</strong>，您可以在其中添加一些脚本和逻辑，通过 <strong>POST /plugins/&lt;<em>plugin_id</em>&gt;</strong> 访问。请注意，此文件<strong>需要一个与插件同名的函数</strong>才能工作。即使该函数为空，也需要此文件。</p>
+</li>
+</ul>
+<h4 id="_17">基本示例</h4>
+<div class="admonition info">
+<p class="admonition-title">Jinja 2 模板</p>
+<p><strong>template.html</strong> 文件是一个 Jinja2 模板，如果需要，请参阅 <a href="https://jinja.palletsprojects.com">Jinja2 文档</a>。</p>
+</div>
+<p>我们可以先不考虑 <strong>actions.py</strong> 文件，<strong>只在 GET 情况下使用模板</strong>。模板可以访问应用程序上下文和库，因此您可以使用 Jinja、请求或 flask 实用程序。</p>
+<p>例如，您可以在模板中像这样获取请求参数：</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>请求参数 : {{ request.args.get() }}.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>```
+
+#### Actions.py
+
+!!! warning &quot;CSRF 令牌&quot;
+
+    请注意，每个表单提交都受到 CSRF 令牌的保护，您需要在您的表单中包含以下代码片段：
+    ```html
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;hidden&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;csrf_token&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;{{ csrf_token() }}&quot;</span> <span class="p">/&gt;</span>
+    ```
+
+当发送 **POST /plugins/<span class="err">&lt;</span>*plugin_id*&gt;** 时，您可以使用 **actions.py** 文件为您的插件页面添加额外的脚本。
+
+在 **actions.py** 中，您默认有两个函数：
+
+**pre_render 函数**
+
+这允许您在 **GET** 模板时检索数据，并使用 Jinja 中可用的 pre_render 变量来更动态地显示内容。
+
+```python
+def pre_render(**kwargs)
+  return <span class="p">&lt;</span><span class="nt">pre_render_data</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>BunkerWeb 会给您发送这种类型的响应：</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok|ko&quot;</span><span class="p">,</span> <span class="s2">&quot;code&quot;</span> <span class="p">:</span> <span class="n">XXX</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">pre_render_data</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
+</code></pre></div>
+<p><strong>&lt;<em>plugin_id</em>&gt; 函数</strong></p>
+<p>这允许您在从模板端点进行 <strong>POST</strong> 时检索数据，该端点必须在 AJAX 中使用。</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">myplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="o">&lt;</span><span class="n">plugin_id_data</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>BunkerWeb 会给你发送这种类型的响应：</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">plugin_id_data</span><span class="o">&gt;</span><span class="p">}),</span> <span class="mi">200</span>
+</code></pre></div>
+<p><strong>您可以从 action.py 访问什么</strong></p>
+<p>以下是在 action.py 函数上传递和访问的参数：</p>
+<div class="highlight"><pre><span></span><code><span class="n">function</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">可用的 Python 库</p>
+<p>BunkerWeb 的 Web UI 包含一组预安装的 Python 库，您可以在插件的 <code>actions.py</code> 或其他与 UI 相关的脚本中使用。这些库开箱即用，无需额外安装。</p>
+<p>以下是包含的库的完整列表：</p>
+<ul>
+<li><strong>bcrypt</strong> - 密码哈希库</li>
+<li><strong>biscuit-python</strong> - Biscuit 认证令牌</li>
+<li><strong>certbot</strong> - 用于 Let's Encrypt 的 ACME 客户端</li>
+<li><strong>Flask</strong> - Web 框架</li>
+<li><strong>Flask-Login</strong> - 用户会话管理</li>
+<li><strong>Flask-Session[cachelib]</strong> - 服务器端会话存储</li>
+<li><strong>Flask-WTF</strong> - 表单处理和 CSRF 保护</li>
+<li><strong>gunicorn[gthread]</strong> - WSGI HTTP 服务器</li>
+<li><strong>pillow</strong> - 图像处理</li>
+<li><strong>psutil</strong> - 系统和进程实用程序</li>
+<li><strong>python_dateutil</strong> - 日期和时间实用程序</li>
+<li><strong>qrcode</strong> - 二维码生成</li>
+<li><strong>regex</strong> - 高级正则表达式</li>
+<li><strong>urllib3</strong> - HTTP 客户端</li>
+<li><strong>user_agents</strong> - 用户代理解析</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">在您的插件中使用库</p>
+<p>要在您的 <code>actions.py</code> 文件中导入和使用这些库，只需使用标准的 Python <code>import</code> 语句。例如：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">bcrypt</span>
+</code></pre></div>
+</div>
+<details class="warning">
+<summary>外部库</summary>
+<p>如果您需要上面未列出的库，请将它们安装在您插件的 <code>ui</code> 文件夹中，并使用经典的 <code>import</code> 指令导入它们。请确保与现有环境兼容以避免冲突。</p>
+</details>
+</div>
+<p><strong>一些例子</strong></p>
+<ul>
+<li>检索表单提交的数据</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">myplugin</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">my_form_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s2">&quot;my_form_input&quot;</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">my_form_value</span>
+</code></pre></div>
+<ul>
+<li>访问应用程序配置</li>
+</ul>
+<p><strong>action.py</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pre_render</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;app&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;CONFIG&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">methods</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">config</span>
+</code></pre></div></p>
+<p><strong>模板</strong>
+<div class="highlight"><pre><span></span><code><span class="cm">&lt;!-- 元数据 + 配置 --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>{{ pre_render }}<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div></p>
+<h3 id="hookspy">Hooks.py</h3>
+<p>本文档概述了用于管理应用程序内请求不同阶段的生命周期钩子。每个钩子都与一个特定的阶段相关联。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">before_request</label><label for="__tabbed_2_2">after_request</label><label for="__tabbed_2_3">teardown_request</label><label for="__tabbed_2_4">context_processor</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>这些钩子在处理传入请求<strong>之前</strong>执行。它们通常用于预处理任务，例如身份验证、验证或日志记录。</p>
+<p>如果钩子返回一个响应对象，Flask 将跳过请求处理并直接返回该响应。这对于短路请求处理管道很有用。</p>
+<p><strong>示例：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">before_request</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Before-request: Validating request...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># 在此处执行身份验证、验证或日志记录</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span> <span class="c1"># 我们在应用程序上下文中</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="s2">&quot;Invalid request!&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">is_valid_request</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># 虚拟验证逻辑</span>
+    <span class="k">return</span> <span class="s2">&quot;user&quot;</span> <span class="ow">in</span> <span class="n">request</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>这些钩子在请求处理<strong>之后</strong>运行。它们非常适合后处理任务，例如清理、额外的日志记录或在发送回响应之前对其进行修改。</p>
+<p>它们接收响应对象作为参数，并可以在返回之前对其进行修改。第一个返回响应的 after_request 钩子将用作最终响应。</p>
+<p><strong>示例：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">request</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">after_request</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;After-request: Logging response...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># 在此处执行日志记录、清理或响应修改</span>
+    <span class="n">log_response</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">log_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="c1"># 虚拟日志记录逻辑</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Response logged:&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>当请求上下文被拆除时，会调用这些钩子。这些钩子用于释放资源或处理请求生命周期中发生的错误。</p>
+<p><strong>示例：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">teardown_request</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Teardown-request: Cleaning up resources...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># 在此处执行清理、释放资源或处理错误</span>
+    <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+        <span class="n">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+    <span class="n">cleanup_resources</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_error</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+    <span class="c1"># 虚拟错误处理逻辑</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error encountered:&quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cleanup_resources</span><span class="p">():</span>
+    <span class="c1"># 虚拟资源清理逻辑</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Resources have been cleaned up.&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>这些钩子用于向模板或视图注入额外的上下文。它们通过将通用数据（如用户信息或配置设置）传递给模板来丰富运行时上下文。</p>
+<p>如果上下文处理器返回一个字典，则键和值将添加到所有模板的上下文中。这允许您在多个视图或模板之间共享数据。</p>
+<p><strong>示例：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">context_processor</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Context-processor: Injecting context data...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># 返回一个包含模板/视图上下文数据的字典</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;current_user&quot;</span><span class="p">:</span> <span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;app_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;feature_flags&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;new_ui&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+    <span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>这种生命周期钩子设计为管理请求生命周期的各个方面提供了一种模块化和系统化的方法：</p>
+<ul>
+<li><strong>模块化：</strong> 每个钩子都负责一个独特的阶段，确保了关注点的分离。</li>
+<li><strong>可维护性：</strong> 开发人员可以轻松地添加、修改或删除钩子实现，而不会影响请求生命周期的其他部分。</li>
+<li><strong>可扩展性：</strong> 该框架是灵活的，允许随着应用程序需求的发展添加额外的钩子或增强功能。</li>
+</ul>
+<p>通过明确定义每个钩子的职责及其相关的日志记录前缀，系统确保了请求处理的每个阶段都是透明和可管理的。</p>
+<h3 id="_18">蓝图</h3>
+<p>在 Flask 中，<strong>蓝图</strong>是一种模块化的方式，用于组织应用程序中的相关组件——例如视图、模板和静态文件。它们允许您逻辑地对功能进行分组，并可用于创建应用程序的新部分或覆盖现有部分。</p>
+<h4 id="_19">创建一个蓝图</h4>
+<p>要定义一个蓝图，您需要创建一个 <code>Blueprint</code> 类的实例，并指定其名称和导入路径。然后，您可以定义与此蓝图关联的路由和视图。</p>
+<p><strong>示例：定义一个新的蓝图</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">render_template</span>
+
+<span class="c1"># 定义蓝图</span>
+<span class="n">my_blueprint</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;my_blueprint&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/templates&#39;</span><span class="p">)</span> <span class="c1"># 设置 template_folder 是为了避免与原始蓝图冲突</span>
+
+<span class="c1"># 在蓝图内定义一个路由</span>
+<span class="nd">@my_blueprint</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/my_blueprint&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">my_blueprint_page</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;my_blueprint.html&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>在此示例中，创建了一个名为 <code>my_blueprint</code> 的蓝图，并在其中定义了一个路由 <code>/my_blueprint</code>。</p>
+<h4 id="_20">覆盖现有蓝图</h4>
+<p>蓝图也可以覆盖现有的蓝图以修改或扩展功能。为此，请确保新蓝图的名称与您要覆盖的蓝图相同，并在原始蓝图之后注册它。</p>
+<p><strong>示例：覆盖现有蓝图</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">dirname</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">Blueprint</span>
+
+<span class="c1"># 原始蓝图</span>
+<span class="n">instances</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s1">&#39;instances&#39;</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/templates&#39;</span><span class="p">)</span> <span class="c1"># 设置 template_folder 是为了避免与原始蓝图冲突</span>
+
+<span class="nd">@instances</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/instances&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">override_instances</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;我的新实例页面&quot;</span>
+</code></pre></div>
+<p>在这种情况下，访问 URL <code>/instances</code> 将显示“我的新实例页面”，因为最后注册的 <code>instances</code> 蓝图覆盖了原始的 <code>instances</code> 蓝图。</p>
+<div class="admonition warning">
+<p class="admonition-title">关于覆盖</p>
+<p>在覆盖现有蓝图时要小心，因为它可能会影响应用程序的行为。确保更改与应用程序的要求一致，并且不会引入意外的副作用。</p>
+<p>所有现有的路由都将从原始蓝图中移除，因此如果需要，您需要重新实现它们。</p>
+</div>
+<h4 id="_21">命名约定</h4>
+<div class="admonition danger">
+<p class="admonition-title">重要</p>
+<p>确保蓝图的名称与蓝图变量名称匹配，否则它将不被视为有效的蓝图，也不会被注册。</p>
+</div>
+<p>为了保持一致性和清晰度，建议遵循以下命名约定：</p>
+<ul>
+<li>
+<p><strong>蓝图名称</strong>：使用简短的全小写名称。可以使用下划线来提高可读性，例如 <code>user_auth</code>。</p>
+</li>
+<li>
+<p><strong>文件名</strong>：将文件名与蓝图名称匹配，确保其全小写并根据需要使用下划线，例如 <code>user_auth.py</code>。</p>
+</li>
+</ul>
+<p>这种做法与 Python 的模块命名约定一致，有助于维护清晰的项目结构。</p>
+<p><strong>示例：蓝图和文件名命名</strong></p>
+<div class="highlight"><pre><span></span><code>plugin /
+    ui / blueprints / user_auth.py
+                      templates / user_auth.html
+</code></pre></div>
+<p>在这种结构中，<code>user_auth.py</code> 包含 <code>user_auth</code> 蓝图，而 <code>user_auth.html</code> 是相关的模板，遵循了推荐的命名约定。</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.com/invite/fTf46FmtyD" target="_blank" rel="noopener" title="discord.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/bunkerity" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/bunkerity/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.reddit.com/r/BunkerWeb/" target="_blank" rel="noopener" title="www.reddit.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M0 256C0 114.6 114.6 0 256 0s256 114.6 256 256-114.6 256-256 256H37.1c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256m349.6-102.4c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34-34.5 3.7-61.4 33-61.4 68.4v.2c-37.5 1.6-71.8 12.3-99 29.1-10.1-7.8-22.8-12.5-36.5-12.5-33 0-59.8 26.8-59.8 59.8 0 24 14.1 44.6 34.4 54.1 2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54 0-33-26.8-59.8-59.8-59.8-13.7 0-26.3 4.6-36.4 12.4-27.4-17-62.1-27.7-100-29.1v-.2c0-25.4 18.9-46.5 43.4-49.9 4.4 18.8 21.3 32.8 41.5 32.8zm-172.5 93.3c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6-31.4-8.8-30.4-30.5S160.3 247 177 247zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6 11.8-39.3 28.5-39.3 31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9.8-6.2 3.9-6.5 18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1.3 5.1 3.6 3.9 6.5"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.instagram.com/bunkerweb/" target="_blank" rel="noopener" title="www.instagram.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M224.3 141a115 115 0 1 0-.6 230 115 115 0 1 0 .6-230m-.6 40.4a74.6 74.6 0 1 1 .6 149.2 74.6 74.6 0 1 1-.6-149.2m93.4-45.1a26.8 26.8 0 1 1 53.6 0 26.8 26.8 0 1 1-53.6 0m129.7 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8M399 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/bunkerity" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../js/print-site.js"></script>
+      
+        <script src="../../assets/extra.js"></script>
+      
+        <script src="https://chatbot.bunkerweb.io/static/js/chatbot.js"></script>
+      
+        <script src="../../assets/preserve-version-on-language-switch.js"></script>
+      
+        <script src="../../assets/toc-dropdown.js"></script>
+      
+    
+  </body>
+</html>
