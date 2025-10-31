@@ -240,7 +240,7 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
 
     authenticator = env("LETS_ENCRYPT_DNS_PROVIDER", "").lower()
     server_names_val = env("SERVER_NAME", "www.example.com").strip() if IS_MULTISITE else getenv("SERVER_NAME", "www.example.com").strip()
-    email_val = env("EMAIL_LETS_ENCRYPT", "") or f"contact@{service}"
+    email_val = env("EMAIL_LETS_ENCRYPT", "").strip()
     retries_val = env("LETS_ENCRYPT_RETRIES", "0")
     challenge_val = env("LETS_ENCRYPT_CHALLENGE", "http").lower()
     profile_val = env("LETS_ENCRYPT_PROFILE", "classic").lower()
@@ -254,10 +254,13 @@ def build_service_config(service: str) -> Tuple[str, Dict[str, Union[str, bool, 
         LOGGER.warning(f"[Service: {service}] SERVER_NAME is empty. Please set a valid server name, skipping generation.")
         activated = False
 
-    if "@" not in email_val:
-        if activated:
-            LOGGER.warning(f"[Service: {service}] EMAIL_LETS_ENCRYPT is missing or invalid. Using default: 'contact@{service}'")
-        email_val = f"contact@{service}"
+    if email_val:
+        if "@" not in email_val:
+            if activated:
+                LOGGER.warning(f"[Service: {service}] EMAIL_LETS_ENCRYPT is invalid. Ignoring the provided value and proceeding without a contact email.")
+            email_val = ""
+    elif activated:
+        LOGGER.warning(f"[Service: {service}] EMAIL_LETS_ENCRYPT is not set. Proceeding without a contact email.")
 
     try:
         retries_int = int(retries_val)
@@ -463,11 +466,14 @@ def certbot_new(config: Dict[str, Union[str, bool, int, Dict[str, str]]], cmd_en
         WORK_DIR,
         "--logs-dir",
         LOGS_DIR,
-        "--email",
-        config["email"],
         "--break-my-certs",
         "--expand",
     ]
+
+    if config.get("email"):
+        command.extend(["--email", config["email"]])
+    else:
+        command.append("--register-unsafely-without-email")
 
     if LOG_LEVEL == "DEBUG":
         command.append("-v")
@@ -703,7 +709,7 @@ try:
             continue
 
         LOGGER.info(
-            f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email']}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile..."
+            f"Asking{' wildcard' if config['wildcard'] else ''} certificates for domain(s) : {config['server_names']} (email = {config['email'] or 'not provided'}){' using staging' if config['staging'] else ''} with {config['challenge']} challenge, using {config['profile']!r} profile..."
         )
         LOGGER.debug(f"Service configuration: {config}")
 

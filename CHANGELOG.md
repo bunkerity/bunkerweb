@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.6-rc1 - ????/??/??
+## v1.6.6-rc2 - ????/??/??
+
+- [FEATURE] Refactor `Let's Encrypt` mail handling: validate the configured email and warn if missing/invalid. Use normal registration when valid; otherwise add **--register-unsafely-without-email** to Certbot and log that choice.
+
+## v1.6.6-rc1 - 2025/10/31
 
 - [BUGFIX] Update BunkerWeb integration to use dedicated CrowdSec collection so that CrowdSec now works with the log format used by BunkerWeb.
 - [FEATURE] Enhance plugin update process with per-plugin commit option and improved error handling
