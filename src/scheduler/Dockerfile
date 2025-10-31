@@ -18,7 +18,7 @@ WORKDIR /usr/share/bunkerweb
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/arm/v6" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 

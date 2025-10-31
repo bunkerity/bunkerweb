@@ -57,13 +57,13 @@ jobs:
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
 
-  # Build arm64 + arm/v7 + arm/v6 images
+  # Build arm64 + arm/v7 images
   build-containers-arm:
     needs: [create-arm]
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
-        arch: [linux/arm64, linux/arm/v7, linux/arm/v6]
+        arch: [linux/arm64, linux/arm/v7]
         include:
           - release: beta
             cache: false
@@ -84,8 +84,6 @@ jobs:
             cache_suffix: arm64
           - arch: linux/arm/v7
             cache_suffix: armv7
-          - arch: linux/arm/v6
-            cache_suffix: armv6
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ${{ matrix.release }}

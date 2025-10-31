@@ -71,7 +71,7 @@ jobs:
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         with:
           endpoint: ssh://root@arm
-          platforms: linux/arm64,linux/arm/v7,linux/arm/v6
+          platforms: linux/arm64,linux/arm/v7
           buildkitd-flags: --debug
       # Compute metadata
       - name: Extract metadata
@@ -85,7 +85,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
-          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v6
+          platforms: linux/amd64,linux/386,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ inputs.TAGS }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -94,7 +94,6 @@ jobs:
             type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-386
             type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-arm64
             type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv7
-            type=registry,ref=docker.io/bunkerity/bw-images-cache:${{ inputs.CACHE_FROM }}-armv6
           outputs: type=registry,oci-mediatypes=true,compression=zstd
           provenance: true
           sbom: true
