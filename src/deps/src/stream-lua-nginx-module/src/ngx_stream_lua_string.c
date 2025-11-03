@@ -141,6 +141,7 @@ ngx_stream_lua_ngx_escape_sql_str(u_char *dst, u_char *src, size_t size)
                         break;
                 }
             }
+
             src++;
             size--;
         }
@@ -200,9 +201,11 @@ ngx_stream_lua_ngx_escape_sql_str(u_char *dst, u_char *src, size_t size)
                     *dst++ = *src;
                     break;
             }
+
         } else {
             *dst++ = *src;
         }
+
         src++;
         size--;
     } /* while (size) */
@@ -456,8 +459,5 @@ ngx_stream_lua_ffi_escape_uri(const u_char *src, size_t len, u_char *dst,
     ngx_stream_lua_escape_uri(dst, (u_char *) src, len,
                               type);
 }
-
-
-
 
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */

@@ -9,6 +9,7 @@
 - [DEPS] Updated luajit2 version to v2.1-20251030
 - [DEPS] Updated lua-resty-core version to v0.1.32
 - [DEPS] Updated lua-nginx-module version to v0.10.29
+- [DEPS] Updated stream-lua-nginx-module version to v0.0.17
 
 ## v1.6.6-rc1 - 2025/10/31
 

@@ -208,8 +208,6 @@ ngx_stream_lua_content_handler(ngx_stream_session_t *s)
 }
 
 
-
-
 ngx_int_t
 ngx_stream_lua_content_handler_file(ngx_stream_lua_request_t *r)
 {

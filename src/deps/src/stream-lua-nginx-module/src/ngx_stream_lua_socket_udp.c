@@ -36,6 +36,7 @@
 
 
 static int ngx_stream_lua_socket_udp(lua_State *L);
+static int ngx_stream_lua_socket_udp_bind(lua_State *L);
 static int ngx_stream_lua_socket_udp_setpeername(lua_State *L);
 static int ngx_stream_lua_socket_udp_send(lua_State *L);
 static int ngx_stream_lua_socket_udp_receive(lua_State *L);
@@ -66,7 +67,7 @@ static void ngx_stream_lua_socket_udp_read_handler(ngx_stream_lua_request_t *r,
 static void ngx_stream_lua_socket_udp_handle_success(
     ngx_stream_lua_request_t *r, ngx_stream_lua_socket_udp_upstream_t *u);
 static ngx_int_t ngx_stream_lua_udp_connect(
-    ngx_stream_lua_udp_connection_t *uc);
+    ngx_stream_lua_socket_udp_upstream_t *u);
 static int ngx_stream_lua_socket_udp_close(lua_State *L);
 static ngx_int_t ngx_stream_lua_socket_udp_resume(ngx_stream_lua_request_t *r);
 static void ngx_stream_lua_udp_resolve_cleanup(void *data);
@@ -75,11 +76,18 @@ static void ngx_stream_lua_udp_socket_cleanup(void *data);
 static ssize_t ngx_stream_lua_udp_sendmsg(ngx_connection_t *c,
     ngx_iovec_t *vec);
 #endif
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+static ngx_int_t ngx_stream_lua_udp_connect_set_transparent(
+     ngx_stream_lua_udp_connection_t *uc, ngx_socket_t s);
+#endif
+static int ngx_stream_lua_socket_udp_setoption(lua_State *L);
 
 
 enum {
     SOCKET_CTX_INDEX = 1,
-    SOCKET_TIMEOUT_INDEX = 2
+    SOCKET_TIMEOUT_INDEX = 2,
+    SOCKET_BIND_INDEX = 3,   /* only in upstream cosocket */
+    SOCKET_IP_TRANSPARENT_INDEX = 4
 };
 
 
@@ -101,7 +109,10 @@ ngx_stream_lua_inject_socket_udp_api(ngx_log_t *log, lua_State *L)
     /* udp upstream socket object metatable */
     lua_pushlightuserdata(L, ngx_stream_lua_lightudata_mask(
                           socket_udp_metatable_key));
-    lua_createtable(L, 0 /* narr */, 6 /* nrec */);
+    lua_createtable(L, 0 /* narr */, 7 /* nrec */);
+
+    lua_pushcfunction(L, ngx_stream_lua_socket_udp_bind);
+    lua_setfield(L, -2, "bind"); /* ngx socket mt */
 
     lua_pushcfunction(L, ngx_stream_lua_socket_udp_setpeername);
     lua_setfield(L, -2, "setpeername"); /* ngx socket mt */
@@ -117,6 +128,9 @@ ngx_stream_lua_inject_socket_udp_api(ngx_log_t *log, lua_State *L)
 
     lua_pushcfunction(L, ngx_stream_lua_socket_udp_close);
     lua_setfield(L, -2, "close"); /* ngx socket mt */
+
+    lua_pushcfunction(L, ngx_stream_lua_socket_udp_setoption);
+    lua_setfield(L, -2, "setoption");
 
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
@@ -188,7 +202,7 @@ ngx_stream_lua_socket_udp(lua_State *L)
 
     ngx_stream_lua_check_context(L, ctx, NGX_STREAM_LUA_CONTEXT_YIELDABLE);
 
-    lua_createtable(L, 3 /* narr */, 1 /* nrec */);
+    lua_createtable(L, 4 /* narr */, 1 /* nrec */);
     lua_pushlightuserdata(L, ngx_stream_lua_lightudata_mask(
                           socket_udp_metatable_key));
     lua_rawget(L, LUA_REGISTRYINDEX);
@@ -196,6 +210,54 @@ ngx_stream_lua_socket_udp(lua_State *L)
 
     dd("top: %d", lua_gettop(L));
 
+    return 1;
+}
+
+
+static int
+ngx_stream_lua_socket_udp_bind(lua_State *L)
+{
+    ngx_stream_lua_ctx_t   *ctx;
+    int                     n;
+    u_char                 *text;
+    size_t                  len;
+    ngx_addr_t             *local;
+
+    ngx_stream_lua_request_t    *r;
+
+    n = lua_gettop(L);
+    if (n != 2) {
+        return luaL_error(L, "expecting 2 arguments, but got %d",
+                          lua_gettop(L));
+    }
+
+    r = ngx_stream_lua_get_req(L);
+    if (r == NULL) {
+        return luaL_error(L, "no request found");
+    }
+
+    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
+    if (ctx == NULL) {
+        return luaL_error(L, "no ctx found");
+    }
+
+    ngx_stream_lua_check_context(L, ctx, NGX_STREAM_LUA_CONTEXT_YIELDABLE);
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    text = (u_char *) luaL_checklstring(L, 2, &len);
+    local = ngx_stream_lua_parse_addr(L, text, len);
+    if (local == NULL) {
+        lua_pushnil(L);
+        lua_pushfstring(L, "bad address");
+        return 2;
+    }
+
+    /* TODO: we may reuse the userdata here */
+    lua_rawseti(L, 1, SOCKET_BIND_INDEX);
+    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "lua udp socket bind ip: %V", &local->name);
+    lua_pushboolean(L, 1);
     return 1;
 }
 
@@ -216,6 +278,7 @@ ngx_stream_lua_socket_udp_setpeername(lua_State *L)
     ngx_url_t                    url;
     ngx_int_t                    rc;
     int                          timeout;
+    ngx_addr_t                  *local;
 
     ngx_stream_lua_loc_conf_t                   *llcf;
     ngx_stream_lua_co_ctx_t                     *coctx;
@@ -326,6 +389,25 @@ ngx_stream_lua_socket_udp_setpeername(lua_State *L)
     uc->log = *r->connection->log;
 
     dd("lua peer connection log: %p", &uc->log);
+
+    lua_rawgeti(L, 1, SOCKET_BIND_INDEX);
+    local = lua_touserdata(L, -1);
+    lua_pop(L, 1);
+
+    if (local) {
+        uc->local = local;
+    }
+
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+    lua_rawgeti(L, 1, SOCKET_IP_TRANSPARENT_INDEX);
+    if (lua_toboolean(L, -1)) {
+        uc->transparent = 1;
+        ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                       "stream lua set UDP upstream with IP_TRANSPARENT");
+    }
+
+    lua_pop(L, 1);
+#endif
 
     lua_rawgeti(L, 1, SOCKET_TIMEOUT_INDEX);
     timeout = (ngx_int_t) lua_tointeger(L, -1);
@@ -547,7 +629,8 @@ ngx_stream_lua_socket_resolve_handler(ngx_resolver_ctx_t *ctx)
         addr.data = text;
 
         for (i = 0; i < ctx->naddrs; i++) {
-            addr.len = ngx_sock_ntop(ur->addrs[i].sockaddr, ur->addrs[i].socklen,
+            addr.len = ngx_sock_ntop(ur->addrs[i].sockaddr,
+                                     ur->addrs[i].socklen,
                                      text, NGX_SOCKADDR_STRLEN, 0);
 
             ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
@@ -668,7 +751,7 @@ ngx_stream_lua_socket_resolve_retval_handler(ngx_stream_lua_request_t *r,
         return 2;
     }
 
-    rc = ngx_stream_lua_udp_connect(uc);
+    rc = ngx_stream_lua_udp_connect(u);
 
     if (rc != NGX_OK) {
         u->socket_errno = ngx_socket_errno;
@@ -1416,15 +1499,107 @@ ngx_stream_lua_socket_udp_handle_success(ngx_stream_lua_request_t *r,
     }
 }
 
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+static ngx_int_t
+ngx_stream_lua_udp_connect_set_transparent(ngx_stream_lua_udp_connection_t *uc,
+    ngx_socket_t s)
+{
+    int  value;
+
+    value = 1;
+
+#if defined(SO_BINDANY)
+
+    if (setsockopt(s, SOL_SOCKET, SO_BINDANY,
+                   (const void *) &value, sizeof(int)) == -1)
+    {
+        ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
+                      "setsockopt(SO_BINDANY) failed");
+        return NGX_ERROR;
+    }
+
+#else
+
+   switch (uc->sockaddr->sa_family) {
+
+    case AF_INET:
+
+#if defined(IP_TRANSPARENT)
+
+        if (setsockopt(s, IPPROTO_IP, IP_TRANSPARENT,
+                       (const void *) &value, sizeof(int)) == -1)
+        {
+            ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
+                          "setsockopt(IP_TRANSPARENT) failed");
+            return NGX_ERROR;
+        }
+
+#elif defined(IP_BINDANY)
+
+        if (setsockopt(s, IPPROTO_IP, IP_BINDANY,
+                       (const void *) &value, sizeof(int)) == -1)
+        {
+            ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
+                          "setsockopt(IP_BINDANY) failed");
+            return NGX_ERROR;
+        }
+
+#endif
+
+        break;
+
+#if (NGX_HAVE_INET6)
+
+    case AF_INET6:
+
+#if defined(IPV6_TRANSPARENT)
+
+        if (setsockopt(s, IPPROTO_IPV6, IPV6_TRANSPARENT,
+                       (const void *) &value, sizeof(int)) == -1)
+        {
+            ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
+                          "setsockopt(IPV6_TRANSPARENT) failed");
+            return NGX_ERROR;
+        }
+
+#elif defined(IPV6_BINDANY)
+
+        if (setsockopt(s, IPPROTO_IPV6, IPV6_BINDANY,
+                       (const void *) &value, sizeof(int)) == -1)
+        {
+            ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
+                          "setsockopt(IPV6_BINDANY) failed");
+            return NGX_ERROR;
+        }
+
+#endif
+        break;
+
+#endif /* NGX_HAVE_INET6 */
+
+    }
+
+#endif /* SO_BINDANY */
+
+return NGX_OK;
+}
+#endif
+
 
 static ngx_int_t
-ngx_stream_lua_udp_connect(ngx_stream_lua_udp_connection_t *uc)
+ngx_stream_lua_udp_connect(ngx_stream_lua_socket_udp_upstream_t *u)
 {
     int                rc;
+#if (NGX_HAVE_IP_BIND_ADDRESS_NO_PORT || NGX_LINUX)
+    in_port_t          port;
+#endif
     ngx_int_t          event;
     ngx_event_t       *rev, *wev;
+    ngx_addr_t        *local;
     ngx_socket_t       s;
     ngx_connection_t  *c;
+
+    ngx_stream_lua_udp_connection_t *uc = &u->udp_connection;
 
     s = ngx_socket(uc->sockaddr->sa_family, SOCK_DGRAM, 0);
 
@@ -1490,7 +1665,80 @@ ngx_stream_lua_udp_connect(ngx_stream_lua_udp_connection_t *uc)
 
             return NGX_ERROR;
         }
+
+        goto connect;
     }
+#endif
+
+    local = uc->local;
+
+    if (local) {
+
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+        if (uc->transparent) {
+            if (ngx_stream_lua_udp_connect_set_transparent(uc, s) != NGX_OK) {
+                return NGX_ERROR;
+            }
+        }
+#endif
+
+#if (NGX_HAVE_IP_BIND_ADDRESS_NO_PORT || NGX_LINUX)
+        port = u->resolved->port;
+#endif
+
+#if (NGX_HAVE_IP_BIND_ADDRESS_NO_PORT)
+
+        if (uc->sockaddr->sa_family != AF_UNIX && port == 0) {
+            static int  bind_address_no_port = 1;
+
+            if (bind_address_no_port) {
+                if (setsockopt(s, IPPROTO_IP, IP_BIND_ADDRESS_NO_PORT,
+                               (const void *) &bind_address_no_port,
+                               sizeof(int)) == -1)
+                {
+                    int err = ngx_socket_errno;
+
+                    if (err != NGX_EOPNOTSUPP && err != NGX_ENOPROTOOPT) {
+                        ngx_log_error(NGX_LOG_ALERT, &uc->log, err,
+                                      "setsockopt(IP_BIND_ADDRESS_NO_PORT) "
+                                      "failed, ignored");
+
+                    } else {
+                        bind_address_no_port = 0;
+                    }
+                }
+            }
+        }
+
+#endif
+
+#if (NGX_LINUX)
+
+        if (port != 0) {
+            int  reuse_addr = 1;
+
+            if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+                           (const void *) &reuse_addr, sizeof(int))
+                 == -1)
+            {
+                ngx_log_error(NGX_LOG_ALERT, &uc->log, ngx_socket_errno,
+                              "setsockopt(SO_REUSEADDR) failed");
+                return NGX_ERROR;
+            }
+        }
+
+#endif
+
+        if (bind(s, local->sockaddr, local->socklen) == -1) {
+            ngx_log_error(NGX_LOG_CRIT, &uc->log, ngx_socket_errno,
+                          "bind(%V) failed", &local->name);
+
+            return NGX_ERROR;
+        }
+    }
+
+#if (NGX_STREAM_LUA_HAVE_SO_PASSCRED)
+connect:
 #endif
 
     ngx_log_debug3(NGX_LOG_DEBUG_EVENT, &uc->log, 0,
@@ -1575,6 +1823,61 @@ ngx_stream_lua_socket_udp_close(lua_State *L)
 
     lua_pushinteger(L, 1);
     return 1;
+}
+
+
+static int
+ngx_stream_lua_socket_udp_setoption(lua_State *L)
+{
+    ngx_stream_lua_ctx_t   *ctx;
+    int                     n;
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+    int                     ip_transparent;
+#endif
+    size_t                  len;
+    u_char                 *option;
+
+    ngx_stream_lua_request_t  *r;
+
+    n = lua_gettop(L);
+
+    if (n < 2) {
+        return luaL_error(L, "ngx.socket setoption: expecting 2"
+                          "arguments (including the object) but seen %d",
+                          lua_gettop(L));
+    }
+
+    r = ngx_stream_lua_get_req(L);
+    if (r == NULL) {
+        return luaL_error(L, "no request found");
+    }
+
+    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
+    if (ctx == NULL) {
+        return luaL_error(L, "no ctx found");
+    }
+
+    ngx_stream_lua_check_context(L, ctx, NGX_STREAM_LUA_CONTEXT_YIELDABLE);
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+    option = (u_char *) luaL_checklstring(L, 2, &len);
+
+    if (len == sizeof("ip-transparent") - 1
+        && memcmp(option, "ip-transparent", len) == 0)
+    {
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+        ip_transparent = lua_toboolean(L, 3);
+        lua_rawseti(L, 1, SOCKET_IP_TRANSPARENT_INDEX);
+        lua_pushboolean(L, ip_transparent);
+#endif
+        lua_pushnumber(L, 0);
+        return 1;
+    }
+
+    lua_pushnil(L);
+    lua_pushfstring(L, "unknown option %s", option);
+
+    return 2;
 }
 
 

@@ -76,3 +76,4 @@ src/ringbuf.c
 src/ringbuf.h
 src/ssl.c
 src/ssl.h
+*.project

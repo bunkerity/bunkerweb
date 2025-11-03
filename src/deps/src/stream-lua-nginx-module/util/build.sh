@@ -15,30 +15,13 @@ if [ -z "$version" ]; then
     exit 1
 fi
 
-add_http3_module=--with-http_v3_module
-answer=`$root/util/ver-ge "$version" 1.25.1`
-if [ "$OPENSSL_VER" = "1.1.0l" ] || [ "$answer" = "N" ]; then
-    add_http3_module=""
-fi
-
-disable_pcre2=--without-pcre2
-answer=`$root/util/ver-ge "$version" 1.25.1`
-if [ "$answer" = "N" ] || [ "$USE_PCRE2" = "Y" ]; then
-    disable_pcre2=""
-fi
-if [ "$USE_PCRE2" = "Y" ]; then
-    PCRE_INC=$PCRE2_INC
-    PCRE_LIB=$PCRE2_LIB
-fi
-
-            #--add-module=$root/../stream-echo-nginx-module \
+#--add-module=$root/../stream-echo-nginx-module \
 ngx-build $force $version \
-            --with-cc-opt="-DNGX_LUA_USE_ASSERT -I$PCRE_INC -I$OPENSSL_INC" \
-            --with-ld-opt="-L$PCRE_LIB -L$OPENSSL_LIB -Wl,-rpath,$PCRE_LIB:$LIBDRIZZLE_LIB:$OPENSSL_LIB" \
+            --with-cc-opt="-DNGX_LUA_USE_ASSERT -I$PCRE2_INC -I$OPENSSL_INC" \
+            --with-ld-opt="-L$PCRE2_LIB -L$OPENSSL_LIB -Wl,-rpath,$PCRE2_LIB:$LIBDRIZZLE_LIB:$OPENSSL_LIB" \
             --with-http_stub_status_module \
             --with-http_image_filter_module \
-            $add_http3_module \
-            $disable_pcre2 \
+            --with-http_v3_module \
             --with-http_ssl_module \
             --without-mail_pop3_module \
             --without-mail_imap_module \

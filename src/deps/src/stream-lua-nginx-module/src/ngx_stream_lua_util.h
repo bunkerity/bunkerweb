@@ -27,6 +27,8 @@
 #include "ngx_stream_lua_api.h"
 
 
+
+
 #ifndef NGX_UNESCAPE_URI_COMPONENT
 #define NGX_UNESCAPE_URI_COMPONENT  0
 #endif
@@ -70,6 +72,31 @@ extern char ngx_stream_lua_headers_metatable_key;
     (str)->len = sizeof(text) - 1; (str)->data = (u_char *) text
 #endif
 
+#ifdef HAVE_PROXY_SSL_PATCH
+
+#define NGX_STREAM_LUA_CONTEXT_YIELDABLE (NGX_STREAM_LUA_CONTEXT_PREREAD     \
+                                | NGX_STREAM_LUA_CONTEXT_CONTENT             \
+                                | NGX_STREAM_LUA_CONTEXT_TIMER               \
+                                | NGX_STREAM_LUA_CONTEXT_SSL_CLIENT_HELLO    \
+                                | NGX_STREAM_LUA_CONTEXT_SSL_CERT            \
+                                | NGX_STREAM_LUA_CONTEXT_PROXY_SSL_VERIFY)
+
+
+#define ngx_stream_lua_context_name(c)                                       \
+    ((c) == NGX_STREAM_LUA_CONTEXT_CONTENT ? "content_by_lua*"               \
+     : (c) == NGX_STREAM_LUA_CONTEXT_LOG ? "log_by_lua*"                     \
+     : (c) == NGX_STREAM_LUA_CONTEXT_TIMER ? "ngx.timer"                     \
+     : (c) == NGX_STREAM_LUA_CONTEXT_INIT_WORKER ? "init_worker_by_lua*"     \
+     : (c) == NGX_STREAM_LUA_CONTEXT_BALANCER ? "balancer_by_lua*"           \
+     : (c) == NGX_STREAM_LUA_CONTEXT_PREREAD ? "preread_by_lua*"             \
+     : (c) == NGX_STREAM_LUA_CONTEXT_SSL_CLIENT_HELLO ?                      \
+                                                 "ssl_client_hello_by_lua*"  \
+     : (c) == NGX_STREAM_LUA_CONTEXT_SSL_CERT ? "ssl_certificate_by_lua*"    \
+     : (c) == NGX_STREAM_LUA_CONTEXT_PROXY_SSL_VERIFY ?                      \
+                                                 "proxy_ssl_verify_by_lua*"  \
+     : "(unknown)")
+
+#else
 
 #define NGX_STREAM_LUA_CONTEXT_YIELDABLE (NGX_STREAM_LUA_CONTEXT_PREREAD     \
                                 | NGX_STREAM_LUA_CONTEXT_CONTENT             \
@@ -89,6 +116,8 @@ extern char ngx_stream_lua_headers_metatable_key;
                                                  "ssl_client_hello_by_lua*"  \
      : (c) == NGX_STREAM_LUA_CONTEXT_SSL_CERT ? "ssl_certificate_by_lua*"    \
      : "(unknown)")
+
+#endif
 
 
 #define ngx_stream_lua_check_context(L, ctx, flags)                          \
@@ -190,6 +219,8 @@ ngx_int_t ngx_stream_lua_open_and_stat_file(u_char *name,
 
 ngx_chain_t *ngx_stream_lua_chain_get_free_buf(ngx_log_t *log, ngx_pool_t *p,
     ngx_chain_t **free, size_t len);
+
+ngx_addr_t *ngx_stream_lua_parse_addr(lua_State *L, u_char *text, size_t len);
 
 
 static ngx_inline void
@@ -467,8 +498,6 @@ ngx_stream_lua_hash_str(u_char *src, size_t n)
 
     return key;
 }
-
-
 
 
 static ngx_inline void
