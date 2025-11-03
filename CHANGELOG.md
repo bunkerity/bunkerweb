@@ -5,6 +5,7 @@
 - [FEATURE] Refactor `Let's Encrypt` mail handling: validate the configured email and warn if missing/invalid. Use normal registration when valid; otherwise add **--register-unsafely-without-email** to Certbot and log that choice.
 - [FEATURE] Add `DuckDNS` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `AUTH_BASIC_ROUNDS` setting to the `authbasic` plugin to configure password hashing strength (default: 656000, range: 1000-999999999).
+- [DEPS] Update coreruleset-v4 version to v4.20.0
 
 ## v1.6.6-rc1 - 2025/10/31
 

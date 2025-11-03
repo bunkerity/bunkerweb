@@ -3623,7 +3623,7 @@ ModSecurity 插件将功能强大的 [ModSecurity](https://modsecurity.org) Web 
 选择一个 CRS 版本以最符合您的安全需求：
 
 - **`3`**：稳定版 [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7)。
-- **`4`**：稳定版 [v4.19.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0) (**默认**)。
+- **`4`**：稳定版 [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**默认**)。
 - **`nightly`**：[每日构建版](https://github.com/coreruleset/coreruleset/releases/tag/nightly)，提供最新的规则更新。
 
 !!! example "每日构建版"
