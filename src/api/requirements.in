@@ -1,7 +1,7 @@
 bcrypt==5.0.0
 biscuit-python<0.4.0
 cryptography==46.0.3
-fastapi==0.120.2
+fastapi==0.120.4
 gunicorn==23.0.0
 pydantic==2.12.3
 pydantic_settings==2.11.0
