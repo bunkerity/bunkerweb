@@ -92,6 +92,17 @@
 |.macro ret_auth; ret; .endmacro
 |.endif
 |
+|// ARM64 branch target identification (BTI).
+|.if BRANCH_TRACK
+|.macro bti_jump; bti j; .endmacro
+|.macro bti_call; bti c; .endmacro
+|.macro bti_tailcall; bti jc; .endmacro
+|.else
+|.macro bti_jump; .endmacro
+|.macro bti_call; .endmacro
+|.macro bti_tailcall; .endmacro
+|.endif
+|
 |//-----------------------------------------------------------------------
 |
 |// Stack layout while in interpreter. Must match with lj_frame.h.
@@ -439,24 +450,28 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_unwind_c:			// Unwind C stack, return from vm_pcall.
   |  // (void *cframe, int errcode)
+  |  bti_tailcall
   |  add fp, CARG1, # SAVE_FP_LR_
   |  mov sp, CARG1
   |  mov CRET1, CARG2
   |  ldr L, SAVE_L
   |  ldr GL, L->glref
   |->vm_unwind_c_eh:			// Landing pad for external unwinder.
+  |  bti_tailcall
   |   mv_vmstate TMP0w, C
   |   st_vmstate TMP0w
   |  b ->vm_leave_unw
   |
   |->vm_unwind_ff:			// Unwind C stack, return from ff pcall.
   |  // (void *cframe)
+  |  bti_tailcall
   |  add fp, CARG1, # SAVE_FP_LR_
   |  mov sp, CARG1
   |  ldr L, SAVE_L
   |    init_constants
   |   ldr GL, L->glref			// Setup pointer to global state.
   |->vm_unwind_ff_eh:			// Landing pad for external unwinder.
+  |  bti_tailcall
   |    mov RC, #16			// 2 results: false + error message.
   |  ldr BASE, L->base
   |    mov_false TMP0
@@ -632,6 +647,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |
   |->cont_cat:				// RA = resultptr, CARG4 = meta base
+  |  bti_jump
   |  ldr INSw, [PC, #-4]
   |   sub CARG2, CARG4, #32
   |   ldr TMP0, [RA]
@@ -789,9 +805,11 @@ static void build_subroutines(BuildCtx *ctx)
   |   sub RB, RB, #0x20000
   |  csel PC, PC, RB, lo
   |->cont_nop:
+  |  bti_jump
   |  ins_next
   |
   |->cont_ra:				// RA = resultptr
+  |  bti_jump
   |  ldr INSw, [PC, #-4]
   |   ldr TMP0, [RA]
   |  decode_RA TMP1, INS
@@ -799,12 +817,14 @@ static void build_subroutines(BuildCtx *ctx)
   |  b ->cont_nop
   |
   |->cont_condt:			// RA = resultptr
+  |  bti_jump
   |  ldr TMP0, [RA]
   |   mov_true TMP1
   |  cmp TMP1, TMP0			// Branch if result is true.
   |  b <4
   |
   |->cont_condf:			// RA = resultptr
+  |  bti_jump
   |  ldr TMP0, [RA]
   |   mov_false TMP1
   |  cmp TMP0, TMP1			// Branch if result is false.
@@ -956,10 +976,12 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |.macro .ffunc, name
   |->ff_ .. name:
+  |  bti_jump
   |.endmacro
   |
   |.macro .ffunc_1, name
   |->ff_ .. name:
+  |  bti_jump
   |  ldr CARG1, [BASE]
   |   cmp NARGS8:RC, #8
   |   blo ->fff_fallback
@@ -967,6 +989,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |.macro .ffunc_2, name
   |->ff_ .. name:
+  |  bti_jump
   |  ldp CARG1, CARG2, [BASE]
   |   cmp NARGS8:RC, #16
   |   blo ->fff_fallback
@@ -1810,6 +1833,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_record:				// Dispatch target for recording phase.
   |.if JIT
+  |  bti_jump
   |  ldrb CARG1w, GL->hookmask
   |  tst CARG1, #HOOK_VMEVENT		// No recording while in vmevent.
   |  bne >5
@@ -1825,6 +1849,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |
   |->vm_rethook:			// Dispatch target for return hooks.
+  |  bti_jump
   |  ldrb TMP2w, GL->hookmask
   |  tbz TMP2w, #HOOK_ACTIVE_SHIFT, >1	// Hook already active?
   |5:  // Re-dispatch to static ins.
@@ -1832,6 +1857,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  br_auth TMP0
   |
   |->vm_inshook:			// Dispatch target for instr/line hooks.
+  |  bti_jump
   |  ldrb TMP2w, GL->hookmask
   |   ldr TMP3w, GL->hookcount
   |  tbnz TMP2w, #HOOK_ACTIVE_SHIFT, <5	// Hook already active?
@@ -1858,6 +1884,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  br_auth TMP0
   |
   |->cont_hook:				// Continue from hook yield.
+  |  bti_jump
   |  ldr CARG1, [CARG4, #-40]
   |   add PC, PC, #4
   |  str CARG1w, SAVE_MULTRES		// Restore MULTRES for *M ins.
@@ -1881,6 +1908,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |
   |->vm_callhook:			// Dispatch target for call hooks.
+  |  bti_jump
   |  mov CARG2, PC
   |.if JIT
   |  b >1
@@ -1910,6 +1938,7 @@ static void build_subroutines(BuildCtx *ctx)
   |->cont_stitch:			// Trace stitching.
   |.if JIT
   |  // RA = resultptr, CARG4 = meta base
+  |  bti_jump
   |   ldr RBw, SAVE_MULTRES
   |  ldr INSw, [PC, #-4]
   |    ldr TRACE:CARG3, [CARG4, #-40]	// Save previous trace.
@@ -1958,6 +1987,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_profhook:			// Dispatch target for profiler hook.
 #if LJ_HASPROFILE
+  |  bti_jump
   |  mov CARG1, L
   |   str BASE, L->base
   |  mov CARG2, PC
@@ -1979,6 +2009,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_exit_handler:
   |.if JIT
+  |  bti_call
   |  sub     sp, sp, #(64*8)
   |  savex_, 0, 1
   |  savex_, 2, 3
@@ -2029,6 +2060,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |
   |->vm_exit_interp:
+  |  bti_jump
   |  // CARG1 = MULTRES or negated error code, BASE, PC and GL set.
   |.if JIT
   |  ldr L, SAVE_L
@@ -2106,6 +2138,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |  // int lj_vm_modi(int dividend, int divisor);
   |->vm_modi:
+  |  bti_call
   |    eor CARG4w, CARG1w, CARG2w
   |    cmp CARG4w, #0
   |  eor CARG3w, CARG1w, CARG1w, asr #31
@@ -2142,6 +2175,7 @@ static void build_subroutines(BuildCtx *ctx)
   |// Next idx returned in CRET2w.
   |->vm_next:
   |.if JIT
+  |  bti_call
   |  ldr NEXT_LIM, NEXT_TAB->asize
   |   ldr NEXT_TMP1, NEXT_TAB->array
   |1:  // Traverse array part.
@@ -2284,6 +2318,26 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
 {
   int vk = 0;
   |=>defop:
+
+  switch (op) {
+#if !LJ_HASJIT
+  case BC_FORL:
+  case BC_JFORI:
+  case BC_JFORL:
+  case BC_ITERL:
+  case BC_JITERL:
+  case BC_LOOP:
+  case BC_JLOOP:
+  case BC_FUNCF:
+  case BC_JFUNCF:
+  case BC_JFUNCV:
+#endif
+  case BC_FUNCV:  /* NYI: compiled vararg functions. */
+    break;  /* Avoid redundant bti instructions. */
+  default:
+    |  bti_jump
+    break;
+  }
 
   switch (op) {
 
@@ -3443,6 +3497,9 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |.endif
     |->vm_IITERN:
     |  // RA = base, (RB = nresults+1, RC = nargs+1 (2+1))
+    |.if JIT
+    |  bti_jump
+    |.endif
     |  add RA, BASE, RA, lsl #3
     |  ldr TAB:RB, [RA, #-16]
     |    ldrh TMP3w, [PC, # OFS_RD]
@@ -4122,6 +4179,19 @@ static void emit_asm_debug(BuildCtx *ctx)
 	"\t.align 3\n"
 	".LEFDE3:\n\n", (int)ctx->codesz - fcofs);
 #endif
+#endif
+#if LJ_TARGET_LINUX && LJ_ABI_BRANCH_TRACK
+    fprintf(ctx->fp,
+	"\t.section .note.gnu.property,\"a\"\n"
+	"\t.align 3\n"
+	"\t.long 4\n"
+	"\t.long 16\n"
+	"\t.long 5\n"
+	"\t.long 0x00554e47\n"
+	"\t.long 0xc0000000\n"
+	"\t.long 4\n"
+	"\t.long 1\n"
+	"\t.long 0\n");
 #endif
     break;
 #if !LJ_NO_UNWIND

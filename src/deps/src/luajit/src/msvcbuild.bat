@@ -6,8 +6,8 @@
 @rem options (in order), if needed. The default is a dynamic release build.
 @rem
 @rem   nogc64        disable LJ_GC64 mode for x64
-@rem   debug         emit debug symbols
 @rem   lua52compat   enable extra Lua 5.2 extensions
+@rem   debug         emit debug symbols
 @rem   amalg         amalgamated build
 @rem   static        create static lib to statically link into your project
 @rem   mixed         create static lib to build a DLL in your project
@@ -19,7 +19,7 @@
 @set DEBUGCFLAGS=
 @set LJCOMPILE=cl /nologo /c /O2 /W3 /D_CRT_SECURE_NO_DEPRECATE /D_CRT_STDIO_INLINE=__declspec(dllexport)__inline
 @set LJDYNBUILD=/DLUA_BUILD_AS_DLL /MD
-@set LJDYNBUILD_DEBUG=/DLUA_BUILD_AS_DLL /MDd 
+@set LJDYNBUILD_DEBUG=/DLUA_BUILD_AS_DLL /MDd
 @set LJCOMPILETARGET=/Zi
 @set LJLINKTYPE=/DEBUG /RELEASE
 @set LJLINKTYPE_DEBUG=/DEBUG
@@ -65,6 +65,10 @@ if exist minilua.exe.manifest^
 @set DASC=vm_x86.dasc
 @set LJCOMPILE=%LJCOMPILE% /DLUAJIT_DISABLE_GC64
 :DA
+@if "%1" neq "lua52compat" goto :NOLUA52COMPAT
+@shift
+@set LJCOMPILE=%LJCOMPILE% /DLUAJIT_ENABLE_LUA52COMPAT
+:NOLUA52COMPAT
 minilua %DASM% -LN %DASMFLAGS% -o host\buildvm_arch.h %DASC%
 @if errorlevel 1 goto :BAD
 
@@ -102,10 +106,6 @@ buildvm -m folddef -o lj_folddef.h lj_opt_fold.c
 @set LJDYNBUILD=%LJDYNBUILD_DEBUG%
 @set LJLINKTYPE=%LJLINKTYPE_DEBUG%
 :NODEBUG
-@if "%1" neq "lua52compat" goto :NOLUA52COMPAT
-@shift
-@set LJCOMPILE=%LJCOMPILE% /DLUAJIT_ENABLE_LUA52COMPAT
-:NOLUA52COMPAT
 @set LJCOMPILE=%LJCOMPILE% %LJCOMPILETARGET%
 @set LJLINK=%LJLINK% %LJLINKTYPE% %LJLINKTARGET%
 @if "%1"=="amalg" goto :AMALGDLL

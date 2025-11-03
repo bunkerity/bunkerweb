@@ -265,6 +265,10 @@ typedef enum A64Ins {
   A64I_BRAAZ = 0xd61f081f,
   A64I_BLRAAZ = 0xd63f081f,
 
+  A64I_BTI_C  = 0xd503245f,
+  A64I_BTI_J  = 0xd503249f,
+  A64I_BTI_JC = 0xd50324df,
+
   A64I_NOP = 0xd503201f,
 
   /* FP */

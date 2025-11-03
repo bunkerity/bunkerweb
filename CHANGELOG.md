@@ -6,6 +6,7 @@
 - [FEATURE] Add `DuckDNS` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `AUTH_BASIC_ROUNDS` setting to the `authbasic` plugin to configure password hashing strength (default: 656000, range: 1000-999999999).
 - [DEPS] Update coreruleset-v4 version to v4.20.0
+- [DEPS] Updated luajit2 version to v2.1-20251030
 
 ## v1.6.6-rc1 - 2025/10/31
 

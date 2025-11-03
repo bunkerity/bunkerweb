@@ -695,7 +695,10 @@ local map_br = { -- Branches, exception generating and system instructions.
     },
     { -- System instructions.
       shift = 0, mask = 0x3fffff,
-      [0x03201f] = "nop"
+      [0x03201f] = "nop",
+      [0x03245f] = "bti c",
+      [0x03249f] = "bti j",
+      [0x0324df] = "bti jc",
     },
     { -- Unconditional branch, register.
       shift = 0, mask = 0xfffc1f,
@@ -1171,6 +1174,9 @@ local function disass_ins(ctx)
 	end
       end
       second0 = true
+    elseif p == " " then
+      operands[#operands+1] = pat:match(" (.*)")
+      break
     else
       assert(false)
     end
