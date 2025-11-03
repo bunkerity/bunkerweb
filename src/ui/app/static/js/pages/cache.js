@@ -184,7 +184,7 @@ $(document).ready(function () {
 
   const getSelectedCacheFiles = () => {
     const cacheFiles = [];
-    $("tr.selected").each(function () {
+    $("#cache tbody tr.selected").each(function () {
       const $row = $(this);
       const fileNameHtml = $row.find("td:eq(2)").html();
       const jobNameHtml = $row.find("td:eq(3)").html();
