@@ -1207,7 +1207,7 @@ ngx_http_lua_socket_udp_read(ngx_http_request_t *r,
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
                    "lua udp socket read data: waiting: %d", (int) u->waiting);
 
-    n = ngx_udp_recv(u->udp_connection.connection,
+    n = ngx_udp_recv(c,
                      ngx_http_lua_socket_udp_buffer, u->recv_buf_size);
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
@@ -1481,7 +1481,6 @@ ngx_http_lua_udp_connect(ngx_http_lua_udp_connection_t *uc, ngx_addr_t *local)
 #endif
 
     if (local != NULL) {
-        fprintf(stderr, "=== have local address\n");
         if (bind(s, local->sockaddr, local->socklen) == -1) {
             ngx_log_error(NGX_LOG_CRIT, &uc->log, ngx_socket_errno,
                           "bind(%V) failed", &local->name);
