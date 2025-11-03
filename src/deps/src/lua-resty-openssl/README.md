@@ -282,6 +282,8 @@ Table of Contents
     + [ssl_ctx.from_request](#ssl_ctxfrom_request)
     + [ssl_ctx.from_socket](#ssl_ctxfrom_socket)
     + [ssl_ctx:set_alpns](#ssl_ctxset_alpns)
+  * [resty.openssl.crypto](#restyopensslcrypto)
+    + [crypto.memcmp](#cryptomemcmp)
   * [Functions for stack-like objects](#functions-for-stack-like-objects)
     + [metamethods](#metamethods)
     + [each](#each)
@@ -4515,6 +4517,23 @@ been called `sslhandshake`.
 
 Set the ALPN list to be negotiated with peer. Each `alpn` is the plaintext
 literal for the protocol, like `"h2"`.
+
+[Back to TOC](#table-of-contents)
+
+## resty.openssl.crypto
+
+Module to interact with utility openssl functions.
+
+[Back to TOC](#table-of-contents)
+
+### crypto.memcmp
+
+**syntax**: *res, err = crypto.memcmp(a, b, len)*
+
+Performs constant-time comparison of 2 memory regions a and b with len bytes. See [CRYPTO_memcmp](https://docs.openssl.org/3.2/man3/CRYPTO_memcmp)
+for more info. The 2 memory regions must be of type string or cdata.
+
+Returns 0 if the memory regions are equal and nonzero otherwise.
 
 [Back to TOC](#table-of-contents)
 
