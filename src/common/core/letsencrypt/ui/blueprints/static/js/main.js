@@ -186,7 +186,7 @@
           viewTotal: true,
           cascadePanes: true,
           collapse: false,
-          columns: [2, 5, 6, 7], // Issuer, Preferred Profile, Challenge and Key Type
+          columns: [4, 7, 8, 9], // Issuer, Preferred Profile, Challenge and Key Type
         },
       },
       topStart: {},
@@ -399,7 +399,7 @@
             combiner: "or",
             header: t("searchpane.issuer", "Issuer"),
           },
-          targets: 2, // Issuer column
+          targets: 4, // Issuer column
         },
         {
           searchPanes: {
@@ -407,7 +407,7 @@
             header: t("searchpane.preferred_profile", "Preferred Profile"),
             combiner: "or",
           },
-          targets: 5, // Preferred Profile column
+          targets: 7, // Preferred Profile column
         },
         {
           searchPanes: {
@@ -415,7 +415,7 @@
             header: t("searchpane.challenge", "Challenge"),
             combiner: "or",
           },
-          targets: 6, // Challenge column
+          targets: 8, // Challenge column
         },
         {
           searchPanes: {
@@ -423,7 +423,7 @@
             header: t("searchpane.key_type", "Key Type"),
             combiner: "or",
           },
-          targets: 7, // Key Type column
+          targets: 9, // Key Type column
         },
       ];
     }
