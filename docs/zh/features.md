@@ -217,14 +217,14 @@ STREAM 支持 :x:
 
 Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.
 
-|            参数            |   默认值    |上下文|可重复|                                 描述                                  |
-|----------------------------|-------------|------|------|-----------------------------------------------------------------------|
-|`USE_ANTIDDOS`              |`no`         |global|否    |Enable or disable anti DDoS protection to mitigate high traffic spikes.|
-|`ANTIDDOS_METRICS_DICT_SIZE`|`10M`        |global|否    |Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).          |
-|`ANTIDDOS_THRESHOLD`        |`100`        |global|否    |Maximum suspicious requests allowed from a single IP before blocking.  |
-|`ANTIDDOS_WINDOW_TIME`      |`10`         |global|否    |Time window (seconds) to detect abnormal request patterns.             |
-|`ANTIDDOS_STATUS_CODES`     |`429 403 444`|global|否    |HTTP status codes treated as suspicious for DDoS analysis.             |
-|`ANTIDDOS_DISTINCT_IP`      |`5`          |global|否    |Minimum distinct IP count before enabling anti DDoS measures.          |
+| 参数                         | 默认值        | 上下文 | 可重复 | 描述                                                                    |
+| ---------------------------- | ------------- | ------ | ------ | ----------------------------------------------------------------------- |
+| `USE_ANTIDDOS`               | `no`          | global | 否     | Enable or disable anti DDoS protection to mitigate high traffic spikes. |
+| `ANTIDDOS_METRICS_DICT_SIZE` | `10M`         | global | 否     | Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).           |
+| `ANTIDDOS_THRESHOLD`         | `100`         | global | 否     | Maximum suspicious requests allowed from a single IP before blocking.   |
+| `ANTIDDOS_WINDOW_TIME`       | `10`          | global | 否     | Time window (seconds) to detect abnormal request patterns.              |
+| `ANTIDDOS_STATUS_CODES`      | `429 403 444` | global | 否     | HTTP status codes treated as suspicious for DDoS analysis.              |
+| `ANTIDDOS_DISTINCT_IP`       | `5`           | global | 否     | Minimum distinct IP count before enabling anti DDoS measures.           |
 
 ## Antibot
 
@@ -737,18 +737,18 @@ STREAM 支持 :white_check_mark:
 
 Automatically backup your data to an S3 bucket
 
-|            参数             |默认值 |上下文|可重复|                    描述                    |
-|-----------------------------|-------|------|------|--------------------------------------------|
-|`USE_BACKUP_S3`              |`no`   |global|否    |Enable or disable the S3 backup feature     |
-|`BACKUP_S3_SCHEDULE`         |`daily`|global|否    |The frequency of the backup                 |
-|`BACKUP_S3_ROTATION`         |`7`    |global|否    |The number of backups to keep               |
-|`BACKUP_S3_ENDPOINT`         |       |global|否    |The S3 endpoint                             |
-|`BACKUP_S3_BUCKET`           |       |global|否    |The S3 bucket                               |
-|`BACKUP_S3_DIR`              |       |global|否    |The S3 directory                            |
-|`BACKUP_S3_REGION`           |       |global|否    |The S3 region                               |
-|`BACKUP_S3_ACCESS_KEY_ID`    |       |global|否    |The S3 access key ID                        |
-|`BACKUP_S3_ACCESS_KEY_SECRET`|       |global|否    |The S3 access key secret                    |
-|`BACKUP_S3_COMP_LEVEL`       |`6`    |global|否    |The compression level of the backup zip file|
+| 参数                          | 默认值  | 上下文 | 可重复 | 描述                                         |
+| ----------------------------- | ------- | ------ | ------ | -------------------------------------------- |
+| `USE_BACKUP_S3`               | `no`    | global | 否     | Enable or disable the S3 backup feature      |
+| `BACKUP_S3_SCHEDULE`          | `daily` | global | 否     | The frequency of the backup                  |
+| `BACKUP_S3_ROTATION`          | `7`     | global | 否     | The number of backups to keep                |
+| `BACKUP_S3_ENDPOINT`          |         | global | 否     | The S3 endpoint                              |
+| `BACKUP_S3_BUCKET`            |         | global | 否     | The S3 bucket                                |
+| `BACKUP_S3_DIR`               |         | global | 否     | The S3 directory                             |
+| `BACKUP_S3_REGION`            |         | global | 否     | The S3 region                                |
+| `BACKUP_S3_ACCESS_KEY_ID`     |         | global | 否     | The S3 access key ID                         |
+| `BACKUP_S3_ACCESS_KEY_SECRET` |         | global | 否     | The S3 access key secret                     |
+| `BACKUP_S3_COMP_LEVEL`        | `6`     | global | 否     | The compression level of the backup zip file |
 
 ## Bad behavior
 
@@ -1030,6 +1030,31 @@ STREAM 支持 :warning:
     BLACKLIST_USER_AGENT_URLS: "file:///path/to/user-agent-blacklist.txt"
     BLACKLIST_URI_URLS: "file:///path/to/uri-blacklist.txt"
     ```
+
+### 使用本地列表文件
+
+Whitelist、Greylist 和 Blacklist 插件提供的 `*_URLS` 设置共用同一个下载器。当你引用 `file:///` URL 时：
+
+- 路径会在 **scheduler** 容器内解析（Docker 部署通常为 `bunkerweb-scheduler`）。请将文件挂载到该容器，并确保 scheduler 用户拥有读取权限。
+- 每个文件都是 UTF-8 编码的纯文本，每行一个条目。空行会被忽略，注释行必须以 `#` 或 `;` 开头。不支持 `//` 注释。
+- 各类列表的条目要求：
+  - **IP 列表** 接受 IPv4/IPv6 地址或 CIDR 网段（例如 `192.0.2.10` 或 `2001:db8::/48`）。
+  - **rDNS 列表** 需要没有空格的后缀（例如 `.search.msn.com`），并会自动转换为小写。
+  - **ASN 列表** 可以仅包含编号（`32934`），或带 `AS` 前缀的编号（`AS15169`）。
+  - **User-Agent 列表** 视为 PCRE 模式，整行（包括空格）都会保留。请把注释放在独立行，避免被当成模式。
+  - **URI 列表** 必须以 `/` 开头，可以使用 `^`、`$` 等 PCRE 标记。
+
+符合格式的示例文件：
+
+```text
+# /etc/bunkerweb/lists/ip-blacklist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-blacklist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
 
 ## Brotli
 
@@ -1395,12 +1420,12 @@ STREAM 支持 :x:
 
 ### 配置设置
 
-| 设置                      | 默认值                                                                    | 上下文    | 多个 | 描述                                                                      |
-| ------------------------- | ------------------------------------------------------------------------- | --------- | ---- | ------------------------------------------------------------------------- |
-| `USE_CLIENT_CACHE`        | `no`                                                                      | multisite | 否   | **启用客户端缓存：** 设置为 `yes` 以启用静态文件的客户端缓存。            |
-| `CLIENT_CACHE_EXTENSIONS` | `jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2` | 全局      | 否   | **可缓存的扩展名：** 应由客户端缓存的文件扩展名列表（以管道符分隔）。     |
-| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000`                                                | multisite | 否   | **Cache-Control 标头：** 用于控制缓存行为的 Cache-Control HTTP 标头的值。 |
-| `CLIENT_CACHE_ETAG`       | `yes`                                                                     | multisite | 否   | **启用 ETags：** 设置为 `yes` 以发送静态资源的 HTTP ETag 标头。           |
+| 设置                      | 默认值                     | 上下文    | 多个 | 描述                                                                      |
+| ------------------------- | -------------------------- | --------- | ---- | ------------------------------------------------------------------------- |
+| `USE_CLIENT_CACHE`        | `no`                       | multisite | 否   | **启用客户端缓存：** 设置为 `yes` 以启用静态文件的客户端缓存。            |
+| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png  | bmp                                                                       | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | 全局 | 否 | **可缓存的扩展名：** 应由客户端缓存的文件扩展名列表（以管道符分隔）。 |
+| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | 否   | **Cache-Control 标头：** 用于控制缓存行为的 Cache-Control HTTP 标头的值。 |
+| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | 否   | **启用 ETags：** 设置为 `yes` 以发送静态资源的 HTTP ETag 标头。           |
 
 !!! tip "优化缓存设置"
     对于频繁更新的内容，请考虑使用较短的 max-age 值。对于很少更改的内容（如带版本的 JavaScript 库或徽标），请使用较长的缓存时间。默认值 15552000 秒（180 天）适用于大多数静态资产。
@@ -2372,6 +2397,31 @@ Greylist 插件提供了一种灵活的安全方法，允许访问者访问，�
     GREYLIST_IP: "203.0.113.0/24"  # 外部合作伙伴网络
     ```
 
+### 使用本地列表文件
+
+Whitelist、Greylist 和 Blacklist 插件提供的 `*_URLS` 设置共用同一个下载器。当你引用 `file:///` URL 时：
+
+- 路径会在 **scheduler** 容器内解析（Docker 部署通常为 `bunkerweb-scheduler`）。请将文件挂载到该容器，并确保 scheduler 用户拥有读取权限。
+- 每个文件都是 UTF-8 编码的纯文本，每行一个条目。空行会被忽略，注释行必须以 `#` 或 `;` 开头。不支持 `//` 注释。
+- 各类列表的条目要求：
+  - **IP 列表** 接受 IPv4/IPv6 地址或 CIDR 网段（例如 `192.0.2.10` 或 `2001:db8::/48`）。
+  - **rDNS 列表** 需要没有空格的后缀（例如 `.search.msn.com`），并会自动转换为小写。
+  - **ASN 列表** 可以仅包含编号（`32934`），或带 `AS` 前缀的编号（`AS15169`）。
+  - **User-Agent 列表** 视为 PCRE 模式，整行（包括空格）都会保留。请把注释放在独立行，避免被当成模式。
+  - **URI 列表** 必须以 `/` 开头，可以使用 `^`、`$` 等 PCRE 标记。
+
+符合格式的示例文件：
+
+```text
+# /etc/bunkerweb/lists/ip-greylist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-greylist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
+
 ## Gzip
 
 STREAM 支持 :x:
@@ -3027,27 +3077,27 @@ STREAM 支持 :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
 
-|                  参数                   |   默认值    |上下文|可重复|                               描述                               |
-|-----------------------------------------|-------------|------|------|------------------------------------------------------------------|
-|`LOADBALANCER_HEALTHCHECK_DICT_SIZE`     |`10m`        |global|否    |Shared dict size (datastore for all healthchecks).                |
-|`LOADBALANCER_UPSTREAM_NAME`             |             |global|是    |Name of the upstream (used in REVERSE_PROXY_HOST).                |
-|`LOADBALANCER_UPSTREAM_SERVERS`          |             |global|是    |List of servers/IPs in the server group.                          |
-|`LOADBALANCER_UPSTREAM_MODE`             |`round-robin`|global|是    |Load balancing mode (round-robin or sticky).                      |
-|`LOADBALANCER_UPSTREAM_STICKY_METHOD`    |`ip`         |global|是    |Sticky session method (ip or cookie).                             |
-|`LOADBALANCER_UPSTREAM_RESOLVE`          |`no`         |global|是    |Dynamically resolve upstream hostnames.                           |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE`        |             |global|是    |Number of keepalive connections to cache per worker.              |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT`|`60s`        |global|是    |Keepalive timeout for upstream connections.                       |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`   |`1h`         |global|是    |Keepalive time for upstream connections.                          |
-|`LOADBALANCER_HEALTHCHECK_URL`           |`/status`    |global|是    |The healthcheck URL.                                              |
-|`LOADBALANCER_HEALTHCHECK_INTERVAL`      |`2000`       |global|是    |Healthcheck interval in milliseconds.                             |
-|`LOADBALANCER_HEALTHCHECK_TIMEOUT`       |`1000`       |global|是    |Healthcheck timeout in milliseconds.                              |
-|`LOADBALANCER_HEALTHCHECK_FALL`          |`3`          |global|是    |Number of failed healthchecks before marking the server as down.  |
-|`LOADBALANCER_HEALTHCHECK_RISE`          |`1`          |global|是    |Number of successful healthchecks before marking the server as up.|
-|`LOADBALANCER_HEALTHCHECK_VALID_STATUSES`|`200`        |global|是    |HTTP status considered valid in healthchecks.                     |
-|`LOADBALANCER_HEALTHCHECK_CONCURRENCY`   |`10`         |global|是    |Maximum number of concurrent healthchecks.                        |
-|`LOADBALANCER_HEALTHCHECK_TYPE`          |`http`       |global|是    |Type of healthcheck (http or https).                              |
-|`LOADBALANCER_HEALTHCHECK_SSL_VERIFY`    |`yes`        |global|是    |Verify SSL certificate in healthchecks.                           |
-|`LOADBALANCER_HEALTHCHECK_HOST`          |             |global|是    |Host header for healthchecks (useful for HTTPS).                  |
+| 参数                                      | 默认值        | 上下文 | 可重复 | 描述                                                               |
+| ----------------------------------------- | ------------- | ------ | ------ | ------------------------------------------------------------------ |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`         | global | 否     | Shared dict size (datastore for all healthchecks).                 |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global | 是     | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global | 是     | List of servers/IPs in the server group.                           |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global | 是     | Load balancing mode (round-robin or sticky).                       |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global | 是     | Sticky session method (ip or cookie).                              |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global | 是     | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global | 是     | Number of keepalive connections to cache per worker.               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global | 是     | Keepalive timeout for upstream connections.                        |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global | 是     | Keepalive time for upstream connections.                           |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global | 是     | The healthcheck URL.                                               |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`        | global | 是     | Healthcheck interval in milliseconds.                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`        | global | 是     | Healthcheck timeout in milliseconds.                               |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`           | global | 是     | Number of failed healthchecks before marking the server as down.   |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`           | global | 是     | Number of successful healthchecks before marking the server as up. |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`         | global | 是     | HTTP status considered valid in healthchecks.                      |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`          | global | 是     | Maximum number of concurrent healthchecks.                         |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`        | global | 是     | Type of healthcheck (http or https).                               |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global | 是     | Verify SSL certificate in healthchecks.                            |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |               | global | 是     | Host header for healthchecks (useful for HTTPS).                   |
 
 ## Metrics
 
@@ -3302,9 +3352,9 @@ STREAM 支持 :warning:
         - 通过禁用可能有害的方法来减少攻击面
         - 阻止攻击者使用的 HTTP 方法枚举技术
 
-    | 设置              | 默认值            | 上下文    | 多选 | 描述                                                   |
-    | ----------------- | ----------------- | --------- | ---- | ------------------------------------------------------ |
-    | `ALLOWED_METHODS` | `GET|POST|HEAD` | multisite | no   | **HTTP 方法：** 允许的 HTTP 方法列表，用竖线字符分隔。 |
+    | 设置              | 默认值 | 上下文 | 多选  | 描述      |
+    | ----------------- | ------ | ------ | ----- | --------- |
+    | `ALLOWED_METHODS` | `GET   | POST   | HEAD` | multisite | no | **HTTP 方法：** 允许的 HTTP 方法列表，用竖线字符分隔。 |
 
     !!! abstract "CORS 和预检请求"
         如果您的应用程序支持[跨源资源共享 (CORS)](#cors)，您应该在 `ALLOWED_METHODS` 设置中包含 `OPTIONS` 方法以处理预检请求。这确保了浏览器发出跨源请求时的正常功能。
@@ -3753,11 +3803,11 @@ STREAM 支持 :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-|             参数             |默认值|上下文|可重复|                                   描述                                    |
-|------------------------------|------|------|------|---------------------------------------------------------------------------|
-|`USE_MONITORING`              |`yes` |global|否    |Enable monitoring of BunkerWeb.                                            |
-|`MONITORING_METRICS_DICT_SIZE`|`10M` |global|否    |Size of the dict to store monitoring metrics.                              |
-|`MONITORING_IGNORE_URLS`      |      |global|否    |List of URLs to ignore when monitoring separated with spaces (e.g. /health)|
+| 参数                           | 默认值 | 上下文 | 可重复 | 描述                                                                        |
+| ------------------------------ | ------ | ------ | ------ | --------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`  | global | 否     | Enable monitoring of BunkerWeb.                                             |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`  | global | 否     | Size of the dict to store monitoring metrics.                               |
+| `MONITORING_IGNORE_URLS`       |        | global | 否     | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
 
 ## PHP
 
@@ -3916,13 +3966,13 @@ STREAM 支持 :x:
 
 Prometheus exporter for BunkerWeb internal metrics.
 
-|             参数             |                       默认值                        |上下文|可重复|                                  描述                                  |
-|------------------------------|-----------------------------------------------------|------|------|------------------------------------------------------------------------|
-|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global|否    |Enable the Prometheus export.                                           |
-|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global|否    |Listening IP of the Prometheus exporter.                                |
-|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global|否    |Listening port of the Prometheus exporter.                              |
-|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global|否    |HTTP URL of the Prometheus exporter.                                    |
-|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global|否    |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
+| 参数                           | 默认值                                                | 上下文 | 可重复 | 描述                                                                     |
+| ------------------------------ | ----------------------------------------------------- | ------ | ------ | ------------------------------------------------------------------------ |
+| `USE_PROMETHEUS_EXPORTER`      | `no`                                                  | global | 否     | Enable the Prometheus export.                                            |
+| `PROMETHEUS_EXPORTER_IP`       | `0.0.0.0`                                             | global | 否     | Listening IP of the Prometheus exporter.                                 |
+| `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global | 否     | Listening port of the Prometheus exporter.                               |
+| `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global | 否     | HTTP URL of the Prometheus exporter.                                     |
+| `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global | 否     | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
 ## Real IP
 
@@ -4299,20 +4349,20 @@ STREAM 支持 :x:
 
 Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
 
-|             参数             |      默认值      |上下文|可重复|                                                               描述                                                               |
-|------------------------------|------------------|------|------|----------------------------------------------------------------------------------------------------------------------------------|
-|`USE_REPORTING_SMTP`          |`no`              |global|否    |Enable sending the report via email.                                                                                              |
-|`USE_REPORTING_WEBHOOK`       |`no`              |global|否    |Enable sending the report via webhook.                                                                                            |
-|`REPORTING_SCHEDULE`          |`weekly`          |global|否    |The frequency at which reports are sent.                                                                                          |
-|`REPORTING_WEBHOOK_URLS`      |                  |global|否    |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
-|`REPORTING_SMTP_EMAILS`       |                  |global|否    |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
-|`REPORTING_SMTP_HOST`         |                  |global|否    |The host server used for SMTP sending.                                                                                            |
-|`REPORTING_SMTP_PORT`         |`465`             |global|否    |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
-|`REPORTING_SMTP_FROM_EMAIL`   |                  |global|否    |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
-|`REPORTING_SMTP_FROM_USER`    |                  |global|否    |The user authentication value for sending via the from email address.                                                             |
-|`REPORTING_SMTP_FROM_PASSWORD`|                  |global|否    |The password authentication value for sending via the from email address.                                                         |
-|`REPORTING_SMTP_SSL`          |`SSL`             |global|否    |Determine whether or not to use a secure connection for SMTP.                                                                     |
-|`REPORTING_SMTP_SUBJECT`      |`BunkerWeb Report`|global|否    |The subject line of the email.                                                                                                    |
+| 参数                           | 默认值             | 上下文 | 可重复 | 描述                                                                                                                               |
+| ------------------------------ | ------------------ | ------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global | 否     | Enable sending the report via email.                                                                                               |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global | 否     | Enable sending the report via webhook.                                                                                             |
+| `REPORTING_SCHEDULE`           | `weekly`           | global | 否     | The frequency at which reports are sent.                                                                                           |
+| `REPORTING_WEBHOOK_URLS`       |                    | global | 否     | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
+| `REPORTING_SMTP_EMAILS`        |                    | global | 否     | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
+| `REPORTING_SMTP_HOST`          |                    | global | 否     | The host server used for SMTP sending.                                                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | global | 否     | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global | 否     | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
+| `REPORTING_SMTP_FROM_USER`     |                    | global | 否     | The user authentication value for sending via the from email address.                                                              |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global | 否     | The password authentication value for sending via the from email address.                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global | 否     | Determine whether or not to use a secure connection for SMTP.                                                                      |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global | 否     | The subject line of the email.                                                                                                     |
 
 ## Reverse proxy
 
@@ -5197,10 +5247,10 @@ STREAM 支持 :x:
 
 Integrate easily the BunkerWeb UI.
 
-|  参数   |默认值| 上下文  |可重复|                    描述                    |
-|---------|------|---------|------|--------------------------------------------|
-|`USE_UI` |`no`  |multisite|否    |Use UI                                      |
-|`UI_HOST`|      |global   |否    |Address of the web UI used for initial setup|
+| 参数      | 默认值 | 上下文    | 可重复 | 描述                                         |
+| --------- | ------ | --------- | ------ | -------------------------------------------- |
+| `USE_UI`  | `no`   | multisite | 否     | Use UI                                       |
+| `UI_HOST` |        | global    | 否     | Address of the web UI used for initial setup |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5211,9 +5261,9 @@ STREAM 支持 :x:
 
 Add the possibility to manage users on the web interface
 
-|       参数        |默认值|上下文|可重复|                     描述                      |
-|-------------------|------|------|------|-----------------------------------------------|
-|`USERS_REQUIRE_2FA`|`no`  |global|否    |Require two-factor authentication for all users|
+| 参数                | 默认值 | 上下文 | 可重复 | 描述                                            |
+| ------------------- | ------ | ------ | ------ | ----------------------------------------------- |
+| `USERS_REQUIRE_2FA` | `no`   | global | 否     | Require two-factor authentication for all users |
 
 ## Whitelist
 
@@ -5378,3 +5428,28 @@ STREAM 支持 :warning:
     ```
 
     此配置允许合法的爬虫索引您的网站，而不会受到可能阻止它们的速率限制或其他安全措施的影响。rDNS 检查有助于验证爬虫是否确实来自其声称的公司。
+
+### 使用本地列表文件
+
+Whitelist、Greylist 和 Blacklist 插件提供的 `*_URLS` 设置共用同一个下载器。当你引用 `file:///` URL 时：
+
+- 路径会在 **scheduler** 容器内解析（Docker 部署通常为 `bunkerweb-scheduler`）。请将文件挂载到该容器，并确保 scheduler 用户拥有读取权限。
+- 每个文件都是 UTF-8 编码的纯文本，每行一个条目。空行会被忽略，注释行必须以 `#` 或 `;` 开头。不支持 `//` 注释。
+- 各类列表的条目要求：
+  - **IP 列表** 接受 IPv4/IPv6 地址或 CIDR 网段（例如 `192.0.2.10` 或 `2001:db8::/48`）。
+  - **rDNS 列表** 需要没有空格的后缀（例如 `.search.msn.com`），并会自动转换为小写。
+  - **ASN 列表** 可以仅包含编号（`32934`），或带 `AS` 前缀的编号（`AS15169`）。
+  - **User-Agent 列表** 视为 PCRE 模式，整行（包括空格）都会保留。请把注释放在独立行，避免被当成模式。
+  - **URI 列表** 必须以 `/` 开头，可以使用 `^`、`$` 等 PCRE 标记。
+
+符合格式的示例文件：
+
+```text
+# /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```

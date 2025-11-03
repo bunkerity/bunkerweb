@@ -216,14 +216,14 @@ STREAM-Unterstützung :x:
 
 Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.
 
-|        Einstellung         |Standardwert |Kontext|Mehrfach|                             Beschreibung                              |
-|----------------------------|-------------|-------|--------|-----------------------------------------------------------------------|
-|`USE_ANTIDDOS`              |`no`         |global |nein    |Enable or disable anti DDoS protection to mitigate high traffic spikes.|
-|`ANTIDDOS_METRICS_DICT_SIZE`|`10M`        |global |nein    |Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).          |
-|`ANTIDDOS_THRESHOLD`        |`100`        |global |nein    |Maximum suspicious requests allowed from a single IP before blocking.  |
-|`ANTIDDOS_WINDOW_TIME`      |`10`         |global |nein    |Time window (seconds) to detect abnormal request patterns.             |
-|`ANTIDDOS_STATUS_CODES`     |`429 403 444`|global |nein    |HTTP status codes treated as suspicious for DDoS analysis.             |
-|`ANTIDDOS_DISTINCT_IP`      |`5`          |global |nein    |Minimum distinct IP count before enabling anti DDoS measures.          |
+| Einstellung                  | Standardwert  | Kontext | Mehrfach | Beschreibung                                                            |
+| ---------------------------- | ------------- | ------- | -------- | ----------------------------------------------------------------------- |
+| `USE_ANTIDDOS`               | `no`          | global  | nein     | Enable or disable anti DDoS protection to mitigate high traffic spikes. |
+| `ANTIDDOS_METRICS_DICT_SIZE` | `10M`         | global  | nein     | Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).           |
+| `ANTIDDOS_THRESHOLD`         | `100`         | global  | nein     | Maximum suspicious requests allowed from a single IP before blocking.   |
+| `ANTIDDOS_WINDOW_TIME`       | `10`          | global  | nein     | Time window (seconds) to detect abnormal request patterns.              |
+| `ANTIDDOS_STATUS_CODES`      | `429 403 444` | global  | nein     | HTTP status codes treated as suspicious for DDoS analysis.              |
+| `ANTIDDOS_DISTINCT_IP`       | `5`           | global  | nein     | Minimum distinct IP count before enabling anti DDoS measures.           |
 
 ## Antibot
 
@@ -307,8 +307,8 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                       |
-    | :------------ | :------- | :-------- | :------- | :----------------------------------------------------------------- |
+    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                  |
+    | :------------ | :------- | :-------- | :------- | :---------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `cookie` setzen, um diesen Mechanismus zu aktivieren. |
 
 === "JavaScript"
@@ -328,8 +328,8 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                           |
-    | :------------ | :------- | :-------- | :------- | :--------------------------------------------------------------------- |
+    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
+    | :------------ | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
 
 === "Captcha"
@@ -360,9 +360,9 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                  | Standard                                                 | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                               |
-    | :------------------------- | :------------------------------------------------------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`              | `no`                                                     | Multisite | nein     | **Antibot aktivieren:** Auf `captcha` setzen, um diesen Mechanismus zu aktivieren.                                                                                                                                                                                    |
+    | Parameter                  | Standard                                               | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                              |
+    | :------------------------- | :----------------------------------------------------- | :-------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`                                                   | Multisite | nein     | **Antibot aktivieren:** Auf `captcha` setzen, um diesen Mechanismus zu aktivieren.                                                                                                                                                                        |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | Multisite | nein     | **Captcha-Alphabet:** Eine Zeichenkette, die zur Generierung des CAPTCHAs verwendet werden soll. Unterstützte Zeichen: alle Buchstaben (a-z, A-Z), die Ziffern 2-9 (schließt 0 und 1 aus) und die Sonderzeichen: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
 === "reCAPTCHA"
@@ -378,17 +378,17 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                         |
-    | :----------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`                  | `no`     | Multisite | nein     | Antibot aktivieren: Auf `recaptcha` setzen, um diesen Mechanismus zu aktivieren.                                                |
-    | `ANTIBOT_RECAPTCHA_CLASSIC`    | `yes`    | Multisite | nein     | Klassisches reCAPTCHA verwenden. Auf `no` setzen, um die neue Google Cloud-basierte Version zu verwenden.               |
-    | `ANTIBOT_RECAPTCHA_SITEKEY`    |          | Multisite | nein     | reCAPTCHA Site-Schlüssel. Für beide Versionen erforderlich.                                                              |
-    | `ANTIBOT_RECAPTCHA_SECRET`     |          | Multisite | nein     | reCAPTCHA Geheimschlüssel. Nur für die klassische Version erforderlich.                                                |
-    | `ANTIBOT_RECAPTCHA_PROJECT_ID` |          | Multisite | nein     | Google Cloud Projekt-ID. Nur für die neue Version erforderlich.                                              |
+    | Parameter                      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                     |
+    | :----------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                  | `no`     | Multisite | nein     | Antibot aktivieren: Auf `recaptcha` setzen, um diesen Mechanismus zu aktivieren.                                                 |
+    | `ANTIBOT_RECAPTCHA_CLASSIC`    | `yes`    | Multisite | nein     | Klassisches reCAPTCHA verwenden. Auf `no` setzen, um die neue Google Cloud-basierte Version zu verwenden.                        |
+    | `ANTIBOT_RECAPTCHA_SITEKEY`    |          | Multisite | nein     | reCAPTCHA Site-Schlüssel. Für beide Versionen erforderlich.                                                                      |
+    | `ANTIBOT_RECAPTCHA_SECRET`     |          | Multisite | nein     | reCAPTCHA Geheimschlüssel. Nur für die klassische Version erforderlich.                                                          |
+    | `ANTIBOT_RECAPTCHA_PROJECT_ID` |          | Multisite | nein     | Google Cloud Projekt-ID. Nur für die neue Version erforderlich.                                                                  |
     | `ANTIBOT_RECAPTCHA_API_KEY`    |          | Multisite | nein     | Google Cloud API-Schlüssel, der zum Aufrufen der reCAPTCHA Enterprise API verwendet wird. Nur für die neue Version erforderlich. |
-    | `ANTIBOT_RECAPTCHA_JA3`        |          | Multisite | nein     | Optionaler JA3 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                            |
-    | `ANTIBOT_RECAPTCHA_JA4`        |          | Multisite | nein     | Optionaler JA4 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                            |
-    | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`    | Multisite | nein     | Mindestpunktzahl, die zum Bestehen erforderlich ist (gilt für klassische v3 und die neue Version).                           |
+    | `ANTIBOT_RECAPTCHA_JA3`        |          | Multisite | nein     | Optionaler JA3 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                             |
+    | `ANTIBOT_RECAPTCHA_JA4`        |          | Multisite | nein     | Optionaler JA4 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                             |
+    | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`    | Multisite | nein     | Mindestpunktzahl, die zum Bestehen erforderlich ist (gilt für klassische v3 und die neue Version).                               |
 
 === "hCaptcha"
 
@@ -398,11 +398,11 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                  | Standard | Kontext   | Mehrfach | Beschreibung                                                         |
-    | :------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------- |
+    | Parameter                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                    |
+    | :------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------ |
     | `USE_ANTIBOT`              | `no`     | Multisite | nein     | Antibot aktivieren: Auf `hcaptcha` setzen, um diesen Mechanismus zu aktivieren. |
-    | `ANTIBOT_HCAPTCHA_SITEKEY` |          | Multisite | nein     | hCaptcha Site-Schlüssel.                                                  |
-    | `ANTIBOT_HCAPTCHA_SECRET`  |          | Multisite | nein     | hCaptcha Geheimschlüssel.                                               |
+    | `ANTIBOT_HCAPTCHA_SITEKEY` |          | Multisite | nein     | hCaptcha Site-Schlüssel.                                                        |
+    | `ANTIBOT_HCAPTCHA_SECRET`  |          | Multisite | nein     | hCaptcha Geheimschlüssel.                                                       |
 
 === "Turnstile"
 
@@ -412,11 +412,11 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                          |
-    | :-------------------------- | :------- | :-------- | :------- | :-------------------------------------------------------------------- |
+    | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                     |
+    | :-------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------- |
     | `USE_ANTIBOT`               | `no`     | Multisite | nein     | Antibot aktivieren: Auf `turnstile` setzen, um diesen Mechanismus zu aktivieren. |
-    | `ANTIBOT_TURNSTILE_SITEKEY` |          | Multisite | nein     | Turnstile Site-Schlüssel (Cloudflare).                                     |
-    | `ANTIBOT_TURNSTILE_SECRET`  |          | Multisite | nein     | Turnstile Geheimschlüssel (Cloudflare).                                  |
+    | `ANTIBOT_TURNSTILE_SITEKEY` |          | Multisite | nein     | Turnstile Site-Schlüssel (Cloudflare).                                           |
+    | `ANTIBOT_TURNSTILE_SECRET`  |          | Multisite | nein     | Turnstile Geheimschlüssel (Cloudflare).                                          |
 
 === "mCaptcha"
 
@@ -428,12 +428,12 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                  | Standard                      | Kontext   | Mehrfach | Beschreibung                                                         |
-    | :------------------------- | :---------------------------- | :-------- | :------- | :------------------------------------------------------------------- |
-    | `USE_ANTIBOT`              | `no`                          | Multisite | nein     | Antibot aktivieren: Auf `mcaptcha` setzen, um diesen Mechanismus zu aktivieren. |
-    | `ANTIBOT_MCAPTCHA_SITEKEY` |                               | Multisite | nein     | mCaptcha Site-Schlüssel.                                                  |
-    | `ANTIBOT_MCAPTCHA_SECRET`  |                               | Multisite | nein     | mCaptcha Geheimschlüssel.                                               |
-    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                   |
+    | Parameter                  | Standard                    | Kontext   | Mehrfach | Beschreibung                                                                    |
+    | :------------------------- | :-------------------------- | :-------- | :------- | :------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`              | `no`                        | Multisite | nein     | Antibot aktivieren: Auf `mcaptcha` setzen, um diesen Mechanismus zu aktivieren. |
+    | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | Multisite | nein     | mCaptcha Site-Schlüssel.                                                        |
+    | `ANTIBOT_MCAPTCHA_SECRET`  |                             | Multisite | nein     | mCaptcha Geheimschlüssel.                                                       |
+    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                             |
 
     Siehe Allgemeine Parameter für zusätzliche Optionen.
 
@@ -726,18 +726,18 @@ STREAM-Unterstützung :white_check_mark:
 
 Automatically backup your data to an S3 bucket
 
-|         Einstellung         |Standardwert|Kontext|Mehrfach|                Beschreibung                |
-|-----------------------------|------------|-------|--------|--------------------------------------------|
-|`USE_BACKUP_S3`              |`no`        |global |nein    |Enable or disable the S3 backup feature     |
-|`BACKUP_S3_SCHEDULE`         |`daily`     |global |nein    |The frequency of the backup                 |
-|`BACKUP_S3_ROTATION`         |`7`         |global |nein    |The number of backups to keep               |
-|`BACKUP_S3_ENDPOINT`         |            |global |nein    |The S3 endpoint                             |
-|`BACKUP_S3_BUCKET`           |            |global |nein    |The S3 bucket                               |
-|`BACKUP_S3_DIR`              |            |global |nein    |The S3 directory                            |
-|`BACKUP_S3_REGION`           |            |global |nein    |The S3 region                               |
-|`BACKUP_S3_ACCESS_KEY_ID`    |            |global |nein    |The S3 access key ID                        |
-|`BACKUP_S3_ACCESS_KEY_SECRET`|            |global |nein    |The S3 access key secret                    |
-|`BACKUP_S3_COMP_LEVEL`       |`6`         |global |nein    |The compression level of the backup zip file|
+| Einstellung                   | Standardwert | Kontext | Mehrfach | Beschreibung                                 |
+| ----------------------------- | ------------ | ------- | -------- | -------------------------------------------- |
+| `USE_BACKUP_S3`               | `no`         | global  | nein     | Enable or disable the S3 backup feature      |
+| `BACKUP_S3_SCHEDULE`          | `daily`      | global  | nein     | The frequency of the backup                  |
+| `BACKUP_S3_ROTATION`          | `7`          | global  | nein     | The number of backups to keep                |
+| `BACKUP_S3_ENDPOINT`          |              | global  | nein     | The S3 endpoint                              |
+| `BACKUP_S3_BUCKET`            |              | global  | nein     | The S3 bucket                                |
+| `BACKUP_S3_DIR`               |              | global  | nein     | The S3 directory                             |
+| `BACKUP_S3_REGION`            |              | global  | nein     | The S3 region                                |
+| `BACKUP_S3_ACCESS_KEY_ID`     |              | global  | nein     | The S3 access key ID                         |
+| `BACKUP_S3_ACCESS_KEY_SECRET` |              | global  | nein     | The S3 access key secret                     |
+| `BACKUP_S3_COMP_LEVEL`        | `6`          | global  | nein     | The compression level of the backup zip file |
 
 ## Bad behavior
 
@@ -888,10 +888,10 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 
     Der Parameter `BLACKLIST_COMMUNITY_LISTS` ermöglicht Ihnen die Auswahl aus ausgewählten Blacklist-Quellen. Die verfügbaren Optionen umfassen:
 
-    | ID                                        | Beschreibung                                                                                                                                                                                                             | Quelle                                                                                                                         |
-    | :---------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
-    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist. DST = Europa                                                                                                                                                                                | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`   |
-    | `ip:danmeuk-tor-exit`                     | IP-Adressen von Tor-Exit-Nodes (dan.me.uk)                                                                                                                                                                               | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
+    | ID                                        | Beschreibung                                                                                                                                                                                                              | Quelle                                                                                                                         |
+    | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------- |
+    | `ip:laurent-minne-data-shield-aggressive` | Data-Shield IPv4 Blocklist. DST = Europa                                                                                                                                                                                  | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt`   |
+    | `ip:danmeuk-tor-exit`                     | IP-Adressen von Tor-Exit-Nodes (dan.me.uk)                                                                                                                                                                                | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
     | `ua:mitchellkrogza-bad-user-agents`       | Nginx Block Bad Bots, Spam Referrer Blocker, Vulnerability Scanners, User-Agents, Malware, Adware, Ransomware, Malicious Sites, mit Anti-DDOS, Wordpress Theme Detector Blocking und Fail2Ban Jail für Wiederholungstäter | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
 
     **Konfiguration:** Geben Sie mehrere Listen durch Leerzeichen getrennt an. Zum Beispiel:
@@ -905,59 +905,59 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
 === "IP-Adresse"[18][19][20][21][22]
     **Was es bewirkt:** Blockiert Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk.
 
-    | Parameter                  | Standard                                | Kontext   | Mehrfach | Beschreibung                                                                                                                     |
-    | :------------------------- | :-------------------------------------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------------------- |
-    | `BLACKLIST_IP`             |                                         | Multisite | Nein     | **IP-Blacklist:** Liste von IP-Adressen oder Netzwerken (CIDR-Notation) zum Blockieren, durch Leerzeichen getrennt.                    |
-    | `BLACKLIST_IGNORE_IP`      |                                         | Multisite | Nein     | **IP-Ignorierliste:** Liste von IP-Adressen oder Netzwerken, die IP-Blacklist-Überprüfungen umgehen sollen. |
-    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit`   | Multisite | Nein     | **IP-Blacklist-URLs:** Liste von URLs, die zu blockierende IP-Adressen oder Netzwerke enthalten, durch Leerzeichen getrennt.        |
-    | `BLACKLIST_IGNORE_IP_URLS` |                                         | Multisite | Nein     | **IP-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende IP-Adressen oder Netzwerke enthalten.                            |
+    | Parameter                  | Standard                              | Kontext   | Mehrfach | Beschreibung                                                                                                                 |
+    | :------------------------- | :------------------------------------ | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_IP`             |                                       | Multisite | Nein     | **IP-Blacklist:** Liste von IP-Adressen oder Netzwerken (CIDR-Notation) zum Blockieren, durch Leerzeichen getrennt.          |
+    | `BLACKLIST_IGNORE_IP`      |                                       | Multisite | Nein     | **IP-Ignorierliste:** Liste von IP-Adressen oder Netzwerken, die IP-Blacklist-Überprüfungen umgehen sollen.                  |
+    | `BLACKLIST_IP_URLS`        | `https://www.dan.me.uk/torlist/?exit` | Multisite | Nein     | **IP-Blacklist-URLs:** Liste von URLs, die zu blockierende IP-Adressen oder Netzwerke enthalten, durch Leerzeichen getrennt. |
+    | `BLACKLIST_IGNORE_IP_URLS` |                                       | Multisite | Nein     | **IP-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende IP-Adressen oder Netzwerke enthalten.                        |
 
     Der Standardparameter `BLACKLIST_IP_URLS` enthält eine URL, die eine **Liste bekannter Tor-Exit-Nodes** bereitstellt. Dies ist eine häufige Quelle für bösartigen Datenverkehr und ein guter Ausgangspunkt für viele Websites.
 
 === "Reverse DNS"[23][24][25][26][27]
     **Was es bewirkt:** Blockiert Besucher basierend auf ihrem Reverse-Domain-Namen. Dies ist nützlich, um bekannte Scanner und Crawler basierend auf ihren Organisationsdomänen zu blockieren.
 
-    | Parameter                    | Standard                | Kontext   | Mehrfach | Beschreibung                                                                                                                    |
-    | :--------------------------- | :---------------------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------------------ |
-    | `BLACKLIST_RDNS`             | `.shodan.io .censys.io` | Multisite | Nein     | **rDNS-Blacklist:** Liste von Reverse-DNS-Suffixen zum Blockieren, durch Leerzeichen getrennt.                                    |
-    | `BLACKLIST_RDNS_GLOBAL`      | `yes`                   | Multisite | Nein     | **Nur globales rDNS:** Führt rDNS-Überprüfungen nur für globale IP-Adressen durch, wenn auf `yes` gesetzt.                |
-    | `BLACKLIST_IGNORE_RDNS`      |                         | Multisite | Nein     | **rDNS-Ignorierliste:** Liste von Reverse-DNS-Suffixen, die rDNS-Blacklist-Überprüfungen umgehen sollen. |
-    | `BLACKLIST_RDNS_URLS`        |                         | Multisite | Nein     | **rDNS-Blacklist-URLs:** Liste von URLs, die zu blockierende Reverse-DNS-Suffixe enthalten.                                   |
-    | `BLACKLIST_IGNORE_RDNS_URLS` |                         | Multisite | Nein     | **rDNS-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende Reverse-DNS-Suffixe enthalten.                              |
+    | Parameter                    | Standard                | Kontext   | Mehrfach | Beschreibung                                                                                               |
+    | :--------------------------- | :---------------------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_RDNS`             | `.shodan.io .censys.io` | Multisite | Nein     | **rDNS-Blacklist:** Liste von Reverse-DNS-Suffixen zum Blockieren, durch Leerzeichen getrennt.             |
+    | `BLACKLIST_RDNS_GLOBAL`      | `yes`                   | Multisite | Nein     | **Nur globales rDNS:** Führt rDNS-Überprüfungen nur für globale IP-Adressen durch, wenn auf `yes` gesetzt. |
+    | `BLACKLIST_IGNORE_RDNS`      |                         | Multisite | Nein     | **rDNS-Ignorierliste:** Liste von Reverse-DNS-Suffixen, die rDNS-Blacklist-Überprüfungen umgehen sollen.   |
+    | `BLACKLIST_RDNS_URLS`        |                         | Multisite | Nein     | **rDNS-Blacklist-URLs:** Liste von URLs, die zu blockierende Reverse-DNS-Suffixe enthalten.                |
+    | `BLACKLIST_IGNORE_RDNS_URLS` |                         | Multisite | Nein     | **rDNS-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende Reverse-DNS-Suffixe enthalten.           |
 
     Der Standardparameter `BLACKLIST_RDNS` enthält Domänen gängiger Scanner wie **Shodan** und **Censys**. Diese werden oft von Sicherheitsforschern und Scannern verwendet, um anfällige Websites zu identifizieren.
 
 === "ASN"
     **Was es bewirkt:** Blockiert Besucher von bestimmten Netzwerkanbietern. ASNs sind wie Postleitzahlen für das Internet – sie identifizieren, zu welchem Anbieter oder welcher Organisation eine IP gehört.
 
-    | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                 |
-    | :-------------------------- | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------- |
-    | `BLACKLIST_ASN`             |          | Multisite | Nein     | **ASN-Blacklist:** Liste von autonomen Systemnummern zum Blockieren, durch Leerzeichen getrennt.          |
-    | `BLACKLIST_IGNORE_ASN`      |          | Multisite | Nein     | **ASN-Ignorierliste:** Liste von ASNs, die ASN-Blacklist-Überprüfungen umgehen sollen. |
-    | `BLACKLIST_ASN_URLS`        |          | Multisite | Nein     | **ASN-Blacklist-URLs:** Liste von URLs, die zu blockierende ASNs enthalten.                                   |
-    | `BLACKLIST_IGNORE_ASN_URLS` |          | Multisite | Nein     | **ASN-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende ASNs enthalten.                              |
+    | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                     |
+    | :-------------------------- | :------- | :-------- | :------- | :----------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_ASN`             |          | Multisite | Nein     | **ASN-Blacklist:** Liste von autonomen Systemnummern zum Blockieren, durch Leerzeichen getrennt. |
+    | `BLACKLIST_IGNORE_ASN`      |          | Multisite | Nein     | **ASN-Ignorierliste:** Liste von ASNs, die ASN-Blacklist-Überprüfungen umgehen sollen.           |
+    | `BLACKLIST_ASN_URLS`        |          | Multisite | Nein     | **ASN-Blacklist-URLs:** Liste von URLs, die zu blockierende ASNs enthalten.                      |
+    | `BLACKLIST_IGNORE_ASN_URLS` |          | Multisite | Nein     | **ASN-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende ASNs enthalten.                 |
 
 === "User-Agent"[28][29][30][31][32]
     **Was es bewirkt:** Blockiert Besucher basierend auf dem Browser oder Tool, das sie angeblich verwenden. Dies ist effektiv gegen Bots, die sich ehrlich identifizieren (wie "ScannerBot" oder "WebHarvestTool").
 
-    | Parameter                          | Standard                                                                                                                         | Kontext   | Mehrfach | Beschreibung                                                                                                                                   |
-    | :--------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :-------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `BLACKLIST_USER_AGENT`             |                                                                                                                                | Multisite | Nein     | **User-Agent-Blacklist:** Liste von User-Agent-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt.                                |
+    | Parameter                          | Standard                                                                                                                       | Kontext   | Mehrfach | Beschreibung                                                                                                       |
+    | :--------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :-------- | :------- | :----------------------------------------------------------------------------------------------------------------- |
+    | `BLACKLIST_USER_AGENT`             |                                                                                                                                | Multisite | Nein     | **User-Agent-Blacklist:** Liste von User-Agent-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt.    |
     | `BLACKLIST_IGNORE_USER_AGENT`      |                                                                                                                                | Multisite | Nein     | **User-Agent-Ignorierliste:** Liste von User-Agent-Mustern, die User-Agent-Blacklist-Überprüfungen umgehen sollen. |
-    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | Multisite | Nein     | **User-Agent-Blacklist-URLs:** Liste von URLs, die zu blockierende User-Agent-Muster enthalten.                                            |
-    | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | Multisite | Nein     | **User-Agent-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende User-Agent-Muster enthalten.                                       |
+    | `BLACKLIST_USER_AGENT_URLS`        | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` | Multisite | Nein     | **User-Agent-Blacklist-URLs:** Liste von URLs, die zu blockierende User-Agent-Muster enthalten.                    |
+    | `BLACKLIST_IGNORE_USER_AGENT_URLS` |                                                                                                                                | Multisite | Nein     | **User-Agent-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende User-Agent-Muster enthalten.               |
 
     Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **Liste bekannter bösartiger User-Agents** bereitstellt. Diese werden oft von bösartigen Bots und Scannern verwendet, um anfällige Websites zu identifizieren.
 
 === "URI"[33][34][35][36][37]
     **Was es bewirkt:** Blockiert Anfragen an spezifische URLs auf Ihrer Website. Dies ist nützlich, um Zugriffsversuche auf Admin-Seiten, Anmeldeformulare oder andere sensible Bereiche zu blockieren, die angegriffen werden könnten.
 
-    | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                           |
-    | :-------------------------- | :------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------- |
-    | `BLACKLIST_URI`             |          | Multisite | Nein     | **URI-Blacklist:** Liste von URI-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt.                        |
-    | `BLACKLIST_IGNORE_URI`      |          | Multisite | Nein     | **URI-Ignorierliste:** Liste von URI-Mustern, die URI-Blacklist-Überprüfungen umgehen sollen. |
-    | `BLACKLIST_URI_URLS`        |          | Multisite | Nein     | **URI-Blacklist-URLs:** Liste von URLs, die zu blockierende URI-Muster enthalten.                                    |
-    | `BLACKLIST_IGNORE_URI_URLS` |          | Multisite | Nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende URI-Muster enthalten.                               |
+    | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                      |
+    | :-------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------ |
+    | `BLACKLIST_URI`             |          | Multisite | Nein     | **URI-Blacklist:** Liste von URI-Mustern (PCRE-Regex) zum Blockieren, durch Leerzeichen getrennt. |
+    | `BLACKLIST_IGNORE_URI`      |          | Multisite | Nein     | **URI-Ignorierliste:** Liste von URI-Mustern, die URI-Blacklist-Überprüfungen umgehen sollen.     |
+    | `BLACKLIST_URI_URLS`        |          | Multisite | Nein     | **URI-Blacklist-URLs:** Liste von URLs, die zu blockierende URI-Muster enthalten.                 |
+    | `BLACKLIST_IGNORE_URI_URLS` |          | Multisite | Nein     | **URI-Ignorierlisten-URLs:** Liste von URLs, die zu ignorierende URI-Muster enthalten.            |
 
 !!! info "Unterstützung von URL-Formaten"
     Alle `*_URLS`-Parameter unterstützen HTTP/HTTPS-URLs sowie lokale Dateipfade unter Verwendung des Präfixes `file:///`. Die Basisauthentifizierung wird im Format `http://user:pass@url` unterstützt.
@@ -1018,6 +1018,31 @@ Befolgen Sie diese Schritte, um die Blacklist-Funktion einzurichten und zu verwe
     BLACKLIST_USER_AGENT_URLS: "file:///chemin/vers/user-agent-blacklist.txt"
     BLACKLIST_URI_URLS: "file:///chemin/vers/uri-blacklist.txt"
     ```
+
+### Arbeiten mit lokalen Listendateien
+
+Die `*_URLS`-Einstellungen der Whitelist-, Greylist- und Blacklist-Plugins verwenden denselben Downloader. Wenn Sie eine `file:///`-URL angeben:
+
+- Der Pfad wird innerhalb des **Scheduler**-Containers aufgelöst (bei Docker-Bereitstellungen in der Regel `bunkerweb-scheduler`). Binden Sie die Dateien dort ein und stellen Sie sicher, dass der Scheduler-Benutzer Lesezugriff hat.
+- Jede Datei ist eine UTF-8-codierte Textdatei mit einem Eintrag pro Zeile. Leere Zeilen werden ignoriert und Kommentarzeilen müssen mit `#` oder `;` beginnen. `//`-Kommentare werden nicht unterstützt.
+- Erwartete Werte je Listentyp:
+  - **IP-Listen** akzeptieren IPv4/IPv6-Adressen oder CIDR-Netzwerke (z. B. `192.0.2.10` oder `2001:db8::/48`).
+  - **rDNS-Listen** erwarten ein Suffix ohne Leerzeichen (z. B. `.search.msn.com`). Werte werden automatisch in Kleinbuchstaben umgewandelt.
+  - **ASN-Listen** können nur die Nummer (`32934`) oder die mit `AS` vorangestellte Nummer (`AS15169`) enthalten.
+  - **User-Agent-Listen** werden als PCRE-Muster behandelt und die vollständige Zeile bleibt erhalten (einschließlich Leerzeichen). Schreiben Sie Kommentare in eine eigene Zeile, damit sie nicht als Muster interpretiert werden.
+  - **URI-Listen** müssen mit `/` beginnen und dürfen PCRE-Tokens wie `^` oder `$` verwenden.
+
+Beispieldateien im erwarteten Format:
+
+```text
+# /etc/bunkerweb/lists/ip-blacklist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-blacklist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
 
 ## Brotli
 
@@ -1371,12 +1396,12 @@ Führen Sie die folgenden Schritte aus, um die Client-Cache-Funktion zu konfigur
 
 ### Konfigurationseinstellungen
 
-| Einstellung               | Standard                                                                  | Kontext   | Mehrfach | Beschreibung                                                                                                      |
-| ------------------------- | ------------------------------------------------------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `USE_CLIENT_CACHE`        | `no`                                                                      | multisite | nein     | **Client-Cache aktivieren:** Auf `yes` setzen, um das clientseitige Caching von statischen Dateien zu aktivieren. |
-| `CLIENT_CACHE_EXTENSIONS` | `jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2` | global    | nein     | **Cache-fähige Erweiterungen:** Liste der Dateierweiterungen (getrennt durch `                                    | `), die vom Client zwischengespeichert werden sollen. |
-| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000`                                                | multisite | nein     | **Cache-Control-Header:** Wert für den Cache-Control-HTTP-Header zur Steuerung des Caching-Verhaltens.            |
-| `CLIENT_CACHE_ETAG`       | `yes`                                                                     | multisite | nein     | **ETags aktivieren:** Auf `yes` setzen, um den HTTP-ETag-Header für statische Ressourcen zu senden.               |
+| Einstellung               | Standard                   | Kontext   | Mehrfach | Beschreibung                                                                                                      |
+| ------------------------- | -------------------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- | --- |
+| `USE_CLIENT_CACHE`        | `no`                       | multisite | nein     | **Client-Cache aktivieren:** Auf `yes` setzen, um das clientseitige Caching von statischen Dateien zu aktivieren. |
+| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png      | bmp                                                                                                               | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | global | nein | **Cache-fähige Erweiterungen:** Liste der Dateierweiterungen (getrennt durch ` | `), die vom Client zwischengespeichert werden sollen. |
+| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | nein     | **Cache-Control-Header:** Wert für den Cache-Control-HTTP-Header zur Steuerung des Caching-Verhaltens.            |
+| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | nein     | **ETags aktivieren:** Auf `yes` setzen, um den HTTP-ETag-Header für statische Ressourcen zu senden.               |
 
 !!! tip "Optimierung der Cache-Einstellungen"
     Für häufig aktualisierte Inhalte sollten Sie kürzere `max-age`-Werte verwenden. Für Inhalte, die sich selten ändern (wie versionierte JavaScript-Bibliotheken oder Logos), verwenden Sie längere Cache-Zeiten. Der Standardwert von 15552000 Sekunden (180 Tage) ist für die meisten statischen Assets angemessen.
@@ -2313,6 +2338,31 @@ Führen Sie die folgenden Schritte aus, um die Greylist-Funktion zu konfiguriere
     GREYLIST_IP: "203.0.113.0/24"  # Externes Partnernetzwerk
     ```
 
+### Arbeiten mit lokalen Listendateien
+
+Die `*_URLS`-Einstellungen der Whitelist-, Greylist- und Blacklist-Plugins verwenden denselben Downloader. Wenn Sie eine `file:///`-URL angeben:
+
+- Der Pfad wird innerhalb des **Scheduler**-Containers aufgelöst (bei Docker-Bereitstellungen in der Regel `bunkerweb-scheduler`). Binden Sie die Dateien dort ein und stellen Sie sicher, dass der Scheduler-Benutzer Lesezugriff hat.
+- Jede Datei ist eine UTF-8-codierte Textdatei mit einem Eintrag pro Zeile. Leere Zeilen werden ignoriert und Kommentarzeilen müssen mit `#` oder `;` beginnen. `//`-Kommentare werden nicht unterstützt.
+- Erwartete Werte je Listentyp:
+  - **IP-Listen** akzeptieren IPv4/IPv6-Adressen oder CIDR-Netzwerke (z. B. `192.0.2.10` oder `2001:db8::/48`).
+  - **rDNS-Listen** erwarten ein Suffix ohne Leerzeichen (z. B. `.search.msn.com`). Werte werden automatisch in Kleinbuchstaben umgewandelt.
+  - **ASN-Listen** können nur die Nummer (`32934`) oder die mit `AS` vorangestellte Nummer (`AS15169`) enthalten.
+  - **User-Agent-Listen** werden als PCRE-Muster behandelt und die vollständige Zeile bleibt erhalten (einschließlich Leerzeichen). Schreiben Sie Kommentare in eine eigene Zeile, damit sie nicht als Muster interpretiert werden.
+  - **URI-Listen** müssen mit `/` beginnen und dürfen PCRE-Tokens wie `^` oder `$` verwenden.
+
+Beispieldateien im erwarteten Format:
+
+```text
+# /etc/bunkerweb/lists/ip-greylist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-greylist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
+
 ## Gzip
 
 STREAM-Unterstützung :x:
@@ -2695,7 +2745,7 @@ Das Let's Encrypt-Plugin unterstützt eine breite Palette von DNS-Anbietern für
 | `domainoffensive` | Domain-Offensive | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md) |
 | `dnsimple`        | DNSimple         | `token`                                                                                                      |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                               |
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
-| `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                          | [Dokumentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
+| `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                              | [Dokumentation](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                              | [Dokumentation](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (Standard: `service_account`)<br>`auth_uri` (Standard: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (Standard: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (Standard: `https://www.googleapis.com/oauth2/v1/certs`) | [Dokumentation](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
@@ -2954,27 +3004,27 @@ STREAM-Unterstützung :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
 
-|               Einstellung               |Standardwert |Kontext|Mehrfach|                           Beschreibung                           |
-|-----------------------------------------|-------------|-------|--------|------------------------------------------------------------------|
-|`LOADBALANCER_HEALTHCHECK_DICT_SIZE`     |`10m`        |global |nein    |Shared dict size (datastore for all healthchecks).                |
-|`LOADBALANCER_UPSTREAM_NAME`             |             |global |ja      |Name of the upstream (used in REVERSE_PROXY_HOST).                |
-|`LOADBALANCER_UPSTREAM_SERVERS`          |             |global |ja      |List of servers/IPs in the server group.                          |
-|`LOADBALANCER_UPSTREAM_MODE`             |`round-robin`|global |ja      |Load balancing mode (round-robin or sticky).                      |
-|`LOADBALANCER_UPSTREAM_STICKY_METHOD`    |`ip`         |global |ja      |Sticky session method (ip or cookie).                             |
-|`LOADBALANCER_UPSTREAM_RESOLVE`          |`no`         |global |ja      |Dynamically resolve upstream hostnames.                           |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE`        |             |global |ja      |Number of keepalive connections to cache per worker.              |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT`|`60s`        |global |ja      |Keepalive timeout for upstream connections.                       |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`   |`1h`         |global |ja      |Keepalive time for upstream connections.                          |
-|`LOADBALANCER_HEALTHCHECK_URL`           |`/status`    |global |ja      |The healthcheck URL.                                              |
-|`LOADBALANCER_HEALTHCHECK_INTERVAL`      |`2000`       |global |ja      |Healthcheck interval in milliseconds.                             |
-|`LOADBALANCER_HEALTHCHECK_TIMEOUT`       |`1000`       |global |ja      |Healthcheck timeout in milliseconds.                              |
-|`LOADBALANCER_HEALTHCHECK_FALL`          |`3`          |global |ja      |Number of failed healthchecks before marking the server as down.  |
-|`LOADBALANCER_HEALTHCHECK_RISE`          |`1`          |global |ja      |Number of successful healthchecks before marking the server as up.|
-|`LOADBALANCER_HEALTHCHECK_VALID_STATUSES`|`200`        |global |ja      |HTTP status considered valid in healthchecks.                     |
-|`LOADBALANCER_HEALTHCHECK_CONCURRENCY`   |`10`         |global |ja      |Maximum number of concurrent healthchecks.                        |
-|`LOADBALANCER_HEALTHCHECK_TYPE`          |`http`       |global |ja      |Type of healthcheck (http or https).                              |
-|`LOADBALANCER_HEALTHCHECK_SSL_VERIFY`    |`yes`        |global |ja      |Verify SSL certificate in healthchecks.                           |
-|`LOADBALANCER_HEALTHCHECK_HOST`          |             |global |ja      |Host header for healthchecks (useful for HTTPS).                  |
+| Einstellung                               | Standardwert  | Kontext | Mehrfach | Beschreibung                                                       |
+| ----------------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------ |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`         | global  | nein     | Shared dict size (datastore for all healthchecks).                 |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global  | ja       | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | ja       | List of servers/IPs in the server group.                           |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | ja       | Load balancing mode (round-robin or sticky).                       |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | ja       | Sticky session method (ip or cookie).                              |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | ja       | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | ja       | Number of keepalive connections to cache per worker.               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | ja       | Keepalive timeout for upstream connections.                        |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | ja       | Keepalive time for upstream connections.                           |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`     | global  | ja       | The healthcheck URL.                                               |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`        | global  | ja       | Healthcheck interval in milliseconds.                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`        | global  | ja       | Healthcheck timeout in milliseconds.                               |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`           | global  | ja       | Number of failed healthchecks before marking the server as down.   |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`           | global  | ja       | Number of successful healthchecks before marking the server as up. |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`         | global  | ja       | HTTP status considered valid in healthchecks.                      |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`          | global  | ja       | Maximum number of concurrent healthchecks.                         |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`        | global  | ja       | Type of healthcheck (http or https).                               |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`         | global  | ja       | Verify SSL certificate in healthchecks.                            |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |               | global  | ja       | Host header for healthchecks (useful for HTTPS).                   |
 
 ## Metrics
 
@@ -3229,9 +3279,9 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
         - Reduziert die Angriffsfläche durch Deaktivierung potenziell schädlicher Methoden
         - Blockiert von Angreifern verwendete Techniken zur Aufzählung von HTTP-Methoden
 
-    | Einstellung       | Standard          | Kontext   | Mehrfach | Beschreibung                                                                         |
-    | ----------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------ |
-    | `ALLOWED_METHODS` | `GET|POST|HEAD` | multisite | nein     | **HTTP-Methoden:** Liste der erlaubten HTTP-Methoden, getrennt durch Pipe-Zeichen (` | `). |
+    | Einstellung       | Standard | Kontext | Mehrfach | Beschreibung |
+    | ----------------- | -------- | ------- | -------- | ------------ |
+    | `ALLOWED_METHODS` | `GET     | POST    | HEAD`    | multisite    | nein | **HTTP-Methoden:** Liste der erlaubten HTTP-Methoden, getrennt durch Pipe-Zeichen (` | `). |
 
     !!! abstract "CORS und Preflight-Anfragen"
         Wenn Ihre Anwendung [Cross-Origin Resource Sharing (CORS)](#cors) unterstützt, sollten Sie die `OPTIONS`-Methode in der `ALLOWED_METHODS`-Einstellung aufnehmen, um Preflight-Anfragen zu bearbeiten. Dies gewährleistet die ordnungsgemäße Funktionalität für Browser, die Cross-Origin-Anfragen stellen.
@@ -3680,11 +3730,11 @@ STREAM-Unterstützung :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-|         Einstellung          |Standardwert|Kontext|Mehrfach|                               Beschreibung                                |
-|------------------------------|------------|-------|--------|---------------------------------------------------------------------------|
-|`USE_MONITORING`              |`yes`       |global |nein    |Enable monitoring of BunkerWeb.                                            |
-|`MONITORING_METRICS_DICT_SIZE`|`10M`       |global |nein    |Size of the dict to store monitoring metrics.                              |
-|`MONITORING_IGNORE_URLS`      |            |global |nein    |List of URLs to ignore when monitoring separated with spaces (e.g. /health)|
+| Einstellung                    | Standardwert | Kontext | Mehrfach | Beschreibung                                                                |
+| ------------------------------ | ------------ | ------- | -------- | --------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`        | global  | nein     | Enable monitoring of BunkerWeb.                                             |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`        | global  | nein     | Size of the dict to store monitoring metrics.                               |
+| `MONITORING_IGNORE_URLS`       |              | global  | nein     | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
 
 ## PHP
 
@@ -3843,13 +3893,13 @@ STREAM-Unterstützung :x:
 
 Prometheus exporter for BunkerWeb internal metrics.
 
-|         Einstellung          |                    Standardwert                     |Kontext|Mehrfach|                              Beschreibung                              |
-|------------------------------|-----------------------------------------------------|-------|--------|------------------------------------------------------------------------|
-|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global |nein    |Enable the Prometheus export.                                           |
-|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global |nein    |Listening IP of the Prometheus exporter.                                |
-|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global |nein    |Listening port of the Prometheus exporter.                              |
-|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global |nein    |HTTP URL of the Prometheus exporter.                                    |
-|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global |nein    |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
+| Einstellung                    | Standardwert                                          | Kontext | Mehrfach | Beschreibung                                                             |
+| ------------------------------ | ----------------------------------------------------- | ------- | -------- | ------------------------------------------------------------------------ |
+| `USE_PROMETHEUS_EXPORTER`      | `no`                                                  | global  | nein     | Enable the Prometheus export.                                            |
+| `PROMETHEUS_EXPORTER_IP`       | `0.0.0.0`                                             | global  | nein     | Listening IP of the Prometheus exporter.                                 |
+| `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global  | nein     | Listening port of the Prometheus exporter.                               |
+| `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global  | nein     | HTTP URL of the Prometheus exporter.                                     |
+| `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global  | nein     | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
 ## Real IP
 
@@ -4118,20 +4168,20 @@ STREAM-Unterstützung :x:
 
 Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
 
-|         Einstellung          |   Standardwert   |Kontext|Mehrfach|                                                           Beschreibung                                                           |
-|------------------------------|------------------|-------|--------|----------------------------------------------------------------------------------------------------------------------------------|
-|`USE_REPORTING_SMTP`          |`no`              |global |nein    |Enable sending the report via email.                                                                                              |
-|`USE_REPORTING_WEBHOOK`       |`no`              |global |nein    |Enable sending the report via webhook.                                                                                            |
-|`REPORTING_SCHEDULE`          |`weekly`          |global |nein    |The frequency at which reports are sent.                                                                                          |
-|`REPORTING_WEBHOOK_URLS`      |                  |global |nein    |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
-|`REPORTING_SMTP_EMAILS`       |                  |global |nein    |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
-|`REPORTING_SMTP_HOST`         |                  |global |nein    |The host server used for SMTP sending.                                                                                            |
-|`REPORTING_SMTP_PORT`         |`465`             |global |nein    |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
-|`REPORTING_SMTP_FROM_EMAIL`   |                  |global |nein    |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
-|`REPORTING_SMTP_FROM_USER`    |                  |global |nein    |The user authentication value for sending via the from email address.                                                             |
-|`REPORTING_SMTP_FROM_PASSWORD`|                  |global |nein    |The password authentication value for sending via the from email address.                                                         |
-|`REPORTING_SMTP_SSL`          |`SSL`             |global |nein    |Determine whether or not to use a secure connection for SMTP.                                                                     |
-|`REPORTING_SMTP_SUBJECT`      |`BunkerWeb Report`|global |nein    |The subject line of the email.                                                                                                    |
+| Einstellung                    | Standardwert       | Kontext | Mehrfach | Beschreibung                                                                                                                       |
+| ------------------------------ | ------------------ | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global  | nein     | Enable sending the report via email.                                                                                               |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global  | nein     | Enable sending the report via webhook.                                                                                             |
+| `REPORTING_SCHEDULE`           | `weekly`           | global  | nein     | The frequency at which reports are sent.                                                                                           |
+| `REPORTING_WEBHOOK_URLS`       |                    | global  | nein     | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
+| `REPORTING_SMTP_EMAILS`        |                    | global  | nein     | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
+| `REPORTING_SMTP_HOST`          |                    | global  | nein     | The host server used for SMTP sending.                                                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | global  | nein     | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global  | nein     | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
+| `REPORTING_SMTP_FROM_USER`     |                    | global  | nein     | The user authentication value for sending via the from email address.                                                              |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global  | nein     | The password authentication value for sending via the from email address.                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global  | nein     | Determine whether or not to use a secure connection for SMTP.                                                                      |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global  | nein     | The subject line of the email.                                                                                                     |
 
 ## Reverse proxy
 
@@ -4990,10 +5040,10 @@ STREAM-Unterstützung :x:
 
 Integrate easily the BunkerWeb UI.
 
-|Einstellung|Standardwert| Kontext |Mehrfach|                Beschreibung                |
-|-----------|------------|---------|--------|--------------------------------------------|
-|`USE_UI`   |`no`        |multisite|nein    |Use UI                                      |
-|`UI_HOST`  |            |global   |nein    |Address of the web UI used for initial setup|
+| Einstellung | Standardwert | Kontext   | Mehrfach | Beschreibung                                 |
+| ----------- | ------------ | --------- | -------- | -------------------------------------------- |
+| `USE_UI`    | `no`         | multisite | nein     | Use UI                                       |
+| `UI_HOST`   |              | global    | nein     | Address of the web UI used for initial setup |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -5004,9 +5054,9 @@ STREAM-Unterstützung :x:
 
 Add the possibility to manage users on the web interface
 
-|    Einstellung    |Standardwert|Kontext|Mehrfach|                 Beschreibung                  |
-|-------------------|------------|-------|--------|-----------------------------------------------|
-|`USERS_REQUIRE_2FA`|`no`        |global |nein    |Require two-factor authentication for all users|
+| Einstellung         | Standardwert | Kontext | Mehrfach | Beschreibung                                    |
+| ------------------- | ------------ | ------- | -------- | ----------------------------------------------- |
+| `USERS_REQUIRE_2FA` | `no`         | global  | nein     | Require two-factor authentication for all users |
 
 ## Whitelist
 
@@ -5171,3 +5221,28 @@ Führen Sie die folgenden Schritte aus, um die Whitelist-Funktion zu konfigurier
     ```
 
     Diese Konfiguration ermöglicht es legitimen Crawlern, Ihre Website zu indizieren, ohne Ratenbegrenzungen oder anderen Sicherheitsmaßnahmen unterworfen zu sein, die sie blockieren könnten. Die rDNS-Prüfungen helfen zu überprüfen, ob die Crawler tatsächlich von den von ihnen angegebenen Unternehmen stammen.
+
+### Arbeiten mit lokalen Listendateien
+
+Die `*_URLS`-Einstellungen der Whitelist-, Greylist- und Blacklist-Plugins verwenden denselben Downloader. Wenn Sie eine `file:///`-URL angeben:
+
+- Der Pfad wird innerhalb des **Scheduler**-Containers aufgelöst (bei Docker-Bereitstellungen in der Regel `bunkerweb-scheduler`). Binden Sie die Dateien dort ein und stellen Sie sicher, dass der Scheduler-Benutzer Lesezugriff hat.
+- Jede Datei ist eine UTF-8-codierte Textdatei mit einem Eintrag pro Zeile. Leere Zeilen werden ignoriert und Kommentarzeilen müssen mit `#` oder `;` beginnen. `//`-Kommentare werden nicht unterstützt.
+- Erwartete Werte je Listentyp:
+  - **IP-Listen** akzeptieren IPv4/IPv6-Adressen oder CIDR-Netzwerke (z. B. `192.0.2.10` oder `2001:db8::/48`).
+  - **rDNS-Listen** erwarten ein Suffix ohne Leerzeichen (z. B. `.search.msn.com`). Werte werden automatisch in Kleinbuchstaben umgewandelt.
+  - **ASN-Listen** können nur die Nummer (`32934`) oder die mit `AS` vorangestellte Nummer (`AS15169`) enthalten.
+  - **User-Agent-Listen** werden als PCRE-Muster behandelt und die vollständige Zeile bleibt erhalten (einschließlich Leerzeichen). Schreiben Sie Kommentare in eine eigene Zeile, damit sie nicht als Muster interpretiert werden.
+  - **URI-Listen** müssen mit `/` beginnen und dürfen PCRE-Tokens wie `^` oder `$` verwenden.
+
+Beispieldateien im erwarteten Format:
+
+```text
+# /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```

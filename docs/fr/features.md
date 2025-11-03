@@ -215,14 +215,14 @@ Prise en charge STREAM :x:
 
 Provides enhanced protection against DDoS attacks by analyzing and filtering suspicious traffic.
 
-|         Paramètre          |Valeur par défaut|Contexte|Multiple|                              Description                              |
-|----------------------------|-----------------|--------|--------|-----------------------------------------------------------------------|
-|`USE_ANTIDDOS`              |`no`             |global  |non     |Enable or disable anti DDoS protection to mitigate high traffic spikes.|
-|`ANTIDDOS_METRICS_DICT_SIZE`|`10M`            |global  |non     |Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).          |
-|`ANTIDDOS_THRESHOLD`        |`100`            |global  |non     |Maximum suspicious requests allowed from a single IP before blocking.  |
-|`ANTIDDOS_WINDOW_TIME`      |`10`             |global  |non     |Time window (seconds) to detect abnormal request patterns.             |
-|`ANTIDDOS_STATUS_CODES`     |`429 403 444`    |global  |non     |HTTP status codes treated as suspicious for DDoS analysis.             |
-|`ANTIDDOS_DISTINCT_IP`      |`5`              |global  |non     |Minimum distinct IP count before enabling anti DDoS measures.          |
+| Paramètre                    | Valeur par défaut | Contexte | Multiple | Description                                                             |
+| ---------------------------- | ----------------- | -------- | -------- | ----------------------------------------------------------------------- |
+| `USE_ANTIDDOS`               | `no`              | global   | non      | Enable or disable anti DDoS protection to mitigate high traffic spikes. |
+| `ANTIDDOS_METRICS_DICT_SIZE` | `10M`             | global   | non      | Size of in-memory storage for DDoS metrics (e.g., 10M, 500k).           |
+| `ANTIDDOS_THRESHOLD`         | `100`             | global   | non      | Maximum suspicious requests allowed from a single IP before blocking.   |
+| `ANTIDDOS_WINDOW_TIME`       | `10`              | global   | non      | Time window (seconds) to detect abnormal request patterns.              |
+| `ANTIDDOS_STATUS_CODES`      | `429 403 444`     | global   | non      | HTTP status codes treated as suspicious for DDoS analysis.              |
+| `ANTIDDOS_DISTINCT_IP`       | `5`               | global   | non      | Minimum distinct IP count before enabling anti DDoS measures.           |
 
 ## Antibot
 
@@ -697,18 +697,18 @@ Prise en charge STREAM :white_check_mark:
 
 Automatically backup your data to an S3 bucket
 
-|          Paramètre          |Valeur par défaut|Contexte|Multiple|                Description                 |
-|-----------------------------|-----------------|--------|--------|--------------------------------------------|
-|`USE_BACKUP_S3`              |`no`             |global  |non     |Enable or disable the S3 backup feature     |
-|`BACKUP_S3_SCHEDULE`         |`daily`          |global  |non     |The frequency of the backup                 |
-|`BACKUP_S3_ROTATION`         |`7`              |global  |non     |The number of backups to keep               |
-|`BACKUP_S3_ENDPOINT`         |                 |global  |non     |The S3 endpoint                             |
-|`BACKUP_S3_BUCKET`           |                 |global  |non     |The S3 bucket                               |
-|`BACKUP_S3_DIR`              |                 |global  |non     |The S3 directory                            |
-|`BACKUP_S3_REGION`           |                 |global  |non     |The S3 region                               |
-|`BACKUP_S3_ACCESS_KEY_ID`    |                 |global  |non     |The S3 access key ID                        |
-|`BACKUP_S3_ACCESS_KEY_SECRET`|                 |global  |non     |The S3 access key secret                    |
-|`BACKUP_S3_COMP_LEVEL`       |`6`              |global  |non     |The compression level of the backup zip file|
+| Paramètre                     | Valeur par défaut | Contexte | Multiple | Description                                  |
+| ----------------------------- | ----------------- | -------- | -------- | -------------------------------------------- |
+| `USE_BACKUP_S3`               | `no`              | global   | non      | Enable or disable the S3 backup feature      |
+| `BACKUP_S3_SCHEDULE`          | `daily`           | global   | non      | The frequency of the backup                  |
+| `BACKUP_S3_ROTATION`          | `7`               | global   | non      | The number of backups to keep                |
+| `BACKUP_S3_ENDPOINT`          |                   | global   | non      | The S3 endpoint                              |
+| `BACKUP_S3_BUCKET`            |                   | global   | non      | The S3 bucket                                |
+| `BACKUP_S3_DIR`               |                   | global   | non      | The S3 directory                             |
+| `BACKUP_S3_REGION`            |                   | global   | non      | The S3 region                                |
+| `BACKUP_S3_ACCESS_KEY_ID`     |                   | global   | non      | The S3 access key ID                         |
+| `BACKUP_S3_ACCESS_KEY_SECRET` |                   | global   | non      | The S3 access key secret                     |
+| `BACKUP_S3_COMP_LEVEL`        | `6`               | global   | non      | The compression level of the backup zip file |
 
 ## Bad behavior
 
@@ -969,6 +969,31 @@ Suivez ces étapes pour configurer et utiliser la fonctionnalité Blacklist :
     BLACKLIST_URI_URLS: "file:///chemin/vers/uri-blacklist.txt"
     ```
 
+### Travailler avec des fichiers de listes locaux
+
+Les paramètres `*_URLS` fournis par les plugins Whitelist, Greylist et Blacklist utilisent le même téléchargeur. Lorsque vous référencez une URL `file:///` :
+
+- Le chemin est résolu dans le conteneur du **scheduler** (dans un déploiement Docker il s’agit généralement de `bunkerweb-scheduler`). Montez-y vos fichiers et vérifiez que l’utilisateur scheduler possède un accès en lecture.
+- Chaque fichier est un texte encodé en UTF-8 avec une entrée par ligne. Les lignes vides sont ignorées et les commentaires doivent commencer par `#` ou `;`. Les commentaires `//` ne sont pas pris en charge.
+- Valeur attendue selon le type de liste :
+  - **Listes IP** acceptent des adresses IPv4/IPv6 ou des réseaux CIDR (par exemple `192.0.2.10` ou `2001:db8::/48`).
+  - **Listes rDNS** attendent un suffixe sans espaces (par exemple `.search.msn.com`). Les valeurs sont automatiquement converties en minuscules.
+  - **Listes ASN** peuvent contenir uniquement le numéro (`32934`) ou le numéro préfixé par `AS` (`AS15169`).
+  - **Listes User-Agent** sont traitées comme des motifs PCRE et la ligne complète est conservée (espaces compris). Placez vos commentaires sur une ligne séparée pour éviter qu’ils ne soient interprétés comme motif.
+  - **Listes URI** doivent commencer par `/` et peuvent utiliser des jetons PCRE tels que `^` ou `$`.
+
+Exemples de fichiers conformes :
+
+```text
+# /etc/bunkerweb/lists/ip-blacklist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-blacklist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
+
 ## Brotli
 
 Prise en charge STREAM :x:
@@ -1227,12 +1252,12 @@ Comment ça marche :
 
 ### Paramètres
 
-| Paramètre                 | Défaut                                                                    | Contexte  | Multiple | Description                                                  |
-| ------------------------- | ------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------ | --- |
-| `USE_CLIENT_CACHE`        | `no`                                                                      | multisite | non      | Activer la mise en cache côté client des fichiers statiques. |
-| `CLIENT_CACHE_EXTENSIONS` | `jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2` | global    | non      | Extensions mises en cache (séparées par `                    | `). |
-| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000`                                                | multisite | non      | Valeur de l’en‑tête HTTP Cache-Control.                      |
-| `CLIENT_CACHE_ETAG`       | `yes`                                                                     | multisite | non      | Envoi d’un ETag pour les ressources statiques.               |
+| Paramètre                 | Défaut                     | Contexte  | Multiple | Description                                                  |
+| ------------------------- | -------------------------- | --------- | -------- | ------------------------------------------------------------ | --- |
+| `USE_CLIENT_CACHE`        | `no`                       | multisite | non      | Activer la mise en cache côté client des fichiers statiques. |
+| `CLIENT_CACHE_EXTENSIONS` | `jpg                       | jpeg      | png      | bmp                                                          | ico | svg | tif | css | js | otf | ttf | eot | woff | woff2` | global | non | Extensions mises en cache (séparées par ` | `). |
+| `CLIENT_CACHE_CONTROL`    | `public, max-age=15552000` | multisite | non      | Valeur de l’en‑tête HTTP Cache-Control.                      |
+| `CLIENT_CACHE_ETAG`       | `yes`                      | multisite | non      | Envoi d’un ETag pour les ressources statiques.               |
 
 !!! tip "Optimiser le cache"
     Contenu fréquemment mis à jour : durée plus courte. Contenu versionné ou peu changeant : durée plus longue. La valeur par défaut (180 jours) convient souvent.
@@ -2081,6 +2106,31 @@ Général
 !!! tip "Mises à jour"
     Les listes récupérées par URL sont mises à jour automatiquement toutes les heures.
 
+### Travailler avec des fichiers de listes locaux
+
+Les paramètres `*_URLS` fournis par les plugins Whitelist, Greylist et Blacklist utilisent le même téléchargeur. Lorsque vous référencez une URL `file:///` :
+
+- Le chemin est résolu dans le conteneur du **scheduler** (dans un déploiement Docker il s’agit généralement de `bunkerweb-scheduler`). Montez-y vos fichiers et vérifiez que l’utilisateur scheduler possède un accès en lecture.
+- Chaque fichier est un texte encodé en UTF-8 avec une entrée par ligne. Les lignes vides sont ignorées et les commentaires doivent commencer par `#` ou `;`. Les commentaires `//` ne sont pas pris en charge.
+- Valeur attendue selon le type de liste :
+  - **Listes IP** acceptent des adresses IPv4/IPv6 ou des réseaux CIDR (par exemple `192.0.2.10` ou `2001:db8::/48`).
+  - **Listes rDNS** attendent un suffixe sans espaces (par exemple `.search.msn.com`). Les valeurs sont automatiquement converties en minuscules.
+  - **Listes ASN** peuvent contenir uniquement le numéro (`32934`) ou le numéro préfixé par `AS` (`AS15169`).
+  - **Listes User-Agent** sont traitées comme des motifs PCRE et la ligne complète est conservée (espaces compris). Placez vos commentaires sur une ligne séparée pour éviter qu’ils ne soient interprétés comme motif.
+  - **Listes URI** doivent commencer par `/` et peuvent utiliser des jetons PCRE tels que `^` ou `$`.
+
+Exemples de fichiers conformes :
+
+```text
+# /etc/bunkerweb/lists/ip-greylist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-greylist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
+
 ## Gzip
 
 Prise en charge STREAM :x:
@@ -2705,27 +2755,27 @@ Prise en charge STREAM :x:
 
 Provides load balancing feature to group of upstreams with optional healthchecks.
 
-|                Paramètre                |Valeur par défaut|Contexte|Multiple|                           Description                            |
-|-----------------------------------------|-----------------|--------|--------|------------------------------------------------------------------|
-|`LOADBALANCER_HEALTHCHECK_DICT_SIZE`     |`10m`            |global  |non     |Shared dict size (datastore for all healthchecks).                |
-|`LOADBALANCER_UPSTREAM_NAME`             |                 |global  |oui     |Name of the upstream (used in REVERSE_PROXY_HOST).                |
-|`LOADBALANCER_UPSTREAM_SERVERS`          |                 |global  |oui     |List of servers/IPs in the server group.                          |
-|`LOADBALANCER_UPSTREAM_MODE`             |`round-robin`    |global  |oui     |Load balancing mode (round-robin or sticky).                      |
-|`LOADBALANCER_UPSTREAM_STICKY_METHOD`    |`ip`             |global  |oui     |Sticky session method (ip or cookie).                             |
-|`LOADBALANCER_UPSTREAM_RESOLVE`          |`no`             |global  |oui     |Dynamically resolve upstream hostnames.                           |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE`        |                 |global  |oui     |Number of keepalive connections to cache per worker.              |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT`|`60s`            |global  |oui     |Keepalive timeout for upstream connections.                       |
-|`LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`   |`1h`             |global  |oui     |Keepalive time for upstream connections.                          |
-|`LOADBALANCER_HEALTHCHECK_URL`           |`/status`        |global  |oui     |The healthcheck URL.                                              |
-|`LOADBALANCER_HEALTHCHECK_INTERVAL`      |`2000`           |global  |oui     |Healthcheck interval in milliseconds.                             |
-|`LOADBALANCER_HEALTHCHECK_TIMEOUT`       |`1000`           |global  |oui     |Healthcheck timeout in milliseconds.                              |
-|`LOADBALANCER_HEALTHCHECK_FALL`          |`3`              |global  |oui     |Number of failed healthchecks before marking the server as down.  |
-|`LOADBALANCER_HEALTHCHECK_RISE`          |`1`              |global  |oui     |Number of successful healthchecks before marking the server as up.|
-|`LOADBALANCER_HEALTHCHECK_VALID_STATUSES`|`200`            |global  |oui     |HTTP status considered valid in healthchecks.                     |
-|`LOADBALANCER_HEALTHCHECK_CONCURRENCY`   |`10`             |global  |oui     |Maximum number of concurrent healthchecks.                        |
-|`LOADBALANCER_HEALTHCHECK_TYPE`          |`http`           |global  |oui     |Type of healthcheck (http or https).                              |
-|`LOADBALANCER_HEALTHCHECK_SSL_VERIFY`    |`yes`            |global  |oui     |Verify SSL certificate in healthchecks.                           |
-|`LOADBALANCER_HEALTHCHECK_HOST`          |                 |global  |oui     |Host header for healthchecks (useful for HTTPS).                  |
+| Paramètre                                 | Valeur par défaut | Contexte | Multiple | Description                                                        |
+| ----------------------------------------- | ----------------- | -------- | -------- | ------------------------------------------------------------------ |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`             | global   | non      | Shared dict size (datastore for all healthchecks).                 |
+| `LOADBALANCER_UPSTREAM_NAME`              |                   | global   | oui      | Name of the upstream (used in REVERSE_PROXY_HOST).                 |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |                   | global   | oui      | List of servers/IPs in the server group.                           |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin`     | global   | oui      | Load balancing mode (round-robin or sticky).                       |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`              | global   | oui      | Sticky session method (ip or cookie).                              |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`              | global   | oui      | Dynamically resolve upstream hostnames.                            |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |                   | global   | oui      | Number of keepalive connections to cache per worker.               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`             | global   | oui      | Keepalive timeout for upstream connections.                        |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`              | global   | oui      | Keepalive time for upstream connections.                           |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status`         | global   | oui      | The healthcheck URL.                                               |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`            | global   | oui      | Healthcheck interval in milliseconds.                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`            | global   | oui      | Healthcheck timeout in milliseconds.                               |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`               | global   | oui      | Number of failed healthchecks before marking the server as down.   |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`               | global   | oui      | Number of successful healthchecks before marking the server as up. |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`             | global   | oui      | HTTP status considered valid in healthchecks.                      |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`              | global   | oui      | Maximum number of concurrent healthchecks.                         |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`            | global   | oui      | Type of healthcheck (http or https).                               |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`             | global   | oui      | Verify SSL certificate in healthchecks.                            |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |                   | global   | oui      | Host header for healthchecks (useful for HTTPS).                   |
 
 ## Metrics
 
@@ -2892,9 +2942,9 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
         - Réduit la surface d'attaque en désactivant les méthodes potentiellement dangereuses
         - Bloque les techniques d'énumération de méthodes HTTP utilisées par les attaquants
 
-    | Paramètre         | Défaut            | Contexte  | Multiple | Description                                                                                   |
-    | ----------------- | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------- |
-    | `ALLOWED_METHODS` | `GET|POST|HEAD` | multisite | no       | **Méthodes HTTP :** Liste des méthodes HTTP autorisées, séparées par des barres verticales (` | `). |
+    | Paramètre         | Défaut | Contexte | Multiple | Description |
+    | ----------------- | ------ | -------- | -------- | ----------- |
+    | `ALLOWED_METHODS` | `GET   | POST     | HEAD`    | multisite   | no | **Méthodes HTTP :** Liste des méthodes HTTP autorisées, séparées par des barres verticales (` | `). |
 
     !!! abstract "CORS et requêtes pre-flight"
         Si votre application prend en charge le [Cross-Origin Resource Sharing (CORS)](#cors), vous devriez inclure la méthode `OPTIONS` dans `ALLOWED_METHODS` pour gérer les requêtes pre-flight. Cela garantit le bon fonctionnement pour les navigateurs effectuant des requêtes inter-origines.
@@ -3341,11 +3391,11 @@ Prise en charge STREAM :x:
 
 BunkerWeb monitoring pro system. This plugin is a prerequisite for some other plugins.
 
-|          Paramètre           |Valeur par défaut|Contexte|Multiple|                                Description                                |
-|------------------------------|-----------------|--------|--------|---------------------------------------------------------------------------|
-|`USE_MONITORING`              |`yes`            |global  |non     |Enable monitoring of BunkerWeb.                                            |
-|`MONITORING_METRICS_DICT_SIZE`|`10M`            |global  |non     |Size of the dict to store monitoring metrics.                              |
-|`MONITORING_IGNORE_URLS`      |                 |global  |non     |List of URLs to ignore when monitoring separated with spaces (e.g. /health)|
+| Paramètre                      | Valeur par défaut | Contexte | Multiple | Description                                                                 |
+| ------------------------------ | ----------------- | -------- | -------- | --------------------------------------------------------------------------- |
+| `USE_MONITORING`               | `yes`             | global   | non      | Enable monitoring of BunkerWeb.                                             |
+| `MONITORING_METRICS_DICT_SIZE` | `10M`             | global   | non      | Size of the dict to store monitoring metrics.                               |
+| `MONITORING_IGNORE_URLS`       |                   | global   | non      | List of URLs to ignore when monitoring separated with spaces (e.g. /health) |
 
 ## PHP
 
@@ -3488,13 +3538,13 @@ Prise en charge STREAM :x:
 
 Prometheus exporter for BunkerWeb internal metrics.
 
-|          Paramètre           |                  Valeur par défaut                  |Contexte|Multiple|                              Description                               |
-|------------------------------|-----------------------------------------------------|--------|--------|------------------------------------------------------------------------|
-|`USE_PROMETHEUS_EXPORTER`     |`no`                                                 |global  |non     |Enable the Prometheus export.                                           |
-|`PROMETHEUS_EXPORTER_IP`      |`0.0.0.0`                                            |global  |non     |Listening IP of the Prometheus exporter.                                |
-|`PROMETHEUS_EXPORTER_PORT`    |`9113`                                               |global  |non     |Listening port of the Prometheus exporter.                              |
-|`PROMETHEUS_EXPORTER_URL`     |`/metrics`                                           |global  |non     |HTTP URL of the Prometheus exporter.                                    |
-|`PROMETHEUS_EXPORTER_ALLOW_IP`|`127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16`|global  |non     |List of IP/networks allowed to contact the Prometheus exporter endpoint.|
+| Paramètre                      | Valeur par défaut                                     | Contexte | Multiple | Description                                                              |
+| ------------------------------ | ----------------------------------------------------- | -------- | -------- | ------------------------------------------------------------------------ |
+| `USE_PROMETHEUS_EXPORTER`      | `no`                                                  | global   | non      | Enable the Prometheus export.                                            |
+| `PROMETHEUS_EXPORTER_IP`       | `0.0.0.0`                                             | global   | non      | Listening IP of the Prometheus exporter.                                 |
+| `PROMETHEUS_EXPORTER_PORT`     | `9113`                                                | global   | non      | Listening port of the Prometheus exporter.                               |
+| `PROMETHEUS_EXPORTER_URL`      | `/metrics`                                            | global   | non      | HTTP URL of the Prometheus exporter.                                     |
+| `PROMETHEUS_EXPORTER_ALLOW_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | global   | non      | List of IP/networks allowed to contact the Prometheus exporter endpoint. |
 
 ## Real IP
 
@@ -3740,20 +3790,20 @@ Prise en charge STREAM :x:
 
 Regular reporting of important data from BunkerWeb (global, attacks, bans, requests, reasons, AS...). Monitoring pro plugin needed to work.
 
-|          Paramètre           |Valeur par défaut |Contexte|Multiple|                                                           Description                                                            |
-|------------------------------|------------------|--------|--------|----------------------------------------------------------------------------------------------------------------------------------|
-|`USE_REPORTING_SMTP`          |`no`              |global  |non     |Enable sending the report via email.                                                                                              |
-|`USE_REPORTING_WEBHOOK`       |`no`              |global  |non     |Enable sending the report via webhook.                                                                                            |
-|`REPORTING_SCHEDULE`          |`weekly`          |global  |non     |The frequency at which reports are sent.                                                                                          |
-|`REPORTING_WEBHOOK_URLS`      |                  |global  |non     |List of webhook URLs to receive the report in Markdown (separated by spaces).                                                     |
-|`REPORTING_SMTP_EMAILS`       |                  |global  |non     |List of email addresses to receive the report in HTML format (separated by spaces).                                               |
-|`REPORTING_SMTP_HOST`         |                  |global  |non     |The host server used for SMTP sending.                                                                                            |
-|`REPORTING_SMTP_PORT`         |`465`             |global  |non     |The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587).|
-|`REPORTING_SMTP_FROM_EMAIL`   |                  |global  |non     |The email address used as the sender. Note that 2FA must be disabled for this email address.                                      |
-|`REPORTING_SMTP_FROM_USER`    |                  |global  |non     |The user authentication value for sending via the from email address.                                                             |
-|`REPORTING_SMTP_FROM_PASSWORD`|                  |global  |non     |The password authentication value for sending via the from email address.                                                         |
-|`REPORTING_SMTP_SSL`          |`SSL`             |global  |non     |Determine whether or not to use a secure connection for SMTP.                                                                     |
-|`REPORTING_SMTP_SUBJECT`      |`BunkerWeb Report`|global  |non     |The subject line of the email.                                                                                                    |
+| Paramètre                      | Valeur par défaut  | Contexte | Multiple | Description                                                                                                                        |
+| ------------------------------ | ------------------ | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global   | non      | Enable sending the report via email.                                                                                               |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global   | non      | Enable sending the report via webhook.                                                                                             |
+| `REPORTING_SCHEDULE`           | `weekly`           | global   | non      | The frequency at which reports are sent.                                                                                           |
+| `REPORTING_WEBHOOK_URLS`       |                    | global   | non      | List of webhook URLs to receive the report in Markdown (separated by spaces).                                                      |
+| `REPORTING_SMTP_EMAILS`        |                    | global   | non      | List of email addresses to receive the report in HTML format (separated by spaces).                                                |
+| `REPORTING_SMTP_HOST`          |                    | global   | non      | The host server used for SMTP sending.                                                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | global   | non      | The port used for SMTP. Please note that there are different standards depending on the type of connection (SSL = 465, TLS = 587). |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global   | non      | The email address used as the sender. Note that 2FA must be disabled for this email address.                                       |
+| `REPORTING_SMTP_FROM_USER`     |                    | global   | non      | The user authentication value for sending via the from email address.                                                              |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global   | non      | The password authentication value for sending via the from email address.                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global   | non      | Determine whether or not to use a secure connection for SMTP.                                                                      |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global   | non      | The subject line of the email.                                                                                                     |
 
 ## Reverse proxy
 
@@ -4555,10 +4605,10 @@ Prise en charge STREAM :x:
 
 Integrate easily the BunkerWeb UI.
 
-|Paramètre|Valeur par défaut|Contexte |Multiple|                Description                 |
-|---------|-----------------|---------|--------|--------------------------------------------|
-|`USE_UI` |`no`             |multisite|non     |Use UI                                      |
-|`UI_HOST`|                 |global   |non     |Address of the web UI used for initial setup|
+| Paramètre | Valeur par défaut | Contexte  | Multiple | Description                                  |
+| --------- | ----------------- | --------- | -------- | -------------------------------------------- |
+| `USE_UI`  | `no`              | multisite | non      | Use UI                                       |
+| `UI_HOST` |                   | global    | non      | Address of the web UI used for initial setup |
 
 ## User Manager <img src='../../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style='transform : translateY(3px);'> (PRO)
 
@@ -4569,9 +4619,9 @@ Prise en charge STREAM :x:
 
 Add the possibility to manage users on the web interface
 
-|     Paramètre     |Valeur par défaut|Contexte|Multiple|                  Description                  |
-|-------------------|-----------------|--------|--------|-----------------------------------------------|
-|`USERS_REQUIRE_2FA`|`no`             |global  |non     |Require two-factor authentication for all users|
+| Paramètre           | Valeur par défaut | Contexte | Multiple | Description                                     |
+| ------------------- | ----------------- | -------- | -------- | ----------------------------------------------- |
+| `USERS_REQUIRE_2FA` | `no`              | global   | non      | Require two-factor authentication for all users |
 
 ## Whitelist
 
@@ -4642,3 +4692,28 @@ Général
     | `WHITELIST_IGNORE_URI`      |        | multisite | non      | Motifs d’URI ignorés.                |
     | `WHITELIST_URI_URLS`        |        | multisite | non      | URLs de motifs d’URI autorisés.      |
     | `WHITELIST_IGNORE_URI_URLS` |        | multisite | non      | URLs de motifs d’URI à ignorer.      |
+
+### Travailler avec des fichiers de listes locaux
+
+Les paramètres `*_URLS` fournis par les plugins Whitelist, Greylist et Blacklist utilisent le même téléchargeur. Lorsque vous référencez une URL `file:///` :
+
+- Le chemin est résolu dans le conteneur du **scheduler** (dans un déploiement Docker il s’agit généralement de `bunkerweb-scheduler`). Montez-y vos fichiers et vérifiez que l’utilisateur scheduler possède un accès en lecture.
+- Chaque fichier est un texte encodé en UTF-8 avec une entrée par ligne. Les lignes vides sont ignorées et les commentaires doivent commencer par `#` ou `;`. Les commentaires `//` ne sont pas pris en charge.
+- Valeur attendue selon le type de liste :
+  - **Listes IP** acceptent des adresses IPv4/IPv6 ou des réseaux CIDR (par exemple `192.0.2.10` ou `2001:db8::/48`).
+  - **Listes rDNS** attendent un suffixe sans espaces (par exemple `.search.msn.com`). Les valeurs sont automatiquement converties en minuscules.
+  - **Listes ASN** peuvent contenir uniquement le numéro (`32934`) ou le numéro préfixé par `AS` (`AS15169`).
+  - **Listes User-Agent** sont traitées comme des motifs PCRE et la ligne complète est conservée (espaces compris). Placez vos commentaires sur une ligne séparée pour éviter qu’ils ne soient interprétés comme motif.
+  - **Listes URI** doivent commencer par `/` et peuvent utiliser des jetons PCRE tels que `^` ou `$`.
+
+Exemples de fichiers conformes :
+
+```text
+# /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
