@@ -70,9 +70,9 @@
     },
     {
       "id": "lua-resty-core",
-      "name": "lua-resty-core v0.1.31",
+      "name": "lua-resty-core v0.1.32",
       "url": "https://github.com/openresty/lua-resty-core.git",
-      "commit": "cb7264da6d94c259c4ad01ee5c61b5f65e3c7eb4",
+      "commit": "768ce9631dd91f864ba454af9615a81847c3230c",
       "post_install": "rm -r src/deps/src/lua-resty-core/t"
     },
     {

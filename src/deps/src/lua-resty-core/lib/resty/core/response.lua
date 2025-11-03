@@ -42,6 +42,8 @@ ffi.cdef[[
         const unsigned char *key, size_t key_len,
         unsigned char *key_buf, ngx_http_lua_ffi_str_t *values,
         int max_nvalues, char **errmsg);
+
+    int ngx_http_lua_ffi_bypass_if_checks(ngx_http_request_t *r);
 ]]
 
 
@@ -224,6 +226,18 @@ local function get_resp_header(tb, key)
     -- n == FFI_ERROR
     error(ffi_str(errmsg[0]), 2)
 end
+
+
+local function bypass_if_checks()
+    local r = get_request()
+    if not r then
+        error("no request found")
+    end
+    C.ngx_http_lua_ffi_bypass_if_checks(r)
+end
+
+
+_M.bypass_if_checks = bypass_if_checks
 
 
 do

@@ -1,7 +1,8 @@
 local base = require "resty.core.base"
-base.allows_subsystem("http")
+-- base.allows_subsystem("http")
 local debug = require "debug"
 local ffi = require "ffi"
+local subsystem = ngx.config.subsystem
 
 
 local error    = error
@@ -30,9 +31,13 @@ local option_index = {
     ["tcp-nodelay"] = 3,
     ["sndbuf"]      = 4,
     ["rcvbuf"]      = 5,
+    ["ip-transparent"] = 6,
 }
 
 
+local ngx_lua_ffi_socket_tcp_getoption
+local ngx_lua_ffi_socket_tcp_setoption
+if subsystem == 'http' then
 ffi.cdef[[
 typedef struct ngx_http_lua_socket_tcp_upstream_s
     ngx_http_lua_socket_tcp_upstream_t;
@@ -58,7 +63,32 @@ ngx_http_lua_ffi_socket_tcp_get_sslhandshake_result(ngx_http_request_t *r,
 
 void
 ngx_http_lua_ffi_ssl_free_session(void *sess);
+
+int
+ngx_http_lua_ffi_socket_tcp_getfd(ngx_http_request_t *r,
+    ngx_http_lua_socket_tcp_upstream_t *u, char **errmsg);
 ]]
+
+ngx_lua_ffi_socket_tcp_getoption = C.ngx_http_lua_ffi_socket_tcp_getoption
+ngx_lua_ffi_socket_tcp_setoption = C.ngx_http_lua_ffi_socket_tcp_setoption
+
+elseif subsystem == 'stream' then
+
+ffi.cdef[[
+typedef struct ngx_stream_lua_socket_tcp_upstream_s
+    ngx_stream_lua_socket_tcp_upstream_t;
+
+int
+ngx_stream_lua_ffi_socket_tcp_getoption(ngx_stream_lua_socket_tcp_upstream_t *u,
+    int option, int *val, unsigned char *err, size_t *errlen);
+int
+ngx_stream_lua_ffi_socket_tcp_setoption(ngx_stream_lua_socket_tcp_upstream_t *u,
+    int opt, int val, unsigned char *err, size_t *errlen);
+]]
+
+ngx_lua_ffi_socket_tcp_getoption = C.ngx_stream_lua_ffi_socket_tcp_getoption
+ngx_lua_ffi_socket_tcp_setoption = C.ngx_stream_lua_ffi_socket_tcp_setoption
+end
 
 
 local output_value_buf = ffi_new("int[1]")
@@ -73,6 +103,7 @@ local FFI_NO_REQ_CTX = base.FFI_NO_REQ_CTX
 local SOCKET_CTX_INDEX          = 1
 local SOCKET_CLIENT_CERT_INDEX  = 6
 local SOCKET_CLIENT_PKEY_INDEX  = 7
+local SOCKET_IP_TRANSPARENT_INDEX = 9
 
 
 local function get_tcp_socket(cosocket)
@@ -83,7 +114,6 @@ local function get_tcp_socket(cosocket)
 
     return tcp_socket
 end
-
 
 local function getoption(cosocket, option)
     local tcp_socket = get_tcp_socket(cosocket)
@@ -100,11 +130,11 @@ local function getoption(cosocket, option)
     local errlen = get_size_ptr()
     errlen[0] = ERR_BUF_SIZE
 
-    local rc = C.ngx_http_lua_ffi_socket_tcp_getoption(tcp_socket,
-                                                       option_index[option],
-                                                       output_value_buf,
-                                                       err,
-                                                       errlen)
+    local rc = ngx_lua_ffi_socket_tcp_getoption(tcp_socket,
+                                                option_index[option],
+                                                output_value_buf,
+                                                err,
+                                                errlen)
     if rc ~= FFI_OK then
         return nil, ffi_str(err, errlen[0])
     end
@@ -113,8 +143,8 @@ local function getoption(cosocket, option)
 end
 
 
+
 local function setoption(cosocket, option, value)
-    local tcp_socket = get_tcp_socket(cosocket)
 
     if option == nil then
         return nil, 'missing the "option" argument'
@@ -124,6 +154,12 @@ local function setoption(cosocket, option, value)
         return nil, 'missing the "value" argument'
     end
 
+    if option == "ip-transparent" then
+        cosocket[SOCKET_IP_TRANSPARENT_INDEX] = value
+        return true
+    end
+
+    local tcp_socket = get_tcp_socket(cosocket)
     if option_index[option] == nil then
         return nil, "unsupported option " .. tostring(option)
     end
@@ -132,11 +168,11 @@ local function setoption(cosocket, option, value)
     local errlen = get_size_ptr()
     errlen[0] = ERR_BUF_SIZE
 
-    local rc = C.ngx_http_lua_ffi_socket_tcp_setoption(tcp_socket,
-                                                       option_index[option],
-                                                       value,
-                                                       err,
-                                                       errlen)
+    local rc = ngx_lua_ffi_socket_tcp_setoption(tcp_socket,
+                                                option_index[option],
+                                                value,
+                                                err,
+                                                errlen)
     if rc ~= FFI_OK then
         return nil, ffi_str(err, errlen[0])
     end
@@ -145,6 +181,7 @@ local function setoption(cosocket, option, value)
 end
 
 
+if subsystem == 'http' then
 local errmsg             = base.get_errmsg_ptr()
 local session_ptr        = ffi_new("void *[1]")
 local server_name_str    = ffi_new("ngx_str_t[1]")
@@ -220,6 +257,15 @@ local function sslhandshake(cosocket, reused_session, server_name, ssl_verify,
         error("no request ctx found", 2)
     end
 
+    if rc == FFI_OK then
+        if reused_session == false then
+            return true
+        end
+
+        rc = C.ngx_http_lua_ffi_socket_tcp_get_sslhandshake_result(r, u,
+                 session_ptr, errmsg, openssl_error_code)
+    end
+
     while true do
         if rc == FFI_ERROR then
             if openssl_error_code[0] ~= 0 then
@@ -260,13 +306,48 @@ local function sslhandshake(cosocket, reused_session, server_name, ssl_verify,
 end
 
 
+local function getfd(cosocket)
+    if not cosocket then
+        error("ngx.socket getfd: expecting the cosocket object, but seen none")
+    end
+
+    local r = get_request()
+    if not r then
+        error("no request found")
+    end
+
+    local u = get_tcp_socket(cosocket)
+
+    local fd = C.ngx_http_lua_ffi_socket_tcp_getfd(r, u, errmsg)
+    if (fd < 0) then
+        return nil, ffi_str(errmsg[0])
+    end
+
+    return fd;
+end
+
+
 do
     local method_table = registry.__tcp_cosocket_mt
     method_table.getoption = getoption
     method_table.setoption = setoption
     method_table.setclientcert = setclientcert
     method_table.sslhandshake  = sslhandshake
+    method_table.getfd = getfd
+
+    method_table = registry.__tcp_req_cosocket_mt
+    method_table.getfd = getfd
+
+    method_table = registry.__tcp_raw_req_cosocket_mt
+    method_table.getfd = getfd
 end
 
+elseif subsystem == 'stream' then
+do
+    local method_table = registry.__tcp_cosocket_mt
+    method_table.getoption = getoption
+    method_table.setoption = setoption
+end
+end
 
 return { version = base.version }
