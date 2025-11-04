@@ -995,8 +995,9 @@ class Database:
                                     continue
 
                                 content = config_file.read_bytes()
+                                config_type = config_type.strip().replace("-", "_").lower()
                                 checksum = bytes_hash(content, algorithm="sha256")
-                                config_name_clean = config_name.replace(".conf", "").replace("-", "_").lower()
+                                config_name_clean = config_name.removesuffix(".conf")
 
                                 # Check if belongs to a step
                                 step_id = None
@@ -1945,7 +1946,7 @@ class Database:
 
                     custom_config = config
 
-                custom_config["type"] = custom_config["type"].replace("-", "_").lower()  # type: ignore
+                custom_config["type"] = custom_config["type"].strip().replace("-", "_").lower()  # type: ignore
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
                 custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
 
@@ -2361,15 +2362,16 @@ class Database:
                             .filter_by(template_id=value)
                             .order_by(Template_custom_configs.order)
                         ):
+                            config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
                             if not any(
                                 custom_config["service_id"] == service.id
-                                and custom_config["type"] == template_config.type
+                                and custom_config["type"] == config_type
                                 and custom_config["name"] == template_config.name
                                 for custom_config in custom_configs
                             ):
                                 custom_config = {
                                     "service_id": service.id,
-                                    "type": template_config.type,
+                                    "type": config_type,
                                     "name": template_config.name,
                                     "checksum": template_config.checksum,
                                     "method": "default",
@@ -2390,6 +2392,7 @@ class Database:
 
     def get_custom_config(self, config_type: str, name: str, *, service_id: Optional[str] = None, with_data: bool = True) -> Dict[str, Any]:
         """Get a custom config from the database"""
+        config_type = config_type.strip().replace("-", "_").lower()
         with self._db_session() as session:
             entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
             if with_data:
@@ -3244,8 +3247,9 @@ class Database:
                                     continue
 
                                 content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
+                                config_type = config_type.strip().replace("-", "_").lower()
                                 checksum = bytes_hash(content, algorithm="sha256")
-                                config_name = config_name.replace(".conf", "").replace("-", "_").lower()
+                                config_name = config_name.removesuffix(".conf")
 
                                 step_id = None
                                 for step, configs in steps_configs.items():
@@ -3528,8 +3532,9 @@ class Database:
                                 continue
 
                             content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
+                            config_type = config_type.strip().replace("-", "_").lower()
                             checksum = bytes_hash(content, algorithm="sha256")
-                            config_name = config_name.replace(".conf", "").replace("-", "_").lower()
+                            config_name = config_name.removesuffix(".conf")
 
                             step_id = None
                             for step, configs in steps_configs.items():
@@ -4578,6 +4583,7 @@ class Database:
                 session.add(Template_settings(**setting))
 
             for config_row in config_entities:
+                config_row["type"] = config_row["type"].strip().replace("-", "_").lower()
                 session.add(Template_custom_configs(**config_row))
 
             try:
@@ -4678,6 +4684,7 @@ class Database:
                 session.add(Template_settings(**setting))
 
             for config_row in config_entities:
+                config_row["type"] = config_row["type"].strip().replace("-", "_").lower()
                 session.add(Template_custom_configs(**config_row))
 
             session.query(Plugins).filter(Plugins.id.in_(set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all()))).update(
