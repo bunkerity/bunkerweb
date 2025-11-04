@@ -391,13 +391,21 @@ deprecated==1.3.1 \
     --hash=sha256:597bfef186b6f60181535a29fbe44865ce137a5079f295b479886c82729d5f3f \
     --hash=sha256:b1b50e0ff0c1fddaa5708a2c6b0a6588bb09b892825ab2b214ac9ea9d92a5223
     # via limits
+dnspython==2.8.0 \
+    --hash=sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af \
+    --hash=sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f
+    # via email-validator
+email-validator==2.3.0 \
+    --hash=sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4 \
+    --hash=sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426
+    # via -r requirements.in
 exceptiongroup==1.3.0 \
     --hash=sha256:4d111e6e0c13d0644cad6ddaa7ed0261a0b36971f6d23e7ec9b4b9097da78a10 \
     --hash=sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88
     # via anyio
-fastapi==0.120.4 \
-    --hash=sha256:2d856bc847893ca4d77896d4504ffdec0fb04312b705065fca9104428eca3868 \
-    --hash=sha256:9bdf192308676480d3593e10fd05094e56d6fdc7d9283db26053d8104d5f82a0
+fastapi==0.121.0 \
+    --hash=sha256:06663356a0b1ee93e875bbf05a31fb22314f5bed455afaaad2b2dad7f26e98fa \
+    --hash=sha256:8bdf1b15a55f4e4b0d6201033da9109ea15632cb76cf156e7b8b4019f2172106
     # via -r requirements.in
 gunicorn==23.0.0 \
     --hash=sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d \
@@ -455,7 +463,9 @@ httptools==0.7.1 \
 idna==3.11 \
     --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea \
     --hash=sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902
-    # via anyio
+    # via
+    #   anyio
+    #   email-validator
 limits==5.6.0 \
     --hash=sha256:807fac75755e73912e894fdd61e2838de574c5721876a19f7ab454ae1fffb4b5 \
     --hash=sha256:b585c2104274528536a5b68864ec3835602b3c4a802cd6aa0b07419798394021
