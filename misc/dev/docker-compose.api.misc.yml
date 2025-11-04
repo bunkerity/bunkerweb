@@ -1,3 +1,8 @@
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
+  LOG_LEVEL: "info"
+  CUSTOM_LOG_LEVEL: "debug"
+
 services:
   bunkerweb:
     build:
@@ -28,12 +33,11 @@ services:
       - bunkerweb
     volumes:
       - bw-storage:/data
-      - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
+      - ./configs/server-http/hello.conf:/data/configs/server-http/app1.example.com/hello.conf:ro
     environment:
+      <<: *env
       BUNKERWEB_INSTANCES: "bunkerweb"
-      SERVER_NAME: "app1.example.com"
-      LOG_LEVEL: "info"
-      CUSTOM_LOG_LEVEL: "debug"
+      SERVER_NAME: "api.example.com app1.example.com"
       MULTISITE: "yes"
       API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
       USE_BUNKERNET: "no"
@@ -42,17 +46,25 @@ services:
       SEND_ANONYMOUS_REPORT: "no"
       SERVE_FILES: "no"
       DISABLE_DEFAULT_SERVER: "yes"
-      USE_CLIENT_CACHE: "yes"
-      USE_GZIP: "yes"
       SESSIONS_CHECK_IP: "no"
       EXTERNAL_PLUGIN_URLS: "https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/dev.zip"
-      CUSTOM_CONF_MODSEC_CRS_reqbody-suppress: "SecRuleRemoveById 200002"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/"
+      api.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
       app1.example.com_USE_REVERSE_PROXY: "yes"
       app1.example.com_REVERSE_PROXY_URL: "/"
       app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
+      app1.example.com_USE_CLIENT_CACHE: "yes"
+      app1.example.com_USE_GZIP: "yes"
+      app1.example.com_CUSTOM_CONF_MODSEC_CRS_reqbody-suppress: "SecRuleRemoveById 200002"
     restart: "unless-stopped"
     networks:
       bw-universe:
+        aliases:
+          - bw-scheduler
+      bw-db:
         aliases:
           - bw-scheduler
 
@@ -63,19 +75,37 @@ services:
     ports:
       - 8888:8888
     volumes:
-      - bw-storage:/data
       - ../../src/api/app:/usr/share/bunkerweb/api/app:ro
       - ../../src/api/utils:/usr/share/bunkerweb/api/utils:ro
     environment:
+      <<: *env
       API_USERNAME: "admin"
       API_PASSWORD: "P@ssw0rd"
-      CUSTOM_LOG_LEVEL: "debug"
       DEBUG: "1"
     restart: "unless-stopped"
     networks:
       bw-universe:
         aliases:
           - bw-api
+      bw-db:
+        aliases:
+          - bw-api
+
+  bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        aliases:
+          - bw-db
 
   app1:
     image: nginxdemos/nginx-hello
@@ -97,3 +127,5 @@ networks:
         - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
+  bw-db:
+    name: bw-db
