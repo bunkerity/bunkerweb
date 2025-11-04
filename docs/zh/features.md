@@ -268,14 +268,20 @@ STREAM 支持 :x:
 
 BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑战。这对于将受信任的服务、内部网络或应始终无需挑战即可访问的特定页面列入白名单非常有用：
 
-| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                      |
-| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。        |
-| `ANTIBOT_IGNORE_IP`         |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。        |
-| `ANTIBOT_IGNORE_RDNS`       |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。          |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。 |
-| `ANTIBOT_IGNORE_ASN`        |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                  |
-| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。 |
+| 设置                        | 默认值 | 上下文    | 多个 | 描述                                                                                  |
+| --------------------------- | ------ | --------- | ---- | ------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |        | multisite | 否   | **排除的 URL：** 应绕过挑战的以空格分隔的 URI 正则表达式模式列表。                    |
+| `ANTIBOT_IGNORE_IP`         |        | multisite | 否   | **排除的 IP：** 应绕过挑战的以空格分隔的 IP 地址或 CIDR 范围列表。                    |
+| `ANTIBOT_IGNORE_RDNS`       |        | multisite | 否   | **排除的反向 DNS：** 应绕过挑战的以空格分隔的反向 DNS 后缀列表。                      |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | 否   | **仅限全局 IP：** 如果设置为 `yes`，则仅对公共 IP 地址执行反向 DNS 检查。             |
+| `ANTIBOT_IGNORE_ASN`        |        | multisite | 否   | **排除的 ASN：** 应绕过挑战的以空格分隔的 ASN 编号列表。                              |
+| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | 否   | **排除的用户代理：** 应绕过挑战的以空格分隔的用户代理正则表达式模式列表。             |
+| `ANTIBOT_IGNORE_COUNTRY`    |        | multisite | 否   | **排除的国家：** 应绕过挑战的 ISO 3166-1 alpha-2 国家代码（用空格分隔）列表。         |
+| `ANTIBOT_ONLY_COUNTRY`      |        | multisite | 否   | **仅挑战的国家：** 必须完成挑战的 ISO 3166-1 alpha-2 国家代码列表，其他国家将被跳过。 |
+
+!!! note "国家设置的行为"
+      - 当同时设置 `ANTIBOT_IGNORE_COUNTRY` 和 `ANTIBOT_ONLY_COUNTRY` 时，忽略列表优先——同时出现在两个列表中的国家将绕过挑战。
+      - 当设置了 `ANTIBOT_ONLY_COUNTRY` 且 IP 为私有或无法解析的地址时，由于无法确定国家代码，请求会绕过挑战。
 
 **示例：**
 
@@ -293,6 +299,12 @@ BunkerWeb 允许您指定某些用户、IP 或请求应完全绕过 antibot 挑�
 
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
   这将从 antibot 挑战中排除用户代理与指定正则表达式模式匹配的请求。
+
+- `ANTIBOT_IGNORE_COUNTRY: "US CA"`
+  这将使来自美国或加拿大的访问者绕过 antibot 挑战。
+
+- `ANTIBOT_ONLY_COUNTRY: "CN RU"`
+  这将仅要求来自中国或俄罗斯的访问者完成挑战。来自其他国家（或私有 IP 范围）的请求将被跳过。
 
 ### 支持的挑战机制
 

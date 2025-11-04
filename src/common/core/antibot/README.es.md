@@ -36,14 +36,20 @@ Las siguientes configuraciones son compartidas por todos los mecanismos de desaf
 
 BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben omitir por completo el desafío antibot. Esto es útil para incluir en la lista blanca servicios de confianza, redes internas o páginas específicas que siempre deben ser accesibles sin desafío:
 
-| Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                            |
-| --------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío.                  |
-| `ANTIBOT_IGNORE_IP`         |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.            |
-| `ANTIBOT_IGNORE_RDNS`       |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.          |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas. |
-| `ANTIBOT_IGNORE_ASN`        |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                         |
-| `ANTIBOT_IGNORE_USER_AGENT` |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.   |
+| Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                      |
+| --------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío.                            |
+| `ANTIBOT_IGNORE_IP`         |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                      |
+| `ANTIBOT_IGNORE_RDNS`       |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                    |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.           |
+| `ANTIBOT_IGNORE_ASN`        |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                                   |
+| `ANTIBOT_IGNORE_USER_AGENT` |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.             |
+| `ANTIBOT_IGNORE_COUNTRY`    |                   | multisite | no       | **Países excluidos:** Lista de códigos de país ISO 3166-1 alfa-2 separados por espacios que deben omitir el desafío.             |
+| `ANTIBOT_ONLY_COUNTRY`      |                   | multisite | no       | **Países con desafío obligatorio:** Lista de códigos de país ISO 3166-1 alfa-2 que deben resolver el desafío. El resto se omite. |
+
+!!! note "Comportamiento de la configuración basada en países"
+      - Cuando se configuran `ANTIBOT_IGNORE_COUNTRY` y `ANTIBOT_ONLY_COUNTRY`, la lista de exclusiones tiene prioridad: los países presentes en ambas listas omiten el desafío.
+      - Las direcciones IP privadas o desconocidas omiten el desafío cuando `ANTIBOT_ONLY_COUNTRY` está configurado, porque no se puede determinar un código de país.
 
 **Ejemplos:**
 
@@ -57,6 +63,12 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
   Esto excluirá del desafío antibot las solicitudes de los ASN 15169 (Google) y 8075 (Microsoft).
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
   Esto excluirá del desafío antibot las solicitudes con User-Agents que coincidan con el patrón regex especificado.
+
+- `ANTIBOT_IGNORE_COUNTRY: "US CA"`
+  Esto omitirá el desafío antibot para visitantes ubicados en Estados Unidos o Canadá.
+
+- `ANTIBOT_ONLY_COUNTRY: "CN RU"`
+  Esto solo desafiará a los visitantes de China o Rusia. Las solicitudes de otros países (o rangos IP privados) omitirán el desafío.
 
 ### Mecanismos de desafío compatibles
 

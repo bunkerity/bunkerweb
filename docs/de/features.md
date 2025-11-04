@@ -267,14 +267,20 @@ Die folgenden Parameter werden von allen Herausforderungsmechanismen gemeinsam g
 
 BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die die Antibot-Herausforderung vollständig umgehen sollen. Nützlich für vertrauenswürdige Dienste, interne Netzwerke oder Seiten, die immer zugänglich sein sollen:
 
-| Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                              |
-| :-------------------------- | :------- | :-------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen.        |
-| `ANTIBOT_IGNORE_IP`         |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.  |
-| `ANTIBOT_IGNORE_RDNS`       |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.            |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                              |
-| `ANTIBOT_IGNORE_ASN`        |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                     |
-| `ANTIBOT_IGNORE_USER_AGENT` |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen. |
+| Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                              |
+| :-------------------------- | :------- | :-------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen.                                                        |
+| `ANTIBOT_IGNORE_IP`         |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                  |
+| `ANTIBOT_IGNORE_RDNS`       |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                            |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                              |
+| `ANTIBOT_IGNORE_ASN`        |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                                                                     |
+| `ANTIBOT_IGNORE_USER_AGENT` |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.                                                 |
+| `ANTIBOT_IGNORE_COUNTRY`    |          | Multisite | nein     | Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.                                                |
+| `ANTIBOT_ONLY_COUNTRY`      |          | Multisite | nein     | Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen. |
+
+!!! note "Verhalten der länderspezifischen Einstellungen"
+      - Wenn sowohl `ANTIBOT_IGNORE_COUNTRY` als auch `ANTIBOT_ONLY_COUNTRY` gesetzt sind, hat die Ignore-Liste Vorrang – Länder, die in beiden Listen stehen, umgehen die Herausforderung.
+      - Private oder unbekannte IP-Adressen umgehen die Herausforderung, wenn `ANTIBOT_ONLY_COUNTRY` gesetzt ist, da kein Ländercode ermittelt werden kann.
 
 Beispiele:
 
@@ -292,6 +298,12 @@ Beispiele:
 
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
   Schließt Anfragen aus, deren User-Agent dem angegebenen Regex-Muster entspricht.
+
+- `ANTIBOT_IGNORE_COUNTRY: "US CA"`
+  Umgeht die Antibot-Herausforderung für Besucher aus den USA oder Kanada.
+
+- `ANTIBOT_ONLY_COUNTRY: "CN RU"`
+  Stellt nur Besucher aus China oder Russland vor die Herausforderung. Anfragen aus anderen Ländern (oder privaten IP-Bereichen) überspringen die Herausforderung.
 
 ### Herausforderungsmechanismen
 

@@ -36,14 +36,20 @@ Die folgenden Parameter werden von allen Herausforderungsmechanismen gemeinsam g
 
 BunkerWeb ermöglicht es, bestimmte Benutzer, IPs oder Anfragen anzugeben, die die Antibot-Herausforderung vollständig umgehen sollen. Nützlich für vertrauenswürdige Dienste, interne Netzwerke oder Seiten, die immer zugänglich sein sollen:
 
-| Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                              |
-| :-------------------------- | :------- | :-------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen.        |
-| `ANTIBOT_IGNORE_IP`         |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.  |
-| `ANTIBOT_IGNORE_RDNS`       |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.            |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                              |
-| `ANTIBOT_IGNORE_ASN`        |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                     |
-| `ANTIBOT_IGNORE_USER_AGENT` |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen. |
+| Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                              |
+| :-------------------------- | :------- | :-------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |          | Multisite | nein     | Ausgeschlossene URLs: Eine durch Leerzeichen getrennte Liste von URI-Regulären Ausdrücken, die die Herausforderung umgehen sollen.                                                        |
+| `ANTIBOT_IGNORE_IP`         |          | Multisite | nein     | Ausgeschlossene IPs: Eine durch Leerzeichen getrennte Liste von IP-Adressen oder CIDR-Bereichen, die die Herausforderung umgehen sollen.                                                  |
+| `ANTIBOT_IGNORE_RDNS`       |          | Multisite | nein     | Ausgeschlossene rDNS: Eine durch Leerzeichen getrennte Liste von Reverse-DNS-Suffixen, die die Herausforderung umgehen sollen.                                                            |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`    | Multisite | nein     | Nur öffentliche IPs: Wenn `yes`, werden rDNS-Prüfungen nur für öffentliche IPs durchgeführt.                                                                                              |
+| `ANTIBOT_IGNORE_ASN`        |          | Multisite | nein     | Ausgeschlossene ASNs: Eine durch Leerzeichen getrennte Liste von ASN-Nummern, die die Herausforderung umgehen sollen.                                                                     |
+| `ANTIBOT_IGNORE_USER_AGENT` |          | Multisite | nein     | Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.                                                 |
+| `ANTIBOT_IGNORE_COUNTRY`    |          | Multisite | nein     | Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.                                                |
+| `ANTIBOT_ONLY_COUNTRY`      |          | Multisite | nein     | Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen. |
+
+!!! note "Verhalten der länderspezifischen Einstellungen"
+      - Wenn sowohl `ANTIBOT_IGNORE_COUNTRY` als auch `ANTIBOT_ONLY_COUNTRY` gesetzt sind, hat die Ignore-Liste Vorrang – Länder, die in beiden Listen stehen, umgehen die Herausforderung.
+      - Private oder unbekannte IP-Adressen umgehen die Herausforderung, wenn `ANTIBOT_ONLY_COUNTRY` gesetzt ist, da kein Ländercode ermittelt werden kann.
 
 Beispiele:
 
@@ -62,6 +68,12 @@ Beispiele:
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
   Schließt Anfragen aus, deren User-Agent dem angegebenen Regex-Muster entspricht.
 
+- `ANTIBOT_IGNORE_COUNTRY: "US CA"`
+  Umgeht die Antibot-Herausforderung für Besucher aus den USA oder Kanada.
+
+- `ANTIBOT_ONLY_COUNTRY: "CN RU"`
+  Stellt nur Besucher aus China oder Russland vor die Herausforderung. Anfragen aus anderen Ländern (oder privaten IP-Bereichen) überspringen die Herausforderung.
+
 ### Herausforderungsmechanismen
 
 === "Cookie"
@@ -76,8 +88,8 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                       |
-    | :------------ | :------- | :-------- | :------- | :----------------------------------------------------------------- |
+    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                  |
+    | :------------ | :------- | :-------- | :------- | :---------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `cookie` setzen, um diesen Mechanismus zu aktivieren. |
 
 === "JavaScript"
@@ -97,8 +109,8 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                           |
-    | :------------ | :------- | :-------- | :------- | :--------------------------------------------------------------------- |
+    | Parameter     | Standard | Kontext   | Mehrfach | Beschreibung                                                                      |
+    | :------------ | :------- | :-------- | :------- | :-------------------------------------------------------------------------------- |
     | `USE_ANTIBOT` | `no`     | Multisite | nein     | Antibot aktivieren: Auf `javascript` setzen, um diesen Mechanismus zu aktivieren. |
 
 === "Captcha"
@@ -129,9 +141,9 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                  | Standard                                                 | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                               |
-    | :------------------------- | :------------------------------------------------------- | :-------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`              | `no`                                                     | Multisite | nein     | **Antibot aktivieren:** Auf `captcha` setzen, um diesen Mechanismus zu aktivieren.                                                                                                                                                                                    |
+    | Parameter                  | Standard                                               | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                                                                                              |
+    | :------------------------- | :----------------------------------------------------- | :-------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`              | `no`                                                   | Multisite | nein     | **Antibot aktivieren:** Auf `captcha` setzen, um diesen Mechanismus zu aktivieren.                                                                                                                                                                        |
     | `ANTIBOT_CAPTCHA_ALPHABET` | `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ` | Multisite | nein     | **Captcha-Alphabet:** Eine Zeichenkette, die zur Generierung des CAPTCHAs verwendet werden soll. Unterstützte Zeichen: alle Buchstaben (a-z, A-Z), die Ziffern 2-9 (schließt 0 und 1 aus) und die Sonderzeichen: ```+-/=%"'&_(),.;:?!§`^ÄÖÜßäöüé''‚""„``` |
 
 === "reCAPTCHA"
@@ -147,17 +159,17 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                         |
-    | :----------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------- |
-    | `USE_ANTIBOT`                  | `no`     | Multisite | nein     | Antibot aktivieren: Auf `recaptcha` setzen, um diesen Mechanismus zu aktivieren.                                                |
-    | `ANTIBOT_RECAPTCHA_CLASSIC`    | `yes`    | Multisite | nein     | Klassisches reCAPTCHA verwenden. Auf `no` setzen, um die neue Google Cloud-basierte Version zu verwenden.               |
-    | `ANTIBOT_RECAPTCHA_SITEKEY`    |          | Multisite | nein     | reCAPTCHA Site-Schlüssel. Für beide Versionen erforderlich.                                                              |
-    | `ANTIBOT_RECAPTCHA_SECRET`     |          | Multisite | nein     | reCAPTCHA Geheimschlüssel. Nur für die klassische Version erforderlich.                                                |
-    | `ANTIBOT_RECAPTCHA_PROJECT_ID` |          | Multisite | nein     | Google Cloud Projekt-ID. Nur für die neue Version erforderlich.                                              |
+    | Parameter                      | Standard | Kontext   | Mehrfach | Beschreibung                                                                                                                     |
+    | :----------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------------------------------------------------------- |
+    | `USE_ANTIBOT`                  | `no`     | Multisite | nein     | Antibot aktivieren: Auf `recaptcha` setzen, um diesen Mechanismus zu aktivieren.                                                 |
+    | `ANTIBOT_RECAPTCHA_CLASSIC`    | `yes`    | Multisite | nein     | Klassisches reCAPTCHA verwenden. Auf `no` setzen, um die neue Google Cloud-basierte Version zu verwenden.                        |
+    | `ANTIBOT_RECAPTCHA_SITEKEY`    |          | Multisite | nein     | reCAPTCHA Site-Schlüssel. Für beide Versionen erforderlich.                                                                      |
+    | `ANTIBOT_RECAPTCHA_SECRET`     |          | Multisite | nein     | reCAPTCHA Geheimschlüssel. Nur für die klassische Version erforderlich.                                                          |
+    | `ANTIBOT_RECAPTCHA_PROJECT_ID` |          | Multisite | nein     | Google Cloud Projekt-ID. Nur für die neue Version erforderlich.                                                                  |
     | `ANTIBOT_RECAPTCHA_API_KEY`    |          | Multisite | nein     | Google Cloud API-Schlüssel, der zum Aufrufen der reCAPTCHA Enterprise API verwendet wird. Nur für die neue Version erforderlich. |
-    | `ANTIBOT_RECAPTCHA_JA3`        |          | Multisite | nein     | Optionaler JA3 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                            |
-    | `ANTIBOT_RECAPTCHA_JA4`        |          | Multisite | nein     | Optionaler JA4 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                            |
-    | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`    | Multisite | nein     | Mindestpunktzahl, die zum Bestehen erforderlich ist (gilt für klassische v3 und die neue Version).                           |
+    | `ANTIBOT_RECAPTCHA_JA3`        |          | Multisite | nein     | Optionaler JA3 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                             |
+    | `ANTIBOT_RECAPTCHA_JA4`        |          | Multisite | nein     | Optionaler JA4 TLS-Fingerabdruck, der in Enterprise-Bewertungen enthalten sein soll.                                             |
+    | `ANTIBOT_RECAPTCHA_SCORE`      | `0.7`    | Multisite | nein     | Mindestpunktzahl, die zum Bestehen erforderlich ist (gilt für klassische v3 und die neue Version).                               |
 
 === "hCaptcha"
 
@@ -167,11 +179,11 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                  | Standard | Kontext   | Mehrfach | Beschreibung                                                         |
-    | :------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------- |
+    | Parameter                  | Standard | Kontext   | Mehrfach | Beschreibung                                                                    |
+    | :------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------ |
     | `USE_ANTIBOT`              | `no`     | Multisite | nein     | Antibot aktivieren: Auf `hcaptcha` setzen, um diesen Mechanismus zu aktivieren. |
-    | `ANTIBOT_HCAPTCHA_SITEKEY` |          | Multisite | nein     | hCaptcha Site-Schlüssel.                                                  |
-    | `ANTIBOT_HCAPTCHA_SECRET`  |          | Multisite | nein     | hCaptcha Geheimschlüssel.                                               |
+    | `ANTIBOT_HCAPTCHA_SITEKEY` |          | Multisite | nein     | hCaptcha Site-Schlüssel.                                                        |
+    | `ANTIBOT_HCAPTCHA_SECRET`  |          | Multisite | nein     | hCaptcha Geheimschlüssel.                                                       |
 
 === "Turnstile"
 
@@ -181,11 +193,11 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                          |
-    | :-------------------------- | :------- | :-------- | :------- | :-------------------------------------------------------------------- |
+    | Parameter                   | Standard | Kontext   | Mehrfach | Beschreibung                                                                     |
+    | :-------------------------- | :------- | :-------- | :------- | :------------------------------------------------------------------------------- |
     | `USE_ANTIBOT`               | `no`     | Multisite | nein     | Antibot aktivieren: Auf `turnstile` setzen, um diesen Mechanismus zu aktivieren. |
-    | `ANTIBOT_TURNSTILE_SITEKEY` |          | Multisite | nein     | Turnstile Site-Schlüssel (Cloudflare).                                     |
-    | `ANTIBOT_TURNSTILE_SECRET`  |          | Multisite | nein     | Turnstile Geheimschlüssel (Cloudflare).                                  |
+    | `ANTIBOT_TURNSTILE_SITEKEY` |          | Multisite | nein     | Turnstile Site-Schlüssel (Cloudflare).                                           |
+    | `ANTIBOT_TURNSTILE_SECRET`  |          | Multisite | nein     | Turnstile Geheimschlüssel (Cloudflare).                                          |
 
 === "mCaptcha"
 
@@ -197,12 +209,12 @@ Beispiele:
 
     **Parameter:**
 
-    | Parameter                  | Standard                      | Kontext   | Mehrfach | Beschreibung                                                         |
-    | :------------------------- | :---------------------------- | :-------- | :------- | :------------------------------------------------------------------- |
-    | `USE_ANTIBOT`              | `no`                          | Multisite | nein     | Antibot aktivieren: Auf `mcaptcha` setzen, um diesen Mechanismus zu aktivieren. |
-    | `ANTIBOT_MCAPTCHA_SITEKEY` |                               | Multisite | nein     | mCaptcha Site-Schlüssel.                                                  |
-    | `ANTIBOT_MCAPTCHA_SECRET`  |                               | Multisite | nein     | mCaptcha Geheimschlüssel.                                               |
-    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                   |
+    | Parameter                  | Standard                    | Kontext   | Mehrfach | Beschreibung                                                                    |
+    | :------------------------- | :-------------------------- | :-------- | :------- | :------------------------------------------------------------------------------ |
+    | `USE_ANTIBOT`              | `no`                        | Multisite | nein     | Antibot aktivieren: Auf `mcaptcha` setzen, um diesen Mechanismus zu aktivieren. |
+    | `ANTIBOT_MCAPTCHA_SITEKEY` |                             | Multisite | nein     | mCaptcha Site-Schlüssel.                                                        |
+    | `ANTIBOT_MCAPTCHA_SECRET`  |                             | Multisite | nein     | mCaptcha Geheimschlüssel.                                                       |
+    | `ANTIBOT_MCAPTCHA_URL`     | `https://demo.mcaptcha.org` | Multisite | nein     | Zu verwendende Domain für mCaptcha.                                             |
 
     Siehe Allgemeine Parameter für zusätzliche Optionen.
 
