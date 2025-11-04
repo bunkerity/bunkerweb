@@ -130,7 +130,8 @@ docker run -d \
   -v bw-storage:/data \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
-  -e API_TOKEN="changeme" \
+  -e API_USERNAME=changeme \
+  -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
   bunkerity/bunkerweb-all-in-one:1.6.6-rc1
@@ -140,29 +141,38 @@ Recommended (behind BunkerWeb) — do not publish `8888`; reverse‑proxy it ins
 
 ```yaml
 services:
-  bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc1
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
+    container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
       - "443:8443/udp"
     environment:
-      SERVER_NAME: "www.example.com"
+      SERVER_NAME: "api.example.com"
       MULTISITE: "yes"
       DISABLE_DEFAULT_SERVER: "yes"
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_URL: "/api-<unguessable>"
-      REVERSE_PROXY_HOST: "http://bunkerweb-aio:8888"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/api-<unguessable>"
+      api.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:8888" # Internal API endpoint
 
-  bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
-    environment:
+      # API settings
       SERVICE_API: "yes"
-      API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
-      # Optionally set an admin override token
-      # API_TOKEN: "changeme"
+      # Set a strong token and whitelist only trusted IPs/networks (more details below)
+      API_USERNAME: "changeme"
+      API_PASSWORD: "StrongP@ssw0rd"
+      API_ROOT_PATH: "/api-<unguessable>" # Match REVERSE_PROXY_URL
+
+      # We deactivate the UI - change to "yes" to enable it
+      SERVICE_UI: "no"
+    volumes:
+      - bw-storage:/data
     networks:
       - bw-universe
+
+volumes:
+  bw-storage:
 
 networks:
   bw-universe:
@@ -736,7 +746,7 @@ For non-interactive or automated setups, the script can be controlled with comma
 
 | Option                  | Description                                                           |
 | ----------------------- | --------------------------------------------------------------------- |
-| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.6-rc1`).           |
+| `-v, --version VERSION` | Specifies the BunkerWeb version to install (e.g., `1.6.6-rc1`).       |
 | `-w, --enable-wizard`   | Enables the setup wizard.                                             |
 | `-n, --no-wizard`       | Disables the setup wizard.                                            |
 | `-y, --yes`             | Runs in non-interactive mode using default answers for all prompts.   |
