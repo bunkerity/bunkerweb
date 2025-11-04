@@ -278,7 +278,7 @@
       "name": "stream-lua-nginx-module v0.0.17",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
       "commit": "86cf76e3b62a5dea50813b3a00ff87b628c41aa4",
-      "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t"
+      "post_install": "rm -r src/deps/src/stream-lua-nginx-module/t && patch --forward src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c src/deps/misc/stream-lua-nginx-module.patch || rm src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.orig src/deps/src/stream-lua-nginx-module/src/ngx_stream_lua_proxy_ssl_verifyby.c.rej"
     },
     {
       "id": "zlib",

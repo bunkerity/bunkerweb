@@ -891,7 +891,7 @@ ngx_stream_lua_ffi_proxy_ssl_get_verify_result(ngx_stream_lua_request_t *r,
 
 
 void
-ngx_stream_lua_ffi_proxy_ssl_free_verify_cert(void *)
+ngx_stream_lua_ffi_proxy_ssl_free_verify_cert(void *cdata)
 {
 }
 
