@@ -503,7 +503,7 @@ class Database:
                 metadata = session.query(Metadata).with_entities(Metadata.version).filter_by(id=1).first()
                 if metadata:
                     return metadata.version
-                return "1.6.6-rc1"
+                return "1.6.6-rc2"
             except BaseException as e:
                 return f"Error: {e}"
 
@@ -536,7 +536,7 @@ class Database:
             "last_instances_change": None,
             "reload_ui_plugins": False,
             "integration": "unknown",
-            "version": "1.6.6-rc1",
+            "version": "1.6.6-rc2",
             "database_version": "Unknown",  # ? Extracted from the database
             "default": True,  # ? Extra field to know if the returned data is the default one
         }
@@ -995,8 +995,9 @@ class Database:
                                     continue
 
                                 content = config_file.read_bytes()
+                                config_type = config_type.strip().replace("-", "_").lower()
                                 checksum = bytes_hash(content, algorithm="sha256")
-                                config_name_clean = config_name.replace(".conf", "").replace("-", "_").lower()
+                                config_name_clean = config_name.removesuffix(".conf")
 
                                 # Check if belongs to a step
                                 step_id = None
@@ -1517,7 +1518,11 @@ class Database:
                 services = [service for service in services if service]  # Clean up empty strings
 
                 if db_services:
-                    missing_ids = [service.id for service in db_services if self._methods_are_compatible(method, service.method) and service.id not in services]
+                    missing_ids = [
+                        service.id
+                        for service in db_services
+                        if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api"))) and service.id not in services
+                    ]
 
                     if missing_ids:
                         self.logger.debug(f"Removing {len(missing_ids)} services that are no longer in the list")
@@ -1541,7 +1546,9 @@ class Database:
                     missing_drafts = [
                         service.id
                         for service in db_services
-                        if self._methods_are_compatible(method, service.method) and service.id not in drafts and service.id not in missing_ids
+                        if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api")))
+                        and service.id not in drafts
+                        and service.id not in missing_ids
                     ]
 
                     if missing_drafts:
@@ -1557,7 +1564,7 @@ class Database:
                             self.logger.debug(f"Adding draft {draft}")
                             to_put.append(Services(id=draft, method=method, is_draft=True, creation_date=current_time, last_update=current_time))
                             db_ids[draft] = {"method": method, "is_draft": True}
-                        elif self._methods_are_compatible(method, db_ids[draft]["method"]):
+                        elif db_ids[draft]["method"] == method or (db_ids[draft]["method"] in ("ui", "api") and method in ("ui", "api")):
                             self.logger.debug(f"Updating draft {draft}")
                             to_update.append({"model": Services, "filter": {"id": draft}, "values": {"is_draft": True, "last_update": current_time}})
                             changed_services = True
@@ -1945,7 +1952,7 @@ class Database:
 
                     custom_config = config
 
-                custom_config["type"] = custom_config["type"].replace("-", "_").lower()  # type: ignore
+                custom_config["type"] = custom_config["type"].strip().replace("-", "_").lower()  # type: ignore
                 custom_config["data"] = custom_config["data"].encode("utf-8") if isinstance(custom_config["data"], str) else custom_config["data"]
                 custom_config["checksum"] = custom_config.get("checksum", bytes_hash(custom_config["data"], algorithm="sha256"))  # type: ignore
 
@@ -2361,15 +2368,16 @@ class Database:
                             .filter_by(template_id=value)
                             .order_by(Template_custom_configs.order)
                         ):
+                            config_type = template_config.type.replace("_", "-").replace(".conf", "").strip()
                             if not any(
                                 custom_config["service_id"] == service.id
-                                and custom_config["type"] == template_config.type
+                                and custom_config["type"] == config_type
                                 and custom_config["name"] == template_config.name
                                 for custom_config in custom_configs
                             ):
                                 custom_config = {
                                     "service_id": service.id,
-                                    "type": template_config.type,
+                                    "type": config_type,
                                     "name": template_config.name,
                                     "checksum": template_config.checksum,
                                     "method": "default",
@@ -2390,6 +2398,7 @@ class Database:
 
     def get_custom_config(self, config_type: str, name: str, *, service_id: Optional[str] = None, with_data: bool = True) -> Dict[str, Any]:
         """Get a custom config from the database"""
+        config_type = config_type.strip().replace("-", "_").lower()
         with self._db_session() as session:
             entities = [Custom_configs.service_id, Custom_configs.type, Custom_configs.name, Custom_configs.checksum, Custom_configs.method]
             if with_data:
@@ -3244,8 +3253,9 @@ class Database:
                                     continue
 
                                 content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
+                                config_type = config_type.strip().replace("-", "_").lower()
                                 checksum = bytes_hash(content, algorithm="sha256")
-                                config_name = config_name.replace(".conf", "").replace("-", "_").lower()
+                                config_name = config_name.removesuffix(".conf")
 
                                 step_id = None
                                 for step, configs in steps_configs.items():
@@ -3528,8 +3538,9 @@ class Database:
                                 continue
 
                             content = templates_path.joinpath(template_id, "configs", config_type, config_name).read_bytes()
+                            config_type = config_type.strip().replace("-", "_").lower()
                             checksum = bytes_hash(content, algorithm="sha256")
-                            config_name = config_name.replace(".conf", "").replace("-", "_").lower()
+                            config_name = config_name.removesuffix(".conf")
 
                             step_id = None
                             for step, configs in steps_configs.items():
@@ -4578,6 +4589,7 @@ class Database:
                 session.add(Template_settings(**setting))
 
             for config_row in config_entities:
+                config_row["type"] = config_row["type"].strip().replace("-", "_").lower()
                 session.add(Template_custom_configs(**config_row))
 
             try:
@@ -4678,6 +4690,7 @@ class Database:
                 session.add(Template_settings(**setting))
 
             for config_row in config_entities:
+                config_row["type"] = config_row["type"].strip().replace("-", "_").lower()
                 session.add(Template_custom_configs(**config_row))
 
             session.query(Plugins).filter(Plugins.id.in_(set(plugin.id for plugin in session.query(Plugins).with_entities(Plugins.id).all()))).update(

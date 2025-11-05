@@ -5,7 +5,25 @@
   or the CRS Google Group at
 * https://groups.google.com/a/owasp.org/g/modsecurity-core-rule-set-project
 
-## Version 4.20.0-dev - 2025-MM-DD
+## Version 4.21.0-dev - 2025-MM-DD
+
+## Version 4.20.0 - 2025-11-02
+
+## What's Changed
+### 🆕 New features and detections 🎉
+* feat: update restricted file extensions by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4287
+* feat(930120): adding conf file for PrestaShop 1.6 / 1.7 / 8+ & Magento 2 by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4303
+* feat: add expect header to list of restricted headers by @franbuehler in https://github.com/coreruleset/coreruleset/pull/4298
+### 🧰 Other Changes
+* fix(942560): missing capture keyword by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4285
+* fix(932281): reduce false positive matches with json payload by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4288
+* fix(932240): reduce false positive matches with json payloads by @EsadCetiner in https://github.com/coreruleset/coreruleset/pull/4290
+* fix(921180, 921210, 921220): should be block not pass by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4294
+* fix(942550): partial revert - too high risk of false positive by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4284
+* fix(942160): updating regex to deal with new payloads by @touchweb-vincent in https://github.com/coreruleset/coreruleset/pull/4292
+
+
+**Full Changelog**: https://github.com/coreruleset/coreruleset/compare/v4.19.0...v4.20.0
 
 ## Version 4.19.0 - 2025-10-02
 

@@ -1,6 +1,6 @@
 /var/log/bunkerweb/*.log
 {
-    su root nginx
+    su nginx nginx
     daily
     size 100M
     rotate 7
@@ -11,17 +11,17 @@
     notifempty
     dateext
     dateformat -%Y-%m-%d
-    create 0640 root nginx
+    create 0640 nginx nginx
 }
 
 /var/log/bunkerweb/letsencrypt/*.log \
 /var/log/bunkerweb/letsencrypt/*.log.[0-9]+ {
-    su root nginx
+    su nginx nginx
     daily
     rotate 0
     maxage 7
     missingok
     compress
     delaycompress
-    create 0640 root nginx
+    create 0640 nginx nginx
 }

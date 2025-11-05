@@ -32,8 +32,6 @@ ngx_stream_lua_ffi_get_resp_status(ngx_stream_lua_request_t *r)
 }
 
 
-
-
 int
 ngx_stream_lua_ffi_get_conf_env(u_char *name, u_char **env_buf,
     size_t *name_len)

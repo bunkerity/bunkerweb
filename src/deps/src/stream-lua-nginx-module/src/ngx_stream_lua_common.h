@@ -136,6 +136,10 @@
 #define NGX_STREAM_LUA_CONTEXT_SSL_CERT                             0x0040
 #define NGX_STREAM_LUA_CONTEXT_SSL_CLIENT_HELLO                     0x0080
 
+#ifdef HAVE_PROXY_SSL_PATCH
+#define NGX_STREAM_LUA_CONTEXT_PROXY_SSL_VERIFY                     0x0100
+#endif
+
 
 #define NGX_STREAM_LUA_FFI_NO_REQ_CTX         -100
 #define NGX_STREAM_LUA_FFI_BAD_CONTEXT        -101
@@ -246,8 +250,6 @@ struct ngx_stream_lua_main_conf_s {
 };
 
 
-
-
 struct ngx_stream_lua_srv_conf_s {
 #if (NGX_STREAM_SSL)
     ngx_ssl_t              *ssl;  /* shared by SSL cosockets */
@@ -258,6 +260,7 @@ struct ngx_stream_lua_srv_conf_s {
     ngx_uint_t              ssl_verify_depth;
     ngx_str_t               ssl_trusted_certificate;
     ngx_str_t               ssl_crl;
+    ngx_str_t               ssl_key_log;
 #if (nginx_version >= 1019004)
     ngx_array_t            *ssl_conf_commands;
 #endif
@@ -271,39 +274,36 @@ struct ngx_stream_lua_srv_conf_s {
         ngx_str_t                                    ssl_client_hello_src;
         u_char                                      *ssl_client_hello_src_key;
     } srv;
+
+#ifdef HAVE_PROXY_SSL_PATCH
+    struct {
+        ngx_stream_lua_srv_conf_handler_pt           proxy_ssl_verify_handler;
+        ngx_str_t                                    proxy_ssl_verify_src;
+        u_char                                      *proxy_ssl_verify_src_key;
+
+        ngx_flag_t  upstream_skip_openssl_default_verify;
+    } ups;
+#endif
+
 #endif
 
     ngx_flag_t              enable_code_cache; /* whether to enable
                                                   code cache */
 
     ngx_stream_lua_handler_pt           preread_handler;
+    u_char                             *preread_chunkname;
+    ngx_stream_complex_value_t          preread_src;
+    u_char                             *preread_src_key;
 
     ngx_stream_lua_handler_pt           content_handler;
+    u_char                             *content_chunkname;
+    ngx_stream_complex_value_t          content_src;
+    u_char                             *content_src_key;
+
     ngx_stream_lua_handler_pt           log_handler;
-
-    u_char                      *preread_chunkname;
-    ngx_stream_complex_value_t   preread_src;     /* access_by_lua
-                                                inline script/script
-                                                file path */
-
-    u_char                  *preread_src_key; /* cached key for access_src */
-
-    u_char                  *content_chunkname;
-
-    ngx_stream_complex_value_t       content_src;
-                                                  /* content_by_lua
-                                                   * inline script/script
-                                                   * file path */
-
-    u_char                 *content_src_key; /* cached key for content_src */
-
-    u_char                           *log_chunkname;
-    ngx_stream_complex_value_t        log_src;
-                                              /* log_by_lua inline script/script
-                                               * file path */
-
-    u_char                                 *log_src_key;
-    /* cached key for log_src */
+    u_char                             *log_chunkname;
+    ngx_stream_complex_value_t          log_src;
+    u_char                             *log_src_key;
 
 
     ngx_msec_t                       keepalive_timeout;
@@ -329,6 +329,7 @@ struct ngx_stream_lua_srv_conf_s {
     } balancer;
 
 };
+
 
 typedef ngx_stream_lua_srv_conf_t ngx_stream_lua_loc_conf_t;
 
@@ -358,8 +359,6 @@ struct ngx_stream_lua_posted_thread_s {
     ngx_stream_lua_co_ctx_t                     *co_ctx;
     ngx_stream_lua_posted_thread_t              *next;
 };
-
-
 
 
 struct ngx_stream_lua_co_ctx_s {
@@ -527,10 +526,7 @@ typedef struct ngx_stream_lua_ctx_s {
 } ngx_stream_lua_ctx_t;
 
 
-
-
 extern ngx_module_t ngx_stream_lua_module;
-
 
 
 #endif /* _NGX_STREAM_LUA_COMMON_H_INCLUDED_ */

@@ -99,6 +99,4 @@ ngx_stream_lua_ffi_utctime(u_char *buf)
 }
 
 
-
-
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */

@@ -119,6 +119,26 @@
       "type": "multivalue",
       "separator": " "
     },
+    "ANTIBOT_IGNORE_COUNTRY": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of ISO 3166-1 alpha-2 country codes, separated with spaces, to ignore the antibot challenge.",
+      "id": "antibot-ignore-country",
+      "label": "Ignored countries",
+      "regex": "^( *[A-Za-z]{2} *)*$",
+      "type": "multivalue",
+      "separator": " "
+    },
+    "ANTIBOT_ONLY_COUNTRY": {
+      "context": "multisite",
+      "default": "",
+      "help": "List of ISO 3166-1 alpha-2 country codes, separated with spaces, that should receive the antibot challenge.",
+      "id": "antibot-only-country",
+      "label": "Only challenge countries",
+      "regex": "^( *[A-Za-z]{2} *)*$",
+      "type": "multivalue",
+      "separator": " "
+    },
     "ANTIBOT_RECAPTCHA_SCORE": {
       "context": "multisite",
       "default": "0.7",

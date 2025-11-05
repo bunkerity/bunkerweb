@@ -5,6 +5,7 @@ ffi.cdef [[
   int FIPS_mode(void);
   int FIPS_mode_set(int ONOFF);
   void CRYPTO_free(void *ptr, const char *file, int line);
+  int CRYPTO_memcmp(const void *a, const void *b, size_t len);
 ]]
 
 local OPENSSL_free = function(ptr)

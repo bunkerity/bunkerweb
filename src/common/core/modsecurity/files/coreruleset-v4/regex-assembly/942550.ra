@@ -10,10 +10,20 @@
 ##! PostgreSQL: '{"b":2}'::jsonb @ '{"a":1, "b":2}'::jsonb
 ##! PostgreSQL: '{"b":2}'::jsonb < '{"a":1, "b":2}'::jsonb
 ##! PostgreSQL: '{"b":2}'::jsonb > '{"a":1, "b":2}'::jsonb
+##! PostgreSQL: '["a", "b"]'::jsonb - 1 → ["a"]
+##! PostgreSQL: '["a", {"b":1}]'::jsonb #- '{1,b}' → ["a", {}]
+##! PostgreSQL: '{"a":[1,2,3,4,5]}'::jsonb @? '$.a[*] ? (@ > 2)' → t
+##! PostgreSQL: '{"a":[1,2,3,4,5]}'::jsonb @@ '$.a[*] > 2' → t
+##! PostgreSQL: '[1, 2]'::jsonb || '3'::jsonb → [1, 2, 3]
+##! PostgreSQL: '["a", "b", "c"]'::jsonb ?& array['a', 'b'] → t
+##! PostgreSQL: '{"a":1, "b":2, "c":3}'::jsonb ?| array['b', 'd'] → t
+##! PostgreSQL: '["a", "b", "c"]'::jsonb ? 'b' → t
+##! PostgreSQL: '{"a": {"b": ["foo","bar"]}}'::json #>> '{a,b,1}' → bar
+##! PostgreSQL: '{"a": {"b": ["foo","bar"]}}'::json #> '{a,b,1}' → "bar"
 
 ##! SQLite reference: https://www.sqlite.org/json1.html
-##! SQLite: '{"a":2,"c":[4,5,{"f":7}]}' -> '$.c[2].f' = 7
-##! SQLite: '{"a":2,"c":[4,5,{"f":7}]}' <- '$.c[2].f' = 7
+##! SQLite: '{"a":2,"c":[4,5,{"f":7}]}' -> '$.c[2].f' = '7'
+##! SQLite: '{"a":2,"c":[4,5,{"f":7}]}' ->> '$.c[2].f' = 7
 ##! SQLite: '{"a":2,"c":[4,5,{"f":7}]}' < '$.c[2].f' = 7
 ##! SQLite: '{"a":2,"c":[4,5,{"f":7}]}' > '$.c[2].f' = 7
 
@@ -26,8 +36,9 @@
 ##!+ i
 
 ##!> define quotes [\"'`]
-##!> define operators (?:@>|<@|\?[&\|]|#>|#>>|->>|<|>|->|<-)
+##!> define operators (?:@|@>|<@|@\?|@@|\?|\?&|\?\|#>|#>>|#-|->>|<|>|->|-)
 ##!> define json_starting_brackets [[{]
+##!> define sqlite_path \$[.[]
 ##!> define something_except_json_ending_brackets [^}\]#]*
 ##!> define json_ending_brackets [\]}]+
 ##!> define sql_comment (/\*.*?\*/)?
@@ -35,9 +46,9 @@
 
 ##!> assemble
   ##! SQLite + PostgreSQL
-  {{non_greedy_jsonb}}{{operators}}
   {{quotes}}{{json_starting_brackets}}{{something_except_json_ending_brackets}}{{json_ending_brackets}}{{quotes}}
   {{operators}}{{quotes}}{{json_starting_brackets}}{{something_except_json_ending_brackets}}{{json_ending_brackets}}{{quotes}}
+  {{operators}}{{quotes}}{{sqlite_path}}
 
   ##! MySQL
   \bjson_extract\b[^\(]*\([^)]*\)

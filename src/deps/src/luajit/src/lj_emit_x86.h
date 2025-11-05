@@ -70,6 +70,13 @@ static LJ_AINLINE MCode *emit_op(x86Op xo, Reg rr, Reg rb, Reg rx,
   return p;
 }
 
+#if LJ_ABI_BRANCH_TRACK
+static void emit_branch_track(ASMState *as)
+{
+  emit_u32(as, XI_ENDBR64);
+}
+#endif
+
 /* op + modrm */
 #define emit_opm(xo, mode, rr, rb, p, delta) \
   (p[(delta)-1] = MODRM((mode), (rr), (rb)), \

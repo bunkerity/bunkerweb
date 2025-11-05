@@ -74,6 +74,7 @@
     "AUTH_BASIC_LOCATION": "sitewide",
     "AUTH_BASIC_USER": "changeme",
     "AUTH_BASIC_PASSWORD": "changeme",
+    "AUTH_BASIC_ROUNDS": "656000",
     "AUTH_BASIC_TEXT": "Restricted area",
     "BLACKLIST_COUNTRY": "",
     "WHITELIST_COUNTRY": "",
@@ -211,6 +212,7 @@
         "AUTH_BASIC_LOCATION",
         "AUTH_BASIC_USER",
         "AUTH_BASIC_PASSWORD",
+        "AUTH_BASIC_ROUNDS",
         "AUTH_BASIC_TEXT"
       ]
     },

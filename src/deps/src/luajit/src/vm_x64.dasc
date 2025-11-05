@@ -189,6 +189,14 @@
 |
 |.endif
 |
+|//-- Control-Flow Enforcement Technique (CET) ---------------------------
+|
+|.if BRANCH_TRACK
+|.macro endbr; endbr64; .endmacro
+|.else
+|.macro endbr; .endmacro
+|.endif
+|
 |//-----------------------------------------------------------------------
 |
 |// Instruction headers.
@@ -484,15 +492,18 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_unwind_c:			// Unwind C stack, return from vm_pcall.
   |  // (void *cframe, int errcode)
+  |  endbr
   |  mov eax, CARG2d			// Error return status for vm_pcall.
   |  mov rsp, CARG1
   |->vm_unwind_c_eh:			// Landing pad for external unwinder.
+  |  endbr
   |  mov L:RB, SAVE_L
   |  mov GL:RB, L:RB->glref
   |  mov dword GL:RB->vmstate, ~LJ_VMST_C
   |  jmp ->vm_leave_unw
   |
   |->vm_unwind_rethrow:
+  |  endbr
   |.if not X64WIN
   |  mov CARG1, SAVE_L
   |  mov CARG2d, eax
@@ -502,9 +513,11 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_unwind_ff:			// Unwind C stack, return from ff pcall.
   |  // (void *cframe)
+  |  endbr
   |  and CARG1, CFRAME_RAWMASK
   |  mov rsp, CARG1
   |->vm_unwind_ff_eh:			// Landing pad for external unwinder.
+  |  endbr
   |  mov L:RB, SAVE_L
   |  mov RDd, 1+1			// Really 1+2 results, incr. later.
   |  mov BASE, L:RB->base
@@ -706,6 +719,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |
   |->cont_cat:				// BASE = base, RC = result, RB = mbase
+  |  endbr
   |  movzx RAd, PC_RB
   |  sub RB, 32
   |  lea RA, [BASE+RA*8]
@@ -774,6 +788,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  test RC, RC
   |  jz >3
   |->cont_ra:				// BASE = base, RC = result
+  |  endbr
   |  movzx RAd, PC_RA
   |  mov RB, [RC]
   |  mov [BASE+RA*8], RB
@@ -851,6 +866,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  mov RB, [BASE+RA*8]
   |  mov [RC], RB
   |->cont_nop:				// BASE = base, (RC = result)
+  |  endbr
   |  ins_next
   |
   |3:  // Call __newindex metamethod.
@@ -921,6 +937,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  ins_next
   |
   |->cont_condt:			// BASE = base, RC = result
+  |  endbr
   |  add PC, 4
   |  mov ITYPE, [RC]
   |  sar ITYPE, 47
@@ -929,6 +946,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  jmp <6
   |
   |->cont_condf:			// BASE = base, RC = result
+  |  endbr
   |  mov ITYPE, [RC]
   |  sar ITYPE, 47
   |  cmp ITYPEd, LJ_TISTRUECOND		// Branch if result is false.
@@ -1132,16 +1150,17 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |.macro .ffunc, name
   |->ff_ .. name:
+  |  endbr
   |.endmacro
   |
   |.macro .ffunc_1, name
   |->ff_ .. name:
-  |  cmp NARGS:RDd, 1+1;  jb ->fff_fallback
+  |  endbr; cmp NARGS:RDd, 1+1;  jb ->fff_fallback
   |.endmacro
   |
   |.macro .ffunc_2, name
   |->ff_ .. name:
-  |  cmp NARGS:RDd, 2+1;  jb ->fff_fallback
+  |  endbr; cmp NARGS:RDd, 2+1;  jb ->fff_fallback
   |.endmacro
   |
   |.macro .ffunc_n, name, op
@@ -2207,6 +2226,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_record:				// Dispatch target for recording phase.
   |.if JIT
+  |  endbr
   |  movzx RDd, byte [DISPATCH+DISPATCH_GL(hookmask)]
   |  test RDL, HOOK_VMEVENT		// No recording while in vmevent.
   |  jnz >5
@@ -2220,12 +2240,14 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |
   |->vm_rethook:			// Dispatch target for return hooks.
+  |  endbr
   |  movzx RDd, byte [DISPATCH+DISPATCH_GL(hookmask)]
   |  test RDL, HOOK_ACTIVE		// Hook already active?
   |  jnz >5
   |  jmp >1
   |
   |->vm_inshook:			// Dispatch target for instr/line hooks.
+  |  endbr
   |  movzx RDd, byte [DISPATCH+DISPATCH_GL(hookmask)]
   |  test RDL, HOOK_ACTIVE		// Hook already active?
   |  jnz >5
@@ -2253,6 +2275,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  jmp aword [DISPATCH+OP*8+GG_DISP2STATIC]	// Re-dispatch to static ins.
   |
   |->cont_hook:				// Continue from hook yield.
+  |  endbr
   |  add PC, 4
   |  mov RA, [RB-40]
   |  mov MULTRES, RAd			// Restore MULTRES for *M ins.
@@ -2277,6 +2300,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |
   |->vm_callhook:			// Dispatch target for call hooks.
+  |  endbr
   |  mov SAVE_PC, PC
   |.if JIT
   |  jmp >1
@@ -2313,6 +2337,7 @@ static void build_subroutines(BuildCtx *ctx)
   |->cont_stitch:			// Trace stitching.
   |.if JIT
   |  // BASE = base, RC = result, RB = mbase
+  |  endbr
   |  mov TRACE:ITYPE, [RB-40]		// Save previous trace.
   |  cleartp TRACE:ITYPE
   |  mov TMPRd, MULTRES
@@ -2364,6 +2389,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_profhook:			// Dispatch target for profiler hook.
 #if LJ_HASPROFILE
+  |  endbr
   |  mov L:RB, SAVE_L
   |  mov L:RB->base, BASE
   |  mov CARG2, PC			// Caveat: CARG2 == BASE
@@ -2383,6 +2409,7 @@ static void build_subroutines(BuildCtx *ctx)
   |// The 16 bit exit number is stored with two (sign-extended) push imm8.
   |->vm_exit_handler:
   |.if JIT
+  |  endbr
   |  push r13; push r12
   |  push r11; push r10; push r9; push r8
   |  push rdi; push rsi; push rbp; lea rbp, [rsp+88]; push rbp
@@ -2432,6 +2459,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |->vm_exit_interp:
   |  // RD = MULTRES or negated error code, BASE, PC and DISPATCH set.
+  |  endbr
   |.if JIT
   |  // Restore additional callee-save registers only used in compiled code.
   |.if X64WIN
@@ -2537,6 +2565,7 @@ static void build_subroutines(BuildCtx *ctx)
   |.macro vm_round, name, mode, cond
   |->name:
   |->name .. _sse:
+  |  endbr
   |  sseconst_abs xmm2, RD
   |  sseconst_2p52 xmm3, RD
   |  movaps xmm1, xmm0
@@ -2647,6 +2676,7 @@ static void build_subroutines(BuildCtx *ctx)
   |// Next idx returned in edx.
   |->vm_next:
   |.if JIT
+  |  endbr
   |  mov NEXT_ASIZE, NEXT_TAB->asize
   |1:  // Traverse array part.
   |  cmp NEXT_IDX, NEXT_ASIZE;  jae >5
@@ -2828,6 +2858,26 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
   int vk = 0;
   |// Note: aligning all instructions does not pay off.
   |=>defop:
+
+  switch (op) {
+#if !LJ_HASJIT
+  case BC_FORL:
+  case BC_JFORI:
+  case BC_JFORL:
+  case BC_ITERL:
+  case BC_JITERL:
+  case BC_LOOP:
+  case BC_JLOOP:
+  case BC_FUNCF:
+  case BC_JFUNCF:
+  case BC_JFUNCV:
+#endif
+  case BC_FUNCV:  /* NYI: compiled vararg functions. */
+    break;  /* Avoid redundant endbr instructions. */
+  default:
+    |  endbr
+    break;
+  }
 
   switch (op) {
 
@@ -4103,6 +4153,9 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  hotloop RBd
     |.endif
     |->vm_IITERN:
+    |.if JIT
+    |  endbr
+    |.endif
     |  ins_A	// RA = base, (RB = nresults+1, RC = nargs+1 (2+1))
     |  mov TAB:RB, [BASE+RA*8-16]
     |  cleartp TAB:RB
@@ -4873,6 +4926,30 @@ static void emit_asm_debug(BuildCtx *ctx)
 	"\t.align 8\n"
 	".LEFDE3:\n\n", (int)ctx->codesz - fcofs);
 #endif
+#endif
+#if LJ_TARGET_LINUX && (LJ_ABI_BRANCH_TRACK || LJ_ABI_SHADOW_STACK)
+    fprintf(ctx->fp,
+	"\t.section .note.gnu.property,\"a\"\n"
+	"\t.align 8\n"
+	"\t.long 4\n"
+	"\t.long 16\n"
+	"\t.long 5\n"
+	"\t.long 0x00554e47\n"
+	"\t.long 0xc0000002\n"
+	"\t.long 4\n"
+	"\t.long %d\n"
+	"\t.long 0\n",
+#if LJ_ABI_BRANCH_TRACK
+	1|
+#else
+	0|
+#endif
+#if LJ_ABI_SHADOW_STACK
+	2
+#else
+	0
+#endif
+	);
 #endif
     break;
 #if !LJ_NO_UNWIND

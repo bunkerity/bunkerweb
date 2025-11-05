@@ -166,3 +166,28 @@ Follow these steps to configure and use the Blacklist feature:
     BLACKLIST_USER_AGENT_URLS: "file:///path/to/user-agent-blacklist.txt"
     BLACKLIST_URI_URLS: "file:///path/to/uri-blacklist.txt"
     ```
+
+### Working with local list files
+
+The `*_URLS` settings provided by the whitelist, greylist, and blacklist plugins all use the same downloader. When you reference a `file:///` URL:
+
+- The path is resolved inside the **scheduler** container (for Docker deployments this is typically `bunkerweb-scheduler`). Mount the files there and ensure they are readable by the scheduler user.
+- Each file is plain text encoded in UTF-8 with one entry per line. Empty lines are ignored and comment lines must begin with `#` or `;`. `//` comments are not supported.
+- Expected value per list type:
+  - **IP lists** accept IPv4/IPv6 addresses or CIDR networks (for example `192.0.2.10` or `2001:db8::/48`).
+  - **rDNS lists** expect a suffix without spaces (for example `.search.msn.com`). Values are normalised to lowercase automatically.
+  - **ASN lists** may contain just the number (`32934`) or the number prefixed with `AS` (`AS15169`).
+  - **User-Agent lists** are treated as PCRE patterns and the whole line is preserved (including spaces). Keep comments on their own line so they are not interpreted as part of the pattern.
+  - **URI lists** must start with `/` and may use PCRE tokens such as `^` or `$`.
+
+Example files that match the expected format:
+
+```text
+# /etc/bunkerweb/lists/ip-blacklist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-blacklist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```

@@ -408,8 +408,6 @@ ngx_stream_lua_rebase_path(ngx_pool_t *pool, u_char *src, size_t len)
 }
 
 
-
-
 ngx_int_t
 ngx_stream_lua_send_chain_link(ngx_stream_lua_request_t *r,
     ngx_stream_lua_ctx_t *ctx, ngx_chain_t *in)
@@ -422,8 +420,6 @@ ngx_stream_lua_send_chain_link(ngx_stream_lua_request_t *r,
 
     return ngx_stream_lua_output_filter(r, in);
 }
-
-
 
 
 static ngx_int_t
@@ -446,8 +442,6 @@ ngx_stream_lua_output_filter(ngx_stream_lua_request_t *r, ngx_chain_t *in)
 
     return rc;
 }
-
-
 
 
 static void
@@ -691,8 +685,6 @@ ngx_stream_lua_reset_ctx(ngx_stream_lua_request_t *r, lua_State *L,
 
     ctx->co_op = 0;
 }
-
-
 
 
 void
@@ -1773,6 +1765,7 @@ ngx_stream_lua_escape_uri(u_char *dst, u_char *src, size_t size,
             if (escape[*src >> 5] & (1 << (*src & 0x1f))) {
                 n++;
             }
+
             src++;
             size--;
         }
@@ -1790,6 +1783,7 @@ ngx_stream_lua_escape_uri(u_char *dst, u_char *src, size_t size,
         } else {
             *dst++ = *src++;
         }
+
         size--;
     }
 
@@ -1941,6 +1935,10 @@ ngx_stream_lua_req_socket(lua_State *L)
 
     r = ngx_stream_lua_get_req(L);
 
+    if (r == NULL) {
+        return luaL_error(L, "no request found");
+    }
+
     ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
     if (ctx == NULL) {
         return luaL_error(L, "no ctx found");
@@ -1982,8 +1980,6 @@ ngx_stream_lua_inject_req_api(ngx_log_t *log, lua_State *L)
 }
 
 
-
-
 static ngx_int_t
 ngx_stream_lua_handle_exit(lua_State *L, ngx_stream_lua_request_t *r,
     ngx_stream_lua_ctx_t *ctx)
@@ -1998,7 +1994,6 @@ ngx_stream_lua_handle_exit(lua_State *L, ngx_stream_lua_request_t *r,
     ngx_stream_lua_probe_coroutine_done(r, ctx->cur_co_ctx->co, 1);
 
     ctx->cur_co_ctx->co_status = NGX_STREAM_LUA_CO_DEAD;
-
 
     ngx_stream_lua_request_cleanup(ctx, 0);
 
@@ -2278,7 +2273,6 @@ ngx_stream_lua_process_args_option(ngx_stream_lua_request_t *r, lua_State *L,
         return;
     }
 }
-
 
 
 /* XXX ngx_open_and_stat_file is static in the core. sigh. */
@@ -2583,8 +2577,6 @@ ngx_stream_lua_traceback(lua_State *L)
     lua_call(L, 2, 1);  /* call debug.traceback */
     return 1;
 }
-
-
 
 
 ngx_stream_lua_co_ctx_t *
@@ -3113,17 +3105,48 @@ ngx_stream_lua_on_abort_resume(ngx_stream_lua_request_t *r)
 }
 
 
-
-
 void
 ngx_stream_lua_finalize_request(ngx_stream_lua_request_t *r, ngx_int_t rc)
 {
     ngx_stream_lua_ctx_t                    *ctx;
+#ifdef HAVE_PROXY_SSL_PATCH
+#if (NGX_STREAM_SSL)
+    ngx_stream_upstream_t                   *u;
+    ngx_connection_t                        *c;
+    ngx_stream_lua_ssl_ctx_t                *cctx;
+#endif
+#endif
 
     ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
     if (ctx && ctx->cur_co_ctx) {
         ngx_stream_lua_cleanup_pending_operation(ctx->cur_co_ctx);
     }
+
+#ifdef HAVE_PROXY_SSL_PATCH
+#if (NGX_STREAM_SSL)
+    u = r->session->upstream;
+    if (u) {
+        c = u->peer.connection;
+        if (c && c->ssl) {
+            cctx = ngx_stream_lua_ssl_get_ctx(c->ssl->connection);
+            if (cctx && cctx->pool) {
+                if (rc == NGX_ERROR || rc >= NGX_STREAM_BAD_REQUEST) {
+                    cctx->exit_code = 0;
+                }
+
+                if (rc == NGX_DONE) {
+                    return;
+                }
+
+                ngx_destroy_pool(cctx->pool);
+                cctx->pool = NULL;
+
+                return;
+            }
+        }
+    }
+#endif
+#endif
 
     if (r->connection->fd != (ngx_socket_t) -1) {
 
@@ -3325,6 +3348,7 @@ ngx_stream_lua_init_vm(lua_State **new_vm, lua_State *parent_vm,
     if (state == NULL) {
         return NGX_ERROR;
     }
+
     state->vm = L;
     state->count = 1;
 
@@ -3607,8 +3631,6 @@ ngx_stream_lua_get_raw_phase_context(lua_State *L)
 }
 
 
-
-
 void
 ngx_stream_lua_cleanup_free(ngx_stream_lua_request_t *r,
     ngx_stream_lua_cleanup_pt *cleanup)
@@ -3621,7 +3643,6 @@ ngx_stream_lua_cleanup_free(ngx_stream_lua_request_t *r,
     if (ctx == NULL) {
         return;
     }
-
 
     cln = (ngx_stream_lua_cleanup_t *)
           ((u_char *) cleanup - offsetof(ngx_stream_lua_cleanup_t, handler));
@@ -3675,6 +3696,69 @@ ngx_stream_lua_set_sa_restart(ngx_log_t *log)
     }
 }
 #endif
+
+
+ngx_addr_t *
+ngx_stream_lua_parse_addr(lua_State *L, u_char *text, size_t len)
+{
+    ngx_addr_t           *addr;
+    size_t                socklen;
+    in_addr_t             inaddr;
+    ngx_uint_t            family;
+    struct sockaddr_in   *sin;
+#if (NGX_HAVE_INET6)
+    struct in6_addr       inaddr6;
+    struct sockaddr_in6  *sin6;
+    /*
+     * prevent MSVC8 warning:
+     *    potentially uninitialized local variable 'inaddr6' used
+     */
+    ngx_memzero(&inaddr6, (sizeof(struct in6_addr)));
+#endif
+
+    inaddr = ngx_inet_addr(text, len);
+    if (inaddr != INADDR_NONE) {
+        family = AF_INET;
+        socklen = sizeof(struct sockaddr_in);
+#if (NGX_HAVE_INET6)
+
+    } else if (ngx_inet6_addr(text, len, inaddr6.s6_addr) == NGX_OK) {
+        family = AF_INET6;
+        socklen = sizeof(struct sockaddr_in6);
+#endif
+
+    } else {
+        return NULL;
+    }
+
+    addr = lua_newuserdata(L, sizeof(ngx_addr_t) + socklen + len);
+    if (addr == NULL) {
+        luaL_error(L, "no memory");
+        return NULL;
+    }
+
+    addr->sockaddr = (struct sockaddr *) ((u_char *) addr + sizeof(ngx_addr_t));
+    ngx_memzero(addr->sockaddr, socklen);
+    addr->sockaddr->sa_family = (u_char) family;
+    addr->socklen = socklen;
+    switch (family) {
+#if (NGX_HAVE_INET6)
+    case AF_INET6:
+        sin6 = (struct sockaddr_in6 *) addr->sockaddr;
+        ngx_memcpy(sin6->sin6_addr.s6_addr, inaddr6.s6_addr, 16);
+        break;
+#endif
+    default: /* AF_INET */
+        sin = (struct sockaddr_in *) addr->sockaddr;
+        sin->sin_addr.s_addr = inaddr;
+        break;
+    }
+
+    addr->name.data = (u_char *) addr->sockaddr + socklen;
+    addr->name.len = len;
+    ngx_memcpy(addr->name.data, text, len);
+    return addr;
+}
 
 
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */

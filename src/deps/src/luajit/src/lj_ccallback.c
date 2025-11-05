@@ -38,28 +38,39 @@
 
 #elif LJ_TARGET_X86ORX64
 
+#if LJ_ABI_BRANCH_TRACK
+#define CALLBACK_MCODE_SLOTSZ	8
+#else
+#define CALLBACK_MCODE_SLOTSZ	4
+#endif
+#define CALLBACK_MCODE_NSLOT	(128 / CALLBACK_MCODE_SLOTSZ)
+
 #define CALLBACK_MCODE_HEAD	(LJ_64 ? 8 : 0)
 #define CALLBACK_MCODE_GROUP	(-2+1+2+(LJ_GC64 ? 10 : 5)+(LJ_64 ? 6 : 5))
 
 #define CALLBACK_SLOT2OFS(slot) \
-  (CALLBACK_MCODE_HEAD + CALLBACK_MCODE_GROUP*((slot)/32) + 4*(slot))
+  (CALLBACK_MCODE_HEAD + CALLBACK_MCODE_GROUP*((slot)/CALLBACK_MCODE_NSLOT) + CALLBACK_MCODE_SLOTSZ*(slot))
 
 static MSize CALLBACK_OFS2SLOT(MSize ofs)
 {
   MSize group;
   ofs -= CALLBACK_MCODE_HEAD;
-  group = ofs / (32*4 + CALLBACK_MCODE_GROUP);
-  return (ofs % (32*4 + CALLBACK_MCODE_GROUP))/4 + group*32;
+  group = ofs / (128 + CALLBACK_MCODE_GROUP);
+  return (ofs % (128 + CALLBACK_MCODE_GROUP))/CALLBACK_MCODE_SLOTSZ + group*CALLBACK_MCODE_NSLOT;
 }
 
 #define CALLBACK_MAX_SLOT \
-  (((CALLBACK_MCODE_SIZE-CALLBACK_MCODE_HEAD)/(CALLBACK_MCODE_GROUP+4*32))*32)
+  (((CALLBACK_MCODE_SIZE-CALLBACK_MCODE_HEAD)/(CALLBACK_MCODE_GROUP+128))*CALLBACK_MCODE_NSLOT)
 
 #elif LJ_TARGET_ARM
 
 #define CALLBACK_MCODE_HEAD		32
 
 #elif LJ_TARGET_ARM64
+
+#if LJ_ABI_BRANCH_TRACK
+#define CALLBACK_MCODE_SLOTSZ		12
+#endif
 
 #define CALLBACK_MCODE_HEAD		32
 
@@ -101,8 +112,11 @@ static MSize CALLBACK_OFS2SLOT(MSize ofs)
 #endif
 
 #ifndef CALLBACK_SLOT2OFS
-#define CALLBACK_SLOT2OFS(slot)		(CALLBACK_MCODE_HEAD + 8*(slot))
-#define CALLBACK_OFS2SLOT(ofs)		(((ofs)-CALLBACK_MCODE_HEAD)/8)
+#ifndef CALLBACK_MCODE_SLOTSZ
+#define CALLBACK_MCODE_SLOTSZ		8
+#endif
+#define CALLBACK_SLOT2OFS(slot)		(CALLBACK_MCODE_HEAD + CALLBACK_MCODE_SLOTSZ*(slot))
+#define CALLBACK_OFS2SLOT(ofs)		(((ofs)-CALLBACK_MCODE_HEAD)/CALLBACK_MCODE_SLOTSZ)
 #define CALLBACK_MAX_SLOT		(CALLBACK_OFS2SLOT(CALLBACK_MCODE_SIZE))
 #endif
 
@@ -138,9 +152,13 @@ static void *callback_mcode_init(global_State *g, uint8_t *page)
   *(void **)p = target; p += 8;
 #endif
   for (slot = 0; slot < CALLBACK_MAX_SLOT; slot++) {
+#if LJ_ABI_BRANCH_TRACK
+    *(uint32_t *)p = XI_ENDBR64; p += 4;
+#endif
     /* mov al, slot; jmp group */
     *p++ = XI_MOVrib | RID_EAX; *p++ = (uint8_t)slot;
-    if ((slot & 31) == 31 || slot == CALLBACK_MAX_SLOT-1) {
+    if ((slot & (CALLBACK_MCODE_NSLOT-1)) == (CALLBACK_MCODE_NSLOT-1) ||
+	slot == CALLBACK_MAX_SLOT-1) {
       /* push ebp/rbp; mov ah, slot>>8; mov ebp, &g. */
       *p++ = XI_PUSH + RID_EBP;
       *p++ = XI_MOVrib | (RID_EAX+4); *p++ = (uint8_t)(slot >> 8);
@@ -160,7 +178,8 @@ static void *callback_mcode_init(global_State *g, uint8_t *page)
       *p++ = XI_JMP; *(int32_t *)p = target-(p+4); p += 4;
 #endif
     } else {
-      *p++ = XI_JMPs; *p++ = (uint8_t)((2+2)*(31-(slot&31)) - 2);
+      *p++ = XI_JMPs;
+      *p++ = (uint8_t)(CALLBACK_MCODE_SLOTSZ*(CALLBACK_MCODE_NSLOT-1-(slot&(CALLBACK_MCODE_NSLOT-1))) - 2);
     }
   }
   return p;
@@ -201,6 +220,9 @@ static void *callback_mcode_init(global_State *g, uint32_t *page)
   ((void **)p)[1] = g;
   p += 4;
   for (slot = 0; slot < CALLBACK_MAX_SLOT; slot++) {
+#if LJ_ABI_BRANCH_TRACK
+    *p++ = A64I_BTI_C;
+#endif
     *p++ = A64I_LE(A64I_MOVZw | A64F_D(RID_X9) | A64F_U16(slot));
     *p = A64I_LE(A64I_B | A64F_S26((page-p) & 0x03ffffffu));
     p++;

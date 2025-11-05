@@ -55,7 +55,8 @@ ngx_stream_lua_ngx_set_ctx_helper(lua_State *L, ngx_stream_lua_request_t *r,
         lua_pop(L, 1);
 
         pool = r->pool;
-        if (ngx_stream_lua_ngx_ctx_add_cleanup(r, pool, ctx->ctx_ref) != NGX_OK) {
+        if (ngx_stream_lua_ngx_ctx_add_cleanup(r, pool, ctx->ctx_ref) != NGX_OK)
+        {
             return luaL_error(L, "no memory");
         }
 
@@ -160,8 +161,8 @@ ngx_stream_lua_ffi_set_ctx_ref(ngx_stream_lua_request_t *r, int ref)
 
 
 static ngx_int_t
-ngx_stream_lua_ngx_ctx_add_cleanup(ngx_stream_lua_request_t *r, ngx_pool_t *pool,
-    int ref)
+ngx_stream_lua_ngx_ctx_add_cleanup(ngx_stream_lua_request_t *r,
+    ngx_pool_t *pool, int ref)
 {
     lua_State                   *L;
     ngx_pool_cleanup_t          *cln;

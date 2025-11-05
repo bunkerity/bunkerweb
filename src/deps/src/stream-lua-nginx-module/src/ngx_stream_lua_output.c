@@ -646,8 +646,6 @@ ngx_stream_lua_inject_output_api(lua_State *L)
 }
 
 
-
-
 ngx_int_t
 ngx_stream_lua_flush_resume_helper(ngx_stream_lua_request_t *r,
     ngx_stream_lua_ctx_t *ctx)

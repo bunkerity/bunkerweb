@@ -158,6 +158,7 @@ ngx_stream_lua_init_worker(ngx_cycle_t *cycle)
             if (part->next == NULL) {
                 break;
             }
+
             part = part->next;
             ofile = part->elts;
             i = 0;
