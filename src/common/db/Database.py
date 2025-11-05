@@ -1518,7 +1518,11 @@ class Database:
                 services = [service for service in services if service]  # Clean up empty strings
 
                 if db_services:
-                    missing_ids = [service.id for service in db_services if self._methods_are_compatible(method, service.method) and service.id not in services]
+                    missing_ids = [
+                        service.id
+                        for service in db_services
+                        if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api"))) and service.id not in services
+                    ]
 
                     if missing_ids:
                         self.logger.debug(f"Removing {len(missing_ids)} services that are no longer in the list")
@@ -1542,7 +1546,9 @@ class Database:
                     missing_drafts = [
                         service.id
                         for service in db_services
-                        if self._methods_are_compatible(method, service.method) and service.id not in drafts and service.id not in missing_ids
+                        if (service.method == method or (service.method in ("ui", "api") and method in ("ui", "api")))
+                        and service.id not in drafts
+                        and service.id not in missing_ids
                     ]
 
                     if missing_drafts:
@@ -1558,7 +1564,7 @@ class Database:
                             self.logger.debug(f"Adding draft {draft}")
                             to_put.append(Services(id=draft, method=method, is_draft=True, creation_date=current_time, last_update=current_time))
                             db_ids[draft] = {"method": method, "is_draft": True}
-                        elif self._methods_are_compatible(method, db_ids[draft]["method"]):
+                        elif db_ids[draft]["method"] == method or (db_ids[draft]["method"] in ("ui", "api") and method in ("ui", "api")):
                             self.logger.debug(f"Updating draft {draft}")
                             to_update.append({"model": Services, "filter": {"id": draft}, "values": {"is_draft": True, "last_update": current_time}})
                             changed_services = True
