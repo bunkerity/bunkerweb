@@ -2101,6 +2101,48 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mutual-tls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mutual TLS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mutual TLS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mise-en-uvre" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mise en œuvre
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parametres-de-configuration_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Paramètres de configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exemples-de-configuration_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exemples de configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#php" class="md-nav__link">
     <span class="md-ellipsis">
       PHP
@@ -2357,7 +2399,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#exemples-de-configuration_9" class="md-nav__link">
+  <a href="#exemples-de-configuration_10" class="md-nav__link">
     <span class="md-ellipsis">
       Exemples de configuration
     </span>
@@ -8578,6 +8620,133 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
+<h2 id="mutual-tls">Mutual TLS</h2>
+<p>Prise en charge STREAM <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>Le plugin Mutual TLS (mTLS) protège vos applications sensibles en exigeant que les clients présentent des certificats délivrés par des autorités que vous maîtrisez. Une fois activé, BunkerWeb authentifie les appelants avant que leurs requêtes n’atteignent vos services, ce qui sécurise vos outils internes et intégrations partenaires.</p>
+<p>BunkerWeb évalue chaque poignée de main TLS en fonction du bundle d’AC et de la politique que vous définissez. Les clients qui ne répondent pas aux règles sont bloqués, tandis que les connexions conformes peuvent transmettre les détails du certificat aux applications amont pour une autorisation affinée.</p>
+<p><strong>Fonctionnement :</strong></p>
+<ol>
+<li>Le plugin surveille les échanges HTTPS du site sélectionné.</li>
+<li>Pendant l’échange TLS, BunkerWeb inspecte le certificat client et vérifie sa chaîne par rapport à votre magasin de confiance.</li>
+<li>Le mode de vérification détermine si les clients non authentifiés sont rejetés, acceptés avec tolérance ou autorisés pour des diagnostics.</li>
+<li>(Optionnel) BunkerWeb expose le résultat via les en-têtes <code>X-SSL-Client-*</code> afin que vos applications puissent appliquer leur propre logique d’accès.</li>
+</ol>
+<div class="admonition success">
+<p class="admonition-title">Avantages clés</p>
+<ol>
+<li><strong>Contrôle renforcé :</strong> limitez l’accès aux machines et utilisateurs authentifiés.</li>
+<li><strong>Politiques souples :</strong> combinez modes stricts et optionnels pour accompagner vos workflows.</li>
+<li><strong>Visibilité applicative :</strong> transférez empreintes et identités de certificats pour l’audit.</li>
+<li><strong>Défense en profondeur :</strong> associez mTLS aux autres plugins BunkerWeb pour multiplier les protections.</li>
+</ol>
+</div>
+<h3 id="mise-en-uvre">Mise en œuvre</h3>
+<p>Suivez ces étapes pour déployer le mutual TLS sereinement :</p>
+<ol>
+<li><strong>Activer la fonctionnalité :</strong> positionnez <code>USE_MTLS</code> à <code>yes</code> sur les sites qui nécessitent l’authentification par certificat.</li>
+<li><strong>Fournir le bundle d’AC :</strong> stockez vos autorités de confiance dans un fichier PEM et renseignez <code>MTLS_CA_CERTIFICATE</code> avec son chemin absolu.</li>
+<li><strong>Choisir le mode de vérification :</strong> sélectionnez <code>on</code> pour rendre les certificats obligatoires, <code>optional</code> pour offrir un repli ou <code>optional_no_ca</code> pour un diagnostic temporaire.</li>
+<li><strong>Ajuster la profondeur de chaîne :</strong> adaptez <code>MTLS_VERIFY_DEPTH</code> si votre organisation utilise plusieurs intermédiaires.</li>
+<li><strong>Transmettre le résultat (optionnel) :</strong> laissez <code>MTLS_FORWARD_CLIENT_HEADERS</code> à <code>yes</code> si vos services amont doivent inspecter le certificat présenté.</li>
+<li><strong>Maintenir la révocation :</strong> si vous publiez une CRL, renseignez <code>MTLS_CRL</code> pour que BunkerWeb refuse les certificats révoqués.</li>
+</ol>
+<h3 id="parametres-de-configuration_5">Paramètres de configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Valeur par défaut</th>
+<th>Contexte</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_MTLS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Activer le mutual TLS :</strong> active l’authentification par certificat client pour le site courant.</td>
+</tr>
+<tr>
+<td><code>MTLS_CA_CERTIFICATE</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Bundle d’AC client :</strong> chemin absolu vers le bundle d’AC clients (PEM). Requis lorsque <code>MTLS_VERIFY_CLIENT</code> vaut <code>on</code> ou <code>optional</code>; doit être lisible.</td>
+</tr>
+<tr>
+<td><code>MTLS_VERIFY_CLIENT</code></td>
+<td><code>on</code></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Mode de vérification :</strong> choisissez si les certificats sont requis (<code>on</code>), optionnels (<code>optional</code>) ou acceptés sans validation d’AC (<code>optional_no_ca</code>).</td>
+</tr>
+<tr>
+<td><code>MTLS_VERIFY_DEPTH</code></td>
+<td><code>2</code></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Profondeur de vérification :</strong> profondeur maximale de chaîne acceptée pour les certificats clients.</td>
+</tr>
+<tr>
+<td><code>MTLS_FORWARD_CLIENT_HEADERS</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Transmettre les en-têtes client :</strong> propage les résultats de vérification (<code>X-SSL-Client-*</code> avec statut, DN, émetteur, numéro de série, empreinte, validité).</td>
+</tr>
+<tr>
+<td><code>MTLS_CRL</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td><strong>Chemin de la CRL client :</strong> chemin optionnel vers une liste de révocation de certificats encodée en PEM. Appliqué uniquement si le bundle d’AC est chargé avec succès.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Maintenez les certificats à jour</p>
+<p>Stockez bundles d’AC et listes de révocation dans un volume monté accessible par le Scheduler pour que chaque redémarrage récupère les ancrages de confiance récents.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Bundle d’AC obligatoire en mode strict</p>
+<p>Lorsque <code>MTLS_VERIFY_CLIENT</code> vaut <code>on</code> ou <code>optional</code>, le fichier d’AC doit être présent à l’exécution. S’il manque, BunkerWeb ignore les directives mTLS pour éviter un démarrage sur un chemin invalide. Réservez <code>optional_no_ca</code> au diagnostic, car ce mode affaiblit l’authentification.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Certificat approuvé vs. vérification</p>
+<p>BunkerWeb réutilise le même bundle d’AC pour vérifier les clients et bâtir la chaîne de confiance, garantissant une cohérence OCSP/CRL et durant le handshake.</p>
+</div>
+<h3 id="exemples-de-configuration_9">Exemples de configuration</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:3"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">Contrôle d’accès strict</label><label for="__tabbed_33_2">Authentification client optionnelle</label><label for="__tabbed_33_3">Diagnostic sans AC</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Exigez des certificats clients valides émis par votre AC privée et transmettez les informations de vérification au backend :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_MTLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">MTLS_CA_CERTIFICATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/bunkerweb/mtls/engineering-ca.pem&quot;</span>
+<span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;on&quot;</span>
+<span class="nt">MTLS_VERIFY_DEPTH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2&quot;</span>
+<span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Autorisez les utilisateurs anonymes mais transmettez les détails du certificat lorsqu’un client en présente un :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_MTLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">MTLS_CA_CERTIFICATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/bunkerweb/mtls/partner-ca.pem&quot;</span>
+<span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional&quot;</span>
+<span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Autorisez les connexions à aboutir même si un certificat ne peut pas être rattaché à un bundle d’AC de confiance. Utile uniquement pour le dépannage :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_MTLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional_no_ca&quot;</span>
+<span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="php">PHP</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin PHP fournit l’intégration PHP‑FPM avec BunkerWeb pour exécuter du PHP dynamiquement. Il prend en charge des instances locales (même machine) et distantes, offrant de la flexibilité dans l’architecture.</p>
@@ -8657,7 +8826,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Le plugin configure automatiquement la réécriture pour diriger les requêtes vers <code>index.php</code> si le fichier demandé n’existe pas.</p>
 </div>
 <h3 id="exemples_13">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="33:4"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><input id="__tabbed_33_3" name="__tabbed_33" type="radio" /><input id="__tabbed_33_4" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">PHP‑FPM local</label><label for="__tabbed_33_2">PHP‑FPM distant</label><label for="__tabbed_33_3">Port personnalisé</label><label for="__tabbed_33_4">WordPress</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:4"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><input id="__tabbed_34_3" name="__tabbed_34" type="radio" /><input id="__tabbed_34_4" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">PHP‑FPM local</label><label for="__tabbed_34_2">PHP‑FPM distant</label><label for="__tabbed_34_3">Port personnalisé</label><label for="__tabbed_34_4">WordPress</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">LOCAL_PHP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/var/run/php/php8.1-fpm.sock&quot;</span>
@@ -8901,7 +9070,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Avec <code>REAL_IP_RECURSIVE</code>, si l’en‑tête contient plusieurs IPs, la première non listée comme proxy de confiance est retenue comme IP client.</p>
 </div>
 <h3 id="exemples_14">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:1"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">Basique (derrière reverse proxy)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:1"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Basique (derrière reverse proxy)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -8980,7 +9149,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Avec <code>REDIRECT_TO_REQUEST_URI: yes</code>, <code>/blog/post-1</code> vers <code>https://new.com</code> devient <code>https://new.com/blog/post-1</code>.</p>
 </div>
 <h3 id="exemples_15">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:5"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><input id="__tabbed_35_5" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Multiples chemins</label><label for="__tabbed_35_2">Domaine entier</label><label for="__tabbed_35_3">Conserver le chemin</label><label for="__tabbed_35_4">Temporaire</label><label for="__tabbed_35_5">Sous‑domaine → chemin</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:5"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><input id="__tabbed_36_5" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Multiples chemins</label><label for="__tabbed_36_2">Domaine entier</label><label for="__tabbed_36_3">Conserver le chemin</label><label for="__tabbed_36_4">Temporaire</label><label for="__tabbed_36_5">Sous‑domaine → chemin</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">REDIRECT_FROM</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/blog/&quot;</span>
@@ -9169,7 +9338,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 <p>!!! warning "Sécurité" - Mots de passe forts pour Redis et Sentinel - Envisagez SSL/TLS - Ne pas exposer Redis sur Internet - Restreignez l’accès au port Redis (pare‑feu, segmentation)</p>
 <h3 id="exemples_16">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:4"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Configuration basique</label><label for="__tabbed_36_2">Configuration sécurisée</label><label for="__tabbed_36_3">Redis Sentinel</label><label for="__tabbed_36_4">Tuning avancé</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="37:4"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><input id="__tabbed_37_3" name="__tabbed_37" type="radio" /><input id="__tabbed_37_4" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Configuration basique</label><label for="__tabbed_37_2">Configuration sécurisée</label><label for="__tabbed_37_3">Redis Sentinel</label><label for="__tabbed_37_4">Tuning avancé</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -9328,7 +9497,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Mettre en place la mise en cache (optionnel) :</strong> Activez et configurez la mise en cache du proxy pour améliorer les performances pour le contenu fréquemment accédé.</li>
 </ol>
 <h3 id="guide-de-configuration_2">Guide de configuration</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="37:8"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><input id="__tabbed_37_3" name="__tabbed_37" type="radio" /><input id="__tabbed_37_4" name="__tabbed_37" type="radio" /><input id="__tabbed_37_5" name="__tabbed_37" type="radio" /><input id="__tabbed_37_6" name="__tabbed_37" type="radio" /><input id="__tabbed_37_7" name="__tabbed_37" type="radio" /><input id="__tabbed_37_8" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Configuration de base</label><label for="__tabbed_37_2">Paramètres de connexion</label><label for="__tabbed_37_3">Configuration SSL/TLS</label><label for="__tabbed_37_4">Support des protocoles</label><label for="__tabbed_37_5">Gestion des en-têtes</label><label for="__tabbed_37_6">Authentification</label><label for="__tabbed_37_7">Configuration avancée</label><label for="__tabbed_37_8">Configuration du cache</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:8"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><input id="__tabbed_38_5" name="__tabbed_38" type="radio" /><input id="__tabbed_38_6" name="__tabbed_38" type="radio" /><input id="__tabbed_38_7" name="__tabbed_38" type="radio" /><input id="__tabbed_38_8" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Configuration de base</label><label for="__tabbed_38_2">Paramètres de connexion</label><label for="__tabbed_38_3">Configuration SSL/TLS</label><label for="__tabbed_38_4">Support des protocoles</label><label for="__tabbed_38_5">Gestion des en-têtes</label><label for="__tabbed_38_6">Authentification</label><label for="__tabbed_38_7">Configuration avancée</label><label for="__tabbed_38_8">Configuration du cache</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Paramètres principaux</strong></p>
@@ -9849,8 +10018,8 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Lorsque vous utilisez Docker Compose avec des variables NGINX dans vos configurations, vous devez échapper le signe dollar (<code>$</code>) en utilisant des doubles signes dollar (<code>$$</code>). Cela s'applique à tous les paramètres contenant des variables NGINX comme <code>$remote_addr</code>, <code>$proxy_add_x_forwarded_for</code>, etc.</p>
 <p>Sans cet échappement, Docker Compose essaiera de substituer ces variables par des variables d'environnement, qui n'existent généralement pas, ce qui entraînera des valeurs vides dans votre configuration NGINX.</p>
 </div>
-<h3 id="exemples-de-configuration_9">Exemples de configuration</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:6"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><input id="__tabbed_38_5" name="__tabbed_38" type="radio" /><input id="__tabbed_38_6" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Proxy HTTP de base</label><label for="__tabbed_38_2">Application WebSocket</label><label for="__tabbed_38_3">Emplacements multiples</label><label for="__tabbed_38_4">Configuration du cache</label><label for="__tabbed_38_5">Gestion avancée des en-têtes</label><label for="__tabbed_38_6">Intégration de l'authentification</label></div>
+<h3 id="exemples-de-configuration_10">Exemples de configuration</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:6"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><input id="__tabbed_39_5" name="__tabbed_39" type="radio" /><input id="__tabbed_39_6" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Proxy HTTP de base</label><label for="__tabbed_39_2">Application WebSocket</label><label for="__tabbed_39_3">Emplacements multiples</label><label for="__tabbed_39_4">Configuration du cache</label><label for="__tabbed_39_5">Gestion avancée des en-têtes</label><label for="__tabbed_39_6">Intégration de l'authentification</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Une configuration simple pour proxifier les requêtes HTTP vers un serveur d'application backend :</p>
@@ -9993,7 +10162,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>La configuration par défaut inclut 80, 443, 8080, 3128 et SSH (22). Adaptez selon votre modèle de menace.</p>
 </div>
 <h3 id="exemples_17">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="39:4"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Basique</label><label for="__tabbed_39_2">Approfondi</label><label for="__tabbed_39_3">Optimisé performance</label><label for="__tabbed_39_4">Haute sécurité</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="40:4"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Basique</label><label for="__tabbed_40_2">Approfondi</label><label for="__tabbed_40_3">Optimisé performance</label><label for="__tabbed_40_4">Haute sécurité</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REVERSE_SCAN</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10241,7 +10410,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>SSLv3, TLSv1.0 et TLSv1.1 sont désactivés par défaut (vulnérabilités connues). Activez‑les uniquement si nécessaire pour clients hérités.</p>
 </div>
 <h3 id="exemples_19">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="40:4"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Sécurité moderne (défaut)</label><label for="__tabbed_40_2">Sécurité maximale</label><label for="__tabbed_40_3">Compatibilité héritée</label><label for="__tabbed_40_4">Suites personnalisées</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="41:4"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Sécurité moderne (défaut)</label><label for="__tabbed_41_2">Sécurité maximale</label><label for="__tabbed_41_3">Compatibilité héritée</label><label for="__tabbed_41_4">Suites personnalisées</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">LISTEN_HTTPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10396,7 +10565,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Toutes les URLs (sauf <code>mailto:</code> et <code>tel:</code>) DOIVENT utiliser HTTPS. BunkerWeb convertit les URL non‑HTTPS pour la conformité.</p>
 </div>
 <h3 id="exemples_20">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="41:3"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Basique</label><label for="__tabbed_41_2">Complet</label><label for="__tabbed_41_3">Contacts multiples</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="42:3"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Basique</label><label for="__tabbed_42_2">Complet</label><label for="__tabbed_42_3">Contacts multiples</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_SECURITYTXT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10497,7 +10666,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h3 id="exemples_21">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="42:3"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Basique</label><label for="__tabbed_42_2">Certificats courte durée</label><label for="__tabbed_42_3">Test en RSA</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="43:3"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Basique</label><label for="__tabbed_43_2">Certificats courte durée</label><label for="__tabbed_43_3">Test en RSA</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10608,7 +10777,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>!!! warning "Sécurité" - <code>SESSIONS_SECRET</code> doit être fort (≥32 caractères), confidentiel et identique sur toutes les instances. - Utilisez des variables d’environnement/secrets pour éviter le clair.</p>
 <p>!!! tip "Clusters" - <code>USE_REDIS: yes</code> et même <code>SESSIONS_SECRET</code>/<code>SESSIONS_NAME</code> sur tous les nœuds.</p>
 <h3 id="exemples_22">Exemples</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="43:4"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><input id="__tabbed_43_4" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Basique (instance unique)</label><label for="__tabbed_43_2">Sécurité renforcée</label><label for="__tabbed_43_3">Cluster + Redis</label><label for="__tabbed_43_4">Sessions longue durée</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="44:4"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><input id="__tabbed_44_4" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Basique (instance unique)</label><label for="__tabbed_44_2">Sécurité renforcée</label><label for="__tabbed_44_3">Cluster + Redis</label><label for="__tabbed_44_4">Sessions longue durée</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">SESSIONS_SECRET</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;your-strong-random-secret-key-here&quot;</span>
@@ -10739,7 +10908,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="44:5"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><input id="__tabbed_44_4" name="__tabbed_44" type="radio" /><input id="__tabbed_44_5" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Adresse IP</label><label for="__tabbed_44_2">Reverse DNS</label><label for="__tabbed_44_3">ASN</label><label for="__tabbed_44_4">User‑Agent</label><label for="__tabbed_44_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="45:5"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><input id="__tabbed_45_5" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Adresse IP</label><label for="__tabbed_45_2">Reverse DNS</label><label for="__tabbed_45_3">ASN</label><label for="__tabbed_45_4">User‑Agent</label><label for="__tabbed_45_5">URI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <table>

@@ -2150,6 +2150,48 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mutual-tls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mutual TLS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mutual TLS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schritt-fur-schritt" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schritt-für-Schritt
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#konfigurationseinstellungen_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      Konfigurationseinstellungen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#konfigurationsbeispiele_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Konfigurationsbeispiele
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#php" class="md-nav__link">
     <span class="md-ellipsis">
       PHP
@@ -2169,7 +2211,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationseinstellungen_15" class="md-nav__link">
+  <a href="#konfigurationseinstellungen_16" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationseinstellungen
     </span>
@@ -2211,7 +2253,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationseinstellungen_16" class="md-nav__link">
+  <a href="#konfigurationseinstellungen_17" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationseinstellungen
     </span>
@@ -2304,7 +2346,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationseinstellungen_17" class="md-nav__link">
+  <a href="#konfigurationseinstellungen_18" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationseinstellungen
     </span>
@@ -2439,7 +2481,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationseinstellungen_18" class="md-nav__link">
+  <a href="#konfigurationseinstellungen_19" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationseinstellungen
     </span>
@@ -2490,7 +2532,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationseinstellungen_19" class="md-nav__link">
+  <a href="#konfigurationseinstellungen_20" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationseinstellungen
     </span>
@@ -2574,7 +2616,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationseinstellungen_20" class="md-nav__link">
+  <a href="#konfigurationseinstellungen_21" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationseinstellungen
     </span>
@@ -2658,7 +2700,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationseinstellungen_21" class="md-nav__link">
+  <a href="#konfigurationseinstellungen_22" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationseinstellungen
     </span>
@@ -2718,7 +2760,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#konfigurationseinstellungen_22" class="md-nav__link">
+  <a href="#konfigurationseinstellungen_23" class="md-nav__link">
     <span class="md-ellipsis">
       Konfigurationseinstellungen
     </span>
@@ -8791,6 +8833,133 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tr>
 </tbody>
 </table>
+<h2 id="mutual-tls">Mutual TLS</h2>
+<p>STREAM-Unterstützung <img alt="✅" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/2705.svg" title=":white_check_mark:" /></p>
+<p>Das Mutual-TLS-Plugin (mTLS) schützt sensible Anwendungen, indem nur Clients mit Zertifikaten akzeptiert werden, die von Ihren vertrauenswürdigen Zertifizierungsstellen ausgestellt wurden. Mit aktivem Plugin authentifiziert BunkerWeb jede Anfrage bereits an der Perimeter-Grenze und hält interne Tools sowie Partner-Integrationen abgeschirmt.</p>
+<p>BunkerWeb bewertet jeden TLS-Handshake anhand des von Ihnen bereitgestellten CA-Bundles und Ihrer Richtlinien. Clients, die diese Vorgaben nicht erfüllen, werden abgeblockt, während konforme Verbindungen ihre Zertifikatsdetails an nachgelagerte Anwendungen weitergeben können.</p>
+<p><strong>Funktionsweise:</strong></p>
+<ol>
+<li>Das Plugin überwacht die HTTPS-Handshakes der ausgewählten Site.</li>
+<li>Während des TLS-Austauschs prüft BunkerWeb das Client-Zertifikat und vergleicht die Kette mit Ihrem Vertrauensspeicher.</li>
+<li>Der gewählte Verifizierungsmodus entscheidet, ob nicht authentifizierte Clients abgewiesen, toleriert oder zu Diagnosezwecken zugelassen werden.</li>
+<li>(Optional) BunkerWeb stellt die Ergebnisse über <code>X-SSL-Client-*</code>-Header bereit, damit Ihre Anwendungen eigene Autorisierungsregeln anwenden können.</li>
+</ol>
+<div class="admonition success">
+<p class="admonition-title">Wesentliche Vorteile</p>
+<ol>
+<li><strong>Starker Perimeterschutz:</strong> Nur authentifizierte Maschinen und Benutzer erreichen Ihre sensiblen Routen.</li>
+<li><strong>Flexible Vertrauensrichtlinien:</strong> Kombinieren Sie strikte und optionale Modi passend zu Ihrem Onboarding.</li>
+<li><strong>Transparenz für Anwendungen:</strong> Geben Sie Fingerabdrücke und Identitäten an Downstream-Services weiter.</li>
+<li><strong>Geschichtete Sicherheit:</strong> Ergänzen Sie mTLS mit weiteren BunkerWeb-Plugins wie Rate Limiting oder IP-Filterung.</li>
+</ol>
+</div>
+<h3 id="schritt-fur-schritt">Schritt-für-Schritt</h3>
+<p>Gehen Sie diese Schritte durch, um Mutual TLS kontrolliert einzuführen:</p>
+<ol>
+<li><strong>Funktion aktivieren:</strong> Setzen Sie <code>USE_MTLS</code> auf <code>yes</code> für die Site, die Zertifikatsauthentifizierung benötigt.</li>
+<li><strong>CA-Bundle bereitstellen:</strong> Legen Sie Ihre vertrauenswürdigen Aussteller in einer PEM-Datei ab und verweisen Sie mit <code>MTLS_CA_CERTIFICATE</code> auf den absoluten Pfad.</li>
+<li><strong>Verifizierungsmodus wählen:</strong> Nutzen Sie <code>on</code> für verpflichtende Zertifikate, <code>optional</code> für fallback-fähige Szenarien oder <code>optional_no_ca</code> kurzfristig zur Diagnose.</li>
+<li><strong>Kettentiefe anpassen:</strong> Erhöhen oder verringern Sie <code>MTLS_VERIFY_DEPTH</code>, falls Ihre PKI mehrere Zwischenstellen nutzt.</li>
+<li><strong>Ergebnisse weiterreichen (optional):</strong> Belassen Sie <code>MTLS_FORWARD_CLIENT_HEADERS</code> auf <code>yes</code>, wenn nachgelagerte Anwendungen Zertifikatsinformationen benötigen.</li>
+<li><strong>Revokationslisten pflegen:</strong> Verknüpfen Sie <code>MTLS_CRL</code>, sobald Sie eine CRL publizieren, damit BunkerWeb widerrufene Zertifikate ablehnt.</li>
+</ol>
+<h3 id="konfigurationseinstellungen_15">Konfigurationseinstellungen</h3>
+<table>
+<thead>
+<tr>
+<th>Einstellung</th>
+<th>Standardwert</th>
+<th>Kontext</th>
+<th>Mehrfach</th>
+<th>Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USE_MTLS</code></td>
+<td><code>no</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Mutual TLS verwenden:</strong> Aktiviert die Client-Zertifikatsauthentifizierung für die aktuelle Site.</td>
+</tr>
+<tr>
+<td><code>MTLS_CA_CERTIFICATE</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Client-CA-Bundle:</strong> Absoluter Pfad zum vertrauenswürdigen Client-CA-Bundle (PEM). Erforderlich, wenn <code>MTLS_VERIFY_CLIENT</code> <code>on</code> oder <code>optional</code> ist; muss lesbar sein.</td>
+</tr>
+<tr>
+<td><code>MTLS_VERIFY_CLIENT</code></td>
+<td><code>on</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Verifizierungsmodus:</strong> Legen Sie fest, ob Zertifikate erforderlich sind (<code>on</code>), optional (<code>optional</code>) oder ohne CA-Prüfung akzeptiert werden (<code>optional_no_ca</code>).</td>
+</tr>
+<tr>
+<td><code>MTLS_VERIFY_DEPTH</code></td>
+<td><code>2</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Verifizierungstiefe:</strong> Maximale akzeptierte Zertifikatskettentiefe für Client-Zertifikate.</td>
+</tr>
+<tr>
+<td><code>MTLS_FORWARD_CLIENT_HEADERS</code></td>
+<td><code>yes</code></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Client-Header weiterleiten:</strong> Gibt Verifizierungsergebnisse (<code>X-SSL-Client-*</code>-Header mit Status, DN, Aussteller, Seriennummer, Fingerabdruck, Gültigkeit) weiter.</td>
+</tr>
+<tr>
+<td><code>MTLS_CRL</code></td>
+<td></td>
+<td>multisite</td>
+<td>nein</td>
+<td><strong>Client-CRL-Pfad:</strong> Optionaler Pfad zu einer PEM-codierten Sperrliste. Wird nur angewendet, wenn das CA-Bundle erfolgreich geladen wurde.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Zertifikate aktuell halten</p>
+<p>Speichern Sie CA-Bundles und Sperrlisten in einem eingehängten Volume, das der Scheduler lesen kann, damit Neustarts die neuesten Vertrauensanker übernehmen.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">CA-Bundle für strenge Modi obligatorisch</p>
+<p>Sobald <code>MTLS_VERIFY_CLIENT</code> auf <code>on</code> oder <code>optional</code> steht, muss die CA-Datei zur Laufzeit vorhanden sein. Fehlt sie, ignoriert BunkerWeb die mTLS-Direktiven, um keinen Dienst mit ungültigem Pfad zu starten. Verwenden Sie <code>optional_no_ca</code> nur zur Fehlersuche – dieser Modus schwächt die Client-Authentifizierung.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Vertrauensquelle und Verifizierung</p>
+<p>BunkerWeb nutzt dasselbe CA-Bundle sowohl für die Client-Prüfung als auch für den Aufbau der Vertrauenskette, damit OCSP/CRL-Checks konsistent bleiben.</p>
+</div>
+<h3 id="konfigurationsbeispiele_2">Konfigurationsbeispiele</h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:3"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Strikte Zugriffskontrolle</label><label for="__tabbed_35_2">Optionale Client-Authentifizierung</label><label for="__tabbed_35_3">Diagnose ohne CA</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Verlangen Sie gültige Client-Zertifikate Ihrer privaten CA und leiten Sie die Verifizierungsergebnisse an das Backend weiter:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_MTLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">MTLS_CA_CERTIFICATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/bunkerweb/mtls/engineering-ca.pem&quot;</span>
+<span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;on&quot;</span>
+<span class="nt">MTLS_VERIFY_DEPTH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2&quot;</span>
+<span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Erlauben Sie anonyme Nutzer, übermitteln Sie aber Zertifikatsdetails, sobald ein Client eines präsentiert:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_MTLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">MTLS_CA_CERTIFICATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/etc/bunkerweb/mtls/partner-ca.pem&quot;</span>
+<span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional&quot;</span>
+<span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Lassen Sie Verbindungen auch dann zu, wenn ein Zertifikat nicht zu einem vertrauenswürdigen CA-Bundle verknüpft werden kann. Nur für Fehlersuche geeignet:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">USE_MTLS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nt">MTLS_VERIFY_CLIENT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;optional_no_ca&quot;</span>
+<span class="nt">MTLS_FORWARD_CLIENT_HEADERS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="php">PHP</h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das PHP-Plugin bietet eine nahtlose Integration mit PHP-FPM für BunkerWeb und ermöglicht die dynamische PHP-Verarbeitung für Ihre Websites. Diese Funktion unterstützt sowohl lokale PHP-FPM-Instanzen, die auf derselben Maschine laufen, als auch entfernte PHP-FPM-Server, was Ihnen Flexibilität bei der Konfiguration Ihrer PHP-Umgebung gibt.</p>
@@ -8810,7 +8979,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Legen Sie das Dokumentenstammverzeichnis fest:</strong> Konfigurieren Sie den Stammordner, der Ihre PHP-Dateien enthält, mit der entsprechenden Pfadeinstellung.</li>
 <li><strong>Lassen Sie BunkerWeb den Rest erledigen:</strong> Nach der Konfiguration leitet BunkerWeb PHP-Anfragen automatisch an Ihre PHP-FPM-Instanz weiter.</li>
 </ol>
-<h3 id="konfigurationseinstellungen_15">Konfigurationseinstellungen</h3>
+<h3 id="konfigurationseinstellungen_16">Konfigurationseinstellungen</h3>
 <table>
 <thead>
 <tr>
@@ -8876,7 +9045,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Das PHP-Plugin konfiguriert automatisch die URL-Umschreibung, um moderne PHP-Anwendungen zu unterstützen. Anfragen für nicht existierende Dateien werden an <code>index.php</code> weitergeleitet, wobei die ursprüngliche Anfrage-URI als Abfrageparameter verfügbar ist.</p>
 </div>
 <h3 id="beispielkonfigurationen_16">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:4"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><input id="__tabbed_35_3" name="__tabbed_35" type="radio" /><input id="__tabbed_35_4" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">Lokale PHP-FPM-Konfiguration</label><label for="__tabbed_35_2">Entfernte PHP-FPM-Konfiguration</label><label for="__tabbed_35_3">Konfiguration mit benutzerdefiniertem Port</label><label for="__tabbed_35_4">WordPress-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:4"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><input id="__tabbed_36_3" name="__tabbed_36" type="radio" /><input id="__tabbed_36_4" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Lokale PHP-FPM-Konfiguration</label><label for="__tabbed_36_2">Entfernte PHP-FPM-Konfiguration</label><label for="__tabbed_36_3">Konfiguration mit benutzerdefiniertem Port</label><label for="__tabbed_36_4">WordPress-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Konfiguration für die Verwendung einer lokalen PHP-FPM-Instanz:</p>
@@ -8935,7 +9104,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Lassen Sie BunkerWeb den Rest erledigen:</strong> Nach der Konfiguration mit einer gültigen Lizenz werden Pro-Plugins automatisch heruntergeladen und aktiviert.</li>
 <li><strong>Überwachen Sie Ihren Pro-Status:</strong> Überprüfen Sie die Zustandsindikatoren in der <a href="../web-ui/">Web-Benutzeroberfläche</a>, um Ihren Pro-Abonnementstatus zu bestätigen.</li>
 </ol>
-<h3 id="konfigurationseinstellungen_16">Konfigurationseinstellungen</h3>
+<h3 id="konfigurationseinstellungen_17">Konfigurationseinstellungen</h3>
 <table>
 <thead>
 <tr>
@@ -9125,7 +9294,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Mit <code>REAL_IP_RECURSIVE</code> wird, wenn der Header mehrere IPs enthält, die erste IP, die nicht als vertrauenswürdiger Proxy aufgeführt ist, als Client-IP verwendet.</p>
 </div>
 <h3 id="beispiele_5">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:1"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">Basis (hinter Reverse Proxy)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="37:1"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Basis (hinter Reverse Proxy)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REAL_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -9155,7 +9324,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Statuscode auswählen:</strong> Legen Sie den entsprechenden HTTP-Statuscode mit der Einstellung <code>REDIRECT_TO_STATUS_CODE</code> fest, um eine permanente oder temporäre Umleitung anzuzeigen.</li>
 <li><strong>Lassen Sie BunkerWeb den Rest erledigen:</strong> Nach der Konfiguration werden alle Anfragen an die Website automatisch basierend auf Ihren Einstellungen umgeleitet.</li>
 </ol>
-<h3 id="konfigurationseinstellungen_17">Konfigurationseinstellungen</h3>
+<h3 id="konfigurationseinstellungen_18">Konfigurationseinstellungen</h3>
 <table>
 <thead>
 <tr>
@@ -9209,7 +9378,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Wenn <code>REDIRECT_TO_REQUEST_URI</code> auf <code>yes</code> gesetzt ist, behält BunkerWeb den ursprünglichen Anfragepfad bei. Wenn ein Benutzer beispielsweise <code>https://old-domain.com/blog/post-1</code> besucht und Sie eine Umleitung zu <code>https://new-domain.com</code> eingerichtet haben, wird er zu <code>https://new-domain.com/blog/post-1</code> umgeleitet.</p>
 </div>
 <h3 id="beispielkonfigurationen_17">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="37:5"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><input id="__tabbed_37_3" name="__tabbed_37" type="radio" /><input id="__tabbed_37_4" name="__tabbed_37" type="radio" /><input id="__tabbed_37_5" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">Umleitung mehrerer Pfade</label><label for="__tabbed_37_2">Einfache Domain-Umleitung</label><label for="__tabbed_37_3">Pfadbeibehaltende Umleitung</label><label for="__tabbed_37_4">Temporäre Umleitung</label><label for="__tabbed_37_5">Subdomain-Konsolidierung</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:5"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><input id="__tabbed_38_5" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Umleitung mehrerer Pfade</label><label for="__tabbed_38_2">Einfache Domain-Umleitung</label><label for="__tabbed_38_3">Pfadbeibehaltende Umleitung</label><label for="__tabbed_38_4">Temporäre Umleitung</label><label for="__tabbed_38_5">Subdomain-Konsolidierung</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine Konfiguration, die mehrere Pfade an verschiedene Ziele umleitet:</p>
@@ -9414,7 +9583,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li>Beschränken Sie den Zugriff auf den Redis-Port (Firewall, Segmentierung).</li>
 </ul>
 <h3 id="beispiele_6">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:4"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><input id="__tabbed_38_4" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">Basiskonfiguration</label><label for="__tabbed_38_2">Sichere Konfiguration</label><label for="__tabbed_38_3">Redis Sentinel</label><label for="__tabbed_38_4">Erweitertes Tuning</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:4"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Basiskonfiguration</label><label for="__tabbed_39_2">Sichere Konfiguration</label><label for="__tabbed_39_3">Redis Sentinel</label><label for="__tabbed_39_4">Erweitertes Tuning</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -9573,7 +9742,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Caching einrichten (optional):</strong> Aktivieren und konfigurieren Sie das Proxy-Caching, um die Leistung für häufig aufgerufene Inhalte zu verbessern.</li>
 </ol>
 <h3 id="konfigurationsanleitung_1">Konfigurationsanleitung</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="39:8"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><input id="__tabbed_39_4" name="__tabbed_39" type="radio" /><input id="__tabbed_39_5" name="__tabbed_39" type="radio" /><input id="__tabbed_39_6" name="__tabbed_39" type="radio" /><input id="__tabbed_39_7" name="__tabbed_39" type="radio" /><input id="__tabbed_39_8" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">Grundlegende Konfiguration</label><label for="__tabbed_39_2">Verbindungseinstellungen</label><label for="__tabbed_39_3">SSL/TLS-Konfiguration</label><label for="__tabbed_39_4">Protokollunterstützung</label><label for="__tabbed_39_5">Header-Verwaltung</label><label for="__tabbed_39_6">Authentifizierung</label><label for="__tabbed_39_7">Erweiterte Konfiguration</label><label for="__tabbed_39_8">Caching-Konfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="40:8"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><input id="__tabbed_40_7" name="__tabbed_40" type="radio" /><input id="__tabbed_40_8" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Grundlegende Konfiguration</label><label for="__tabbed_40_2">Verbindungseinstellungen</label><label for="__tabbed_40_3">SSL/TLS-Konfiguration</label><label for="__tabbed_40_4">Protokollunterstützung</label><label for="__tabbed_40_5">Header-Verwaltung</label><label for="__tabbed_40_6">Authentifizierung</label><label for="__tabbed_40_7">Erweiterte Konfiguration</label><label for="__tabbed_40_8">Caching-Konfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Kerneinstellungen</strong></p>
@@ -10095,7 +10264,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Ohne diese Maskierung versucht Docker Compose, diese Variablen durch Umgebungsvariablen zu ersetzen, die normalerweise nicht existieren, was zu leeren Werten in Ihrer NGINX-Konfiguration führt.</p>
 </div>
 <h3 id="beispielkonfigurationen_18">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="40:6"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><input id="__tabbed_40_4" name="__tabbed_40" type="radio" /><input id="__tabbed_40_5" name="__tabbed_40" type="radio" /><input id="__tabbed_40_6" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">Grundlegender HTTP-Proxy</label><label for="__tabbed_40_2">WebSocket-Anwendung</label><label for="__tabbed_40_3">Mehrere Standorte</label><label for="__tabbed_40_4">Caching-Konfiguration</label><label for="__tabbed_40_5">Erweiterte Header-Verwaltung</label><label for="__tabbed_40_6">Authentifizierungsintegration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="41:6"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><input id="__tabbed_41_5" name="__tabbed_41" type="radio" /><input id="__tabbed_41_6" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Grundlegender HTTP-Proxy</label><label for="__tabbed_41_2">WebSocket-Anwendung</label><label for="__tabbed_41_3">Mehrere Standorte</label><label for="__tabbed_41_4">Caching-Konfiguration</label><label for="__tabbed_41_5">Erweiterte Header-Verwaltung</label><label for="__tabbed_41_6">Authentifizierungsintegration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration zum Weiterleiten von HTTP-Anfragen an einen Backend-Anwendungsserver:</p>
@@ -10205,7 +10374,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Scan-Timeout festlegen:</strong> Passen Sie den <code>REVERSE_SCAN_TIMEOUT</code> an, um ein Gleichgewicht zwischen gründlichem Scannen und Leistung zu finden.</li>
 <li><strong>Scan-Aktivität überwachen:</strong> Überprüfen Sie die Protokolle und die <a href="../web-ui/">Web-Benutzeroberfläche</a>, um die Scan-Ergebnisse und potenzielle Sicherheitsvorfälle zu überprüfen.</li>
 </ol>
-<h3 id="konfigurationseinstellungen_18">Konfigurationseinstellungen</h3>
+<h3 id="konfigurationseinstellungen_19">Konfigurationseinstellungen</h3>
 <table>
 <thead>
 <tr>
@@ -10249,7 +10418,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Die Standardkonfiguration umfasst gängige Ports, die von Proxyservern (80, 443, 8080, 3128) und SSH (22) verwendet werden. Sie können diese Liste basierend auf Ihrem Bedrohungsmodell anpassen.</p>
 </div>
 <h3 id="beispielkonfigurationen_19">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="41:4"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><input id="__tabbed_41_4" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">Grundlegende Konfiguration</label><label for="__tabbed_41_2">Umfassendes Scannen</label><label for="__tabbed_41_3">Leistungsoptimierte Konfiguration</label><label for="__tabbed_41_4">Hochsicherheitskonfiguration</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="42:4"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><input id="__tabbed_42_4" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Grundlegende Konfiguration</label><label for="__tabbed_42_2">Umfassendes Scannen</label><label for="__tabbed_42_3">Leistungsoptimierte Konfiguration</label><label for="__tabbed_42_4">Hochsicherheitskonfiguration</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration zum Aktivieren des Client-Port-Scannens:</p>
@@ -10310,7 +10479,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Sitemaps hinzufügen (optional):</strong> Verwenden Sie <code>ROBOTSTXT_SITEMAP_N</code> für Sitemap-URLs.</li>
 <li><strong>Die generierte robots.txt-Datei abrufen:</strong> Sobald BunkerWeb mit den obigen Einstellungen läuft, können Sie auf die dynamisch generierte <code>robots.txt</code>-Datei zugreifen, indem Sie eine HTTP-GET-Anfrage an <code>http(s)://your-domain.com/robots.txt</code> senden.</li>
 </ol>
-<h3 id="konfigurationseinstellungen_19">Konfigurationseinstellungen</h3>
+<h3 id="konfigurationseinstellungen_20">Konfigurationseinstellungen</h3>
 <table>
 <thead>
 <tr>
@@ -10511,7 +10680,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>SSLv3, TLSv1.0 und TLSv1.1 sind standardmäßig deaktiviert (bekannte Schwachstellen). Aktivieren Sie diese nur bei Bedarf für ältere Clients.</p>
 </div>
 <h3 id="beispiele_7">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="42:4"><input checked="checked" id="__tabbed_42_1" name="__tabbed_42" type="radio" /><input id="__tabbed_42_2" name="__tabbed_42" type="radio" /><input id="__tabbed_42_3" name="__tabbed_42" type="radio" /><input id="__tabbed_42_4" name="__tabbed_42" type="radio" /><div class="tabbed-labels"><label for="__tabbed_42_1">Moderne Sicherheit (Standard)</label><label for="__tabbed_42_2">Maximale Sicherheit</label><label for="__tabbed_42_3">Legacy-Kompatibilität</label><label for="__tabbed_42_4">Benutzerdefinierte Suiten</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="43:4"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><input id="__tabbed_43_4" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Moderne Sicherheit (Standard)</label><label for="__tabbed_43_2">Maximale Sicherheit</label><label for="__tabbed_43_3">Legacy-Kompatibilität</label><label for="__tabbed_43_4">Benutzerdefinierte Suiten</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">LISTEN_HTTPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10564,7 +10733,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Zusätzliche Informationen festlegen:</strong> Konfigurieren Sie optionale Felder wie Ablaufdatum, Verschlüsselung, Danksagungen und Richtlinien-URLs.</li>
 <li><strong>Lassen Sie BunkerWeb den Rest erledigen:</strong> Nach der Konfiguration erstellt und stellt BunkerWeb die security.txt-Datei automatisch am Standardort bereit.</li>
 </ol>
-<h3 id="konfigurationseinstellungen_20">Konfigurationseinstellungen</h3>
+<h3 id="konfigurationseinstellungen_21">Konfigurationseinstellungen</h3>
 <table>
 <thead>
 <tr>
@@ -10668,7 +10837,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <p>Gemäß RFC 9116 MÜSSEN alle URLs in der security.txt-Datei (außer <code>mailto:</code>- und <code>tel:</code>-Links) HTTPS verwenden. Nicht-HTTPS-URLs werden von BunkerWeb automatisch in HTTPS konvertiert, um die Einhaltung des Standards zu gewährleisten.</p>
 </div>
 <h3 id="beispielkonfigurationen_21">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="43:3"><input checked="checked" id="__tabbed_43_1" name="__tabbed_43" type="radio" /><input id="__tabbed_43_2" name="__tabbed_43" type="radio" /><input id="__tabbed_43_3" name="__tabbed_43" type="radio" /><div class="tabbed-labels"><label for="__tabbed_43_1">Grundlegende Konfiguration</label><label for="__tabbed_43_2">Umfassende Konfiguration</label><label for="__tabbed_43_3">Konfiguration mit mehreren Kontakten</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="44:3"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Grundlegende Konfiguration</label><label for="__tabbed_44_2">Umfassende Konfiguration</label><label for="__tabbed_44_3">Konfiguration mit mehreren Kontakten</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine minimale Konfiguration mit nur Kontaktinformationen:</p>
@@ -10772,7 +10941,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </tbody>
 </table>
 <h3 id="beispiele_8">Beispiele</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="44:3"><input checked="checked" id="__tabbed_44_1" name="__tabbed_44" type="radio" /><input id="__tabbed_44_2" name="__tabbed_44" type="radio" /><input id="__tabbed_44_3" name="__tabbed_44" type="radio" /><div class="tabbed-labels"><label for="__tabbed_44_1">Standard</label><label for="__tabbed_44_2">Kurzzeit-Zertifikate</label><label for="__tabbed_44_3">Test in RSA</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="45:3"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Standard</label><label for="__tabbed_45_2">Kurzzeit-Zertifikate</label><label for="__tabbed_45_3">Test in RSA</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
@@ -10819,7 +10988,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 <li><strong>Redis-Integration konfigurieren:</strong> Setzen Sie für verteilte Umgebungen <code>USE_REDIS</code> auf "yes" und konfigurieren Sie Ihre <a href="#redis">Redis-Verbindung</a>, um Sitzungsdaten über mehrere BunkerWeb-Knoten hinweg zu teilen.</li>
 <li><strong>Lassen Sie BunkerWeb den Rest erledigen:</strong> Nach der Konfiguration erfolgt die Sitzungsverwaltung für Ihre Website automatisch.</li>
 </ol>
-<h3 id="konfigurationseinstellungen_21">Konfigurationseinstellungen</h3>
+<h3 id="konfigurationseinstellungen_22">Konfigurationseinstellungen</h3>
 <table>
 <thead>
 <tr>
@@ -10902,7 +11071,7 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </ol>
 </div>
 <h3 id="beispielkonfigurationen_22">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="45:4"><input checked="checked" id="__tabbed_45_1" name="__tabbed_45" type="radio" /><input id="__tabbed_45_2" name="__tabbed_45" type="radio" /><input id="__tabbed_45_3" name="__tabbed_45" type="radio" /><input id="__tabbed_45_4" name="__tabbed_45" type="radio" /><div class="tabbed-labels"><label for="__tabbed_45_1">Grundlegende Konfiguration</label><label for="__tabbed_45_2">Erhöhte Sicherheit</label><label for="__tabbed_45_3">Cluster-Umgebung mit Redis</label><label for="__tabbed_45_4">Langlebige Sitzungen</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="46:4"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">Grundlegende Konfiguration</label><label for="__tabbed_46_2">Erhöhte Sicherheit</label><label for="__tabbed_46_3">Cluster-Umgebung mit Redis</label><label for="__tabbed_46_4">Langlebige Sitzungen</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration für eine einzelne BunkerWeb-Instanz:</p>
@@ -11027,7 +11196,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <p class="admonition-title">Stream-Modus</p>
 <p>Im Stream-Modus werden nur IP-, rDNS- und ASN-Prüfungen durchgeführt.</p>
 </div>
-<h3 id="konfigurationseinstellungen_22">Konfigurationseinstellungen</h3>
+<h3 id="konfigurationseinstellungen_23">Konfigurationseinstellungen</h3>
 <p><strong>Allgemein</strong></p>
 <table>
 <thead>
@@ -11049,7 +11218,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="46:5"><input checked="checked" id="__tabbed_46_1" name="__tabbed_46" type="radio" /><input id="__tabbed_46_2" name="__tabbed_46" type="radio" /><input id="__tabbed_46_3" name="__tabbed_46" type="radio" /><input id="__tabbed_46_4" name="__tabbed_46" type="radio" /><input id="__tabbed_46_5" name="__tabbed_46" type="radio" /><div class="tabbed-labels"><label for="__tabbed_46_1">IP-Adresse</label><label for="__tabbed_46_2">Reverse DNS</label><label for="__tabbed_46_3">ASN</label><label for="__tabbed_46_4">User-Agent</label><label for="__tabbed_46_5">URI</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="47:5"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">IP-Adresse</label><label for="__tabbed_47_2">Reverse DNS</label><label for="__tabbed_47_3">ASN</label><label for="__tabbed_47_4">User-Agent</label><label for="__tabbed_47_5">URI</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>Was dies bewirkt:</strong> Setzt Besucher basierend auf ihrer IP-Adresse oder ihrem Netzwerk auf die Whitelist. Diese Besucher umgehen alle Sicherheitsprüfungen.</p>
@@ -11293,7 +11462,7 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 <p>Auf der Whitelist stehende Besucher <strong>umgehen vollständig alle anderen Sicherheitsprüfungen</strong> in BunkerWeb, einschließlich WAF-Regeln, Ratenbegrenzung, Erkennung bösartiger Bots und aller anderen Sicherheitsmechanismen. Verwenden Sie die Whitelist nur für vertrauenswürdige Quellen, bei denen Sie absolut sicher sind.</p>
 </div>
 <h3 id="beispielkonfigurationen_23">Beispielkonfigurationen</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="47:5"><input checked="checked" id="__tabbed_47_1" name="__tabbed_47" type="radio" /><input id="__tabbed_47_2" name="__tabbed_47" type="radio" /><input id="__tabbed_47_3" name="__tabbed_47" type="radio" /><input id="__tabbed_47_4" name="__tabbed_47" type="radio" /><input id="__tabbed_47_5" name="__tabbed_47" type="radio" /><div class="tabbed-labels"><label for="__tabbed_47_1">Grundlegender Organisationszugriff</label><label for="__tabbed_47_2">Erweiterte Konfiguration</label><label for="__tabbed_47_3">Verwendung lokaler Dateien</label><label for="__tabbed_47_4">API-Zugriffsmuster</label><label for="__tabbed_47_5">Bekannte Crawler</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="48:5"><input checked="checked" id="__tabbed_48_1" name="__tabbed_48" type="radio" /><input id="__tabbed_48_2" name="__tabbed_48" type="radio" /><input id="__tabbed_48_3" name="__tabbed_48" type="radio" /><input id="__tabbed_48_4" name="__tabbed_48" type="radio" /><input id="__tabbed_48_5" name="__tabbed_48" type="radio" /><div class="tabbed-labels"><label for="__tabbed_48_1">Grundlegender Organisationszugriff</label><label for="__tabbed_48_2">Erweiterte Konfiguration</label><label for="__tabbed_48_3">Verwendung lokaler Dateien</label><label for="__tabbed_48_4">API-Zugriffsmuster</label><label for="__tabbed_48_5">Bekannte Crawler</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Eine einfache Konfiguration, die die IP-Adressen des Unternehmensbüros auf die Whitelist setzt:</p>
