@@ -1,0 +1,5 @@
+@@ -893,3 +893,3 @@
+ void
+-ngx_stream_lua_ffi_proxy_ssl_free_verify_cert(void *)
++ngx_stream_lua_ffi_proxy_ssl_free_verify_cert(void *cdata)
+ {

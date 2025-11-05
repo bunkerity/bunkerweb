@@ -9,7 +9,7 @@
 
 BunkerWeb Cloud 将是开始使用 BunkerWeb 的最简单方式。它为您提供一个完全托管的 BunkerWeb 服务，无需任何麻烦。可以把它想象成一个 BunkerWeb 即服务！
 
-试试我们的 [BunkerWeb Cloud 服务](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)，您将获得：
+试试我们的 [BunkerWeb Cloud 服务](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc)，您将获得：
 
 - 一个完全托管在我们云端的 BunkerWeb 实例
 - 所有 BunkerWeb 功能，包括 PRO 功能
@@ -125,7 +125,8 @@ docker run -d \
   -v bw-storage:/data \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
-  -e API_TOKEN="changeme" \
+  -e API_USERNAME=changeme \
+  -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
   bunkerity/bunkerweb-all-in-one:1.6.6-rc1
@@ -135,29 +136,38 @@ docker run -d \
 
 ```yaml
 services:
-  bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc1
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
+    container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
       - "443:8443/udp"
     environment:
-      SERVER_NAME: "www.example.com"
+      SERVER_NAME: "api.example.com"
       MULTISITE: "yes"
       DISABLE_DEFAULT_SERVER: "yes"
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_URL: "/api-<unguessable>"
-      REVERSE_PROXY_HOST: "http://bunkerweb-aio:8888"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/api-<unguessable>"
+      api.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:8888" # 内部 API 端点
 
-  bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
-    environment:
+      # API 设置
       SERVICE_API: "yes"
-      API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
-      # 可选地设置一个管理员覆盖令牌
-      # API_TOKEN: "changeme"
+      # 设置强壮的凭据并且只允许可信的 IP/网络（详见下文）
+      API_USERNAME: "changeme"
+      API_PASSWORD: "StrongP@ssw0rd"
+      API_ROOT_PATH: "/api-<unguessable>" # 需与 REVERSE_PROXY_URL 保持一致
+
+      # 默认停用 UI；改为 "yes" 可启用
+      SERVICE_UI: "no"
+    volumes:
+      - bw-storage:/data
     networks:
       - bw-universe
+
+volumes:
+  bw-storage:
 
 networks:
   bw-universe:
@@ -725,18 +735,18 @@ sudo ./install-bunkerweb.sh
 
 **通用选项：**
 
-| 选项                    | 描述                                             |
-| ----------------------- | ------------------------------------------------ |
-| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.6-rc1`）。    |
-| `-w, --enable-wizard`   | 启用设置向导。                                   |
-| `-n, --no-wizard`       | 禁用设置向导。                                   |
-| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。       |
-| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。 |
-| `-q, --quiet`           | 静默安装（抑制输出）。                           |
-| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。    |
-| `--no-api`              | 明确禁用 API 服务。                              |
-| `-h, --help`            | 显示包含所有可用选项的帮助信息。                 |
-| `--dry-run`             | 显示将要安装的内容，但不实际执行。               |
+| 选项                    | 描述                                              |
+| ----------------------- | ------------------------------------------------- |
+| `-v, --version VERSION` | 指定要安装的 BunkerWeb 版本（例如 `1.6.6-rc1`）。 |
+| `-w, --enable-wizard`   | 启用设置向导。                                    |
+| `-n, --no-wizard`       | 禁用设置向导。                                    |
+| `-y, --yes`             | 以非交互模式运行，对所有提示使用默认答案。        |
+| `-f, --force`           | 即使在不受支持的操作系统版本上，也强制继续安装。  |
+| `-q, --quiet`           | 静默安装（抑制输出）。                            |
+| `--api`, `--enable-api` | 启用 API (FastAPI) systemd 服务（默认禁用）。     |
+| `--no-api`              | 明确禁用 API 服务。                               |
+| `-h, --help`            | 显示包含所有可用选项的帮助信息。                  |
+| `--dry-run`             | 显示将要安装的内容，但不实际执行。                |
 
 **安装类型：**
 

@@ -9,7 +9,7 @@
 
 BunkerWeb Cloud será la forma más fácil de empezar con BunkerWeb. Te ofrece un servicio de BunkerWeb totalmente gestionado sin complicaciones. ¡Piénsalo como un BunkerWeb-como-un-Servicio!
 
-Prueba nuestra [oferta de BunkerWeb Cloud](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) y obtén acceso a:
+Prueba nuestra [oferta de BunkerWeb Cloud](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) y obtén acceso a:
 
 - Una instancia de BunkerWeb totalmente gestionada alojada en nuestra nube
 - Todas las características de BunkerWeb, incluidas las PRO
@@ -125,7 +125,8 @@ docker run -d \
   -v bw-storage:/data \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
-  -e API_TOKEN="changeme" \
+  -e API_USERNAME=changeme \
+  -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
   bunkerity/bunkerweb-all-in-one:1.6.6-rc1
@@ -135,29 +136,38 @@ Recomendado (detrás de BunkerWeb) — no publiques el `8888`; en su lugar, haz 
 
 ```yaml
 services:
-  bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc1
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
+    container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
       - "443:8443/udp"
     environment:
-      SERVER_NAME: "www.example.com"
+      SERVER_NAME: "api.example.com"
       MULTISITE: "yes"
       DISABLE_DEFAULT_SERVER: "yes"
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_URL: "/api-<unguessable>"
-      REVERSE_PROXY_HOST: "http://bunkerweb-aio:8888"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/api-<unguessable>"
+      api.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:8888" # Punto interno de la API
 
-  bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
-    environment:
+      # Configuración de la API
       SERVICE_API: "yes"
-      API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
-      # Opcionalmente, establece un token de anulación de administrador
-      # API_TOKEN: "changeme"
+      # Usa credenciales robustas y limita el acceso a IP/redes de confianza (más detalles abajo)
+      API_USERNAME: "changeme"
+      API_PASSWORD: "StrongP@ssw0rd"
+      API_ROOT_PATH: "/api-<unguessable>" # Debe coincidir con REVERSE_PROXY_URL
+
+      # Desactivamos la IU; cámbialo a "yes" para habilitarla
+      SERVICE_UI: "no"
+    volumes:
+      - bw-storage:/data
     networks:
       - bw-universe
+
+volumes:
+  bw-storage:
 
 networks:
   bw-universe:
@@ -726,7 +736,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 
 | Opción                  | Descripción                                                                                       |
 | :---------------------- | :------------------------------------------------------------------------------------------------ |
-| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.6-rc1`).                                  |
+| `-v, --version VERSION` | Especifica la versión de BunkerWeb a instalar (p. ej., `1.6.6-rc1`).                              |
 | `-w, --enable-wizard`   | Habilita el asistente de configuración.                                                           |
 | `-n, --no-wizard`       | Deshabilita el asistente de configuración.                                                        |
 | `-y, --yes`             | Se ejecuta en modo no interactivo usando las respuestas predeterminadas para todas las preguntas. |

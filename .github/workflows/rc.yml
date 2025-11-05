@@ -13,9 +13,6 @@ jobs:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         arch: [linux/amd64, linux/386]
-        exclude:
-          - image: all-in-one
-            arch: linux/386
         include:
           - release: rc
             cache: false
@@ -67,9 +64,6 @@ jobs:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui, api, all-in-one]
         arch: [linux/arm64, linux/arm/v7]
-        exclude:
-          - image: all-in-one
-            arch: linux/arm/v7
         include:
           - release: rc
             cache: false

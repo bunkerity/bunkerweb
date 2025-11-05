@@ -68,30 +68,22 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
           chmod 600 ~/.ssh/id_rsa_arm
           echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
-          echo "ServerAliveInterval 60" >> ~/.ssh/config
-          echo "ServerAliveCountMax 10" >> ~/.ssh/config
+          # Enhanced keepalive and timeout settings for long-running builds
+          cat >> ~/.ssh/config << 'EOF'
+          ServerAliveInterval 15
+          ServerAliveCountMax 20
+          TCPKeepAlive yes
+          ConnectTimeout 30
+          ConnectionAttempts 3
+          ControlMaster auto
+          ControlPath ~/.ssh/control-%C
+          ControlPersist 1h
+          StrictHostKeyChecking no
+          EOF
         env:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-      - name: Check ARM SSH connectivity
-        if: startsWith(env.ARCH, 'arm') == true
-        run: |
-          echo "Testing SSH connectivity to ARM node..."
-          for i in {1..5}; do
-            if ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Connection test $i successful' && docker info > /dev/null 2>&1 && echo 'Docker is running'"; then
-              echo "✓ SSH connection and Docker verified"
-              break
-            fi
-            echo "Retry $i/5 failed, waiting 10 seconds..."
-            sleep 10
-          done
-          echo "Waiting for connection to stabilize..."
-          sleep 5
-          echo "Final connectivity check..."
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Final check OK' && uptime"
-        env:
-          SSH_IP: ${{ secrets.ARM_SSH_IP }}
       - name: Setup Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         if: startsWith(env.ARCH, 'arm') == false
@@ -159,7 +151,7 @@ jobs:
       - name: Extract metadata
         if: inputs.TEST == true
         id: meta
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+        uses: docker/metadata-action@318604b99e75e41977312d83839a89be02ca4893 # v5.9.0
         with:
           images: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
       - name: Build test image

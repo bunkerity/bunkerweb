@@ -34,8 +34,12 @@ typedef void (*ngx_stream_lua_socket_udp_upstream_handler_pt)
 
 typedef struct {
     ngx_connection_t         *connection;
+    ngx_addr_t               *local;
     struct sockaddr          *sockaddr;
     socklen_t                 socklen;
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+    unsigned                   transparent:1;
+#endif
     ngx_str_t                 server;
     ngx_log_t                 log;
 } ngx_stream_lua_udp_connection_t;

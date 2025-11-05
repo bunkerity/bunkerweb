@@ -9,7 +9,7 @@
 
 BunkerWeb Cloud sera le moyen le plus simple de commencer avec BunkerWeb. Il vous offre un service BunkerWeb entièrement géré sans tracas. Considérez-le comme un BunkerWeb-as-a-Service !
 
-Essayez notre [offre BunkerWeb Cloud](https://panel.bunkerweb.io/contact.php?language=french&utm_campaign=self&utm_source=doc) et accédez à :
+Essayez notre [offre BunkerWeb Cloud](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) et accédez à :
 
 - Une instance BunkerWeb entièrement gérée et hébergée dans notre cloud
 - Toutes les fonctionnalités de BunkerWeb, y compris les fonctionnalités PRO
@@ -52,6 +52,7 @@ Un volume nommé (ou un bind mount) est nécessaire pour conserver la base SQLit
 services:
   bunkerweb-aio:
     image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
+    container_name: bunkerweb-aio
     volumes:
       - bw-storage:/data
 ...
@@ -103,16 +104,83 @@ L'image tout-en-un est livrée avec plusieurs services intégrés, qui peuvent �
 
 - `SERVICE_UI=yes` (par défaut) - Active le service d'interface utilisateur Web
 - `SERVICE_SCHEDULER=yes` (par défaut) - Active le service Scheduler
+- `SERVICE_API=no` (par défaut) - Active le service API (plan de contrôle FastAPI)
 - `AUTOCONF_MODE=no` (par défaut) - Active le service autoconf
 - `USE_REDIS=yes` (par défaut) : active l' [ instance](#redis-integration) Redis intégrée
 - `USE_CROWDSEC=no` (par défaut) - [ L'intégration CrowdSec](#crowdsec-integration) est désactivée par défaut
 - `HIDE_SERVICE_LOGS=` (optionnel) - Liste de services séparés par des virgules à masquer dans les logs du conteneur. Valeurs acceptées : `api`, `autoconf`, `bunkerweb`, `crowdsec`, `redis`, `scheduler`, `ui`, `nginx.access`, `nginx.error`, `modsec`. Les fichiers sous `/var/log/bunkerweb/<service>.log` continuent d'être alimentés.
 
+### Intégration de l'API
+
+L'image tout-en-un embarque l'API BunkerWeb. Elle est désactivée par défaut et peut être activée en définissant `SERVICE_API=yes`.
+
+!!! warning "Sécurité"
+    L'API constitue un plan de contrôle privilégié. Ne l'exposez pas directement à Internet. Conservez-la sur un réseau interne, restreignez les IP sources avec `API_WHITELIST_IPS`, imposez une authentification (`API_TOKEN` ou utilisateurs API + Biscuit) et, idéalement, passez par BunkerWeb en proxy inverse sur un chemin difficile à deviner.
+
+Activation rapide (autonome) — publie le port de l'API ; à réserver aux tests :
+
+```bash
+docker run -d \
+  --name bunkerweb-aio \
+  -v bw-storage:/data \
+  -e SERVICE_API=yes \
+  -e API_WHITELIST_IPS="127.0.0.0/8" \
+  -e API_USERNAME=changeme \
+  -e API_PASSWORD=StrongP@ssw0rd \
+  -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
+  -p 8888:8888/tcp \
+  bunkerity/bunkerweb-all-in-one:1.6.6-rc1
+```
+
+Configuration recommandée (derrière BunkerWeb) — ne publiez pas `8888` ; utilisez plutôt un proxy inverse :
+
+```yaml
+services:
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
+    container_name: bunkerweb-aio
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp"
+    environment:
+      SERVER_NAME: "api.example.com"
+      MULTISITE: "yes"
+      DISABLE_DEFAULT_SERVER: "yes"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/api-<unguessable>"
+      api.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:8888" # Point d'accès API interne
+
+      # Paramètres API
+      SERVICE_API: "yes"
+      # Définissez des identifiants robustes et autorisez uniquement des IP ou réseaux de confiance (plus de détails ci-dessous)
+      API_USERNAME: "changeme"
+      API_PASSWORD: "StrongP@ssw0rd"
+      API_ROOT_PATH: "/api-<unguessable>" # Doit correspondre à REVERSE_PROXY_URL
+
+      # Nous désactivons l'UI - passez à "yes" pour l'activer
+      SERVICE_UI: "no"
+    volumes:
+      - bw-storage:/data
+    networks:
+      - bw-universe
+
+volumes:
+  bw-storage:
+
+networks:
+  bw-universe:
+    name: bw-universe
+```
+
+Des informations détaillées concernant l'authentification, les permissions (ACL), la limitation de débit, le TLS et les options de configuration sont disponibles dans la [documentation de l'API](api.md).
+
 ### Accès à l'assistant d'installation
 
 Par défaut, l'assistant d'installation est lancé automatiquement lorsque vous exécutez le conteneur AIO pour la première fois. Pour y accéder, procédez comme suit :
 
-1. **Démarrez le conteneur AIO** comme [ci-dessus](#deployment), en vous assurant ( `SERVICE_UI=yes` par défaut).
+1. **Démarrez le conteneur AIO** comme [ci-dessus](#deployment), en vous assurant que `SERVICE_UI=yes` (valeur par défaut).
 2. **Accédez à l'interface utilisateur** via votre point de terminaison BunkerWeb principal, par exemple `https://your-domain`.
 
 > Suivez les étapes suivantes du guide de [démarrage rapide](quickstart-guide.md#complete-the-setup-wizard) pour configurer l'interface utilisateur Web.
@@ -129,7 +197,7 @@ L'image **BunkerWeb All-In-One** inclut Redis prêt à l'emploi pour la [persist
 
 ### Intégration CrowdSec {#crowdsec-integration}
 
-L'image Docker tout-en-un** de BunkerWeb ** est livrée avec CrowdSec entièrement intégré, sans conteneurs supplémentaires ni configuration manuelle requise. Suivez les étapes ci-dessous pour activer, configurer et étendre CrowdSec dans votre déploiement.
+L'image Docker **tout-en-un** de BunkerWeb est livrée avec CrowdSec entièrement intégré, sans conteneurs supplémentaires ni configuration manuelle requise. Suivez les étapes ci-dessous pour activer, configurer et étendre CrowdSec dans votre déploiement.
 
 Par défaut, CrowdSec est **désactivé**. Pour l'activer, il suffit d'ajouter la `USE_CROWDSEC` variable d'environnement :
 
@@ -672,10 +740,10 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 
 | Option                  | Description                                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| `-v, --version VERSION` | Spécifie la version de BunkerWeb à installer (par exemple, `1.6.6-rc1`).                                     |
+| `-v, --version VERSION` | Spécifie la version de BunkerWeb à installer (par exemple, `1.6.6-rc1`).                                 |
 | `-w, --enable-wizard`   | Active l'assistant de configuration.                                                                     |
 | `-n, --no-wizard`       | Désactive l'assistant d'installation.                                                                    |
-| `--api`, `--enable-api` | Active le service API (FastAPI) systemd (désactivé par défaut).                                         |
+| `--api`, `--enable-api` | Active le service API (FastAPI) systemd (désactivé par défaut).                                          |
 | `--no-api`              | Désactive explicitement le service API.                                                                  |
 | `-y, --yes`             | S'exécute en mode non interactif en utilisant les réponses par défaut pour toutes les invites.           |
 | `-f, --force`           | Force l'installation à se poursuivre même sur une version du système d'exploitation non prise en charge. |

@@ -122,7 +122,7 @@ local map_opc2 = {
 "movlhpsXrm$movhpsXrm|movshdupXrm|movhpdXrm",
 "movhpsXmr||movhpdXmr",
 "$prefetcht!Bm","hintnopVm","hintnopVm","hintnopVm",
-"hintnopVm","hintnopVm","hintnopVm","hintnopVm",
+"hintnopVm","hintnopVm","endbr*hintnopVm","hintnopVm",
 --2x
 "movUmx$","movUmy$","movUxm$","movUym$","movUmz$",nil,"movUzm$",nil,
 "movapsXrm||movapdXrm",
@@ -802,6 +802,24 @@ map_act = {
   -- VMX/SVM dispatch.
   vm = function(ctx, name, pat)
     return dispatch(ctx, map_opcvm[ctx.mrm])
+  end,
+
+  -- Special NOP for endbr64/endbr32.
+  endbr = function(ctx, name, pat)
+    if ctx.rep then
+      local pos = ctx.pos
+      local b = byte(ctx.code, pos)
+      local text
+      if b == 0xfa then text = "endbr64"
+      elseif b == 0xfb then text = "endbr64"
+      end
+      if text then
+	ctx.pos = pos + 1
+	ctx.rep = nil
+	return putop(ctx, text)
+      end
+    end
+    return dispatch(ctx, pat)
   end,
 
   -- Floating point opcode dispatch.

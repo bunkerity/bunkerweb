@@ -64,9 +64,12 @@ class Controller(Config):
         instances = []
         for controller_instance in self._get_controller_instances():
             instances.extend(self._to_instances(controller_instance))
-        for db_instance in self._db.get_instances(autoconf=True):
-            if not any(db_instance["hostname"] == instance["hostname"] for instance in instances):
-                instances.append(db_instance)
+
+        if not instances or not self._first_start:
+            for db_instance in self._db.get_instances(autoconf=True):
+                if not any(db_instance["hostname"] == instance["hostname"] for instance in instances):
+                    instances.append(db_instance)
+
         return instances
 
     @abstractmethod

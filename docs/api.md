@@ -17,6 +17,117 @@ The API service requires access to the BunkerWeb database (`DATABASE_URI`). It i
 
 See the quickstart wizard and architecture guidance in the [quickstart guide](quickstart-guide.md).
 
+## Recommended Deployment (Dedicated Containers)
+
+For production, deploy the API as its own container next to the BunkerWeb data plane and scheduler. Keep the API bound to the internal control-plane network and publish it only through BunkerWeb as a reverse proxy. This layout matches the [Docker integration reference](integrations.md#networks) and ensures the scheduler, BunkerWeb, and API share the same settings.
+
+```yaml
+x-bw-env: &bw-env
+  # We use an anchor to avoid repeating the same settings for both services
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Remember to set a stronger password for the database
+
+services:
+  bunkerweb:
+    # This is the name that will be used to identify the instance in the Scheduler
+    image: bunkerity/bunkerweb:1.6.6-rc1
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # For QUIC / HTTP3 support
+    environment:
+      <<: *bw-env # We use the anchor to avoid repeating the same settings for all services
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
+    environment:
+      <<: *bw-env
+      BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
+      SERVER_NAME: "api.example.com" # Change it if needed
+      MULTISITE: "yes"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/"
+      api.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
+    volumes:
+      - bw-storage:/data # This is used to persist the cache and other data like the backups
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.6-rc1
+    environment:
+      <<: *bw-env
+      API_USERNAME: "admin"
+      API_PASSWORD: "Str0ng&P@ss!" # Remember to set a stronger password for the admin user
+      DEBUG: "1"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-api
+      bw-db:
+        aliases:
+          - bw-api
+
+  bw-db:
+    image: mariadb:11
+    # We set the max allowed packet size to avoid issues with large queries
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # Remember to set a stronger password for the database
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
+
+  redis: # Redis service for the persistence of reports/bans/stats
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+volumes:
+  bw-data:
+  bw-storage:
+  redis-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24 # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db
+```
+
+This isolates the API behind BunkerWeb, keeps traffic on trusted networks, and lets you enforce authentication, allowlists, and rate limits at both the control plane and the exposed hostname.
+
 ## Highlights
 
 - Instance‑aware: broadcasts operational actions to discovered instances.
@@ -377,8 +488,8 @@ The API is organised by resource-focused routers. Use the sections below as a ca
 
 ### Global configuration
 
-- `GET /global_config`: fetch non-default settings (use `full=true` for the entire config, `methods=true` to include provenance).
-- `PATCH /global_config`: upsert API-owned (`method="api"`) global settings; validation errors call out unknown or read-only keys.
+- `GET /global-config`: fetch non-default settings (use `full=true` for the entire config, `methods=true` to include provenance).
+- `PATCH /global-config`: upsert API-owned (`method="api"`) global settings; validation errors call out unknown or read-only keys.
 
 ### Service lifecycle
 

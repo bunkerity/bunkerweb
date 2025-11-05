@@ -1,0 +1,203 @@
+x-env: &env
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:secret@bw-db:3306/db"
+  LOG_LEVEL: "info"
+  CUSTOM_LOG_LEVEL: "debug"
+
+services:
+  bunkerweb:
+    build:
+      context: ../..
+      dockerfile: ./src/bw/Dockerfile
+      args:
+        SKIP_MINIFY: "yes"
+    ports:
+      - 80:8080/tcp
+      - 443:8443/tcp
+      - 443:8443/udp
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bunkerweb
+      bw-services:
+        aliases:
+          - bunkerweb
+    logging:
+      driver: syslog
+      options:
+        tag: "bunkerweb"
+        syslog-address: "udp://10.20.30.254:514"
+
+  bw-scheduler:
+    build:
+      context: ../..
+      dockerfile: ./src/scheduler/Dockerfile
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-storage:/data
+    environment:
+      <<: *env
+      BUNKERWEB_INSTANCES: "bunkerweb"
+      SERVER_NAME: "www.example.com api.example.com app1.example.com"
+      MULTISITE: "yes"
+      API_WHITELIST_IP: "127.0.0.0/24 10.20.30.0/24"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      USE_WHITELIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      SERVE_FILES: "no"
+      DISABLE_DEFAULT_SERVER: "yes"
+      USE_CLIENT_CACHE: "yes"
+      USE_GZIP: "yes"
+      SESSIONS_CHECK_IP: "no"
+      www.example.com_USE_TEMPLATE: "ui"
+      www.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+      www.example.com_USE_REVERSE_PROXY: "yes"
+      www.example.com_REVERSE_PROXY_URL: "/admin"
+      www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/"
+      api.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
+      app1.example.com_USE_REVERSE_PROXY: "yes"
+      app1.example.com_REVERSE_PROXY_URL: "/"
+      app1.example.com_REVERSE_PROXY_HOST: "http://app1:8080"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-scheduler
+      bw-db:
+        aliases:
+          - bw-scheduler
+    logging:
+      driver: syslog
+      options:
+        tag: "bw-scheduler"
+        syslog-address: "udp://10.20.30.254:514"
+
+  bw-ui:
+    build:
+      context: ../..
+      dockerfile: ./src/ui/Dockerfile
+      args:
+        SKIP_MINIFY: "yes"
+    ports:
+      - 7000:7000
+    volumes:
+      - bw-logs:/var/log/bunkerweb
+      - ../../src/ui/app:/usr/share/bunkerweb/ui/app:ro
+      - ../../src/ui/utils:/usr/share/bunkerweb/ui/utils:ro
+      - ../../src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
+    environment:
+      <<: *env
+      ADMIN_USERNAME: "admin"
+      ADMIN_PASSWORD: "P@ssw0rd"
+      CHECK_PRIVATE_IP: "no"
+      FLASK_SECRET: "secret"
+      DEBUG: "1"
+      MAX_WORKERS: "1"
+      MAX_THREADS: "4"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-ui
+      bw-db:
+        aliases:
+          - bw-ui
+    logging:
+      driver: syslog
+      options:
+        tag: "bw-ui"
+        syslog-address: "udp://10.20.30.254:514"
+
+  bw-api:
+    build:
+      context: ../..
+      dockerfile: ./src/api/Dockerfile
+    ports:
+      - 8888:8888
+    volumes:
+      - ../../src/api/app:/usr/share/bunkerweb/api/app:ro
+      - ../../src/api/utils:/usr/share/bunkerweb/api/utils:ro
+    environment:
+      <<: *env
+      API_USERNAME: "admin"
+      API_PASSWORD: "P@ssw0rd"
+      DEBUG: "1"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-api
+      bw-db:
+        aliases:
+          - bw-api
+    logging:
+      driver: syslog
+      options:
+        tag: "bw-api"
+        syslog-address: "udp://10.20.30.254:514"
+
+  bw-db:
+    image: mariadb:11
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      bw-db:
+        aliases:
+          - bw-db
+
+  bw-syslog:
+    image: balabit/syslog-ng:4.9.0
+    cap_add:
+      - NET_BIND_SERVICE # Bind to low ports
+      - NET_BROADCAST # Send broadcasts
+      - NET_RAW # Use raw sockets
+      - DAC_READ_SEARCH # Read files bypassing permissions
+      - DAC_OVERRIDE # Override file permissions
+      - CHOWN # Change ownership
+      - SYSLOG # Write to system logs
+    volumes:
+      - bw-logs:/var/log/bunkerweb
+      - ./syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf
+    networks:
+      bw-universe:
+        ipv4_address: 10.20.30.254
+
+  app1:
+    image: nginxdemos/nginx-hello
+    restart: "unless-stopped"
+    networks:
+      bw-services:
+        aliases:
+          - app1
+
+volumes:
+  bw-data:
+  bw-storage:
+  bw-logs:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db

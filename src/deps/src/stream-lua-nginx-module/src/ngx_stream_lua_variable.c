@@ -33,8 +33,10 @@ ngx_stream_lua_ffi_var_get(ngx_stream_lua_request_t *r, u_char *name_data,
     ngx_str_t                    name;
 
     ngx_stream_session_t          *session;
+#if (NGX_STREAM_SSL)
     ngx_stream_lua_ctx_t          *ctx;
     ngx_stream_lua_ssl_ctx_t      *cctx;
+#endif
     ngx_stream_variable_value_t   *vv;
 
     if (r == NULL) {
@@ -43,9 +45,13 @@ ngx_stream_lua_ffi_var_get(ngx_stream_lua_request_t *r, u_char *name_data,
     }
 
     session = r->session;
+#if (NGX_STREAM_SSL)
     if ((r)->connection->fd == (ngx_socket_t) -1) {
         ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
         if (ctx->context & (NGX_STREAM_LUA_CONTEXT_SSL_CERT
+#ifdef HAVE_PROXY_SSL_PATCH
+                            | NGX_STREAM_LUA_CONTEXT_PROXY_SSL_VERIFY
+#endif
                             | NGX_STREAM_LUA_CONTEXT_SSL_CLIENT_HELLO))
         {
             cctx = ngx_stream_lua_ssl_get_ctx(r->connection->ssl->connection);
@@ -56,6 +62,12 @@ ngx_stream_lua_ffi_var_get(ngx_stream_lua_request_t *r, u_char *name_data,
             return NGX_ERROR;
         }
     }
+#else
+    if ((r)->connection->fd == (ngx_socket_t) -1) {
+        *err = "API disabled in the current context";
+        return NGX_ERROR;
+    }
+#endif
 
     hash = ngx_hash_strlow(lowcase_buf, name_data, name_len);
 

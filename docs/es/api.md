@@ -17,6 +17,117 @@ El servicio de la API requiere acceso a la base de datos de BunkerWeb (`DATABASE
 
 Consulta el asistente de inicio rápido y la guía de arquitectura en la [guía de inicio rápido](quickstart-guide.md).
 
+## Despliegue recomendado (Contenedores dedicados)
+
+Para producción, despliega la API como su propio contenedor junto al plano de datos de BunkerWeb y el scheduler. Mantén la API unida a la red interna del plano de control y publícala únicamente a través de BunkerWeb como un proxy inverso. Esta disposición coincide con la [referencia de integración de Docker](integrations.md#networks) y garantiza que el scheduler, BunkerWeb y la API compartan la misma configuración.
+
+```yaml
+x-bw-env: &bw-env
+  # Usamos un ancla para evitar repetir la misma configuración en ambos servicios
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Asegúrate de establecer el rango de IP correcto para que el scheduler pueda enviar la configuración a la instancia
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Recuerda usar una contraseña más fuerte para la base de datos
+
+services:
+  bunkerweb:
+    # Este es el nombre que se usará para identificar la instancia en el Scheduler
+    image: bunkerity/bunkerweb:1.6.6-rc1
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # Para compatibilidad con QUIC / HTTP3
+    environment:
+      <<: *bw-env # Usamos el ancla para evitar repetir la misma configuración en todos los servicios
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.6-rc1
+    environment:
+      <<: *bw-env
+      BUNKERWEB_INSTANCES: "bunkerweb" # Asegúrate de establecer el nombre correcto de la instancia
+      SERVER_NAME: "api.example.com" # Cámbialo si es necesario
+      MULTISITE: "yes"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/"
+      api.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
+    volumes:
+      - bw-storage:/data # Se utiliza para persistir la caché y otros datos como las copias de seguridad
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.6-rc1
+    environment:
+      <<: *bw-env
+      API_USERNAME: "admin"
+      API_PASSWORD: "Str0ng&P@ss!" # Recuerda usar una contraseña más fuerte para el usuario administrador
+      DEBUG: "1"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-api
+      bw-db:
+        aliases:
+          - bw-api
+
+  bw-db:
+    image: mariadb:11
+    # Definimos el tamaño máximo de paquete permitido para evitar problemas con consultas grandes
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # Recuerda usar una contraseña más fuerte para la base de datos
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
+
+  redis: # Servicio de Redis para la persistencia de informes/baneos/estadísticas
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+volumes:
+  bw-data:
+  bw-storage:
+  redis-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24 # Asegúrate de establecer el rango de IP correcto para que el scheduler pueda enviar la configuración a la instancia
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db
+```
+
+Esto aísla la API detrás de BunkerWeb, mantiene el tráfico en redes de confianza y te permite aplicar autenticación, listas blancas y límites de tasa tanto en el plano de control como en el nombre de host expuesto.
+
 ## Puntos destacados
 
 - Consciente de las instancias: transmite acciones operativas a las instancias descubiertas.

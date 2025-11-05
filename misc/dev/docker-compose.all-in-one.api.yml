@@ -1,0 +1,45 @@
+services:
+  bunkerweb-aio:
+    build:
+      context: ../..
+      dockerfile: ./src/all-in-one/Dockerfile
+      args:
+        SKIP_MINIFY: "yes"
+    container_name: bunkerweb-aio
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp"
+    environment:
+      SERVER_NAME: "api.example.com"
+      MULTISITE: "yes"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      USE_WHITELIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
+      LOG_LEVEL: "info"
+      CUSTOM_LOG_LEVEL: "debug"
+      DISABLE_DEFAULT_SERVER: "yes"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:8888" # Internal API endpoint
+
+      # API settings
+      SERVICE_API: "yes"
+      # Set a strong token and whitelist only trusted IPs/networks (more details below)
+      API_USERNAME: "admin"
+      API_PASSWORD: "StrongP@ssw0rd"
+
+      # UI settings
+      SERVICE_UI: "yes"
+    volumes:
+      - bw-storage:/data
+    networks:
+      - bw-universe
+
+volumes:
+  bw-storage:
+
+networks:
+  bw-universe:
+    name: bw-universe

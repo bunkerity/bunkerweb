@@ -9,7 +9,7 @@
 
 BunkerWeb Cloud ist der einfachste Weg, um mit BunkerWeb zu beginnen. Es bietet Ihnen einen vollständig verwalteten BunkerWeb-Dienst ohne Aufwand. Betrachten Sie es als BunkerWeb-as-a-Service!
 
-Probieren Sie unser [BunkerWeb Cloud-Angebot](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) aus und erhalten Sie Zugang zu:
+Probieren Sie unser [BunkerWeb Cloud-Angebot](https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&utm_source=doc) aus und erhalten Sie Zugang zu:
 
 - Eine vollständig verwaltete BunkerWeb-Instanz, die in unserer Cloud gehostet wird
 - Alle BunkerWeb-Funktionen, einschließlich der PRO-Funktionen
@@ -125,7 +125,8 @@ docker run -d \
   -v bw-storage:/data \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
-  -e API_TOKEN="changeme" \
+  -e API_USERNAME=changeme \
+  -e API_PASSWORD=StrongP@ssw0rd \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
   -p 8888:8888/tcp \
   bunkerity/bunkerweb-all-in-one:1.6.6-rc1
@@ -135,29 +136,38 @@ Empfohlen (hinter BunkerWeb) — veröffentlichen Sie `8888` nicht; verwenden Si
 
 ```yaml
 services:
-  bunkerweb:
-    image: bunkerity/bunkerweb:1.6.6-rc1
+  bunkerweb-aio:
+    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
+    container_name: bunkerweb-aio
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
       - "443:8443/udp"
     environment:
-      SERVER_NAME: "www.example.com"
+      SERVER_NAME: "api.example.com"
       MULTISITE: "yes"
       DISABLE_DEFAULT_SERVER: "yes"
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_URL: "/api-<unguessable>"
-      REVERSE_PROXY_HOST: "http://bunkerweb-aio:8888"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/api-<unguessable>"
+      api.example.com_REVERSE_PROXY_HOST: "http://127.0.0.1:8888" # Interner API-Endpunkt
 
-  bunkerweb-aio:
-    image: bunkerity/bunkerweb-all-in-one:1.6.6-rc1
-    environment:
+      # API-Einstellungen
       SERVICE_API: "yes"
-      API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
-      # Optional einen Admin-Überschreibungstoken setzen
-      # API_TOKEN: "changeme"
+      # Verwenden Sie starke Zugangsdaten und erlauben Sie nur vertrauenswürdige IPs/Netze (Details unten)
+      API_USERNAME: "changeme"
+      API_PASSWORD: "StrongP@ssw0rd"
+      API_ROOT_PATH: "/api-<unguessable>" # Muss mit REVERSE_PROXY_URL übereinstimmen
+
+      # Wir deaktivieren die UI – zum Aktivieren auf "yes" setzen
+      SERVICE_UI: "no"
+    volumes:
+      - bw-storage:/data
     networks:
       - bw-universe
+
+volumes:
+  bw-storage:
 
 networks:
   bw-universe:

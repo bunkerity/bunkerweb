@@ -43,6 +43,16 @@
       "type": "password",
       "multiple": "auth-basic-credentials"
     },
+    "AUTH_BASIC_ROUNDS": {
+      "context": "multisite",
+      "default": "656000",
+      "help": "Number of hashing rounds used for generated passwords (1000-999999999).",
+      "id": "auth-basic-rounds",
+      "label": "Auth basic Hash rounds",
+      "regex": "^[1-9][0-9]{3,8}$",
+      "type": "number",
+      "multiple": "auth-basic-credentials"
+    },
     "AUTH_BASIC_TEXT": {
       "context": "multisite",
       "default": "Restricted area",

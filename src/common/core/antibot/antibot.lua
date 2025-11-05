@@ -30,8 +30,10 @@ local decode = cjson.decode
 local encode = cjson.encode
 local get_rdns = utils.get_rdns
 local get_asn = utils.get_asn
+local get_country = utils.get_country
 local regex_match = utils.regex_match
 local ipmatcher_new = ipmatcher.new
+local upper = string.upper
 
 local template
 local render = nil
@@ -54,6 +56,12 @@ end
 function antibot:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "antibot", ctx)
+	self.use_antibot = self.variables["USE_ANTIBOT"] or "no"
+	self.country_ignore = {}
+	self.country_only = {}
+	self.country_ignore_active = false
+	self.country_only_active = false
+	self.country_filter_enabled = false
 	-- Decode lists only once
 	if get_phase() ~= "init" and self.use_antibot ~= "no" then
 		self.lists = {}
@@ -68,6 +76,21 @@ function antibot:initialize(ctx)
 				end
 			end
 		end
+		local ignore_country = self.variables["ANTIBOT_IGNORE_COUNTRY"]
+		if ignore_country and ignore_country ~= "" then
+			for code in ignore_country:gmatch("%S+") do
+				self.country_ignore[upper(code)] = true
+			end
+			self.country_ignore_active = next(self.country_ignore) ~= nil
+		end
+		local only_country = self.variables["ANTIBOT_ONLY_COUNTRY"]
+		if only_country and only_country ~= "" then
+			for code in only_country:gmatch("%S+") do
+				self.country_only[upper(code)] = true
+			end
+			self.country_only_active = next(self.country_only) ~= nil
+		end
+		self.country_filter_enabled = self.country_ignore_active or self.country_only_active
 	end
 end
 
@@ -166,6 +189,9 @@ function antibot:access()
 	local checks = {
 		["IP"] = "ip" .. self.ctx.bw.remote_addr,
 	}
+	if self.country_filter_enabled then
+		checks["COUNTRY"] = "country" .. self.ctx.bw.remote_addr
+	end
 	if self.ctx.bw.http_user_agent then
 		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
 	end
@@ -177,6 +203,9 @@ function antibot:access()
 		["URI"] = false,
 		["UA"] = false,
 	}
+	if self.country_filter_enabled then
+		already_cached["COUNTRY"] = false
+	end
 	for k, v in pairs(checks) do
 		local ok, cached = self:is_in_cache(v)
 		if not ok then
@@ -705,6 +734,8 @@ function antibot:kind_to_ele(kind)
 		return "ua" .. self.ctx.bw.http_user_agent
 	elseif kind == "URI" then
 		return "uri" .. self.ctx.bw.uri
+	elseif kind == "COUNTRY" then
+		return "country" .. self.ctx.bw.remote_addr
 	end
 end
 
@@ -733,8 +764,35 @@ function antibot:is_ignored(kind)
 		return self:is_ignored_uri()
 	elseif kind == "UA" then
 		return self:is_ignored_ua()
+	elseif kind == "COUNTRY" then
+		return self:is_ignored_country()
 	end
 	return false, "unknown kind " .. kind
+end
+
+function antibot:is_ignored_country()
+	if not self.country_filter_enabled then
+		return false, "ko"
+	end
+	if not self.ctx.bw.ip_is_global then
+		if self.country_only_active then
+			return true, "country local-ip"
+		end
+		return false, "ko"
+	end
+	local country_code, err = get_country(self.ctx.bw.remote_addr)
+	if not country_code then
+		self.logger:log(ERR, "can't get country for IP " .. self.ctx.bw.remote_addr .. " : " .. err)
+		return false, "ko"
+	end
+	country_code = upper(country_code)
+	if self.country_ignore_active and self.country_ignore[country_code] then
+		return true, "country " .. country_code
+	end
+	if self.country_only_active and not self.country_only[country_code] then
+		return true, "country " .. country_code
+	end
+	return false, "ko"
 end
 
 function antibot:is_ignored_ip()

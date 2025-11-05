@@ -76,28 +76,23 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
           chmod 600 ~/.ssh/id_rsa_arm
           echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
+          # Enhanced keepalive and timeout settings for long-running builds
+          cat >> ~/.ssh/config << 'EOF'
+          ServerAliveInterval 15
+          ServerAliveCountMax 20
+          TCPKeepAlive yes
+          ConnectTimeout 30
+          ConnectionAttempts 3
+          ControlMaster auto
+          ControlPath ~/.ssh/control-%C
+          ControlPersist 1h
+          StrictHostKeyChecking no
+          EOF
         env:
           SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
-      - name: Check ARM SSH connectivity
-        run: |
-          echo "Testing SSH connectivity to ARM node..."
-          for i in {1..5}; do
-            if ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Connection test $i successful' && docker info > /dev/null 2>&1 && echo 'Docker is running'"; then
-              echo "✓ SSH connection and Docker verified"
-              break
-            fi
-            echo "Retry $i/5 failed, waiting 10 seconds..."
-            sleep 10
-          done
-          echo "Waiting for connection to stabilize..."
-          sleep 5
-          echo "Final connectivity check..."
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa_arm root@$SSH_IP "echo 'Final check OK' && uptime"
-        env:
-          SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
       - name: Install Docker
-        run: ssh root@$SSH_IP "curl -fsSL https://test.docker.com -o test-docker.sh ; chmod +x test-docker.sh ; sh test-docker.sh ; echo 'ClientAliveInterval 60' >> /etc/ssh/sshd_config ; echo 'ClientAliveCountMax 0' >> /etc/ssh/sshd_config ; systemctl restart ssh"
+        run: ssh root@$SSH_IP "curl -fsSL https://test.docker.com -o test-docker.sh ; chmod +x test-docker.sh ; sh test-docker.sh ; echo 'ClientAliveInterval 15' >> /etc/ssh/sshd_config ; echo 'ClientAliveCountMax 60' >> /etc/ssh/sshd_config ; echo 'MaxSessions 50' >> /etc/ssh/sshd_config ; echo 'MaxStartups 50:30:100' >> /etc/ssh/sshd_config ; systemctl restart ssh"
         env:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}

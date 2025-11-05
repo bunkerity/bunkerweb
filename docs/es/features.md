@@ -266,14 +266,20 @@ Las siguientes configuraciones son compartidas por todos los mecanismos de desaf
 
 BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben omitir por completo el desafío antibot. Esto es útil para incluir en la lista blanca servicios de confianza, redes internas o páginas específicas que siempre deben ser accesibles sin desafío:
 
-| Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                            |
-| --------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío.                  |
-| `ANTIBOT_IGNORE_IP`         |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.            |
-| `ANTIBOT_IGNORE_RDNS`       |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.          |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas. |
-| `ANTIBOT_IGNORE_ASN`        |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                         |
-| `ANTIBOT_IGNORE_USER_AGENT` |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.   |
+| Configuración               | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                      |
+| --------------------------- | ----------------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |                   | multisite | no       | **URL excluidas:** Lista de patrones regex de URI separados por espacios que deben omitir el desafío.                            |
+| `ANTIBOT_IGNORE_IP`         |                   | multisite | no       | **IP excluidas:** Lista de direcciones IP o rangos CIDR separados por espacios que deben omitir el desafío.                      |
+| `ANTIBOT_IGNORE_RDNS`       |                   | multisite | no       | **DNS inverso excluido:** Lista de sufijos de DNS inverso separados por espacios que deben omitir el desafío.                    |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`             | multisite | no       | **Solo IP globales:** Si se establece en `yes`, solo realiza comprobaciones de DNS inverso en direcciones IP públicas.           |
+| `ANTIBOT_IGNORE_ASN`        |                   | multisite | no       | **ASN excluidos:** Lista de números de ASN separados por espacios que deben omitir el desafío.                                   |
+| `ANTIBOT_IGNORE_USER_AGENT` |                   | multisite | no       | **User-Agents excluidos:** Lista de patrones regex de User-Agent separados por espacios que deben omitir el desafío.             |
+| `ANTIBOT_IGNORE_COUNTRY`    |                   | multisite | no       | **Países excluidos:** Lista de códigos de país ISO 3166-1 alfa-2 separados por espacios que deben omitir el desafío.             |
+| `ANTIBOT_ONLY_COUNTRY`      |                   | multisite | no       | **Países con desafío obligatorio:** Lista de códigos de país ISO 3166-1 alfa-2 que deben resolver el desafío. El resto se omite. |
+
+!!! note "Comportamiento de la configuración basada en países"
+      - Cuando se configuran `ANTIBOT_IGNORE_COUNTRY` y `ANTIBOT_ONLY_COUNTRY`, la lista de exclusiones tiene prioridad: los países presentes en ambas listas omiten el desafío.
+      - Las direcciones IP privadas o desconocidas omiten el desafío cuando `ANTIBOT_ONLY_COUNTRY` está configurado, porque no se puede determinar un código de país.
 
 **Ejemplos:**
 
@@ -287,6 +293,12 @@ BunkerWeb le permite especificar ciertos usuarios, IP o solicitudes que deben om
   Esto excluirá del desafío antibot las solicitudes de los ASN 15169 (Google) y 8075 (Microsoft).
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
   Esto excluirá del desafío antibot las solicitudes con User-Agents que coincidan con el patrón regex especificado.
+
+- `ANTIBOT_IGNORE_COUNTRY: "US CA"`
+  Esto omitirá el desafío antibot para visitantes ubicados en Estados Unidos o Canadá.
+
+- `ANTIBOT_ONLY_COUNTRY: "CN RU"`
+  Esto solo desafiará a los visitantes de China o Rusia. Las solicitudes de otros países (o rangos IP privados) omitirán el desafío.
 
 ### Mecanismos de desafío compatibles
 
@@ -578,16 +590,18 @@ Siga estos pasos para habilitar y configurar la autenticación básica:
 2.  **Elija el ámbito de protección:** Decida si proteger todo su sitio o solo URL específicas configurando el ajuste `AUTH_BASIC_LOCATION`.
 3.  **Defina las credenciales:** Configure al menos un par de nombre de usuario y contraseña utilizando los ajustes `AUTH_BASIC_USER` y `AUTH_BASIC_PASSWORD`.
 4.  **Personalice el mensaje:** Opcionalmente, cambie el `AUTH_BASIC_TEXT` para mostrar un mensaje personalizado en la solicitud de inicio de sesión.
+5.  **Ajuste el coste del hash (opcional):** Modifique `AUTH_BASIC_ROUNDS` (1000-999999999) para equilibrar el rendimiento del inicio de sesión y la robustez del hashing de contraseñas.
 
 ### Ajustes de configuración
 
-| Ajuste                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                            |
-| --------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Habilitar autenticación básica:** Establezca en `yes` para habilitar la autenticación básica.                                                                        |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Ámbito de protección:** Establezca en `sitewide` para proteger todo el sitio, o especifique una ruta de URL (p. ej., `/admin`) para proteger solo áreas específicas. |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Nombre de usuario:** El nombre de usuario requerido para la autenticación. Puede definir múltiples pares de nombre de usuario/contraseña.                            |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Cada contraseña corresponde a un nombre de usuario.                                                     |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                         |
+| Ajuste                | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                       |
+| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Habilitar autenticación básica:** Establezca en `yes` para habilitar la autenticación básica.                                                                                                   |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Ámbito de protección:** Establezca en `sitewide` para proteger todo el sitio, o especifique una ruta de URL (p. ej., `/admin`) para proteger solo áreas específicas.                            |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Nombre de usuario:** El nombre de usuario requerido para la autenticación. Puede definir múltiples pares de nombre de usuario/contraseña.                                                       |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Cada contraseña corresponde a un nombre de usuario.                                                                                |
+| `AUTH_BASIC_ROUNDS`   | `656000`          | multisite | yes      | **Rondas de hash:** Número de rondas SHA-512 aplicadas al generar el archivo htpasswd (debe mantenerse entre 1000 y 999999999). Valores más bajos aceleran el acceso pero reducen la resistencia. |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                                                    |
 
 !!! warning "Consideraciones de seguridad"
     La autenticación básica HTTP transmite las credenciales codificadas (no cifradas) en Base64. Aunque esto es aceptable cuando se utiliza sobre HTTPS, no debe considerarse seguro sobre HTTP plano. Habilite siempre SSL/TLS cuando utilice la autenticación básica.
@@ -1038,6 +1052,31 @@ Siga estos pasos para configurar y usar la función de Lista Negra:
     BLACKLIST_USER_AGENT_URLS: "file:///ruta/a/user-agent-blacklist.txt"
     BLACKLIST_URI_URLS: "file:///ruta/a/uri-blacklist.txt"
     ```
+
+### Trabajar con archivos de listas locales
+
+Las configuraciones `*_URLS` de los plugins de lista blanca, lista gris y lista negra utilizan el mismo descargador. Cuando referencia una URL `file:///`:
+
+- La ruta se resuelve dentro del contenedor del **scheduler** (en despliegues Docker normalmente `bunkerweb-scheduler`). Monte los archivos allí y asegúrese de que el usuario del scheduler tenga permisos de lectura.
+- Cada archivo es texto codificado en UTF-8 con una entrada por línea. Las líneas vacías se ignoran y las líneas de comentario deben comenzar con `#` o `;`. Los comentarios `//` no son compatibles.
+- Valores esperados por tipo de lista:
+  - **Listas IP** aceptan direcciones IPv4/IPv6 o redes CIDR (por ejemplo `192.0.2.10` o `2001:db8::/48`).
+  - **Listas rDNS** esperan un sufijo sin espacios (por ejemplo `.search.msn.com`). Los valores se normalizan automáticamente a minúsculas.
+  - **Listas ASN** pueden contener solo el número (`32934`) o el número con el prefijo `AS` (`AS15169`).
+  - **Listas de User-Agent** se tratan como patrones PCRE y se conserva la línea completa (incluidos los espacios). Mantenga los comentarios en una línea separada para que no se interpreten como parte del patrón.
+  - **Listas URI** deben comenzar con `/` y pueden usar tokens PCRE como `^` o `$`.
+
+Ejemplos de archivos con el formato esperado:
+
+```text
+# /etc/bunkerweb/lists/ip-blacklist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-blacklist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
 
 ## Brotli
 
@@ -2380,6 +2419,31 @@ Siga estos pasos para configurar y usar la función de Lista Gris:
     GREYLIST_IP: "203.0.113.0/24"  # Red del socio externo
     ```
 
+### Trabajar con archivos de listas locales
+
+Las configuraciones `*_URLS` de los plugins de lista blanca, lista gris y lista negra utilizan el mismo descargador. Cuando referencia una URL `file:///`:
+
+- La ruta se resuelve dentro del contenedor del **scheduler** (en despliegues Docker normalmente `bunkerweb-scheduler`). Monte los archivos allí y asegúrese de que el usuario del scheduler tenga permisos de lectura.
+- Cada archivo es texto codificado en UTF-8 con una entrada por línea. Las líneas vacías se ignoran y las líneas de comentario deben comenzar con `#` o `;`. Los comentarios `//` no son compatibles.
+- Valores esperados por tipo de lista:
+  - **Listas IP** aceptan direcciones IPv4/IPv6 o redes CIDR (por ejemplo `192.0.2.10` o `2001:db8::/48`).
+  - **Listas rDNS** esperan un sufijo sin espacios (por ejemplo `.search.msn.com`). Los valores se normalizan automáticamente a minúsculas.
+  - **Listas ASN** pueden contener solo el número (`32934`) o el número con el prefijo `AS` (`AS15169`).
+  - **Listas de User-Agent** se tratan como patrones PCRE y se conserva la línea completa (incluidos los espacios). Mantenga los comentarios en una línea separada para que no se interpreten como parte del patrón.
+  - **Listas URI** deben comenzar con `/` y pueden usar tokens PCRE como `^` o `$`.
+
+Ejemplos de archivos con el formato esperado:
+
+```text
+# /etc/bunkerweb/lists/ip-greylist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-greylist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```
+
 ## Gzip
 
 Compatibilidad con STREAM :x:
@@ -2714,7 +2778,7 @@ El complemento de Let's Encrypt simplifica la gestión de certificados SSL/TLS a
 Siga estos pasos para configurar y usar la función de Let's Encrypt:
 
 1.  **Habilite la función:** Establezca el ajuste `AUTO_LETS_ENCRYPT` en `yes` para habilitar la emisión y renovación automática de certificados.
-2.  **Proporcione un correo electrónico de contacto:** Ingrese su dirección de correo electrónico utilizando el ajuste `EMAIL_LETS_ENCRYPT` para recibir notificaciones importantes sobre sus certificados.
+2.  **Proporcione un correo electrónico de contacto (recomendado):** Ingrese su dirección de correo electrónico con el ajuste `EMAIL_LETS_ENCRYPT` para que Let's Encrypt pueda avisarle antes de que caduque un certificado. Si lo deja vacío, BunkerWeb se registrará sin dirección (opción de Certbot `--register-unsafely-without-email`) y no recibirá recordatorios ni correos de recuperación.
 3.  **Elija el tipo de desafío:** Seleccione la verificación `http` o `dns` con el ajuste `LETS_ENCRYPT_CHALLENGE`.
 4.  **Configure el proveedor de DNS:** Si utiliza desafíos DNS, especifique su proveedor de DNS y sus credenciales.
 5.  **Seleccione el perfil del certificado:** Elija su perfil de certificado preferido utilizando el ajuste `LETS_ENCRYPT_PROFILE` (classic, tlsserver o shortlived).
@@ -2728,21 +2792,21 @@ Siga estos pasos para configurar y usar la función de Let's Encrypt:
 
 ### Ajustes de Configuración
 
-| Ajuste                             | Valor por defecto        | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                      |
-| ---------------------------------- | ------------------------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTO_LETS_ENCRYPT`                | `no`                     | multisite | no       | **Habilitar Let's Encrypt:** Establezca en `yes` para habilitar la emisión y renovación automática de certificados.                                                                                                                                              |
-| `LETS_ENCRYPT_PASSTHROUGH`         | `no`                     | multisite | no       | **Pasar a través de Let's Encrypt:** Establezca en `yes` para pasar las solicitudes de Let's Encrypt al servidor web. Esto es útil cuando BunkerWeb está detrás de otro proxy inverso que maneja SSL.                                                            |
-| `EMAIL_LETS_ENCRYPT`               | `contact@{FIRST_SERVER}` | multisite | no       | **Correo electrónico de contacto:** Dirección de correo electrónico que se utiliza para las notificaciones de Let's Encrypt y se incluye en los certificados.                                                                                                    |
-| `LETS_ENCRYPT_CHALLENGE`           | `http`                   | multisite | no       | **Tipo de desafío:** Método utilizado para verificar la propiedad del dominio. Opciones: `http` o `dns`.                                                                                                                                                         |
-| `LETS_ENCRYPT_DNS_PROVIDER`        |                          | multisite | no       | **Proveedor de DNS:** Cuando se utilizan desafíos DNS, el proveedor de DNS a utilizar (por ejemplo, cloudflare, route53, digitalocean).                                                                                                                          |
-| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default`                | multisite | no       | **Propagación de DNS:** El tiempo de espera para la propagación de DNS en segundos. Si no se proporciona ningún valor, se utiliza el tiempo de propagación predeterminado del proveedor.                                                                         |
-| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                          | multisite | yes      | **Elemento de credencial:** Elementos de configuración para la autenticación del proveedor de DNS (por ejemplo, `cloudflare_api_token 123456`). Los valores pueden ser texto sin formato, codificados en base64 o un objeto JSON.                                |
-| `USE_LETS_ENCRYPT_WILDCARD`        | `no`                     | multisite | no       | **Certificados comodín:** Cuando se establece en `yes`, crea certificados comodín para todos los dominios. Solo disponible con desafíos DNS.                                                                                                                     |
-| `USE_LETS_ENCRYPT_STAGING`         | `no`                     | multisite | no       | **Usar entorno de prueba:** Cuando se establece en `yes`, utiliza el entorno de prueba de Let's Encrypt para realizar pruebas. El entorno de prueba tiene límites de velocidad más altos pero produce certificados que no son de confianza para los navegadores. |
-| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`                     | global    | no       | **Limpiar certificados antiguos:** Cuando se establece en `yes`, elimina los certificados antiguos que ya no son necesarios durante la renovación.                                                                                                               |
-| `LETS_ENCRYPT_PROFILE`             | `classic`                | multisite | no       | **Perfil de certificado:** Seleccione el perfil de certificado a utilizar. Opciones: `classic` (propósito general), `tlsserver` (optimizado para servidores TLS) o `shortlived` (certificados de 7 días).                                                        |
-| `LETS_ENCRYPT_CUSTOM_PROFILE`      |                          | multisite | no       | **Perfil de certificado personalizado:** Ingrese un perfil de certificado personalizado si su servidor ACME admite perfiles no estándar. Esto anula `LETS_ENCRYPT_PROFILE` si está configurado.                                                                  |
-| `LETS_ENCRYPT_MAX_RETRIES`         | `3`                      | multisite | no       | **Máximo de reintentos:** Número de veces que se reintentará la generación de certificados en caso de fallo. Establezca en `0` para deshabilitar los reintentos. Útil para manejar problemas de red temporales o límites de velocidad de la API.                 |
+| Ajuste                             | Valor por defecto | Contexto  | Múltiple | Descripción                                                                                                                                                                                                                                                      |
+| ---------------------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTO_LETS_ENCRYPT`                | `no`              | multisite | no       | **Habilitar Let's Encrypt:** Establezca en `yes` para habilitar la emisión y renovación automática de certificados.                                                                                                                                              |
+| `LETS_ENCRYPT_PASSTHROUGH`         | `no`              | multisite | no       | **Pasar a través de Let's Encrypt:** Establezca en `yes` para pasar las solicitudes de Let's Encrypt al servidor web. Esto es útil cuando BunkerWeb está detrás de otro proxy inverso que maneja SSL.                                                            |
+| `EMAIL_LETS_ENCRYPT`               | `-`               | multisite | no       | **Correo electrónico de contacto:** Dirección utilizada para los avisos de caducidad de Let's Encrypt. Déjelo en blanco solo si acepta no recibir alertas ni correos de recuperación (Certbot se registra con `--register-unsafely-without-email`).              |
+| `LETS_ENCRYPT_CHALLENGE`           | `http`            | multisite | no       | **Tipo de desafío:** Método utilizado para verificar la propiedad del dominio. Opciones: `http` o `dns`.                                                                                                                                                         |
+| `LETS_ENCRYPT_DNS_PROVIDER`        |                   | multisite | no       | **Proveedor de DNS:** Cuando se utilizan desafíos DNS, el proveedor de DNS a utilizar (por ejemplo, cloudflare, route53, digitalocean).                                                                                                                          |
+| `LETS_ENCRYPT_DNS_PROPAGATION`     | `default`         | multisite | no       | **Propagación de DNS:** El tiempo de espera para la propagación de DNS en segundos. Si no se proporciona ningún valor, se utiliza el tiempo de propagación predeterminado del proveedor.                                                                         |
+| `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` |                   | multisite | yes      | **Elemento de credencial:** Elementos de configuración para la autenticación del proveedor de DNS (por ejemplo, `cloudflare_api_token 123456`). Los valores pueden ser texto sin formato, codificados en base64 o un objeto JSON.                                |
+| `USE_LETS_ENCRYPT_WILDCARD`        | `no`              | multisite | no       | **Certificados comodín:** Cuando se establece en `yes`, crea certificados comodín para todos los dominios. Solo disponible con desafíos DNS.                                                                                                                     |
+| `USE_LETS_ENCRYPT_STAGING`         | `no`              | multisite | no       | **Usar entorno de prueba:** Cuando se establece en `yes`, utiliza el entorno de prueba de Let's Encrypt para realizar pruebas. El entorno de prueba tiene límites de velocidad más altos pero produce certificados que no son de confianza para los navegadores. |
+| `LETS_ENCRYPT_CLEAR_OLD_CERTS`     | `no`              | global    | no       | **Limpiar certificados antiguos:** Cuando se establece en `yes`, elimina los certificados antiguos que ya no son necesarios durante la renovación.                                                                                                               |
+| `LETS_ENCRYPT_PROFILE`             | `classic`         | multisite | no       | **Perfil de certificado:** Seleccione el perfil de certificado a utilizar. Opciones: `classic` (propósito general), `tlsserver` (optimizado para servidores TLS) o `shortlived` (certificados de 7 días).                                                        |
+| `LETS_ENCRYPT_CUSTOM_PROFILE`      |                   | multisite | no       | **Perfil de certificado personalizado:** Ingrese un perfil de certificado personalizado si su servidor ACME admite perfiles no estándar. Esto anula `LETS_ENCRYPT_PROFILE` si está configurado.                                                                  |
+| `LETS_ENCRYPT_MAX_RETRIES`         | `3`               | multisite | no       | **Máximo de reintentos:** Número de veces que se reintentará la generación de certificados en caso de fallo. Establezca en `0` para deshabilitar los reintentos. Útil para manejar problemas de red temporales o límites de velocidad de la API.                 |
 
 !!! info "Información y comportamiento" - El ajuste `LETS_ENCRYPT_DNS_CREDENTIAL_ITEM` es un ajuste múltiple y se puede utilizar para establecer varios elementos para el proveedor de DNS. Los elementos se guardarán como un archivo de caché, y Certbot leerá las credenciales de él. - Si no se proporciona ningún ajuste `LETS_ENCRYPT_DNS_PROPAGATION`, se utiliza el tiempo de propagación predeterminado del proveedor. - La automatización completa de Let's Encrypt utilizando el desafío `http` funciona en modo de flujo (stream) siempre que abra el puerto `80/tcp` desde el exterior. Utilice el ajuste `LISTEN_STREAM_PORT_SSL` para elegir su puerto de escucha SSL/TLS. - Si `LETS_ENCRYPT_PASSTHROUGH` se establece en `yes`, BunkerWeb no manejará las solicitudes de desafío ACME por sí mismo, sino que las pasará al servidor web de backend. Esto es útil en escenarios donde BunkerWeb actúa como un proxy inverso frente a otro servidor que está configurado para manejar los desafíos de Let's Encrypt.
 
@@ -2779,6 +2843,7 @@ El complemento de Let's Encrypt admite una amplia gama de proveedores de DNS par
 | `domainoffensive` | Domain-Offensive | `api_token`                                                                                                  |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/domainoffensive/certbot-dns-domainoffensive/blob/master/README.md) |
 | `dnsimple`        | DNSimple         | `token`                                                                                                      |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-dnsimple.readthedocs.io/en/stable/)                               |
 | `dnsmadeeasy`     | DNS Made Easy    | `api_key`<br>`secret_key`                                                                                    |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/)                            |
+| `duckdns`         | DuckDNS          | `duckdns_token`                                                                                              |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md)           |
 | `dynu`            | Dynu             | `auth_token`                                                                                                 |                                                                                                                                                                                                                                                                                                      | [Documentación](https://github.com/bikram990/certbot-dns-dynu/blob/main/README.md)                    |
 | `gehirn`          | Gehirn DNS       | `api_token`<br>`api_secret`                                                                                  |                                                                                                                                                                                                                                                                                                      | [Documentación](https://certbot-dns-gehirn.readthedocs.io/en/stable/)                                 |
 | `google`          | Google Cloud     | `project_id`<br>`private_key_id`<br>`private_key`<br>`client_email`<br>`client_id`<br>`client_x509_cert_url` | `type` (predeterminado: `service_account`)<br>`auth_uri` (predeterminado: `https://accounts.google.com/o/oauth2/auth`)<br>`token_uri` (predeterminado: `https://accounts.google.com/o/oauth2/token`)<br>`auth_provider_x509_cert_url` (predeterminado: `https://www.googleapis.com/oauth2/v1/certs`) | [Documentación](https://certbot-dns-google.readthedocs.io/en/stable/)                                 |
@@ -3578,7 +3643,7 @@ Siga estos pasos para configurar y usar ModSecurity:
 Seleccione una versión de CRS que se ajuste mejor a sus necesidades de seguridad:
 
 - **`3`**: Estable [v3.3.7](https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7).
-- **`4`**: Estable [v4.19.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0) (**predeterminada**).
+- **`4`**: Estable [v4.20.0](https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0) (**predeterminada**).
 - **`nightly`**: [Compilación nocturna](https://github.com/coreruleset/coreruleset/releases/tag/nightly) que ofrece las últimas actualizaciones de reglas.
 
 !!! example "Compilación Nocturna"
@@ -5386,3 +5451,28 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     ```
 
     Esta configuración permite que los rastreadores legítimos indexen su sitio sin estar sujetos a la limitación de velocidad u otras medidas de seguridad que podrían bloquearlos. Las comprobaciones de DNS inverso ayudan a verificar que los rastreadores provienen realmente de las empresas que dicen ser.
+
+### Trabajar con archivos de listas locales
+
+Las configuraciones `*_URLS` de los plugins de lista blanca, lista gris y lista negra utilizan el mismo descargador. Cuando referencia una URL `file:///`:
+
+- La ruta se resuelve dentro del contenedor del **scheduler** (en despliegues Docker normalmente `bunkerweb-scheduler`). Monte los archivos allí y asegúrese de que el usuario del scheduler tenga permisos de lectura.
+- Cada archivo es texto codificado en UTF-8 con una entrada por línea. Las líneas vacías se ignoran y las líneas de comentario deben comenzar con `#` o `;`. Los comentarios `//` no son compatibles.
+- Valores esperados por tipo de lista:
+  - **Listas IP** aceptan direcciones IPv4/IPv6 o redes CIDR (por ejemplo `192.0.2.10` o `2001:db8::/48`).
+  - **Listas rDNS** esperan un sufijo sin espacios (por ejemplo `.search.msn.com`). Los valores se normalizan automáticamente a minúsculas.
+  - **Listas ASN** pueden contener solo el número (`32934`) o el número con el prefijo `AS` (`AS15169`).
+  - **Listas de User-Agent** se tratan como patrones PCRE y se conserva la línea completa (incluidos los espacios). Mantenga los comentarios en una línea separada para que no se interpreten como parte del patrón.
+  - **Listas URI** deben comenzar con `/` y pueden usar tokens PCRE como `^` o `$`.
+
+Ejemplos de archivos con el formato esperado:
+
+```text
+# /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```

@@ -41,8 +41,8 @@ Version
 =======
 
 This document describes ngx_stream_lua
-[v0.0.13](https://github.com/openresty/stream-lua-nginx-module/tags), which was released
-on 21 May, 2023.
+[v0.0.16](https://github.com/openresty/stream-lua-nginx-module/tags), which was released
+on 17 Jan, 2025.
 
 Synopsis
 ========
@@ -151,6 +151,8 @@ behavior.
 * [ssl_client_hello_by_lua_file](https://github.com/openresty/lua-nginx-module#ssl_client_hello_by_lua_file)
 * [ssl_certificate_by_lua_block](https://github.com/openresty/lua-nginx-module#ssl_certificate_by_lua_block)
 * [ssl_certificate_by_lua_file](https://github.com/openresty/lua-nginx-module#ssl_certificate_by_lua_file)
+* [proxy_ssl_verify_by_lua_block](https://github.com/openresty/lua-nginx-module#proxy_ssl_verify_by_lua_block)
+* [proxy_ssl_verify_by_lua_file](https://github.com/openresty/lua-nginx-module#proxy_ssl_verify_by_lua_file)
 * [lua_shared_dict](https://github.com/openresty/lua-nginx-module#lua_shared_dict)
 * [lua_socket_connect_timeout](https://github.com/openresty/lua-nginx-module#lua_socket_connect_timeout)
 * [lua_socket_buffer_size](https://github.com/openresty/lua-nginx-module#lua_socket_buffer_size)
@@ -164,7 +166,9 @@ behavior.
 * [lua_ssl_certificate_key](https://github.com/openresty/lua-nginx-module#lua_ssl_certificate_key)
 * [lua_ssl_trusted_certificate](https://github.com/openresty/lua-nginx-module#lua_ssl_trusted_certificate)
 * [lua_ssl_verify_depth](https://github.com/openresty/lua-nginx-module#lua_ssl_verify_depth)
+* [lua_ssl_key_log](https://github.com/openresty/lua-nginx-module#lua_ssl_key_log)
 * [lua_ssl_conf_command](https://github.com/openresty/lua-nginx-module#lua_ssl_conf_command)
+* [lua_upstream_skip_openssl_default_verify](https://github.com/openresty/lua-nginx-module#lua_upstream_skip_openssl_default_verify)
 * [lua_check_client_abort](https://github.com/openresty/lua-nginx-module#lua_check_client_abort)
 * [lua_max_pending_timers](https://github.com/openresty/lua-nginx-module#lua_max_pending_timers)
 * [lua_max_running_timers](https://github.com/openresty/lua-nginx-module#lua_max_running_timers)
@@ -541,6 +545,8 @@ Nginx Compatibility
 
 The latest version of this module is compatible with the following versions of Nginx:
 
+* 1.29.x (last tested: 1.29.2)
+* 1.27.x (last tested: 1.27.1)
 * 1.25.x (last tested: 1.25.1)
 * 1.21.x (last tested: 1.21.4)
 * 1.19.x (last tested: 1.19.3)

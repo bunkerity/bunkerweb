@@ -40,8 +40,6 @@ ngx_stream_lua_inject_control_api(ngx_log_t *log, lua_State *L)
 }
 
 
-
-
 static int
 ngx_stream_lua_on_abort(lua_State *L)
 {
@@ -118,6 +116,9 @@ ngx_stream_lua_ffi_exit(ngx_stream_lua_request_t *r, int status, u_char *err,
         | NGX_STREAM_LUA_CONTEXT_BALANCER
         | NGX_STREAM_LUA_CONTEXT_SSL_CLIENT_HELLO
         | NGX_STREAM_LUA_CONTEXT_SSL_CERT
+#ifdef HAVE_PROXY_SSL_PATCH
+        | NGX_STREAM_LUA_CONTEXT_PROXY_SSL_VERIFY
+#endif
         | NGX_STREAM_LUA_CONTEXT_PREREAD,
         err, errlen) != NGX_OK)
     {
@@ -125,6 +126,9 @@ ngx_stream_lua_ffi_exit(ngx_stream_lua_request_t *r, int status, u_char *err,
     }
 
     if (ctx->context & (NGX_STREAM_LUA_CONTEXT_SSL_CERT
+#ifdef HAVE_PROXY_SSL_PATCH
+                        | NGX_STREAM_LUA_CONTEXT_PROXY_SSL_VERIFY
+#endif
                         | NGX_STREAM_LUA_CONTEXT_SSL_CLIENT_HELLO ))
     {
 

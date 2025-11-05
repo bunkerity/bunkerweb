@@ -28,6 +28,8 @@
 	 &#124;
 	📱 <a href="https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=github">Demo UI</a>
 	 &#124;
+	🧩 <a href="https://github.com/bunkerity/bunkerweb-templates">Templates</a>
+	 &#124;
 	🛡️ <a href="https://github.com/bunkerity/bunkerweb/raw/v1.6.6-rc1/examples">Examples</a>
 	<br/>
 	💬 <a href="https://discord.com/invite/fTf46FmtyD">Chat</a>

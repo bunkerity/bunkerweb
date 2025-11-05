@@ -409,6 +409,13 @@ static void emit_call(ASMState *as, ASMFunction target)
   }
 }
 
+#if LJ_ABI_BRANCH_TRACK
+static void emit_branch_track(ASMState *as)
+{
+  *--as->mcp = A64I_BTI_J;
+}
+#endif
+
 /* -- Emit generic operations --------------------------------------------- */
 
 /* Generic move between two regs. */
