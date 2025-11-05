@@ -1141,6 +1141,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#travailler-avec-des-fichiers-de-listes-locaux" class="md-nav__link">
+    <span class="md-ellipsis">
+      Travailler avec des fichiers de listes locaux
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1640,6 +1649,15 @@
   <a href="#parametres_11" class="md-nav__link">
     <span class="md-ellipsis">
       Paramètres
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#travailler-avec-des-fichiers-de-listes-locaux_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Travailler avec des fichiers de listes locaux
     </span>
   </a>
   
@@ -2650,6 +2668,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#travailler-avec-des-fichiers-de-listes-locaux_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Travailler avec des fichiers de listes locaux
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3560,8 +3587,29 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td>non</td>
 <td>User‑Agents exclus : liste de motifs regex d’User‑Agent séparés par des espaces qui doivent contourner le défi.</td>
 </tr>
+<tr>
+<td><code>ANTIBOT_IGNORE_COUNTRY</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Pays exclus : liste de codes pays ISO 3166-1 alpha-2 séparés par des espaces qui doivent contourner le défi.</td>
+</tr>
+<tr>
+<td><code>ANTIBOT_ONLY_COUNTRY</code></td>
+<td></td>
+<td>multisite</td>
+<td>non</td>
+<td>Pays ciblés : liste de codes pays ISO 3166-1 alpha-2 qui doivent résoudre le défi. Les autres pays sont ignorés.</td>
+</tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Comportement des paramètres basés sur le pays</p>
+<ul>
+<li>Lorsque <code>ANTIBOT_IGNORE_COUNTRY</code> et <code>ANTIBOT_ONLY_COUNTRY</code> sont définis, la liste d’exclusion est prioritaire : un pays présent dans les deux listes contourne le défi.</li>
+<li>Les adresses IP privées ou inconnues contournent le défi lorsque <code>ANTIBOT_ONLY_COUNTRY</code> est défini, car aucun code pays ne peut être déterminé.</li>
+</ul>
+</div>
 <p>Exemples :</p>
 <ul>
 <li>
@@ -3583,6 +3631,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>
 <p><code>ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"</code>
   Exclut les requêtes dont le User-Agent correspond au motif regex spécifié.</p>
+</li>
+<li>
+<p><code>ANTIBOT_IGNORE_COUNTRY: "US CA"</code>
+  Contourne le défi antibot pour les visiteurs situés aux États-Unis ou au Canada.</p>
+</li>
+<li>
+<p><code>ANTIBOT_ONLY_COUNTRY: "CN RU"</code>
+  Ne défie que les visiteurs provenant de Chine ou de Russie. Les requêtes d’autres pays (ou d’adresses IP privées) contournent le défi.</p>
 </li>
 </ul>
 <h3 id="mecanismes-de-defi">Mécanismes de défi</h3>
@@ -4017,6 +4073,7 @@ Pour la nouvelle version, créez une clé reCAPTCHA dans votre projet Google Clo
 <li>Portée : <code>AUTH_BASIC_LOCATION</code> = <code>sitewide</code> (tout le site) ou un chemin (ex. <code>/admin</code>).</li>
 <li>Identifiants : configurez <code>AUTH_BASIC_USER</code> et <code>AUTH_BASIC_PASSWORD</code> (plusieurs paires possibles).</li>
 <li>Message : optionnel, ajustez <code>AUTH_BASIC_TEXT</code>.</li>
+<li>Coût du hash (facultatif) : ajustez <code>AUTH_BASIC_ROUNDS</code> (1000-999999999) pour équilibrer rapidité d’authentification et puissance du hachage.</li>
 </ol>
 <h3 id="parametres">Paramètres</h3>
 <table>
@@ -4057,6 +4114,13 @@ Pour la nouvelle version, créez une clé reCAPTCHA dans votre projet Google Clo
 <td>multisite</td>
 <td>oui</td>
 <td>Mot de passe correspondant à chaque utilisateur.</td>
+</tr>
+<tr>
+<td><code>AUTH_BASIC_ROUNDS</code></td>
+<td><code>656000</code></td>
+<td>multisite</td>
+<td>oui</td>
+<td>Nombre de tours SHA-512 appliqués lors de la génération du fichier htpasswd (doit rester entre 1000 et 999999999). Moins de tours = connexion plus rapide mais hachage moins coûteux.</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -4805,6 +4869,27 @@ BACKUP_DIRECTORY: "/var/lib/bunkerweb/backups"
 </div>
 </div>
 </div>
+<h3 id="travailler-avec-des-fichiers-de-listes-locaux">Travailler avec des fichiers de listes locaux</h3>
+<p>Les paramètres <code>*_URLS</code> fournis par les plugins Whitelist, Greylist et Blacklist utilisent le même téléchargeur. Lorsque vous référencez une URL <code>file:///</code> :</p>
+<ul>
+<li>Le chemin est résolu dans le conteneur du <strong>scheduler</strong> (dans un déploiement Docker il s’agit généralement de <code>bunkerweb-scheduler</code>). Montez-y vos fichiers et vérifiez que l’utilisateur scheduler possède un accès en lecture.</li>
+<li>Chaque fichier est un texte encodé en UTF-8 avec une entrée par ligne. Les lignes vides sont ignorées et les commentaires doivent commencer par <code>#</code> ou <code>;</code>. Les commentaires <code>//</code> ne sont pas pris en charge.</li>
+<li>Valeur attendue selon le type de liste :</li>
+<li><strong>Listes IP</strong> acceptent des adresses IPv4/IPv6 ou des réseaux CIDR (par exemple <code>192.0.2.10</code> ou <code>2001:db8::/48</code>).</li>
+<li><strong>Listes rDNS</strong> attendent un suffixe sans espaces (par exemple <code>.search.msn.com</code>). Les valeurs sont automatiquement converties en minuscules.</li>
+<li><strong>Listes ASN</strong> peuvent contenir uniquement le numéro (<code>32934</code>) ou le numéro préfixé par <code>AS</code> (<code>AS15169</code>).</li>
+<li><strong>Listes User-Agent</strong> sont traitées comme des motifs PCRE et la ligne complète est conservée (espaces compris). Placez vos commentaires sur une ligne séparée pour éviter qu’ils ne soient interprétés comme motif.</li>
+<li><strong>Listes URI</strong> doivent commencer par <code>/</code> et peuvent utiliser des jetons PCRE tels que <code>^</code> ou <code>$</code>.</li>
+</ul>
+<p>Exemples de fichiers conformes :</p>
+<div class="highlight"><pre><span></span><code># /etc/bunkerweb/lists/ip-blacklist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-blacklist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+</code></pre></div>
 <h2 id="brotli">Brotli</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin Brotli active la compression des réponses HTTP avec l’algorithme Brotli. Il réduit l’usage de bande passante et accélère le chargement en compressant le contenu avant l’envoi au navigateur.</p>
@@ -6345,6 +6430,27 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p class="admonition-title">Mises à jour</p>
 <p>Les listes récupérées par URL sont mises à jour automatiquement toutes les heures.</p>
 </div>
+<h3 id="travailler-avec-des-fichiers-de-listes-locaux_1">Travailler avec des fichiers de listes locaux</h3>
+<p>Les paramètres <code>*_URLS</code> fournis par les plugins Whitelist, Greylist et Blacklist utilisent le même téléchargeur. Lorsque vous référencez une URL <code>file:///</code> :</p>
+<ul>
+<li>Le chemin est résolu dans le conteneur du <strong>scheduler</strong> (dans un déploiement Docker il s’agit généralement de <code>bunkerweb-scheduler</code>). Montez-y vos fichiers et vérifiez que l’utilisateur scheduler possède un accès en lecture.</li>
+<li>Chaque fichier est un texte encodé en UTF-8 avec une entrée par ligne. Les lignes vides sont ignorées et les commentaires doivent commencer par <code>#</code> ou <code>;</code>. Les commentaires <code>//</code> ne sont pas pris en charge.</li>
+<li>Valeur attendue selon le type de liste :</li>
+<li><strong>Listes IP</strong> acceptent des adresses IPv4/IPv6 ou des réseaux CIDR (par exemple <code>192.0.2.10</code> ou <code>2001:db8::/48</code>).</li>
+<li><strong>Listes rDNS</strong> attendent un suffixe sans espaces (par exemple <code>.search.msn.com</code>). Les valeurs sont automatiquement converties en minuscules.</li>
+<li><strong>Listes ASN</strong> peuvent contenir uniquement le numéro (<code>32934</code>) ou le numéro préfixé par <code>AS</code> (<code>AS15169</code>).</li>
+<li><strong>Listes User-Agent</strong> sont traitées comme des motifs PCRE et la ligne complète est conservée (espaces compris). Placez vos commentaires sur une ligne séparée pour éviter qu’ils ne soient interprétés comme motif.</li>
+<li><strong>Listes URI</strong> doivent commencer par <code>/</code> et peuvent utiliser des jetons PCRE tels que <code>^</code> ou <code>$</code>.</li>
+</ul>
+<p>Exemples de fichiers conformes :</p>
+<div class="highlight"><pre><span></span><code># /etc/bunkerweb/lists/ip-greylist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-greylist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+</code></pre></div>
 <h2 id="gzip">Gzip</h2>
 <p>Prise en charge STREAM <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Le plugin GZIP compresse les réponses HTTP avec l’algorithme gzip pour réduire la bande passante et accélérer le chargement des pages.</p>
@@ -6802,7 +6908,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Suivez ces étapes pour configurer et utiliser la fonctionnalité Let's Encrypt :</p>
 <ol>
 <li><strong>Activer la fonctionnalité :</strong> Mettez le paramètre <code>AUTO_LETS_ENCRYPT</code> à <code>yes</code> pour activer l'émission et le renouvellement automatiques des certificats.</li>
-<li><strong>Fournir un e-mail de contact :</strong> Saisissez votre adresse e-mail dans le paramètre <code>EMAIL_LETS_ENCRYPT</code> pour recevoir les notifications importantes concernant vos certificats.</li>
+<li><strong>Fournir un e-mail de contact (recommandé) :</strong> Saisissez votre adresse e-mail dans le paramètre <code>EMAIL_LETS_ENCRYPT</code> pour que Let's Encrypt puisse vous prévenir avant l'expiration d'un certificat. Si vous laissez ce champ vide, BunkerWeb s'enregistrera sans adresse (option Certbot <code>--register-unsafely-without-email</code>) et vous ne recevrez aucun rappel ni e-mail de récupération.</li>
 <li><strong>Choisir le type de défi :</strong> Sélectionnez la vérification <code>http</code> ou <code>dns</code> avec le paramètre <code>LETS_ENCRYPT_CHALLENGE</code>.</li>
 <li><strong>Configurer le fournisseur DNS :</strong> Si vous utilisez les défis DNS, spécifiez votre fournisseur DNS et vos identifiants.</li>
 <li><strong>Sélectionner un profil de certificat :</strong> Choisissez votre profil de certificat préféré avec le paramètre <code>LETS_ENCRYPT_PROFILE</code> (classic, tlsserver ou shortlived).</li>
@@ -6844,10 +6950,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
-<td><code>contact@{FIRST_SERVER}</code></td>
+<td><code>-</code></td>
 <td>multisite</td>
 <td>no</td>
-<td><strong>E-mail de contact :</strong> Adresse e-mail utilisée pour les notifications Let's Encrypt et incluse dans les certificats.</td>
+<td><strong>E-mail de contact :</strong> Adresse e-mail utilisée pour les rappels Let's Encrypt. Ne laissez ce champ vide que si vous acceptez de ne recevoir aucun avertissement ni e-mail de récupération (Certbot s'enregistre avec <code>--register-unsafely-without-email</code>).</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_CHALLENGE</code></td>
@@ -7007,6 +7113,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td><code>api_key</code><br><code>secret_key</code></td>
 <td></td>
 <td><a href="https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/">Documentation</a></td>
+</tr>
+<tr>
+<td><code>duckdns</code></td>
+<td>DuckDNS</td>
+<td><code>duckdns_token</code></td>
+<td></td>
+<td><a href="https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md">Documentation</a></td>
 </tr>
 <tr>
 <td><code>dynu</code></td>
@@ -8275,7 +8388,7 @@ OPEN_FILE_CACHE_VALID: "60s"</p>
 <p>Sélectionnez une version du CRS pour répondre au mieux à vos besoins de sécurité :</p>
 <ul>
 <li><strong><code>3</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0">v4.19.0</a> (<strong>par défaut</strong>).</li>
+<li><strong><code>4</code></strong> : Stable <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0">v4.20.0</a> (<strong>par défaut</strong>).</li>
 <li><strong><code>nightly</code></strong> : <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Version de nuit</a> offrant les dernières mises à jour de règles.</li>
 </ul>
 <div class="admonition example">
@@ -10852,6 +10965,27 @@ SecRule REQUEST_FILENAME &quot;^/wp-json/yoast&quot; &quot;id:3,ctl:ruleRemoveBy
 </div>
 </div>
 </div>
+<h3 id="travailler-avec-des-fichiers-de-listes-locaux_2">Travailler avec des fichiers de listes locaux</h3>
+<p>Les paramètres <code>*_URLS</code> fournis par les plugins Whitelist, Greylist et Blacklist utilisent le même téléchargeur. Lorsque vous référencez une URL <code>file:///</code> :</p>
+<ul>
+<li>Le chemin est résolu dans le conteneur du <strong>scheduler</strong> (dans un déploiement Docker il s’agit généralement de <code>bunkerweb-scheduler</code>). Montez-y vos fichiers et vérifiez que l’utilisateur scheduler possède un accès en lecture.</li>
+<li>Chaque fichier est un texte encodé en UTF-8 avec une entrée par ligne. Les lignes vides sont ignorées et les commentaires doivent commencer par <code>#</code> ou <code>;</code>. Les commentaires <code>//</code> ne sont pas pris en charge.</li>
+<li>Valeur attendue selon le type de liste :</li>
+<li><strong>Listes IP</strong> acceptent des adresses IPv4/IPv6 ou des réseaux CIDR (par exemple <code>192.0.2.10</code> ou <code>2001:db8::/48</code>).</li>
+<li><strong>Listes rDNS</strong> attendent un suffixe sans espaces (par exemple <code>.search.msn.com</code>). Les valeurs sont automatiquement converties en minuscules.</li>
+<li><strong>Listes ASN</strong> peuvent contenir uniquement le numéro (<code>32934</code>) ou le numéro préfixé par <code>AS</code> (<code>AS15169</code>).</li>
+<li><strong>Listes User-Agent</strong> sont traitées comme des motifs PCRE et la ligne complète est conservée (espaces compris). Placez vos commentaires sur une ligne séparée pour éviter qu’ils ne soient interprétés comme motif.</li>
+<li><strong>Listes URI</strong> doivent commencer par <code>/</code> et peuvent utiliser des jetons PCRE tels que <code>^</code> ou <code>$</code>.</li>
+</ul>
+<p>Exemples de fichiers conformes :</p>
+<div class="highlight"><pre><span></span><code># /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+</code></pre></div>
 
 
 

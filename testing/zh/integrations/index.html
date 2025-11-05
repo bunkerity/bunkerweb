@@ -1570,7 +1570,7 @@
 <figcaption>BunkerWeb 云</figcaption>
 </figure>
 <p>BunkerWeb Cloud 将是开始使用 BunkerWeb 的最简单方式。它为您提供一个完全托管的 BunkerWeb 服务，无需任何麻烦。可以把它想象成一个 BunkerWeb 即服务！</p>
-<p>试试我们的 <a href="https://panel.bunkerweb.io/contact.php?utm_campaign=self&amp;utm_source=doc">BunkerWeb Cloud 服务</a>，您将获得：</p>
+<p>试试我们的 <a href="https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&amp;utm_source=doc">BunkerWeb Cloud 服务</a>，您将获得：</p>
 <ul>
 <li>一个完全托管在我们云端的 BunkerWeb 实例</li>
 <li>所有 BunkerWeb 功能，包括 PRO 功能</li>
@@ -1660,36 +1660,46 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">SERVICE_API</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-e<span class="w"> </span><span class="nv">API_WHITELIST_IPS</span><span class="o">=</span><span class="s2">&quot;127.0.0.0/8&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-e<span class="w"> </span><span class="nv">API_TOKEN</span><span class="o">=</span><span class="s2">&quot;changeme&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">API_USERNAME</span><span class="o">=</span>changeme<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">API_PASSWORD</span><span class="o">=</span>StrongP@ssw0rd<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-p<span class="w"> </span><span class="m">8888</span>:8888/tcp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
 </code></pre></div>
 <p>推荐（在 BunkerWeb 之后）— 不要发布 <code>8888</code>；而是反向代理它：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:testing</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-aio</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;www.example.com&quot;</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api.example.com&quot;</span>
 <span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
 <span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api-&lt;unguessable&gt;&quot;</span>
-<span class="w">      </span><span class="nt">REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bunkerweb-aio:8888&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-api&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api-&lt;unguessable&gt;&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:8888&quot;</span><span class="w"> </span><span class="c1"># 内部 API 端点</span>
 
-<span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:testing</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># API 设置</span>
 <span class="w">      </span><span class="nt">SERVICE_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
-<span class="w">      </span><span class="nt">API_WHITELIST_IPS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span>
-<span class="w">      </span><span class="c1"># 可选地设置一个管理员覆盖令牌</span>
-<span class="w">      </span><span class="c1"># API_TOKEN: &quot;changeme&quot;</span>
+<span class="w">      </span><span class="c1"># 设置强壮的凭据并且只允许可信的 IP/网络（详见下文）</span>
+<span class="w">      </span><span class="nt">API_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
+<span class="w">      </span><span class="nt">API_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;StrongP@ssw0rd&quot;</span>
+<span class="w">      </span><span class="nt">API_ROOT_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api-&lt;unguessable&gt;&quot;</span><span class="w"> </span><span class="c1"># 需与 REVERSE_PROXY_URL 保持一致</span>
+
+<span class="w">      </span><span class="c1"># 默认停用 UI；改为 &quot;yes&quot; 可启用</span>
+<span class="w">      </span><span class="nt">SERVICE_UI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>

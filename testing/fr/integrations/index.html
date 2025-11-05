@@ -816,6 +816,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#integration-de-lapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      Intégration de l'API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#acces-a-lassistant-dinstallation" class="md-nav__link">
     <span class="md-ellipsis">
       Accès à l'assistant d'installation
@@ -1558,7 +1567,7 @@
 <figcaption>BunkerWeb Cloud</figcaption>
 </figure>
 <p>BunkerWeb Cloud sera le moyen le plus simple de commencer avec BunkerWeb. Il vous offre un service BunkerWeb entièrement géré sans tracas. Considérez-le comme un BunkerWeb-as-a-Service !</p>
-<p>Essayez notre <a href="https://panel.bunkerweb.io/contact.php?language=french&amp;utm_campaign=self&amp;utm_source=doc">offre BunkerWeb Cloud</a> et accédez à :</p>
+<p>Essayez notre <a href="https://panel.bunkerweb.io/store/bunkerweb-cloud?utm_campaign=self&amp;utm_source=doc">offre BunkerWeb Cloud</a> et accédez à :</p>
 <ul>
 <li>Une instance BunkerWeb entièrement gérée et hébergée dans notre cloud</li>
 <li>Toutes les fonctionnalités de BunkerWeb, y compris les fonctionnalités PRO</li>
@@ -1593,6 +1602,7 @@
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:testing</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-aio</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
 <span class="nn">...</span>
@@ -1629,15 +1639,74 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <ul>
 <li><code>SERVICE_UI=yes</code> (par défaut) - Active le service d'interface utilisateur Web</li>
 <li><code>SERVICE_SCHEDULER=yes</code> (par défaut) - Active le service Scheduler</li>
+<li><code>SERVICE_API=no</code> (par défaut) - Active le service API (plan de contrôle FastAPI)</li>
 <li><code>AUTOCONF_MODE=no</code> (par défaut) - Active le service autoconf</li>
 <li><code>USE_REDIS=yes</code> (par défaut) : active l' <a href="#redis-integration"> instance</a> Redis intégrée</li>
 <li><code>USE_CROWDSEC=no</code> (par défaut) - <a href="#crowdsec-integration"> L'intégration CrowdSec</a> est désactivée par défaut</li>
 <li><code>HIDE_SERVICE_LOGS=</code> (optionnel) - Liste de services séparés par des virgules à masquer dans les logs du conteneur. Valeurs acceptées : <code>api</code>, <code>autoconf</code>, <code>bunkerweb</code>, <code>crowdsec</code>, <code>redis</code>, <code>scheduler</code>, <code>ui</code>, <code>nginx.access</code>, <code>nginx.error</code>, <code>modsec</code>. Les fichiers sous <code>/var/log/bunkerweb/&lt;service&gt;.log</code> continuent d'être alimentés.</li>
 </ul>
+<h3 id="integration-de-lapi">Intégration de l'API</h3>
+<p>L'image tout-en-un embarque l'API BunkerWeb. Elle est désactivée par défaut et peut être activée en définissant <code>SERVICE_API=yes</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Sécurité</p>
+<p>L'API constitue un plan de contrôle privilégié. Ne l'exposez pas directement à Internet. Conservez-la sur un réseau interne, restreignez les IP sources avec <code>API_WHITELIST_IPS</code>, imposez une authentification (<code>API_TOKEN</code> ou utilisateurs API + Biscuit) et, idéalement, passez par BunkerWeb en proxy inverse sur un chemin difficile à deviner.</p>
+</div>
+<p>Activation rapide (autonome) — publie le port de l'API ; à réserver aux tests :</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>bw-storage:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">SERVICE_API</span><span class="o">=</span>yes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">API_WHITELIST_IPS</span><span class="o">=</span><span class="s2">&quot;127.0.0.0/8&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">API_USERNAME</span><span class="o">=</span>changeme<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">API_PASSWORD</span><span class="o">=</span>StrongP@ssw0rd<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">8888</span>:8888/tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
+</code></pre></div>
+<p>Configuration recommandée (derrière BunkerWeb) — ne publiez pas <code>8888</code> ; utilisez plutôt un proxy inverse :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb-aio</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-all-in-one:testing</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb-aio</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api.example.com&quot;</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">DISABLE_DEFAULT_SERVER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-api&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api-&lt;unguessable&gt;&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:8888&quot;</span><span class="w"> </span><span class="c1"># Point d&#39;accès API interne</span>
+
+<span class="w">      </span><span class="c1"># Paramètres API</span>
+<span class="w">      </span><span class="nt">SERVICE_API</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="c1"># Définissez des identifiants robustes et autorisez uniquement des IP ou réseaux de confiance (plus de détails ci-dessous)</span>
+<span class="w">      </span><span class="nt">API_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span>
+<span class="w">      </span><span class="nt">API_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;StrongP@ssw0rd&quot;</span>
+<span class="w">      </span><span class="nt">API_ROOT_PATH</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api-&lt;unguessable&gt;&quot;</span><span class="w"> </span><span class="c1"># Doit correspondre à REVERSE_PROXY_URL</span>
+
+<span class="w">      </span><span class="c1"># Nous désactivons l&#39;UI - passez à &quot;yes&quot; pour l&#39;activer</span>
+<span class="w">      </span><span class="nt">SERVICE_UI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;no&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+</code></pre></div>
+<p>Des informations détaillées concernant l'authentification, les permissions (ACL), la limitation de débit, le TLS et les options de configuration sont disponibles dans la <a href="../api/">documentation de l'API</a>.</p>
 <h3 id="acces-a-lassistant-dinstallation">Accès à l'assistant d'installation</h3>
 <p>Par défaut, l'assistant d'installation est lancé automatiquement lorsque vous exécutez le conteneur AIO pour la première fois. Pour y accéder, procédez comme suit :</p>
 <ol>
-<li><strong>Démarrez le conteneur AIO</strong> comme <a href="#deployment">ci-dessus</a>, en vous assurant ( <code>SERVICE_UI=yes</code> par défaut).</li>
+<li><strong>Démarrez le conteneur AIO</strong> comme <a href="#deployment">ci-dessus</a>, en vous assurant que <code>SERVICE_UI=yes</code> (valeur par défaut).</li>
 <li><strong>Accédez à l'interface utilisateur</strong> via votre point de terminaison BunkerWeb principal, par exemple <code>https://your-domain</code>.</li>
 </ol>
 <blockquote>
@@ -1653,7 +1722,7 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </sp
 <li>Les journaux Redis apparaissent avec le préfixe <code>[REDIS]</code> dans les journaux Docker et dans <code>/var/log/bunkerweb/redis.log</code>.</li>
 </ul>
 <h3 id="crowdsec-integration">Intégration CrowdSec</h3>
-<p>L'image Docker tout-en-un** de BunkerWeb ** est livrée avec CrowdSec entièrement intégré, sans conteneurs supplémentaires ni configuration manuelle requise. Suivez les étapes ci-dessous pour activer, configurer et étendre CrowdSec dans votre déploiement.</p>
+<p>L'image Docker <strong>tout-en-un</strong> de BunkerWeb est livrée avec CrowdSec entièrement intégré, sans conteneurs supplémentaires ni configuration manuelle requise. Suivez les étapes ci-dessous pour activer, configurer et étendre CrowdSec dans votre déploiement.</p>
 <p>Par défaut, CrowdSec est <strong>désactivé</strong>. Pour l'activer, il suffit d'ajouter la <code>USE_CROWDSEC</code> variable d'environnement :</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>bunkerweb-aio<span class="w"> </span><span class="se">\</span>

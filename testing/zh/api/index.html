@@ -930,6 +930,15 @@
         <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
+      推荐部署（独立容器）
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
       亮点
     </span>
   </a>
@@ -961,7 +970,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       身份验证
     </span>
@@ -994,7 +1003,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       功能参考
     </span>
@@ -1004,7 +1013,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       核心和身份验证
     </span>
@@ -1013,7 +1022,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       实例控制平面
     </span>
@@ -1022,7 +1031,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       全局配置
     </span>
@@ -1031,7 +1040,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       服务生命周期
     </span>
@@ -1040,7 +1049,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       自定义配置片段
     </span>
@@ -1049,7 +1058,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       封禁编排
     </span>
@@ -1058,7 +1067,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       插件管理
     </span>
@@ -1067,7 +1076,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       作业缓存和执行
     </span>
@@ -1076,7 +1085,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       操作说明
     </span>
@@ -1090,7 +1099,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       速率限制
     </span>
@@ -1099,7 +1108,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_17" class="md-nav__link">
     <span class="md-ellipsis">
       配置
     </span>
@@ -1109,7 +1118,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       配置加载方式
     </span>
@@ -1118,7 +1127,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_19" class="md-nav__link">
     <span class="md-ellipsis">
       身份验证和用户
     </span>
@@ -1136,7 +1145,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_19" class="md-nav__link">
+  <a href="#_20" class="md-nav__link">
     <span class="md-ellipsis">
       速率限制快速配方
     </span>
@@ -1150,7 +1159,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_20" class="md-nav__link">
+  <a href="#_21" class="md-nav__link">
     <span class="md-ellipsis">
       操作
     </span>
@@ -1307,7 +1316,113 @@
 <h2 id="_2">先决条件</h2>
 <p>API 服务需要访问 BunkerWeb 数据库 (<code>DATABASE_URI</code>)。它通常与调度器和可选的 Web UI 一起部署。推荐的设置是在前端运行 BunkerWeb 作为反向代理，并将 API 隔离在内部网络上。</p>
 <p>请参阅<a href="../quickstart-guide/">快速入门指南</a>中的快速入门向导和架构指导。</p>
-<h2 id="_3">亮点</h2>
+<h2 id="_3">推荐部署（独立容器）</h2>
+<p>在生产环境中，将 API 作为独立容器部署在 BunkerWeb 数据平面和调度器旁边。让 API 仅绑定在内部控制平面网络上，并只通过 BunkerWeb 作为反向代理对外发布。该布局与 <a href="../integrations/#networks">Docker 集成参考</a> 保持一致，并确保调度器、BunkerWeb 和 API 使用相同的设置。</p>
+<div class="highlight"><pre><span></span><code><span class="nt">x-bw-env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;bw-env</span>
+<span class="w">  </span><span class="c1"># 使用锚点避免在两个服务上重复相同的配置</span>
+<span class="w">  </span><span class="nt">API_WHITELIST_IP</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.20.30.0/24&quot;</span><span class="w"> </span><span class="c1"># 请设置正确的 IP 段，确保调度器可以将配置发送到实例</span>
+<span class="w">  </span><span class="nt">DATABASE_URI</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db&quot;</span><span class="w"> </span><span class="c1"># 请为数据库设置更强的密码</span>
+
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bunkerweb</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># 这是调度器用来识别实例的名称</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:8080/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/tcp&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;443:8443/udp&quot;</span><span class="w"> </span><span class="c1"># 用于支持 QUIC / HTTP3</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span><span class="w"> </span><span class="c1"># 使用锚点避免在所有服务中重复相同的配置</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+
+<span class="w">  </span><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">      </span><span class="nt">BUNKERWEB_INSTANCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span><span class="w"> </span><span class="c1"># 请确保实例名称正确</span>
+<span class="w">      </span><span class="nt">SERVER_NAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api.example.com&quot;</span><span class="w"> </span><span class="c1"># 可按需修改</span>
+<span class="w">      </span><span class="nt">MULTISITE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">USE_REDIS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_USE_TEMPLATE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bw-api&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_GENERATE_SELF_SIGNED_SSL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_USE_REVERSE_PROXY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_REVERSE_PROXY_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="w">      </span><span class="nt">api.example.com_REVERSE_PROXY_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://bw-api:8888&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-storage:/data</span><span class="w"> </span><span class="c1"># 用于持久化缓存和备份等数据</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">bw-api</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-api:testing</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*bw-env</span>
+<span class="w">      </span><span class="nt">API_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin&quot;</span>
+<span class="w">      </span><span class="nt">API_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Str0ng&amp;P@ss!&quot;</span><span class="w"> </span><span class="c1"># 请为管理员用户设置更强的密码</span>
+<span class="w">      </span><span class="nt">DEBUG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-api</span>
+<span class="w">      </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">aliases</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-api</span>
+
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:11</span>
+<span class="w">    </span><span class="c1"># 设置最大允许的数据包大小以避免大查询导致的问题</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-allowed-packet=67108864</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;db&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_USER</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;bunkerweb&quot;</span>
+<span class="w">      </span><span class="nt">MYSQL_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;changeme&quot;</span><span class="w"> </span><span class="c1"># 请为数据库设置更强的密码</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span><span class="w"> </span><span class="c1"># Redis 服务，用于持久化报表/封禁/统计数据</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">      </span><span class="no">redis-server</span>
+<span class="w">      </span><span class="no">--maxmemory 256mb</span>
+<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--save 60 1000</span>
+<span class="w">      </span><span class="no">--appendonly yes</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-data:/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unless-stopped&quot;</span>
+<span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-storage</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis-data</span><span class="p">:</span>
+
+<span class="nt">networks</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bw-universe</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-universe</span>
+<span class="w">    </span><span class="nt">ipam</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">subnet</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.20.30.0/24</span><span class="w"> </span><span class="c1"># 请设置正确的 IP 段，确保调度器可以将配置发送到实例</span>
+<span class="w">  </span><span class="nt">bw-services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-services</span>
+<span class="w">  </span><span class="nt">bw-db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bw-db</span>
+</code></pre></div>
+<p>这样可以将 API 隔离在 BunkerWeb 后面，使流量保持在受信任的网络中，并让你能够在控制平面和暴露的主机名两侧同时实施身份验证、允许列表和速率限制。</p>
+<h2 id="_4">亮点</h2>
 <ul>
 <li>实例感知：将操作性动作广播到已发现的实例。</li>
 <li>强身份验证：管理员的基本认证、Bearer 管理员覆盖或用于细粒度权限的 Biscuit ACL。</li>
@@ -1528,7 +1643,7 @@
 <span class="w">  </span>-p<span class="w"> </span><span class="m">80</span>:8080/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/tcp<span class="w"> </span>-p<span class="w"> </span><span class="m">443</span>:8443/udp<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>bunkerity/bunkerweb-all-in-one:testing
 </code></pre></div>
-<h2 id="_4">身份验证</h2>
+<h2 id="_5">身份验证</h2>
 <p>支持的请求身份验证方式：</p>
 <ul>
 <li>基本管理员认证：当凭据属于管理员 API 用户时，受保护的端点接受 <code>Authorization: Basic &lt;base64(username:password)&gt;</code>。</li>
@@ -1622,14 +1737,14 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <li><code>resource_id: "*"</code>（或 null/空）在该资源类型上全局授予权限。</li>
 <li>现有用户可以通过引导更新密码并应用额外的授权。</li>
 </ul>
-<h2 id="_5">功能参考</h2>
+<h2 id="_6">功能参考</h2>
 <p>API 按资源聚焦的路由器组织。使用以下部分作为功能地图；<code>/docs</code> 处的交互式模式详细记录了请求/响应模型。</p>
-<h3 id="_6">核心和身份验证</h3>
+<h3 id="_7">核心和身份验证</h3>
 <ul>
 <li><code>GET /ping</code>、<code>GET /health</code>：API 服务本身的轻量级存活探针。</li>
 <li><code>POST /auth</code>：用基本凭据（或管理员覆盖令牌）交换 Biscuit。接受 JSON、表单或 <code>Authorization</code> 标头。管理员如果需要，也可以直接在受保护的路由上继续使用 HTTP 基本认证。</li>
 </ul>
-<h3 id="_7">实例控制平面</h3>
+<h3 id="_8">实例控制平面</h3>
 <ul>
 <li><code>GET /instances</code>：列出注册的实例，包括创建/最后一次看到的时间戳、注册方法和元数据。</li>
 <li><code>POST /instances</code>：注册一个新的 API 管理的实例（主机名、可选端口、服务器名称、友好名称、方法）。</li>
@@ -1639,12 +1754,12 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <li><code>POST /instances/reload?test=yes|no</code>、<code>POST /instances/{hostname}/reload</code>：触发配置重新加载（测试模式执行空跑验证）。</li>
 <li><code>POST /instances/stop</code>、<code>POST /instances/{hostname}/stop</code>：向实例中继停止命令。</li>
 </ul>
-<h3 id="_8">全局配置</h3>
+<h3 id="_9">全局配置</h3>
 <ul>
 <li><code>GET /global_config</code>：获取非默认设置（使用 <code>full=true</code> 获取完整配置，<code>methods=true</code> 包含来源信息）。</li>
 <li><code>PATCH /global_config</code>：更新或插入 API 拥有的（<code>method="api"</code>）全局设置；验证错误会指出未知或只读的键。</li>
 </ul>
-<h3 id="_9">服务生命周期</h3>
+<h3 id="_10">服务生命周期</h3>
 <ul>
 <li><code>GET /services</code>：枚举服务及其元数据，包括草稿状态和时间戳。</li>
 <li><code>GET /services/{service}</code>：检索服务的非默认覆盖层（<code>full=false</code>）或完整配置快照（<code>full=true</code>）。</li>
@@ -1653,7 +1768,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <li><code>DELETE /services/{service}</code>：删除一个服务及其派生的配置键。</li>
 <li><code>POST /services/{service}/convert?convert_to=online|draft</code>：快速切换草稿/在线状态，而不更改其他变量。</li>
 </ul>
-<h3 id="_10">自定义配置片段</h3>
+<h3 id="_11">自定义配置片段</h3>
 <ul>
 <li><code>GET /configs</code>：列出服务的自定义配置片段（HTTP/服务器/流/ModSecurity/CRS 挂钩）（默认为 <code>service=global</code>）。<code>with_data=true</code> 在可打印时嵌入 UTF-8 内容。</li>
 <li><code>POST /configs</code> 和 <code>POST /configs/upload</code>：从 JSON 负载或上传的文件创建新片段。接受的类型包括 <code>http</code>、<code>server_http</code>、<code>default_server_http</code>、<code>modsec</code>、<code>modsec_crs</code>、<code>stream</code>、<code>server_stream</code> 和 CRS 插件挂钩。名称必须匹配 <code>^[\w_-]{1,255}$</code>。</li>
@@ -1661,19 +1776,19 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <li><code>PATCH /configs/{service}/{type}/{name}</code> 和 <code>PATCH .../upload</code>：更新或移动 API 管理的片段；模板或文件管理的条目保持只读。</li>
 <li><code>DELETE /configs</code> 和 <code>DELETE /configs/{service}/{type}/{name}</code>：修剪 API 管理的片段，同时保留模板管理的片段，并为被忽略的条目返回一个 <code>skipped</code> 列表。</li>
 </ul>
-<h3 id="_11">封禁编排</h3>
+<h3 id="_12">封禁编排</h3>
 <ul>
 <li><code>GET /bans</code>：聚合所有实例报告的活动封禁。</li>
 <li><code>POST /bans</code> 或 <code>POST /bans/ban</code>：应用一个或多个封禁。负载可以是 JSON 对象、数组或字符串化的 JSON。<code>service</code> 是可选的；省略时封禁是全局的。</li>
 <li><code>POST /bans/unban</code> 或 <code>DELETE /bans</code>：使用同样灵活的负载全局或按服务删除封禁。</li>
 </ul>
-<h3 id="_12">插件管理</h3>
+<h3 id="_13">插件管理</h3>
 <ul>
 <li><code>GET /plugins?type=all|external|ui|pro</code>：列出带有元数据的插件；<code>with_data=true</code> 在可用时包含打包的字节。</li>
 <li><code>POST /plugins/upload</code>：从 <code>.zip</code>、<code>.tar.gz</code> 或 <code>.tar.xz</code> 存档安装 UI 插件。存档可以捆绑多个插件，只要每个插件都包含一个 <code>plugin.json</code>。</li>
 <li><code>DELETE /plugins/{id}</code>：按 ID (<code>^[\w.-]{4,64}$</code>) 删除 UI 插件。</li>
 </ul>
-<h3 id="_13">作业缓存和执行</h3>
+<h3 id="_14">作业缓存和执行</h3>
 <ul>
 <li><code>GET /cache</code>：列出由调度器作业产生的缓存工件，按服务、插件 ID 或作业名称过滤。<code>with_data=true</code> 包含可打印的文件内容。</li>
 <li><code>GET /cache/{service}/{plugin}/{job}/{file}</code>：获取特定的缓存文件（<code>download=true</code> 以附件形式流式传输）。</li>
@@ -1681,12 +1796,12 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <li><code>GET /jobs</code>：检查已知的作业、它们的调度元数据和缓存摘要。</li>
 <li><code>POST /jobs/run</code>：通过将关联的插件标记为已更改来请求作业执行。</li>
 </ul>
-<h3 id="_14">操作说明</h3>
+<h3 id="_15">操作说明</h3>
 <ul>
 <li>写入端点持久化到共享数据库；实例通过调度器同步或在 <code>/instances/reload</code> 后获取更改。</li>
 <li>错误被规范化为 <code>{ "status": "error", "message": "..." }</code>，并带有适当的 HTTP 状态码（422 验证，404 未找到，403 ACL，5xx 上游故障）。</li>
 </ul>
-<h2 id="_15">速率限制</h2>
+<h2 id="_16">速率限制</h2>
 <p>客户端的速率限制由 SlowAPI 处理。通过环境变量或 <code>/etc/bunkerweb/api.yml</code> 启用/禁用它并调整限制。</p>
 <ul>
 <li><code>API_RATE_LIMIT_ENABLED</code> (默认: <code>yes</code>)</li>
@@ -1708,7 +1823,7 @@ API_RATE_LIMIT_RULES:
     methods: "GET|POST"
     times: 100
     seconds: 60</code></p>
-<h2 id="_16">配置</h2>
+<h2 id="_17">配置</h2>
 <p>您可以通过环境变量、Docker secrets 以及可选的 <code>/etc/bunkerweb/api.yml</code> 或 <code>/etc/bunkerweb/api.env</code> 文件来配置 API。关键设置：</p>
 <ul>
 <li>文档和模式: <code>API_DOCS_URL</code>, <code>API_REDOC_URL</code>, <code>API_OPENAPI_URL</code>, <code>API_ROOT_PATH</code>。</li>
@@ -1721,7 +1836,7 @@ API_RATE_LIMIT_RULES:
 <li>速率限制存储: 内存或当 <code>USE_REDIS=yes</code> 且设置了 Redis 相关变量时使用 Redis/Valkey，如 <code>REDIS_HOST</code>, <code>REDIS_PORT</code>, <code>REDIS_PASSWORD</code>, <code>REDIS_DATABASE</code>, <code>REDIS_SSL</code> 或 Sentinel 变量。请参阅 <code>docs/features.md</code> 中的 Redis 设置表。</li>
 <li>网络/TLS: <code>API_LISTEN_ADDR</code>, <code>API_LISTEN_PORT</code>, <code>API_FORWARDED_ALLOW_IPS</code>, <code>API_SSL_ENABLED</code>, <code>API_SSL_CERTFILE</code>, <code>API_SSL_KEYFILE</code>, <code>API_SSL_CA_CERTS</code>。</li>
 </ul>
-<h3 id="_17">配置加载方式</h3>
+<h3 id="_18">配置加载方式</h3>
 <p>优先级从高到低：</p>
 <ul>
 <li>环境变量 (例如容器 <code>environment:</code> 或导出的 shell 变量)</li>
@@ -1737,7 +1852,7 @@ API_RATE_LIMIT_RULES:
 <li>如果 <code>API_SSL_ENABLED=yes</code>，您还必须设置 <code>API_SSL_CERTFILE</code> 和 <code>API_SSL_KEYFILE</code>。</li>
 <li>如果启用了 Redis (<code>USE_REDIS=yes</code>)，请提供 Redis 详细信息；请参阅 <code>docs/features.md</code> 中的 Redis 部分。</li>
 </ul>
-<h3 id="_18">身份验证和用户</h3>
+<h3 id="_19">身份验证和用户</h3>
 <ul>
 <li>管理员引导：设置 <code>API_USERNAME</code> 和 <code>API_PASSWORD</code> 以创建第一个管理员。要稍后重新应用，请设置 <code>OVERRIDE_API_CREDS=yes</code>。</li>
 <li>非管理员和权限：提供 <code>API_ACL_BOOTSTRAP_FILE</code> 并指定一个 JSON 路径（或挂载到 <code>/var/lib/bunkerweb/api_acl_bootstrap.json</code>）。该文件可以列出用户和细粒度的授权。</li>
@@ -1749,7 +1864,7 @@ API_RATE_LIMIT_RULES:
 <li>反向代理：将 <code>API_FORWARDED_ALLOW_IPS</code> 设置为代理 IP，以便 Gunicorn 信任 <code>X-Forwarded-*</code> 标头。</li>
 <li>API 中的 TLS 终止：<code>API_SSL_ENABLED=yes</code> 加上 <code>API_SSL_CERTFILE</code> 和 <code>API_SSL_KEYFILE</code>；可选的 <code>API_SSL_CA_CERTS</code>。</li>
 </ul>
-<h3 id="_19">速率限制快速配方</h3>
+<h3 id="_20">速率限制快速配方</h3>
 <ul>
 <li>全局禁用：<code>API_RATE_LIMIT_ENABLED=no</code></li>
 <li>设置一个简单的全局限制：<code>API_RATE_LIMIT_TIMES=100</code>，<code>API_RATE_LIMIT_SECONDS=60</code></li>
@@ -1764,7 +1879,7 @@ API_RATE_LIMIT_RULES:
 <p class="admonition-title">根路径和代理</p>
 <p>如果您将 API 部署在 BunkerWeb 后面的子路径上，请将 <code>API_ROOT_PATH</code> 设置为该路径，以便 <code>/docs</code> 和相对路由在代理时能正常工作。</p>
 </div>
-<h2 id="_20">操作</h2>
+<h2 id="_21">操作</h2>
 <ul>
 <li>健康状况：当服务正常时，<code>GET /health</code> 返回 <code>{"status":"ok"}</code>。</li>
 <li>Linux 服务：打包了一个名为 <code>bunkerweb-api.service</code> 的 <code>systemd</code> 单元。通过 <code>/etc/bunkerweb/api.env</code> 进行自定义，并使用 <code>systemctl</code> 进行管理。</li>

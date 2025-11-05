@@ -1145,6 +1145,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#arbeiten-mit-lokalen-listendateien" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arbeiten mit lokalen Listendateien
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1653,6 +1662,15 @@
   <a href="#beispielkonfigurationen_8" class="md-nav__link">
     <span class="md-ellipsis">
       Beispielkonfigurationen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arbeiten-mit-lokalen-listendateien_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arbeiten mit lokalen Listendateien
     </span>
   </a>
   
@@ -2717,6 +2735,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#arbeiten-mit-lokalen-listendateien_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arbeiten mit lokalen Listendateien
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3627,8 +3654,29 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td style="text-align: left;">nein</td>
 <td style="text-align: left;">Ausgeschlossene User-Agents: Eine durch Leerzeichen getrennte Liste von User-Agent-Regex-Mustern, die die Herausforderung umgehen sollen.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><code>ANTIBOT_IGNORE_COUNTRY</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">nein</td>
+<td style="text-align: left;">Ausgeschlossene Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung umgehen sollen.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ANTIBOT_ONLY_COUNTRY</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Multisite</td>
+<td style="text-align: left;">nein</td>
+<td style="text-align: left;">Nur Herausforderungs-Länder: Eine durch Leerzeichen getrennte Liste von ISO-3166-1-Alpha-2-Ländercodes, die die Herausforderung erhalten müssen. Alle anderen Länder werden übersprungen.</td>
+</tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Verhalten der länderspezifischen Einstellungen</p>
+<ul>
+<li>Wenn sowohl <code>ANTIBOT_IGNORE_COUNTRY</code> als auch <code>ANTIBOT_ONLY_COUNTRY</code> gesetzt sind, hat die Ignore-Liste Vorrang – Länder, die in beiden Listen stehen, umgehen die Herausforderung.</li>
+<li>Private oder unbekannte IP-Adressen umgehen die Herausforderung, wenn <code>ANTIBOT_ONLY_COUNTRY</code> gesetzt ist, da kein Ländercode ermittelt werden kann.</li>
+</ul>
+</div>
 <p>Beispiele:</p>
 <ul>
 <li>
@@ -3650,6 +3698,14 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li>
 <p><code>ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"</code>
   Schließt Anfragen aus, deren User-Agent dem angegebenen Regex-Muster entspricht.</p>
+</li>
+<li>
+<p><code>ANTIBOT_IGNORE_COUNTRY: "US CA"</code>
+  Umgeht die Antibot-Herausforderung für Besucher aus den USA oder Kanada.</p>
+</li>
+<li>
+<p><code>ANTIBOT_ONLY_COUNTRY: "CN RU"</code>
+  Stellt nur Besucher aus China oder Russland vor die Herausforderung. Anfragen aus anderen Ländern (oder privaten IP-Bereichen) überspringen die Herausforderung.</p>
 </li>
 </ul>
 <h3 id="herausforderungsmechanismen">Herausforderungsmechanismen</h3>
@@ -4086,6 +4142,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 <li><strong>Wählen Sie den Schutzumfang:</strong> Entscheiden Sie, ob Sie Ihre gesamte Website oder nur bestimmte URLs schützen möchten, indem Sie die Einstellung <code>AUTH_BASIC_LOCATION</code> konfigurieren.</li>
 <li><strong>Anmeldeinformationen definieren:</strong> Richten Sie mindestens ein Paar aus Benutzername und Passwort mit den Einstellungen <code>AUTH_BASIC_USER</code> und <code>AUTH_BASIC_PASSWORD</code> ein.</li>
 <li><strong>Passen Sie die Nachricht an:</strong> Ändern Sie optional den <code>AUTH_BASIC_TEXT</code>, um eine benutzerdefinierte Nachricht in der Anmeldeaufforderung anzuzeigen.</li>
+<li><strong>Hash-Kosten abstimmen (optional):</strong> Passen Sie <code>AUTH_BASIC_ROUNDS</code> (1000-999999999) an, um zwischen Login-Performance und Stärke der Passwort-Hashing-Kosten abzuwägen.</li>
 </ol>
 <h3 id="konfigurationseinstellungen_1">Konfigurationseinstellungen</h3>
 <table>
@@ -4126,6 +4183,13 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 <td>multisite</td>
 <td>ja</td>
 <td><strong>Passwort:</strong> Das für die Authentifizierung erforderliche Passwort. Jedes Passwort korrespondiert mit einem Benutzernamen.</td>
+</tr>
+<tr>
+<td><code>AUTH_BASIC_ROUNDS</code></td>
+<td><code>656000</code></td>
+<td>multisite</td>
+<td>ja</td>
+<td><strong>Hash-Runden:</strong> Anzahl der SHA-512-Runden beim Erzeugen der htpasswd-Datei (zulässiger Bereich: 1000 bis 999999999). Weniger Runden beschleunigen den Login, reduzieren aber den Aufwand.</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -4768,6 +4832,27 @@ Der Standardparameter `BLACKLIST_USER_AGENT_URLS` enthält eine URL, die eine **
 </div>
 </div>
 </div>
+<h3 id="arbeiten-mit-lokalen-listendateien">Arbeiten mit lokalen Listendateien</h3>
+<p>Die <code>*_URLS</code>-Einstellungen der Whitelist-, Greylist- und Blacklist-Plugins verwenden denselben Downloader. Wenn Sie eine <code>file:///</code>-URL angeben:</p>
+<ul>
+<li>Der Pfad wird innerhalb des <strong>Scheduler</strong>-Containers aufgelöst (bei Docker-Bereitstellungen in der Regel <code>bunkerweb-scheduler</code>). Binden Sie die Dateien dort ein und stellen Sie sicher, dass der Scheduler-Benutzer Lesezugriff hat.</li>
+<li>Jede Datei ist eine UTF-8-codierte Textdatei mit einem Eintrag pro Zeile. Leere Zeilen werden ignoriert und Kommentarzeilen müssen mit <code>#</code> oder <code>;</code> beginnen. <code>//</code>-Kommentare werden nicht unterstützt.</li>
+<li>Erwartete Werte je Listentyp:</li>
+<li><strong>IP-Listen</strong> akzeptieren IPv4/IPv6-Adressen oder CIDR-Netzwerke (z. B. <code>192.0.2.10</code> oder <code>2001:db8::/48</code>).</li>
+<li><strong>rDNS-Listen</strong> erwarten ein Suffix ohne Leerzeichen (z. B. <code>.search.msn.com</code>). Werte werden automatisch in Kleinbuchstaben umgewandelt.</li>
+<li><strong>ASN-Listen</strong> können nur die Nummer (<code>32934</code>) oder die mit <code>AS</code> vorangestellte Nummer (<code>AS15169</code>) enthalten.</li>
+<li><strong>User-Agent-Listen</strong> werden als PCRE-Muster behandelt und die vollständige Zeile bleibt erhalten (einschließlich Leerzeichen). Schreiben Sie Kommentare in eine eigene Zeile, damit sie nicht als Muster interpretiert werden.</li>
+<li><strong>URI-Listen</strong> müssen mit <code>/</code> beginnen und dürfen PCRE-Tokens wie <code>^</code> oder <code>$</code> verwenden.</li>
+</ul>
+<p>Beispieldateien im erwarteten Format:</p>
+<div class="highlight"><pre><span></span><code># /etc/bunkerweb/lists/ip-blacklist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-blacklist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+</code></pre></div>
 <h2 id="brotli">Brotli</h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Das Brotli-Plugin aktiviert die Komprimierung von HTTP-Antworten mit dem Brotli-Algorithmus. Es reduziert die Bandbreitennutzung and beschleunigt das Laden, indem es Inhalte vor dem Senden an den Browser komprimiert.</p>
@@ -6463,6 +6548,27 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </div>
 </div>
 </div>
+<h3 id="arbeiten-mit-lokalen-listendateien_1">Arbeiten mit lokalen Listendateien</h3>
+<p>Die <code>*_URLS</code>-Einstellungen der Whitelist-, Greylist- und Blacklist-Plugins verwenden denselben Downloader. Wenn Sie eine <code>file:///</code>-URL angeben:</p>
+<ul>
+<li>Der Pfad wird innerhalb des <strong>Scheduler</strong>-Containers aufgelöst (bei Docker-Bereitstellungen in der Regel <code>bunkerweb-scheduler</code>). Binden Sie die Dateien dort ein und stellen Sie sicher, dass der Scheduler-Benutzer Lesezugriff hat.</li>
+<li>Jede Datei ist eine UTF-8-codierte Textdatei mit einem Eintrag pro Zeile. Leere Zeilen werden ignoriert und Kommentarzeilen müssen mit <code>#</code> oder <code>;</code> beginnen. <code>//</code>-Kommentare werden nicht unterstützt.</li>
+<li>Erwartete Werte je Listentyp:</li>
+<li><strong>IP-Listen</strong> akzeptieren IPv4/IPv6-Adressen oder CIDR-Netzwerke (z. B. <code>192.0.2.10</code> oder <code>2001:db8::/48</code>).</li>
+<li><strong>rDNS-Listen</strong> erwarten ein Suffix ohne Leerzeichen (z. B. <code>.search.msn.com</code>). Werte werden automatisch in Kleinbuchstaben umgewandelt.</li>
+<li><strong>ASN-Listen</strong> können nur die Nummer (<code>32934</code>) oder die mit <code>AS</code> vorangestellte Nummer (<code>AS15169</code>) enthalten.</li>
+<li><strong>User-Agent-Listen</strong> werden als PCRE-Muster behandelt und die vollständige Zeile bleibt erhalten (einschließlich Leerzeichen). Schreiben Sie Kommentare in eine eigene Zeile, damit sie nicht als Muster interpretiert werden.</li>
+<li><strong>URI-Listen</strong> müssen mit <code>/</code> beginnen und dürfen PCRE-Tokens wie <code>^</code> oder <code>$</code> verwenden.</li>
+</ul>
+<p>Beispieldateien im erwarteten Format:</p>
+<div class="highlight"><pre><span></span><code># /etc/bunkerweb/lists/ip-greylist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-greylist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+</code></pre></div>
 <h2 id="gzip">Gzip</h2>
 <p>STREAM-Unterstützung <img alt="❌" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/274c.svg" title=":x:" /></p>
 <p>Der GZIP-Plugin komprimiert HTTP-Antworten mit dem GZIP-Algorithmus, um die Bandbreite zu reduzieren und das Laden von Seiten zu beschleunigen.</p>
@@ -6928,7 +7034,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Führen Sie die folgenden Schritte aus, um die Let's Encrypt-Funktion zu konfigurieren und zu verwenden:</p>
 <ol>
 <li><strong>Aktivieren Sie die Funktion:</strong> Setzen Sie die Einstellung <code>AUTO_LETS_ENCRYPT</code> auf <code>yes</code>, um die automatische Ausstellung und Erneuerung von Zertifikaten zu aktivieren.</li>
-<li><strong>Geben Sie eine Kontakt-E-Mail an:</strong> Geben Sie Ihre E-Mail-Adresse in der Einstellung <code>EMAIL_LETS_ENCRYPT</code> ein, um wichtige Benachrichtigungen über Ihre Zertifikate zu erhalten.</li>
+<li><strong>Kontakt-E-Mail angeben (empfohlen):</strong> Geben Sie Ihre E-Mail-Adresse in der Einstellung <code>EMAIL_LETS_ENCRYPT</code> ein, damit Let's Encrypt Sie vor ablaufenden Zertifikaten warnen kann. Wenn Sie das Feld leer lassen, registriert sich BunkerWeb ohne Adresse (Certbot-Option <code>--register-unsafely-without-email</code>) – Sie erhalten dann keine Erinnerungen oder Wiederherstellungs-E-Mails.</li>
 <li><strong>Wählen Sie den Challenge-Typ:</strong> Wählen Sie entweder die <code>http</code>- oder <code>dns</code>-Verifizierung mit der Einstellung <code>LETS_ENCRYPT_CHALLENGE</code>.</li>
 <li><strong>DNS-Anbieter konfigurieren:</strong> Wenn Sie DNS-Challenges verwenden, geben Sie Ihren DNS-Anbieter und Ihre Anmeldeinformationen an.</li>
 <li><strong>Zertifikatsprofil auswählen:</strong> Wählen Sie Ihr bevorzugtes Zertifikatsprofil mit der Einstellung <code>LETS_ENCRYPT_PROFILE</code> (classic, tlsserver oder shortlived).</li>
@@ -6970,10 +7076,10 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 </tr>
 <tr>
 <td><code>EMAIL_LETS_ENCRYPT</code></td>
-<td><code>contact@{FIRST_SERVER}</code></td>
+<td><code>-</code></td>
 <td>multisite</td>
 <td>nein</td>
-<td><strong>Kontakt-E-Mail:</strong> E-Mail-Adresse, die für Let's Encrypt-Benachrichtigungen verwendet und in Zertifikate aufgenommen wird.</td>
+<td><strong>Kontakt-E-Mail:</strong> E-Mail-Adresse für Let's-Encrypt-Erinnerungen. Lassen Sie das Feld nur leer, wenn Sie akzeptieren, dass keine Warnungen oder Wiederherstellungs-E-Mails gesendet werden (Certbot registriert mit <code>--register-unsafely-without-email</code>).</td>
 </tr>
 <tr>
 <td><code>LETS_ENCRYPT_CHALLENGE</code></td>
@@ -7133,6 +7239,13 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <td><code>api_key</code><br><code>secret_key</code></td>
 <td></td>
 <td><a href="https://certbot-dns-dnsmadeeasy.readthedocs.io/en/stable/">Dokumentation</a></td>
+</tr>
+<tr>
+<td><code>duckdns</code></td>
+<td>DuckDNS</td>
+<td><code>duckdns_token</code></td>
+<td></td>
+<td><a href="https://github.com/infinityofspace/certbot_dns_duckdns/blob/main/Readme.md">Dokumentation</a></td>
 </tr>
 <tr>
 <td><code>dynu</code></td>
@@ -8486,7 +8599,7 @@ CROWDSEC_APPSEC_URL=http://127.0.0.1:7422
 <p>Wählen Sie eine CRS-Version, die Ihren Sicherheitsanforderungen am besten entspricht:</p>
 <ul>
 <li><strong><code>3</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v3.3.7">v3.3.7</a>.</li>
-<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.19.0">v4.19.0</a> (<strong>Standard</strong>).</li>
+<li><strong><code>4</code></strong>: Stabile <a href="https://github.com/coreruleset/coreruleset/releases/tag/v4.20.0">v4.20.0</a> (<strong>Standard</strong>).</li>
 <li><strong><code>nightly</code></strong>: <a href="https://github.com/coreruleset/coreruleset/releases/tag/nightly">Nightly-Build</a> mit den neuesten Regel-Updates.</li>
 </ul>
 <div class="admonition example">
@@ -11232,6 +11345,27 @@ Um stattdessen unerwünschte Clients zu blockieren, lesen Sie das <a href="#blac
 </div>
 </div>
 </div>
+<h3 id="arbeiten-mit-lokalen-listendateien_2">Arbeiten mit lokalen Listendateien</h3>
+<p>Die <code>*_URLS</code>-Einstellungen der Whitelist-, Greylist- und Blacklist-Plugins verwenden denselben Downloader. Wenn Sie eine <code>file:///</code>-URL angeben:</p>
+<ul>
+<li>Der Pfad wird innerhalb des <strong>Scheduler</strong>-Containers aufgelöst (bei Docker-Bereitstellungen in der Regel <code>bunkerweb-scheduler</code>). Binden Sie die Dateien dort ein und stellen Sie sicher, dass der Scheduler-Benutzer Lesezugriff hat.</li>
+<li>Jede Datei ist eine UTF-8-codierte Textdatei mit einem Eintrag pro Zeile. Leere Zeilen werden ignoriert und Kommentarzeilen müssen mit <code>#</code> oder <code>;</code> beginnen. <code>//</code>-Kommentare werden nicht unterstützt.</li>
+<li>Erwartete Werte je Listentyp:</li>
+<li><strong>IP-Listen</strong> akzeptieren IPv4/IPv6-Adressen oder CIDR-Netzwerke (z. B. <code>192.0.2.10</code> oder <code>2001:db8::/48</code>).</li>
+<li><strong>rDNS-Listen</strong> erwarten ein Suffix ohne Leerzeichen (z. B. <code>.search.msn.com</code>). Werte werden automatisch in Kleinbuchstaben umgewandelt.</li>
+<li><strong>ASN-Listen</strong> können nur die Nummer (<code>32934</code>) oder die mit <code>AS</code> vorangestellte Nummer (<code>AS15169</code>) enthalten.</li>
+<li><strong>User-Agent-Listen</strong> werden als PCRE-Muster behandelt und die vollständige Zeile bleibt erhalten (einschließlich Leerzeichen). Schreiben Sie Kommentare in eine eigene Zeile, damit sie nicht als Muster interpretiert werden.</li>
+<li><strong>URI-Listen</strong> müssen mit <code>/</code> beginnen und dürfen PCRE-Tokens wie <code>^</code> oder <code>$</code> verwenden.</li>
+</ul>
+<p>Beispieldateien im erwarteten Format:</p>
+<div class="highlight"><pre><span></span><code># /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+</code></pre></div>
 
 
 
