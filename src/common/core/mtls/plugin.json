@@ -1,0 +1,64 @@
+{
+  "id": "mtls",
+  "name": "Mutual TLS",
+  "description": "Require client certificates using mutual TLS (mTLS).",
+  "version": "1.0",
+  "stream": "yes",
+  "settings": {
+    "USE_MTLS": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Enable client authentication with mutual TLS.",
+      "id": "use-mtls",
+      "label": "Use mutual TLS",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "MTLS_CA_CERTIFICATE": {
+      "context": "multisite",
+      "default": "",
+      "help": "Absolute path to the trusted client CA bundle (PEM). Required when MTLS_VERIFY_CLIENT is set to on or optional.",
+      "id": "mtls-ca-certificate",
+      "label": "Client CA bundle",
+      "regex": "^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    },
+    "MTLS_VERIFY_CLIENT": {
+      "context": "multisite",
+      "default": "on",
+      "help": "Client verification mode. 'on' requires a valid certificate, 'optional' lets requests through when no certificate is presented, and 'optional_no_ca' skips CA validation.",
+      "id": "mtls-verify-client",
+      "label": "Verify client mode",
+      "regex": "^(on|optional|optional_no_ca)$",
+      "type": "select",
+      "select": ["on", "optional", "optional_no_ca"]
+    },
+    "MTLS_VERIFY_DEPTH": {
+      "context": "multisite",
+      "default": "2",
+      "help": "Maximum certificate chain depth accepted during client verification.",
+      "id": "mtls-verify-depth",
+      "label": "Verify depth",
+      "regex": "^\\d+$",
+      "type": "number"
+    },
+    "MTLS_FORWARD_CLIENT_HEADERS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": "Forward verification results to upstream backends using X-SSL-Client-* headers.",
+      "id": "mtls-forward-client-headers",
+      "label": "Forward client headers",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "MTLS_CRL": {
+      "context": "multisite",
+      "default": "",
+      "help": "Optional absolute path to a certificate revocation list (PEM). Leave empty to skip CRL checks.",
+      "id": "mtls-crl",
+      "label": "Client CRL path",
+      "regex": "^$|^(/[\\w. \\-]+)+/?$",
+      "type": "text"
+    }
+  }
+}

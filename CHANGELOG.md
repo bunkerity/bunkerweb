@@ -5,6 +5,7 @@
 - [FEATURE] Refactor `Let's Encrypt` mail handling: validate the configured email and warn if missing/invalid. Use normal registration when valid; otherwise add **--register-unsafely-without-email** to Certbot and log that choice.
 - [FEATURE] Add `DuckDNS` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `AUTH_BASIC_ROUNDS` setting to the `authbasic` plugin to configure password hashing strength (default: 656000, range: 1000-999999999).
+- [FEATURE] Add new `mtls` plugin for mutual TLS client certificate authentication, allowing services to require and verify client certificates against trusted CA bundles with configurable verification modes, chain depth control, and optional header forwarding for downstream authorization.
 - [AUTOCONF] Implement event debouncing in Docker, Ingress, and Swarm controllers for improved configuration management
 - [MISC] Update default value for Permissions-Policy header to include additional features (`private-state-token-issuance` and `private-state-token-redemption`).
 - [DEPS] Update coreruleset-v4 version to v4.20.0
