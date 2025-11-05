@@ -2,7 +2,7 @@
 
 from os import getenv
 from contextlib import suppress
-from time import sleep
+from time import sleep, time
 from traceback import format_exc
 from threading import Thread, Lock
 from typing import Any, Dict, List
@@ -23,6 +23,9 @@ class SwarmController(Controller):
         self.__swarm_instances = []
         self.__swarm_services = []
         self.__swarm_configs = []
+        self.__pending_apply = False
+        self.__last_event_time = 0.0
+        self.__debounce_delay = 2  # seconds
         self._logger.warning("Swarm integration is deprecated and will be removed in a future release")
         self.__ignored_labels_exact = set()
         self.__ignored_label_suffixes = set()
@@ -234,6 +237,34 @@ class SwarmController(Controller):
                         continue
                     self._first_start = False
 
+                    # Mark event received and update time
+                    self.__pending_apply = True
+                    self.__last_event_time = time()
+                    self._logger.debug(f"Swarm event ({event_type}) received, will batch if more arrive...")
+                    self.__internal_lock.release()
+                    locked = False
+
+                    # Wait for debounce period
+                    while (time() - self.__last_event_time) < self.__debounce_delay:
+                        sleep(0.1)
+
+                    # Debounce period passed, try to apply
+                    self.__internal_lock.acquire()
+                    locked = True
+
+                    # Check if another event updated the time while we were waiting
+                    if (time() - self.__last_event_time) < self.__debounce_delay:
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
+
+                    if not self.__pending_apply:
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
+
+                    self.__pending_apply = False
+
                     try:
                         to_apply = False
                         while not applied:
@@ -255,7 +286,7 @@ class SwarmController(Controller):
                                 sleep(1)
                                 continue
 
-                            self._logger.info(f"Caught Swarm event ({event_type}), deploying new configuration ...")
+                            self._logger.info("Batched Swarm event(s), deploying configuration...")
                             if not self.apply_config():
                                 self._logger.error("Error while deploying new configuration")
                             else:

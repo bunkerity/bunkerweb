@@ -3,7 +3,7 @@
 from contextlib import suppress
 from os import getenv
 from re import compile as re_compile, split as re_split
-from time import sleep
+from time import sleep, time
 from traceback import format_exc
 from typing import List, Optional, Tuple
 from threading import Thread, Lock
@@ -18,6 +18,9 @@ from Controller import Controller
 class IngressController(Controller):
     def __init__(self):
         self.__internal_lock = Lock()
+        self.__pending_apply = False
+        self.__last_event_time = 0.0
+        self.__debounce_delay = 2  # seconds
         super().__init__("kubernetes")
         config.load_incluster_config()
         self.__managed_configmaps = set()
@@ -474,6 +477,34 @@ class IngressController(Controller):
                         continue
                     self._first_start = False
 
+                    # Mark event received and update time
+                    self.__pending_apply = True
+                    self.__last_event_time = time()
+                    self._logger.debug(f"Kubernetes event ({watch_type}) received, will batch if more arrive...")
+                    self.__internal_lock.release()
+                    locked = False
+
+                    # Wait for debounce period
+                    while (time() - self.__last_event_time) < self.__debounce_delay:
+                        sleep(0.1)
+
+                    # Debounce period passed, try to apply
+                    self.__internal_lock.acquire()
+                    locked = True
+
+                    # Check if another event updated the time while we were waiting
+                    if (time() - self.__last_event_time) < self.__debounce_delay:
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
+
+                    if not self.__pending_apply:
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
+
+                    self.__pending_apply = False
+
                     to_apply = False
                     while not applied:
                         waiting = self.have_to_wait()
@@ -495,7 +526,7 @@ class IngressController(Controller):
                             sleep(1)
                             continue
 
-                        self._logger.info(f"Caught kubernetes event ({watch_type}), deploying new configuration ...")
+                        self._logger.info("Batched kubernetes event(s), deploying configuration...")
                         try:
                             ret = self.apply_config()
                             if not ret:

@@ -5,6 +5,7 @@
 - [FEATURE] Refactor `Let's Encrypt` mail handling: validate the configured email and warn if missing/invalid. Use normal registration when valid; otherwise add **--register-unsafely-without-email** to Certbot and log that choice.
 - [FEATURE] Add `DuckDNS` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `AUTH_BASIC_ROUNDS` setting to the `authbasic` plugin to configure password hashing strength (default: 656000, range: 1000-999999999).
+- [AUTOCONF] Implement event debouncing in Docker, Ingress, and Swarm controllers for improved configuration management
 - [MISC] Update default value for Permissions-Policy header to include additional features (`private-state-token-issuance` and `private-state-token-redemption`).
 - [DEPS] Update coreruleset-v4 version to v4.20.0
 - [DEPS] Updated luajit2 version to v2.1-20251030

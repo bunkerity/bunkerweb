@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 from os import getenv
-from time import sleep
+from contextlib import suppress
+from time import sleep, time
 from typing import Any, Dict, List
+from threading import Lock
 from docker import DockerClient
 from re import compile as re_compile, split as re_split
 from traceback import format_exc
@@ -16,6 +18,10 @@ class DockerController(Controller):
     def __init__(self, docker_host):
         super().__init__("docker")
         self.__client = DockerClient(base_url=docker_host)
+        self.__internal_lock = Lock()
+        self.__pending_apply = False
+        self.__last_event_time = 0.0
+        self.__debounce_delay = 2  # seconds
         self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_STREAM|SERVER_HTTP|MODSEC_CRS|MODSEC|CRS_PLUGINS_BEFORE|CRS_PLUGINS_AFTER)_(.+)$")
         self.__ignored_labels_exact = set()
         self.__ignored_label_suffixes = set()
@@ -197,36 +203,92 @@ class DockerController(Controller):
 
     def process_events(self):
         self._set_autoconf_load_db()
-        for event in self.__client.events(decode=True, filters={"type": "container"}):
-            applied = False
+        locked = False
+        error = False
+        applied = False
+        while True:
             try:
-                if not self.__process_event(event):
-                    continue
-                self._first_start = False
-                to_apply = False
-                while not applied:
-                    waiting = self.have_to_wait()
-                    self._update_settings()
-                    self._instances = self.get_instances()
-                    self._services = self.get_services()
-                    self._configs = self.get_configs()
+                for event in self.__client.events(decode=True, filters={"type": "container"}):
+                    applied = False
+                    self.__internal_lock.acquire()
+                    locked = True
+                    if not self.__process_event(event):
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
+                    self._first_start = False
 
-                    if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
-                        applied = True
+                    # Mark event received and update time
+                    self.__pending_apply = True
+                    self.__last_event_time = time()
+                    self._logger.debug("Docker event received, will batch if more arrive...")
+                    self.__internal_lock.release()
+                    locked = False
+
+                    # Wait for debounce period
+                    while (time() - self.__last_event_time) < self.__debounce_delay:
+                        sleep(0.1)
+
+                    # Debounce period passed, try to apply
+                    self.__internal_lock.acquire()
+                    locked = True
+
+                    # Check if another event updated the time while we were waiting
+                    if (time() - self.__last_event_time) < self.__debounce_delay:
+                        self.__internal_lock.release()
+                        locked = False
                         continue
 
-                    to_apply = True
-                    if waiting:
-                        sleep(1)
+                    if not self.__pending_apply:
+                        self.__internal_lock.release()
+                        locked = False
                         continue
 
-                    self._logger.info("Caught Docker event, deploying new configuration ...")
-                    if not self.apply_config():
-                        self._logger.error("Error while deploying new configuration")
-                    else:
-                        self._logger.info("Successfully deployed new configuration 🚀")
+                    self.__pending_apply = False
 
-                        self._set_autoconf_load_db()
-                    applied = True
+                    try:
+                        to_apply = False
+                        while not applied:
+                            waiting = self.have_to_wait()
+                            self._update_settings()
+                            self._instances = self.get_instances()
+                            self._services = self.get_services()
+                            self._configs = self.get_configs()
+
+                            if not to_apply and not self.update_needed(self._instances, self._services, configs=self._configs):
+                                if locked:
+                                    self.__internal_lock.release()
+                                    locked = False
+                                applied = True
+                                continue
+
+                            to_apply = True
+                            if waiting:
+                                sleep(1)
+                                continue
+
+                            self._logger.info("Batched Docker event(s), deploying configuration...")
+                            if not self.apply_config():
+                                self._logger.error("Error while deploying new configuration")
+                            else:
+                                self._logger.info("Successfully deployed new configuration 🚀")
+                                self._set_autoconf_load_db()
+                            applied = True
+                    except BaseException:
+                        self._logger.error(f"Exception while processing Docker event :\n{format_exc()}")
+
+                    if locked:
+                        self.__internal_lock.release()
+                        locked = False
             except:
-                self._logger.error(f"Exception while processing events :\n{format_exc()}")
+                self._logger.error(f"Exception while reading Docker event :\n{format_exc()}")
+                error = True
+            finally:
+                if locked:
+                    with suppress(BaseException):
+                        self.__internal_lock.release()
+                    locked = False
+                if error is True:
+                    self._logger.warning("Got exception, retrying in 10 seconds ...")
+                    sleep(10)
+                    error = False
