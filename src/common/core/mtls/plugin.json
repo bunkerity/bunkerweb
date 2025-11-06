@@ -20,7 +20,7 @@
       "help": "Absolute path to the trusted client CA bundle (PEM). Required when MTLS_VERIFY_CLIENT is set to on or optional.",
       "id": "mtls-ca-certificate",
       "label": "Client CA bundle",
-      "regex": "^(/[\\w. \\-]+)+/?$",
+      "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
     "MTLS_VERIFY_CLIENT": {
