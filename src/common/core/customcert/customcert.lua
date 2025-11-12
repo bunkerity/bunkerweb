@@ -98,7 +98,10 @@ function customcert:ssl_certificate()
 	local data
 	data, err = self.internalstore:get("plugin_customcert_" .. server_name, true)
 	if not data and err ~= "not found" then
-		return self:ret(false, "error while getting plugin_customcert_" .. server_name .. " from internalstore : " .. err)
+		return self:ret(
+			false,
+			"error while getting plugin_customcert_" .. server_name .. " from internalstore : " .. err
+		)
 	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end
