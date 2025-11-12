@@ -162,4 +162,3 @@ plugins:
         color: "white"
   - mike:
       canonical_version: latest
-  - print-site
