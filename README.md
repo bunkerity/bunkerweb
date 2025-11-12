@@ -37,7 +37,9 @@
 	📝 <a href="https://github.com/bunkerity/bunkerweb/discussions">Forum</a>
 	 &#124;
 	🗺️ <a href="https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=github">Threatmap</a>
-	 &#124;
+	&#124;
+	📊 <a href="https://status.bunkerweb.io/?utm_campaign=self&utm_source=github">Status</a>
+	&#124;
 	🔎 <a href="https://forms.gle/e3VgymAteYPnwM1j9">Feedback</a>
 </p>
 
