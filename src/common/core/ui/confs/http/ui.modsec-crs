@@ -1,63 +1,72 @@
 {% if has_variable(all, "USE_UI", "yes") and SERVER_NAME != "" %}
     {% set re = import("re") %}
+    {% set ui_hosts = [] %}
+    {% set ip_hosts = [] %}
     {% for server_name in SERVER_NAME.split(" ") %}
         {% if all[server_name + "_USE_UI"] == "yes" %}
+            {% if re.match("^(?:\\d{1,3}\\.){3}\\d{1,3}$|^\\[[0-9a-fA-F:]+\\]$", server_name) %}
+                {% set _ = ip_hosts.append(re.escape(server_name)) %}
+            {% else %}
+                {% set _ = ui_hosts.append(re.escape(server_name)) %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% if ui_hosts %}
 SecRule REQUEST_FILENAME "@rx ^/" \
     "id:1007770,ctl:ruleRemoveById=930120,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@rx /(support/config|global-config|services/.+|templates/.+)$" \
     "id:1007771,ctl:ruleRemoveById=932235,ctl:ruleRemoveById=941130,ctl:ruleRemoveByTag=attack-rfi,ctl:ruleRemoveByTag=attack-lfi,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-ssrf,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@rx /(services|cache)/.+$" \
     "id:1007772,ctl:ruleRemoveById=920440,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@rx /configs/.+$" \
     "id:1007773,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-rfi,ctl:ruleRemoveByTag=attack-lfi,ctl:ruleRemoveByTag=attack-rce,ctl:ruleRemoveByTag=attack-sqli,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@endsWith /logs" \
     "id:1007774,ctl:ruleRemoveById=953100,ctl:ruleRemoveByTag=attack-disclosure,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@rx /plugins/.+$" \
     "id:1007775,ctl:ruleRemoveByTag=language-java,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@rx /fonts/.+$" \
     "id:1007776,ctl:ruleRemoveById=920440,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@rx ^/" \
     "id:1007777,ctl:ruleRemoveByTag=language-php,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@endsWith /login" \
     "id:1007778,ctl:ruleRemoveTargetByTag=attack-sqli;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rce;ARGS:password,ctl:ruleRemoveTargetByTag=attack-rfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-lfi;ARGS:password,ctl:ruleRemoveTargetByTag=attack-protocol;ARGS:password,ctl:ruleRemoveTargetByTag=attack-ssrf;ARGS:password,ctl:ruleRemoveTargetByTag=attack-xss;ARGS:password,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
 
 SecRule REQUEST_FILENAME "@endsWith /instances/new" \
     "id:1007779,ctl:ruleRemoveTargetById=931100;ARGS:hostname,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
+    {% endif %}
+    {% if ip_hosts %}
 
-            {% if re.match("^(?:\d{1,3}\.){3}\d{1,3}$|^\[[0-9a-fA-F:]+\]$", server_name) %}
 SecRule REQUEST_FILENAME "@rx ^/" \
     "id:1007780,ctl:ruleRemoveById=920350,nolog,chain"
-SecRule REQUEST_HEADERS:Host "@eq {{ server_name }}" \
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ip_hosts | join('|') }})$" \
     "nolog"
-            {% endif %}
-        {% endif %}
-    {% endfor %}
+    {% endif %}
 {% endif %}
