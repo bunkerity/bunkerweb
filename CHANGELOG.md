@@ -2,6 +2,7 @@
 
 ## v1.6.6-rc3 - ????/??/??
 
+- [BUGFIX] Fix `Let's Encrypt` wildcard certificate serving when using `wildcard` mode in multisite setups and the root domain is a part of the `SERVER_NAME` setting of the service.
 - [FEATURE] Start monitoring `405` http status code in the requests to be able to see them in the reports page.
 
 ## v1.6.6-rc2 - 2025/11/05

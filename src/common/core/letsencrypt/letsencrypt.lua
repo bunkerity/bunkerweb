@@ -29,19 +29,146 @@ local execute = os.execute
 local remove = os.remove
 local insert = table.insert
 local ipairs = ipairs
+local pairs = pairs
+local sort = table.sort
+local lower = string.lower
+local gsub = string.gsub
 
-local function get_wildcard_cert_identifier(host)
+-- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
+local function sanitize_domain_labels(domain)
+	if not domain or domain == "" then
+		return nil
+	end
+	local cleaned = lower(gsub(domain, "^%*%.", ""))
+	cleaned = gsub(cleaned, "%.+$", "")
+	local labels = {}
+	for label in cleaned:gmatch("[^.]+") do
+		if label ~= "" then
+			insert(labels, label)
+		end
+	end
+	if #labels == 0 then
+		return nil
+	end
+	return labels
+end
+
+local function determine_wildcard_bases(labels_list)
+	local count = #labels_list
+	if count == 0 then
+		return {}
+	end
+	if count == 1 then
+		local labels = labels_list[1]
+		if #labels > 2 then
+			return { table.concat(labels, ".", 2) }
+		end
+		return { table.concat(labels, ".") }
+	end
+	local min_len = #labels_list[1]
+	for i = 2, count do
+		if #labels_list[i] < min_len then
+			min_len = #labels_list[i]
+		end
+	end
+	local common_suffix = {}
+	for idx = 1, min_len do
+		local label = labels_list[1][#labels_list[1] - idx + 1]
+		local match_all = true
+		for j = 2, count do
+			if labels_list[j][#labels_list[j] - idx + 1] ~= label then
+				match_all = false
+				break
+			end
+		end
+		if not match_all then
+			break
+		end
+		insert(common_suffix, 1, label)
+	end
+	if #common_suffix >= 2 and #common_suffix >= (min_len - 1) then
+		return { table.concat(common_suffix, ".") }
+	end
+	local bases = {}
+	local seen = {}
+	for _, labels in ipairs(labels_list) do
+		local base
+		if #labels > 2 then
+			base = table.concat(labels, ".", 2)
+		else
+			base = table.concat(labels, ".")
+		end
+		if base ~= "" and not seen[base] then
+			seen[base] = true
+			insert(bases, base)
+		end
+	end
+	return bases
+end
+
+local function build_wildcard_domain_list(domains)
+	local grouped = {}
+	local has_entries = false
+	for _, domain in ipairs(domains) do
+		local labels = sanitize_domain_labels(domain)
+		if labels then
+			has_entries = true
+			local len = #labels
+			local key
+			if len >= 2 then
+				key = labels[len - 1] .. "." .. labels[len]
+			else
+				key = labels[1]
+			end
+			grouped[key] = grouped[key] or {}
+			insert(grouped[key], labels)
+		end
+	end
+	if not has_entries then
+		return {}
+	end
+	local results = {}
+	local seen = {}
+	for _, labels_list in pairs(grouped) do
+		local bases = determine_wildcard_bases(labels_list)
+		for _, base in ipairs(bases) do
+			if base ~= "" then
+				local wildcard = "*." .. base
+				if not seen[wildcard] then
+					insert(results, wildcard)
+					seen[wildcard] = true
+				end
+				if not seen[base] then
+					insert(results, base)
+					seen[base] = true
+				end
+			end
+		end
+	end
+	sort(results, function(a, b)
+		local a_wildcard = sub(a, 1, 2) == "*."
+		local b_wildcard = sub(b, 1, 2) == "*."
+		if a_wildcard == b_wildcard then
+			return a < b
+		end
+		return a_wildcard and not b_wildcard
+	end)
+	return results
+end
+
+local function get_wildcard_cert_identifier(host, domains)
 	if not host or host == "" then
 		return host
 	end
-	local parts = {}
-	for part in host:gmatch("[^.]+") do
-		insert(parts, part)
+	local targets = domains
+	if not targets or #targets == 0 then
+		targets = { host }
 	end
-	if #parts <= 2 then
-		return host
+	local processed = build_wildcard_domain_list(targets)
+	if #processed > 0 then
+		return processed[#processed]
 	end
-	return table.concat(parts, ".", 2)
+	return host
 end
 
 function letsencrypt:initialize(ctx)
@@ -108,7 +235,7 @@ function letsencrypt:init()
 						multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 						and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 					then
-						cert_identifier = get_wildcard_cert_identifier(cert_identifier)
+						cert_identifier = get_wildcard_cert_identifier(cert_identifier, server_list)
 						for _, part in ipairs(server_list) do
 							wildcard_servers[part] = cert_identifier
 						end
@@ -172,7 +299,7 @@ function letsencrypt:init()
 			end
 			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
 			if use_wildcard_mode then
-				cert_identifier = get_wildcard_cert_identifier(cert_identifier)
+				cert_identifier = get_wildcard_cert_identifier(cert_identifier, server_list)
 				for _, part in ipairs(server_list) do
 					wildcard_servers[part] = cert_identifier
 				end
