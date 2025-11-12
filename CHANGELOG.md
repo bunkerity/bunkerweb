@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.6.6-rc2 - ????/??/??
+## v1.6.6-rc3 - ????/??/??
+
+- [FEATURE] Start monitoring `405` http status code in the requests to be able to see them in the reports page.
+
+## v1.6.6-rc2 - 2025/11/05
 
 - [BUGFIX] Update logrotate config to use the right chown when creating the folders/files.
 - [FEATURE] Refactor `Let's Encrypt` mail handling: validate the configured email and warn if missing/invalid. Use normal registration when valid; otherwise add **--register-unsafely-without-email** to Certbot and log that choice.
