@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=src/all-in-one/logging-utils.sh
+# shellcheck disable=SC1091
 . "${SCRIPT_DIR}/logging-utils.sh"
 
 service_key="$1"
