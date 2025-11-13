@@ -7,6 +7,7 @@
 - [FEATURE] Start monitoring `405` http status code in the requests to be able to see them in the reports page.
 - [FEATURE] Refactored `Auth Basic` authentication implementation to enhance security and maintainability by switching password hashing to bcrypt.
 - [LINUX] Support RHEL 9.7 instead of 9.6
+- [LINUX] Support RHEL 10.1 instead of 10.0
 - [DOCS] Add live status updates link to README and documentation in multiple languages.
 - [DOCS] Fix PDF generation to generate it in english.
 
