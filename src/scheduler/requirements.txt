@@ -39,13 +39,13 @@ beautifulsoup4==4.14.2 \
     --hash=sha256:2a98ab9f944a11acee9cc848508ec28d9228abfd522ef0fad6a02a72e0ded69e \
     --hash=sha256:5ef6fa3a8cbece8488d66985560f97ed091e22bbc4e9c2338508a9d5de6d4515
     # via dns-lexicon
-boto3==1.40.71 \
-    --hash=sha256:4ac9ee8d1629e45d6b6adc727795d1fc9852e998cd1a73e4eda50f6120677bab \
-    --hash=sha256:6d38e0250154552658be92a62cd48adf8ca8fd4abc181fb52d13371b53179503
+boto3==1.40.72 \
+    --hash=sha256:1063a295712f2605d3e463e4dc1fe32fce17cf77a0f4d3bb14249d68533ee856 \
+    --hash=sha256:58d30dd5e046789a760db7a49f817650b8ff08d8d169e127976a61f44b7c59ad
     # via certbot-dns-route53
-botocore==1.40.71 \
-    --hash=sha256:4c05907b2a56b1f6fd70403fbae0f09a4758b95758192db5ff93c0e9940a11bb \
-    --hash=sha256:7ed28c2e092fc0d67fbfba818fbdccc92426b452cc936bf034db6de717e0d068
+botocore==1.40.72 \
+    --hash=sha256:4f859e5aaf871fe59aac431d6bba59cc0c8ed8a38da2a6a5345700bdc5c74b32 \
+    --hash=sha256:f69199ff6570695556e733fa052f2739e01e0c592c9b60f843f84c77ba3bcdf3
     # via
     #   boto3
     #   s3transfer
