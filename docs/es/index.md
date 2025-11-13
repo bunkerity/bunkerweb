@@ -125,7 +125,7 @@ Sitios web, herramientas y recursos oficiales sobre BunkerWeb:
 - [**Documentación**](https://docs.bunkerweb.io): Documentación técnica de la solución BunkerWeb.
 - [**Demo**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc): Sitio web de demostración de BunkerWeb. No dudes en intentar ataques para probar la robustez de la solución.
 - [**Interfaz de usuario web**](https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=doc): Demostración en línea de solo lectura de la interfaz de usuario web de BunkerWeb.
-- [**Mapa de amenazas**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=doc): Ciberataques en vivo bloqueados por instancias de BunkerWeb en todo el mundo.
+- [**Mapa de amenazas**](https://www.bunkerweb.io/threatmap/?utm_campaign=self&utm_source=doc): Ciberataques en vivo bloqueados por instancias de BunkerWeb en todo el mundo.
 - [**Estado**](https://status.bunkerweb.io/?utm_campaign=self&utm_source=doc): Actualizaciones en vivo sobre la salud y disponibilidad de los servicios de BunkerWeb.
 
 Comunidad y redes sociales:

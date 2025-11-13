@@ -36,7 +36,7 @@
 	 &#124;
 	📝 <a href="https://github.com/bunkerity/bunkerweb/discussions">Forum</a>
 	 &#124;
-	🗺️ <a href="https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=github">Threatmap</a>
+	🗺️ <a href="https://www.bunkerweb.io/threatmap/?utm_campaign=self&utm_source=github">Threatmap</a>
 	&#124;
 	📊 <a href="https://status.bunkerweb.io/?utm_campaign=self&utm_source=github">Status</a>
 	&#124;
@@ -144,7 +144,7 @@ Official websites, tools, and resources about BunkerWeb:
 - [**Documentation**](https://docs.bunkerweb.io): technical documentation of the BunkerWeb solution
 - [**Demo**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc): demonstration website of BunkerWeb, don't hesitate to attempt attacks to test the robustness of the solution
 - [**Web UI**](https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=doc): online read-only demo of the web UI of BunkerWeb
-- [**Threatmap**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=doc): live cyber attack blocked by BunkerWeb instances all around the world
+- [**Threatmap**](https://www.bunkerweb.io/threatmap/?utm_campaign=self&utm_source=doc): live cyber attack blocked by BunkerWeb instances all around the world
 
 Community and social networks:
 

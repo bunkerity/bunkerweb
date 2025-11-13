@@ -125,7 +125,7 @@ BunkerWeb 提供了一个可选的[用户界面](web-ui.md)来管理您的实例
 - [**文档**](https://docs.bunkerweb.io)：BunkerWeb 解决方案的技术文档。
 - [**演示**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc)：BunkerWeb 的演示网站。欢迎尝试攻击以测试该解决方案的稳健性。
 - [**Web UI**](https://demo-ui.bunkerweb.io/?utm_campaign=self&utm_source=doc)：BunkerWeb Web UI 的在线只读演示。
-- [**威胁地图**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=doc)：全球 BunkerWeb 实例实时拦截的网络攻击。
+- [**威胁地图**](https://www.bunkerweb.io/threatmap/?utm_campaign=self&utm_source=doc)：全球 BunkerWeb 实例实时拦截的网络攻击。
 - [**状态**](https://status.bunkerweb.io/?utm_campaign=self&utm_source=doc)：BunkerWeb 服务运行状况和可用性的实时更新。
 
 社区和社交网络：
