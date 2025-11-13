@@ -75,14 +75,25 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
+ARG NODE_VERSION=24.11.1
+ENV PATH="/opt/node/bin:${PATH}"
+
 ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
-  dnf module reset -y nodejs && \
-  dnf module enable -y nodejs:18 && \
-  dnf install -y nodejs npm parallel && \
+  dnf install -y xz parallel && \
+  arch="$(uname -m)" && \
+  case "$arch" in \
+  x86_64) node_arch="x64" ;; \
+  aarch64) node_arch="arm64" ;; \
+  *) echo "Unsupported architecture: $arch" >&2; exit 1 ;; \
+  esac && \
+  wget -qO node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz" && \
+  mkdir -p /opt/node && \
+  tar -xJf node.tar.xz -C /opt/node --strip-components=1 && \
+  rm -f node.tar.xz && \
   cd /tmp && \
   npm ci --ignore-scripts; \
   fi
