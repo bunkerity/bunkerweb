@@ -4,6 +4,7 @@
 
 - [BUGFIX] Fix `Let's Encrypt` wildcard certificate serving when using `wildcard` mode in multisite setups and the root domain is a part of the `SERVER_NAME` setting of the service.
 - [BUGFIX] Fix duplicated id error with ModSecurity rules when two services have the `USE_UI` setting enabled and the `USE_MODSECURITY_GLOBAL_CRS` setting enabled as well.
+- [BUGFIX] Ensure the `Limit` plugin ignores global rules when `USE_LIMIT_REQ` is disabled globally so service-specific configs do not get throttled unintentionally.
 - [FEATURE] Start monitoring `405` http status code in the requests to be able to see them in the reports page.
 - [FEATURE] Refactored `Auth Basic` authentication implementation to enhance security and maintainability by switching password hashing to bcrypt.
 - [UI] Update DataTable initialization to automatically enable state saving for improved user experience.

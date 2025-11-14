@@ -100,7 +100,7 @@ function limit:init()
 		return self:ret(true, "no service uses limit for requests, skipping init")
 	end
 	-- Get variables
-	local variables, err = get_multiple_variables({ "LIMIT_REQ_URL", "LIMIT_REQ_RATE" })
+	local variables, err = get_multiple_variables({ "USE_LIMIT_REQ", "LIMIT_REQ_URL", "LIMIT_REQ_RATE" })
 	if variables == nil then
 		return self:ret(false, err)
 	end
@@ -108,15 +108,17 @@ function limit:init()
 	local data = {}
 	local i = 0
 	for srv, vars in pairs(variables) do
-		for var, value in pairs(vars) do
-			if regex_match(var, "LIMIT_REQ_URL") then
-				local url = value
-				local rate = vars[var:gsub("URL", "RATE")]
-				if data[srv] == nil then
-					data[srv] = {}
+		if vars["USE_LIMIT_REQ"] == "yes" then
+			for var, value in pairs(vars) do
+				if regex_match(var, "LIMIT_REQ_URL") then
+					local url = value
+					local rate = vars[var:gsub("URL", "RATE")]
+					if data[srv] == nil then
+						data[srv] = {}
+					end
+					data[srv][url] = rate
+					i = i + 1
 				end
-				data[srv][url] = rate
-				i = i + 1
 			end
 		end
 	end
