@@ -61,11 +61,16 @@ SecRule REQUEST_FILENAME "@endsWith /instances/new" \
     "id:1007779,ctl:ruleRemoveTargetById=931100;ARGS:hostname,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
     "nolog"
+
+SecRule REQUEST_FILENAME "@endsWith /reports/fetch" \
+    "id:1007780,ctl:ruleEngine=Off,nolog,chain"
+SecRule REQUEST_HEADERS:Host "@rx ^({{ ui_hosts | join('|') }})$" \
+    "nolog"
     {% endif %}
     {% if ip_hosts %}
 
 SecRule REQUEST_FILENAME "@rx ^/" \
-    "id:1007780,ctl:ruleRemoveById=920350,nolog,chain"
+    "id:1007781,ctl:ruleRemoveById=920350,nolog,chain"
 SecRule REQUEST_HEADERS:Host "@rx ^({{ ip_hosts | join('|') }})$" \
     "nolog"
     {% endif %}
