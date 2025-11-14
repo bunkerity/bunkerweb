@@ -443,7 +443,7 @@ class InstancesUtils:
         pane_counts = {}
         filtered_ids = {r.get("id") for r in filtered_reports}
 
-        pane_fields = ["country", "method", "status", "reason", "server_name", "security_mode"]
+        pane_fields = ["ip", "country", "method", "url", "status", "reason", "server_name", "security_mode"]
 
         for field in pane_fields:
             pane_counts[field] = {}
