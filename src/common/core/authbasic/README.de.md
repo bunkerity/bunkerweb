@@ -16,18 +16,16 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
 2.  **Wählen Sie den Schutzumfang:** Entscheiden Sie, ob Sie Ihre gesamte Website oder nur bestimmte URLs schützen möchten, indem Sie die Einstellung `AUTH_BASIC_LOCATION` konfigurieren.
 3.  **Anmeldeinformationen definieren:** Richten Sie mindestens ein Paar aus Benutzername und Passwort mit den Einstellungen `AUTH_BASIC_USER` und `AUTH_BASIC_PASSWORD` ein.
 4.  **Passen Sie die Nachricht an:** Ändern Sie optional den `AUTH_BASIC_TEXT`, um eine benutzerdefinierte Nachricht in der Anmeldeaufforderung anzuzeigen.
-5.  **Hash-Kosten abstimmen (optional):** Passen Sie `AUTH_BASIC_ROUNDS` (1000-999999999) an, um zwischen Login-Performance und Stärke der Passwort-Hashing-Kosten abzuwägen.
 
 ### Konfigurationseinstellungen
 
-| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                                               |
-| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                                                  |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen.                           |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                                             |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Jedes Passwort korrespondiert mit einem Benutzernamen.                                                                 |
-| `AUTH_BASIC_ROUNDS`   | `656000`          | multisite | ja       | **Hash-Runden:** Anzahl der SHA-512-Runden beim Erzeugen der htpasswd-Datei (zulässiger Bereich: 1000 bis 999999999). Weniger Runden beschleunigen den Login, reduzieren aber den Aufwand. |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                                                        |
+| Einstellung           | Standard          | Kontext   | Mehrfach | Beschreibung                                                                                                                                                     |
+| --------------------- | ----------------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                        |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen. |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                   |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit bcrypt für maximale Sicherheit gehasht.                                |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                              |
 
 !!! warning "Sicherheitshinweise"
     Die HTTP-Basisauthentifizierung überträgt Anmeldeinformationen, die in Base64 kodiert (nicht verschlüsselt) sind. Obwohl dies bei Verwendung über HTTPS akzeptabel ist, sollte es über reines HTTP nicht als sicher angesehen werden. Aktivieren Sie immer SSL/TLS, wenn Sie die Basisauthentifizierung verwenden.

@@ -222,7 +222,11 @@ function bunkernet:log(bypass_checks)
 			return self:ret(false, "can't set IP report into datastore : " .. err)
 		end
 		-- Store in recent reports
-		ret, err = self.datastore:set_with_retries("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason, "added", 5400)
+		ret, err = self.datastore:set_with_retries(
+			"plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason,
+			"added",
+			5400
+		)
 		if not ret then
 			return self:ret(false, "can't add recent IP into datastore : " .. err)
 		end

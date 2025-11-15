@@ -484,8 +484,13 @@ $(document).ready(function () {
 
   if (cacheJobNameSelection || cachePluginSelection || cacheServiceSelection) {
     cache_table.searchPanes.container().show();
-    $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-    $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+    if (typeof cache_table.updateFilterToggleUI === "function") {
+      cache_table.updateFilterToggleUI(true);
+    } else if (cache_table.filterToggleSelectors) {
+      const selectors = cache_table.filterToggleSelectors;
+      if (selectors.show) $(selectors.show).addClass("d-none");
+      if (selectors.hide) $(selectors.hide).removeClass("d-none");
+    }
   }
 
   // Modal event handlers

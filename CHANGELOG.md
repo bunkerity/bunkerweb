@@ -1,12 +1,32 @@
 # Changelog
 
-## v1.6.6-rc2 - ????/??/??
+## v1.6.6-rc3 - ????/??/??
 
+- [BUGFIX] Fix `Let's Encrypt` wildcard certificate serving when using `wildcard` mode in multisite setups and the root domain is a part of the `SERVER_NAME` setting of the service.
+- [BUGFIX] Fix duplicated id error with ModSecurity rules when two services have the `USE_UI` setting enabled and the `USE_MODSECURITY_GLOBAL_CRS` setting enabled as well.
+- [BUGFIX] Ensure the `Limit` plugin ignores global rules when `USE_LIMIT_REQ` is disabled globally so service-specific configs do not get throttled unintentionally.
+- [FEATURE] Start monitoring `405` http status code in the requests to be able to see them in the reports page.
+- [FEATURE] Refactored `Auth Basic` authentication implementation to enhance security and maintainability by switching password hashing to bcrypt.
+- [UI] Update DataTable initialization to automatically enable state saving for improved user experience.
+- [LINUX] Support RHEL 9.7 instead of 9.6
+- [LINUX] Support RHEL 10.1 instead of 10.0
+- [DOCS] Add live status updates link to README and documentation in multiple languages.
+- [DOCS] Fix PDF generation to generate it in english.
+
+## v1.6.6-rc2 - 2025/11/05
+
+- [BUGFIX] Update logrotate config to use the right chown when creating the folders/files.
 - [FEATURE] Refactor `Let's Encrypt` mail handling: validate the configured email and warn if missing/invalid. Use normal registration when valid; otherwise add **--register-unsafely-without-email** to Certbot and log that choice.
 - [FEATURE] Add `DuckDNS` as a DNS provider in the `letsencrypt` plugin
 - [FEATURE] Add `AUTH_BASIC_ROUNDS` setting to the `authbasic` plugin to configure password hashing strength (default: 656000, range: 1000-999999999).
+- [FEATURE] Add new `API` template to easily protect the API service using BunkerWeb.
+- [FEATURE] Add new `ANTIBOT_IGNORE_COUNTRY` and `ANTIBOT_ONLY_COUNTRY` to the `Antibot` plugin for country-based challenge prompting/bypassing.
 - [FEATURE] Add new `mtls` plugin for mutual TLS client certificate authentication, allowing services to require and verify client certificates against trusted CA bundles with configurable verification modes, chain depth control, and optional header forwarding for downstream authorization.
 - [AUTOCONF] Implement event debouncing in Docker, Ingress, and Swarm controllers for improved configuration management
+- [UI] Fix confirmation message not showing the right value when removing cache files on the file cache page.
+- [UI] Fix filtering on the `Let's Encrypt` custom page
+- [UI] Update CSS to fix truncated text in specific lang on the menu
+- [MISC] Update regex for `MODSECURITY_REQ_BODY_NO_FILES_LIMIT` setting to support human readable values.
 - [MISC] Update default value for Permissions-Policy header to include additional features (`private-state-token-issuance` and `private-state-token-redemption`).
 - [DEPS] Update coreruleset-v4 version to v4.20.0
 - [DEPS] Updated luajit2 version to v2.1-20251030

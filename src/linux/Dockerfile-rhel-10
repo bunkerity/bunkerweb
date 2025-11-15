@@ -1,4 +1,4 @@
-FROM redhat/ubi10:10.0@sha256:9bd3aebdfdf6eebb6a18541d838cac9e9a35d2f807aa8e36d9518978cc86371f AS builder
+FROM redhat/ubi10:10.1@sha256:16b1abc74e376b750be3fd1e47492b31f1019eabf838a138925e98437a8b9fdc AS builder
 
 ENV OS=rhel
 ENV OS_VERSION=10
@@ -78,12 +78,25 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
+ARG NODE_VERSION=24.11.1
+ENV PATH="/opt/node/bin:${PATH}"
+
 ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
 ARG SKIP_MINIFY_CSS=no
 ARG SKIP_MINIFY_HTML=no
 RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
-  dnf install -y nodejs npm parallel && \
+  dnf install -y xz parallel && \
+  arch="$(uname -m)" && \
+  case "$arch" in \
+  x86_64) node_arch="x64" ;; \
+  aarch64) node_arch="arm64" ;; \
+  *) echo "Unsupported architecture: $arch" >&2; exit 1 ;; \
+  esac && \
+  wget -qO node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${node_arch}.tar.xz" && \
+  mkdir -p /opt/node && \
+  tar -xJf node.tar.xz -C /opt/node --strip-components=1 && \
+  rm -f node.tar.xz && \
   cd /tmp && \
   npm ci --ignore-scripts; \
   fi
@@ -125,7 +138,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
   echo "Skipping HTML minification"; \
   fi
 
-FROM redhat/ubi10:10.0@sha256:9bd3aebdfdf6eebb6a18541d838cac9e9a35d2f807aa8e36d9518978cc86371f
+FROM redhat/ubi10:10.1@sha256:16b1abc74e376b750be3fd1e47492b31f1019eabf838a138925e98437a8b9fdc
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
