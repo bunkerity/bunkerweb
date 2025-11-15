@@ -148,14 +148,6 @@
       
     
     
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
       <link rel="stylesheet" href="../../assets/extra.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
@@ -4111,11 +4103,10 @@ Pour la nouvelle version, créez une clé reCAPTCHA dans votre projet Google Clo
 </ol>
 <h3 id="comment-lutiliser_1">Comment l’utiliser</h3>
 <ol>
-<li>Activer : <code>USE_AUTH_BASIC: yes</code>.</li>
-<li>Portée : <code>AUTH_BASIC_LOCATION</code> = <code>sitewide</code> (tout le site) ou un chemin (ex. <code>/admin</code>).</li>
-<li>Identifiants : configurez <code>AUTH_BASIC_USER</code> et <code>AUTH_BASIC_PASSWORD</code> (plusieurs paires possibles).</li>
-<li>Message : optionnel, ajustez <code>AUTH_BASIC_TEXT</code>.</li>
-<li>Coût du hash (facultatif) : ajustez <code>AUTH_BASIC_ROUNDS</code> (1000-999999999) pour équilibrer rapidité d’authentification et puissance du hachage.</li>
+<li>Activer : <code>USE_AUTH_BASIC: yes</code>.</li>
+<li>Portée : <code>AUTH_BASIC_LOCATION</code> = <code>sitewide</code> (tout le site) ou un chemin (ex. <code>/admin</code>).</li>
+<li>Identifiants : configurez <code>AUTH_BASIC_USER</code> et <code>AUTH_BASIC_PASSWORD</code> (plusieurs paires possibles).</li>
+<li>Message : optionnel, ajustez <code>AUTH_BASIC_TEXT</code>.</li>
 </ol>
 <h3 id="parametres">Paramètres</h3>
 <table>
@@ -4155,21 +4146,14 @@ Pour la nouvelle version, créez une clé reCAPTCHA dans votre projet Google Clo
 <td><code>changeme</code></td>
 <td>multisite</td>
 <td>oui</td>
-<td>Mot de passe correspondant à chaque utilisateur.</td>
-</tr>
-<tr>
-<td><code>AUTH_BASIC_ROUNDS</code></td>
-<td><code>656000</code></td>
-<td>multisite</td>
-<td>oui</td>
-<td>Nombre de tours SHA-512 appliqués lors de la génération du fichier htpasswd (doit rester entre 1000 et 999999999). Moins de tours = connexion plus rapide mais hachage moins coûteux.</td>
+<td>Mot de passe. Les mots de passe sont hachés avec bcrypt pour une sécurité maximale.</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
 <td><code>Restricted area</code></td>
 <td>multisite</td>
 <td>non</td>
-<td>Message affiché dans l’invite d’authentification.</td>
+<td>Message affiché dans l'invite d'authentification.</td>
 </tr>
 </tbody>
 </table>
@@ -11280,10 +11264,6 @@ TrustedMonitor/\d+\.\d+
     
     
       <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

@@ -148,10 +148,6 @@
       
     
     
-      <link rel="stylesheet" href="../css/print-site.css">
-    
-      <link rel="stylesheet" href="../css/print-site-material.css">
-    
       <link rel="stylesheet" href="../assets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
@@ -4239,7 +4235,6 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 <li><strong>Choose protection scope:</strong> Decide whether to protect your entire site or just specific URLs by configuring the <code>AUTH_BASIC_LOCATION</code> setting.</li>
 <li><strong>Define credentials:</strong> Set up at least one username and password pair using the <code>AUTH_BASIC_USER</code> and <code>AUTH_BASIC_PASSWORD</code> settings.</li>
 <li><strong>Customize the message:</strong> Optionally change the <code>AUTH_BASIC_TEXT</code> to display a custom message in the login prompt.</li>
-<li><strong>Tune hashing cost (optional):</strong> Adjust <code>AUTH_BASIC_ROUNDS</code> (1000-999999999 inclusive) to balance login performance and password hashing strength.</li>
 </ol>
 <h3 id="configuration-settings_1">Configuration Settings</h3>
 <table>
@@ -4279,14 +4274,7 @@ For the new version, create a reCAPTCHA key in your Google Cloud project and use
 <td><code>changeme</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Password:</strong> The password required for authentication. Each password corresponds to a username.</td>
-</tr>
-<tr>
-<td><code>AUTH_BASIC_ROUNDS</code></td>
-<td><code>656000</code></td>
-<td>multisite</td>
-<td>yes</td>
-<td><strong>Hash Rounds:</strong> Number of SHA-512 rounds applied when generating the htpasswd file (allowed range: 1000 to 999999999). Lower values improve login speed but reduce cost.</td>
+<td><strong>Password:</strong> The password required for authentication. Passwords are hashed using bcrypt for maximum security.</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -12091,8 +12079,6 @@ TrustedMonitor/\d+\.\d+
     
     
       <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
-      
-        <script src="../js/print-site.js"></script>
       
         <script src="../assets/extra.js"></script>
       

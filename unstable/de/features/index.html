@@ -148,18 +148,6 @@
       
     
     
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
       <link rel="stylesheet" href="../../assets/extra.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
@@ -4184,7 +4172,6 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 <li><strong>Wählen Sie den Schutzumfang:</strong> Entscheiden Sie, ob Sie Ihre gesamte Website oder nur bestimmte URLs schützen möchten, indem Sie die Einstellung <code>AUTH_BASIC_LOCATION</code> konfigurieren.</li>
 <li><strong>Anmeldeinformationen definieren:</strong> Richten Sie mindestens ein Paar aus Benutzername und Passwort mit den Einstellungen <code>AUTH_BASIC_USER</code> und <code>AUTH_BASIC_PASSWORD</code> ein.</li>
 <li><strong>Passen Sie die Nachricht an:</strong> Ändern Sie optional den <code>AUTH_BASIC_TEXT</code>, um eine benutzerdefinierte Nachricht in der Anmeldeaufforderung anzuzeigen.</li>
-<li><strong>Hash-Kosten abstimmen (optional):</strong> Passen Sie <code>AUTH_BASIC_ROUNDS</code> (1000-999999999) an, um zwischen Login-Performance und Stärke der Passwort-Hashing-Kosten abzuwägen.</li>
 </ol>
 <h3 id="konfigurationseinstellungen_1">Konfigurationseinstellungen</h3>
 <table>
@@ -4224,14 +4211,7 @@ Für die neue Version erstellen Sie einen reCAPTCHA-Schlüssel in Ihrem Google C
 <td><code>changeme</code></td>
 <td>multisite</td>
 <td>ja</td>
-<td><strong>Passwort:</strong> Das für die Authentifizierung erforderliche Passwort. Jedes Passwort korrespondiert mit einem Benutzernamen.</td>
-</tr>
-<tr>
-<td><code>AUTH_BASIC_ROUNDS</code></td>
-<td><code>656000</code></td>
-<td>multisite</td>
-<td>ja</td>
-<td><strong>Hash-Runden:</strong> Anzahl der SHA-512-Runden beim Erzeugen der htpasswd-Datei (zulässiger Bereich: 1000 bis 999999999). Weniger Runden beschleunigen den Login, reduzieren aber den Aufwand.</td>
+<td><strong>Passwort:</strong> Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit bcrypt für maximale Sicherheit gehasht.</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -11660,12 +11640,6 @@ TrustedMonitor/\d+\.\d+
     
     
       <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

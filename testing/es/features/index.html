@@ -148,22 +148,6 @@
       
     
     
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
       <link rel="stylesheet" href="../../assets/extra.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
@@ -4243,7 +4227,6 @@ Para la nueva versión, cree una clave de reCAPTCHA en su proyecto de Google Clo
 <li><strong>Elija el ámbito de protección:</strong> Decida si proteger todo su sitio o solo URL específicas configurando el ajuste <code>AUTH_BASIC_LOCATION</code>.</li>
 <li><strong>Defina las credenciales:</strong> Configure al menos un par de nombre de usuario y contraseña utilizando los ajustes <code>AUTH_BASIC_USER</code> y <code>AUTH_BASIC_PASSWORD</code>.</li>
 <li><strong>Personalice el mensaje:</strong> Opcionalmente, cambie el <code>AUTH_BASIC_TEXT</code> para mostrar un mensaje personalizado en la solicitud de inicio de sesión.</li>
-<li><strong>Ajuste el coste del hash (opcional):</strong> Modifique <code>AUTH_BASIC_ROUNDS</code> (1000-999999999) para equilibrar el rendimiento del inicio de sesión y la robustez del hashing de contraseñas.</li>
 </ol>
 <h3 id="ajustes-de-configuracion_1">Ajustes de configuración</h3>
 <table>
@@ -4283,14 +4266,7 @@ Para la nueva versión, cree una clave de reCAPTCHA en su proyecto de Google Clo
 <td><code>changeme</code></td>
 <td>multisite</td>
 <td>yes</td>
-<td><strong>Contraseña:</strong> La contraseña requerida para la autenticación. Cada contraseña corresponde a un nombre de usuario.</td>
-</tr>
-<tr>
-<td><code>AUTH_BASIC_ROUNDS</code></td>
-<td><code>656000</code></td>
-<td>multisite</td>
-<td>yes</td>
-<td><strong>Rondas de hash:</strong> Número de rondas SHA-512 aplicadas al generar el archivo htpasswd (debe mantenerse entre 1000 y 999999999). Valores más bajos aceleran el acceso pero reducen la resistencia.</td>
+<td><strong>Contraseña:</strong> La contraseña requerida para la autenticación. Las contraseñas se hash con bcrypt para máxima seguridad.</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -12062,14 +12038,6 @@ TrustedMonitor/\d+\.\d+
     
     
       <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
       
         <script src="../../assets/extra.js"></script>
       

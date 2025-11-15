@@ -148,26 +148,6 @@
       
     
     
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
-      <link rel="stylesheet" href="../../css/print-site.css">
-    
-      <link rel="stylesheet" href="../../css/print-site-material.css">
-    
       <link rel="stylesheet" href="../../assets/extra.css">
     
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
@@ -4250,7 +4230,6 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <li><strong>选择保护范围：</strong> 通过配置 <code>AUTH_BASIC_LOCATION</code> 设置，决定是保护整个网站还是仅保护特定 URL。</li>
 <li><strong>定义凭据：</strong> 使用 <code>AUTH_BASIC_USER</code> 和 <code>AUTH_BASIC_PASSWORD</code> 设置至少设置一对用户名和密码。</li>
 <li><strong>自定义消息：</strong> 可选地更改 <code>AUTH_BASIC_TEXT</code> 以在登录提示中显示自定义消息。</li>
-<li><strong>调整哈希成本（可选）：</strong> 通过 <code>AUTH_BASIC_ROUNDS</code>（1000-999999999）在登录性能和密码哈希强度之间取得平衡。</li>
 </ol>
 <h3 id="_13">配置设置</h3>
 <table>
@@ -4290,14 +4269,7 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Hos
 <td><code>changeme</code></td>
 <td>multisite</td>
 <td>是</td>
-<td><strong>密码：</strong> 身份验证所需的密码。每个密码对应一个用户名。</td>
-</tr>
-<tr>
-<td><code>AUTH_BASIC_ROUNDS</code></td>
-<td><code>656000</code></td>
-<td>multisite</td>
-<td>是</td>
-<td><strong>哈希轮数：</strong> 生成 htpasswd 文件时使用的 SHA-512 轮数（必须保持在 1000 至 999999999 之间）。值越低验证越快，但计算成本也越低。</td>
+<td><strong>密码：</strong> 身份验证所需的密码。密码使用 bcrypt 哈希以实现最大安全性。</td>
 </tr>
 <tr>
 <td><code>AUTH_BASIC_TEXT</code></td>
@@ -12044,16 +12016,6 @@ TrustedMonitor/\d+\.\d+
     
     
       <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
-      
-        <script src="../../js/print-site.js"></script>
       
         <script src="../../assets/extra.js"></script>
       
