@@ -23,11 +23,27 @@ footerHtml = `<div style="font-size: 10px; text-align: center; width: 100%;"><sp
     const browser = await puppeteer.launch({
         headless: true,
         executablePath: process.env.CHROME_BIN || null,
-        args: ['--no-sandbox', '--headless', '--disable-gpu', '--disable-dev-shm-usage']
+        args: [
+            '--no-sandbox',
+            '--headless',
+            '--disable-gpu',
+            '--disable-dev-shm-usage',
+            '--font-render-hinting=none',
+            '--disable-software-rasterizer',
+            '--disable-extensions',
+            '--disable-setuid-sandbox'
+        ]
     });
 
     const page = await browser.newPage();
+    // Set default font preferences
+    await page.evaluateOnNewDocument(() => {
+        // Force font loading
+        document.fonts.ready.then(() => console.log('Fonts loaded'));
+    });
     await page.goto(url, { waitUntil: 'networkidle2' });
+    // Wait for fonts to load
+    await page.evaluateHandle('document.fonts.ready');
     // Remove chatbot container completely
     await page.evaluate(() => {
         const el = document.getElementById('chatbot-container');

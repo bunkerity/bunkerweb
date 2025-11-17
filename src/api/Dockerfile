@@ -45,7 +45,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client postgresql-
   adduser -h /usr/share/bunkerweb/api -g api -s /sbin/nologin -G api -D -H -u 101 --disabled-password api
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "libpq>=17.7-r0" "postgresql17-client>=17.7-r0" # CVE-2025-12817 CVE-2025-12818
 
 # Copy deps and app
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -63,7 +63,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.6-rc2"
+LABEL version="1.6.6-rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="api"
 

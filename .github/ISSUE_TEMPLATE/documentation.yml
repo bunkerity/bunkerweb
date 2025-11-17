@@ -7,6 +7,10 @@ body:
     attributes:
       value: >
         #### Before submitting a documentation enhancement request, please make sure the feature hasn't been already addressed by searching through [the existing and past documentation enhancement requests](https://github.com/bunkerity/bunkerweb/issues?q=is%3Aissue+sort%3Acreated-desc+%5BDOC%5D+in%3Atitle).
+  - type: markdown
+    attributes:
+      value: >
+        📊 If your docs concern relates to a suspected outage or degraded service, review https://status.bunkerweb.io/?utm_campaign=self&utm_source=github&utm_medium=issue-template first and link to any relevant incident.
   - type: textarea
     id: description
     attributes:

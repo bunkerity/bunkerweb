@@ -563,22 +563,20 @@ Comment ça marche :
 
 ### Comment l’utiliser
 
-1. Activer : `USE_AUTH_BASIC: yes`.
-2. Portée : `AUTH_BASIC_LOCATION` = `sitewide` (tout le site) ou un chemin (ex. `/admin`).
-3. Identifiants : configurez `AUTH_BASIC_USER` et `AUTH_BASIC_PASSWORD` (plusieurs paires possibles).
-4. Message : optionnel, ajustez `AUTH_BASIC_TEXT`.
-5. Coût du hash (facultatif) : ajustez `AUTH_BASIC_ROUNDS` (1000-999999999) pour équilibrer rapidité d’authentification et puissance du hachage.
+1. Activer : `USE_AUTH_BASIC: yes`.
+2. Portée : `AUTH_BASIC_LOCATION` = `sitewide` (tout le site) ou un chemin (ex. `/admin`).
+3. Identifiants : configurez `AUTH_BASIC_USER` et `AUTH_BASIC_PASSWORD` (plusieurs paires possibles).
+4. Message : optionnel, ajustez `AUTH_BASIC_TEXT`.
 
 ### Paramètres
 
-| Paramètre             | Défaut            | Contexte  | Multiple | Description                                                                                                                                                                           |
-| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | non      | Activer l’authentification Basic.                                                                                                                                                     |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | non      | Portée : `sitewide` ou un chemin (ex. `/admin`).                                                                                                                                      |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | oui      | Nom d’utilisateur. Plusieurs paires peuvent être définies.                                                                                                                            |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | oui      | Mot de passe correspondant à chaque utilisateur.                                                                                                                                      |
-| `AUTH_BASIC_ROUNDS`   | `656000`          | multisite | oui      | Nombre de tours SHA-512 appliqués lors de la génération du fichier htpasswd (doit rester entre 1000 et 999999999). Moins de tours = connexion plus rapide mais hachage moins coûteux. |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l’invite d’authentification.                                                                                                                                     |
+| Paramètre             | Défaut            | Contexte  | Multiple | Description                                                                         |
+| --------------------- | ----------------- | --------- | -------- | ----------------------------------------------------------------------------------- |
+| `USE_AUTH_BASIC`      | `no`              | multisite | non      | Activer l’authentification Basic.                                                   |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | non      | Portée : `sitewide` ou un chemin (ex. `/admin`).                                    |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | oui      | Nom d’utilisateur. Plusieurs paires peuvent être définies.                          |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | oui      | Mot de passe. Les mots de passe sont hachés avec bcrypt pour une sécurité maximale. |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | non      | Message affiché dans l'invite d'authentification.                                   |
 
 !!! warning "Sécurité"
     Les identifiants sont encodés Base64, pas chiffrés. Utilisez toujours HTTPS avec l’authentification Basic.
@@ -1477,7 +1475,7 @@ Les sections suivantes détaillent chacune de ces étapes.
     services:
       bunkerweb:
         # C'est le nom qui sera utilisé pour identifier l'instance dans le planificateur
-        image: bunkerity/bunkerweb:1.6.6-rc2
+        image: bunkerity/bunkerweb:1.6.6-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1494,7 +1492,7 @@ Les sections suivantes détaillent chacune de ces étapes.
             syslog-address: "udp://10.20.30.254:514" # L'adresse IP du service syslog
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Assurez-vous de définir le nom correct de l'instance

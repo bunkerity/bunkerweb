@@ -594,18 +594,16 @@ Follow these steps to enable and configure Auth Basic authentication:
 2. **Choose protection scope:** Decide whether to protect your entire site or just specific URLs by configuring the `AUTH_BASIC_LOCATION` setting.
 3. **Define credentials:** Set up at least one username and password pair using the `AUTH_BASIC_USER` and `AUTH_BASIC_PASSWORD` settings.
 4. **Customize the message:** Optionally change the `AUTH_BASIC_TEXT` to display a custom message in the login prompt.
-5. **Tune hashing cost (optional):** Adjust `AUTH_BASIC_ROUNDS` (1000-999999999 inclusive) to balance login performance and password hashing strength.
 
 ### Configuration Settings
 
-| Setting               | Default           | Context   | Multiple | Description                                                                                                                                                               |
-| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Enable Auth Basic:** Set to `yes` to enable basic authentication.                                                                                                       |
-| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Protection Scope:** Set to `sitewide` to protect the entire site, or specify a URL path (e.g., `/admin`) to protect only specific areas.                                |
-| `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Username:** The username required for authentication. You can define multiple username/password pairs.                                                                  |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Password:** The password required for authentication. Each password corresponds to a username.                                                                          |
-| `AUTH_BASIC_ROUNDS`   | `656000`          | multisite | yes      | **Hash Rounds:** Number of SHA-512 rounds applied when generating the htpasswd file (allowed range: 1000 to 999999999). Lower values improve login speed but reduce cost. |
-| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Prompt Text:** The message displayed in the authentication prompt shown to users.                                                                                       |
+| Setting               | Default           | Context   | Multiple | Description                                                                                                                                |
+| --------------------- | ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Enable Auth Basic:** Set to `yes` to enable basic authentication.                                                                        |
+| `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Protection Scope:** Set to `sitewide` to protect the entire site, or specify a URL path (e.g., `/admin`) to protect only specific areas. |
+| `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Username:** The username required for authentication. You can define multiple username/password pairs.                                   |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Password:** The password required for authentication. Passwords are hashed using bcrypt for maximum security.                            |
+| `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Prompt Text:** The message displayed in the authentication prompt shown to users.                                                        |
 
 !!! warning "Security Considerations"
     HTTP Basic Authentication transmits credentials encoded (not encrypted) in Base64. While this is acceptable when used over HTTPS, it should not be considered secure over plain HTTP. Always enable SSL/TLS when using basic authentication.
@@ -1681,7 +1679,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
     services:
       bunkerweb:
         # This is the name that will be used to identify the instance in the Scheduler
-        image: bunkerity/bunkerweb:1.6.6-rc2
+        image: bunkerity/bunkerweb:1.6.6-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -1698,7 +1696,7 @@ Follow one of the environment-specific guides below so the CrowdSec agent ingest
             syslog-address: "udp://10.20.30.254:514" # The IP address of the syslog service
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name

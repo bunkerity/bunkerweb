@@ -561,8 +561,13 @@ $(document).ready(function () {
       // Show/hide filters based on initial selections
       if (configTypeSelection || configServiceSelection) {
         dt.searchPanes.container().show();
-        $("#show-filters").toggleClass("d-none");
-        $("#hide-filters").toggleClass("d-none");
+        if (typeof dt.updateFilterToggleUI === "function") {
+          dt.updateFilterToggleUI(true);
+        } else if (dt.filterToggleSelectors) {
+          const selectors = dt.filterToggleSelectors;
+          if (selectors.show) $(selectors.show).addClass("d-none");
+          if (selectors.hide) $(selectors.hide).removeClass("d-none");
+        }
       }
       return dt;
     });

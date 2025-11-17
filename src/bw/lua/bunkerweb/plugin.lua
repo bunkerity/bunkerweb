@@ -45,7 +45,8 @@ function plugin:initialize(id, ctx)
 	self.use_redis = use_redis == "yes"
 	if self.is_request then
 		self.ctx = ctx or ngx.ctx
-		self.internalstore = get_ctx_obj("internalstore", self.ctx) or datastore:new(subsystem == "http" and shared.internalstore or shared.internalstore_stream)
+		self.internalstore = get_ctx_obj("internalstore", self.ctx)
+			or datastore:new(subsystem == "http" and shared.internalstore or shared.internalstore_stream)
 		self.datastore = get_ctx_obj("datastore", self.ctx) or datastore:new()
 		self.cachestore = get_ctx_obj("cachestore", self.ctx) or cachestore:new(use_redis == "yes", self.ctx)
 		self.clusterstore = get_ctx_obj("clusterstore", self.ctx) or clusterstore:new()

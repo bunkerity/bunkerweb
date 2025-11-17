@@ -25,7 +25,8 @@ function greylist:initialize(ctx)
 	plugin.initialize(self, "greylist", ctx)
 	-- Decode lists
 	if get_phase() ~= "init" and self:is_needed() then
-		local internalstore_lists, err = self.internalstore:get("plugin_greylist_lists_" .. self.ctx.bw.server_name, true)
+		local internalstore_lists, err =
+			self.internalstore:get("plugin_greylist_lists_" .. self.ctx.bw.server_name, true)
 		if not internalstore_lists then
 			self.logger:log(ERR, err)
 			self.lists = {}

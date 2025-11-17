@@ -3,7 +3,7 @@
 exclude: (^src/ui/client|^LICENSE.md$|^src/VERSION$|^env/|^examples/community/|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/(js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js)|css/dashboard\.css))|\.(svg|drawio|patch\d?|ascii|tf|tftpl|key)$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # frozen: v5.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
     hooks:
       - id: requirements-txt-fixer
         name: Fix requirements.txt and requirements.in files
@@ -13,12 +13,12 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
-        exclude: ^(mkdocs.yml|examples/bigbluebutton/docker-compose.yml)$
+        exclude: ^(mkdocs.*.yml|examples/bigbluebutton/docker-compose.yml)$
         args: ["--allow-multiple-documents"]
       - id: check-case-conflict
 
   - repo: https://github.com/psf/black
-    rev: 8a737e727ac5ab2f1d4cf5876720ed276dc8dc4b # frozen: 25.1.0
+    rev: 05f0a8ce1f71fbb36e1e032d3b518c7b945089a2 # frozen: 25.11.0
     hooks:
       - id: black
         name: Black Python Formatter
@@ -34,7 +34,7 @@ repos:
         files: \.(js|ts|jsx|tsx|css|less|html|json|markdown|md|yaml|yml)$
 
   - repo: https://github.com/JohnnyMorganz/StyLua
-    rev: c4616d3cdddb48779b0c4097752157cdb9903b52 # frozen: v2.1.0
+    rev: 3701d2cb65198ec748d3a593628625be9f91fe27 # frozen: v2.3.1
     hooks:
       - id: stylua-github
         exclude: ^src/(bw/lua/middleclass.lua$|common/core/antibot/captcha.lua$|common/core/crowdsec/lib)
@@ -55,7 +55,7 @@ repos:
         exclude: ^src/common/db/alembic/(mariadb|mysql|postgresql|sqlite)_versions
 
   - repo: https://github.com/dosisod/refurb
-    rev: 6310068b3faa547fb36240fd52e5bd282c29289f # frozen: v2.1.0
+    rev: 854db6cdfab04b7f4911d9cba6bfc084f086ea92 # frozen: v2.2.0
     hooks:
       - id: refurb
         name: Refurb Python Refactoring Tool
@@ -77,7 +77,7 @@ repos:
   #     - id: gitleaks
 
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: 2491238703a5d3415bb2b7ff11388bf775372f29 # frozen: v0.10.0
+    rev: 99470f5e12208ff0fb17ab81c3c494f7620a1d8d # frozen: v0.11.0
     hooks:
       - id: shellcheck
         exclude: ^tests/

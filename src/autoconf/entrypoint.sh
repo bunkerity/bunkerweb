@@ -4,6 +4,7 @@
 . /usr/share/bunkerweb/helpers/utils.sh
 
 # trap SIGTERM and SIGINT
+# shellcheck disable=SC2329
 function trap_exit() {
 	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️ " "Caught stop operation"

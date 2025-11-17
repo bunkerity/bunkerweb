@@ -15,6 +15,8 @@ local var = ngx.var
 local ERR = ngx.ERR
 local INFO = ngx.INFO
 local WARN = ngx.WARN
+local HTTP_FORBIDDEN = ngx.HTTP_FORBIDDEN
+local HTTP_CLOSED = ngx.HTTP_CLOSED
 local null = ngx.null
 local re_match = ngx.re.match
 local subsystem = ngx.config.subsystem
@@ -640,11 +642,11 @@ utils.get_deny_status = function()
 		local variables, err = internalstore:get("variables", true)
 		if not variables then
 			logger:log(ERR, "can't get variables from internalstore : " .. err)
-			return 403
+			return HTTP_FORBIDDEN
 		end
 		return tonumber(variables["global"]["DENY_HTTP_STATUS"])
 	end
-	return 444
+	return HTTP_CLOSED
 end
 
 utils.get_security_mode = function(ctx)

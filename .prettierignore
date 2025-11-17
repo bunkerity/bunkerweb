@@ -5,6 +5,7 @@ env/
 src/common/core/modsecurity/files/
 src/deps/src/
 mkdocs.yml
+mkdocs*.yml
 CHANGELOG.md
 CONTRIBUTING.md
 CODE_OF_CONDUCT.md

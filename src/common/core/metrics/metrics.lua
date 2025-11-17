@@ -472,7 +472,7 @@ function metrics:api_requests_query()
 		filtered_ids[req.id] = true
 	end
 
-	local pane_fields = { "country", "method", "status", "reason", "server_name", "security_mode" }
+	local pane_fields = { "ip", "country", "method", "url", "status", "reason", "server_name", "security_mode" }
 	for _, field in ipairs(pane_fields) do
 		pane_counts[field] = {}
 	end

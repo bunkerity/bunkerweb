@@ -7,6 +7,10 @@ body:
     attributes:
       value: >
         #### Before submitting a feature request, please make sure the feature hasn't been already addressed by searching through [the existing and past feature requests](https://github.com/bunkerity/bunkerweb/issues?q=is%3Aissue+sort%3Acreated-desc+%5BFEATURE%5D+in%3Atitle).
+  - type: markdown
+    attributes:
+      value: >
+        📊 Wondering if your request is driven by an outage? Double-check https://status.bunkerweb.io/?utm_campaign=self&utm_source=github&utm_medium=issue-template to confirm it's not caused by an ongoing incident.
   - type: textarea
     id: whats-needed-and-why
     attributes:

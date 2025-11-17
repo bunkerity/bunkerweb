@@ -38,6 +38,28 @@ function initializeDataTable(config) {
       ? dataTableOptions
       : {};
 
+  const filterToggleStorageKey = `bw-${tableName}-filters-expanded`;
+  const filterToggleIdSuffix = String(tableName || "items")
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "_");
+  const showFiltersId = `show-filters-${filterToggleIdSuffix}`;
+  const hideFiltersId = `hide-filters-${filterToggleIdSuffix}`;
+  const showFiltersSelector = `#${showFiltersId}`;
+  const hideFiltersSelector = `#${hideFiltersId}`;
+
+  const syncFilterToggleUI = (isExpanded) => {
+    const $showFilters = $(showFiltersSelector);
+    const $hideFilters = $(hideFiltersSelector);
+    if (!$showFilters.length || !$hideFilters.length) return;
+    if (isExpanded) {
+      $showFilters.addClass("d-none");
+      $hideFilters.removeClass("d-none");
+    } else {
+      $showFilters.removeClass("d-none");
+      $hideFilters.addClass("d-none");
+    }
+  };
+
   const applyLanguageSettings = (dtInstance, translator) => {
     const languageConfig = configureI18n(translator, entityName);
     // Merge new settings into existing ones to preserve any custom settings
@@ -63,9 +85,9 @@ function initializeDataTable(config) {
 
   $.fn.dataTable.ext.buttons.toggle_filters = {
     // Use i18next.t for translatable parts
-    text: `<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="show-filters" data-i18n="button.show">${t(
+    text: `<span class="tf-icons bx bx-filter bx-18px me-2"></span><span id="${showFiltersId}" data-i18n="button.show">${t(
       "button.show",
-    )}</span><span id="hide-filters" class="d-none" data-i18n="button.hide">${t(
+    )}</span><span id="${hideFiltersId}" class="d-none" data-i18n="button.hide">${t(
       "button.hide",
     )}</span><span class="d-none d-md-inline" data-i18n="button.filters_suffix">${t(
       "button.filters_suffix",
@@ -73,9 +95,11 @@ function initializeDataTable(config) {
     action: function (e, dt, node, config) {
       const searchPanesContainer = dataTable.searchPanes.container();
       if (!searchPanesContainer) return;
-      dataTable.searchPanes.container().slideToggle(); // Smoothly hide or show the container
-      $("#show-filters").toggleClass("d-none"); // Toggle the visibility of the 'Show' span
-      $("#hide-filters").toggleClass("d-none"); // Toggle the visibility of the 'Hide' span
+      const $container = $(searchPanesContainer);
+      const willShow = !$container.is(":visible");
+      $container.slideToggle(); // Smoothly hide or show the container
+      syncFilterToggleUI(willShow);
+      localStorage.setItem(filterToggleStorageKey, willShow ? "true" : "false");
     },
   };
 
@@ -115,6 +139,9 @@ function initializeDataTable(config) {
   }
 
   // Initialize DataTable
+  // Automatically enable state saving for DataTable
+  safeDataTableOptions.stateSave = true;
+
   const dataTable = new DataTable(tableSelector, safeDataTableOptions);
   applyTranslations();
 
@@ -126,8 +153,22 @@ function initializeDataTable(config) {
     if (i18nSuffix) $this.attr("data-i18n", `searchpane.${i18nSuffix}`);
   });
 
-  if (dataTable.searchPanes.container())
-    dataTable.searchPanes.container().hide();
+  const searchPanesContainer = dataTable.searchPanes.container();
+  if (searchPanesContainer) {
+    const $container = $(searchPanesContainer);
+    const savedFiltersExpanded = localStorage.getItem(filterToggleStorageKey);
+    const shouldShowFilters = savedFiltersExpanded === "true";
+    if (shouldShowFilters) $container.show();
+    else $container.hide();
+    syncFilterToggleUI(shouldShowFilters);
+  }
+
+  dataTable.filterToggleSelectors = {
+    show: showFiltersSelector,
+    hide: hideFiltersSelector,
+  };
+  dataTable.updateFilterToggleUI = syncFilterToggleUI;
+  dataTable.filterToggleStorageKey = filterToggleStorageKey;
 
   $(".dt-type-numeric").removeClass("dt-type-numeric");
 
