@@ -30,7 +30,7 @@ x-bw-env: &bw-env
 services:
   bunkerweb:
     # Name, unter dem der Scheduler die Instanz identifiziert
-    image: bunkerity/bunkerweb:1.6.6-rc2
+    image: bunkerity/bunkerweb:1.6.6-rc3
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -43,7 +43,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc2
+    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass der Instanzname korrekt ist
@@ -64,7 +64,7 @@ services:
       - bw-db
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.6-rc2
+    image: bunkerity/bunkerweb-api:1.6.6-rc3
     environment:
       <<: *bw-env
       API_USERNAME: "admin"
@@ -148,7 +148,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc2
+        image: bunkerity/bunkerweb:1.6.6-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -161,7 +161,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb"  # Entspricht dem Dienstnamen der Instanz
@@ -181,7 +181,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6-rc2
+        image: bunkerity/bunkerweb-api:1.6.6-rc3
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # Verwenden Sie ein starkes Passwort
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # API-Zulassungsliste
@@ -235,7 +235,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc2
+        image: bunkerity/bunkerweb:1.6.6-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -249,7 +249,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc2
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
         environment:
           <<: *api-env
           BUNKERWEB_INSTANCES: ""    # Von Autoconf entdeckt
@@ -264,7 +264,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6-rc2
+        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
         depends_on:
           - bunkerweb
           - bw-docker
@@ -278,7 +278,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6-rc2
+        image: bunkerity/bunkerweb-api:1.6.6-rc3
         environment:
           <<: *api-env
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
@@ -353,7 +353,7 @@ docker run -d \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc2
+  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
 ```
 
 ## Authentifizierung

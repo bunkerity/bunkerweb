@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Default values
 # Hardcoded default version (immutable reference)
-DEFAULT_BUNKERWEB_VERSION="1.6.6-rc2"
+DEFAULT_BUNKERWEB_VERSION="1.6.6-rc3"
 # Mutable effective version (can be overridden by --version)
 BUNKERWEB_VERSION="$DEFAULT_BUNKERWEB_VERSION"
 NGINX_VERSION=""
