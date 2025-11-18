@@ -1371,6 +1371,472 @@ helm install -f myvalues.yaml mybunkerweb bunkerweb/bunkerweb
 
 值的完整列表在 [bunkerity/bunkerweb-helm 仓库](https://github.com/bunkerity/bunkerweb-helm) 的 [charts/bunkerweb/values.yaml 文件](https://github.com/bunkerity/bunkerweb-helm/blob/main/charts/bunkerweb/values.yaml) 中列出。
 
+#### Sidecar Container + Helm
+
+This documentation explains how to deploy BunkerWeb as a sidecar to protect your Kubernetes applications. In this architecture, each application has its own BunkerWeb container acting as a security reverse proxy.
+
+##### Architecture
+
+```
+┌─────────────────────────────────────┐
+│  BunkerWeb Scheduler (centralized)  │
+│   + UI + MariaDB + Redis            │
+└──────────────┬──────────────────────┘
+               │ (API port 5000)
+               │
+    ┏━━━━━━━━━━┻━━━━━━━━━━┓
+    ┃                     ┃
+┌───▼──────────────┐  ┌───▼──────────────┐
+│  Application Pod │  │  Application Pod │
+│  ┌─────────────┐ │  │  ┌─────────────┐ │
+│  │     App     │ │  │  │     App     │ │
+│  │  (port 80)  │ │  │  │  (port XX)  │ │
+│  └──────┬──────┘ │  │  └──────┬──────┘ │
+│         │        │  │         │        │
+│  ┌──────▼──────┐ │  │  ┌──────▼──────┐ │
+│  │  BunkerWeb  │ │  │  │  BunkerWeb  │ │
+│  │ (port 8080) │ │  │  │ (port 8080) │ │
+│  │ (API  5000) │ │  │  │ (API  5000) │ │
+│  └─────────────┘ │  │  └─────────────┘ │
+└──────────────────┘  └──────────────────┘
+```
+
+##### Prerequisites
+
+- A working Kubernetes cluster
+- Helm 3.x installed
+- BunkerWeb Helm chart deployed with:
+  - `scheduler` enabled
+  - `ui` enabled
+  - `mariadb` enabled (to store configurations)
+  - `redis` enabled (for synchronization)
+  - `controller` enabled (recommended for automatic sidecar discovery)
+  - `bunkerweb.replicas: 0` (no standalone deployment)
+
+##### Sidecar Discovery Modes
+
+BunkerWeb offers two modes for sidecar discovery:
+
+###### Mode 1: Automatic Discovery (Controller - Recommended)
+
+The **BunkerWeb controller** automatically discovers pods with BunkerWeb sidecars without manual configuration.
+
+**Advantages:**
+- ✅ Automatic discovery of new sidecars
+- ✅ No need to manually maintain `BUNKERWEB_INSTANCES`
+- ✅ Automatic scaling
+
+**Configuration:**
+
+1. Enable the controller in `values.yaml`:
+```yaml
+controller:
+  enabled: true
+  tag: "1.6.5"
+```
+
+2. For each sidecar, add:
+   - **Pod annotation**: `bunkerweb.io/INSTANCE: "yes"`
+   - **Environment variable**: `KUBERNETES_MODE: "yes"`
+
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: nginx-bunkerweb
+    namespace: bunkerweb
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: nginx-bw
+    template:
+      metadata:
+        labels:
+          app: nginx-bw
+        annotations:
+          # Mandatory annotation for auto-discovery when using bunkerweb-controller
+          bunkerweb.io/INSTANCE: "yes"
+      spec:
+        containers:
+          # Random WebApp you want to protect
+          - name: nginx
+            image: nginx:latest
+            ports:
+              - containerPort: 80
+          # Sidecar BunkerWeb
+          - name: bunkerweb
+            image: bunkerity/bunkerweb:latest
+            ports:
+              - containerPort: 8080
+                name: entrypoint
+              - containerPort: 5000
+                name: bwapi
+              - containerPort: 9113
+                name: metrics
+            env:
+              - name: API_WHITELIST_IP
+                value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+              - name: KUBERNETES_MODE
+                value: "yes"
+  ---
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: nginx-bunkerweb
+    namespace: bunkerweb
+  spec:
+    type: ClusterIP
+    selector:
+      app: nginx-bw
+    ports:
+      - name: http
+        port: 80
+        targetPort: 8080 # BunkerWeb exposed port
+  ```
+
+3. **No need for headless service** - the controller communicates directly with pods
+
+4. **No need** to manually configure the scheduler with `BUNKERWEB_INSTANCES` - the controller handles discovery
+
+###### Mode 2: Manual Configuration (BUNKERWEB_INSTANCES)
+
+Explicit configuration of each instance via the `BUNKERWEB_INSTANCES` environment variable.
+
+**Advantages:**
+- ✅ Precise control over managed instances
+- ✅ Useful for complex multi-namespace environments
+
+**Configuration:**
+
+See the following sections for details.
+
+##### Step 1: Scheduler Configuration
+
+The BunkerWeb scheduler is the central component that distributes configurations to all sidecars.
+
+###### Option A: With Controller (Recommended)
+
+If you're using the controller for automatic discovery, **no special configuration is needed** for the scheduler. The controller will automatically detect pods with the `bunkerweb.io/INSTANCE: "yes"` annotation.
+
+###### Option B: Manual Configuration with `BUNKERWEB_INSTANCES`
+
+In your BunkerWeb chart `values.yaml`, configure the `BUNKERWEB_INSTANCES` environment variable with the URLs of all your headless services:
+
+```yaml
+scheduler:
+  tag: "1.6.5"
+  extraEnvs:
+    - name: BUNKERWEB_INSTANCES
+      value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
+```
+
+**Important:**
+- Separate URLs with spaces
+- Use port **5000** (BunkerWeb internal API)
+- Format: `http://<service-name>.<namespace>.svc.cluster.local:5000`
+
+##### Step 2: Creating the Deployment with Sidecar
+
+###### Deployment Structure with Controller (Automatic Mode - Recommended)
+
+**Recommended configuration** with automatic discovery:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-bunkerweb
+  namespace: your-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+      annotations:
+        bunkerweb.io/INSTANCE: "yes"  # Enable automatic discovery
+    spec:
+      containers:
+        # Your application
+        - name: my-app
+          image: my-image:latest
+          ports:
+            - containerPort: 80  # Port your app listens on
+
+        # BunkerWeb Sidecar
+        - name: bunkerweb
+          image: bunkerity/bunkerweb:1.6.6-rc2
+          ports:
+            - containerPort: 8080  # Exposed HTTP port
+            - containerPort: 5000  # Internal API (mandatory)
+          env:
+            - name: KUBERNETES_MODE
+              value: "yes"  # Enable Kubernetes mode
+            - name: API_WHITELIST_IP
+              value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: MULTISITE
+              value: "yes"
+            - name: USE_REVERSE_PROXY
+              value: "yes"
+            - name: LOG_LEVEL
+              value: "info"
+```
+
+**Key points for automatic mode:**
+- ✅ **Mandatory annotation**: `bunkerweb.io/INSTANCE: "yes"` at pod level
+- ✅ **Mandatory environment variable**: `KUBERNETES_MODE: "yes"`
+- ✅ **No headless service needed**: the controller communicates directly with pods via Kubernetes API
+- ✅ **No need to manually configure** `BUNKERWEB_INSTANCES`
+
+###### Deployment Structure without Controller (Manual Mode)
+
+If you're not using the controller:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-bunkerweb
+  namespace: your-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        # Your application
+        - name: my-app
+          image: my-image:latest
+          ports:
+            - containerPort: 80  # Port your app listens on
+
+        # BunkerWeb Sidecar
+        - name: bunkerweb
+          image: bunkerity/bunkerweb:1.6.5
+          ports:
+            - containerPort: 8080  # Exposed HTTP port
+            - containerPort: 5000  # Internal API (mandatory)
+          env:
+            - name: API_WHITELIST_IP
+              value: "127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+```
+
+###### Important Environment Variables
+
+| Variable           | Value                                                 | Description                                              |
+| ------------------ | ----------------------------------------------------- | -------------------------------------------------------- |
+| `KUBERNETES_MODE`  | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
+| `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
+
+
+##### Step 3: Creating Services
+
+###### ClusterIP Service (external exposure)
+
+Service to expose your application through BunkerWeb:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-bunkerweb
+  namespace: your-namespace
+spec:
+  type: ClusterIP  # or LoadBalancer depending on your needs
+  selector:
+    app: my-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080  # BunkerWeb port
+```
+
+###### Headless Service (internal API) - Conditional
+
+**Only required in manual mode (without controller)**:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-bunkerweb-workers
+  namespace: your-namespace
+spec:
+  clusterIP: None  # Headless service
+  selector:
+    app: my-app
+  ports:
+    - name: bwapi
+      protocol: TCP
+      port: 5000
+      targetPort: 5000
+```
+
+**Important:**
+- ⚠️ **Not required with controller** - the controller communicates directly with pods via Kubernetes API
+- ✅ **Mandatory without controller** - this service name must be manually added to `BUNKERWEB_INSTANCES`
+- The `selector` must match your deployment labels
+
+##### Step 4: Reverse Proxy Configuration
+
+You have **two options** to configure the reverse proxy:
+
+###### Option A: Via Web Interface (UI)
+
+1. Access the BunkerWeb UI
+2. Go to the **"Services"**
+3. Create a new service with:
+   - **Server name**: `my-app.example.com`
+   - **Reverse proxy host**: `http://127.0.0.1:80` (or your app's port)
+   - **Use reverse proxy**: `yes`
+4. Save
+
+The scheduler will automatically send the configuration to the sidecar via the API (port 5000).
+
+###### Option B: Via Environment Variables
+
+Add these variables in the `bunkerweb` container:
+
+```yaml
+env:
+  - name: MULTISITE
+    value: "yes"
+  - name: SERVER_NAME
+    value: "my-app.example.com"
+  - name: my-app.example.com_USE_REVERSE_PROXY
+    value: "yes"
+  - name: my-app.example.com_REVERSE_PROXY_HOST
+    value: "http://127.0.0.1:80"
+  - name: my-app.example.com_REVERSE_PROXY_URL
+    value: "/"
+```
+
+**Note:** The UI option is recommended for centralized and dynamic management.
+
+##### Step 5: Deployment
+
+###### With Controller (Automatic Mode - Recommended)
+
+1. **Deploy your application with the sidecar**:
+   ```bash
+   kubectl apply -f my-app-deployment.yaml
+   ```
+
+   Make sure that:
+   - The annotation `bunkerweb.io/INSTANCE: "yes"` is present in `template.metadata.annotations`
+   - The variable `KUBERNETES_MODE: "yes"` is defined in the bunkerweb container
+
+2. **Verify that the controller detects the sidecar**:
+   ```bash
+   kubectl logs -n bunkerweb deployment/bunkerweb-controller -f
+   ```
+   You should see logs indicating the discovery of the new pod.
+
+3. **Create the reverse proxy configuration** via the BunkerWeb UI
+
+4. **Test your application**:
+   ```bash
+   curl -H "Host: my-app.example.com" http://<service-ip>
+   ```
+
+###### Without Controller (Manual Mode)
+
+1. **Deploy your application with the sidecar**:
+   ```bash
+   kubectl apply -f my-app-deployment.yaml
+   ```
+
+2. **Add the headless service to `BUNKERWEB_INSTANCES`**:
+   Update your `values.yaml` and upgrade the Helm chart:
+   ```bash
+   helm upgrade bunkerweb bunkerity/bunkerweb -n bunkerweb -f values.yaml
+   ```
+
+3. **Verify that the scheduler detects the sidecar**:
+   ```bash
+   kubectl logs -n bunkerweb deployment/bunkerweb-scheduler -f
+   ```
+   You should see logs indicating the connection to the new worker.
+
+4. **Create the reverse proxy configuration** via the BunkerWeb UI
+
+5. **Test your application**:
+   ```bash
+   curl -H "Host: my-app.example.com" http://<service-ip>
+   ```
+
+###### Common Issues
+
+| Issue                            | Cause                                     | Solution                                                   |
+| -------------------------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| Scheduler can't find the sidecar | Missing or misconfigured headless service | Verify the service exists and is in `BUNKERWEB_INSTANCES`  |
+| 502 Bad Gateway error            | App is not accessible from BunkerWeb      | Verify the reverse proxy URL is correct (`127.0.0.1:port`) |
+| Configuration not applied        | Sidecar didn't receive the config         | Check scheduler and sidecar logs                           |
+| Port 5000 not accessible         | Port not exposed in the container         | Add `- containerPort: 5000` in the bunkerweb container     |
+
+##### Adding a New Application
+
+###### With Controller (Automatic Mode)
+
+To add a new application protected by BunkerWeb:
+
+1. **Create a new deployment** with the BunkerWeb sidecar with:
+   - Annotation `bunkerweb.io/INSTANCE: "yes"` in `template.metadata.annotations`
+   - Environment variable `KUBERNETES_MODE: "yes"` in the bunkerweb container
+
+2. **Create only the ClusterIP service** (no headless service needed!)
+
+3. **Apply the deployment**:
+   ```bash
+   kubectl apply -f new-app-deployment.yaml
+   ```
+
+4. **The controller automatically detects the new pod** - no chart redeployment needed!
+
+5. **Configure the reverse proxy** in the UI
+
+###### Without Controller (Manual Mode)
+
+To add a new application protected by BunkerWeb:
+
+1. **Create a new deployment** with the BunkerWeb sidecar (as described above)
+
+2. **Create both services** (ClusterIP + Headless)
+
+3. **Add the new headless service** to `BUNKERWEB_INSTANCES`:
+   ```yaml
+   extraEnvs:
+     - name: BUNKERWEB_INSTANCES
+       value: "http://app1-workers.ns.svc.cluster.local:5000 http://app2-workers.ns.svc.cluster.local:5000"
+   ```
+
+4. **Redeploy the chart**:
+   ```bash
+   helm upgrade bunkerweb bunkerity/bunkerweb -n bunkerweb -f values.yaml
+   ```
+
+5. **Configure the reverse proxy** in the UI or via env vars
+
+##### Best Practices
+
+✅ **Use the controller** for automatic sidecar discovery (simpler, no headless service needed)
+✅ **Use a single centralized scheduler** to manage all sidecars
+✅ **Always add the annotation** `bunkerweb.io/INSTANCE: "yes"` and environment variable `KUBERNETES_MODE: "yes"` when using controller mode
+✅ **No headless service needed with controller** - only ClusterIP service is sufficient
+✅ **Use the UI** to manage configurations (more flexible)
+✅ **Define resource limits** for containers
+✅ **Use Kubernetes secrets** for sensitive configurations
+✅ **Check logs** of scheduler and sidecars regularly
+
 #### 完整的 YAML 文件
 
 除了使用 helm chart，您还可以使用 GitHub 仓库中 [misc/integrations 文件夹](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/misc/integrations)内的 YAML 样板文件。请注意，我们强烈建议您改用 helm chart。
