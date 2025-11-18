@@ -161,7 +161,7 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
