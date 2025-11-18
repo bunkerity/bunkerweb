@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.arm.in
 #
-alembic==1.17.1 \
-    --hash=sha256:8a289f6778262df31571d29cca4c7fbacd2f0f582ea0816f4c399b6da7528486 \
-    --hash=sha256:cbc2386e60f89608bb63f30d2d6cc66c7aaed1fe105bd862828600e5ad167023
+alembic==1.17.2 \
+    --hash=sha256:bbe9751705c5e0f14877f02d46c53d10885e377e3d90eda810a016f9baa19e8e \
+    --hash=sha256:f483dd1fe93f6c5d49217055e4d15b905b425b6af906746abb35b69c1996c4e6
     # via -r requirements.arm.in
 cffi==2.0.0 \
     --hash=sha256:00bdf7acc5f795150faa6957054fbbca2439db2f775ce831222b66f192f03beb \
