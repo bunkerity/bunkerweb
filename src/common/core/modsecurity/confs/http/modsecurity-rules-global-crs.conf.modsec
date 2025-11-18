@@ -87,12 +87,12 @@ SecAction \
   t:none,\
   setvar:'tx.allowed_methods={{ ALLOWED_METHODS.replace("|", " ") }}'"
   {% else %}
-    {%- set ns = namespace(allowed_methods=[]) -%}
+    {%- set allowed_methods_list = [] -%}
     {%- for server_name in SERVER_NAME.split(" ") -%}
       {%- set server_allowed_methods = all[server_name + "_ALLOWED_METHODS"].split("|") -%}
       {%- for method in server_allowed_methods -%}
-        {%- if method not in ns.allowed_methods -%}
-          {%- set ns.allowed_methods = ns.allowed_methods + [method] -%}
+        {%- if method not in allowed_methods_list -%}
+          {%- set tmp = allowed_methods_list.append(method) -%}
         {%- endif -%}
       {%- endfor -%}
     {%- endfor -%}
@@ -103,43 +103,7 @@ SecAction \
   nolog,\
   pass,\
   t:none,\
-  setvar:'tx.allowed_methods={{ ns.allowed_methods | join(" ") }}'"
-  {% endif %}
-
-# Auto update allowed content types (Generated from ALLOWED_CONTENT_TYPES)
-  {% if MULTISITE == "no" %}
-    {%- set ns = namespace(wrapped=[]) -%}
-    {%- for p in ALLOWED_CONTENT_TYPES.split(" ") -%}
-      {%- set ns.wrapped = ns.wrapped + ['|' ~ p ~ '|'] -%}
-    {%- endfor %}
-SecAction \
- "id:900201,\
-  phase:1,\
-  nolog,\
-  pass,\
-  t:none,\
-  setvar:'tx.allowed_request_content_type={{ ns.wrapped | join(' ') }}'"
-  {% else %}
-    {%- set ns = namespace(allowed_content_types=[], wrapped=[]) -%}
-    {%- for server_name in SERVER_NAME.split(" ") -%}
-      {%- set server_allowed_content_types = all[server_name + "_ALLOWED_CONTENT_TYPES"].split(" ") -%}
-      {%- for content_type in server_allowed_content_types -%}
-        {%- if content_type not in ns.allowed_content_types -%}
-          {%- set ns.allowed_content_types = ns.allowed_content_types + [content_type] -%}
-        {%- endif -%}
-      {%- endfor -%}
-    {%- endfor -%}
-    {%- for p in ns.allowed_content_types -%}
-      {%- set ns.wrapped = ns.wrapped + ['|' ~ p ~ '|'] -%}
-    {%- endfor %}
-# Auto update allowed content types (Generated from all server-specific ALLOWED_CONTENT_TYPES)
-SecAction \
- "id:900201,\
-  phase:1,\
-  nolog,\
-  pass,\
-  t:none,\
-  setvar:'tx.allowed_request_content_type={{ ns.wrapped | join(' ') }}'"
+  setvar:'tx.allowed_methods={{ allowed_methods_list | join(" ") }}'"
   {% endif %}
 
   {% if USE_MODSECURITY_CRS == "yes" -%}

@@ -3376,37 +3376,6 @@ STREAM 支持 :warning:
         - **定期审查允许的方法：** 定期审核 `ALLOWED_METHODS` 设置，以确保其与您应用程序的当前要求保持一致。
         - **部署前进行彻底测试：** 对 HTTP 方法限制的更改可能会影响应用程序功能。在将其应用于生产环境之前，请在预演环境中验证您的配置。
 
-=== "内容类型"
-
-    **内容类型控制**
-
-    将内容类型限制为应用程序所需的类型是一项重要的安全措施，有助于防止通过意外的内容类型进行利用。通过明确定义可接受的内容类型，您可以最大限度地降低依赖意外或恶意内容类型标头的攻击风险。
-
-    此功能使用 `ALLOWED_CONTENT_TYPES` 设置进行配置，其中内容类型用空格分隔（默认值：`application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report`）。如果客户端发送的请求包含未列出的内容类型，服务器将以 **415 - Unsupported Media Type** 状态响应。
-
-    默认的内容类型集涵盖了常见的 Web 应用程序需求，包括表单提交、文件上传、XML/SOAP 请求和 JSON API。
-
-    !!! success "安全优势"
-        - 防止通过意外或恶意内容类型进行利用
-        - 通过拒绝不常见的内容类型来减少攻击面
-        - 阻止内容类型操纵攻击
-        - 与 ModSecurity 规则一起提供纵深防御
-
-    | 设置                    | 默认值                                                                                                                                                                 | 上下文    | 多选 | 描述                                            |
-    | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---- | ----------------------------------------------- |
-    | `ALLOWED_CONTENT_TYPES` | `application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report` | multisite | no   | **内容类型：** 允许的内容类型列表，用空格分隔。 |
-
-    !!! info "内容类型检查"
-        - 内容类型检查仅在请求中存在 `Content-Type` 标头时应用
-        - 提取基本内容类型（例如，从 `application/json; charset=utf-8` 中提取 `application/json`）
-        - GET 和 HEAD 请求通常不包含 Content-Type 标头，因此不受此检查的约束
-
-    !!! danger "安全注意事项"
-        - **检查您的应用程序需求：** 确保允许的内容类型与您应用程序的实际需求相匹配
-        - **谨慎对待不常见的类型：** 只添加您的应用程序真正需要的内容类型
-        - **部署前进行彻底测试：** 对内容类型限制的更改可能会破坏应用程序功能。在将其应用于生产环境之前，请在预演环境中验证您的配置
-        - **考虑 ModSecurity 集成：** 此检查与 ModSecurity 规则一起工作，以实现全面的内容类型验证
-
 === "请求大小限制"
 
     **请求大小限制**
@@ -3567,20 +3536,6 @@ STREAM 支持 :warning:
 
     ```yaml
     ALLOWED_METHODS: "GET|POST|PUT|DELETE"
-    ```
-
-=== "内容类型"
-
-    将内容类型限制为仅 JSON（用于 API）的示例配置：
-
-    ```yaml
-    ALLOWED_CONTENT_TYPES: "application/json"
-    ```
-
-    具有文件上传功能的标准 Web 应用程序的示例配置：
-
-    ```yaml
-    ALLOWED_CONTENT_TYPES: "application/x-www-form-urlencoded multipart/form-data application/json"
     ```
 
 === "请求大小限制"

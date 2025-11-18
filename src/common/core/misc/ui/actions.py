@@ -19,19 +19,11 @@ def pre_render(**kwargs):
             "subtitle_color": "olive",
             "svg_color": "olive",
         },
-        "counter_failed_content_type": {
-            "value": 0,
-            "title": "DISALLOWED CONTENT TYPES",
-            "subtitle": "Count",
-            "subtitle_color": "purple",
-            "svg_color": "purple",
-        },
     }
     try:
         data = kwargs["bw_instances_utils"].get_metrics("misc")
         ret["counter_failed_default"]["value"] = data.get("counter_failed_default", 0)
         ret["counter_failed_method"]["value"] = data.get("counter_failed_method", 0)
-        ret["counter_failed_content_type"]["value"] = data.get("counter_failed_content_type", 0)
     except BaseException as e:
         logger.debug(format_exc())
         logger.error(f"Failed to get default metrics: {e}")
