@@ -14,6 +14,7 @@
 - [LINUX] Support RHEL 10.1 instead of 10.0
 - [DOCS] Add live status updates link to README and documentation in multiple languages.
 - [DOCS] Fix PDF generation to generate it in english.
+- [DOCS] Add documentation about how to setup BunkerWeb as a sidecar in Kubernetes.
 
 ## v1.6.6-rc2 - 2025/11/05
 
