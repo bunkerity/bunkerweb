@@ -93,6 +93,37 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
         - **Überprüfen Sie regelmäßig die erlaubten Methoden:** Überprüfen Sie die `ALLOWED_METHODS`-Einstellung regelmäßig, um sicherzustellen, dass sie den aktuellen Anforderungen Ihrer Anwendung entspricht.
         - **Testen Sie gründlich vor der Bereitstellung:** Änderungen an den Einschränkungen von HTTP-Methoden können die Anwendungsfunktionalität beeinträchtigen. Validieren Sie Ihre Konfiguration in einer Staging-Umgebung, bevor Sie sie in der Produktion anwenden.
 
+=== "Inhaltstypen"
+
+    **Steuerung der Inhaltstypen**
+
+    Die Beschränkung der Inhaltstypen auf nur diejenigen, die von Ihrer Anwendung benötigt werden, ist eine wichtige Sicherheitsmaßnahme, die hilft, Ausnutzung durch unerwartete Inhaltstypen zu verhindern. Indem Sie explizit zulässige Inhaltstypen definieren, können Sie das Risiko von Angriffen minimieren, die auf unerwarteten oder bösartigen Content-Type-Headern beruhen.
+
+    Diese Funktion wird mit der Einstellung `ALLOWED_CONTENT_TYPES` konfiguriert, wobei die Inhaltstypen aufgelistet und durch Leerzeichen getrennt sind (Standard: `application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report`). Wenn ein Client eine Anfrage mit einem nicht aufgelisteten Inhaltstyp sendet, antwortet der Server mit einem **415 - Unsupported Media Type**-Status.
+
+    Der Standardsatz von Inhaltstypen deckt gängige Anforderungen von Webanwendungen ab, einschließlich Formularübermittlungen, Datei-Uploads, XML/SOAP-Anfragen und JSON-APIs.
+
+    !!! success "Sicherheitsvorteile"
+        - Verhindert Ausnutzung durch unerwartete oder bösartige Inhaltstypen
+        - Reduziert die Angriffsfläche durch Ablehnung ungewöhnlicher Inhaltstypen
+        - Blockiert Angriffe durch Content-Type-Manipulation
+        - Bietet Defense-in-Depth zusammen mit ModSecurity-Regeln
+
+    | Einstellung             | Standard                                                                                                                                                               | Kontext   | Mehrfach | Beschreibung                                                                    |
+    | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------- |
+    | `ALLOWED_CONTENT_TYPES` | `application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report` | multisite | nein     | **Inhaltstypen:** Liste der erlaubten Inhaltstypen, getrennt durch Leerzeichen. |
+
+    !!! info "Content-Type-Prüfung"
+        - Die Content-Type-Prüfung gilt nur, wenn ein `Content-Type`-Header in der Anfrage vorhanden ist
+        - Der Basis-Inhaltstyp wird extrahiert (z.B. `application/json` aus `application/json; charset=utf-8`)
+        - GET- und HEAD-Anfragen enthalten normalerweise keinen Content-Type-Header und unterliegen daher nicht dieser Prüfung
+
+    !!! danger "Sicherheitsüberlegungen"
+        - **Überprüfen Sie die Anforderungen Ihrer Anwendung:** Stellen Sie sicher, dass die erlaubten Inhaltstypen den tatsächlichen Anforderungen Ihrer Anwendung entsprechen
+        - **Seien Sie vorsichtig mit ungewöhnlichen Typen:** Fügen Sie nur Inhaltstypen hinzu, die tatsächlich von Ihrer Anwendung benötigt werden
+        - **Testen Sie gründlich vor der Bereitstellung:** Änderungen an den Content-Type-Beschränkungen können die Anwendungsfunktionalität beeinträchtigen. Validieren Sie Ihre Konfiguration in einer Staging-Umgebung
+        - **Berücksichtigen Sie die ModSecurity-Integration:** Diese Prüfung arbeitet zusammen mit ModSecurity-Regeln für eine umfassende Content-Type-Validierung
+
 === "Größenbeschränkungen für Anfragen"
 
     **Größenbeschränkungen für Anfragen**
@@ -253,6 +284,20 @@ Ob Sie HTTP-Methoden einschränken, Anforderungsgrößen verwalten, das Datei-Ca
 
     ```yaml
     ALLOWED_METHODS: "GET|POST|PUT|DELETE"
+    ```
+
+=== "Inhaltstypen"
+
+    Beispielkonfiguration zur Beschränkung der Inhaltstypen nur auf JSON für eine API:
+
+    ```yaml
+    ALLOWED_CONTENT_TYPES: "application/json"
+    ```
+
+    Beispielkonfiguration für eine Standard-Webanwendung mit Datei-Uploads:
+
+    ```yaml
+    ALLOWED_CONTENT_TYPES: "application/x-www-form-urlencoded multipart/form-data application/json"
     ```
 
 === "Größenbeschränkungen für Anfragen"

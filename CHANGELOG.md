@@ -8,6 +8,7 @@
 - [BUGFIX] Ensure HTTP/3 works with the HTTP3 plugin by adding conditional reuseport to QUIC listen directives on the default HTTPS server.
 - [FEATURE] Start monitoring `405` and `400` http status codes in the requests to be able to see them in the reports page.
 - [FEATURE] Refactored `Auth Basic` authentication implementation to enhance security and maintainability by switching password hashing to bcrypt.
+- [FEATURE] Implement content type restrictions and validation in HTTP requests via the new `ALLOWED_CONTENT_TYPES` setting in the `Miscellaneous` plugin (default: `application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report`).
 - [UI] Update DataTable initialization to automatically enable state saving for improved user experience.
 - [LINUX] Support RHEL 9.7 instead of 9.6
 - [LINUX] Support RHEL 10.1 instead of 10.0

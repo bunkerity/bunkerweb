@@ -165,6 +165,20 @@ SecAction \
   t:none,\
   setvar:'tx.allowed_methods={{ ALLOWED_METHODS.replace("|", " ") }}'"
 
+# Auto update allowed content types (Generated from ALLOWED_CONTENT_TYPES)
+{% set ns = namespace(wrapped=[]) %}
+{% for p in ALLOWED_CONTENT_TYPES.split(" ") %}
+    {# Append to the list stored in the namespace #}
+    {% set ns.wrapped = ns.wrapped + ['|' ~ p ~ '|'] %}
+{% endfor %}
+SecAction \
+ "id:900201,\
+  phase:1,\
+  nolog,\
+  pass,\
+  t:none,\
+  setvar:'tx.allowed_request_content_type={{ ns.wrapped | join(' ') }}'"
+
     {% if USE_WHITELIST == "yes" -%}
 # Check if client is whitelisted
 SecRule ENV:is_whitelisted "yes" "id:1000,phase:1,allow,nolog,ctl:ruleEngine=Off"
