@@ -33,6 +33,16 @@
       "type": "multivalue",
       "separator": "|"
     },
+    "ALLOWED_CONTENT_TYPES": {
+      "context": "multisite",
+      "default": "application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report",
+      "help": "Allowed content types for HTTP requests, separated with pipes.",
+      "id": "allowed-content-types",
+      "label": "Allowed content types",
+      "regex": "^(?:[A-Za-z]+\\/[A-Za-z0-9\\-\\+\\.]+)(?:\\s+[A-Za-z]+\\/[A-Za-z0-9\\-\\+\\.]+)*$",
+      "type": "multivalue",
+      "separator": " "
+    },
     "MAX_CLIENT_SIZE": {
       "context": "multisite",
       "default": "10m",

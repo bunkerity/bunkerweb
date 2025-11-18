@@ -93,6 +93,37 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
         - **Révisez régulièrement les méthodes autorisées :** Auditez périodiquement `ALLOWED_METHODS` pour vous assurer qu'il correspond aux besoins actuels de votre application.
         - **Testez minutieusement avant le déploiement :** Les changements de restrictions de méthodes HTTP peuvent impacter la fonctionnalité de l'application. Validez votre configuration dans un environnement de pré-production.
 
+=== "Types de contenu"
+
+    **Contrôle des types de contenu**
+
+    Restreindre les types de contenu à ceux requis par votre application est une mesure de sécurité importante qui aide à prévenir l'exploitation via des types de contenu inattendus. En définissant explicitement les types de contenu acceptables, vous minimisez le risque d'attaques qui reposent sur des en-têtes de type de contenu inattendus ou malveillants.
+
+    Cette fonctionnalité est configurée avec `ALLOWED_CONTENT_TYPES`, où les types de contenu sont listés et séparés par des espaces (défaut : `application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report`). Si un client envoie une requête avec un type de contenu non listé, le serveur répondra avec un statut **415 - Unsupported Media Type**.
+
+    L'ensemble par défaut des types de contenu couvre les besoins courants des applications web, y compris les soumissions de formulaires, les téléchargements de fichiers, les requêtes XML/SOAP et les API JSON.
+
+    !!! success "Avantages en matière de sécurité"
+        - Empêche l'exploitation via des types de contenu inattendus ou malveillants
+        - Réduit la surface d'attaque en rejetant les types de contenu peu courants
+        - Bloque les attaques par manipulation de type de contenu
+        - Fournit une défense en profondeur aux côtés des règles ModSecurity
+
+    | Paramètre               | Défaut                                                                                                                                                                 | Contexte  | Multiple | Description                                                                           |
+    | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------------- |
+    | `ALLOWED_CONTENT_TYPES` | `application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report` | multisite | no       | **Types de contenu :** Liste des types de contenu autorisés, séparés par des espaces. |
+
+    !!! info "Vérification du type de contenu"
+        - La vérification du type de contenu ne s'applique que lorsqu'un en-tête `Content-Type` est présent dans la requête
+        - Le type de contenu de base est extrait (par ex., `application/json` à partir de `application/json; charset=utf-8`)
+        - Les requêtes GET et HEAD n'incluent généralement pas d'en-tête Content-Type et ne sont pas soumises à cette vérification
+
+    !!! danger "Considérations de sécurité"
+        - **Vérifiez les besoins de votre application :** Assurez-vous que les types de contenu autorisés correspondent aux besoins réels de votre application
+        - **Soyez prudent avec les types peu courants :** N'ajoutez que les types de contenu réellement nécessaires à votre application
+        - **Testez minutieusement avant le déploiement :** Les changements de restrictions de type de contenu peuvent casser la fonctionnalité de l'application. Validez votre configuration dans un environnement de pré-production
+        - **Considérez l'intégration ModSecurity :** Cette vérification fonctionne aux côtés des règles ModSecurity pour une validation complète du type de contenu
+
 === "Limites de taille des requêtes"
 
     **Limites de taille des requêtes**
@@ -253,6 +284,20 @@ Que vous ayez besoin de restreindre les méthodes HTTP, de gérer la taille des 
 
     ```yaml
     ALLOWED_METHODS: "GET|POST|PUT|DELETE"
+    ```
+
+=== "Types de contenu"
+
+    Exemple pour restreindre les types de contenu uniquement à JSON pour une API :
+
+    ```yaml
+    ALLOWED_CONTENT_TYPES: "application/json"
+    ```
+
+    Exemple pour une application web standard avec téléchargement de fichiers :
+
+    ```yaml
+    ALLOWED_CONTENT_TYPES: "application/x-www-form-urlencoded multipart/form-data application/json"
     ```
 
 === "Limites de taille des requêtes"

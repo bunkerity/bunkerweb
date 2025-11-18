@@ -3417,6 +3417,37 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
         - **Regularly review allowed methods:** Periodically audit the `ALLOWED_METHODS` setting to ensure it aligns with your application's current requirements.
         - **Test thoroughly before deployment:** Changes to HTTP method restrictions can impact application functionality. Validate your configuration in a staging environment before applying it to production.
 
+=== "Content Types"
+
+    **Content Type Control**
+
+    Restricting content types to only those required by your application is an important security measure that helps prevent exploitation through unexpected content types. By explicitly defining acceptable content types, you can minimize the risk of attacks that rely on unexpected or malicious content type headers.
+
+    This feature is configured using the `ALLOWED_CONTENT_TYPES` setting, where content types are listed and separated by spaces (default: `application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report`). If a client sends a request with a content type not in the list, the server will respond with a **415 - Unsupported Media Type** status.
+
+    The default set of content types covers common web application needs, including form submissions, file uploads, XML/SOAP requests, and JSON APIs.
+
+    !!! success "Security Benefits"
+        - Prevents exploitation through unexpected or malicious content types
+        - Reduces the attack surface by rejecting uncommon content types
+        - Blocks content type manipulation attacks
+        - Provides defense-in-depth alongside ModSecurity rules
+
+    | Setting                 | Default                                                                                                                                                                | Context   | Multiple | Description                                                                     |
+    | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------- | ------------------------------------------------------------------------------- |
+    | `ALLOWED_CONTENT_TYPES` | `application/x-www-form-urlencoded multipart/form-data text/xml application/xml application/soap+xml application/json application/reports+json application/csp-report` | multisite | no       | **Content Types:** List of content types that are allowed, separated by spaces. |
+
+    !!! info "Content Type Checking"
+        - Content type checking only applies when a `Content-Type` header is present in the request
+        - The base content type is extracted (e.g., `application/json` from `application/json; charset=utf-8`)
+        - GET and HEAD requests typically do not include a Content-Type header and are not subject to this check
+
+    !!! danger "Security Considerations"
+        - **Review your application's needs:** Ensure the allowed content types match your application's actual requirements
+        - **Be cautious with uncommon types:** Only add content types that are genuinely needed by your application
+        - **Test thoroughly before deployment:** Changes to content type restrictions can break application functionality. Validate your configuration in a staging environment before applying it to production
+        - **Consider ModSecurity integration:** This check works alongside ModSecurity rules for comprehensive content type validation
+
 === "Request Size Limits"
 
     **Request Size Limits**
@@ -3577,6 +3608,20 @@ Whether you need to restrict HTTP methods, manage request sizes, optimize file c
 
     ```yaml
     ALLOWED_METHODS: "GET|POST|PUT|DELETE"
+    ```
+
+=== "Content Types"
+
+    Example configuration for restricting content types to only JSON for an API:
+
+    ```yaml
+    ALLOWED_CONTENT_TYPES: "application/json"
+    ```
+
+    Example configuration for a standard web application with file uploads:
+
+    ```yaml
+    ALLOWED_CONTENT_TYPES: "application/x-www-form-urlencoded multipart/form-data application/json"
     ```
 
 === "Request Size Limits"
