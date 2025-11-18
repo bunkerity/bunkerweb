@@ -1551,7 +1551,7 @@ scheduler:
       value: "http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000 http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000"
 ```
 
-**Important:** 
+**Important:**
 - Separate URLs with spaces
 - Use port **5000** (BunkerWeb internal API)
 - Format: `http://<service-name>.<namespace>.svc.cluster.local:5000`
@@ -1652,10 +1652,10 @@ spec:
 
 ###### Important Environment Variables
 
-| Variable | Value | Description |
-|----------|-------|-------------|
-| `KUBERNETES_MODE` | `yes` | **Mandatory** for automatic discovery via the controller |
-| `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API |
+| Variable           | Value                                                 | Description                                              |
+| ------------------ | ----------------------------------------------------- | -------------------------------------------------------- |
+| `KUBERNETES_MODE`  | `yes`                                                 | **Mandatory** for automatic discovery via the controller |
+| `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs allowed to access the API                            |
 
 
 ##### Step 3: Creating Services
@@ -1701,7 +1701,7 @@ spec:
       targetPort: 5000
 ```
 
-**Important:** 
+**Important:**
 - ⚠️ **Not required with controller** - the controller communicates directly with pods via Kubernetes API
 - ✅ **Mandatory without controller** - this service name must be manually added to `BUNKERWEB_INSTANCES`
 - The `selector` must match your deployment labels
@@ -1750,7 +1750,7 @@ env:
    ```bash
    kubectl apply -f my-app-deployment.yaml
    ```
-   
+
    Make sure that:
    - The annotation `bunkerweb.io/INSTANCE: "yes"` is present in `template.metadata.annotations`
    - The variable `KUBERNETES_MODE: "yes"` is defined in the bunkerweb container
@@ -1796,12 +1796,12 @@ env:
 
 ###### Common Issues
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Scheduler can't find the sidecar | Missing or misconfigured headless service | Verify the service exists and is in `BUNKERWEB_INSTANCES` |
-| 502 Bad Gateway error | App is not accessible from BunkerWeb | Verify the reverse proxy URL is correct (`127.0.0.1:port`) |
-| Configuration not applied | Sidecar didn't receive the config | Check scheduler and sidecar logs |
-| Port 5000 not accessible | Port not exposed in the container | Add `- containerPort: 5000` in the bunkerweb container |
+| Issue                            | Cause                                     | Solution                                                   |
+| -------------------------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| Scheduler can't find the sidecar | Missing or misconfigured headless service | Verify the service exists and is in `BUNKERWEB_INSTANCES`  |
+| 502 Bad Gateway error            | App is not accessible from BunkerWeb      | Verify the reverse proxy URL is correct (`127.0.0.1:port`) |
+| Configuration not applied        | Sidecar didn't receive the config         | Check scheduler and sidecar logs                           |
+| Port 5000 not accessible         | Port not exposed in the container         | Add `- containerPort: 5000` in the bunkerweb container     |
 
 ##### Adding a New Application
 
