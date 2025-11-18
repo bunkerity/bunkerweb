@@ -22,54 +22,17 @@ function misc:access()
 		return self:ret(true, "method is not valid", HTTP_BAD_REQUEST)
 	end
 	-- Check if method is allowed
-	local method_allowed = false
 	for allowed_method in self.variables["ALLOWED_METHODS"]:gmatch("[^|]+") do
 		if method == allowed_method then
-			method_allowed = true
-			break
+			return self:ret(true, "method " .. method .. " is allowed")
 		end
 	end
-	if not method_allowed then
-		self:set_metric("counters", "failed_method", 1)
-		local security_mode = get_security_mode(self.ctx)
-		if security_mode == "block" then
-			return self:ret(true, "method " .. method .. " is not allowed", HTTP_NOT_ALLOWED)
-		end
-		return self:ret(true, "detected method " .. method .. " not allowed")
+	self:set_metric("counters", "failed_method", 1)
+	local security_mode = get_security_mode(self.ctx)
+	if security_mode == "block" then
+		return self:ret(true, "method " .. method .. " is not allowed", HTTP_NOT_ALLOWED)
 	end
-
-	-- Check if content type is allowed (only if Content-Type header is present)
-	local content_type = self.ctx.bw.http_content_type
-	if content_type and content_type ~= "" then
-		-- Extract base content type (before semicolon)
-		local base_content_type = content_type:match("^([^;]+)")
-		if base_content_type then
-			base_content_type = base_content_type:gsub("^%s*(.-)%s*$", "%1") -- trim whitespace
-			local is_allowed = false
-			for allowed_type in self.variables["ALLOWED_CONTENT_TYPES"]:gmatch("[^%s]+") do
-				if base_content_type == allowed_type then
-					is_allowed = true
-					break
-				end
-			end
-			if not is_allowed then
-				self:set_metric("counters", "failed_content_type", 1)
-				local security_mode = get_security_mode(self.ctx)
-				if security_mode == "block" then
-					return self:ret(
-						true,
-						"content type " .. base_content_type .. " is not allowed",
-						415,
-						nil,
-						{ ["content_type"] = base_content_type }
-					)
-				end
-				return self:ret(true, "detected content type " .. base_content_type .. " not allowed")
-			end
-		end
-	end
-
-	return self:ret(true, "method " .. method .. " and content type " .. (content_type or "nil") .. " is allowed")
+	return self:ret(true, "detected method " .. method .. " not allowed")
 end
 
 function misc:header()
