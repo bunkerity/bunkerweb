@@ -362,7 +362,8 @@ docker pull bunkerity/bunkerweb:1.6.6-rc3
 Docker 镜像也可在 [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) 上找到，可以使用 `ghcr.io` 仓库地址下载：
 
 ```shell
-docker pull ghcr.io/bunkerity/bunkerweb:1.6.6-rc3```
+docker pull ghcr.io/bunkerity/bunkerweb:1.6.6-rc3
+```
 
 Docker 集成的关键概念包括：
 
@@ -1377,28 +1378,53 @@ This documentation explains how to deploy BunkerWeb as a sidecar to protect your
 
 ##### Architecture
 
-```
-┌─────────────────────────────────────┐
-│  BunkerWeb Scheduler (centralized)  │
-│   + UI + MariaDB + Redis            │
-└──────────────┬──────────────────────┘
-               │ (API port 5000)
-               │
-    ┏━━━━━━━━━━┻━━━━━━━━━━┓
-    ┃                     ┃
-┌───▼──────────────┐  ┌───▼──────────────┐
-│  Application Pod │  │  Application Pod │
-│  ┌─────────────┐ │  │  ┌─────────────┐ │
-│  │     App     │ │  │  │     App     │ │
-│  │  (port 80)  │ │  │  │  (port XX)  │ │
-│  └──────┬──────┘ │  │  └──────┬──────┘ │
-│         │        │  │         │        │
-│  ┌──────▼──────┐ │  │  ┌──────▼──────┐ │
-│  │  BunkerWeb  │ │  │  │  BunkerWeb  │ │
-│  │ (port 8080) │ │  │  │ (port 8080) │ │
-│  │ (API  5000) │ │  │  │ (API  5000) │ │
-│  └─────────────┘ │  │  └─────────────┘ │
-└──────────────────┘  └──────────────────┘
+```mermaid
+flowchart TB
+
+  %% ---------- 样式 ----------
+  classDef scheduler     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef podContainer  fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:6 3,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+
+  %% ---------- 顶部：调度器 ----------
+  SCHED["BunkerWeb 调度器（集中式）<br/>+ UI + MariaDB + Redis"]:::scheduler
+
+  %% ---------- Pods 组 ----------
+  subgraph PODS["Pod 组"]
+    %% 应用 Pod 1 ----------
+    subgraph POD1["应用 Pod"]
+      BW1["BunkerWeb"]:::component
+      APP1["应用程序<br/>(端口 80)"]:::component
+      BW1 -->|合法请求| APP1
+    end
+    class POD1 podContainer
+
+    %% 应用 Pod 2 ----------
+    subgraph POD2["应用 Pod"]
+      BW2["BunkerWeb"]:::component
+      APP2["应用程序<br/>(端口 XX)"]:::component
+      BW2 -->|合法请求| APP2
+    end
+    class POD2 podContainer
+  end
+
+  %% ---------- 底部：负载均衡器 ----------
+  LB["负载均衡器"]:::lb
+
+  %% 调度器通过 API 控制 BunkerWeb 实例
+  %% The Scheduler controls the BunkerWeb instances (API)
+  SCHED -->|API 5000| BW1
+  SCHED -->|API 5000| BW2
+  %% 负载均衡器将流量发送到 BunkerWeb
+  %% The load balancer sends traffic to BunkerWeb
+  LB -->|HTTP/HTTPS| BW1
+  LB -->|HTTP/HTTPS| BW2
+  %% ---------- 布局辅助（隐藏） ----------
+  %% 将负载均衡器放置在整个 Pod 组之下
+  %% Place the load balancer under the entire PODS group
+  PODS --> LB
+  linkStyle 6 stroke-width:0px,stroke:transparent;
 ```
 
 ##### Prerequisites

@@ -1377,28 +1377,53 @@ Cette documentation explique comment déployer BunkerWeb en tant que sidecar pou
 
 ##### Architecture
 
-```
-┌─────────────────────────────────────┐
-│   Scheduler BunkerWeb (centralisé)  │
-│   + UI + MariaDB + Redis            │
-└──────────────┬──────────────────────┘
-               │ (API port 5000)
-               │
-    ┏━━━━━━━━━━┻━━━━━━━━━━┓
-    ┃                     ┃
-┌───▼──────────────┐  ┌───▼──────────────┐
-│  Pod Application │  │  Pod Application │
-│  ┌─────────────┐ │  │  ┌─────────────┐ │
-│  │   App       │ │  │  │   App       │ │
-│  │  (port 80)  │ │  │  │  (port XX)  │ │
-│  └──────┬──────┘ │  │  └──────┬──────┘ │
-│         │        │  │         │        │
-│  ┌──────▼──────┐ │  │  ┌──────▼──────┐ │
-│  │  BunkerWeb  │ │  │  │  BunkerWeb  │ │
-│  │ (port 8080) │ │  │  │ (port 8080) │ │
-│  │ (API  5000) │ │  │  │ (API  5000) │ │
-│  └─────────────┘ │  │  └─────────────┘ │
-└──────────────────┘  └──────────────────┘
+```mermaid
+flowchart TB
+
+  %% ---------- Styles ----------
+  classDef scheduler     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef podContainer  fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:6 3,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+
+  %% ---------- Haut : Scheduler ----------
+  SCHED["Scheduler BunkerWeb (centralisé)<br/>+ UI + MariaDB + Redis"]:::scheduler
+
+  %% ---------- Groupe de Pods ----------
+  subgraph PODS["Pods"]
+    %% Pod d'application 1 ----------
+    subgraph POD1["Pod d'application"]
+      BW1["BunkerWeb"]:::component
+      APP1["Application<br/>(port 80)"]:::component
+      BW1 -->|requêtes légitimes| APP1
+    end
+    class POD1 podContainer
+
+    %% Pod d'application 2 ----------
+    subgraph POD2["Pod d'application"]
+      BW2["BunkerWeb"]:::component
+      APP2["Application<br/>(port XX)"]:::component
+      BW2 -->|requêtes légitimes| APP2
+    end
+    class POD2 podContainer
+  end
+
+  %% ---------- Équilibreur de charge (en bas) ----------
+  LB["Équilibreur de charge"]:::lb
+
+  %% ---------- Câblage (visible, sémantique) ----------
+  %% Le Scheduler contrôle les instances BunkerWeb (API)
+  SCHED -->|API 5000| BW1
+  SCHED -->|API 5000| BW2
+
+  %% L'équilibreur de charge envoie le trafic vers BunkerWeb
+  LB -->|HTTP/HTTPS| BW1
+  LB -->|HTTP/HTTPS| BW2
+
+  %% ---------- Aide à la mise en page (caché) ----------
+  %% Place l'équilibreur de charge sous tout le groupe PODS
+  PODS --> LB
+  linkStyle 6 stroke-width:0px,stroke:transparent;
 ```
 
 ##### Prérequis

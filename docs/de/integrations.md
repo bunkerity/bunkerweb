@@ -1378,28 +1378,53 @@ This documentation explains how to deploy BunkerWeb as a sidecar to protect your
 
 ##### Architecture
 
-```
-┌─────────────────────────────────────┐
-│  BunkerWeb Scheduler (centralized)  │
-│   + UI + MariaDB + Redis            │
-└──────────────┬──────────────────────┘
-               │ (API port 5000)
-               │
-    ┏━━━━━━━━━━┻━━━━━━━━━━┓
-    ┃                     ┃
-┌───▼──────────────┐  ┌───▼──────────────┐
-│  Application Pod │  │  Application Pod │
-│  ┌─────────────┐ │  │  ┌─────────────┐ │
-│  │     App     │ │  │  │     App     │ │
-│  │  (port 80)  │ │  │  │  (port XX)  │ │
-│  └──────┬──────┘ │  │  └──────┬──────┘ │
-│         │        │  │         │        │
-│  ┌──────▼──────┐ │  │  ┌──────▼──────┐ │
-│  │  BunkerWeb  │ │  │  │  BunkerWeb  │ │
-│  │ (port 8080) │ │  │  │ (port 8080) │ │
-│  │ (API  5000) │ │  │  │ (API  5000) │ │
-│  └─────────────┘ │  │  └─────────────┘ │
-└──────────────────┘  └──────────────────┘
+```mermaid
+flowchart TB
+
+  %% ---------- Stil ----------
+  classDef scheduler     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef podContainer  fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:6 3,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+
+  %% ---------- Oben: Scheduler ----------
+  SCHED["BunkerWeb Scheduler (zentralisiert)<br/>+ UI + MariaDB + Redis"]:::scheduler
+
+  %% ---------- Pods-Gruppe ----------
+  subgraph PODS["Pods"]
+    %% Anwendungs-Pod 1 ----------
+    subgraph POD1["Anwendungs-Pod"]
+      BW1["BunkerWeb"]:::component
+      APP1["Anwendung<br/>(Port 80)"]:::component
+      BW1 -->|legitime Anfragen| APP1
+    end
+    class POD1 podContainer
+
+    %% Anwendungs-Pod 2 ----------
+    subgraph POD2["Anwendungs-Pod"]
+      BW2["BunkerWeb"]:::component
+      APP2["Anwendung<br/>(Port XX)"]:::component
+      BW2 -->|legitime Anfragen| APP2
+    end
+    class POD2 podContainer
+  end
+
+  %% ---------- Lastenausgleich (unten) ----------
+  LB["Lastenausgleich"]:::lb
+
+  %% ---------- Verbindungen (sichtbar, semantisch) ----------
+  %% Der Scheduler steuert die BunkerWeb-Instanzen (API)
+  SCHED -->|API 5000| BW1
+  SCHED -->|API 5000| BW2
+
+  %% Der Load Balancer leitet den Datenverkehr an BunkerWeb weiter
+  LB -->|HTTP/HTTPS| BW1
+  LB -->|HTTP/HTTPS| BW2
+
+  %% ---------- Layout-Hilfe (versteckt) ----------
+  %% Platziere den Load Balancer unter der gesamten PODS-Gruppe
+  PODS --> LB
+  linkStyle 6 stroke-width:0px,stroke:transparent;
 ```
 
 ##### Prerequisites

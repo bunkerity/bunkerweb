@@ -413,7 +413,8 @@ services:
 ...
 secrets:
   ADMIN_PASSWORD:
-    external: true```
+    external: true
+```
 
 Esto asegura que las configuraciones sensibles se mantengan fuera del entorno y de los registros.
 
@@ -1377,28 +1378,53 @@ This documentation explains how to deploy BunkerWeb as a sidecar to protect your
 
 ##### Architecture
 
-```
-┌─────────────────────────────────────┐
-│  BunkerWeb Scheduler (centralized)  │
-│   + UI + MariaDB + Redis            │
-└──────────────┬──────────────────────┘
-               │ (API port 5000)
-               │
-    ┏━━━━━━━━━━┻━━━━━━━━━━┓
-    ┃                     ┃
-┌───▼──────────────┐  ┌───▼──────────────┐
-│  Application Pod │  │  Application Pod │
-│  ┌─────────────┐ │  │  ┌─────────────┐ │
-│  │     App     │ │  │  │     App     │ │
-│  │  (port 80)  │ │  │  │  (port XX)  │ │
-│  └──────┬──────┘ │  │  └──────┬──────┘ │
-│         │        │  │         │        │
-│  ┌──────▼──────┐ │  │  ┌──────▼──────┐ │
-│  │  BunkerWeb  │ │  │  │  BunkerWeb  │ │
-│  │ (port 8080) │ │  │  │ (port 8080) │ │
-│  │ (API  5000) │ │  │  │ (API  5000) │ │
-│  └─────────────┘ │  │  └─────────────┘ │
-└──────────────────┘  └──────────────────┘
+```mermaid
+flowchart TB
+
+  %% ---------- Estilos ----------
+  classDef scheduler     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef podContainer  fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:6 3,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+
+  %% ---------- Arriba: Programador ----------
+  SCHED["Programador de BunkerWeb (centralizado)<br/>+ IU + MariaDB + Redis"]:::scheduler
+
+  %% ---------- Grupo de Pods ----------
+  subgraph PODS["Pods"]
+    %% Pod de aplicación 1 ----------
+    subgraph POD1["Pod de aplicación"]
+      BW1["BunkerWeb"]:::component
+      APP1["Aplicación<br/>(puerto 80)"]:::component
+      BW1 -->|solicitudes legítimas| APP1
+    end
+    class POD1 podContainer
+
+    %% Pod de aplicación 2 ----------
+    subgraph POD2["Pod de aplicación"]
+      BW2["BunkerWeb"]:::component
+      APP2["Aplicación<br/>(puerto XX)"]:::component
+      BW2 -->|solicitudes legítimas| APP2
+    end
+    class POD2 podContainer
+  end
+
+  %% ---------- Balanceador de carga (inferior) ----------
+  LB["Balanceador de carga"]:::lb
+
+  %% El programador controla las instancias de BunkerWeb (API)---
+  %% The Scheduler controls the BunkerWeb instances (API)
+  SCHED -->|API 5000| BW1
+  SCHED -->|API 5000| BW2
+  %% El balanceador de carga envía tráfico a BunkerWeb
+  %% The load balancer sends traffic to BunkerWeb
+  LB -->|HTTP/HTTPS| BW1
+  LB -->|HTTP/HTTPS| BW2
+  %% ---------- Auxiliar de diseño (oculto) ----------
+  %% Coloca el balanceador de carga debajo del grupo PODS
+  %% Place the load balancer under the entire PODS group
+  PODS --> LB
+  linkStyle 6 stroke-width:0px,stroke:transparent;
 ```
 
 ##### Prerequisites
