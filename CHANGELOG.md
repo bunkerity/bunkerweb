@@ -3,6 +3,7 @@
 ## v1.6.6 - ????/??/??
 
 - [LINUX] Enhance Easy Install script with manager and worker mode configurations
+- [UI] Enhance bad behavior logging and UI actions with additional fields and filtering capabilities
 
 ## v1.6.6-rc3 - ????/??/??
 

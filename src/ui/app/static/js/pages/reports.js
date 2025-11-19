@@ -772,14 +772,20 @@ $(document).ready(function () {
     let reason = "Unknown";
     let anomalyScore = null;
     let isModSec = false;
+    let currentServerName = "";
 
     try {
       // First, try to get the reason from row data
       const $row = button.closest("tr");
       const table = $("#reports").DataTable();
       const rowData = table.row($row).data();
-      if (rowData && rowData.reason) {
-        reason = rowData.reason;
+      if (rowData) {
+        if (rowData.reason) {
+          reason = rowData.reason;
+        }
+        if (rowData.server_name) {
+          currentServerName = decodeHtml(rowData.server_name);
+        }
       }
 
       // Try to parse the report data
@@ -869,7 +875,11 @@ $(document).ready(function () {
 
       // Generate formatted content with error handling
       try {
-        const formattedContent = formatSecurityReportData(reportData, reason);
+        const formattedContent = formatSecurityReportData(
+          reportData,
+          reason,
+          currentServerName,
+        );
         $("#dataContent").html(formattedContent);
       } catch (formatError) {
         console.error("Error formatting report data:", formatError);
@@ -932,6 +942,8 @@ $(document).ready(function () {
     }
   });
 
+  const htmlDecoder = document.createElement("textarea");
+
   // Function to safely escape HTML content
   function escapeHtml(text) {
     if (typeof text !== "string") {
@@ -940,6 +952,14 @@ $(document).ready(function () {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  function decodeHtml(html) {
+    if (html === undefined || html === null) {
+      return "";
+    }
+    htmlDecoder.innerHTML = html;
+    return htmlDecoder.value;
   }
 
   // Function to safely escape HTML attributes (more restrictive)
@@ -1040,7 +1060,7 @@ $(document).ready(function () {
   };
 
   // Function to format security report data
-  function formatSecurityReportData(data, reason = "") {
+  function formatSecurityReportData(data, reason = "", serverName = "") {
     if (!data || typeof data !== "object") {
       return '<div class="alert alert-warning" data-i18n="status.no_data">No data available</div>';
     }
@@ -1049,6 +1069,10 @@ $(document).ready(function () {
       .trim()
       .toLowerCase();
     const badBehaviorEntries = normalizeBadBehaviorEntries(data);
+    const shouldFilterByServer = shouldFilterBadBehaviorByServer(serverName);
+    const filteredBadBehaviorEntries = shouldFilterByServer
+      ? filterBadBehaviorEntriesByServer(badBehaviorEntries, serverName)
+      : badBehaviorEntries;
     const isBadBehaviorReason =
       normalizedReason === "bad behavior" ||
       normalizedReason === "bad_behavior" ||
@@ -1058,7 +1082,7 @@ $(document).ready(function () {
       (!normalizedReason && badBehaviorEntries.length > 0);
 
     if (shouldFormatBadBehavior) {
-      if (!badBehaviorEntries.length) {
+      if (!filteredBadBehaviorEntries.length) {
         return `
           <div class="alert alert-info" data-i18n="status.no_data">
             ${escapeHtml(
@@ -1071,7 +1095,7 @@ $(document).ready(function () {
           ${createRawDataFallback(data)}
         `;
       }
-      return formatBadBehaviorData(badBehaviorEntries);
+      return formatBadBehaviorData(filteredBadBehaviorEntries);
     }
 
     const hasSecurityFields =
@@ -1306,6 +1330,40 @@ $(document).ready(function () {
 
     html += "</div>";
     return html;
+  }
+
+  function shouldFilterBadBehaviorByServer(serverName) {
+    const normalized = normalizeServerNameValue(serverName);
+    return Boolean(
+      normalized && normalized !== "n/a" && normalized !== "unknown",
+    );
+  }
+
+  function filterBadBehaviorEntriesByServer(entries, serverName) {
+    if (!entries || !entries.length) {
+      return [];
+    }
+
+    const normalizedTarget = normalizeServerNameValue(serverName);
+    if (
+      !normalizedTarget ||
+      normalizedTarget === "n/a" ||
+      normalizedTarget === "unknown"
+    ) {
+      return entries;
+    }
+
+    return entries.filter((entry) => {
+      const entryServer = normalizeServerNameValue(entry && entry.server_name);
+      return entryServer === normalizedTarget;
+    });
+  }
+
+  function normalizeServerNameValue(value) {
+    if (value === undefined || value === null) {
+      return "";
+    }
+    return String(value).trim().toLowerCase();
   }
 
   function getMethodBadgeClass(method) {

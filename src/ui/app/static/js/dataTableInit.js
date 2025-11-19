@@ -145,6 +145,20 @@ function initializeDataTable(config) {
   const dataTable = new DataTable(tableSelector, safeDataTableOptions);
   applyTranslations();
 
+  // Ensure toggle filter buttons keep the outline-primary styling
+  const buttonsContainer = dataTable.buttons().container();
+  if (buttonsContainer && $(buttonsContainer).length) {
+    $(buttonsContainer)
+      .find(".toggle-filters")
+      .removeClass("btn-secondary")
+      .addClass("btn btn-sm btn-outline-primary");
+  }
+
+  const tableWrapperSelector =
+    typeof tableSelector === "string" && tableSelector
+      ? `${tableSelector}_wrapper`
+      : null;
+
   $("input.dtsp-paneInputButton.search").each(function () {
     const $this = $(this);
     const placeholder = $this.attr("placeholder") || "";
@@ -247,45 +261,45 @@ function initializeDataTable(config) {
         dataTable.draw(false);
         // Re-apply translations to static elements within the table wrapper if needed
         // (e.g., custom buttons, search input placeholder if not handled by draw)
-        $(`${tableSelector}_wrapper [data-i18n]`).each(function () {
-          const element = $(this);
-          const key = element.attr("data-i18n");
-          // Basic translation update, assuming no complex options needed here
-          const translation = t(key);
-          if (element.is("input[placeholder]")) {
-            element.attr("placeholder", translation);
-          } else if (element.is("button") || element.is("span")) {
-            // Update text, handle potential nested spans if necessary
-            const textNode = element
-              .contents()
-              .filter(function () {
-                return this.nodeType === 3; // Node.TEXT_NODE
-              })
-              .first();
-            if (element.is("[placeholder]")) {
+        if (tableWrapperSelector) {
+          $(`${tableWrapperSelector} [data-i18n]`).each(function () {
+            const element = $(this);
+            const key = element.attr("data-i18n");
+            const translation = t(key);
+
+            if (element.is("input[placeholder]")) {
               element.attr("placeholder", translation);
-            } else if (element.is("[title]")) {
-              element.attr("title", translation);
-            } else if (element.is("[data-bs-original-title]")) {
-              element.attr("data-bs-original-title", translation);
-            } else if (element.is("[aria-label]")) {
-              element.attr("aria-label", translation);
-            } else if (textNode.length) {
-              textNode.replaceWith(translation);
-            } else {
-              element.text(translation);
-              if (element.parent().is("span.dtsp-name[title]")) {
-                element.parent().attr("title", ` ${translation}`);
+            } else if (element.is("button") || element.is("span")) {
+              const textNode = element
+                .contents()
+                .filter(function () {
+                  return this.nodeType === 3;
+                })
+                .first();
+
+              if (element.is("[placeholder]")) {
+                element.attr("placeholder", translation);
+              } else if (element.is("[title]")) {
+                element.attr("title", translation);
+              } else if (element.is("[data-bs-original-title]")) {
+                element.attr("data-bs-original-title", translation);
+              } else if (element.is("[aria-label]")) {
+                element.attr("aria-label", translation);
+              } else if (textNode.length) {
+                textNode.replaceWith(translation);
+              } else {
+                element.text(translation);
+                if (element.parent().is("span.dtsp-name[title]")) {
+                  element.parent().attr("title", ` ${translation}`);
+                }
               }
-              element.text(translation); // Fallback if no direct text node
             }
-          }
-          // Add more conditions if other element types need updates
-        });
-        // Update search pane titles and buttons specifically if they exist
+          });
+        }
+
         const searchPanesContainer = dataTable.searchPanes.container();
         if (searchPanesContainer && $(searchPanesContainer).length) {
-          updateFilterTranslations(); // Reuse function from i18n.js if available globally or redefine needed parts
+          updateFilterTranslations();
         }
       });
     }

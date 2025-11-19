@@ -42,6 +42,8 @@
             </div>
         </div>
     </div>
+    {% set base_flags_url = url_for('static', filename='img/flags') %}
+    <input type="hidden" id="base_flags_url" value="{{ base_flags_url }}" />
     {% if not is_used %}
         <div class="d-flex align-items-center justify-content-center">
             <div class="text-center text-primary">
@@ -169,7 +171,7 @@
                                         {% endif %}
                                         <div id="table-{{ key.replace('_', '-') }}-types" class="visually-hidden">{{ value.get('types', {}) |tojson }}</div>
                                         <div class="card table-responsive text-nowrap">
-                                            <table id="table-{{ key.replace('_', '-') }}" class="table w-100 d-none">
+                                            <table id="table-{{ key.replace('_', '-') }}" class="table w-100 d-none" data-table-key="{{ key }}">
                                                 <thead>
                                                     <tr>
                                                         {% set ns_list = namespace(size=0) %}
@@ -184,9 +186,16 @@
                                                     {% for n in range(ns_list.size) %}
                                                         <tr>
                                                             {% for val_key, items in value['data'].items() %}
-                                                                <td>
-                                                                    {{ items[n]|trim if n < items|length else '' }}
-                                                                </td>
+                                                                {% set cell_value = items[n]|trim if n < items|length else '' %}
+                                                                {% if val_key|lower == 'date' %}
+                                                                    <td class="date-field" data-date-iso="{{ cell_value }}">
+                                                                        {{ cell_value }}
+                                                                    </td>
+                                                                {% else %}
+                                                                    <td>
+                                                                        {{ cell_value }}
+                                                                    </td>
+                                                                {% endif %}
                                                             {% endfor %}
                                                         </tr>
                                                     {% endfor %}
