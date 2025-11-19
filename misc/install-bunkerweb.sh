@@ -368,6 +368,25 @@ check_supported_os() {
     esac
 }
 
+# Function to check for port conflicts
+check_ports() {
+    if [[ "$INSTALL_TYPE" == "full" || "$INSTALL_TYPE" == "worker" || -z "$INSTALL_TYPE" ]]; then
+        if command -v ss >/dev/null 2>&1; then
+            if ss -tulpn | grep -E ":(80|443)\s" >/dev/null 2>&1; then
+                print_warning "Port 80 or 443 appears to be in use."
+                print_warning "Common conflict: Apache/httpd running."
+                print_warning "Please stop conflicting services before proceeding."
+                if [ "$INTERACTIVE_MODE" = "yes" ]; then
+                    read -p "Continue anyway? (y/N): " -r
+                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                        exit 1
+                    fi
+                fi
+            fi
+        fi
+    fi
+}
+
 # Function to install NGINX on Debian/Ubuntu
 install_nginx_debian() {
     print_step "Installing NGINX on Debian/Ubuntu"
@@ -500,13 +519,8 @@ install_bunkerweb_rpm() {
     run_cmd bash /tmp/bunkerweb-repo.sh
     run_cmd rm -f /tmp/bunkerweb-repo.sh
 
-    if [ "$DISTRO_ID" = "fedora" ]; then
-        run_cmd dnf makecache
-        run_cmd dnf install -y --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
-    else
-        dnf check-update || true  # Don't fail if no updates available
-        run_cmd dnf install -y --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
-    fi
+    run_cmd dnf makecache
+    run_cmd dnf install -y "bunkerweb-$BUNKERWEB_VERSION"
 
     # Lock BunkerWeb version
     run_cmd dnf versionlock add bunkerweb
@@ -1019,7 +1033,7 @@ upgrade_only() {
             else
                 dnf check-update || true
             fi
-            run_cmd dnf install -y --allowerasing --allow-downgrades "bunkerweb-$BUNKERWEB_VERSION"
+            run_cmd dnf install -y --allowerasing "bunkerweb-$BUNKERWEB_VERSION"
             run_cmd dnf versionlock add bunkerweb nginx
             ;;
     esac
@@ -1051,6 +1065,9 @@ main() {
 
     # Ask user preferences in interactive mode
     ask_user_preferences
+
+    # Check for port conflicts after knowing the install type
+    check_ports
 
     if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
         # Use a temporary file to pass the setting to the postinstall script
