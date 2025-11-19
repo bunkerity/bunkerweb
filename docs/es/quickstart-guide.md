@@ -65,6 +65,14 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     !!! danger "Aviso de seguridad"
         Verifica siempre la integridad del script con la suma de comprobación proporcionada antes de ejecutarlo.
 
+    #### Aspectos destacados del Easy Install
+
+    - Detecta tu distribución de Linux y la arquitectura de CPU por adelantado y avisa si estás fuera de la matriz soportada antes de aplicar cambios.
+    - El flujo interactivo permite elegir el perfil de instalación (full stack, manager, worker, etc.); el modo manager expone siempre la API en `0.0.0.0`, deshabilita el asistente y solicita la IP a incluir en la lista blanca (proporciónala con `--manager-ip` en ejecuciones no interactivas), mientras que el modo worker exige las IP del manager para su lista blanca.
+    - Las instalaciones de tipo Manager pueden decidir si el servicio Web UI debe iniciarse, aunque el asistente permanezca deshabilitado.
+    - El resumen indica si el servicio FastAPI se ejecutará, de modo que puedas activarlo o desactivarlo conscientemente mediante `--api` / `--no-api`.
+    - Las opciones de CrowdSec solo están disponibles para instalaciones full stack; los modos manager/worker las omiten automáticamente para centrarse en el control remoto.
+
     Para métodos de instalación avanzados (gestor de paquetes, tipos de instalación, indicadores no interactivos, integración con CrowdSec, etc.), consulta la [Integración con Linux](integrations.md#linux).
 
 === "Docker"

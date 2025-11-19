@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.6 - ????/??/??
+
+- [LINUX] Enhance Easy Install script with manager and worker mode configurations
+
 ## v1.6.6-rc3 - ????/??/??
 
 - [BUGFIX] Fix `Let's Encrypt` wildcard certificate serving when using `wildcard` mode in multisite setups and the root domain is a part of the `SERVER_NAME` setting of the service.

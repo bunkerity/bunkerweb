@@ -114,6 +114,12 @@
         * El modo de actualización evita intencionadamente reinstalar o degradar NGINX fuera de la versión anclada compatible ya presente.
         * Los registros para la solución de problemas permanecen en `/var/log/bunkerweb/`.
 
+    * **Comportamiento según el modo**:
+
+        - El instalador reutiliza la misma lógica de selección durante la actualización: el modo manager mantiene el asistente deshabilitado, vincula la API a `0.0.0.0` y sigue exigiendo una IP para la lista blanca (proporciónala con `--manager-ip` en ejecuciones no interactivas), mientras que el modo worker continúa obligando a indicar las IP del manager.
+        - Las actualizaciones del manager pueden decidir si se inicia el servicio Web UI, y el resumen indica explícitamente el estado del servicio API para que puedas controlarlo con `--api` / `--no-api`.
+        - Las opciones de CrowdSec siguen limitadas a las actualizaciones full stack, y el script continúa validando el sistema operativo y la arquitectura de CPU antes de modificar paquetes; las combinaciones no soportadas siguen requiriendo `--force`.
+
         Resumen de la reversión:
 
         * Usa el directorio de copia de seguridad generado (o tu copia de seguridad manual) + los pasos en la sección de Reversión para restaurar la base de datos, luego reinstala la versión anterior de la imagen/paquete y vuelve a bloquear los paquetes.

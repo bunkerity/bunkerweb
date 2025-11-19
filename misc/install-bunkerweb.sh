@@ -25,9 +25,12 @@ CROWDSEC_INSTALL="no"
 CROWDSEC_APPSEC_INSTALL="no"
 INSTALL_TYPE=""
 BUNKERWEB_INSTANCES_INPUT=""
+MANAGER_IP_INPUT=""
+MANAGER_UI_START=""
 UPGRADE_SCENARIO="no"
 BACKUP_DIRECTORY=""
 AUTO_BACKUP="yes"
+SYSTEM_ARCH=""
 
 # Function to print colored output
 print_status() {
@@ -146,8 +149,81 @@ ask_user_preferences() {
             fi
         fi
 
+        if [ "$INSTALL_TYPE" = "manager" ] && [ -z "$MANAGER_IP_INPUT" ]; then
+            local detected_ip=""
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🌐 Manager API Binding${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "The manager listens on 0.0.0.0 but only whitelists explicit local IPs for API access."
+            echo "We'll detect the best local IPv4 to whitelist, or you can provide one manually."
+            echo
+            detected_ip=$(get_primary_ipv4)
+            if [ -n "$detected_ip" ]; then
+                while true; do
+                    echo -e "${YELLOW}Whitelist detected IP $detected_ip for API access? (Y/n):${NC}"
+                    read -p "" -r
+                    case $REPLY in
+                        [Yy]*|"")
+                            MANAGER_IP_INPUT="$detected_ip"
+                            break
+                            ;;
+                        [Nn]*)
+                            echo
+                            echo -e "${BLUE}----------------------------------------${NC}"
+                            echo -e "${BLUE}✍️  Manual Manager IP Entry${NC}"
+                            echo -e "${BLUE}----------------------------------------${NC}"
+                            echo "Enter the IPv4 address you want to whitelist for manager API access."
+                            prompt_for_local_ipv4 MANAGER_IP_INPUT
+                            break
+                            ;;
+                        *)
+                            echo "Please answer yes (y) or no (n)."
+                            ;;
+                    esac
+                done
+            else
+                print_warning "Unable to detect a local IPv4 automatically."
+                echo -e "${BLUE}----------------------------------------${NC}"
+                echo -e "${BLUE}✍️  Manual Manager IP Entry${NC}"
+                echo -e "${BLUE}----------------------------------------${NC}"
+                echo "Enter the IPv4 address you want to whitelist for manager API access."
+                prompt_for_local_ipv4 MANAGER_IP_INPUT
+            fi
+        fi
+
+        if [ "$INSTALL_TYPE" = "worker" ] && [ -z "$MANAGER_IP_INPUT" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🛡️  Manager API Access${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "Provide the IP address (or space-separated list) of the manager/scheduler that will control this worker."
+            echo "The worker API listens on 0.0.0.0, and these IPs will be whitelisted automatically."
+            echo
+            while true; do
+                echo -e "${YELLOW}Enter manager IP address(es):${NC} "
+                read -p "" -r MANAGER_IP_INPUT
+                if [ -n "$MANAGER_IP_INPUT" ]; then
+                    break
+                else
+                    print_warning "This field cannot be empty for Worker installations."
+                fi
+            done
+        fi
+
         # Ask about setup wizard
-        if [ -z "$ENABLE_WIZARD" ]; then
+        if [ "$INSTALL_TYPE" = "manager" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🧙 Setup Wizard Not Available${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            if [ "$ENABLE_WIZARD" = "yes" ]; then
+                print_warning "Setup wizard cannot be enabled for manager mode; it will be disabled."
+            fi
+            echo "Manager installations are not compatible with the setup wizard."
+            echo "The UI can still be started normally without the wizard."
+            ENABLE_WIZARD="no"
+        elif [ -z "$ENABLE_WIZARD" ]; then
             if [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "scheduler" ]; then
                 ENABLE_WIZARD="no"
             else
@@ -180,8 +256,34 @@ ask_user_preferences() {
             fi
         fi
 
+        if [ "$INSTALL_TYPE" = "manager" ] && [ -z "$MANAGER_UI_START" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🖥  Manager Web UI${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "The setup wizard is disabled, but you can still start the Web UI service."
+            echo "Do you want the Web UI to run after installation?"
+            while true; do
+                echo -e "${YELLOW}Start the Web UI service? (Y/n):${NC} "
+                read -p "" -r
+                case $REPLY in
+                    [Nn]*)
+                        MANAGER_UI_START="no"
+                        break
+                        ;;
+                    [Yy]*|"")
+                        MANAGER_UI_START="yes"
+                        break
+                        ;;
+                    *)
+                        echo "Please answer yes (y) or no (n)."
+                        ;;
+                esac
+            done
+        fi
+
         # Ask about CrowdSec installation
-        if [ "$INSTALL_TYPE" != "worker" ] && [ "$INSTALL_TYPE" != "scheduler" ] && [ "$INSTALL_TYPE" != "ui" ]; then
+        if [[ "$INSTALL_TYPE" != "worker" && "$INSTALL_TYPE" != "scheduler" && "$INSTALL_TYPE" != "ui" && "$INSTALL_TYPE" != "manager" ]]; then
             if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
                 echo
                 echo -e "${BLUE}========================================${NC}"
@@ -275,17 +377,35 @@ ask_user_preferences() {
         if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
             echo "  🔗 BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
         fi
-        echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
-        echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
-        echo "  🟢 NGINX version: $NGINX_VERSION"
-        if [ "$CROWDSEC_INSTALL" = "yes" ]; then
-            if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
-                echo "  🦙 CrowdSec: Will be installed (with AppSec Component)"
-            else
-                echo "  🦙 CrowdSec: Will be installed (without AppSec Component)"
-            fi
+        if [ -n "$MANAGER_IP_INPUT" ]; then
+            echo "  📡 Manager API whitelist: $MANAGER_IP_INPUT"
+        fi
+        if [ "$INSTALL_TYPE" = "manager" ]; then
+            echo "  🖥 Web UI service: $([ "${MANAGER_UI_START:-yes}" = "no" ] && echo "Disabled" || echo "Enabled")"
+            echo "  🧙 Setup wizard: Disabled (not supported in manager mode)"
         else
-            echo "  🦙 CrowdSec: Not installed"
+            echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
+        fi
+        if [ "${SERVICE_API:-no}" = "yes" ]; then
+            echo "  🔌 API service: Enabled"
+        else
+            echo "  🔌 API service: Disabled"
+        fi
+        echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
+        echo "  ⚙️ Architecture: ${SYSTEM_ARCH:-unknown}"
+        echo "  🟢 NGINX version: $NGINX_VERSION"
+        if [ "$INSTALL_TYPE" = "manager" ] || [ "$INSTALL_TYPE" = "worker" ]; then
+            echo "  🦙 CrowdSec: Not available for this mode"
+        else
+            if [ "$CROWDSEC_INSTALL" = "yes" ]; then
+                if [ "$CROWDSEC_APPSEC_INSTALL" = "yes" ]; then
+                    echo "  🦙 CrowdSec: Will be installed (with AppSec Component)"
+                else
+                    echo "  🦙 CrowdSec: Will be installed (without AppSec Component)"
+                fi
+            else
+                echo "  🦙 CrowdSec: Not installed"
+            fi
         fi
         echo
     fi
@@ -384,6 +504,220 @@ check_ports() {
                 fi
             fi
         fi
+    fi
+}
+
+# Check if provided IPv4 belongs to a private (LAN) range
+is_private_ipv4() {
+    local ip="$1"
+    local o1 o2 _o3 _o4
+
+    if [[ ! $ip =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+        return 1
+    fi
+
+    IFS='.' read -r o1 o2 _o3 _o4 <<< "$ip"
+
+    if [ "$o1" -eq 10 ]; then
+        return 0
+    elif [ "$o1" -eq 172 ] && [ "$o2" -ge 16 ] && [ "$o2" -le 31 ]; then
+        return 0
+    elif [ "$o1" -eq 192 ] && [ "$o2" -eq 168 ]; then
+        return 0
+    fi
+
+    return 1
+}
+
+# Extract the first IPv4 address from a whitespace-separated list
+extract_first_ipv4() {
+    local input="$1"
+    local token
+
+    for token in $input; do
+        if [[ $token =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+            echo "$token"
+            return 0
+        fi
+    done
+
+    echo ""
+    return 1
+}
+
+# Prompt interactively for a local IPv4 address
+prompt_for_local_ipv4() {
+    local -n __target_var="$1"
+    local answer=""
+    local ip=""
+
+    while true; do
+        echo -e "${YELLOW}Enter the local IPv4 address to use:${NC} "
+        read -p "" -r answer
+        ip=$(extract_first_ipv4 "$answer")
+        if [ -n "$ip" ]; then
+            __target_var="$ip"
+            return 0
+        fi
+        print_warning "Invalid IPv4 address. Please try again."
+    done
+}
+
+# Function to determine the primary IPv4 address of the current host using only
+# locally available routing/interface information (no external queries)
+get_primary_ipv4() {
+    local primary_ip=""
+    local route_output=""
+    local host_output=""
+    local addr_output=""
+    local prev=""
+    local token=""
+    local line=""
+    local candidate=""
+
+    if command -v ip >/dev/null 2>&1; then
+        route_output=$(ip -4 route show default 2>/dev/null || true)
+        if [ -z "$route_output" ]; then
+            route_output=$(ip route show default 2>/dev/null || true)
+        fi
+        if [ -n "$route_output" ]; then
+            for token in $route_output; do
+                if [ "$prev" = "src" ]; then
+                    candidate="$token"
+                    if is_private_ipv4 "$candidate"; then
+                        primary_ip="$candidate"
+                        break
+                    fi
+                fi
+                prev="$token"
+            done
+        fi
+    fi
+
+    if [ -z "$primary_ip" ] && command -v hostname >/dev/null 2>&1; then
+        host_output=$(hostname -I 2>/dev/null || true)
+        if [ -n "$host_output" ]; then
+            for token in $host_output; do
+                if [[ $token =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && is_private_ipv4 "$token"; then
+                    primary_ip="$token"
+                    break
+                fi
+            done
+        fi
+    fi
+
+    if [ -z "$primary_ip" ] && command -v ip >/dev/null 2>&1; then
+        addr_output=$(ip -4 addr show scope global 2>/dev/null || true)
+        if [ -n "$addr_output" ]; then
+            while IFS= read -r line; do
+                case "$line" in
+                    *inet\ *)
+                        line=${line#*inet }
+                        candidate=${line%%/*}
+                        if [[ $candidate =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && is_private_ipv4 "$candidate"; then
+                            primary_ip="$candidate"
+                            break
+                        fi
+                        ;;
+                esac
+            done <<< "$addr_output"
+        fi
+    fi
+
+    echo "$primary_ip"
+}
+
+# Ensure manager installations expose the API and only whitelist the local host IP
+configure_manager_api_defaults() {
+    local config_file="/etc/bunkerweb/variables.env"
+    local whitelist_ip
+    local provided_ip
+
+    provided_ip=$(extract_first_ipv4 "$MANAGER_IP_INPUT")
+
+    if [ -n "$provided_ip" ]; then
+        whitelist_ip="$provided_ip"
+    else
+        whitelist_ip=$(get_primary_ipv4)
+    fi
+
+    if [ -z "$whitelist_ip" ]; then
+        if [ "$INTERACTIVE_MODE" = "yes" ]; then
+            print_warning "Unable to detect a local network IP automatically."
+            prompt_for_local_ipv4 whitelist_ip
+            MANAGER_IP_INPUT="$whitelist_ip"
+        else
+            print_error "Unable to detect a local network IP. Provide it with --manager-ip <IP>."
+            exit 1
+        fi
+    fi
+
+    if [ -z "$provided_ip" ]; then
+        MANAGER_IP_INPUT="$whitelist_ip"
+    fi
+
+    print_status "Applying manager API defaults (listen on 0.0.0.0, whitelist local IP $whitelist_ip)"
+
+    if [ ! -d /etc/bunkerweb ]; then
+        mkdir -p /etc/bunkerweb
+    fi
+
+    if [ ! -f "$config_file" ]; then
+        touch "$config_file"
+    fi
+
+    chown root:nginx "$config_file" 2>/dev/null || true
+    chmod 660 "$config_file" 2>/dev/null || true
+
+    if grep -q "^API_LISTEN_IP=" "$config_file"; then
+        sed -i 's|^API_LISTEN_IP=.*|API_LISTEN_IP=0.0.0.0|' "$config_file"
+    else
+        echo "API_LISTEN_IP=0.0.0.0" >> "$config_file"
+    fi
+
+    if grep -q "^API_WHITELIST_IP=" "$config_file"; then
+        sed -i "s|^API_WHITELIST_IP=.*|API_WHITELIST_IP=$whitelist_ip|" "$config_file"
+    else
+        echo "API_WHITELIST_IP=$whitelist_ip" >> "$config_file"
+    fi
+}
+
+# Ensure worker installations whitelist the selected manager/scheduler IPs
+configure_worker_api_whitelist() {
+    local config_file="/etc/bunkerweb/variables.env"
+    local whitelist_value
+
+    if [ -z "$MANAGER_IP_INPUT" ]; then
+        print_warning "Manager IP not provided; please whitelist it manually in $config_file."
+        return
+    fi
+
+    whitelist_value="127.0.0.0/8 $MANAGER_IP_INPUT"
+    whitelist_value=$(printf '%s\n' "$whitelist_value" | xargs)
+
+    print_status "Applying worker API whitelist: $whitelist_value"
+
+    if [ ! -d /etc/bunkerweb ]; then
+        mkdir -p /etc/bunkerweb
+    fi
+
+    if [ ! -f "$config_file" ]; then
+        touch "$config_file"
+    fi
+
+    chown root:nginx "$config_file" 2>/dev/null || true
+    chmod 660 "$config_file" 2>/dev/null || true
+
+    if grep -q "^API_LISTEN_IP=" "$config_file"; then
+        sed -i 's|^API_LISTEN_IP=.*|API_LISTEN_IP=0.0.0.0|' "$config_file"
+    else
+        echo "API_LISTEN_IP=0.0.0.0" >> "$config_file"
+    fi
+
+    if grep -q "^API_WHITELIST_IP=" "$config_file"; then
+        sed -i "s|^API_WHITELIST_IP=.*|API_WHITELIST_IP=$whitelist_value|" "$config_file"
+    else
+        echo "API_WHITELIST_IP=$whitelist_value" >> "$config_file"
     fi
 }
 
@@ -749,6 +1083,7 @@ usage() {
     echo "Advanced options:"
     echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
     echo "                           (required for --manager and --scheduler-only)"
+    echo "  --manager-ip IPs         Manager/Scheduler IPs to whitelist (required for --worker in non-interactive mode, overrides auto-detect for --manager)"
     echo "  --backup-dir PATH        Directory to store automatic backup before upgrade"
     echo "  --no-auto-backup         Skip automatic backup (you MUST have done it manually)"
     echo
@@ -837,6 +1172,10 @@ while [[ $# -gt 0 ]]; do
             BUNKERWEB_INSTANCES_INPUT="$2"
             shift 2
             ;;
+        --manager-ip)
+            MANAGER_IP_INPUT="$2"
+            shift 2
+            ;;
         --api|--enable-api)
             SERVICE_API=yes
             shift
@@ -873,6 +1212,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Force wizard off for manager installations
+if [ "$INSTALL_TYPE" = "manager" ]; then
+    if [ "$ENABLE_WIZARD" = "yes" ]; then
+        print_warning "Setup wizard cannot run in manager mode; disabling it."
+    fi
+    ENABLE_WIZARD="no"
+fi
+
 # Validate instances option usage
 if [ -n "$BUNKERWEB_INSTANCES_INPUT" ] && [[ "$INSTALL_TYPE" != "manager" && "$INSTALL_TYPE" != "scheduler" ]]; then
     print_error "The --instances option can only be used with --manager or --scheduler-only installation types"
@@ -886,9 +1233,15 @@ if [ "$INTERACTIVE_MODE" = "no" ] && [[ "$INSTALL_TYPE" = "manager" || "$INSTALL
     exit 1
 fi
 
+if [ "$INTERACTIVE_MODE" = "no" ] && [ "$INSTALL_TYPE" = "worker" ] && [ -z "$MANAGER_IP_INPUT" ]; then
+    print_error "The --manager-ip option is required when using --worker in non-interactive mode"
+    print_error "Example: --worker --manager-ip 10.20.30.40"
+    exit 1
+fi
+
 # Validate CrowdSec options usage
-if [[ "$CROWDSEC_INSTALL" = "yes" || "$CROWDSEC_APPSEC_INSTALL" = "yes" ]] && [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" ]]; then
-    print_error "CrowdSec options (--crowdsec, --crowdsec-appsec) can only be used with --full or --manager installation types"
+if [[ "$CROWDSEC_INSTALL" = "yes" || "$CROWDSEC_APPSEC_INSTALL" = "yes" ]] && [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" || "$INSTALL_TYPE" = "manager" ]]; then
+    print_error "CrowdSec options (--crowdsec, --crowdsec-appsec) can only be used with --full installation type"
     exit 1
 fi
 
@@ -1051,6 +1404,7 @@ main() {
     # Preliminary checks
     check_root
     detect_os
+    detect_architecture
     check_supported_os
     # New: check if already installed (after OS detection)
     check_existing_installation
@@ -1082,27 +1436,25 @@ main() {
     # Set environment variables based on installation type
     case "$INSTALL_TYPE" in
         "manager")
-            print_status "Installation Type: Manager"
             export MANAGER_MODE=yes
+            if [ "${MANAGER_UI_START:-yes}" = "no" ]; then
+                export SERVICE_UI=no
+            fi
             ;;
         "worker")
-            print_status "Installation Type: Worker"
             export WORKER_MODE=yes
             ;;
         "scheduler")
-            print_status "Installation Type: Scheduler only"
             export SERVICE_BUNKERWEB=no
             export SERVICE_SCHEDULER=yes
             export SERVICE_UI=no
             ;;
         "ui")
-            print_status "Installation Type: Web UI only"
             export SERVICE_BUNKERWEB=no
             export SERVICE_SCHEDULER=no
             export SERVICE_UI=yes
             ;;
         "full"|"")
-            print_status "Installation Type: Full Stack"
             ;;
     esac
 
@@ -1112,7 +1464,6 @@ main() {
     fi
 
     print_status "Installing BunkerWeb $BUNKERWEB_VERSION"
-    print_status "Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
     echo
 
     # Confirmation prompt in interactive mode
@@ -1186,6 +1537,12 @@ main() {
             ;;
     esac
 
+    if [ "$INSTALL_TYPE" = "manager" ]; then
+        configure_manager_api_defaults
+    elif [ "$INSTALL_TYPE" = "worker" ]; then
+        configure_worker_api_whitelist
+    fi
+
     if [ "$CROWDSEC_INSTALL" = "yes" ]; then
         run_cmd systemctl restart crowdsec
         sleep 2
@@ -1198,3 +1555,32 @@ main() {
 
 # Run main function
 main "$@"
+# Function to detect system architecture and warn for unsupported combinations
+detect_architecture() {
+    SYSTEM_ARCH=$(uname -m 2>/dev/null || echo "unknown")
+    NORMALIZED_ARCH="$SYSTEM_ARCH"
+    case "$SYSTEM_ARCH" in
+        x86_64|amd64)
+            NORMALIZED_ARCH="amd64"
+            ;;
+        aarch64|arm64)
+            NORMALIZED_ARCH="arm64"
+            ;;
+        armv7l|armhf)
+            NORMALIZED_ARCH="armhf"
+            ;;
+        unknown)
+            print_warning "Unable to detect system architecture."
+            ;;
+        *)
+            print_warning "Architecture $SYSTEM_ARCH has not been validated with the easy install script."
+            if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
+                read -p "Continue anyway? (y/N): " -r
+                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    exit 1
+                fi
+            fi
+            ;;
+    esac
+    export NORMALIZED_ARCH
+}

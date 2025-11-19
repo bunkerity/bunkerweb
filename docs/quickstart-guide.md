@@ -65,6 +65,14 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3
     !!! danger "Security Notice"
         Always verify the script integrity with the provided checksum before executing it.
 
+    #### Easy Install Highlights
+
+    - Detects your Linux distribution and CPU architecture up front and warns if you are outside the supported matrix before making any change.
+    - The interactive flow lets you pick the installation profile (full stack, manager, worker, etc.); manager mode always exposes the API on `0.0.0.0`, disables the setup wizard, and asks for the whitelist IP (pass it with `--manager-ip` for non-interactive runs), while worker mode requires the manager IPs for its whitelist.
+    - Manager installations can still decide whether the Web UI service should start even though the wizard remains disabled.
+    - The summary now shows whether the FastAPI service will run so you can intentionally enable or disable it with `--api` / `--no-api`.
+    - CrowdSec options are only available for full-stack installs; manager/worker modes skip them automatically so the workflow stays focused on remote control.
+
     For advanced installation methods (package manager, installation types, non-interactive flags, CrowdSec integration, etc.), see the [Linux Integration](integrations.md#linux).
 
 === "Docker"

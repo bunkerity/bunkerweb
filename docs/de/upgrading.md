@@ -114,6 +114,12 @@
         * Der Upgrade-Modus vermeidet absichtlich die Neuinstallation oder das Downgrade von NGINX außerhalb der unterstützten fixierten Version, die bereits vorhanden ist.
         * Protokolle zur Fehlerbehebung bleiben in `/var/log/bunkerweb/`.
 
+    * **Verhaltensweisen je nach Installationsmodus**:
+
+        - Das Skript verwendet beim Upgrade dieselbe Logik zur Auswahl des Installationstyps: Im Manager-Modus bleibt der Setup-Assistent deaktiviert, die API wird an `0.0.0.0` gebunden und eine freizuschaltende IP ist weiterhin erforderlich (für unbeaufsichtigte Abläufe per `--manager-ip` angeben), während der Worker-Modus die Manager-IP-Liste strikt erzwingt.
+        - Manager-Upgrades können festlegen, ob der Web-UI-Dienst gestartet wird, und die Zusammenfassung weist aus, ob der API-Dienst aktiviert wird, sodass Sie ihn gezielt mit `--api` / `--no-api` steuern können.
+        - CrowdSec-Optionen bleiben ausschließlich Full-Stack-Upgrades vorbehalten, und das Skript prüft weiterhin Betriebssystem und CPU-Architektur, bevor Pakete verändert werden; nicht unterstützte Kombinationen erfordern nach wie vor `--force`.
+
         Zusammenfassung des Rollbacks:
 
         * Verwenden Sie das generierte Sicherungsverzeichnis (oder Ihre manuelle Sicherung) + die Schritte im Rollback-Abschnitt, um die DB wiederherzustellen, installieren Sie dann die vorherige Image-/Paketversion neu und sperren Sie die Pakete erneut.

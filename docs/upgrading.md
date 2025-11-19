@@ -114,6 +114,12 @@
         * Upgrade mode intentionally avoids reinstalling or downgrading NGINX outside the supported pinned version already present.
         * Logs for troubleshooting remain in `/var/log/bunkerweb/`.
 
+    * **Mode-aware behavior**:
+
+        - The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the API to `0.0.0.0`, and requires a whitelist IP (pass `--manager-ip` for unattended runs), while worker mode still enforces the manager IP list.
+        - Manager upgrades can opt to start or skip the Web UI service, and the summary explicitly reports the API service state so you can decide whether to enable it via `--api` / `--no-api`.
+        - CrowdSec options remain limited to full-stack upgrades, and the script continues to validate both the operating system and CPU architecture before touching packages, gating unsupported combinations behind `--force`.
+
         Rollback summary:
 
         * Use the generated backup directory (or your manual backup) + the steps in the Rollback section to restore DB, then reinstall the previous image / package version and re‑lock packages.

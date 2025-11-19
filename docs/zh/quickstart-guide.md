@@ -65,6 +65,14 @@
     !!! danger "安全提示"
         在执行脚本之前，请务必使用提供的校验和验证脚本的完整性。
 
+    #### Easy Install 亮点
+
+    - 在更改系统之前，会预先检测您的 Linux 发行版和 CPU 架构，并在超出支持矩阵时发出警告。
+    - 交互式流程允许选择安装配置（全栈、manager、worker 等）；manager 模式始终将 API 绑定到 `0.0.0.0`、禁用设置向导并要求提供白名单 IP（非交互式运行可通过 `--manager-ip` 传入），而 worker 模式会强制收集 manager IP 以填充其白名单。
+    - 即使向导被禁用，Manager 安装仍可决定是否启动 Web UI 服务。
+    - 汇总信息会显示 FastAPI 服务是否会启动，便于使用 `--api` / `--no-api` 明确启用或禁用它。
+    - CrowdSec 选项仅适用于全栈安装；manager / worker 模式会自动跳过它们，以专注于远程控制。
+
     有关高级安装方法（包管理器、安装类型、非交互式标志、CrowdSec 集成等），请参阅[Linux 集成](integrations.md#linux)。
 
 === "Docker"

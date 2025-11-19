@@ -114,6 +114,12 @@
         * Le mode de mise à niveau évite intentionnellement de réinstaller ou de rétrograder NGINX en dehors de la version épinglée prise en charge déjà présente.
         * Les journaux de dépannage restent dans `/var/log/bunkerweb/`.
 
+    * **Comportement selon le mode** :
+
+        - Le programme d'installation réutilise la même logique de sélection de mode pendant une mise à jour : le mode manager garde l'assistant désactivé, attache l'API à `0.0.0.0` et exige une IP à placer sur liste blanche (à fournir avec `--manager-ip` pour les exécutions non interactives), tandis que le mode worker impose toujours la liste d'IP du manager.
+        - Les mises à jour Manager peuvent décider de démarrer ou non le service Web UI, et le récapitulatif mentionne explicitement l'état du service API afin de pouvoir le contrôler via `--api` / `--no-api`.
+        - Les options CrowdSec restent réservées aux mises à jour full stack et le script continue de valider le système d'exploitation et l'architecture CPU avant de toucher aux paquets, les combinaisons non prises en charge nécessitant toujours `--force`.
+
         Résumé du retour en arrière :
 
         * Utilisez le répertoire de sauvegarde généré (ou votre sauvegarde manuelle) + les étapes de la section Rollback pour restaurer la base de données, puis réinstallez la version précédente de l'image/du paquet et verrouillez à nouveau les paquets.

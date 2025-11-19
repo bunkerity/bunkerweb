@@ -65,6 +65,14 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examp
     !!! danger "Sicherheitshinweis"
         Überprüfen Sie immer die Integrität des Skripts mit der bereitgestellten Prüfsumme, bevor Sie es ausführen.
 
+    #### Highlights des Easy-Install-Skripts
+
+    - Erkennt Ihre Linux-Distribution und CPU-Architektur im Voraus und warnt, wenn Sie sich außerhalb der unterstützten Matrix befinden, bevor Änderungen vorgenommen werden.
+    - Der interaktive Ablauf lässt Sie das Installationsprofil auswählen (Full Stack, Manager, Worker usw.); im Manager-Modus wird die API immer auf `0.0.0.0` gebunden, der Setup-Assistent deaktiviert und nach der freizuschaltenden IP gefragt (in nicht-interaktiven Läufen per `--manager-ip` übergeben), während der Worker-Modus die Manager-IP(s) für seine Whitelist erzwingt.
+    - Manager-Installationen können weiterhin entscheiden, ob der Web-UI-Dienst gestartet werden soll, obwohl der Assistent deaktiviert bleibt.
+    - Die Zusammenfassung zeigt an, ob der FastAPI-Dienst gestartet wird, sodass Sie ihn bewusst mit `--api` / `--no-api` aktivieren oder deaktivieren können.
+    - CrowdSec-Optionen stehen nur für Full-Stack-Installationen zur Verfügung; Manager-/Worker-Modi überspringen sie automatisch, damit sich der Ablauf auf die Fernverwaltung konzentriert.
+
     Weitere Installationsmethoden (Paketmanager, Installationstypen, nicht-interaktive Flags, CrowdSec-Integration usw.) finden Sie unter [Linux-Integration](integrations.md#linux).
 
 === "Docker"

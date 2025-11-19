@@ -65,6 +65,14 @@ Consultez le [dossier examples](https://github.com/bunkerity/bunkerweb/tree/v1.6
     !!! danger "Avis de sécurité"
         Vérifiez toujours l'intégrité du script avec la somme de contrôle fournie avant de l'exécuter.
 
+    #### Points forts d'Easy Install
+
+    - Détecte votre distribution Linux et l'architecture CPU en amont et avertit si vous sortez de la matrice supportée avant toute modification.
+    - Le flux interactif vous laisse choisir le profil d'installation (full stack, manager, worker, etc.) ; le mode manager expose toujours l'API sur `0.0.0.0`, désactive l'assistant et demande l'IP à autoriser (passez-la avec `--manager-ip` en mode non interactif), tandis que le mode worker exige les IP du manager pour sa liste blanche.
+    - Les installations Manager peuvent toujours décider si le service Web UI doit démarrer, même si l'assistant reste désactivé.
+    - Le récapitulatif indique si le service FastAPI sera lancé, ce qui vous permet de l'activer ou de le désactiver volontairement via `--api` / `--no-api`.
+    - Les options CrowdSec ne sont disponibles que pour les installations full stack ; les modes manager/worker les ignorent automatiquement pour se concentrer sur le pilotage distant.
+
     Pour des méthodes d'installation avancées (gestionnaire de paquets, types d'installation, options non interactives, intégration CrowdSec, etc.), consultez l'[intégration Linux](integrations.md#linux).
 
 === "Docker"
