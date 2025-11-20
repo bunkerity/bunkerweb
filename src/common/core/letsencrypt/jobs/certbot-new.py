@@ -45,6 +45,7 @@ from letsencrypt_providers import (
     NSOneProvider,
     OvhProvider,
     Provider,
+    PowerdnsProvider
     Rfc2136Provider,
     Route53Provider,
     SakuraCloudProvider,
@@ -87,6 +88,7 @@ PROVIDERS: Dict[str, Type[Provider]] = {
     "njalla": NjallaProvider,
     "nsone": NSOneProvider,
     "ovh": OvhProvider,
+    "powerdns": PowerdnsProvider,
     "rfc2136": Rfc2136Provider,
     "route53": Route53Provider,
     "sakuracloud": SakuraCloudProvider,

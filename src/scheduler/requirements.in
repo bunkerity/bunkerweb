@@ -23,6 +23,7 @@ certbot-dns-dynu==0.0.6.post2502111739272536
 certbot-dns-infomaniak==0.2.3
 certbot-dns-ionos==2024.11.9
 certbot-dns-njalla==2.0.2
+certbot-dns-pdns==0.1.1
 certbot-dns-scaleway==0.0.7
 
 cryptography==46.0.2
