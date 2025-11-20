@@ -682,8 +682,8 @@ docker build -t bw-ui -f src/ui/Dockerfile .
 
 ```bash
 # 下载脚本及其校验和
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
 
 # 验证校验和
 sha256sum -c install-bunkerweb.sh.sha256

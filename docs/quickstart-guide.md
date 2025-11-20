@@ -51,8 +51,8 @@ See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3
 
     ```bash
     # Download the script and its checksum
-    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
-    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
 
     # Verify the checksum
     sha256sum -c install-bunkerweb.sh.sha256

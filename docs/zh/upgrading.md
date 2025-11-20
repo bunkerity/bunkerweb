@@ -63,11 +63,11 @@
         ```bash
         LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | jq -r .tag_name)
 
-        # 下载脚本及其校验和
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        # Download the script and its checksum
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
 
-        # 验证校验和
+        # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
 
         # 如果检查成功，则运行脚本

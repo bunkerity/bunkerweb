@@ -63,16 +63,12 @@
         ```bash
         LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | jq -r .tag_name)
 
-        # Skript und Prüfsumme herunterladen
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        # Download the script and its checksum
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
 
-        # Prüfsumme überprüfen
+        # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
-
-        # Wenn die Überprüfung erfolgreich ist, Skript ausführen
-        chmod +x install-bunkerweb.sh
-        sudo ./install-bunkerweb.sh
         ```
 
         !!! danger "Sicherheitshinweis"

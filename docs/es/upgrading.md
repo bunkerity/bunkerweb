@@ -63,11 +63,11 @@
         ```bash
         LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | jq -r .tag_name)
 
-        # Descargar el script y su suma de verificación
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        # Download the script and its checksum
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
 
-        # Verificar la suma de verificación
+        # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
 
         # Si la verificación es exitosa, ejecuta el script

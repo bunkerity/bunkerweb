@@ -50,14 +50,13 @@ Consulta la [carpeta de ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1
     Usa el script de instalación fácil para configurar BunkerWeb en las distribuciones de Linux compatibles. Instala y configura automáticamente NGINX, añade el repositorio de BunkerWeb y configura los servicios necesarios.
 
     ```bash
-    # Descargar el script y su suma de comprobación
-    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
-    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
+    ```bash
+    # Download the script and its checksum
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
 
-    # Verificar la suma de comprobación
-    sha256sum -c install-bunkerweb.sh.sha256
-
-    # Si la comprobación es exitosa, ejecuta el script
+    # Verify the checksum
+    sha256sum -c install-bunkerweb.sh.sha256    # Si la comprobación es exitosa, ejecuta el script
     chmod +x install-bunkerweb.sh
     sudo ./install-bunkerweb.sh
     ```

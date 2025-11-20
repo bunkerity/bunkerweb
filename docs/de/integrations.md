@@ -682,8 +682,8 @@ Um zu beginnen, laden Sie das Installationsskript und seine Prüfsumme herunter 
 
 ```bash
 # Skript und Prüfsumme herunterladen
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
-wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
+curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
 
 # Prüfsumme überprüfen
 sha256sum -c install-bunkerweb.sh.sha256

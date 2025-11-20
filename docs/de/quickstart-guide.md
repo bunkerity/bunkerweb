@@ -51,8 +51,8 @@ Im [Beispielordner](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examp
 
     ```bash
     # Laden Sie das Skript und seine Prüfsumme herunter
-    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
-    wget https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh
+    curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/v1.6.6-rc3/install-bunkerweb.sh.sha256
 
     # Überprüfen Sie die Prüfsumme
     sha256sum -c install-bunkerweb.sh.sha256
