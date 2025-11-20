@@ -93,6 +93,36 @@ detect_os() {
     print_status "Detected OS: $DISTRO_ID $DISTRO_VERSION"
 }
 
+# Function to detect system architecture and warn for unsupported combinations
+detect_architecture() {
+    SYSTEM_ARCH=$(uname -m 2>/dev/null || echo "unknown")
+    NORMALIZED_ARCH="$SYSTEM_ARCH"
+    case "$SYSTEM_ARCH" in
+        x86_64|amd64)
+            NORMALIZED_ARCH="amd64"
+            ;;
+        aarch64|arm64)
+            NORMALIZED_ARCH="arm64"
+            ;;
+        armv7l|armhf)
+            NORMALIZED_ARCH="armhf"
+            ;;
+        unknown)
+            print_warning "Unable to detect system architecture."
+            ;;
+        *)
+            print_warning "Architecture $SYSTEM_ARCH has not been validated with the easy install script."
+            if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
+                read -p "Continue anyway? (y/N): " -r
+                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    exit 1
+                fi
+            fi
+            ;;
+    esac
+    export NORMALIZED_ARCH
+}
+
 # Function to ask user preferences
 ask_user_preferences() {
     if [ "$INTERACTIVE_MODE" = "yes" ]; then
@@ -111,9 +141,10 @@ ask_user_preferences() {
             echo "  3) Worker: Installs only the BunkerWeb instance, to be managed remotely."
             echo "  4) Scheduler Only: Installs only the Scheduler component."
             echo "  5) Web UI Only: Installs only the Web UI component."
+            echo "  6) API Only: Installs only the API service component."
             echo
             while true; do
-                echo -e "${YELLOW}Select installation type (1-5) [1]:${NC} "
+                echo -e "${YELLOW}Select installation type (1-6) [1]:${NC} "
                 read -p "" -r
                 REPLY=${REPLY:-1}
                 case $REPLY in
@@ -122,7 +153,8 @@ ask_user_preferences() {
                     3) INSTALL_TYPE="worker"; break ;;
                     4) INSTALL_TYPE="scheduler"; break ;;
                     5) INSTALL_TYPE="ui"; break ;;
-                    *) echo "Invalid option. Please choose a number between 1 and 5." ;;
+                    6) INSTALL_TYPE="api"; break ;;
+                    *) echo "Invalid option. Please choose a number between 1 and 6." ;;
                 esac
             done
         fi
@@ -224,7 +256,7 @@ ask_user_preferences() {
             echo "The UI can still be started normally without the wizard."
             ENABLE_WIZARD="no"
         elif [ -z "$ENABLE_WIZARD" ]; then
-            if [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "scheduler" ]; then
+            if [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "scheduler" ] || [ "$INSTALL_TYPE" = "api" ]; then
                 ENABLE_WIZARD="no"
             else
                 echo -e "${BLUE}========================================${NC}"
@@ -283,7 +315,7 @@ ask_user_preferences() {
         fi
 
         # Ask about CrowdSec installation
-        if [[ "$INSTALL_TYPE" != "worker" && "$INSTALL_TYPE" != "scheduler" && "$INSTALL_TYPE" != "ui" && "$INSTALL_TYPE" != "manager" ]]; then
+        if [[ "$INSTALL_TYPE" != "worker" && "$INSTALL_TYPE" != "scheduler" && "$INSTALL_TYPE" != "ui" && "$INSTALL_TYPE" != "manager" && "$INSTALL_TYPE" != "api" ]]; then
             if [ -z "$CROWDSEC_INSTALL" ] || [ "$CROWDSEC_INSTALL" = "no" ]; then
                 echo
                 echo -e "${BLUE}========================================${NC}"
@@ -311,12 +343,12 @@ ask_user_preferences() {
                 done
             fi
         else
-            # CrowdSec not applicable for worker, scheduler-only, or ui-only installations
+            # CrowdSec not applicable for manager, worker, scheduler-only, ui-only, or api-only installations
             CROWDSEC_INSTALL="no"
         fi
 
-        # Ask about API service enablement
-        if [ -z "$SERVICE_API" ]; then
+        # Ask about API service enablement (not applicable for worker, scheduler-only, ui-only, or api-only)
+        if [[ "$INSTALL_TYPE" != "worker" && "$INSTALL_TYPE" != "scheduler" && "$INSTALL_TYPE" != "ui" && "$INSTALL_TYPE" != "api" ]] && [ -z "$SERVICE_API" ]; then
             echo
             echo -e "${BLUE}========================================${NC}"
             echo -e "${BLUE}🧩 BunkerWeb API Service${NC}"
@@ -334,6 +366,9 @@ ask_user_preferences() {
                     *) echo "Please answer yes (y) or no (n)." ;;
                 esac
             done
+        elif [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" || "$INSTALL_TYPE" = "api" ]]; then
+            # API service not applicable for these installation types
+            SERVICE_API=no
         fi
 
         # Ask about AppSec installation if CrowdSec is chosen
@@ -373,6 +408,7 @@ ask_user_preferences() {
             "worker") echo "  📦 Installation type: Worker" ;;
             "scheduler") echo "  📦 Installation type: Scheduler Only" ;;
             "ui") echo "  📦 Installation type: Web UI Only" ;;
+            "api") echo "  📦 Installation type: API Only" ;;
         esac
         if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
             echo "  🔗 BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
@@ -386,7 +422,9 @@ ask_user_preferences() {
         else
             echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
         fi
-        if [ "${SERVICE_API:-no}" = "yes" ]; then
+        if [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" ]]; then
+            echo "  🔌 API service: Not available for this mode"
+        elif [ "${SERVICE_API:-no}" = "yes" ]; then
             echo "  🔌 API service: Enabled"
         else
             echo "  🔌 API service: Disabled"
@@ -394,7 +432,7 @@ ask_user_preferences() {
         echo "  🖥 Operating system: $DISTRO_ID $DISTRO_VERSION"
         echo "  ⚙️ Architecture: ${SYSTEM_ARCH:-unknown}"
         echo "  🟢 NGINX version: $NGINX_VERSION"
-        if [ "$INSTALL_TYPE" = "manager" ] || [ "$INSTALL_TYPE" = "worker" ]; then
+        if [ "$INSTALL_TYPE" = "manager" ] || [ "$INSTALL_TYPE" = "worker" ] || [ "$INSTALL_TYPE" = "api" ]; then
             echo "  🦙 CrowdSec: Not available for this mode"
         else
             if [ "$CROWDSEC_INSTALL" = "yes" ]; then
@@ -1012,26 +1050,105 @@ show_final_info() {
     echo "  - Logs: /var/log/bunkerweb/"
     echo
 
-    if [ "$ENABLE_WIZARD" = "yes" ]; then
-        echo "Next steps:"
-        echo "  1. Access the setup wizard at: https://your-server-ip/setup"
-        echo "  2. Follow the configuration wizard to complete setup"
-        echo
-        echo "📝 Setup wizard information:"
-        echo "  • The wizard will guide you through the initial configuration"
-        echo "  • You can configure your first protected service"
-        echo "  • SSL/TLS certificates can be set up automatically"
-        echo "  • Access the management interface after completion"
-    else
-        echo "Next steps:"
-        echo "  1. Edit /etc/bunkerweb/variables.env to configure BunkerWeb"
-        echo "  2. Add your server settings and protected services"
-        echo "  3. Restart services: systemctl restart bunkerweb-scheduler"
-        echo
-        echo "📝 Manual configuration:"
-        echo "  • See documentation for configuration examples"
-        echo "  • Use 'bwcli' command for advanced management"
-    fi
+    # Display next steps based on installation type and wizard status
+    case "$INSTALL_TYPE" in
+        "manager")
+            echo "Next steps:"
+            echo "  1. Configure database connection in /etc/bunkerweb/scheduler.env"
+            echo "     Set DATABASE_URI (e.g., sqlite:///var/lib/bunkerweb/db.sqlite3)"
+            echo "  2. Verify BUNKERWEB_INSTANCES is set to: $BUNKERWEB_INSTANCES_INPUT"
+            if [ "${MANAGER_UI_START:-yes}" != "no" ]; then
+                echo "  3. Access the Web UI at: http://your-server-ip:7000"
+                echo "  4. Use the UI to manage your BunkerWeb workers"
+            else
+                echo "  3. Start the Web UI: systemctl start bunkerweb-ui"
+                echo "  4. Access the UI at: http://your-server-ip:7000"
+            fi
+            echo
+            echo "📝 Manager mode information:"
+            echo "  • The scheduler orchestrates configuration across all workers"
+            echo "  • Workers must have their API accessible on port 5000 (default)"
+            echo "  • Ensure workers whitelist this manager's IP: $MANAGER_IP_INPUT"
+            echo "  • Use multisite mode: MULTISITE=yes for multiple services"
+            ;;
+        "worker")
+            echo "Next steps:"
+            echo "  1. Verify this worker's API is accessible from the manager"
+            echo "     Default API port: 5000 (configured via API_HTTP_PORT)"
+            echo "  2. Ensure firewall allows connections from: $MANAGER_IP_INPUT"
+            echo "  3. Configuration will be pushed automatically from the manager"
+            echo
+            echo "📝 Worker mode information:"
+            echo "  • This instance is managed remotely by the scheduler"
+            echo "  • API_WHITELIST_IP is configured to allow: $MANAGER_IP_INPUT"
+            echo "  • API listens on: 0.0.0.0:5000 (whitelisting enforces access control)"
+            echo "  • Local config changes in /etc/bunkerweb/variables.env may be overwritten"
+            echo "  • Check logs: journalctl -u bunkerweb -f"
+            ;;
+        "scheduler")
+            echo "Next steps:"
+            echo "  1. Configure database connection in /etc/bunkerweb/scheduler.env"
+            echo "     Set DATABASE_URI for shared configuration storage"
+            echo "  2. Verify BUNKERWEB_INSTANCES is set to: $BUNKERWEB_INSTANCES_INPUT"
+            echo "  3. Restart scheduler: systemctl restart bunkerweb-scheduler"
+            echo "  4. Use 'bwcli' commands to manage the cluster"
+            echo
+            echo "📝 Scheduler-only mode information:"
+            echo "  • Workers communicate via their API (port 5000 by default)"
+            echo "  • Install the Web UI separately for graphical management"
+            echo "  • All instances must share the same database backend"
+            ;;
+        "ui")
+            echo "Next steps:"
+            echo "  1. Configure database connection in /etc/bunkerweb/ui.env"
+            echo "     Set DATABASE_URI to the same database as your scheduler"
+            echo "  2. Restart the UI: systemctl restart bunkerweb-ui"
+            echo "  3. Access the Web UI at: http://your-server-ip:7000"
+            echo
+            echo "📝 UI-only mode information:"
+            echo "  • The UI must connect to the same database as the scheduler"
+            echo "  • Requires an existing scheduler instance managing workers"
+            echo "  • Default UI port: 7000"
+            ;;
+        "api")
+            echo "Next steps:"
+            echo "  1. Configure API settings in /etc/bunkerweb/api.env"
+            echo "     Set API_LISTEN_IP and API_HTTP_PORT as needed"
+            echo "  2. Configure database connection: DATABASE_URI"
+            echo "  3. Restart the API: systemctl restart bunkerweb-api"
+            echo "  4. The API will be available at: http://your-server-ip:8000"
+            echo
+            echo "📝 API-only mode information:"
+            echo "  • The API service provides programmatic access to BunkerWeb"
+            echo "  • Must connect to the same database as scheduler/UI"
+            echo "  • Default API port: 8000 (FastAPI service, not internal API)"
+            echo "  • Configure API_KEY for authentication if needed"
+            ;;
+        "full"|*)
+            if [ "$ENABLE_WIZARD" = "yes" ]; then
+                echo "Next steps:"
+                echo "  1. Access the setup wizard at: https://your-server-ip/setup"
+                echo "  2. Follow the configuration wizard to complete setup"
+                echo
+                echo "📝 Setup wizard information:"
+                echo "  • The wizard guides you through initial configuration"
+                echo "  • Configure your first protected service"
+                echo "  • Set up SSL/TLS certificates automatically"
+                echo "  • Access the management UI after completion"
+            else
+                echo "Next steps:"
+                echo "  1. Edit /etc/bunkerweb/variables.env to configure BunkerWeb"
+                echo "  2. Add your server settings and protected services"
+                echo "  3. Restart services: systemctl restart bunkerweb bunkerweb-scheduler"
+                echo
+                echo "📝 Manual configuration:"
+                echo "  • Default database: SQLite (upgrade to MariaDB/PostgreSQL for production)"
+                echo "  • Use 'bwcli' for command-line management"
+                echo "  • Check logs: journalctl -u bunkerweb -f"
+                echo "  • Access Web UI (if enabled): http://your-server-ip:7000"
+            fi
+            ;;
+    esac
     echo
 
     # Show RHEL database information if applicable
@@ -1074,6 +1191,7 @@ usage() {
     echo "  --worker                 Worker installation (BunkerWeb only)"
     echo "  --scheduler-only         Scheduler only installation"
     echo "  --ui-only                Web UI only installation"
+    echo "  --api-only               API service only installation"
     echo
     echo "Security integrations:"
     echo "  --crowdsec               Install and configure CrowdSec"
@@ -1153,6 +1271,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --ui-only)
             INSTALL_TYPE="ui"
+            shift
+            ;;
+        --api-only)
+            INSTALL_TYPE="api"
             shift
             ;;
         --crowdsec)
@@ -1240,8 +1362,8 @@ if [ "$INTERACTIVE_MODE" = "no" ] && [ "$INSTALL_TYPE" = "worker" ] && [ -z "$MA
 fi
 
 # Validate CrowdSec options usage
-if [[ "$CROWDSEC_INSTALL" = "yes" || "$CROWDSEC_APPSEC_INSTALL" = "yes" ]] && [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" || "$INSTALL_TYPE" = "manager" ]]; then
-    print_error "CrowdSec options (--crowdsec, --crowdsec-appsec) can only be used with --full installation type"
+if [[ "$CROWDSEC_INSTALL" = "yes" || "$CROWDSEC_APPSEC_INSTALL" = "yes" ]] && [[ "$INSTALL_TYPE" = "worker" || "$INSTALL_TYPE" = "scheduler" || "$INSTALL_TYPE" = "ui" || "$INSTALL_TYPE" = "api" ]]; then
+    print_error "CrowdSec options (--crowdsec, --crowdsec-appsec) can only be used with --full or --manager installation types"
     exit 1
 fi
 
@@ -1454,6 +1576,12 @@ main() {
             export SERVICE_SCHEDULER=no
             export SERVICE_UI=yes
             ;;
+        "api")
+            export SERVICE_BUNKERWEB=no
+            export SERVICE_SCHEDULER=no
+            export SERVICE_UI=no
+            export SERVICE_API=yes
+            ;;
         "full"|"")
             ;;
     esac
@@ -1555,32 +1683,3 @@ main() {
 
 # Run main function
 main "$@"
-# Function to detect system architecture and warn for unsupported combinations
-detect_architecture() {
-    SYSTEM_ARCH=$(uname -m 2>/dev/null || echo "unknown")
-    NORMALIZED_ARCH="$SYSTEM_ARCH"
-    case "$SYSTEM_ARCH" in
-        x86_64|amd64)
-            NORMALIZED_ARCH="amd64"
-            ;;
-        aarch64|arm64)
-            NORMALIZED_ARCH="arm64"
-            ;;
-        armv7l|armhf)
-            NORMALIZED_ARCH="armhf"
-            ;;
-        unknown)
-            print_warning "Unable to detect system architecture."
-            ;;
-        *)
-            print_warning "Architecture $SYSTEM_ARCH has not been validated with the easy install script."
-            if [ "$FORCE_INSTALL" != "yes" ] && [ "$INTERACTIVE_MODE" = "yes" ]; then
-                read -p "Continue anyway? (y/N): " -r
-                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                    exit 1
-                fi
-            fi
-            ;;
-    esac
-    export NORMALIZED_ARCH
-}
