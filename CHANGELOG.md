@@ -4,6 +4,7 @@
 
 - [LINUX] Enhance Easy Install script with manager and worker mode configurations
 - [UI] Enhance bad behavior logging and UI actions with additional fields and filtering capabilities
+- [UI] Optimize the reports page export functionality for large datasets by implementing server-side processing to handle data exports in manageable chunks, reducing memory usage and improving performance.
 
 ## v1.6.6-rc3 - 2025/11/18
 
