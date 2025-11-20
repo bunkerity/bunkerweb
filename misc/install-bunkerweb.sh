@@ -26,7 +26,7 @@ CROWDSEC_APPSEC_INSTALL="no"
 INSTALL_TYPE=""
 BUNKERWEB_INSTANCES_INPUT=""
 MANAGER_IP_INPUT=""
-MANAGER_UI_START=""
+DNS_RESOLVERS_INPUT=""
 UPGRADE_SCENARIO="no"
 BACKUP_DIRECTORY=""
 AUTO_BACKUP="yes"
@@ -243,6 +243,39 @@ ask_user_preferences() {
             done
         fi
 
+        # Ask about custom DNS resolvers for full, manager, or worker installations
+        if [[ "$INSTALL_TYPE" = "full" || "$INSTALL_TYPE" = "manager" || "$INSTALL_TYPE" = "worker" ]] && [ -z "$DNS_RESOLVERS_INPUT" ]; then
+            echo
+            echo -e "${BLUE}========================================${NC}"
+            echo -e "${BLUE}🔍 DNS Resolvers Configuration${NC}"
+            echo -e "${BLUE}========================================${NC}"
+            echo "BunkerWeb needs DNS resolvers for domain resolution."
+            echo "Default: 9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4 (Quad9 and Google DNS)"
+            echo
+            while true; do
+                echo -e "${YELLOW}Use custom DNS resolvers? (y/N):${NC} "
+                read -p "" -r
+                case $REPLY in
+                    [Yy]*)
+                        echo -e "${YELLOW}Enter space-separated DNS resolver IPs:${NC} "
+                        read -p "" -r DNS_RESOLVERS_INPUT
+                        if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+                            break
+                        else
+                            print_warning "DNS resolvers cannot be empty. Please enter at least one resolver."
+                        fi
+                        ;;
+                    [Nn]*|"")
+                        DNS_RESOLVERS_INPUT="9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4"
+                        break
+                        ;;
+                    *)
+                        echo "Please answer yes (y) or no (n)."
+                        ;;
+                esac
+            done
+        fi
+
         # Ask about setup wizard
         if [ "$INSTALL_TYPE" = "manager" ]; then
             echo
@@ -288,7 +321,7 @@ ask_user_preferences() {
             fi
         fi
 
-        if [ "$INSTALL_TYPE" = "manager" ] && [ -z "$MANAGER_UI_START" ]; then
+        if [ "$INSTALL_TYPE" = "manager" ] && [ -z "$SERVICE_UI" ]; then
             echo
             echo -e "${BLUE}========================================${NC}"
             echo -e "${BLUE}🖥  Manager Web UI${NC}"
@@ -300,11 +333,11 @@ ask_user_preferences() {
                 read -p "" -r
                 case $REPLY in
                     [Nn]*)
-                        MANAGER_UI_START="no"
+                        export SERVICE_UI="no"
                         break
                         ;;
                     [Yy]*|"")
-                        MANAGER_UI_START="yes"
+                        export SERVICE_UI="yes"
                         break
                         ;;
                     *)
@@ -416,8 +449,11 @@ ask_user_preferences() {
         if [ -n "$MANAGER_IP_INPUT" ]; then
             echo "  📡 Manager API whitelist: $MANAGER_IP_INPUT"
         fi
+        if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+            echo "  🔍 DNS resolvers: $DNS_RESOLVERS_INPUT"
+        fi
         if [ "$INSTALL_TYPE" = "manager" ]; then
-            echo "  🖥 Web UI service: $([ "${MANAGER_UI_START:-yes}" = "no" ] && echo "Disabled" || echo "Enabled")"
+            echo "  🖥 Web UI service: $([ "${SERVICE_UI:-yes}" = "no" ] && echo "Disabled" || echo "Enabled")"
             echo "  🧙 Setup wizard: Disabled (not supported in manager mode)"
         else
             echo "  🧙 Setup wizard: $([ "$ENABLE_WIZARD" = "yes" ] && echo "Enabled" || echo "Disabled")"
@@ -690,6 +726,9 @@ configure_manager_api_defaults() {
         fi
     fi
 
+    whitelist_ip="127.0.0.0/8 $whitelist_ip"
+    whitelist_ip=$(printf '%s\n' "$whitelist_ip" | xargs)
+
     if [ -z "$provided_ip" ]; then
         MANAGER_IP_INPUT="$whitelist_ip"
     fi
@@ -700,24 +739,35 @@ configure_manager_api_defaults() {
         mkdir -p /etc/bunkerweb
     fi
 
-    if [ ! -f "$config_file" ]; then
-        touch "$config_file"
-    fi
-
+    {
+        echo "SERVER_NAME="
+        if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
+            echo "BUNKERWEB_INSTANCES=$BUNKERWEB_INSTANCES_INPUT"
+        else
+            echo "BUNKERWEB_INSTANCES="
+        fi
+        # Use custom DNS resolvers if provided, otherwise use defaults
+        if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+            echo "DNS_RESOLVERS=$DNS_RESOLVERS_INPUT"
+        else
+            echo "DNS_RESOLVERS=9.9.9.9 149.112.112.112 8.8.8.8 8.8.4.4" # Quad9, Google
+        fi
+        echo "HTTP_PORT=80"
+        echo "HTTPS_PORT=443"
+        echo "API_LISTEN_IP=0.0.0.0"
+        echo "API_WHITELIST_IP=$whitelist_ip"
+        echo "API_TOKEN="
+        # Enable multisite mode when UI service is used
+        if [ "${SERVICE_UI:-yes}" != "no" ]; then
+            echo "MULTISITE=yes"
+        fi
+    } > "$config_file"
     chown root:nginx "$config_file" 2>/dev/null || true
     chmod 660 "$config_file" 2>/dev/null || true
 
-    if grep -q "^API_LISTEN_IP=" "$config_file"; then
-        sed -i 's|^API_LISTEN_IP=.*|API_LISTEN_IP=0.0.0.0|' "$config_file"
-    else
-        echo "API_LISTEN_IP=0.0.0.0" >> "$config_file"
-    fi
-
-    if grep -q "^API_WHITELIST_IP=" "$config_file"; then
-        sed -i "s|^API_WHITELIST_IP=.*|API_WHITELIST_IP=$whitelist_ip|" "$config_file"
-    else
-        echo "API_WHITELIST_IP=$whitelist_ip" >> "$config_file"
-    fi
+    run_cmd systemctl restart bunkerweb-scheduler
+    sleep 2
+    systemctl status bunkerweb-scheduler --no-pager -l || print_warning "BunkerWeb Scheduler may not be running"
 }
 
 # Ensure worker installations whitelist the selected manager/scheduler IPs
@@ -757,6 +807,59 @@ configure_worker_api_whitelist() {
     else
         echo "API_WHITELIST_IP=$whitelist_value" >> "$config_file"
     fi
+
+    # Configure custom DNS resolvers if provided
+    if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+        print_status "Configuring custom DNS resolvers: $DNS_RESOLVERS_INPUT"
+        if grep -q "^DNS_RESOLVERS=" "$config_file"; then
+            sed -i "s|^DNS_RESOLVERS=.*|DNS_RESOLVERS=$DNS_RESOLVERS_INPUT|" "$config_file"
+        else
+            echo "DNS_RESOLVERS=$DNS_RESOLVERS_INPUT" >> "$config_file"
+        fi
+    fi
+
+    run_cmd systemctl restart bunkerweb
+    sleep 2
+    systemctl status bunkerweb --no-pager -l || print_warning "BunkerWeb may not be running"
+}
+
+# Configure DNS resolvers for full installation
+configure_full_dns_resolvers() {
+    local config_file="/etc/bunkerweb/variables.env"
+
+    if [ -z "$DNS_RESOLVERS_INPUT" ]; then
+        return
+    fi
+
+    print_status "Configuring custom DNS resolvers: $DNS_RESOLVERS_INPUT"
+
+    if [ ! -d /etc/bunkerweb ]; then
+        mkdir -p /etc/bunkerweb
+    fi
+
+    if [ ! -f "$config_file" ]; then
+        touch "$config_file"
+    fi
+
+    chown root:nginx "$config_file" 2>/dev/null || true
+    chmod 660 "$config_file" 2>/dev/null || true
+
+    if grep -q "^DNS_RESOLVERS=" "$config_file"; then
+        sed -i "s|^DNS_RESOLVERS=.*|DNS_RESOLVERS=$DNS_RESOLVERS_INPUT|" "$config_file"
+    else
+        echo "DNS_RESOLVERS=$DNS_RESOLVERS_INPUT" >> "$config_file"
+    fi
+
+    # Enable multisite mode when UI service is used
+    if [ "$ENABLE_WIZARD" = "yes" ] || [ "${SERVICE_UI:-no}" = "yes" ]; then
+        if grep -q "^MULTISITE=" "$config_file"; then
+            sed -i "s|^MULTISITE=.*|MULTISITE=yes|" "$config_file"
+        else
+            echo "MULTISITE=yes" >> "$config_file"
+        fi
+    fi
+
+    run_cmd systemctl reload bunkerweb-scheduler
 }
 
 # Function to install NGINX on Debian/Ubuntu
@@ -1057,7 +1160,7 @@ show_final_info() {
             echo "  1. Configure database connection in /etc/bunkerweb/scheduler.env"
             echo "     Set DATABASE_URI (e.g., sqlite:///var/lib/bunkerweb/db.sqlite3)"
             echo "  2. Verify BUNKERWEB_INSTANCES is set to: $BUNKERWEB_INSTANCES_INPUT"
-            if [ "${MANAGER_UI_START:-yes}" != "no" ]; then
+            if [ "${SERVICE_UI:-yes}" != "no" ]; then
                 echo "  3. Access the Web UI at: http://your-server-ip:7000"
                 echo "  4. Use the UI to manage your BunkerWeb workers"
             else
@@ -1202,6 +1305,7 @@ usage() {
     echo "  --instances \"IP1 IP2\"    Space-separated list of BunkerWeb instances"
     echo "                           (required for --manager and --scheduler-only)"
     echo "  --manager-ip IPs         Manager/Scheduler IPs to whitelist (required for --worker in non-interactive mode, overrides auto-detect for --manager)"
+    echo "  --dns-resolvers \"IP1 IP2\"  Custom DNS resolver IPs (for --full, --manager, --worker)"
     echo "  --backup-dir PATH        Directory to store automatic backup before upgrade"
     echo "  --no-auto-backup         Skip automatic backup (you MUST have done it manually)"
     echo
@@ -1213,7 +1317,10 @@ usage() {
     echo "  $0 --force               # Force install on unsupported OS"
     echo "  $0 --manager --instances \"192.168.1.10 192.168.1.11\""
     echo "                           # Manager setup with worker instances"
-    echo "  $0 --worker --no-wizard  # Worker-only installation"
+    echo "  $0 --worker --manager-ip 10.20.30.40"
+    echo "                           # Worker installation with manager IP"
+    echo "  $0 --dns-resolvers \"1.1.1.1 1.0.0.1\""
+    echo "                           # Use Cloudflare DNS resolvers"
     echo "  $0 --crowdsec-appsec     # Full installation with CrowdSec AppSec"
     echo "  $0 --quiet --yes         # Silent non-interactive installation"
     echo "  $0 --dry-run             # Preview installation without executing"
@@ -1298,6 +1405,10 @@ while [[ $# -gt 0 ]]; do
             MANAGER_IP_INPUT="$2"
             shift 2
             ;;
+        --dns-resolvers)
+            DNS_RESOLVERS_INPUT="$2"
+            shift 2
+            ;;
         --api|--enable-api)
             SERVICE_API=yes
             shift
@@ -1323,6 +1434,12 @@ while [[ $# -gt 0 ]]; do
             echo "CrowdSec: ${CROWDSEC_INSTALL:-no}"
             if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
                 echo "BunkerWeb instances: $BUNKERWEB_INSTANCES_INPUT"
+            fi
+            if [ -n "$MANAGER_IP_INPUT" ]; then
+                echo "Manager IP: $MANAGER_IP_INPUT"
+            fi
+            if [ -n "$DNS_RESOLVERS_INPUT" ]; then
+                echo "DNS resolvers: $DNS_RESOLVERS_INPUT"
             fi
             exit 0
             ;;
@@ -1545,26 +1662,15 @@ main() {
     # Check for port conflicts after knowing the install type
     check_ports
 
-    if [ -n "$BUNKERWEB_INSTANCES_INPUT" ]; then
-        # Use a temporary file to pass the setting to the postinstall script
-        echo "BUNKERWEB_INSTANCES=$BUNKERWEB_INSTANCES_INPUT" > /var/tmp/bunkerweb_instances.env
-    fi
-
-    # Persist API enablement for postinstall if chosen
-    if [ "${SERVICE_API:-no}" = "yes" ]; then
-        touch /var/tmp/bunkerweb_enable_api
-    fi
-
     # Set environment variables based on installation type
     case "$INSTALL_TYPE" in
         "manager")
             export MANAGER_MODE=yes
-            if [ "${MANAGER_UI_START:-yes}" = "no" ]; then
-                export SERVICE_UI=no
-            fi
+            export ENABLE_WIZARD=no
             ;;
         "worker")
             export WORKER_MODE=yes
+            export ENABLE_WIZARD=no
             ;;
         "scheduler")
             export SERVICE_BUNKERWEB=no
@@ -1669,6 +1775,8 @@ main() {
         configure_manager_api_defaults
     elif [ "$INSTALL_TYPE" = "worker" ]; then
         configure_worker_api_whitelist
+    elif [ "$INSTALL_TYPE" = "full" ] || [ -z "$INSTALL_TYPE" ]; then
+        configure_full_dns_resolvers
     fi
 
     if [ "$CROWDSEC_INSTALL" = "yes" ]; then
