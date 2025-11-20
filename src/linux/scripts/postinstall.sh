@@ -114,23 +114,6 @@ if {
         echo "🚀 Enabling and starting the BunkerWeb service..."
         do_and_check_cmd systemctl enable --now bunkerweb
     fi
-
-    # Wait for the service to be ready
-    echo "⏳ Waiting for BunkerWeb service to be ready..."
-    timeout=60
-    elapsed=0
-    while [ $elapsed -lt $timeout ]; do
-        if systemctl is-active --quiet bunkerweb && [ -s /var/run/bunkerweb/nginx.pid ]; then
-            echo "✅ BunkerWeb service is ready"
-            break
-        fi
-        sleep 2
-        elapsed=$((elapsed + 2))
-    done
-
-    if [ $elapsed -ge $timeout ]; then
-        echo "⚠️  Warning: BunkerWeb service may not be fully ready yet"
-    fi
 # Disable BunkerWeb if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb; then
     echo "🛑 Disabling and stopping the BunkerWeb service..."
@@ -166,23 +149,6 @@ if {
             echo "📋 Restarting the BunkerWeb Scheduler service after upgrade..."
             do_and_check_cmd systemctl restart bunkerweb-scheduler
         fi
-    fi
-
-    # Wait for the service to be ready
-    echo "⏳ Waiting for the BunkerWeb Scheduler service to be ready..."
-    timeout=60
-    elapsed=0
-    while [ $elapsed -lt $timeout ]; do
-        if systemctl is-active --quiet bunkerweb-scheduler && [ -s /var/run/bunkerweb/scheduler.pid ]; then
-            echo "✅ BunkerWeb Scheduler service is ready"
-            break
-        fi
-        sleep 2
-        elapsed=$((elapsed + 2))
-    done
-
-    if [ $elapsed -ge $timeout ]; then
-        echo "⚠️  Warning: the BunkerWeb Scheduler service may not be fully ready yet"
     fi
 # Disable scheduler if it shouldn't be running but is active
 elif systemctl is-active --quiet bunkerweb-scheduler; then
@@ -259,15 +225,11 @@ fi
 echo "Configuring BunkerWeb API service..."
 
 # Enable API only when explicitly requested (via env or flag)
-if [ "${SERVICE_API:-no}" = "yes" ] || [ -f /var/tmp/bunkerweb_enable_api ]; then
+if [ "${SERVICE_API:-no}" = "yes" ]; then
     # Fresh installation or explicit API enablement
     if [ ! -f /var/tmp/bunkerweb_upgrade ]; then
         echo "🚀 Enabling and starting the BunkerWeb API service..."
         do_and_check_cmd systemctl enable --now bunkerweb-api
-        # Clean up enable flag if present
-        if [ -f /var/tmp/bunkerweb_enable_api ]; then
-            rm -f /var/tmp/bunkerweb_enable_api
-        fi
     else
         # Restart API only if already running
         if systemctl is-active --quiet bunkerweb-api; then
@@ -296,22 +258,6 @@ if [ -f /var/tmp/crowdsec.env ] && [ -f /etc/bunkerweb/variables.env ]; then
     done < /var/tmp/crowdsec.env
     echo "✔️ CrowdSec configuration added to /etc/bunkerweb/variables.env"
     rm -f /var/tmp/crowdsec.env
-fi
-
-# Fetch BunkerWeb instances config from /var/tmp/bunkerweb_instances.env and merge into variables.env if present
-if [ -f /var/tmp/bunkerweb_instances.env ] && [ -f /etc/bunkerweb/variables.env ]; then
-    echo "Adding BunkerWeb instances configuration from the easy-install script to /etc/bunkerweb/variables.env ..."
-    while IFS= read -r line; do
-        key="${line%%=*}"
-        value="${line#*=}"
-        if grep -q "^${key}=" /etc/bunkerweb/variables.env; then
-            sed -i "s|^${key}=.*|${key}=${value}|" /etc/bunkerweb/variables.env
-        else
-            echo "${key}=${value}" >> /etc/bunkerweb/variables.env
-        fi
-    done < /var/tmp/bunkerweb_instances.env
-    echo "✔️ BunkerWeb instances configuration added to /etc/bunkerweb/variables.env"
-    rm -f /var/tmp/bunkerweb_instances.env
 fi
 
 if [ -f /var/tmp/bunkerweb_upgrade ]; then
