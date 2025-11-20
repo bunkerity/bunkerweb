@@ -722,10 +722,11 @@ sudo ./install-bunkerweb.sh
     *   **工作节点**：仅安装 BunkerWeb 实例，可由远程管理器管理。
     *   **仅调度器**：仅安装调度器组件。
     *   **仅 Web UI**：仅安装 Web UI 组件。
+    *   **仅 API**：仅安装 API 服务以便进行编程访问。
 2.  **设置向导**：选择是否启用基于 Web 的配置向导。强烈建议初次使用的用户选择此项。
-3.  **CrowdSec 集成**：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。
+3.  **CrowdSec 集成**：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。仅适用于完整堆栈安装。
 4.  **CrowdSec AppSec**：如果您选择安装 CrowdSec，您还可以启用应用程序安全 (AppSec) 组件，它增加了 WAF 功能。
-5.  **API 服务**：选择是否启用可选的 BunkerWeb API 服务。在 Linux 安装中，它默认是禁用的。
+5.  **API 服务**：对于完整堆栈和管理器安装，选择是否启用可选的外部 API 服务。在 Linux 安装中，它默认是禁用的。
 
 !!! info "管理器和调度器安装"
     如果您选择**管理器**或**仅调度器**安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。
@@ -758,6 +759,7 @@ sudo ./install-bunkerweb.sh
 | `--worker`         | 仅安装 BunkerWeb 实例。                               |
 | `--scheduler-only` | 仅安装调度器组件。                                    |
 | `--ui-only`        | 仅安装 Web UI 组件。                                  |
+| `--api-only`       | 仅安装 API 服务（端口 8000）。                        |
 
 **安全集成：**
 
@@ -813,8 +815,15 @@ sudo ./install-bunkerweb.sh --yes --api
 !!! warning "关于选项兼容性的重要说明"
 
     **CrowdSec 限制：**
-    - CrowdSec 选项（`--crowdsec`, `--crowdsec-appsec`）仅与 `--full`（默认）和 `--manager` 安装类型兼容
-    - 它们不能与 `--worker`, `--scheduler-only` 或 `--ui-only` 安装一起使用
+
+    - CrowdSec 选项（`--crowdsec`, `--crowdsec-appsec`）仅与 `--full`（默认）安装类型兼容
+    - 它们不能与 `--manager`, `--worker`, `--scheduler-only`, `--ui-only` 或 `--api-only` 安装一起使用
+
+    **API 服务可用性：**
+
+    - 外部 API 服务（端口 8000）适用于 `--full` 和 `--manager` 安装类型
+    - 它不适用于 `--worker`, `--scheduler-only` 或 `--ui-only` 安装
+    - 使用 `--api-only` 进行专用的 API 服务安装
 
     **Instances 要求：**
     - `--instances` 选项仅对 `--manager` 和 `--scheduler-only` 安装类型有效

@@ -721,10 +721,11 @@ Cuando se ejecuta sin ninguna opción, el script entra en un modo interactivo qu
     *   **Trabajador**: Instala solo la instancia de BunkerWeb, que puede ser gestionada por un Gestor remoto.
     *   **Solo Programador**: Instala solo el componente del Programador.
     *   **Solo Interfaz de Usuario Web**: Instala solo el componente de la Interfaz de Usuario Web.
+    *   **Solo API**: Instala solo el servicio API para acceso programático.
 2.  **Asistente de configuración**: Elige si habilitar el asistente de configuración basado en la web. Esto es muy recomendable para los usuarios primerizos.
-3.  **Integración con CrowdSec**: Opta por instalar el motor de seguridad CrowdSec para una protección avanzada contra amenazas en tiempo real.
+3.  **Integración con CrowdSec**: Opta por instalar el motor de seguridad CrowdSec para una protección avanzada contra amenazas en tiempo real. Disponible solo para instalaciones de Pila completa.
 4.  **CrowdSec AppSec**: Si eliges instalar CrowdSec, también puedes habilitar el componente de Seguridad de Aplicaciones (AppSec), que añade capacidades de WAF.
-5.  **Servicio de API**: Elige si habilitar el servicio opcional de la API de BunkerWeb. Está deshabilitado por defecto en las instalaciones de Linux.
+5.  **Servicio de API**: Para instalaciones de Pila completa y Gestor, elige si habilitar el servicio API externo opcional. Está deshabilitado por defecto en las instalaciones de Linux.
 
 !!! info "Instalaciones de Gestor y Programador"
     Si eliges el tipo de instalación **Gestor** o **Solo Programador**, también se te pedirá que proporciones las direcciones IP o los nombres de host de tus instancias de trabajador de BunkerWeb.
@@ -757,6 +758,7 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 | `--worker`         | Instala solo la instancia de BunkerWeb.                                               |
 | `--scheduler-only` | Instala solo el componente del Programador.                                           |
 | `--ui-only`        | Instala solo el componente de la Interfaz de Usuario Web.                             |
+| `--api-only`       | Instala solo el servicio API (puerto 8000).                                           |
 
 **Integraciones de seguridad:**
 
@@ -812,8 +814,15 @@ sudo ./install-bunkerweb.sh --yes --api
 !!! warning "Notas importantes sobre la compatibilidad de las opciones"
 
     **Limitaciones de CrowdSec:**
-    - Las opciones de CrowdSec (`--crowdsec`, `--crowdsec-appsec`) solo son compatibles con los tipos de instalación `--full` (predeterminado) y `--manager`
-    - No se pueden usar con instalaciones `--worker`, `--scheduler-only` o `--ui-only`
+
+    - Las opciones de CrowdSec (`--crowdsec`, `--crowdsec-appsec`) solo son compatibles con el tipo de instalación `--full` (predeterminado)
+    - No se pueden usar con instalaciones `--manager`, `--worker`, `--scheduler-only`, `--ui-only` o `--api-only`
+
+    **Disponibilidad del servicio API:**
+
+    - El servicio API externo (puerto 8000) está disponible para los tipos de instalación `--full` y `--manager`
+    - No está disponible para instalaciones `--worker`, `--scheduler-only` o `--ui-only`
+    - Usa `--api-only` para una instalación dedicada del servicio API
 
     **Requisitos de las instancias:**
     - La opción `--instances` solo es válida con los tipos de instalación `--manager` y `--scheduler-only`

@@ -722,10 +722,11 @@ Wenn das Skript ohne Optionen ausgeführt wird, wechselt es in einen interaktive
     *   **Worker**: Installiert nur die BunkerWeb-Instanz, die von einem entfernten Manager verwaltet werden kann.
     *   **Nur Scheduler**: Installiert nur die Scheduler-Komponente.
     *   **Nur Web-UI**: Installiert nur die Web-UI-Komponente.
+    *   **Nur API**: Installiert nur den API-Dienst für programmgesteuerten Zugriff.
 2.  **Einrichtungsassistent**: Wählen Sie, ob der webbasierte Konfigurationsassistent aktiviert werden soll. Dies wird für Erstanwender dringend empfohlen.
-3.  **CrowdSec-Integration**: Entscheiden Sie sich für die Installation der CrowdSec-Sicherheits-Engine für erweiterten Echtzeit-Bedrohungsschutz.
+3.  **CrowdSec-Integration**: Entscheiden Sie sich für die Installation der CrowdSec-Sicherheits-Engine für erweiterten Echtzeit-Bedrohungsschutz. Nur für Full Stack-Installationen verfügbar.
 4.  **CrowdSec AppSec**: Wenn Sie sich für die Installation von CrowdSec entscheiden, können Sie auch die Application Security (AppSec)-Komponente aktivieren, die WAF-Funktionen hinzufügt.
-5.  **API-Dienst**: Wählen Sie, ob der optionale BunkerWeb-API-Dienst aktiviert werden soll. Er ist bei Linux-Installationen standardmäßig deaktiviert.
+5.  **API-Dienst**: Für Full Stack- und Manager-Installationen können Sie den optionalen externen API-Dienst aktivieren. Er ist bei Linux-Installationen standardmäßig deaktiviert.
 
 !!! info "Manager- und Scheduler-Installationen"
     Wenn Sie den Installationstyp **Manager** oder **Nur Scheduler** wählen, werden Sie auch aufgefordert, die IP-Adressen oder Hostnamen Ihrer BunkerWeb-Worker-Instanzen anzugeben.
@@ -758,6 +759,7 @@ Für nicht-interaktive oder automatisierte Setups kann das Skript mit Befehlszei
 | `--worker`         | Installiert nur die BunkerWeb-Instanz.                                             |
 | `--scheduler-only` | Installiert nur die Scheduler-Komponente.                                          |
 | `--ui-only`        | Installiert nur die Web-UI-Komponente.                                             |
+| `--api-only`       | Installiert nur den API-Dienst (Port 8000).                                        |
 
 **Sicherheitsintegrationen:**
 
@@ -813,8 +815,15 @@ sudo ./install-bunkerweb.sh --yes --api
 !!! warning "Wichtige Hinweise zur Optionskompatibilität"
 
     **CrowdSec-Einschränkungen:**
-    - CrowdSec-Optionen (`--crowdsec`, `--crowdsec-appsec`) sind nur mit den Installationstypen `--full` (Standard) und `--manager` kompatibel
-    - Sie können nicht mit den Installationen `--worker`, `--scheduler-only` oder `--ui-only` verwendet werden
+
+    - CrowdSec-Optionen (`--crowdsec`, `--crowdsec-appsec`) sind nur mit dem Installationstyp `--full` (Standard) kompatibel
+    - Sie können nicht mit `--manager`, `--worker`, `--scheduler-only`, `--ui-only` oder `--api-only` Installationen verwendet werden
+
+    **Verfügbarkeit des API-Dienstes:**
+
+    - Der externe API-Dienst (Port 8000) ist für die Installationstypen `--full` und `--manager` verfügbar
+    - Er ist nicht verfügbar für `--worker`, `--scheduler-only` oder `--ui-only` Installationen
+    - Verwenden Sie `--api-only` für eine dedizierte API-Dienst-Installation
 
     **Anforderungen für Instanzen:**
     - Die Option `--instances` ist nur mit den Installationstypen `--manager` und `--scheduler-only` gültig

@@ -760,6 +760,7 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 | `--worker`         | Installe uniquement l'instance BunkerWeb.                                                      |
 | `--scheduler-only` | Installe uniquement le composant Scheduler.                                                    |
 | `--ui-only`        | Installe uniquement le composant Interface utilisateur Web.                                    |
+| `--api-only`       | Installe uniquement le service API (port 8000).                                                |
 
 **Intégrations de sécurité :**
 
@@ -812,8 +813,15 @@ sudo ./install-bunkerweb.sh --dry-run
 !!! warning "Remarques importantes sur la compatibilité des options"
 
     **CrowdSec Limitations:**
-    - Les options CrowdSec (`--crowdsec`, `--crowdsec-appsec`) ne sont compatibles qu'avec `--full` (par défaut) et `--manager` les types d'installation
-    - Ils ne peuvent pas être utilisés avec `--worker`des installations , `--scheduler-only`, ou `--ui-only`
+
+    - Les options CrowdSec (`--crowdsec`, `--crowdsec-appsec`) ne sont compatibles qu'avec le type d'installation `--full` (par défaut)
+    - Ils ne peuvent pas être utilisés avec les installations `--manager`, `--worker`, `--scheduler-only`, `--ui-only` ou `--api-only`
+
+    **Disponibilité du service API :**
+
+    - Le service API externe (port 8000) est disponible pour les types d'installation `--full` et `--manager`
+    - Il n'est pas disponible pour les installations `--worker`, `--scheduler-only` ou `--ui-only`
+    - Utilisez `--api-only` pour une installation dédiée du service API
 
     **Exigences relatives aux instances :**
     - L `--instances` 'option n'est valable qu'avec `--manager` les types d `--scheduler-only` 'installation et

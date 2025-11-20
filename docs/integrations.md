@@ -726,14 +726,15 @@ When run without any options, the script enters an interactive mode that guides 
 
 1.  **Installation Type**: Select the components you want to install.
     *   **Full Stack (default)**: An all-in-one installation including BunkerWeb, the Scheduler, and the Web UI.
-    *   **Manager**: Installs the Scheduler and Web UI, intended to manage one or more remote BunkerWeb workers.
+    *   **Manager**: Installs the Scheduler and Web UI, intended to manage one or more remote BunkerWeb workers. Can optionally include the API service.
     *   **Worker**: Installs only the BunkerWeb instance, which can be managed by a remote Manager.
     *   **Scheduler Only**: Installs only the Scheduler component.
     *   **Web UI Only**: Installs only the Web UI component.
+    *   **API Only**: Installs only the API service for programmatic access.
 2.  **Setup Wizard**: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.
-3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection.
+3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection. Available for Full Stack installations only.
 4.  **CrowdSec AppSec**: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.
-5.  **API Service**: Choose whether to enable the optional BunkerWeb API service. It is disabled by default on Linux installations.
+5.  **API Service**: For Full Stack and Manager installations, choose whether to enable the optional external API service. It is disabled by default on Linux installations.
 
 !!! info "Manager and Scheduler installations"
     If you choose the **Manager** or **Scheduler Only** installation type, you will also be prompted to provide the IP addresses or hostnames of your BunkerWeb worker instances.
@@ -766,6 +767,7 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `--worker`         | Installs only the BunkerWeb instance.                                    |
 | `--scheduler-only` | Installs only the Scheduler component.                                   |
 | `--ui-only`        | Installs only the Web UI component.                                      |
+| `--api-only`       | Installs only the API service (port 8000).                               |
 
 **Security Integrations:**
 
@@ -811,25 +813,43 @@ sudo ./install-bunkerweb.sh --dry-run
 # Enable the API during easy install (non-interactive)
 sudo ./install-bunkerweb.sh --yes --api
 
-# Error: CrowdSec cannot be used with worker installations
+# Error: CrowdSec cannot be used with worker, scheduler-only, ui-only, or api-only installations
 # sudo ./install-bunkerweb.sh --worker --crowdsec  # This will fail
+
+# Error: API service not available for worker installations
+# sudo ./install-bunkerweb.sh --worker --api  # This will fail
 
 # Error: Instances required for manager in non-interactive mode
 # sudo ./install-bunkerweb.sh --manager --yes  # This will fail without --instances
+
+# Install API-only mode
+sudo ./install-bunkerweb.sh --api-only
+
+# Manager with API service enabled
+sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --api
 ```
 
 !!! warning "Important Notes on Option Compatibility"
 
     **CrowdSec Limitations:**
-    - CrowdSec options (`--crowdsec`, `--crowdsec-appsec`) are only compatible with `--full` (default) and `--manager` installation types
-    - They cannot be used with `--worker`, `--scheduler-only`, or `--ui-only` installations
+
+    - CrowdSec options (`--crowdsec`, `--crowdsec-appsec`) are only compatible with `--full` (default) installation type
+    - They cannot be used with `--manager`, `--worker`, `--scheduler-only`, `--ui-only`, or `--api-only` installations
+
+    **API Service Availability:**
+
+    - The external API service (port 8000) is available for `--full` and `--manager` installation types
+    - It is not available for `--worker`, `--scheduler-only`, or `--ui-only` installations
+    - Use `--api-only` for a dedicated API service installation
 
     **Instances Requirements:**
+
     - The `--instances` option is only valid with `--manager` and `--scheduler-only` installation types
     - When using `--manager` or `--scheduler-only` with `--yes` (non-interactive mode), the `--instances` option is mandatory
     - Format: `--instances "192.168.1.10 192.168.1.11 192.168.1.12"`
 
     **Interactive vs Non-Interactive:**
+
     - Interactive mode (default) will prompt for missing required values
     - Non-interactive mode (`--yes`) requires all necessary options to be provided via command line
 
@@ -865,19 +885,38 @@ This provides a seamless, out-of-the-box integration for powerful intrusion prev
 
 #### After installation
 
-Depending on your choices during installation:
+Once installation is complete, the script provides mode-specific next steps to help you get started with your BunkerWeb deployment.
 
-**With setup wizard enabled:**
+**Installation Modes Overview:**
 
-1. Access the setup wizard at: `https://your-server-ip/setup`
+| Mode           | Components                 | Ports                                                                              | Configuration Files                                                                                                         |
+| -------------- | -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Full Stack     | BunkerWeb + Scheduler + UI | HTTP/HTTPS (80/443), UI (7000), Internal API (5000), Optional: External API (8000) | `/etc/bunkerweb/variables.env`, `/etc/bunkerweb/scheduler.env`, `/etc/bunkerweb/ui.env`, Optional: `/etc/bunkerweb/api.env` |
+| Manager        | Scheduler + UI             | UI (7000), Internal API (5000), Optional: External API (8000)                      | `/etc/bunkerweb/scheduler.env`, `/etc/bunkerweb/ui.env`, `/etc/bunkerweb/variables.env`, Optional: `/etc/bunkerweb/api.env` |
+| Worker         | BunkerWeb only             | HTTP/HTTPS (80/443)                                                                | `/etc/bunkerweb/variables.env`                                                                                              |
+| Scheduler Only | Scheduler                  | Internal API (5000)                                                                | `/etc/bunkerweb/scheduler.env`, `/etc/bunkerweb/variables.env`                                                              |
+| UI Only        | Web UI                     | UI (7000)                                                                          | `/etc/bunkerweb/ui.env`                                                                                                     |
+| API Only       | External API               | API (8000)                                                                         | `/etc/bunkerweb/api.env`                                                                                                    |
+
+**With setup wizard enabled (Full Stack or Manager):**
+
+1. Access the setup wizard at: `https://your-server-ip/setup` (Full Stack) or `http://your-server-ip:7000/setup` (Manager)
 2. Follow the guided configuration to set up your first protected service
 3. Configure SSL/TLS certificates and other security settings
 
 **Without setup wizard:**
 
-1. Edit `/etc/bunkerweb/variables.env` to configure BunkerWeb manually
-2. Add your server settings and protected services
-3. Restart the scheduler: `sudo systemctl restart bunkerweb-scheduler`
+Depending on your installation type:
+
+- **Full Stack**: Edit `/etc/bunkerweb/variables.env` for BunkerWeb settings, then restart: `sudo systemctl restart bunkerweb-scheduler`
+- **Manager**: Configure the database connection (`DATABASE_URI`) in `/etc/bunkerweb/scheduler.env` and manage worker instances via the Web UI at `http://your-server-ip:7000`
+- **Worker**: Edit `/etc/bunkerweb/variables.env` for BunkerWeb settings, then restart: `sudo systemctl restart bunkerweb`
+- **Scheduler Only**: Configure `DATABASE_URI` in `/etc/bunkerweb/scheduler.env`, then restart: `sudo systemctl restart bunkerweb-scheduler`
+- **UI Only**: Configure `DATABASE_URI` in `/etc/bunkerweb/ui.env`, then restart: `sudo systemctl restart bunkerweb-ui`
+- **API Only**: Configure `DATABASE_URI` in `/etc/bunkerweb/api.env`, then restart: `sudo systemctl restart bunkerweb-api`
+
+!!! info "Database Configuration"
+    For Manager, Scheduler, UI, and API installations, you must configure a shared database using the `DATABASE_URI` setting. The format is: `mariadb+pymysql://user:password@host:port/database` (or `postgresql://`, `mysql+pymysql://`, `sqlite:////path/to/db.sqlite`).
 
 ### Installation using package manager
 
