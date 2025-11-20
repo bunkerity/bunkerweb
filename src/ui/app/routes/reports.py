@@ -1,11 +1,17 @@
 from collections import defaultdict
+from contextlib import suppress
 from datetime import datetime
 from json import dumps, loads
 from traceback import format_exc
 from html import escape
+from io import StringIO, BytesIO
+import csv
 
-from flask import Blueprint, jsonify, render_template, request, url_for
+
+from flask import Blueprint, jsonify, render_template, request, url_for, Response, send_file
 from flask_login import login_required
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
 from app.utils import LOGGER
@@ -236,3 +242,209 @@ def reports_fetch():
             "searchPanes": {"options": search_panes_options},
         }
     )
+
+
+@reports.route("/reports/export/csv", methods=["GET"])
+@login_required
+def reports_export_csv():
+    """Export all reports as CSV"""
+    try:
+        # Get search and order parameters
+        search_value = request.args.get("search", "").lower()
+        order_column = request.args.get("order_column", "date")
+        order_dir = request.args.get("order_dir", "desc")
+
+        # Get all reports (no pagination)
+        if BW_INSTANCES_UTILS:
+            result = BW_INSTANCES_UTILS.get_reports_query(
+                start=0,
+                length=-1,  # Get all records
+                search=search_value,
+                order_column=order_column,
+                order_dir=order_dir,
+                search_panes="",
+                count_only=False,
+            )
+            all_reports = result.get("data", [])
+        else:
+            all_reports = []
+
+        # Create CSV in memory
+        output = StringIO()
+        writer = csv.writer(output)
+
+        # Write header
+        writer.writerow(
+            [
+                "Date",
+                "Request ID",
+                "IP Address",
+                "Country",
+                "Method",
+                "URL",
+                "Status Code",
+                "User-Agent",
+                "Reason",
+                "Server Name",
+                "Data",
+                "Security Mode",
+            ]
+        )
+
+        # Write data rows
+        for report in all_reports:
+            # Format data field
+            data_field = report.get("data", {})
+            if isinstance(data_field, str):
+                try:
+                    data_output = dumps(loads(data_field))
+                except (ValueError, TypeError):
+                    data_output = data_field
+            else:
+                data_output = dumps(data_field)
+
+            writer.writerow(
+                [
+                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                    str(report.get("id", "N/A")),
+                    str(report.get("ip", "N/A")),
+                    str(report.get("country", "N/A")),
+                    str(report.get("method", "N/A")),
+                    str(report.get("url", "N/A")),
+                    str(report.get("status", "N/A")),
+                    str(report.get("user_agent", "N/A")),
+                    str(report.get("reason", "N/A")),
+                    str(report.get("server_name", "N/A")),
+                    data_output,
+                    str(report.get("security_mode", "N/A")),
+                ]
+            )
+
+        # Prepare response
+        output.seek(0)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return Response(
+            output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-Disposition": f"attachment; filename=bunkerweb_reports_{timestamp}.csv"},
+        )
+
+    except Exception as e:
+        LOGGER.error(f"Error exporting reports to CSV: {e}")
+        LOGGER.debug(format_exc())
+        return jsonify({"error": "Failed to export reports"}), 500
+
+
+@reports.route("/reports/export/excel", methods=["GET"])
+@login_required
+def reports_export_excel():
+    """Export all reports as Excel"""
+    try:
+        # Get search and order parameters
+        search_value = request.args.get("search", "").lower()
+        order_column = request.args.get("order_column", "date")
+        order_dir = request.args.get("order_dir", "desc")
+
+        # Get all reports (no pagination)
+        if BW_INSTANCES_UTILS:
+            result = BW_INSTANCES_UTILS.get_reports_query(
+                start=0,
+                length=-1,  # Get all records
+                search=search_value,
+                order_column=order_column,
+                order_dir=order_dir,
+                search_panes="",
+                count_only=False,
+            )
+            all_reports = result.get("data", [])
+        else:
+            all_reports = []
+
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Reports"
+
+        # Style for header
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+
+        # Write header
+        headers = [
+            "Date",
+            "Request ID",
+            "IP Address",
+            "Country",
+            "Method",
+            "URL",
+            "Status Code",
+            "User-Agent",
+            "Reason",
+            "Server Name",
+            "Data",
+            "Security Mode",
+        ]
+        ws.append(headers)
+
+        # Apply header styling
+        for cell in ws[1]:
+            cell.font = header_font
+            cell.fill = header_fill
+
+        # Write data rows
+        for report in all_reports:
+            # Format data field
+            data_field = report.get("data", {})
+            if isinstance(data_field, str):
+                try:
+                    data_output = dumps(loads(data_field))
+                except (ValueError, TypeError):
+                    data_output = data_field
+            else:
+                data_output = dumps(data_field)
+
+            ws.append(
+                [
+                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                    str(report.get("id", "N/A")),
+                    str(report.get("ip", "N/A")),
+                    str(report.get("country", "N/A")),
+                    str(report.get("method", "N/A")),
+                    str(report.get("url", "N/A")),
+                    str(report.get("status", "N/A")),
+                    str(report.get("user_agent", "N/A")),
+                    str(report.get("reason", "N/A")),
+                    str(report.get("server_name", "N/A")),
+                    data_output,
+                    str(report.get("security_mode", "N/A")),
+                ]
+            )
+
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                with suppress(Exception):
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+
+        # Save to BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"bunkerweb_reports_{timestamp}.xlsx",
+        )
+
+    except Exception as e:
+        LOGGER.error(f"Error exporting reports to Excel: {e}")
+        LOGGER.debug(format_exc())
+        return jsonify({"error": "Failed to export reports"}), 500

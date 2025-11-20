@@ -5,7 +5,7 @@
 - [LINUX] Enhance Easy Install script with manager and worker mode configurations
 - [UI] Enhance bad behavior logging and UI actions with additional fields and filtering capabilities
 
-## v1.6.6-rc3 - ????/??/??
+## v1.6.6-rc3 - 2025/11/18
 
 - [BUGFIX] Fix `Let's Encrypt` wildcard certificate serving when using `wildcard` mode in multisite setups and the root domain is a part of the `SERVER_NAME` setting of the service.
 - [BUGFIX] Fix duplicated id error with ModSecurity rules when two services have the `USE_UI` setting enabled and the `USE_MODSECURITY_GLOBAL_CRS` setting enabled as well.
