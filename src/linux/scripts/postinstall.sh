@@ -204,6 +204,11 @@ EOF
             echo ""
             echo "⚠️  Note: Make sure that your firewall settings allow access to this URL."
             echo ""
+        elif [ "$SERVICE_UI" = "yes" ]; then
+            echo "🚀 Enabling and starting the BunkerWeb UI service..."
+            do_and_check_cmd systemctl enable --now bunkerweb-ui
+        else
+            echo "ℹ️ BunkerWeb UI service is not enabled in the current configuration."
         fi
     # Upgrade scenario
     else
