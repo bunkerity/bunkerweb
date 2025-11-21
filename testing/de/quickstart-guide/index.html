@@ -808,6 +808,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Grundlegende Einrichtung">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#highlights-des-easy-install-skripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Highlights des Easy-Install-Skripts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1151,8 +1166,8 @@
 <div class="tabbed-block">
 <p>Verwenden Sie das Easy Install-Skript, um BunkerWeb auf unterstützten Linux-Distributionen einzurichten. Es installiert und konfiguriert NGINX automatisch, fügt das BunkerWeb-Repository hinzu und richtet die erforderlichen Dienste ein.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Laden Sie das Skript und seine Prüfsumme herunter</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
 <span class="c1"># Überprüfen Sie die Prüfsumme</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1165,6 +1180,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Sicherheitshinweis</p>
 <p>Überprüfen Sie immer die Integrität des Skripts mit der bereitgestellten Prüfsumme, bevor Sie es ausführen.</p>
 </div>
+<h4 id="highlights-des-easy-install-skripts">Highlights des Easy-Install-Skripts</h4>
+<ul>
+<li>Erkennt Ihre Linux-Distribution und CPU-Architektur im Voraus und warnt, wenn Sie sich außerhalb der unterstützten Matrix befinden, bevor Änderungen vorgenommen werden.</li>
+<li>Der interaktive Ablauf lässt Sie das Installationsprofil auswählen (Full Stack, Manager, Worker usw.); im Manager-Modus wird die API immer auf <code>0.0.0.0</code> gebunden, der Setup-Assistent deaktiviert und nach der freizuschaltenden IP gefragt (in nicht-interaktiven Läufen per <code>--manager-ip</code> übergeben), während der Worker-Modus die Manager-IP(s) für seine Whitelist erzwingt.</li>
+<li>Manager-Installationen können weiterhin entscheiden, ob der Web-UI-Dienst gestartet werden soll, obwohl der Assistent deaktiviert bleibt.</li>
+<li>Die Zusammenfassung zeigt an, ob der FastAPI-Dienst gestartet wird, sodass Sie ihn bewusst mit <code>--api</code> / <code>--no-api</code> aktivieren oder deaktivieren können.</li>
+<li>CrowdSec-Optionen stehen nur für Full-Stack-Installationen zur Verfügung; Manager-/Worker-Modi überspringen sie automatisch, damit sich der Ablauf auf die Fernverwaltung konzentriert.</li>
+</ul>
 <p>Weitere Installationsmethoden (Paketmanager, Installationstypen, nicht-interaktive Flags, CrowdSec-Integration usw.) finden Sie unter <a href="../integrations/#linux">Linux-Integration</a>.</p>
 </div>
 <div class="tabbed-block">

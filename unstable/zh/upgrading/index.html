@@ -1244,11 +1244,11 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <p>要开始使用，请下载安装脚本及其校验和，然后在运行前验证脚本的完整性。</p>
 <div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.tag_name<span class="k">)</span>
 
-<span class="c1"># 下载脚本及其校验和</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
+<span class="c1"># Download the script and its checksum</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
 
-<span class="c1"># 验证校验和</span>
+<span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
 
 <span class="c1"># 如果检查成功，则运行脚本</span>
@@ -1307,6 +1307,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li>如果自动备份失败（或被禁用），您仍然可以使用下面的回滚部分进行手动恢复。</li>
 <li>升级模式有意避免在已存在的受支持固定版本之外重新安装或降级 NGINX。</li>
 <li>用于故障排除的日志保留在 <code>/var/log/bunkerweb/</code> 中。</li>
+</ul>
+</li>
+<li>
+<p><strong>基于模式的行为</strong>：</p>
+<ul>
+<li>升级期间将重复使用相同的安装类型逻辑：manager 模式保持设置向导禁用、将 API 绑定到 <code>0.0.0.0</code> 并仍然需要白名单 IP（无人值守运行时请通过 <code>--manager-ip</code> 传入），而 worker 模式继续强制要求提供 manager IP 列表。</li>
+<li>Manager 升级可以选择启动或跳过 Web UI 服务，汇总信息会明确显示 API 服务的状态，以便通过 <code>--api</code> / <code>--no-api</code> 控制它。</li>
+<li>CrowdSec 选项仍仅适用于全栈升级，脚本会在修改软件包之前持续验证操作系统和 CPU 架构，对不受支持的组合仍需使用 <code>--force</code>。</li>
 </ul>
 <p>回滚摘要：</p>
 <ul>

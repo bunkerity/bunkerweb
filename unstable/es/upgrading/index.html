@@ -1244,11 +1244,11 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <p>Para empezar, descarga el script de instalación y su suma de verificación, luego verifica la integridad del script antes de ejecutarlo.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.tag_name<span class="k">)</span>
 
-<span class="c1"># Descargar el script y su suma de verificación</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
+<span class="c1"># Download the script and its checksum</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
 
-<span class="c1"># Verificar la suma de verificación</span>
+<span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
 
 <span class="c1"># Si la verificación es exitosa, ejecuta el script</span>
@@ -1307,6 +1307,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li>Si la copia de seguridad automática falló (o se deshabilitó), aún puedes hacer una restauración manual usando la sección de Reversión a continuación.</li>
 <li>El modo de actualización evita intencionadamente reinstalar o degradar NGINX fuera de la versión anclada compatible ya presente.</li>
 <li>Los registros para la solución de problemas permanecen en <code>/var/log/bunkerweb/</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Comportamiento según el modo</strong>:</p>
+<ul>
+<li>El instalador reutiliza la misma lógica de selección durante la actualización: el modo manager mantiene el asistente deshabilitado, vincula la API a <code>0.0.0.0</code> y sigue exigiendo una IP para la lista blanca (proporciónala con <code>--manager-ip</code> en ejecuciones no interactivas), mientras que el modo worker continúa obligando a indicar las IP del manager.</li>
+<li>Las actualizaciones del manager pueden decidir si se inicia el servicio Web UI, y el resumen indica explícitamente el estado del servicio API para que puedas controlarlo con <code>--api</code> / <code>--no-api</code>.</li>
+<li>Las opciones de CrowdSec siguen limitadas a las actualizaciones full stack, y el script continúa validando el sistema operativo y la arquitectura de CPU antes de modificar paquetes; las combinaciones no soportadas siguen requiriendo <code>--force</code>.</li>
 </ul>
 <p>Resumen de la reversión:</p>
 <ul>

@@ -808,6 +808,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Configuración básica">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aspectos-destacados-del-easy-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aspectos destacados del Easy Install
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1150,14 +1165,13 @@
 </div>
 <div class="tabbed-block">
 <p>Usa el script de instalación fácil para configurar BunkerWeb en las distribuciones de Linux compatibles. Instala y configura automáticamente NGINX, añade el repositorio de BunkerWeb y configura los servicios necesarios.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Descargar el script y su suma de comprobación</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+<div class="highlight"><pre><span></span><code><span class="sb">```</span>bash
+<span class="c1"># Download the script and its checksum</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
-<span class="c1"># Verificar la suma de comprobación</span>
-sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
-
-<span class="c1"># Si la comprobación es exitosa, ejecuta el script</span>
+<span class="c1"># Verify the checksum</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256<span class="w">    </span><span class="c1"># Si la comprobación es exitosa, ejecuta el script</span>
 chmod<span class="w"> </span>+x<span class="w"> </span>install-bunkerweb.sh
 sudo<span class="w"> </span>./install-bunkerweb.sh
 </code></pre></div>
@@ -1165,6 +1179,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Aviso de seguridad</p>
 <p>Verifica siempre la integridad del script con la suma de comprobación proporcionada antes de ejecutarlo.</p>
 </div>
+<h4 id="aspectos-destacados-del-easy-install">Aspectos destacados del Easy Install</h4>
+<ul>
+<li>Detecta tu distribución de Linux y la arquitectura de CPU por adelantado y avisa si estás fuera de la matriz soportada antes de aplicar cambios.</li>
+<li>El flujo interactivo permite elegir el perfil de instalación (full stack, manager, worker, etc.); el modo manager expone siempre la API en <code>0.0.0.0</code>, deshabilita el asistente y solicita la IP a incluir en la lista blanca (proporciónala con <code>--manager-ip</code> en ejecuciones no interactivas), mientras que el modo worker exige las IP del manager para su lista blanca.</li>
+<li>Las instalaciones de tipo Manager pueden decidir si el servicio Web UI debe iniciarse, aunque el asistente permanezca deshabilitado.</li>
+<li>El resumen indica si el servicio FastAPI se ejecutará, de modo que puedas activarlo o desactivarlo conscientemente mediante <code>--api</code> / <code>--no-api</code>.</li>
+<li>Las opciones de CrowdSec solo están disponibles para instalaciones full stack; los modos manager/worker las omiten automáticamente para centrarse en el control remoto.</li>
+</ul>
 <p>Para métodos de instalación avanzados (gestor de paquetes, tipos de instalación, indicadores no interactivos, integración con CrowdSec, etc.), consulta la <a href="../integrations/#linux">Integración con Linux</a>.</p>
 </div>
 <div class="tabbed-block">

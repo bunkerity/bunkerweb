@@ -808,6 +808,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="基本设置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#easy-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      Easy Install 亮点
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1151,8 +1166,8 @@
 <div class="tabbed-block">
 <p>使用简易安装脚本在支持的 Linux 发行版上设置 BunkerWeb。它会自动安装和配置 NGINX，添加 BunkerWeb 仓库，并设置所需的服务。</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 下载脚本及其校验和</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
 <span class="c1"># 验证校验和</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1165,6 +1180,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">安全提示</p>
 <p>在执行脚本之前，请务必使用提供的校验和验证脚本的完整性。</p>
 </div>
+<h4 id="easy-install">Easy Install 亮点</h4>
+<ul>
+<li>在更改系统之前，会预先检测您的 Linux 发行版和 CPU 架构，并在超出支持矩阵时发出警告。</li>
+<li>交互式流程允许选择安装配置（全栈、manager、worker 等）；manager 模式始终将 API 绑定到 <code>0.0.0.0</code>、禁用设置向导并要求提供白名单 IP（非交互式运行可通过 <code>--manager-ip</code> 传入），而 worker 模式会强制收集 manager IP 以填充其白名单。</li>
+<li>即使向导被禁用，Manager 安装仍可决定是否启动 Web UI 服务。</li>
+<li>汇总信息会显示 FastAPI 服务是否会启动，便于使用 <code>--api</code> / <code>--no-api</code> 明确启用或禁用它。</li>
+<li>CrowdSec 选项仅适用于全栈安装；manager / worker 模式会自动跳过它们，以专注于远程控制。</li>
+</ul>
 <p>有关高级安装方法（包管理器、安装类型、非交互式标志、CrowdSec 集成等），请参阅<a href="../integrations/#linux">Linux 集成</a>。</p>
 </div>
 <div class="tabbed-block">

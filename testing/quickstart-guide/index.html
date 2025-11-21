@@ -808,6 +808,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Basic setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#easy-install-highlights" class="md-nav__link">
+    <span class="md-ellipsis">
+      Easy Install Highlights
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1151,8 +1166,8 @@
 <div class="tabbed-block">
 <p>Use the Easy Install script to set up BunkerWeb on supported Linux distributions. It automatically installs and configures NGINX, adds the BunkerWeb repository, and sets up the required services.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1165,6 +1180,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Security Notice</p>
 <p>Always verify the script integrity with the provided checksum before executing it.</p>
 </div>
+<h4 id="easy-install-highlights">Easy Install Highlights</h4>
+<ul>
+<li>Detects your Linux distribution and CPU architecture up front and warns if you are outside the supported matrix before making any change.</li>
+<li>The interactive flow lets you pick the installation profile (full stack, manager, worker, etc.); manager mode always exposes the API on <code>0.0.0.0</code>, disables the setup wizard, and asks for the whitelist IP (pass it with <code>--manager-ip</code> for non-interactive runs), while worker mode requires the manager IPs for its whitelist.</li>
+<li>Manager installations can still decide whether the Web UI service should start even though the wizard remains disabled.</li>
+<li>The summary now shows whether the FastAPI service will run so you can intentionally enable or disable it with <code>--api</code> / <code>--no-api</code>.</li>
+<li>CrowdSec options are only available for full-stack installs; manager/worker modes skip them automatically so the workflow stays focused on remote control.</li>
+</ul>
 <p>For advanced installation methods (package manager, installation types, non-interactive flags, CrowdSec integration, etc.), see the <a href="../integrations/#linux">Linux Integration</a>.</p>
 </div>
 <div class="tabbed-block">

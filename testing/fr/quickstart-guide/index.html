@@ -808,6 +808,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Configuration de base">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#points-forts-deasy-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      Points forts d'Easy Install
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1151,8 +1166,8 @@
 <div class="tabbed-block">
 <p>Utilisez le script d'installation Easy Install pour configurer BunkerWeb sur les distributions Linux prises en charge. Il installe et configure automatiquement NGINX, ajoute le dépôt BunkerWeb et met en place les services requis.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1165,6 +1180,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <p class="admonition-title">Avis de sécurité</p>
 <p>Vérifiez toujours l'intégrité du script avec la somme de contrôle fournie avant de l'exécuter.</p>
 </div>
+<h4 id="points-forts-deasy-install">Points forts d'Easy Install</h4>
+<ul>
+<li>Détecte votre distribution Linux et l'architecture CPU en amont et avertit si vous sortez de la matrice supportée avant toute modification.</li>
+<li>Le flux interactif vous laisse choisir le profil d'installation (full stack, manager, worker, etc.) ; le mode manager expose toujours l'API sur <code>0.0.0.0</code>, désactive l'assistant et demande l'IP à autoriser (passez-la avec <code>--manager-ip</code> en mode non interactif), tandis que le mode worker exige les IP du manager pour sa liste blanche.</li>
+<li>Les installations Manager peuvent toujours décider si le service Web UI doit démarrer, même si l'assistant reste désactivé.</li>
+<li>Le récapitulatif indique si le service FastAPI sera lancé, ce qui vous permet de l'activer ou de le désactiver volontairement via <code>--api</code> / <code>--no-api</code>.</li>
+<li>Les options CrowdSec ne sont disponibles que pour les installations full stack ; les modes manager/worker les ignorent automatiquement pour se concentrer sur le pilotage distant.</li>
+</ul>
 <p>Pour des méthodes d'installation avancées (gestionnaire de paquets, types d'installation, options non interactives, intégration CrowdSec, etc.), consultez l'<a href="../integrations/#linux">intégration Linux</a>.</p>
 </div>
 <div class="tabbed-block">

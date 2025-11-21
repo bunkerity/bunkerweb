@@ -1245,8 +1245,8 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <div class="highlight"><pre><span></span><code><span class="nv">LATEST_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.github.com/repos/bunkerity/bunkerweb/releases/latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>.tag_name<span class="k">)</span>
 
 <span class="c1"># Download the script and its checksum</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/<span class="si">${</span><span class="nv">LATEST_VERSION</span><span class="si">}</span>/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -1307,6 +1307,14 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <li>If automatic backup failed (or was disabled) you can still do a manual restore using the Rollback section below.</li>
 <li>Upgrade mode intentionally avoids reinstalling or downgrading NGINX outside the supported pinned version already present.</li>
 <li>Logs for troubleshooting remain in <code>/var/log/bunkerweb/</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Mode-aware behavior</strong>:</p>
+<ul>
+<li>The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the API to <code>0.0.0.0</code>, and requires a whitelist IP (pass <code>--manager-ip</code> for unattended runs), while worker mode still enforces the manager IP list.</li>
+<li>Manager upgrades can opt to start or skip the Web UI service, and the summary explicitly reports the API service state so you can decide whether to enable it via <code>--api</code> / <code>--no-api</code>.</li>
+<li>CrowdSec options remain limited to full-stack upgrades, and the script continues to validate both the operating system and CPU architecture before touching packages, gating unsupported combinations behind <code>--force</code>.</li>
 </ul>
 <p>Rollback summary:</p>
 <ul>

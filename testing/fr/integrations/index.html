@@ -1175,11 +1175,260 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#utilisation-du-graphique-de-barre-recommande" class="md-nav__link">
+  <a href="#utilisation-de-la-charte-helm-recommande" class="md-nav__link">
     <span class="md-ellipsis">
-      Utilisation du graphique de barre (recommandé)
+      Utilisation de la charte Helm (recommandé)
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conteneur-sidecar-helm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conteneur Sidecar + Helm
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Conteneur Sidecar + Helm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prerequis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prérequis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modes-de-decouverte-des-sidecars" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modes de Découverte des Sidecars
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Modes de Découverte des Sidecars">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mode-1-decouverte-automatique-controller-recommande" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mode 1 : Découverte Automatique (Controller - Recommandé)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mode-2-configuration-manuelle-bunkerweb_instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mode 2 : Configuration Manuelle (BUNKERWEB_INSTANCES)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etape-1-configuration-du-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Étape 1 : Configuration du Scheduler
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Étape 1 : Configuration du Scheduler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-avec-le-controller-recommande" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A : Avec le Controller (Recommandé)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-configuration-manuelle-avec-bunkerweb_instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B : Configuration Manuelle avec BUNKERWEB_INSTANCES
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etape-2-creation-du-deploiement-avec-sidecar" class="md-nav__link">
+    <span class="md-ellipsis">
+      Étape 2 : Création du Déploiement avec Sidecar
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Étape 2 : Création du Déploiement avec Sidecar">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure-du-deploiement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure du Déploiement
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-headless-api-interne-conditionnel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Service Headless (API interne) - Conditionnel
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etape-4-configuration-du-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Étape 4 : Configuration du Reverse Proxy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Étape 4 : Configuration du Reverse Proxy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-via-linterface-web-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A : Via l'Interface Web (UI)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-via-variables-denvironnement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B : Via Variables d'Environnement
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#etape-5-deploiement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Étape 5 : Déploiement
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Étape 5 : Déploiement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#avec-le-controller-mode-automatique-recommande" class="md-nav__link">
+    <span class="md-ellipsis">
+      Avec le Controller (Mode Automatique - Recommandé)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sans-controller-mode-manuel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sans Controller (Mode Manuel)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problemes-courants" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problèmes courants
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ajouter-une-nouvelle-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ajouter une Nouvelle Application
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ajouter une Nouvelle Application">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#avec-le-controller-mode-automatique" class="md-nav__link">
+    <span class="md-ellipsis">
+      Avec le Controller (Mode Automatique)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sans-le-controller-mode-manuel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sans le Controller (Mode Manuel)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bonnes-pratiques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bonnes Pratiques
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2140,8 +2389,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <h4 id="demarrage-rapide">Démarrage rapide</h4>
 <p>Pour commencer, téléchargez le script d'installation et sa somme de contrôle, puis vérifiez l'intégrité du script avant de l'exécuter.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the script and its checksum</span>
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
-wget<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>-O<span class="w"> </span>https://github.com/bunkerity/bunkerweb/releases/download/vtesting/install-bunkerweb.sh.sha256
 
 <span class="c1"># Verify the checksum</span>
 sha256sum<span class="w"> </span>-c<span class="w"> </span>install-bunkerweb.sh.sha256
@@ -2269,6 +2518,10 @@ sudo<span class="w"> </span>./install-bunkerweb.sh
 <td><code>--ui-only</code></td>
 <td>Installe uniquement le composant Interface utilisateur Web.</td>
 </tr>
+<tr>
+<td><code>--api-only</code></td>
+<td>Installe uniquement le service API (port 8000).</td>
+</tr>
 </tbody>
 </table>
 <p><strong>Intégrations de sécurité :</strong></p>
@@ -2342,9 +2595,17 @@ sudo<span class="w"> </span>./install-bunkerweb.sh<span class="w"> </span>--dry-
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Remarques importantes sur la compatibilité des options</p>
-<p><strong>CrowdSec Limitations:</strong>
-- Les options CrowdSec (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) ne sont compatibles qu'avec <code>--full</code> (par défaut) et <code>--manager</code> les types d'installation
-- Ils ne peuvent pas être utilisés avec <code>--worker</code>des installations , <code>--scheduler-only</code>, ou <code>--ui-only</code></p>
+<p><strong>CrowdSec Limitations:</strong></p>
+<ul>
+<li>Les options CrowdSec (<code>--crowdsec</code>, <code>--crowdsec-appsec</code>) ne sont compatibles qu'avec le type d'installation <code>--full</code> (par défaut)</li>
+<li>Ils ne peuvent pas être utilisés avec les installations <code>--manager</code>, <code>--worker</code>, <code>--scheduler-only</code>, <code>--ui-only</code> ou <code>--api-only</code></li>
+</ul>
+<p><strong>Disponibilité du service API :</strong></p>
+<ul>
+<li>Le service API externe (port 8000) est disponible pour les types d'installation <code>--full</code> et <code>--manager</code></li>
+<li>Il n'est pas disponible pour les installations <code>--worker</code>, <code>--scheduler-only</code> ou <code>--ui-only</code></li>
+<li>Utilisez <code>--api-only</code> pour une installation dédiée du service API</li>
+</ul>
 <p><strong>Exigences relatives aux instances :</strong>
 - L <code>--instances</code> 'option n'est valable qu'avec <code>--manager</code> les types d <code>--scheduler-only</code> 'installation et
 - Lors de l'utilisation <code>--manager</code> ou <code>--scheduler-only</code> avec <code>--yes</code> (mode non interactif), l' <code>--instances</code> option est obligatoire
@@ -2782,16 +3043,466 @@ et surveille également d'autres objets Kubernetes, tels que <a href="https://ku
 </div>
 <p>De plus, <strong>il est crucial de définir la <code>KUBERNETES_MODE</code> variable d'environnement lors <code>yes</code> de  l'utilisation de l'intégration Kubernetes</strong>. Cette variable est obligatoire pour un bon fonctionnement.</p>
 <h3 id="methodes-dinstallation">Méthodes d'installation</h3>
-<h4 id="utilisation-du-graphique-de-barre-recommande">Utilisation du graphique de barre (recommandé)</h4>
-<p>La méthode recommandée pour installer Kubernetes est d'utiliser le graphique Helm disponible à l'adresse <code>https://repo.bunkerweb.io/charts</code>:</p>
+<h4 id="utilisation-de-la-charte-helm-recommande">Utilisation de la charte Helm (recommandé)</h4>
+<p>La méthode recommandée pour installer Kubernetes est d'utiliser la charte Helm disponible à l'adresse <code>https://github.com/bunkerity/bunkerweb-helm</code>:</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>bunkerweb<span class="w"> </span>https://repo.bunkerweb.io/charts
 </code></pre></div>
 <p>Vous pouvez ensuite utiliser le tableau de bord de bunkerweb à partir de ce dépôt :</p>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>-f<span class="w"> </span>myvalues.yaml<span class="w"> </span>mybunkerweb<span class="w"> </span>bunkerweb/bunkerweb
 </code></pre></div>
 <p>La liste complète des valeurs est répertoriée dans le <a href="https://github.com/bunkerity/bunkerweb-helm/blob/main/charts/bunkerweb/values.yaml">fichier charts/bunkerweb/values.yaml</a> du <a href="https://github.com/bunkerity/bunkerweb-helm">dépôt bunkerity/bunkerweb-helm</a>.</p>
+<h4 id="conteneur-sidecar-helm">Conteneur Sidecar + Helm</h4>
+<p>Cette documentation explique comment déployer BunkerWeb en tant que sidecar pour protéger vos applications Kubernetes. Dans cette architecture, chaque application possède son propre conteneur BunkerWeb qui agit comme un reverse proxy de sécurité.</p>
+<h5 id="architecture">Architecture</h5>
+<pre class="mermaid"><code>flowchart TB
+
+  %% ---------- Styles ----------
+  classDef scheduler     fill:#eef2ff,stroke:#4c1d95,stroke-width:1px,rx:6px,ry:6px;
+  classDef podContainer  fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:6 3,rx:6px,ry:6px;
+  classDef component     fill:#f9fafb,stroke:#6b7280,stroke-width:1px,rx:4px,ry:4px;
+  classDef lb            fill:#e0f2fe,stroke:#0369a1,stroke-width:1px,rx:6px,ry:6px;
+
+  %% ---------- Haut : Scheduler ----------
+  SCHED["Scheduler BunkerWeb (centralisé)&lt;br/&gt;+ UI + MariaDB + Redis"]:::scheduler
+
+  %% ---------- Groupe de Pods ----------
+  subgraph PODS["Pods"]
+    %% Pod d'application 1 ----------
+    subgraph POD1["Pod d'application"]
+      BW1["BunkerWeb"]:::component
+      APP1["Application&lt;br/&gt;(port 80)"]:::component
+      BW1 --&gt;|requêtes légitimes| APP1
+    end
+    class POD1 podContainer
+
+    %% Pod d'application 2 ----------
+    subgraph POD2["Pod d'application"]
+      BW2["BunkerWeb"]:::component
+      APP2["Application&lt;br/&gt;(port XX)"]:::component
+      BW2 --&gt;|requêtes légitimes| APP2
+    end
+    class POD2 podContainer
+  end
+
+  %% ---------- Équilibreur de charge (en bas) ----------
+  LB["Équilibreur de charge"]:::lb
+
+  %% ---------- Câblage (visible, sémantique) ----------
+  %% Le Scheduler contrôle les instances BunkerWeb (API)
+  SCHED --&gt;|API 5000| BW1
+  SCHED --&gt;|API 5000| BW2
+
+  %% L'équilibreur de charge envoie le trafic vers BunkerWeb
+  LB --&gt;|HTTP/HTTPS| BW1
+  LB --&gt;|HTTP/HTTPS| BW2
+
+  %% ---------- Aide à la mise en page (caché) ----------
+  %% Place l'équilibreur de charge sous tout le groupe PODS
+  PODS --&gt; LB
+  linkStyle 6 stroke-width:0px,stroke:transparent;</code></pre>
+<h5 id="prerequis">Prérequis</h5>
+<ul>
+<li>Un cluster Kubernetes fonctionnel</li>
+<li>Helm 3.x installé</li>
+<li>Le chart Helm BunkerWeb déployé avec :</li>
+<li><code>scheduler</code> activé</li>
+<li><code>ui</code> activée</li>
+<li><code>mariadb</code> activé (pour stocker les configurations)</li>
+<li><code>redis</code> activé (pour la synchronisation)</li>
+<li><code>controller</code> activé (recommandé pour la découverte automatique des sidecars)</li>
+<li><code>bunkerweb.replicas: 0</code> (pas de déploiement standalone)</li>
+</ul>
+<h5 id="modes-de-decouverte-des-sidecars">Modes de Découverte des Sidecars</h5>
+<p>BunkerWeb propose deux modes de découverte des sidecars :</p>
+<h6 id="mode-1-decouverte-automatique-controller-recommande">Mode 1 : Découverte Automatique (Controller - Recommandé)</h6>
+<p>Le <strong>controller BunkerWeb</strong> découvre automatiquement les pods avec sidecars BunkerWeb sans configuration manuelle.</p>
+<p><strong>Avantages :</strong>
+- ✅ Découverte automatique des nouveaux sidecars
+- ✅ Pas besoin de maintenir manuellement <code>BUNKERWEB_INSTANCES</code>
+- ✅ Mise à l'échelle automatique</p>
+<p><strong>Configuration :</strong></p>
+<ol>
+<li>
+<p>Activez le controller dans <code>values.yaml</code> :
+<div class="highlight"><pre><span></span><code><span class="nt">controller</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.5&quot;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Pour chaque sidecar, ajoutez :</p>
+</li>
+<li><strong>Annotation du pod</strong> : <code>bunkerweb.io/INSTANCE: "yes"</code></li>
+<li><strong>Variable d'environnement</strong> : <code>KUBERNETES_MODE: "yes"</code></li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-bunkerweb</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-bw</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-bw</span>
+<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># Mandatory annotation for auto-discovery when using bunkerweb-controller</span>
+<span class="w">        </span><span class="nt">bunkerweb.io/INSTANCE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># Random WebApp you want to protect</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:latest</span>
+<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">        </span><span class="c1"># Sidecar BunkerWeb</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:latest</span>
+<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">entrypoint</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bwapi</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9113</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metrics</span>
+<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">192.168.0.0/16&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-bunkerweb</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-bw</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"> </span><span class="c1"># BunkerWeb exposed port</span>
+</code></pre></div>
+<ol>
+<li>
+<p><strong>Pas besoin de service headless</strong> - le controller communique directement avec les pods</p>
+</li>
+<li>
+<p><strong>Pas besoin</strong> de configurer le scheduler manuellement <code>BUNKERWEB_INSTANCES</code> - le controller gère la découverte</p>
+</li>
+</ol>
+<h6 id="mode-2-configuration-manuelle-bunkerweb_instances">Mode 2 : Configuration Manuelle (BUNKERWEB_INSTANCES)</h6>
+<p>Configuration explicite de chaque instance via la variable d'environnement <code>BUNKERWEB_INSTANCES</code>.</p>
+<p><strong>Avantages :</strong>
+- ✅ Contrôle précis des instances gérées
+- ✅ Utile pour des environnements multi-namespace complexes</p>
+<p><strong>Configuration :</strong></p>
+<p>Voir les sections suivantes pour les détails.</p>
+<h5 id="etape-1-configuration-du-scheduler">Étape 1 : Configuration du Scheduler</h5>
+<p>Le scheduler BunkerWeb est le composant central qui distribue les configurations à tous les sidecars.</p>
+<h6 id="option-a-avec-le-controller-recommande">Option A : Avec le Controller (Recommandé)</h6>
+<p>Si vous utilisez le controller pour la découverte automatique, <strong>aucune configuration spéciale n'est nécessaire</strong> pour le scheduler. Le controller détectera automatiquement les pods avec l'annotation <code>bunkerweb.io/INSTANCE: "yes"</code>.</p>
+<h6 id="option-b-configuration-manuelle-avec-bunkerweb_instances">Option B : Configuration Manuelle avec <code>BUNKERWEB_INSTANCES</code></h6>
+<p>Dans votre fichier <code>values.yaml</code> du chart BunkerWeb, configurez la variable d'environnement <code>BUNKERWEB_INSTANCES</code> avec les URLs de tous vos services headless :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.6-rc2&quot;</span>
+<span class="w">  </span><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUNKERWEB_INSTANCES</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://app1-bunkerweb-workers.namespace.svc.cluster.local:5000</span><span class="nv"> </span><span class="s">http://app2-bunkerweb-workers.namespace.svc.cluster.local:5000&quot;</span>
+</code></pre></div>
+<p><strong>Important :</strong>
+- Séparez les URLs par des espaces
+- Utilisez le port <strong>5000</strong> (API interne de BunkerWeb)
+- Format : <code>http://&lt;service-name&gt;.&lt;namespace&gt;.svc.cluster.local:5000</code></p>
+<h5 id="etape-2-creation-du-deploiement-avec-sidecar">Étape 2 : Création du Déploiement avec Sidecar</h5>
+<h6 id="structure-du-deploiement">Structure du Déploiement</h6>
+<p>Créez un déploiement Kubernetes avec deux conteneurs :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app-bunkerweb</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">votre-namespace</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># Votre application</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-image:latest</span>
+<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w">  </span><span class="c1"># Port sur lequel écoute votre app</span>
+
+<span class="w">        </span><span class="c1"># Sidecar BunkerWeb</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:1.6.6-rc2</span>
+<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w">  </span><span class="c1"># Port HTTP exposé</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span><span class="w">  </span><span class="c1"># API interne (obligatoire)</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bwapi</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9113</span><span class="w"> </span><span class="c1"># Prometheus exporter</span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metrics</span>
+<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KUBERNETES_MODE</span><span class="w">  </span><span class="c1"># OBLIGATOIRE pour le mode controller</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">API_WHITELIST_IP</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.0/8</span><span class="nv"> </span><span class="s">10.0.0.0/8</span><span class="nv"> </span><span class="s">172.16.0.0/12</span><span class="nv"> </span><span class="s">192.168.0.0/16&quot;</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">---</span>
+<span class="w">  </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="w">  </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-bunkerweb</span>
+<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerweb</span>
+<span class="w">  </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
+<span class="w">    </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-bw</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">        </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w"> </span><span class="c1"># BunkerWeb exposed port</span>
+<span class="w">  </span><span class="err">```</span>
+
+<span class="err">*</span><span class="nv">*Points</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clés :**</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">**Annotation obligatoire** : `bunkerweb.io/INSTANCE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="err">`</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">doit être ajoutée dans `template.metadata.annotations` (au même niveau que `labels`)</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="err">*</span><span class="nv">*Variable</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d&#39;environnement obligatoire**</span><span class="w"> </span><span class="nt">: `KUBERNETES_MODE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span><span class="err">`</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">active le mode Kubernetes</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">**Pas de service headless nécessaire** </span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">le controller communique directement avec les pods</span>
+
+<span class="c1">###### Variables d&#39;environnement importantes</span>
+
+<span class="p p-Indicator">|</span><span class="err"> Variable           | Valeur                                                | Description                                                      |</span>
+<span class="p p-Indicator">|</span><span class="err"> ------------------ | ----------------------------------------------------- | ---------------------------------------------------------------- |</span>
+<span class="p p-Indicator">|</span><span class="err"> `KUBERNETES_MODE`  | `yes`                                                 | **Obligatoire** pour la découverte automatique via le controller |</span>
+<span class="p p-Indicator">|</span><span class="err"> `API_WHITELIST_IP` | `127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` | IPs autorisées à accéder à l&#39;API                                 |</span>
+
+<span class="c1">##### Étape 3 : Création des Services</span>
+
+<span class="c1">###### Service ClusterIP (exposition externe)</span>
+
+<span class="nt">Service pour exposer votre application via BunkerWeb </span><span class="p">:</span>
+
+<span class="err">```</span><span class="l l-Scalar l-Scalar-Plain">yaml</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app-bunkerweb</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">votre-namespace</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span><span class="w">  </span><span class="c1"># ou LoadBalancer selon vos besoins</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span><span class="w">  </span><span class="c1"># Port BunkerWeb</span>
+</code></pre></div>
+<h6 id="service-headless-api-interne-conditionnel">Service Headless (API interne) - Conditionnel</h6>
+<p><strong>Uniquement requis en mode manuel (sans controller)</strong> :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app-bunkerweb-workers</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">votre-namespace</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">clusterIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span><span class="w">  </span><span class="c1"># Service headless</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bwapi</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+</code></pre></div>
+<p><strong>Important :</strong>
+- ⚠️ <strong>Non requis avec le controller</strong> - le controller communique directement avec les pods via l'API Kubernetes
+- ✅ <strong>Obligatoire sans le controller</strong> - le nom de ce service doit être ajouté manuellement dans <code>BUNKERWEB_INSTANCES</code>
+- Le <code>selector</code> doit correspondre aux labels de votre déploiement</p>
+<h5 id="etape-4-configuration-du-reverse-proxy">Étape 4 : Configuration du Reverse Proxy</h5>
+<p>Vous avez <strong>deux options</strong> pour configurer le reverse proxy :</p>
+<h6 id="option-a-via-linterface-web-ui">Option A : Via l'Interface Web (UI)</h6>
+<ol>
+<li>Accédez à l'UI de BunkerWeb</li>
+<li>Allez dans la section <strong>"Services"</strong></li>
+<li>Créez un nouveau service avec :</li>
+<li><strong>Server name</strong> : <code>mon-app.example.com</code></li>
+<li><strong>Reverse proxy host</strong> : <code>http://127.0.0.1:80</code> (ou le port de votre app)</li>
+<li><strong>Use reverse proxy</strong> : <code>yes</code></li>
+<li>Sauvegardez</li>
+</ol>
+<p>Le scheduler enverra automatiquement la configuration au sidecar via l'API (port 5000).</p>
+<h6 id="option-b-via-variables-denvironnement">Option B : Via Variables d'Environnement</h6>
+<p>Ajoutez ces variables dans le conteneur <code>bunkerweb</code> :</p>
+<div class="highlight"><pre><span></span><code><span class="nt">env</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;mon-app.example.com&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app.example.com_USE_REVERSE_PROXY</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;yes&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app.example.com_REVERSE_PROXY_HOST</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://127.0.0.1:80&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mon-app.example.com_REVERSE_PROXY_URL</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+</code></pre></div>
+<p><strong>Note :</strong> L'option UI est recommandée pour une gestion centralisée et dynamique.</p>
+<h5 id="etape-5-deploiement">Étape 5 : Déploiement</h5>
+<h6 id="avec-le-controller-mode-automatique-recommande">Avec le Controller (Mode Automatique - Recommandé)</h6>
+<ol>
+<li><strong>Déployez votre application avec le sidecar</strong> :
+   <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>mon-app-deployment.yaml
+</code></pre></div></li>
+</ol>
+<p>Assurez-vous que :
+   - L'annotation <code>bunkerweb.io/INSTANCE: "yes"</code> est présente dans <code>template.metadata.annotations</code>
+   - La variable <code>KUBERNETES_MODE: "yes"</code> est définie dans le conteneur bunkerweb</p>
+<ol>
+<li>
+<p><strong>Vérifiez que le controller détecte le sidecar</strong> :
+   <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>bunkerweb<span class="w"> </span>deployment/bunkerweb-controller<span class="w"> </span>-f
+</code></pre></div>
+   Vous devriez voir des logs indiquant la découverte du nouveau pod.</p>
+</li>
+<li>
+<p><strong>Créez la configuration du reverse proxy</strong> via l'UI de BunkerWeb</p>
+</li>
+<li>
+<p><strong>Testez votre application</strong> :
+   <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: mon-app.example.com&quot;</span><span class="w"> </span>http://&lt;service-ip&gt;
+</code></pre></div></p>
+</li>
+</ol>
+<h6 id="sans-controller-mode-manuel">Sans Controller (Mode Manuel)</h6>
+<ol>
+<li>
+<p><strong>Déployez votre application avec le sidecar</strong> :
+   <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>mon-app-deployment.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Ajoutez le service headless dans <code>BUNKERWEB_INSTANCES</code></strong> :
+   Mettez à jour votre <code>values.yaml</code> et upgrader le chart Helm :
+   <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerity/bunkerweb<span class="w"> </span>-n<span class="w"> </span>bunkerweb<span class="w"> </span>-f<span class="w"> </span>values.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Vérifiez que le scheduler détecte le sidecar</strong> :
+   <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>bunkerweb<span class="w"> </span>deployment/bunkerweb-scheduler<span class="w"> </span>-f
+</code></pre></div>
+   Vous devriez voir des logs indiquant la connexion au nouveau worker.</p>
+</li>
+<li>
+<p><strong>Créez la configuration du reverse proxy</strong> via l'UI de BunkerWeb</p>
+</li>
+<li>
+<p><strong>Testez votre application</strong> :
+   <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Host: mon-app.example.com&quot;</span><span class="w"> </span>http://&lt;service-ip&gt;
+</code></pre></div></p>
+</li>
+</ol>
+<h6 id="problemes-courants">Problèmes courants</h6>
+<table>
+<thead>
+<tr>
+<th>Problème</th>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Le scheduler ne trouve pas le sidecar</td>
+<td>Service headless manquant ou mal configuré</td>
+<td>Vérifier que le service existe et est dans <code>BUNKERWEB_INSTANCES</code></td>
+</tr>
+<tr>
+<td>Erreur 502 Bad Gateway</td>
+<td>L'app n'est pas accessible depuis BunkerWeb</td>
+<td>Vérifier que l'URL du reverse proxy est correcte (<code>127.0.0.1:port</code>)</td>
+</tr>
+<tr>
+<td>Configuration non appliquée</td>
+<td>Le sidecar n'a pas reçu la config</td>
+<td>Vérifier les logs du scheduler et du sidecar</td>
+</tr>
+<tr>
+<td>Port 5000 non accessible</td>
+<td>Port non exposé dans le conteneur</td>
+<td>Ajouter <code>- containerPort: 5000</code> dans le conteneur bunkerweb</td>
+</tr>
+</tbody>
+</table>
+<h5 id="ajouter-une-nouvelle-application">Ajouter une Nouvelle Application</h5>
+<h6 id="avec-le-controller-mode-automatique">Avec le Controller (Mode Automatique)</h6>
+<p>Pour ajouter une nouvelle application protégée par BunkerWeb :</p>
+<ol>
+<li><strong>Créez un nouveau déploiement</strong> avec le sidecar BunkerWeb avec :</li>
+<li>Annotation <code>bunkerweb.io/INSTANCE: "yes"</code> dans <code>template.metadata.annotations</code></li>
+<li>
+<p>Variable d'environnement <code>KUBERNETES_MODE: "yes"</code> dans le conteneur bunkerweb</p>
+</li>
+<li>
+<p><strong>Créez uniquement le service ClusterIP</strong> (pas de service headless nécessaire !)</p>
+</li>
+<li>
+<p><strong>Appliquez le déploiement</strong> :
+   <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>nouvelle-app-deployment.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Le controller détecte automatiquement le nouveau pod</strong> - pas besoin de redéployer le chart !</p>
+</li>
+<li>
+<p><strong>Configurez le reverse proxy</strong> dans l'UI</p>
+</li>
+</ol>
+<h6 id="sans-le-controller-mode-manuel">Sans le Controller (Mode Manuel)</h6>
+<p>Pour ajouter une nouvelle application protégée par BunkerWeb :</p>
+<ol>
+<li>
+<p><strong>Créez un nouveau déploiement</strong> avec le sidecar BunkerWeb (comme décrit ci-dessus)</p>
+</li>
+<li>
+<p><strong>Créez les deux services</strong> (ClusterIP + Headless)</p>
+</li>
+<li>
+<p><strong>Ajoutez le nouveau service headless</strong> dans <code>BUNKERWEB_INSTANCES</code> :
+   <div class="highlight"><pre><span></span><code><span class="nt">extraEnvs</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUNKERWEB_INSTANCES</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://app1-workers.ns.svc.cluster.local:5000</span><span class="nv"> </span><span class="s">http://app2-workers.ns.svc.cluster.local:5000&quot;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Redéployez le chart</strong> :
+   <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>upgrade<span class="w"> </span>bunkerweb<span class="w"> </span>bunkerity/bunkerweb<span class="w"> </span>-n<span class="w"> </span>bunkerweb<span class="w"> </span>-f<span class="w"> </span>values.yaml
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Configurez le reverse proxy</strong> dans l'UI</p>
+</li>
+</ol>
+<h5 id="bonnes-pratiques">Bonnes Pratiques</h5>
+<p>✅ <strong>Utilisez le controller</strong> pour la découverte automatique des sidecars (plus simple, pas de service headless nécessaire)
+✅ <strong>Utilisez un seul scheduler centralisé</strong> pour gérer tous les sidecars
+✅ <strong>Ajoutez toujours l'annotation</strong> <code>bunkerweb.io/INSTANCE: "yes"</code> et la variable <code>KUBERNETES_MODE: "yes"</code> en mode controller
+✅ <strong>Pas de service headless avec le controller</strong> - seul le service ClusterIP est nécessaire
+✅ <strong>Utilisez l'UI</strong> pour gérer les configurations (plus flexible)
+✅ <strong>Définissez des resource limits</strong> pour les conteneurs
+✅ <strong>Utilisez des secrets Kubernetes</strong> pour les configurations sensibles
+✅ <strong>Vérifiez les logs</strong> du scheduler et des sidecars régulièrement</p>
 <h4 id="fichiers-yaml-complets">Fichiers YAML complets</h4>
-<p>Au lieu d'utiliser le graphique helm, vous pouvez également utiliser les modèles YAML dans le <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">dossier misc/integrations</a> du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.</p>
+<p>Au lieu d'utiliser la charte Helm, vous pouvez également utiliser les modèles YAML dans le <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">dossier misc/integrations</a> du référentiel GitHub. Veuillez noter que nous vous recommandons vivement d'utiliser le tableau de barre à la place.</p>
 <h3 id="ressources-dentree">Ressources d'entrée</h3>
 <p>Une fois que la pile Kubernetes de BunkerWeb est correctement configurée et opérationnelle (reportez-vous aux journaux autoconf pour plus d'informations), vous pouvez procéder au déploiement d'applications Web au sein du cluster et déclarer votre ressource d'entrée.</p>
 <p>Il est important de noter que les paramètres BunkerWeb doivent être spécifiés en tant qu'annotations pour la ressource Ingress. Pour la partie domaine, veuillez utiliser la valeur spéciale <strong><code>bunkerweb.io</code></strong>. En incluant les annotations appropriées, vous pouvez configurer BunkerWeb en conséquence pour la ressource Ingress.</p>
