@@ -3,6 +3,7 @@
 ## v1.6.6 - ????/??/??
 
 - [BUGFIX] Fix default rate limit for POST /auth endpoint with API service
+- [BUGFIX] Fix instant ban when using bad behavior with redis if the ban time is set to 0 (permanent ban)
 - [LINUX] Enhance Easy Install script with manager and worker mode configurations
 - [UI] Enhance bad behavior logging and UI actions with additional fields and filtering capabilities
 - [UI] Optimize the reports page export functionality for large datasets by implementing server-side processing to handle data exports in manageable chunks, reducing memory usage and improving performance.
