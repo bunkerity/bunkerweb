@@ -142,7 +142,7 @@ def setup_page():
                 language=request.form.get("language", "en"),
                 totp_secret=totp_secret,
                 totp_recovery_codes=totp_recovery_codes,
-                method="ui",
+                method="wizard",
                 admin=True,
             )
             if ret:

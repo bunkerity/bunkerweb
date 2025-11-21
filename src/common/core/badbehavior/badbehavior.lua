@@ -87,10 +87,16 @@ function badbehavior:log()
 		date = self.ctx.bw.start_time,
 		id = self.ctx.bw.request_id,
 		ip = self.ctx.bw.remote_addr,
+		country = country,
 		server_name = self.ctx.bw.server_name,
 		status = status,
 		method = self.ctx.bw.request_method or "-",
 		url = request_uri,
+		security_mode = security_mode,
+		ban_scope = ban_scope,
+		ban_time = ban_time,
+		threshold = tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]) or 0,
+		count_time = tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]) or 0,
 	})
 	return self:ret(true, "success")
 end

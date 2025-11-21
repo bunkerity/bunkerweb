@@ -105,7 +105,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.6-rc2"
+LABEL version="1.6.6-rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

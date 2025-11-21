@@ -181,21 +181,71 @@ $(document).ready(function () {
         },
         {
           extend: "csv",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>CSV',
+          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_csv_visible">CSV (Visible)</span>',
           bom: true,
-          filename: "bw_report",
+          filename: "bw_report_visible",
           exportOptions: {
-            modifier: { search: "none" },
-            columns: ":not(:nth-child(-n+2)):not(:last-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
+          },
+        },
+        {
+          text: '<span class="tf-icons bx bx-download bx-18px me-2"></span><span data-i18n="button.export_csv_all">CSV (All)</span>',
+          className: "buttons-csv",
+          action: function (e, dt, button, config) {
+            // Get current table state for filters
+            const params = dt.ajax.params();
+            // Build URL with parameters for server-side export
+            const exportUrl = `${window.location.pathname}/export/csv?${$.param(
+              {
+                csrf_token: $("#csrf_token").val(),
+                draw: params.draw,
+                search: params.search ? params.search.value : "",
+                order_column:
+                  params.order && params.order.length > 0
+                    ? params.columns[params.order[0].column].data
+                    : "",
+                order_dir:
+                  params.order && params.order.length > 0
+                    ? params.order[0].dir
+                    : "",
+              },
+            )}`;
+            // Trigger download
+            window.location.href = exportUrl;
           },
         },
         {
           extend: "excel",
-          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span>Excel',
-          filename: "bw_report",
+          text: '<span class="tf-icons bx bx-table bx-18px me-2"></span><span data-i18n="button.export_excel_visible">Excel (Visible)</span>',
+          filename: "bw_report_visible",
           exportOptions: {
-            modifier: { search: "none" },
-            columns: ":not(:nth-child(-n+2)):not(:last-child)",
+            columns: ":visible:not(:nth-child(-n+2)):not(:last-child)",
+          },
+        },
+        {
+          text: '<span class="tf-icons bx bx-download bx-18px me-2"></span><span data-i18n="button.export_excel_all">Excel (All)</span>',
+          className: "buttons-excel",
+          action: function (e, dt, button, config) {
+            // Get current table state for filters
+            const params = dt.ajax.params();
+            // Build URL with parameters for server-side export
+            const exportUrl = `${
+              window.location.pathname
+            }/export/excel?${$.param({
+              csrf_token: $("#csrf_token").val(),
+              draw: params.draw,
+              search: params.search ? params.search.value : "",
+              order_column:
+                params.order && params.order.length > 0
+                  ? params.columns[params.order[0].column].data
+                  : "",
+              order_dir:
+                params.order && params.order.length > 0
+                  ? params.order[0].dir
+                  : "",
+            })}`;
+            // Trigger download
+            window.location.href = exportUrl;
           },
         },
       ],
@@ -772,14 +822,20 @@ $(document).ready(function () {
     let reason = "Unknown";
     let anomalyScore = null;
     let isModSec = false;
+    let currentServerName = "";
 
     try {
       // First, try to get the reason from row data
       const $row = button.closest("tr");
       const table = $("#reports").DataTable();
       const rowData = table.row($row).data();
-      if (rowData && rowData.reason) {
-        reason = rowData.reason;
+      if (rowData) {
+        if (rowData.reason) {
+          reason = rowData.reason;
+        }
+        if (rowData.server_name) {
+          currentServerName = decodeHtml(rowData.server_name);
+        }
       }
 
       // Try to parse the report data
@@ -869,7 +925,11 @@ $(document).ready(function () {
 
       // Generate formatted content with error handling
       try {
-        const formattedContent = formatSecurityReportData(reportData, reason);
+        const formattedContent = formatSecurityReportData(
+          reportData,
+          reason,
+          currentServerName,
+        );
         $("#dataContent").html(formattedContent);
       } catch (formatError) {
         console.error("Error formatting report data:", formatError);
@@ -932,6 +992,8 @@ $(document).ready(function () {
     }
   });
 
+  const htmlDecoder = document.createElement("textarea");
+
   // Function to safely escape HTML content
   function escapeHtml(text) {
     if (typeof text !== "string") {
@@ -940,6 +1002,14 @@ $(document).ready(function () {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  function decodeHtml(html) {
+    if (html === undefined || html === null) {
+      return "";
+    }
+    htmlDecoder.innerHTML = html;
+    return htmlDecoder.value;
   }
 
   // Function to safely escape HTML attributes (more restrictive)
@@ -1040,7 +1110,7 @@ $(document).ready(function () {
   };
 
   // Function to format security report data
-  function formatSecurityReportData(data, reason = "") {
+  function formatSecurityReportData(data, reason = "", serverName = "") {
     if (!data || typeof data !== "object") {
       return '<div class="alert alert-warning" data-i18n="status.no_data">No data available</div>';
     }
@@ -1049,6 +1119,10 @@ $(document).ready(function () {
       .trim()
       .toLowerCase();
     const badBehaviorEntries = normalizeBadBehaviorEntries(data);
+    const shouldFilterByServer = shouldFilterBadBehaviorByServer(serverName);
+    const filteredBadBehaviorEntries = shouldFilterByServer
+      ? filterBadBehaviorEntriesByServer(badBehaviorEntries, serverName)
+      : badBehaviorEntries;
     const isBadBehaviorReason =
       normalizedReason === "bad behavior" ||
       normalizedReason === "bad_behavior" ||
@@ -1058,7 +1132,7 @@ $(document).ready(function () {
       (!normalizedReason && badBehaviorEntries.length > 0);
 
     if (shouldFormatBadBehavior) {
-      if (!badBehaviorEntries.length) {
+      if (!filteredBadBehaviorEntries.length) {
         return `
           <div class="alert alert-info" data-i18n="status.no_data">
             ${escapeHtml(
@@ -1071,7 +1145,7 @@ $(document).ready(function () {
           ${createRawDataFallback(data)}
         `;
       }
-      return formatBadBehaviorData(badBehaviorEntries);
+      return formatBadBehaviorData(filteredBadBehaviorEntries);
     }
 
     const hasSecurityFields =
@@ -1306,6 +1380,40 @@ $(document).ready(function () {
 
     html += "</div>";
     return html;
+  }
+
+  function shouldFilterBadBehaviorByServer(serverName) {
+    const normalized = normalizeServerNameValue(serverName);
+    return Boolean(
+      normalized && normalized !== "n/a" && normalized !== "unknown",
+    );
+  }
+
+  function filterBadBehaviorEntriesByServer(entries, serverName) {
+    if (!entries || !entries.length) {
+      return [];
+    }
+
+    const normalizedTarget = normalizeServerNameValue(serverName);
+    if (
+      !normalizedTarget ||
+      normalizedTarget === "n/a" ||
+      normalizedTarget === "unknown"
+    ) {
+      return entries;
+    }
+
+    return entries.filter((entry) => {
+      const entryServer = normalizeServerNameValue(entry && entry.server_name);
+      return entryServer === normalizedTarget;
+    });
+  }
+
+  function normalizeServerNameValue(value) {
+    if (value === undefined || value === null) {
+      return "";
+    }
+    return String(value).trim().toLowerCase();
   }
 
   function getMethodBadgeClass(method) {

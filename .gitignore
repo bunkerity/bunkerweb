@@ -1,6 +1,8 @@
 site/
 .idea/
 .vscode/
+.kiro/
+.gemini/
 __pycache__
 env/
 tmp_venv/
@@ -20,3 +22,5 @@ src/ui/templates
 src/ui/builder
 src/ui/client/builder/*.json
 src/ui/client/builder/*.txt
+
+sync-fork.sh

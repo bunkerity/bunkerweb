@@ -1,6 +1,12 @@
 # Changelog
 
-## v1.6.6-rc3 - ????/??/??
+## v1.6.6 - ????/??/??
+
+- [LINUX] Enhance Easy Install script with manager and worker mode configurations
+- [UI] Enhance bad behavior logging and UI actions with additional fields and filtering capabilities
+- [UI] Optimize the reports page export functionality for large datasets by implementing server-side processing to handle data exports in manageable chunks, reducing memory usage and improving performance.
+
+## v1.6.6-rc3 - 2025/11/18
 
 - [BUGFIX] Fix `Let's Encrypt` wildcard certificate serving when using `wildcard` mode in multisite setups and the root domain is a part of the `SERVER_NAME` setting of the service.
 - [BUGFIX] Fix duplicated id error with ModSecurity rules when two services have the `USE_UI` setting enabled and the `USE_MODSECURITY_GLOBAL_CRS` setting enabled as well.
@@ -13,6 +19,7 @@
 - [LINUX] Support RHEL 10.1 instead of 10.0
 - [DOCS] Add live status updates link to README and documentation in multiple languages.
 - [DOCS] Fix PDF generation to generate it in english.
+- [DOCS] Add documentation about how to setup BunkerWeb as a sidecar in Kubernetes.
 
 ## v1.6.6-rc2 - 2025/11/05
 

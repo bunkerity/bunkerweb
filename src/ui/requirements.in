@@ -5,6 +5,7 @@ Flask-Login==0.6.3
 Flask-Session[cachelib]==0.8.0
 Flask-WTF==1.2.2
 gunicorn[gthread]==23.0.0
+openpyxl==3.1.5
 passlib==1.7.4
 pillow==12.0.0
 psutil==7.1.3
