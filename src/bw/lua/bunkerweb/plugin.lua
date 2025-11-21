@@ -45,18 +45,21 @@ function plugin:initialize(id, ctx)
 	self.use_redis = use_redis == "yes"
 	if self.is_request then
 		self.ctx = ctx or ngx.ctx
+		self.internalstore = get_ctx_obj("internalstore", self.ctx)
+			or datastore:new(subsystem == "http" and shared.internalstore or shared.internalstore_stream)
 		self.datastore = get_ctx_obj("datastore", self.ctx) or datastore:new()
 		self.cachestore = get_ctx_obj("cachestore", self.ctx) or cachestore:new(use_redis == "yes", self.ctx)
 		self.clusterstore = get_ctx_obj("clusterstore", self.ctx) or clusterstore:new()
 		self.cachestore_local = get_ctx_obj("cachestore_local", self.ctx) or cachestore:new(false, self.ctx)
 	else
+		self.internalstore = datastore:new(subsystem == "http" and shared.internalstore or shared.internalstore_stream)
 		self.datastore = datastore:new()
 		self.cachestore = cachestore:new(use_redis == "yes")
 		self.clusterstore = clusterstore:new(false)
 		self.cachestore_local = cachestore:new(false)
 	end
 	-- Get metadata
-	local metadata, err = self.datastore:get("plugin_" .. id, true)
+	local metadata, err = self.internalstore:get("plugin_" .. id, true)
 	if not metadata then
 		self.logger:log(ERR, err)
 		return

@@ -13,6 +13,8 @@ Table of Contents
 * [Methods](#methods)
     * [get_client_hello_server_name](#get_client_hello_server_name)
     * [get_supported_versions](#get_supported_versions)
+    * [get_client_hello_ciphers](#get_client_hello_ciphers)
+    * [get_client_hello_ext_present](#get_client_hello_ext_present)
     * [get_client_hello_ext](#get_client_hello_ext)
     * [set_protocols](#set_protocols)
 * [Community](#community)
@@ -70,7 +72,7 @@ Description
 
 This Lua module provides API functions for post-processing SSL client hello message for NGINX downstream connections.
 
-It must to be used in the contexts [ssl_client_hello_by_lua*](https://github.com/openresty/lua-nginx-module/#ssl_client_hello_by_lua_block).
+It must be used in the context [ssl_client_hello_by_lua*](https://github.com/openresty/lua-nginx-module/#ssl_client_hello_by_lua_block).
 
 This Lua API is particularly useful for dynamically setting the SSL protocols according to the SNI.
 
@@ -125,8 +127,91 @@ So this function can only be called in the context of [ssl_client_hello_by_lua*]
 
 [Back to TOC](#table-of-contents)
 
+get_client_hello_ciphers
+----------------------------
+**syntax:** *ciphers, err = ssl_clt.get_client_hello_ciphers()*
+
+**context:** *ssl_client_hello_by_lua&#42;*
+
+Returns a Lua table containing the decimal representations of the ciphers sent by the client on success.
+
+GREASE ciphers are also returned by the underlying OPENSSL function (SSL_client_hello_get0_ciphers) but excluded by the lua implementation of get_client_hello_ciphers().
+
+In case of errors, `nil` and a string describing the error are returned.
+
+This function can only be called in the context of [ssl_client_hello_by_lua*](https://github.com/openresty/lua-nginx-module/#ssl_client_hello_by_lua_block).
+
+Example:
+
+```nginx
+# nginx.conf
+server {
+    listen 443 ssl;
+    server_name   test.com;
+    ssl_client_hello_by_lua_block {
+        local ssl_clt = require "ngx.ssl.clienthello"
+        local ciphers, err = ssl_clt.get_client_hello_ciphers()
+        if not ciphers then
+            ngx.log(ngx.ERR, "failed to get_client_hello_ciphers()")
+            ngx.exit(ngx.ERROR)
+        end
+
+        for i, cipher in ipairs(ciphers) do
+            ngx.log(ngx.INFO, "ciphers ", cipher)
+        end
+    }
+    ssl_certificate test.crt;
+    ssl_certificate_key test.key;
+}
+```
+
+get_client_hello_ext_present
+----------------------------
+**syntax:** *ext, err = ssl_clt.get_client_hello_ext_present()*
+
+**context:** *ssl_client_hello_by_lua&#42;*
+
+Returns a Lua table contains the extension types on success.
+
+In case of errors, it returns `nil` and a string describing the error.
+
+Note that the ext is gotten from the raw extensions of the client hello message associated with the current downstream SSL connection.
+
+So this function can only be called in the context of [ssl_client_hello_by_lua*](https://github.com/openresty/lua-nginx-module/#ssl_client_hello_by_lua_block).
+
+GREASE extensions are excluded by the underlying OPENSSL function (SSL_client_hello_get1_extensions_present)
+
+Most modern browsers will randomize the order of the extensions so you may want to sort the table before working with it.
+
+
+Example:
+
+```nginx
+# nginx.conf
+server {
+    listen 443 ssl;
+    server_name   test.com;
+    ssl_client_hello_by_lua_block {
+        local ssl_clt = require "ngx.ssl.clienthello"
+        local exts = ssl_clt.get_client_hello_ext_present()
+        if not exts then
+            ngx.log(ngx.ERR, "failed to get_client_hello_ext_present()")
+            ngx.exit(ngx.ERROR)
+        end
+
+        for i, ext in ipairs(exts) do
+            ngx.log(ngx.INFO, "extension ", ext)
+        end
+    }
+    ssl_certificate test.crt;
+    ssl_certificate_key test.key;
+}
+```
+
+[Back to TOC](#table-of-contents)
+
 get_client_hello_ext
-----------------------
+--------------------
 **syntax:** *ext, err = ssl_clt.get_client_hello_ext(ext_type)*
 
 **context:** *ssl_client_hello_by_lua&#42;*

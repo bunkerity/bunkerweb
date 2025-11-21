@@ -1,0 +1,94 @@
+{
+  "name": "Basic settings when using BunkerWeb's API",
+  "settings": {
+    "SERVER_NAME": "www.example.com",
+    "AUTO_LETS_ENCRYPT": "no",
+    "USE_LETS_ENCRYPT_STAGING": "no",
+    "USE_LETS_ENCRYPT_WILDCARD": "no",
+    "LETS_ENCRYPT_CHALLENGE": "http",
+    "LETS_ENCRYPT_DNS_PROVIDER": "",
+    "LETS_ENCRYPT_DNS_PROPAGATION": "default",
+    "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM": "",
+    "USE_CUSTOM_SSL": "no",
+    "CUSTOM_SSL_CERT_PRIORITY": "file",
+    "CUSTOM_SSL_CERT": "",
+    "CUSTOM_SSL_KEY": "",
+    "CUSTOM_SSL_CERT_DATA": "",
+    "CUSTOM_SSL_KEY_DATA": "",
+    "USE_REVERSE_PROXY": "yes",
+    "REVERSE_PROXY_HOST": "http://bw-api:8888",
+    "REVERSE_PROXY_URL": "/",
+    "REVERSE_PROXY_INTERCEPT_ERRORS": "no",
+    "USE_LIMIT_REQ": "no",
+    "LIMIT_REQ_URL": "/",
+    "LIMIT_REQ_RATE": "8r/s",
+    "USE_LIMIT_CONN": "no",
+    "LIMIT_CONN_MAX_HTTP1": "20",
+    "LIMIT_CONN_MAX_HTTP2": "200",
+    "LIMIT_CONN_MAX_HTTP3": "200",
+    "SERVE_FILES": "no",
+    "ALLOWED_METHODS": "GET|POST|HEAD|PATCH|DELETE",
+    "MAX_CLIENT_SIZE": "1G",
+    "CONTENT_SECURITY_POLICY": "",
+    "PERMISSIONS_POLICY": ""
+  },
+  "configs": ["modsec/api.conf", "modsec-crs/api.conf"],
+  "steps": [
+    {
+      "title": "Service - Front service",
+      "subtitle": "Configure the server name and SSL/TLS settings",
+      "settings": [
+        "SERVER_NAME",
+        "AUTO_LETS_ENCRYPT",
+        "USE_LETS_ENCRYPT_STAGING",
+        "USE_LETS_ENCRYPT_WILDCARD",
+        "LETS_ENCRYPT_CHALLENGE",
+        "LETS_ENCRYPT_DNS_PROVIDER",
+        "LETS_ENCRYPT_DNS_PROPAGATION",
+        "LETS_ENCRYPT_DNS_CREDENTIAL_ITEM",
+        "USE_CUSTOM_SSL",
+        "CUSTOM_SSL_CERT_PRIORITY",
+        "CUSTOM_SSL_CERT",
+        "CUSTOM_SSL_KEY",
+        "CUSTOM_SSL_CERT_DATA",
+        "CUSTOM_SSL_KEY_DATA"
+      ]
+    },
+    {
+      "title": "Service - Upstream server",
+      "subtitle": "Configure the upstream server to be protected by BunkerWeb",
+      "settings": [
+        "USE_REVERSE_PROXY",
+        "REVERSE_PROXY_HOST",
+        "REVERSE_PROXY_URL",
+        "REVERSE_PROXY_INTERCEPT_ERRORS"
+      ]
+    },
+    {
+      "title": "API - Rate limiting",
+      "subtitle": "Configure rate limiting settings - keep in mind that the API has internal rate limiting as well",
+      "settings": [
+        "USE_LIMIT_REQ",
+        "LIMIT_REQ_URL",
+        "LIMIT_REQ_RATE",
+        "USE_LIMIT_CONN",
+        "LIMIT_CONN_MAX_HTTP1",
+        "LIMIT_CONN_MAX_HTTP2",
+        "LIMIT_CONN_MAX_HTTP3"
+      ]
+    },
+    {
+      "title": "API - Miscellaneous settings",
+      "subtitle": "Other important settings for proper API functioning",
+      "settings": [
+        "SERVE_FILES",
+        "USE_CLIENT_CACHE",
+        "ALLOWED_METHODS",
+        "MAX_CLIENT_SIZE",
+        "CONTENT_SECURITY_POLICY",
+        "PERMISSIONS_POLICY"
+      ],
+      "configs": ["modsec/api.conf", "modsec-crs/api.conf"]
+    }
+  ]
+}

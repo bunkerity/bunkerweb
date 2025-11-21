@@ -29,6 +29,9 @@
 #define NGX_STREAM_LUA_SOCKET_FT_CLIENTABORT   0x0080
 #define NGX_STREAM_LUA_SOCKET_FT_SSL           0x0100
 
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+#define NGX_STREAM_LUA_SOCKET_OPTION_TRANSPARENT    1
+#endif
 
 typedef struct ngx_stream_lua_socket_tcp_upstream_s
         ngx_stream_lua_socket_tcp_upstream_t;

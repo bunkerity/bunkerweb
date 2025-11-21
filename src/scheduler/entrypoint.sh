@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Enforce a restrictive default umask for all operations
-umask 027
-
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
 # trap SIGTERM and SIGINT
+# shellcheck disable=SC2329
 function trap_exit() {
 	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️ " "Caught stop operation"

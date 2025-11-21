@@ -17,6 +17,117 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
 
 请参阅[快速入门指南](quickstart-guide.md)中的快速入门向导和架构指导。
 
+## 推荐部署（独立容器）
+
+在生产环境中，将 API 作为独立容器部署在 BunkerWeb 数据平面和调度器旁边。让 API 仅绑定在内部控制平面网络上，并只通过 BunkerWeb 作为反向代理对外发布。该布局与 [Docker 集成参考](integrations.md#networks) 保持一致，并确保调度器、BunkerWeb 和 API 使用相同的设置。
+
+```yaml
+x-bw-env: &bw-env
+  # 使用锚点避免在两个服务上重复相同的配置
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # 请设置正确的 IP 段，确保调度器可以将配置发送到实例
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # 请为数据库设置更强的密码
+
+services:
+  bunkerweb:
+    # 这是调度器用来识别实例的名称
+    image: bunkerity/bunkerweb:1.6.6-rc3
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # 用于支持 QUIC / HTTP3
+    environment:
+      <<: *bw-env # 使用锚点避免在所有服务中重复相同的配置
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    environment:
+      <<: *bw-env
+      BUNKERWEB_INSTANCES: "bunkerweb" # 请确保实例名称正确
+      SERVER_NAME: "api.example.com" # 可按需修改
+      MULTISITE: "yes"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/"
+      api.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
+    volumes:
+      - bw-storage:/data # 用于持久化缓存和备份等数据
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.6-rc3
+    environment:
+      <<: *bw-env
+      API_USERNAME: "admin"
+      API_PASSWORD: "Str0ng&P@ss!" # 请为管理员用户设置更强的密码
+      DEBUG: "1"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-api
+      bw-db:
+        aliases:
+          - bw-api
+
+  bw-db:
+    image: mariadb:11
+    # 设置最大允许的数据包大小以避免大查询导致的问题
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # 请为数据库设置更强的密码
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
+
+  redis: # Redis 服务，用于持久化报表/封禁/统计数据
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+volumes:
+  bw-data:
+  bw-storage:
+  redis-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24 # 请设置正确的 IP 段，确保调度器可以将配置发送到实例
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db
+```
+
+这样可以将 API 隔离在 BunkerWeb 后面，使流量保持在受信任的网络中，并让你能够在控制平面和暴露的主机名两侧同时实施身份验证、允许列表和速率限制。
+
 ## 亮点
 
 - 实例感知：将操作性动作广播到已发现的实例。
@@ -37,7 +148,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -50,7 +161,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb"  # 匹配实例服务名称
@@ -70,7 +181,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.5
+        image: bunkerity/bunkerweb-api:1.6.6-rc3
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # 使用强密码
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # API 允许列表
@@ -124,7 +235,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -138,7 +249,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
         environment:
           <<: *api-env
           BUNKERWEB_INSTANCES: ""    # 由 Autoconf 发现
@@ -153,7 +264,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5
+        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
         depends_on:
           - bunkerweb
           - bw-docker
@@ -167,7 +278,7 @@ API 服务需要访问 BunkerWeb 数据库 (`DATABASE_URI`)。它通常与调度
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.5
+        image: bunkerity/bunkerweb-api:1.6.6-rc3
         environment:
           <<: *api-env
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
@@ -242,7 +353,7 @@ docker run -d \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5
+  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
 ```
 
 ## 身份验证
@@ -392,7 +503,7 @@ API 按资源聚焦的路由器组织。使用以下部分作为功能地图；`
 ### 自定义配置片段
 
 - `GET /configs`：列出服务的自定义配置片段（HTTP/服务器/流/ModSecurity/CRS 挂钩）（默认为 `service=global`）。`with_data=true` 在可打印时嵌入 UTF-8 内容。
-- `POST /configs` 和 `POST /configs/upload`：从 JSON 负载或上传的文件创建新片段。接受的类型包括 `http`、`server_http`、`default_server_http`、`modsec`、`modsec_crs`、`stream`、`server_stream` 和 CRS 插件挂钩。名称必须匹配 `^[\w_-]{1,64}$`。
+- `POST /configs` 和 `POST /configs/upload`：从 JSON 负载或上传的文件创建新片段。接受的类型包括 `http`、`server_http`、`default_server_http`、`modsec`、`modsec_crs`、`stream`、`server_stream` 和 CRS 插件挂钩。名称必须匹配 `^[\w_-]{1,255}$`。
 - `GET /configs/{service}/{type}/{name}`：检索带有可选内容的片段（`with_data=true`）。
 - `PATCH /configs/{service}/{type}/{name}` 和 `PATCH .../upload`：更新或移动 API 管理的片段；模板或文件管理的条目保持只读。
 - `DELETE /configs` 和 `DELETE /configs/{service}/{type}/{name}`：修剪 API 管理的片段，同时保留模板管理的片段，并为被忽略的条目返回一个 `skipped` 列表。
@@ -431,6 +542,8 @@ API 按资源聚焦的路由器组织。使用以下部分作为功能地图；`
 - `API_RATE_LIMIT_RULES`: 内联 JSON/CSV，或指向包含按路由规则的 YAML/JSON 文件的路径
 - 存储后端: 内存或当 `USE_REDIS=yes` 且提供了 `REDIS_*` 变量时使用 Redis/Valkey (支持 Sentinel)
 - 标头: `API_RATE_LIMIT_HEADERS_ENABLED` (默认: `yes`)
+
+`POST /auth` 始终执行 `API_RATE_LIMIT_AUTH_TIMES` / `API_RATE_LIMIT_AUTH_SECONDS`（默认 `10` / `60`）的独立限流。将任一值设置为 `0` 或为 `/auth` 添加自定义规则即可覆盖或禁用它。该内置规则复用相同的 SlowAPI 后端（内存或 Redis/Valkey），因此在所有副本之间都能保持一致的限流行为。
 
 示例 YAML (挂载在 `/etc/bunkerweb/api.yml`):
 

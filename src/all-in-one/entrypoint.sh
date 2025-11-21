@@ -1,17 +1,34 @@
 #!/bin/bash
 
-# Enforce a restrictive default umask for all operations
-umask 027
-
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
+# Ensure Redis data directory exists when running the AIO image
+if [ "${USE_REDIS}" = "yes" ]; then
+	redis_dir="/var/lib/redis"
+	if [ -L "$redis_dir" ]; then
+		redis_dir="$(readlink "$redis_dir")"
+	fi
+	if [ ! -d "$redis_dir" ]; then
+		if mkdir -p "$redis_dir"; then
+			# Align permissions with build-time defaults
+			chmod 770 "$redis_dir"
+			chown nginx:nginx "$redis_dir"
+			log "ENTRYPOINT" "✅" "Created Redis data directory at $redis_dir"
+		else
+			log "ENTRYPOINT" "❌" "Failed to create Redis data directory at $redis_dir (check /data permissions)"
+			exit 1
+		fi
+	fi
+fi
+
 handle_docker_secrets
 
 # trap SIGTERM and SIGINT
+# shellcheck disable=SC2329
 function trap_exit() {
 	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️" "Caught stop operation, stopping services..."
@@ -51,6 +68,7 @@ function trap_exit() {
 trap trap_exit TERM INT QUIT
 
 # trap SIGHUP
+# shellcheck disable=SC2329
 function trap_reload() {
 	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️" "Caught reload operation"
@@ -227,7 +245,7 @@ if [ "${USE_CROWDSEC}" = "yes" ] && [[ "${CROWDSEC_API:-http://127.0.0.1:8000}" 
 	fi
 
 	log "ENTRYPOINT" "ℹ️" "[CROWDSEC] Processing required collections and parsers..."
-	install_or_upgrade_collection "crowdsecurity/nginx"
+	install_or_upgrade_collection "bunkerity/bunkerweb"
 	install_or_upgrade_collection "crowdsecurity/linux"
 
 	if [[ "${CROWDSEC_APPSEC_URL}" == http://127.0.0.1* || "${CROWDSEC_APPSEC_URL}" == http://localhost* ]]; then

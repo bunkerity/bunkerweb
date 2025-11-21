@@ -96,7 +96,7 @@
       "help": "SecRequestBodyNoFilesLimit directive of ModSecurity.",
       "id": "modsecurity-req-body-no-files-limit",
       "label": "SecRequestBodyNoFilesLimit",
-      "regex": "^[0-9]+$",
+      "regex": "^[0-9]+[kKmMgG]?$",
       "type": "text"
     }
   },

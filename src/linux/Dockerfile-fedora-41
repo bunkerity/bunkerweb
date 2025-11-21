@@ -1,4 +1,4 @@
-FROM fedora:41@sha256:9b6125f8fee07f1b5e8db594eb05b1289e9cf7b45cceb0de80e53a5e5a87b003 AS builder
+FROM fedora:41@sha256:c3643bda846169b342b400d4bbd1cb7022a7037e108b403a97305d1cb1644bcd AS builder
 
 ENV OS=fedora
 ENV NGINX_VERSION=1.28.0
@@ -64,13 +64,20 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
-RUN dnf install -y nodejs npm parallel && \
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+ARG SKIP_MINIFY_CSS=no
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
+    dnf install -y nodejs npm parallel && \
     cd /tmp && \
-    npm ci --ignore-scripts
+    npm ci --ignore-scripts; \
+    fi
 
 # Minify JS files
+ARG SKIP_MINIFY=no
 ARG SKIP_MINIFY_JS=no
-RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
     | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
     else \
@@ -79,7 +86,7 @@ RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
 
 # Minify CSS files
 ARG SKIP_MINIFY_CSS=no
-RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
     | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
     else \
@@ -88,7 +95,7 @@ RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
 
 # Minify HTML files
 ARG SKIP_MINIFY_HTML=no
-RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
     parallel 'npx html-minifier-terser \
     --collapse-whitespace \
@@ -104,7 +111,7 @@ RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM fedora:41@sha256:9b6125f8fee07f1b5e8db594eb05b1289e9cf7b45cceb0de80e53a5e5a87b003
+FROM fedora:41@sha256:c3643bda846169b342b400d4bbd1cb7022a7037e108b403a97305d1cb1644bcd
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

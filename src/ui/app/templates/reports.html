@@ -27,10 +27,18 @@
         <table id="reports"
                class="table responsive nowrap position-relative w-100 d-none">
         </table>
-        <span class="position-absolute bottom-0 start-50 translate-middle badge rounded-pill bg-secondary">
-            TZ:
-            <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
-        </span>
+        <div class="d-flex flex-column flex-sm-row align-items-center gap-3 mt-4 pt-3 border-top border-light-subtle small text-muted w-100">
+            <div class="flex-grow-1 text-center">
+                <span class="badge rounded-pill bg-secondary">
+                    TZ:
+                    <script nonce="{{ script_nonce }}">document.write(Intl.DateTimeFormat().resolvedOptions().timeZone);</script>
+                </span>
+            </div>
+            <a href="https://db-ip.com"
+               class="link-secondary text-decoration-none ms-sm-auto"
+               target="_blank"
+               rel="noopener noreferrer">IP Geolocation by DB-IP</a>
+        </div>
     </div>
     <!-- / Content -->
     <!-- Full URL Modal -->

@@ -19,12 +19,11 @@ if subsystem == 'http' then
     require "resty.core.response"
     require "resty.core.phase"
     require "resty.core.ndk"
-    require "resty.core.socket"
     require "resty.core.coroutine"
     require "resty.core.param"
 end
 
-
+require "resty.core.socket"
 require "resty.core.misc"
 require "resty.core.ctx"
 

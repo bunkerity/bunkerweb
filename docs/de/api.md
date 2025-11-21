@@ -17,6 +17,117 @@ Der API-Dienst benötigt Zugriff auf die BunkerWeb-Datenbank (`DATABASE_URI`). E
 
 Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-Leitfaden](quickstart-guide.md).
 
+## Empfohlenes Deployment (Dedizierte Container)
+
+Für Produktionsumgebungen führen Sie die API als eigenen Container neben dem BunkerWeb-Datenpfad und dem Scheduler aus. Binden Sie die API an das interne Control-Plane-Netz und veröffentlichen Sie sie ausschließlich über BunkerWeb als Reverse-Proxy. Dieses Setup entspricht der [Docker-Integrationsreferenz](integrations.md#networks) und stellt sicher, dass Scheduler, BunkerWeb und die API dieselben Einstellungen verwenden.
+
+```yaml
+x-bw-env: &bw-env
+  # Wir verwenden einen Anker, um dieselben Einstellungen nicht für beide Dienste wiederholen zu müssen
+  API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24" # Stellen Sie sicher, dass der Scheduler die Konfiguration an die Instanz senden kann, indem Sie den richtigen IP-Bereich festlegen
+  DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db" # Verwenden Sie ein stärkeres Passwort für die Datenbank
+
+services:
+  bunkerweb:
+    # Name, unter dem der Scheduler die Instanz identifiziert
+    image: bunkerity/bunkerweb:1.6.6-rc3
+    ports:
+      - "80:8080/tcp"
+      - "443:8443/tcp"
+      - "443:8443/udp" # Für QUIC-/HTTP3-Unterstützung
+    environment:
+      <<: *bw-env # Wir nutzen den Anker, um dieselbe Konfiguration nicht bei allen Diensten zu wiederholen
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    environment:
+      <<: *bw-env
+      BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass der Instanzname korrekt ist
+      SERVER_NAME: "api.example.com" # Passen Sie ihn bei Bedarf an
+      MULTISITE: "yes"
+      USE_REDIS: "yes"
+      REDIS_HOST: "redis"
+      api.example.com_USE_TEMPLATE: "bw-api"
+      api.example.com_GENERATE_SELF_SIGNED_SSL: "yes"
+      api.example.com_USE_REVERSE_PROXY: "yes"
+      api.example.com_REVERSE_PROXY_URL: "/"
+      api.example.com_REVERSE_PROXY_HOST: "http://bw-api:8888"
+    volumes:
+      - bw-storage:/data # Dient zur Persistierung des Caches und anderer Daten wie Backups
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-api:
+    image: bunkerity/bunkerweb-api:1.6.6-rc3
+    environment:
+      <<: *bw-env
+      API_USERNAME: "admin"
+      API_PASSWORD: "Str0ng&P@ss!" # Verwenden Sie ein stärkeres Passwort für den Administrator
+      DEBUG: "1"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-api
+      bw-db:
+        aliases:
+          - bw-api
+
+  bw-db:
+    image: mariadb:11
+    # Legt die maximale Paketgröße fest, um Probleme mit großen Abfragen zu vermeiden
+    command: --max-allowed-packet=67108864
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "db"
+      MYSQL_USER: "bunkerweb"
+      MYSQL_PASSWORD: "changeme" # Verwenden Sie ein stärkeres Passwort für die Datenbank
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: "unless-stopped"
+    networks:
+      - bw-db
+
+  redis: # Redis-Dienst zur Persistierung von Berichten/Sperren/Statistiken
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: "unless-stopped"
+    networks:
+      - bw-universe
+
+volumes:
+  bw-data:
+  bw-storage:
+  redis-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24 # Stellen Sie sicher, dass der Scheduler die Konfiguration an die Instanz senden kann, indem Sie den richtigen IP-Bereich festlegen
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db
+```
+
+Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauenswürdigen Netzen und Sie können Authentifizierung, Zulassungslisten und Ratenbegrenzungen sowohl auf der Control Plane als auch auf dem exponierten Hostnamen durchsetzen.
+
 ## Highlights
 
 - Instanz-bewusst: sendet operative Aktionen an entdeckte Instanzen.
@@ -37,7 +148,7 @@ Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -50,7 +161,7 @@ Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb"  # Entspricht dem Dienstnamen der Instanz
@@ -70,7 +181,7 @@ Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.5
+        image: bunkerity/bunkerweb-api:1.6.6-rc3
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # Verwenden Sie ein starkes Passwort
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # API-Zulassungsliste
@@ -124,7 +235,7 @@ Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.5
+        image: bunkerity/bunkerweb:1.6.6-rc3
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -138,7 +249,7 @@ Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.5
+        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
         environment:
           <<: *api-env
           BUNKERWEB_INSTANCES: ""    # Von Autoconf entdeckt
@@ -153,7 +264,7 @@ Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.5
+        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
         depends_on:
           - bunkerweb
           - bw-docker
@@ -167,7 +278,7 @@ Siehe den Schnellstart-Assistenten und die Architekturhinweise im [Schnellstart-
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.5
+        image: bunkerity/bunkerweb-api:1.6.6-rc3
         environment:
           <<: *api-env
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
@@ -242,7 +353,7 @@ docker run -d \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.5
+  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
 ```
 
 ## Authentifizierung
@@ -392,7 +503,7 @@ Die API ist nach ressourcenorientierten Routern organisiert. Verwenden Sie die f
 ### Benutzerdefinierte Konfigurations-Snippets
 
 -   `GET /configs`: listet benutzerdefinierte Konfigurationsfragmente (HTTP/Server/Stream/ModSecurity/CRS-Hooks) für einen Dienst auf (`service=global` standardmäßig). `with_data=true` bettet UTF-8-Inhalt ein, wenn er druckbar ist.
--   `POST /configs` und `POST /configs/upload`: erstellt neue Snippets aus JSON-Payloads oder hochgeladenen Dateien. Akzeptierte Typen sind `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream` und CRS-Plugin-Hooks. Namen müssen mit `^[\w_-]{1,64}$` übereinstimmen.
+-   `POST /configs` und `POST /configs/upload`: erstellt neue Snippets aus JSON-Payloads oder hochgeladenen Dateien. Akzeptierte Typen sind `http`, `server_http`, `default_server_http`, `modsec`, `modsec_crs`, `stream`, `server_stream` und CRS-Plugin-Hooks. Namen müssen mit `^[\w_-]{1,255}$` übereinstimmen.
 -   `GET /configs/{service}/{type}/{name}`: ruft ein Snippet mit optionalem Inhalt ab (`with_data=true`).
 -   `PATCH /configs/{service}/{type}/{name}` und `PATCH .../upload`: aktualisiert oder verschiebt API-verwaltete Snippets; vorlagen- oder dateiverwaltete Einträge bleiben schreibgeschützt.
 -   `DELETE /configs` und `DELETE /configs/{service}/{type}/{name}`: entfernt API-verwaltete Snippets unter Beibehaltung von vorlagenverwalteten, wobei eine `skipped`-Liste für ignorierte Einträge zurückgegeben wird.
@@ -431,6 +542,8 @@ Die Ratenbegrenzung pro Client wird von SlowAPI gehandhabt. Aktivieren/deaktivie
 -   `API_RATE_LIMIT_RULES`: inline JSON/CSV oder ein Pfad zu einer YAML/JSON-Datei mit Regeln pro Route
 -   Speicher-Backend: In-Memory oder Redis/Valkey, wenn `USE_REDIS=yes` und `REDIS_*`-Variablen bereitgestellt werden (Sentinel unterstützt)
 -   Header: `API_RATE_LIMIT_HEADERS_ENABLED` (Standard: `yes`)
+
+`POST /auth` erzwingt immer sein eigenes Limit von `API_RATE_LIMIT_AUTH_TIMES` pro `API_RATE_LIMIT_AUTH_SECONDS` (Standard `10` pro `60`). Setzen Sie einen der Werte auf `0` oder fügen Sie eine benutzerdefinierte `/auth`-Regel hinzu, um dies zu überschreiben oder zu deaktivieren. Diese integrierte Regel läuft über dasselbe SlowAPI-Backend (Memory oder Redis/Valkey), sodass das Limit konsistent über alle Replikate hinweg erzwungen wird.
 
 Beispiel YAML (gemountet unter `/etc/bunkerweb/api.yml`):
 

@@ -454,7 +454,7 @@ ngx_stream_lua_balancer_free_peer(ngx_peer_connection_t *pc, void *data,
 {
     ngx_stream_lua_balancer_peer_data_t        *bp = data;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
+    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, pc->log, 0,
                    "lua balancer free peer, tries: %ui", pc->tries);
 
     if (bp->sockaddr && bp->socklen) {

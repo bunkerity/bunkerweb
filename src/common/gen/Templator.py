@@ -77,52 +77,98 @@ class ConfigurableCustomUndefined(Undefined):
         return self.__class__(name=item_key)
 
     def __eq__(self, other: Any) -> bool:
-        value = self._config_dict.get(self._undefined_name)
-        if value is not None:
-            if other == "" and isinstance(value, str):
-                value = value.strip()
-            return value == other
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                if other == "" and isinstance(value, str):
+                    value = value.strip()
+                return value == other
         return super().__eq__(other)
 
     def __ne__(self, other: Any) -> bool:
-        value = self._config_dict.get(self._undefined_name)
-        if value is not None:
-            if other == "" and isinstance(value, str):
-                value = value.strip()
-            return value != other
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                if other == "" and isinstance(value, str):
+                    value = value.strip()
+                return value != other
         return super().__ne__(other)
 
+    def __repr__(self) -> str:
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                return repr(value)
+        return super().__repr__()
+
+    def __lt__(self, other: Any) -> bool:
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                with suppress(TypeError):
+                    return value < other
+        return super().__lt__(other)
+
+    def __le__(self, other: Any) -> bool:
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                with suppress(TypeError):
+                    return value <= other
+        return super().__le__(other)
+
+    def __gt__(self, other: Any) -> bool:
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                with suppress(TypeError):
+                    return value > other
+        return super().__gt__(other)
+
+    def __ge__(self, other: Any) -> bool:
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                with suppress(TypeError):
+                    return value >= other
+        return super().__ge__(other)
+
     def __str__(self) -> str:
-        value = self._config_dict.get(self._undefined_name)
-        if value is not None:
-            return str(value)
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                return str(value)
         return super().__str__()
 
     def __len__(self) -> int:
-        value = self._config_dict.get(self._undefined_name)
-        if value is not None and hasattr(value, "__len__"):
-            return len(value)
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None and hasattr(value, "__len__"):
+                return len(value)
         return super().__len__()
 
     def __iter__(self):
-        value = self._config_dict.get(self._undefined_name)
-        if value is not None and hasattr(value, "__iter__"):
-            return iter(value)
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None and hasattr(value, "__iter__"):
+                return iter(value)
         return super().__iter__()
 
     def __bool__(self) -> bool:
-        value = self._config_dict.get(self._undefined_name)
-        if value is not None:
-            if isinstance(value, str):
-                value = value.strip()
-            return bool(value)
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None:
+                if isinstance(value, str):
+                    value = value.strip()
+                return bool(value)
         return super().__bool__()
 
     def __contains__(self, item: Any) -> bool:
-        value = self._config_dict.get(self._undefined_name)
-        if value is not None and hasattr(value, "__contains__"):
-            return item in value
-        return super().__contains__(item)
+        if self._undefined_name:
+            value = self._config_dict.get(self._undefined_name)
+            if value is not None and hasattr(value, "__contains__"):
+                return item in value
+        return False
 
 
 def create_custom_undefined_class(default_config: Dict[str, Any]):

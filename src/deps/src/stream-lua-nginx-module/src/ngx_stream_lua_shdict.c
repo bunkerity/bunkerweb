@@ -601,8 +601,6 @@ ngx_stream_lua_shdict_get_keys(lua_State *L)
 }
 
 
-
-
 static int
 ngx_stream_lua_shdict_lpush(lua_State *L)
 {

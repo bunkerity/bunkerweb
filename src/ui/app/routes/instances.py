@@ -1,13 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from re import compile as re_compile
-from threading import Thread
 from time import time
 from typing import Literal
 from urllib.parse import urlsplit
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB
+from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.utils import flash
 
 from app.models.instance import Instance
@@ -206,7 +205,7 @@ def instances_action(action: Literal["ping", "reload", "stop", "delete"]):  # TO
                 executor.map(execute_action, instances)
             DATA["RELOADING"] = False
 
-        Thread(target=execute_actions, args=(instances,)).start()
+        CONFIG_TASKS_EXECUTOR.submit(execute_actions, instances)
 
     return redirect(
         url_for(

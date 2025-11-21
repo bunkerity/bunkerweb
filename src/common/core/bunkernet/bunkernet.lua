@@ -37,7 +37,7 @@ function bunkernet:initialize(ctx)
 	plugin.initialize(self, "bunkernet", ctx)
 	-- Get BunkerNet ID and save info
 	if get_phase() ~= "init" and self:is_needed() then
-		local id, _ = self.datastore:get("plugin_bunkernet_id", true)
+		local id, _ = self.internalstore:get("plugin_bunkernet_id", true)
 		if id then
 			self.bunkernet_id = id
 			self.version = get_version(self.ctx)
@@ -102,10 +102,10 @@ function bunkernet:init()
 	-- Retrieve instance ID
 	local id = f:read("*all"):gsub("[\r\n]", "")
 	f:close()
-	-- Store ID in datastore
-	local ok, err = self.datastore:set("plugin_bunkernet_id", id, nil, true)
+	-- Store ID in internalstore
+	local ok, err = self.internalstore:set("plugin_bunkernet_id", id, nil, true)
 	if not ok then
-		return self:ret(false, "can't save instance ID to the datastore : " .. err)
+		return self:ret(false, "can't save instance ID to the internalstore : " .. err)
 	end
 	-- Load databases
 	local ret = true
@@ -128,9 +128,9 @@ function bunkernet:init()
 		return self:ret(false, "error while reading database : " .. err)
 	end
 	f:close()
-	local ok, err = self.datastore:set("plugin_bunkernet_db", db, nil, true)
+	local ok, err = self.internalstore:set("plugin_bunkernet_db", db, nil, true)
 	if not ok then
-		return self:ret(false, "can't store bunkernet database into datastore : " .. err)
+		return self:ret(false, "can't store bunkernet database into internalstore : " .. err)
 	end
 	return self:ret(true, "successfully loaded " .. tostring(i) .. " bad IPs using instance ID " .. id)
 end
@@ -154,7 +154,7 @@ function bunkernet:access()
 		return self:ret(true, "missing instance ID")
 	end
 	-- Extract DB
-	local db, err = self.datastore:get("plugin_bunkernet_db", true)
+	local db, err = self.internalstore:get("plugin_bunkernet_db", true)
 	if db then
 		-- Check if is IP is present
 		if #db.ip > 0 then
@@ -222,9 +222,13 @@ function bunkernet:log(bypass_checks)
 			return self:ret(false, "can't set IP report into datastore : " .. err)
 		end
 		-- Store in recent reports
-		ret, err = self.datastore:set("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason, "added", 5400)
+		ret, err = self.datastore:set_with_retries(
+			"plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason,
+			"added",
+			5400
+		)
 		if not ret then
-			return self:ret(false, "can't set IP added into datastore : " .. err)
+			return self:ret(false, "can't add recent IP into datastore : " .. err)
 		end
 		return self:ret(true, "IP added to reports")
 	end
@@ -355,7 +359,7 @@ function bunkernet:api()
 
 	if match(self.ctx.bw.uri, "^/bunkernet/ping$") then
 		-- Check id
-		local id, err_id = self.datastore:get("plugin_bunkernet_id", true)
+		local id, err_id = self.internalstore:get("plugin_bunkernet_id", true)
 		if not id and err_id ~= "not found" then
 			return self:ret(true, "error while getting bunkernet id : " .. err_id, HTTP_INTERNAL_SERVER_ERROR)
 		elseif not id then

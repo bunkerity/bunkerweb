@@ -1,12 +1,11 @@
 from contextlib import suppress
-from threading import Thread
 from time import time
 from typing import Dict
 
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.utils import get_blacklisted_settings
 
 from app.routes.utils import handle_error, wait_applying
@@ -85,7 +84,7 @@ def global_config_page():
             DATA["RELOADING"] = False
 
         DATA.update({"RELOADING": True, "LAST_RELOAD": time(), "CONFIG_CHANGED": True})
-        Thread(target=update_global_config, args=(variables,)).start()
+        CONFIG_TASKS_EXECUTOR.submit(update_global_config, variables)
 
         arguments = {}
         if request.args.get("mode", "advanced") != "advanced":

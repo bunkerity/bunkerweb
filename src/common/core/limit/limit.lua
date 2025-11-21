@@ -55,8 +55,8 @@ function limit:initialize(ctx)
 	plugin.initialize(self, "limit", ctx)
 	-- Load rules if needed
 	if get_phase() ~= "init" and self:is_needed() then
-		-- Get all rules from datastore
-		local all_rules, err = self.datastore:get("plugin_limit_rules", true)
+		-- Get all rules from internalstore
+		local all_rules, err = self.internalstore:get("plugin_limit_rules", true)
 		if not all_rules then
 			self.logger:log(ERR, err)
 			return
@@ -100,7 +100,7 @@ function limit:init()
 		return self:ret(true, "no service uses limit for requests, skipping init")
 	end
 	-- Get variables
-	local variables, err = get_multiple_variables({ "LIMIT_REQ_URL", "LIMIT_REQ_RATE" })
+	local variables, err = get_multiple_variables({ "USE_LIMIT_REQ", "LIMIT_REQ_URL", "LIMIT_REQ_RATE" })
 	if variables == nil then
 		return self:ret(false, err)
 	end
@@ -108,19 +108,21 @@ function limit:init()
 	local data = {}
 	local i = 0
 	for srv, vars in pairs(variables) do
-		for var, value in pairs(vars) do
-			if regex_match(var, "LIMIT_REQ_URL") then
-				local url = value
-				local rate = vars[var:gsub("URL", "RATE")]
-				if data[srv] == nil then
-					data[srv] = {}
+		if vars["USE_LIMIT_REQ"] == "yes" then
+			for var, value in pairs(vars) do
+				if regex_match(var, "LIMIT_REQ_URL") then
+					local url = value
+					local rate = vars[var:gsub("URL", "RATE")]
+					if data[srv] == nil then
+						data[srv] = {}
+					end
+					data[srv][url] = rate
+					i = i + 1
 				end
-				data[srv][url] = rate
-				i = i + 1
 			end
 		end
 	end
-	local ok, err = self.datastore:set("plugin_limit_rules", data, nil, true)
+	local ok, err = self.internalstore:set("plugin_limit_rules", data, nil, true)
 	if not ok then
 		return self:ret(false, err)
 	end
@@ -212,7 +214,7 @@ function limit:limit_req(rate_max, rate_time)
 			timestamps = redis_timestamps
 			-- Save the new timestamps
 			-- luacheck: ignore 421
-			local ok, err = self.datastore:set(
+			local ok, err = self.datastore:set_with_retries(
 				"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
 				encode(timestamps),
 				delay
@@ -251,7 +253,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	-- Save new timestamps if needed
 	if updated then
 		-- luacheck: ignore 421
-		local ok, err = self.datastore:set(
+		local ok, err = self.datastore:set_with_retries(
 			"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
 			encode(new_timestamps),
 			delay

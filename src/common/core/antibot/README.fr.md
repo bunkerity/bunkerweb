@@ -36,14 +36,20 @@ Les paramètres suivants sont partagés par tous les mécanismes de défi :
 
 BunkerWeb permet d’indiquer certains utilisateurs, IP ou requêtes qui doivent contourner totalement le défi antibot. Utile pour des services de confiance, réseaux internes ou des pages à laisser toujours accessibles :
 
-| Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                                     |
-| --------------------------- | ------ | --------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |        | multisite | non      | URL exclues : liste d’expressions régulières d’URI séparées par des espaces qui doivent contourner le défi.     |
-| `ANTIBOT_IGNORE_IP`         |        | multisite | non      | IP exclues : liste d’adresses IP ou de plages CIDR séparées par des espaces qui doivent contourner le défi.     |
-| `ANTIBOT_IGNORE_RDNS`       |        | multisite | non      | rDNS exclu : liste de suffixes de DNS inversés séparés par des espaces qui doivent contourner le défi.          |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | non      | IP publiques uniquement : si `yes`, ne faire des vérifications rDNS que sur des IP publiques.                   |
-| `ANTIBOT_IGNORE_ASN`        |        | multisite | non      | ASN exclus : liste de numéros d’ASN séparés par des espaces qui doivent contourner le défi.                     |
-| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | non      | User‑Agents exclus : liste de motifs regex d’User‑Agent séparés par des espaces qui doivent contourner le défi. |
+| Paramètre                   | Défaut | Contexte  | Multiple | Description                                                                                                      |
+| --------------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |        | multisite | non      | URL exclues : liste d’expressions régulières d’URI séparées par des espaces qui doivent contourner le défi.      |
+| `ANTIBOT_IGNORE_IP`         |        | multisite | non      | IP exclues : liste d’adresses IP ou de plages CIDR séparées par des espaces qui doivent contourner le défi.      |
+| `ANTIBOT_IGNORE_RDNS`       |        | multisite | non      | rDNS exclu : liste de suffixes de DNS inversés séparés par des espaces qui doivent contourner le défi.           |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`  | multisite | non      | IP publiques uniquement : si `yes`, ne faire des vérifications rDNS que sur des IP publiques.                    |
+| `ANTIBOT_IGNORE_ASN`        |        | multisite | non      | ASN exclus : liste de numéros d’ASN séparés par des espaces qui doivent contourner le défi.                      |
+| `ANTIBOT_IGNORE_USER_AGENT` |        | multisite | non      | User‑Agents exclus : liste de motifs regex d’User‑Agent séparés par des espaces qui doivent contourner le défi.  |
+| `ANTIBOT_IGNORE_COUNTRY`    |        | multisite | non      | Pays exclus : liste de codes pays ISO 3166-1 alpha-2 séparés par des espaces qui doivent contourner le défi.     |
+| `ANTIBOT_ONLY_COUNTRY`      |        | multisite | non      | Pays ciblés : liste de codes pays ISO 3166-1 alpha-2 qui doivent résoudre le défi. Les autres pays sont ignorés. |
+
+!!! note "Comportement des paramètres basés sur le pays"
+      - Lorsque `ANTIBOT_IGNORE_COUNTRY` et `ANTIBOT_ONLY_COUNTRY` sont définis, la liste d’exclusion est prioritaire : un pays présent dans les deux listes contourne le défi.
+      - Les adresses IP privées ou inconnues contournent le défi lorsque `ANTIBOT_ONLY_COUNTRY` est défini, car aucun code pays ne peut être déterminé.
 
 Exemples :
 
@@ -61,6 +67,12 @@ Exemples :
 
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
   Exclut les requêtes dont le User-Agent correspond au motif regex spécifié.
+
+- `ANTIBOT_IGNORE_COUNTRY: "US CA"`
+  Contourne le défi antibot pour les visiteurs situés aux États-Unis ou au Canada.
+
+- `ANTIBOT_ONLY_COUNTRY: "CN RU"`
+  Ne défie que les visiteurs provenant de Chine ou de Russie. Les requêtes d’autres pays (ou d’adresses IP privées) contournent le défi.
 
 ### Mécanismes de défi
 

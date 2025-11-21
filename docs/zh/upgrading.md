@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.5
+                    image: bunkerity/bunkerweb:1.6.6-rc3
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.5
+                    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.5
+                    image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.5
+                    image: bunkerity/bunkerweb-ui:1.6.6-rc3
                     ...
             ```
 
@@ -63,11 +63,11 @@
         ```bash
         LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | jq -r .tag_name)
 
-        # 下载脚本及其校验和
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        # Download the script and its checksum
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
 
-        # 验证校验和
+        # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
 
         # 如果检查成功，则运行脚本
@@ -114,6 +114,12 @@
         *   升级模式有意避免在已存在的受支持固定版本之外重新安装或降级 NGINX。
         *   用于故障排除的日志保留在 `/var/log/bunkerweb/` 中。
 
+    *   **基于模式的行为**：
+
+        - 升级期间将重复使用相同的安装类型逻辑：manager 模式保持设置向导禁用、将 API 绑定到 `0.0.0.0` 并仍然需要白名单 IP（无人值守运行时请通过 `--manager-ip` 传入），而 worker 模式继续强制要求提供 manager IP 列表。
+        - Manager 升级可以选择启动或跳过 Web UI 服务，汇总信息会明确显示 API 服务的状态，以便通过 `--api` / `--no-api` 控制它。
+        - CrowdSec 选项仍仅适用于全栈升级，脚本会在修改软件包之前持续验证操作系统和 CPU 架构，对不受支持的组合仍需使用 `--force`。
+
         回滚摘要：
 
         *   使用生成的备份目录（或您的手动备份）+ 回滚部分中的步骤来恢复数据库，然后重新安装以前的镜像/软件包版本并重新锁定软件包。
@@ -135,20 +141,20 @@
         示例：
 
         ```bash
-        # 交互式升级到 1.6.5（会提示备份）
-        sudo ./install-bunkerweb.sh --version 1.6.5
+        # 交互式升级到 1.6.6-rc3（会提示备份）
+        sudo ./install-bunkerweb.sh --version 1.6.6-rc3
 
         # 使用自动备份到自定义目录的非交互式升级
-        sudo ./install-bunkerweb.sh -v 1.6.5 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --backup-dir /var/backups/bw-2025-01 -y
 
         # 静默无人值守升级（抑制日志）– 依赖默认的自动备份
-        sudo ./install-bunkerweb.sh -v 1.6.5 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 -y -q
 
         # 执行一次空运行（计划）而不应用更改
-        sudo ./install-bunkerweb.sh -v 1.6.5 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --dry-run
 
         # 跳过自动备份进行升级（不推荐）
-        sudo ./install-bunkerweb.sh -v 1.6.5 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --no-auto-backup -y
         ```
 
         !!! warning "跳过备份"
@@ -228,7 +234,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -254,7 +260,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.6-rc3
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -651,16 +657,16 @@
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.5
+                        image: bunkerity/bunkerweb:1.6.6-rc3
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.5
+                        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.5
+                        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.5
+                        image: bunkerity/bunkerweb-ui:1.6.6-rc3
                         ...
                 ```
 
@@ -695,7 +701,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
                     ```
 
                     为了防止在执行 `apt upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：
@@ -721,7 +727,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.6-rc3
                     ```
 
                     为了防止在执行 `dnf upgrade` 时升级 BunkerWeb 软件包，您可以使用以下命令：

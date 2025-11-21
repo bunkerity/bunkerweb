@@ -96,9 +96,12 @@ function selfsigned:ssl_certificate()
 		return self:ret(false, "can't get server_name : " .. err)
 	end
 	local data
-	data, err = self.datastore:get("plugin_selfsigned_" .. server_name, true)
+	data, err = self.internalstore:get("plugin_selfsigned_" .. server_name, true)
 	if not data and err ~= "not found" then
-		return self:ret(false, "error while getting plugin_selfsigned_" .. server_name .. " from datastore : " .. err)
+		return self:ret(
+			false,
+			"error while getting plugin_selfsigned_" .. server_name .. " from internalstore : " .. err
+		)
 	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end
@@ -120,9 +123,9 @@ function selfsigned:load_data(data, server_name)
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_selfsigned_" .. key
 		local ok
-		ok, err = self.datastore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
 		if not ok then
-			return false, "error while setting data into datastore : " .. err
+			return false, "error while setting data into internalstore : " .. err
 		end
 	end
 	return true

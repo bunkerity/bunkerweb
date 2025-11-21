@@ -1,17 +1,22 @@
 from collections import defaultdict
+from contextlib import suppress
 from datetime import datetime
-from itertools import chain
 from json import dumps, loads
 from traceback import format_exc
 from html import escape
+from io import StringIO, BytesIO
+import csv
 
-from flask import Blueprint, flash, jsonify, render_template, request, url_for
+
+from flask import Blueprint, jsonify, render_template, request, url_for, Response, send_file
 from flask_login import login_required
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 
 from app.dependencies import BW_CONFIG, BW_INSTANCES_UTILS
 from app.utils import LOGGER
 
-from app.routes.utils import cors_required, get_redis_client
+from app.routes.utils import cors_required
 
 reports = Blueprint("reports", __name__)
 
@@ -26,8 +31,6 @@ def reports_page():
 @login_required
 @cors_required
 def reports_fetch():
-    redis_client = get_redis_client()
-
     # Load configuration to resolve Bad Behavior ban time per service
     try:
         db_config = BW_CONFIG.get_config(methods=False, with_drafts=True) if BW_CONFIG else {}
@@ -42,43 +45,18 @@ def reports_fetch():
             if server_name and server_name not in ("_", ""):
                 service_key = f"{server_name}_BAD_BEHAVIOR_BAN_TIME"
                 if service_key in db_config:
-                    return int(db_config.get(service_key, 86400))
+                    return int(db_config[service_key])
             # Fallback to global default from config, or plugin default (24h)
             return int(db_config.get("BAD_BEHAVIOR_BAN_TIME", 86400))
         except Exception:
             return 86400
-
-    # Fetch reports
-    def fetch_reports():
-        if redis_client:
-            try:
-                redis_reports = redis_client.lrange("requests", 0, -1)
-                redis_reports = (loads(report_raw.decode("utf-8", "replace")) for report_raw in redis_reports)
-            except BaseException as e:
-                LOGGER.debug(format_exc())
-                LOGGER.error(f"Failed to fetch reports from Redis: {e}")
-                flash("Failed to fetch reports from Redis, see logs for more information.", "error")
-                redis_reports = []
-        else:
-            redis_reports = []
-        instance_reports = BW_INSTANCES_UTILS.get_reports() if BW_INSTANCES_UTILS else []
-        return chain(redis_reports, instance_reports)
-
-    # Filter valid and unique reports
-    seen_ids = set()
-    all_reports = list(
-        report
-        for report in fetch_reports()
-        if report.get("id") not in seen_ids
-        and (400 <= report.get("status", 0) < 500 or report.get("security_mode") == "detect")
-        and not seen_ids.add(report.get("id"))
-    )
 
     # Extract DataTables parameters
     draw = int(request.form.get("draw", 1))
     start = int(request.form.get("start", 0))
     length = int(request.form.get("length", 10))
     search_value = request.form.get("search[value]", "").lower()
+
     # DataTables includes two leading non-data columns (details-control and select)
     # Adjust the incoming order column index to match our data columns mapping
     try:
@@ -88,6 +66,8 @@ def reports_fetch():
     # Subtract 2 to align with backend columns (starting at "date")
     order_column_index = max(order_column_index_dt - 2, 0)
     order_direction = request.form.get("order[0][dir]", "desc")
+
+    # Parse search panes
     search_panes = defaultdict(list)
     for key, value in request.form.items():
         if key.startswith("searchPanes["):
@@ -111,43 +91,46 @@ def reports_fetch():
         "actions",  # actions column for row buttons
     ]
 
-    # Apply searchPanes filters
-    def filter_by_search_panes(reports):
-        for field, selected_values in search_panes.items():
-            # Compare as strings to handle numeric fields (e.g., status codes)
-            selected_values_str = {str(v) for v in selected_values}
-            reports = [report for report in reports if str(report.get(field, "N/A")) in selected_values_str]
-        return reports
+    # Build search panes string for backend (format: field1:value1,value2;field2:value3)
+    search_panes_str = ";".join(f"{field}:{','.join(values)}" for field, values in search_panes.items()) if search_panes else ""
 
-    # Global search filtering
-    def global_search_filter(report):
-        return any(search_value in str(report.get(col, "")).lower() for col in columns)
+    # Determine order column name
+    order_column_name = columns[order_column_index] if 0 <= order_column_index < len(columns) else "date"
 
-    # Sort reports
-    def _to_float(value, default=0.0):
+    # Use optimized query endpoint from InstancesUtils
+    if BW_INSTANCES_UTILS:
         try:
-            if isinstance(value, (int, float)):
-                return float(value)
-            if value is None:
-                return float(default)
-            return float(str(value))
-        except Exception:
-            return float(default)
+            result = BW_INSTANCES_UTILS.get_reports_query(
+                start=start,
+                length=length,
+                search=search_value,
+                order_column=order_column_name,
+                order_dir=order_direction,
+                search_panes=search_panes_str,
+                count_only=False,
+            )
 
-    def sort_reports(reports):
-        if 0 <= order_column_index < len(columns):
-            sort_key = columns[order_column_index]
-            if sort_key == "date":
-                reports.sort(key=lambda x: _to_float(x.get("date", 0.0), 0.0), reverse=(order_direction == "desc"))
-            else:
-                reports.sort(key=lambda x: x.get(sort_key, ""), reverse=(order_direction == "desc"))
+            total_count = result.get("total", 0)
+            filtered_count = result.get("filtered", 0)
+            paginated_reports = result.get("data", [])
+            pane_counts_backend = result.get("pane_counts", {})
 
-    # Apply filters and sort
-    filtered_reports = filter(global_search_filter, all_reports) if search_value else all_reports
-    filtered_reports = list(filter_by_search_panes(filtered_reports))
-    sort_reports(filtered_reports)
-
-    paginated_reports = filtered_reports if length == -1 else filtered_reports[start : start + length]  # noqa: E203
+        except Exception as e:
+            LOGGER.error(f"Error using optimized reports query: {e}")
+            LOGGER.debug(format_exc())
+            # Fallback to old method
+            result = {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
+            total_count = 0
+            filtered_count = 0
+            paginated_reports = []
+            pane_counts_backend = {}
+    else:
+        # Fallback when BW_INSTANCES_UTILS is not available
+        result = {"total": 0, "filtered": 0, "data": [], "pane_counts": {}}
+        total_count = 0
+        filtered_count = 0
+        paginated_reports = []
+        pane_counts_backend = {}
 
     # Format reports for the response
     def format_report(report):
@@ -156,12 +139,11 @@ def reports_fetch():
             data_field = report.get("data", {})
             if isinstance(data_field, str):
                 try:
-                    # Try to parse if it's already a JSON string
-                    data_json = loads(data_field)
-                    data_output = dumps(data_json)
+                    # Try to parse it as JSON
+                    data_output = dumps(loads(data_field))
                 except (ValueError, TypeError):
-                    # If parsing fails, just dump it as a string
-                    data_output = dumps(data_field)
+                    # If it fails, wrap it as a JSON string
+                    data_output = dumps({"raw": data_field})
             else:
                 # If it's not a string, dump the object directly
                 data_output = dumps(data_field)
@@ -206,29 +188,11 @@ def reports_fetch():
 
     formatted_reports = [format_report(report) for report in paginated_reports]
 
-    # Calculate pane counts
-    pane_counts = defaultdict(lambda: defaultdict(lambda: {"total": 0, "count": 0}))
-    filtered_ids = {report["id"] for report in filtered_reports}
-
-    for report in all_reports:
-        for field in columns[2:]:  # Skip date and id fields for panes
-            # Skip actions field from search panes aggregation
-            if field == "actions":
-                continue
-            value = report.get(field, "N/A")
-
-            # Ensure value is hashable (convert dicts or lists to strings if necessary)
-            if isinstance(value, (dict, list)):
-                value = str(value)
-
-            pane_counts[field][value]["total"] += 1
-            if report["id"] in filtered_ids:
-                pane_counts[field][value]["count"] += 1
-
-    # Prepare SearchPanes options
+    # Prepare SearchPanes options from backend counts
     base_flags_url = url_for("static", filename="img/flags")
     search_panes_options = {}
-    for field, values in pane_counts.items():
+
+    for field, values in pane_counts_backend.items():
         if field == "country":
             search_panes_options["country"] = []
             for code, counts in values.items():
@@ -249,11 +213,10 @@ def reports_fetch():
         elif field == "server_name":
             search_panes_options["server_name"] = []
             for name, counts in values.items():
-                display_name = "default server" if name == "_" else name
                 search_panes_options["server_name"].append(
                     {
-                        "label": display_name,
-                        "value": name,
+                        "label": f'<code class="language-dns">{escape("default server" if name == "_" else name)}</code>',
+                        "value": escape(name),
                         "total": counts["total"],
                         "count": counts["count"],
                     }
@@ -273,9 +236,215 @@ def reports_fetch():
     return jsonify(
         {
             "draw": draw,
-            "recordsTotal": len(all_reports),
-            "recordsFiltered": len(filtered_reports),
+            "recordsTotal": total_count,
+            "recordsFiltered": filtered_count,
             "data": formatted_reports,
             "searchPanes": {"options": search_panes_options},
         }
     )
+
+
+@reports.route("/reports/export/csv", methods=["GET"])
+@login_required
+def reports_export_csv():
+    """Export all reports as CSV"""
+    try:
+        # Get search and order parameters
+        search_value = request.args.get("search", "").lower()
+        order_column = request.args.get("order_column", "date")
+        order_dir = request.args.get("order_dir", "desc")
+
+        # Get all reports (no pagination)
+        if BW_INSTANCES_UTILS:
+            result = BW_INSTANCES_UTILS.get_reports_query(
+                start=0,
+                length=-1,  # Get all records
+                search=search_value,
+                order_column=order_column,
+                order_dir=order_dir,
+                search_panes="",
+                count_only=False,
+            )
+            all_reports = result.get("data", [])
+        else:
+            all_reports = []
+
+        # Create CSV in memory
+        output = StringIO()
+        writer = csv.writer(output)
+
+        # Write header
+        writer.writerow(
+            [
+                "Date",
+                "Request ID",
+                "IP Address",
+                "Country",
+                "Method",
+                "URL",
+                "Status Code",
+                "User-Agent",
+                "Reason",
+                "Server Name",
+                "Data",
+                "Security Mode",
+            ]
+        )
+
+        # Write data rows
+        for report in all_reports:
+            # Format data field
+            data_field = report.get("data", {})
+            if isinstance(data_field, str):
+                try:
+                    data_output = dumps(loads(data_field))
+                except (ValueError, TypeError):
+                    data_output = data_field
+            else:
+                data_output = dumps(data_field)
+
+            writer.writerow(
+                [
+                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                    str(report.get("id", "N/A")),
+                    str(report.get("ip", "N/A")),
+                    str(report.get("country", "N/A")),
+                    str(report.get("method", "N/A")),
+                    str(report.get("url", "N/A")),
+                    str(report.get("status", "N/A")),
+                    str(report.get("user_agent", "N/A")),
+                    str(report.get("reason", "N/A")),
+                    str(report.get("server_name", "N/A")),
+                    data_output,
+                    str(report.get("security_mode", "N/A")),
+                ]
+            )
+
+        # Prepare response
+        output.seek(0)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return Response(
+            output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-Disposition": f"attachment; filename=bunkerweb_reports_{timestamp}.csv"},
+        )
+
+    except Exception as e:
+        LOGGER.error(f"Error exporting reports to CSV: {e}")
+        LOGGER.debug(format_exc())
+        return jsonify({"error": "Failed to export reports"}), 500
+
+
+@reports.route("/reports/export/excel", methods=["GET"])
+@login_required
+def reports_export_excel():
+    """Export all reports as Excel"""
+    try:
+        # Get search and order parameters
+        search_value = request.args.get("search", "").lower()
+        order_column = request.args.get("order_column", "date")
+        order_dir = request.args.get("order_dir", "desc")
+
+        # Get all reports (no pagination)
+        if BW_INSTANCES_UTILS:
+            result = BW_INSTANCES_UTILS.get_reports_query(
+                start=0,
+                length=-1,  # Get all records
+                search=search_value,
+                order_column=order_column,
+                order_dir=order_dir,
+                search_panes="",
+                count_only=False,
+            )
+            all_reports = result.get("data", [])
+        else:
+            all_reports = []
+
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Reports"
+
+        # Style for header
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+
+        # Write header
+        headers = [
+            "Date",
+            "Request ID",
+            "IP Address",
+            "Country",
+            "Method",
+            "URL",
+            "Status Code",
+            "User-Agent",
+            "Reason",
+            "Server Name",
+            "Data",
+            "Security Mode",
+        ]
+        ws.append(headers)
+
+        # Apply header styling
+        for cell in ws[1]:
+            cell.font = header_font
+            cell.fill = header_fill
+
+        # Write data rows
+        for report in all_reports:
+            # Format data field
+            data_field = report.get("data", {})
+            if isinstance(data_field, str):
+                try:
+                    data_output = dumps(loads(data_field))
+                except (ValueError, TypeError):
+                    data_output = data_field
+            else:
+                data_output = dumps(data_field)
+
+            ws.append(
+                [
+                    datetime.fromtimestamp(report.get("date", 0)).isoformat() if report.get("date") else "N/A",
+                    str(report.get("id", "N/A")),
+                    str(report.get("ip", "N/A")),
+                    str(report.get("country", "N/A")),
+                    str(report.get("method", "N/A")),
+                    str(report.get("url", "N/A")),
+                    str(report.get("status", "N/A")),
+                    str(report.get("user_agent", "N/A")),
+                    str(report.get("reason", "N/A")),
+                    str(report.get("server_name", "N/A")),
+                    data_output,
+                    str(report.get("security_mode", "N/A")),
+                ]
+            )
+
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                with suppress(Exception):
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+
+        # Save to BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=f"bunkerweb_reports_{timestamp}.xlsx",
+        )
+
+    except Exception as e:
+        LOGGER.error(f"Error exporting reports to Excel: {e}")
+        LOGGER.debug(format_exc())
+        return jsonify({"error": "Failed to export reports"}), 500

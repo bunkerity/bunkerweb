@@ -1,10 +1,10 @@
-FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e AS builder
+FROM nginx:1.28-alpine-slim@sha256:ce2bd4775ed6859d35f47d65401ee9f35f1dd00b32ed05f0ce38b68aa1830195 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev libffi-dev postgresql-dev cargo
+RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip python3-dev libffi-dev postgresql-dev cargo rust
 
 WORKDIR /tmp/bunkerweb/deps
 
@@ -74,11 +74,12 @@ COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
 COPY src/api/requirements.txt /tmp/req/requirements-api.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
-COPY src/common/db/requirements.armv7.txt /tmp/req/requirements-db.armv7.txt
+COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
+COPY src/common/db/requirements.386.txt /tmp/req/requirements-db.386.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-    if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.armv7.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.armv7.txt ; fi && \
+    if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
     pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
     pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
@@ -109,13 +110,18 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
-RUN apk add --no-cache nodejs npm parallel && \
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+ARG SKIP_MINIFY_CSS=no
+ARG SKIP_MINIFY_HTML=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ] || [ "$SKIP_MINIFY_HTML" != "yes" ]; }; then \
+    apk add --no-cache nodejs npm parallel && \
     cd /tmp && \
-    npm ci --ignore-scripts
+    npm ci --ignore-scripts; \
+    fi
 
 # Minify JS files
-ARG SKIP_MINIFY_JS=no
-RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
     | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
     else \
@@ -123,8 +129,7 @@ RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
     fi
 
 # Minify CSS files
-ARG SKIP_MINIFY_CSS=no
-RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
     find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
     | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
     else \
@@ -132,8 +137,7 @@ RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
     fi
 
 # Minify HTML files
-ARG SKIP_MINIFY_HTML=no
-RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     find /usr/share/bunkerweb/loading /usr/share/bunkerweb/core/antibot/files /usr/share/bunkerweb/core/errors/files /usr/share/bunkerweb/core/misc/files -type f -name "*.html" | \
     parallel 'npx html-minifier-terser \
     --collapse-whitespace \
@@ -149,7 +153,7 @@ RUN if [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM nginx:1.28-alpine-slim@sha256:f25f852134140e003ac967604cd1f9004a5e6abd195e8bf59bf0de303c9df35e
+FROM nginx:1.28-alpine-slim@sha256:ce2bd4775ed6859d35f47d65401ee9f35f1dd00b32ed05f0ce38b68aa1830195
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -158,11 +162,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
-RUN apk add --no-cache "sqlite>=3.48.0-r4" "sqlite-libs>=3.48.0-r4" # CVE-2025-29088
-RUN apk add --no-cache "libcrypto3>=3.3.5-r0" "libssl3>=3.3.5-r0" "openssl>=3.3.5-r0" # CVE-2025-9230 CVE-2025-9231 CVE-2025-9232
-RUN apk add --no-cache "libexpat>=2.7.2-r0" # CVE-2025-59375
-RUN apk add --no-cache "tiff>=4.7.1-r0" # CVE-2025-8961 CVE-2025-9165
-RUN apk add --no-cache "curl>=8.14.1-r2" "libcurl>=8.14.1-r2" # CVE-2025-10148 CVE-2025-4947 CVE-2025-5025 CVE-2025-5399 CVE-2025-9086
+RUN apk add --no-cache "libpq>=17.7-r0" "postgresql17-client>=17.7-r0" # CVE-2025-12817 CVE-2025-12818
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
@@ -229,10 +229,9 @@ COPY --chown=root:nginx --chmod=770 src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.
 COPY --chown=root:nginx --chmod=770 src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.1"
+LABEL version="1.6.6-rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="all-in-one"
-LABEL bunkerweb.INSTANCE="bunkerweb"
 
 VOLUME /data
 

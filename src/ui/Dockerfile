@@ -1,4 +1,4 @@
-FROM python:3.13-alpine@sha256:9ba6d8cbebf0fb6546ae71f2a1c14f6ffd2fdab83af7fa5669734ef30ad48844 AS builder
+FROM python:3.13-alpine@sha256:e5fa639e49b85986c4481e28faa2564b45aa8021413f31026c3856e5911618b1 AS builder
 
 # Export var for specific actions on linux/arm/v7
 ARG TARGETPLATFORM
@@ -11,13 +11,14 @@ COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/ui/requirements.txt /tmp/req/requirements-ui.txt
 COPY src/common/gen/requirements.txt /tmp/req/requirements-gen.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements-db.txt
-COPY src/common/db/requirements.armv7.txt /tmp/req/requirements-db.armv7.txt
+COPY src/common/db/requirements.arm.txt /tmp/req/requirements-db.arm.txt
+COPY src/common/db/requirements.386.txt /tmp/req/requirements-db.386.txt
 
 WORKDIR /usr/share/bunkerweb
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.armv7.txt /tmp/req/requirements-db.txt ; else rm -f /tmp/req/requirements-db.armv7.txt ; fi && \
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ] ; then mv /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.386.txt ; elif [ "$TARGETPLATFORM" = "linux/386" ] ; then mv /tmp/req/requirements-db.386.txt /tmp/req/requirements-db.txt && rm -f /tmp/req/requirements-db.arm.txt ; else rm -f /tmp/req/requirements-db.arm.txt /tmp/req/requirements-db.386.txt ; fi && \
   pip install --no-cache-dir --require-hashes --break-system-packages -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
@@ -40,13 +41,17 @@ WORKDIR /tmp
 COPY src/deps/package.json package.json
 COPY src/deps/package-lock.json package-lock.json
 
-RUN apk add --no-cache nodejs npm parallel && \
+ARG SKIP_MINIFY=no
+ARG SKIP_MINIFY_JS=no
+ARG SKIP_MINIFY_CSS=no
+RUN if [ "$SKIP_MINIFY" != "yes" ] && { [ "$SKIP_MINIFY_JS" != "yes" ] || [ "$SKIP_MINIFY_CSS" != "yes" ]; }; then \
+  apk add --no-cache nodejs npm parallel && \
   cd /tmp && \
-  npm ci --ignore-scripts
+  npm ci --ignore-scripts; \
+  fi
 
 # Minify JS files
-ARG SKIP_MINIFY_JS=no
-RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_JS" != "yes" ]; then \
   find /usr/share/bunkerweb/ui/app/static -type f -name "*.js" ! -name "*.min.js" -print0 \
   | parallel -0 --no-run-if-empty 'npx uglify-js {} --compress --mangle --output {}'; \
   else \
@@ -54,15 +59,14 @@ RUN if [ "$SKIP_MINIFY_JS" != "yes" ]; then \
   fi
 
 # Minify CSS files
-ARG SKIP_MINIFY_CSS=no
-RUN if [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
+RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_CSS" != "yes" ]; then \
   find /usr/share/bunkerweb/ui/app/static -type f -name "*.css" ! -name "*.min.css" -print0 \
   | parallel -0 --no-run-if-empty 'npx postcss {} --use cssnano --no-map -o {}'; \
   else \
   echo "Skipping CSS minification"; \
   fi
 
-FROM python:3.13-alpine@sha256:9ba6d8cbebf0fb6546ae71f2a1c14f6ffd2fdab83af7fa5669734ef30ad48844
+FROM python:3.13-alpine@sha256:e5fa639e49b85986c4481e28faa2564b45aa8021413f31026c3856e5911618b1
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -79,7 +83,7 @@ RUN apk add --no-cache bash unzip mariadb-connector-c mariadb-client postgresql-
   adduser -h /usr/share/bunkerweb/ui -g ui -s /sbin/nologin -G ui -D -H -u 101 --disabled-password ui
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.5.4-r0" "libssl3>=3.5.4-r0" # CVE-2025-9230 CVE-2025-9231 CVE-2025-9232
+RUN apk add --no-cache "libpq>=17.7-r0" "postgresql17-client>=17.7-r0" # CVE-2025-12817 CVE-2025-12818
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb
@@ -101,7 +105,7 @@ RUN echo "Docker" > INTEGRATION && \
   chmod 660 INTEGRATION
 
 LABEL maintainer="Bunkerity <contact@bunkerity.com>"
-LABEL version="1.6.5"
+LABEL version="1.6.6-rc3"
 LABEL url="https://www.bunkerweb.io"
 LABEL bunkerweb.type="ui"
 

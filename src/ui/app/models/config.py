@@ -9,7 +9,7 @@ from pathlib import Path
 from re import error as RegexError, search as re_search
 from typing import List, Literal, Optional, Set, Tuple, Union
 
-from app.utils import get_blacklisted_settings
+from app.utils import get_blacklisted_settings, is_editable_method
 
 
 class Config:
@@ -163,7 +163,7 @@ class Config:
                 not new
                 and setting != "IS_DRAFT"
                 and key in config
-                and ((global_config or not config[key].get("global", False)) and config[key].get("method") not in ("default", "ui"))
+                and ((global_config or not config[key].get("global", False)) and not is_editable_method(config[key].get("method"), allow_default=True))
             ):
                 report_error(f"Variable {key} is not editable as it is managed by the {config[key]['method']}, ignoring it.")
                 variables.pop(key, None)

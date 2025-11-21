@@ -27,6 +27,149 @@ local match = string.match
 local decode = cjson.decode
 local execute = os.execute
 local remove = os.remove
+local insert = table.insert
+local ipairs = ipairs
+local pairs = pairs
+local sort = table.sort
+local lower = string.lower
+local gsub = string.gsub
+
+-- Mirror certbot-new wildcard grouping so certificate identifiers stay in sync.
+local function sanitize_domain_labels(domain)
+	if not domain or domain == "" then
+		return nil
+	end
+	local cleaned = lower(gsub(domain, "^%*%.", ""))
+	cleaned = gsub(cleaned, "%.+$", "")
+	local labels = {}
+	for label in cleaned:gmatch("[^.]+") do
+		if label ~= "" then
+			insert(labels, label)
+		end
+	end
+	if #labels == 0 then
+		return nil
+	end
+	return labels
+end
+
+local function determine_wildcard_bases(labels_list)
+	local count = #labels_list
+	if count == 0 then
+		return {}
+	end
+	if count == 1 then
+		local labels = labels_list[1]
+		if #labels > 2 then
+			return { table.concat(labels, ".", 2) }
+		end
+		return { table.concat(labels, ".") }
+	end
+	local min_len = #labels_list[1]
+	for i = 2, count do
+		if #labels_list[i] < min_len then
+			min_len = #labels_list[i]
+		end
+	end
+	local common_suffix = {}
+	for idx = 1, min_len do
+		local label = labels_list[1][#labels_list[1] - idx + 1]
+		local match_all = true
+		for j = 2, count do
+			if labels_list[j][#labels_list[j] - idx + 1] ~= label then
+				match_all = false
+				break
+			end
+		end
+		if not match_all then
+			break
+		end
+		insert(common_suffix, 1, label)
+	end
+	if #common_suffix >= 2 and #common_suffix >= (min_len - 1) then
+		return { table.concat(common_suffix, ".") }
+	end
+	local bases = {}
+	local seen = {}
+	for _, labels in ipairs(labels_list) do
+		local base
+		if #labels > 2 then
+			base = table.concat(labels, ".", 2)
+		else
+			base = table.concat(labels, ".")
+		end
+		if base ~= "" and not seen[base] then
+			seen[base] = true
+			insert(bases, base)
+		end
+	end
+	return bases
+end
+
+local function build_wildcard_domain_list(domains)
+	local grouped = {}
+	local has_entries = false
+	for _, domain in ipairs(domains) do
+		local labels = sanitize_domain_labels(domain)
+		if labels then
+			has_entries = true
+			local len = #labels
+			local key
+			if len >= 2 then
+				key = labels[len - 1] .. "." .. labels[len]
+			else
+				key = labels[1]
+			end
+			grouped[key] = grouped[key] or {}
+			insert(grouped[key], labels)
+		end
+	end
+	if not has_entries then
+		return {}
+	end
+	local results = {}
+	local seen = {}
+	for _, labels_list in pairs(grouped) do
+		local bases = determine_wildcard_bases(labels_list)
+		for _, base in ipairs(bases) do
+			if base ~= "" then
+				local wildcard = "*." .. base
+				if not seen[wildcard] then
+					insert(results, wildcard)
+					seen[wildcard] = true
+				end
+				if not seen[base] then
+					insert(results, base)
+					seen[base] = true
+				end
+			end
+		end
+	end
+	sort(results, function(a, b)
+		local a_wildcard = sub(a, 1, 2) == "*."
+		local b_wildcard = sub(b, 1, 2) == "*."
+		if a_wildcard == b_wildcard then
+			return a < b
+		end
+		return a_wildcard and not b_wildcard
+	end)
+	return results
+end
+
+local function get_wildcard_cert_identifier(host, domains)
+	if not host or host == "" then
+		return host
+	end
+	local targets = domains
+	if not targets or #targets == 0 then
+		targets = { host }
+	end
+	local processed = build_wildcard_domain_list(targets)
+	if #processed > 0 then
+		return processed[#processed]
+	end
+	return host
+end
 
 function letsencrypt:initialize(ctx)
 	-- Call parent initialize
@@ -83,22 +226,23 @@ function letsencrypt:init()
 					local data
 					local server_names = multisite_vars["SERVER_NAME"]
 					local cert_identifier = server_names:match("%S+")
+					local server_list = {}
+					for part in server_names:gmatch("%S+") do
+						insert(server_list, part)
+					end
 
 					if
 						multisite_vars["LETS_ENCRYPT_CHALLENGE"] == "dns"
 						and multisite_vars["USE_LETS_ENCRYPT_WILDCARD"] == "yes"
 					then
-						for part in server_names:gmatch("%S+") do
-							wildcard_servers[part] = true
+						cert_identifier = get_wildcard_cert_identifier(cert_identifier, server_list)
+						for _, part in ipairs(server_list) do
+							wildcard_servers[part] = cert_identifier
 						end
-						local parts = {}
-						for part in cert_identifier:gmatch("[^.]+") do
-							table.insert(parts, part)
-						end
-						cert_identifier = table.concat(parts, ".", 2)
-						data = self.datastore:get("plugin_letsencrypt_" .. cert_identifier, true)
+						wildcard_servers[cert_identifier] = cert_identifier
+						data = self.internalstore:get("plugin_letsencrypt_" .. cert_identifier, true)
 					else
-						for part in server_names:gmatch("%S+") do
+						for _, part in ipairs(server_list) do
 							wildcard_servers[part] = false
 						end
 					end
@@ -149,18 +293,19 @@ function letsencrypt:init()
 			end
 			local server_names = server_name
 			local cert_identifier = server_names:match("%S+")
+			local server_list = {}
+			for part in server_names:gmatch("%S+") do
+				insert(server_list, part)
+			end
 			local use_wildcard_mode = challenge == "dns" and use_wildcard == "yes"
 			if use_wildcard_mode then
-				for part in server_names:gmatch("%S+") do
-					wildcard_servers[part] = true
+				cert_identifier = get_wildcard_cert_identifier(cert_identifier, server_list)
+				for _, part in ipairs(server_list) do
+					wildcard_servers[part] = cert_identifier
 				end
-				local parts = {}
-				for part in cert_identifier:gmatch("[^.]+") do
-					table.insert(parts, part)
-				end
-				cert_identifier = table.concat(parts, ".", 2)
+				wildcard_servers[cert_identifier] = cert_identifier
 			else
-				for part in server_names:gmatch("%S+") do
+				for _, part in ipairs(server_list) do
 					wildcard_servers[part] = false
 				end
 			end
@@ -186,9 +331,9 @@ function letsencrypt:init()
 		ret_err = "let's encrypt is not used"
 	end
 
-	local ok, err = self.datastore:set("plugin_letsencrypt_wildcard_servers", wildcard_servers, nil, true)
+	local ok, err = self.internalstore:set("plugin_letsencrypt_wildcard_servers", wildcard_servers, nil, true)
 	if not ok then
-		return self:ret(false, "error while setting wildcard servers into datastore : " .. err)
+		return self:ret(false, "error while setting wildcard servers into internalstore : " .. err)
 	end
 
 	return self:ret(ret_ok, ret_err)
@@ -199,21 +344,29 @@ function letsencrypt:ssl_certificate()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
-	local wildcard_servers, err = self.datastore:get("plugin_letsencrypt_wildcard_servers", true)
+	local wildcard_servers, err = self.internalstore:get("plugin_letsencrypt_wildcard_servers", true)
 	if not wildcard_servers then
 		return self:ret(false, "can't get wildcard servers : " .. err)
 	end
-	if wildcard_servers[server_name] then
+	local alias = wildcard_servers[server_name]
+	if alias == true then
 		local parts = {}
 		for part in server_name:gmatch("[^.]+") do
-			table.insert(parts, part)
+			insert(parts, part)
 		end
-		server_name = table.concat(parts, ".", 2)
+		if #parts > 2 then
+			server_name = table.concat(parts, ".", 2)
+		end
+	elseif type(alias) == "string" and alias ~= "" then
+		server_name = alias
 	end
 	local data
-	data, err = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
+	data, err = self.internalstore:get("plugin_letsencrypt_" .. server_name, true)
 	if not data and err ~= "not found" then
-		return self:ret(false, "error while getting plugin_letsencrypt_" .. server_name .. " from datastore : " .. err)
+		return self:ret(
+			false,
+			"error while getting plugin_letsencrypt_" .. server_name .. " from internalstore : " .. err
+		)
 	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end
@@ -236,9 +389,9 @@ function letsencrypt:load_data(data, server_name)
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_letsencrypt_" .. key
 		local ok
-		ok, err = self.datastore:set(cache_key, { cert_chain, priv_key }, nil, true)
+		ok, err = self.internalstore:set(cache_key, { cert_chain, priv_key }, nil, true)
 		if not ok then
-			return false, "error while setting data into datastore : " .. err
+			return false, "error while setting data into internalstore : " .. err
 		end
 	end
 	return true

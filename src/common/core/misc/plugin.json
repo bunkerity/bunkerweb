@@ -39,7 +39,7 @@
       "help": "Maximum body size (0 for infinite).",
       "id": "max-client-size",
       "label": "Maximum body size",
-      "regex": "^\\d+[kKmMgG]?$",
+      "regex": "^[0-9]+[kKmMgG]?$",
       "type": "text"
     },
     "SERVE_FILES": {

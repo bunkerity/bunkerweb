@@ -3,7 +3,6 @@ local get_request = base.get_request
 
 do
     local keys = {'create', 'yield', 'resume', 'status', 'wrap'}
-    local errmsg = base.get_errmsg_ptr()
     local get_raw_phase = ngx.get_raw_phase
 
     for _, key in ipairs(keys) do
@@ -12,7 +11,7 @@ do
         coroutine[key] = function (...)
             local r = get_request()
             if r ~= nil then
-                local ctx = get_raw_phase(r, errmsg)
+                local ctx = get_raw_phase(r)
                 if ctx ~= 0x020 and ctx ~= 0x040 then
                     return ours(...)
                 end

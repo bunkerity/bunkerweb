@@ -1,7 +1,7 @@
 {
   "id": "reversescan",
   "name": "Reverse scan",
-  "description": "Scan clients ports to detect proxies or servers.",
+  "description": "Enhance security by scanning client ports to detect and block connections from proxies or servers, helping to prevent circumvention of security measures.",
   "version": "1.0",
   "stream": "yes",
   "settings": {

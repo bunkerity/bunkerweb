@@ -30,12 +30,12 @@ class SwarmTest(Test):
             compose = "/tmp/swarm/stack.yml"
             with open(compose, "r") as f:
                 data = safe_load(f.read())
+            data["services"]["bw-autoconf"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
             if data["services"]["bw-scheduler"]["environment"].get("AUTO_LETS_ENCRYPT", "no") != "yes":
                 data["services"]["bw-scheduler"]["environment"]["AUTO_LETS_ENCRYPT"] = "yes"
             data["services"]["bw-scheduler"]["environment"]["USE_LETS_ENCRYPT_STAGING"] = "yes"
             data["services"]["bw-scheduler"]["environment"]["LETS_ENCRYPT_MAX_RETRIES"] = "3"
             data["services"]["bw-scheduler"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
-            data["services"]["bw-autoconf"]["environment"]["CUSTOM_LOG_LEVEL"] = "debug"
             data["services"]["bw-scheduler"]["environment"]["LOG_LEVEL"] = "info"
             data["services"]["bw-scheduler"]["environment"]["USE_BUNKERNET"] = "no"
             data["services"]["bw-scheduler"]["environment"]["SEND_ANONYMOUS_REPORT"] = "no"

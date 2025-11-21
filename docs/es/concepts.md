@@ -105,7 +105,7 @@ Ten en cuenta que el modo multisitio es implícito cuando se utiliza la interfaz
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) del repositorio.
+    Encontrarás ejemplos concretos del modo multisitio en los [usos avanzados](advanced.md) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples) del repositorio.
 
 ## Configuraciones personalizadas {#custom-configurations}
 
@@ -126,7 +126,7 @@ La gestión de configuraciones personalizadas desde la interfaz de usuario web s
 
 !!! info "Para saber más"
 
-    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples) del repositorio.
+    Encontrarás ejemplos concretos de configuraciones personalizadas en los [usos avanzados](advanced.md#custom-configurations) de la documentación y en el directorio de [ejemplos](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples) del repositorio.
 
 ## Base de datos
 
@@ -144,6 +144,9 @@ BunkerWeb almacena de forma segura su configuración actual en una base de datos
 
 Bajo el capó, cada vez que editas una configuración o agregas una nueva, BunkerWeb almacena automáticamente los cambios en la base de datos, garantizando la persistencia y coherencia de los datos. BunkerWeb admite múltiples opciones de bases de datos de backend, como SQLite, MariaDB, MySQL y PostgreSQL.
 
+!!! tip
+    Si utilizas la interfaz web para la administración diaria, te recomendamos migrar a un motor de base de datos externo (PostgreSQL o MySQL/MariaDB) en lugar de mantenerte en SQLite. Los motores externos gestionan mejor las solicitudes concurrentes y el crecimiento a largo plazo, especialmente en entornos multiusuario.
+
 Configurar la base de datos es sencillo utilizando la configuración `DATABASE_URI`, que sigue los formatos especificados para cada base de datos compatible:
 
 !!! warning
@@ -157,6 +160,27 @@ Configurar la base de datos es sencillo utilizando la configuración `DATABASE_U
 - **PostgreSQL**: `postgresql://bunkerweb:changeme@bw-db:5432/db`
 
 Al especificar el URI de la base de datos apropiado en la configuración, puedes integrar BunkerWeb sin problemas con tu backend de base de datos preferido, garantizando un almacenamiento eficiente y confiable de tus datos de configuración.
+
+### Matriz de compatibilidad de bases de datos
+
+| Integración        | PostgreSQL                     | MariaDB                  | MySQL                    | SQLite       |
+| :----------------- | :----------------------------- | :----------------------- | :----------------------- | :----------- |
+| **Docker**         | ✅ `v17` y anteriores (❌ `v18`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Kubernetes**     | ✅ `v17` y anteriores (❌ `v18`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Autoconf**       | ✅ `v17` y anteriores (❌ `v18`) | ✅ `v11` y anteriores     | ✅ `v9` y anteriores      | ✅ Compatible |
+| **Paquetes Linux** | Ver notas a continuación       | Ver notas a continuación | Ver notas a continuación | ✅ Compatible |
+
+!!! info "Notas"
+    - **PostgreSQL**: `v18` no es compatible porque las imágenes base de Alpine que distribuimos solo incluyen los paquetes del cliente `v17`.
+    - **Linux**: La compatibilidad depende de los paquetes de tu distribución. Si es necesario, puedes instalar los clientes de la base de datos manualmente desde los repositorios del proveedor (esto suele ser necesario en RHEL).
+    - **SQLite**: Se entrega con los paquetes y está listo para usar.
+
+Recursos externos útiles para instalar clientes de bases de datos:
+
+- [Guía de descarga y repositorios de PostgreSQL](https://www.postgresql.org/download/)
+- [Herramienta de configuración de repositorios de MariaDB](https://mariadb.org/download/?t=repo-config)
+- [Guía de configuración del repositorio de MySQL](https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/)
+- [Página de descargas de SQLite](https://www.sqlite.org/download.html)
 
 <figure markdown>
   ![Descripción general](assets/img/bunkerweb_db.svg){ align=center, width="800" }

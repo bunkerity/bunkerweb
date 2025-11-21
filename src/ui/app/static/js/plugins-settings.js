@@ -377,7 +377,7 @@ $(document).ready(() => {
     return true; // Tab change is allowed
   };
 
-  const highlightSettings = (matchedSettings, fadeTimeout = 600) => {
+  const highlightSettings = (matchedSettings, fadeTimeout = 800) => {
     matchedSettings.each(function () {
       const $setting = $(this);
       $setting.removeClass("setting-highlight setting-highlight-fade");
@@ -683,10 +683,12 @@ $(document).ready(() => {
       const skippedKeys = new Set();
 
       // Process the current configuration
-      const $rawConfig = $("#raw-config");
-      if ($rawConfig.length) {
-        const configLines = $rawConfig
-          .val()
+      const rawEditor = editorRegistry["raw-config-editor"];
+      const rawConfigSource = rawEditor
+        ? rawEditor.getValue()
+        : $("#raw-config").val();
+      if (rawConfigSource) {
+        const configLines = rawConfigSource
           .split("\n")
           .map((line) => line.trim())
           .filter((line) => line && !line.startsWith("#"));
@@ -1538,7 +1540,8 @@ $(document).ready(() => {
   });
 
   $(".copy-settings").on("click", function () {
-    const config = $("#raw-config").val();
+    const rawEditor = editorRegistry["raw-config-editor"];
+    const config = rawEditor ? rawEditor.getValue() : $("#raw-config").val();
 
     // Use the Clipboard API
     navigator.clipboard
@@ -1819,10 +1822,115 @@ $(document).ready(() => {
     }
   }
 
+  const AceRange = ace.require("ace/range").Range;
   var editors = [];
+  var editorRegistry = {};
+  const triggerRawConfigSave = () => {
+    const $saveBtn = $(".raw-config-save-btn").not(".disabled");
+    if ($saveBtn.length) {
+      $saveBtn.first().trigger("click");
+      return true;
+    }
+    return false;
+  };
+  let rawDisabledMarkers = [];
+  let rawDisabledGutterRows = [];
+
+  const setupRawDisabledHighlight = (editor) => {
+    const disabledRaw = $("#raw-config-disabled").val();
+    if (!disabledRaw) {
+      rawDisabledMarkers.forEach((id) => editor.session.removeMarker(id));
+      rawDisabledMarkers = [];
+      rawDisabledGutterRows.forEach((row) =>
+        editor.session.removeGutterDecoration(row, "raw-disabled-gutter"),
+      );
+      rawDisabledGutterRows = [];
+      const remainingAnnotations = editor.session
+        .getAnnotations()
+        .filter((annotation) => !annotation.rawDisabled);
+      editor.session.setAnnotations(remainingAnnotations);
+      return;
+    }
+
+    const disabledMap = new Map(
+      disabledRaw
+        .split(/\r?\n/)
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+        .map((entry) => {
+          const [key, reason] = entry.split("::");
+          return [key.trim(), (reason || "locked").trim()];
+        }),
+    );
+
+    const refreshDisabledIndicators = () => {
+      rawDisabledMarkers.forEach((id) => editor.session.removeMarker(id));
+      rawDisabledMarkers = [];
+      rawDisabledGutterRows.forEach((row) =>
+        editor.session.removeGutterDecoration(row, "raw-disabled-gutter"),
+      );
+      rawDisabledGutterRows = [];
+
+      const baseAnnotations = editor.session
+        .getAnnotations()
+        .filter((annotation) => !annotation.rawDisabled);
+      const disabledAnnotations = [];
+
+      const lines = editor.session.getDocument().getAllLines();
+      lines.forEach((line, index) => {
+        const key = line.split("=")[0].trim();
+        if (!key || !disabledMap.has(key)) return;
+
+        const methodKey = disabledMap.get(key);
+        const methodLabel = methodKey
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (char) => char.toUpperCase());
+        const range = new AceRange(index, 0, index, Infinity);
+        rawDisabledMarkers.push(
+          editor.session.addMarker(range, "raw-disabled-line", "fullLine"),
+        );
+        editor.session.addGutterDecoration(index, "raw-disabled-gutter");
+        rawDisabledGutterRows.push(index);
+
+        disabledAnnotations.push({
+          row: index,
+          column: 0,
+          rawDisabled: true,
+          type: "info",
+          className: " raw-disabled-annotation",
+          text: t("legend.locked_settings_annotation", {
+            defaultValue: `Locked (${methodLabel})`,
+            method: methodLabel,
+            rawMethod: methodKey,
+          }),
+        });
+      });
+
+      editor.session.setAnnotations(
+        baseAnnotations.concat(disabledAnnotations),
+      );
+    };
+
+    refreshDisabledIndicators();
+    editor.on("change", refreshDisabledIndicators);
+  };
 
   $(".ace-editor").each(function () {
-    const initialContent = $(this).text().trim();
+    const $editorElement = $(this);
+    const sourceSelector = $editorElement.data("source");
+    const $source = sourceSelector ? $(sourceSelector) : null;
+    let initialContent = "";
+
+    if ($source && $source.length) {
+      if ($source.is("textarea, input")) {
+        initialContent = $source.val() || "";
+      } else {
+        initialContent = ($source.text() || "").trim();
+      }
+    } else {
+      initialContent = $editorElement.text().trim();
+    }
+
     const editor = ace.edit(this);
 
     editor.session.setMode("ace/mode/nginx");
@@ -1833,8 +1941,13 @@ $(document).ready(() => {
     //   editor.session.setMode("ace/mode/text"); // Default mode if language is unrecognized
     // }
 
-    const method = $(this).data("method");
-    if (method !== "ui" && method !== "default") {
+    const method = $editorElement.data("method");
+    const explicitReadOnly = $editorElement.data("readonly");
+    if (typeof explicitReadOnly !== "undefined") {
+      editor.setReadOnly(
+        explicitReadOnly === true || explicitReadOnly === "true",
+      );
+    } else if (method !== "ui" && method !== "api" && method !== "default") {
       editor.setReadOnly(true);
     }
 
@@ -1849,8 +1962,42 @@ $(document).ready(() => {
       wrap: true,
     });
 
-    editor.renderer.setScrollMargin(10, 10);
+    editor.renderer.setPadding(12);
+    editor.renderer.setScrollMargin(16, 16);
     editors.push(editor);
+
+    const elementId = $editorElement.attr("id");
+    if (elementId) {
+      editorRegistry[elementId] = editor;
+    }
+
+    if (elementId === "raw-config-editor") {
+      editor.commands.addCommand({
+        name: "saveRawConfigShortcut",
+        bindKey: { win: "Ctrl-S", mac: "Command-S" },
+        exec: () => {
+          triggerRawConfigSave();
+        },
+        readOnly: false,
+      });
+
+      const $rawConfigHidden = $("#raw-config");
+      if ($rawConfigHidden.length) {
+        $rawConfigHidden.val(editor.getValue());
+        editor.on("change", () => {
+          $rawConfigHidden.val(editor.getValue());
+        });
+      }
+
+      setupRawDisabledHighlight(editor);
+    }
+
+    if ($source && $source.length && $source.is("textarea, input")) {
+      $source.val(editor.getValue());
+      editor.on("change", () => {
+        $source.val(editor.getValue());
+      });
+    }
   });
 
   var theme = $("#theme").val();
@@ -1878,6 +2025,19 @@ $(document).ready(() => {
     if (e.key === "Enter") {
       e.preventDefault();
       $(".save-settings").trigger("click");
+    }
+  });
+
+  $(document).on("keydown.rawConfigShortcut", function (e) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    if (e.key.toLowerCase() !== "s") return;
+    if (!$(".raw-config-container").length) return;
+
+    if ($(e.target).hasClass("ace_text-input")) return;
+
+    if (currentMode === "raw") {
+      e.preventDefault();
+      triggerRawConfigSave();
     }
   });
 
@@ -1994,7 +2154,7 @@ $(document).ready(() => {
     // First remove 'show' to start fade-out transition
     $currentPane.removeClass("show");
 
-    // After fade-out completes, switch the active panes
+    // After fade-out completes, switch active panes
     setTimeout(() => {
       $currentPane.removeClass("active");
       $targetPane.addClass("active");
@@ -2220,6 +2380,17 @@ $(document).ready(() => {
     });
   };
 
+  const seeMoreLabel = t("link.see_more", { defaultValue: "See more" });
+  const showLessLabel = t("plugins.multivalue.show_less", {
+    defaultValue: "Show less",
+  });
+  const moreValueLabel = t("plugins.multivalue.more_value", {
+    defaultValue: "more value",
+  });
+  const moreValuesLabel = t("plugins.multivalue.more_values", {
+    defaultValue: "more values",
+  });
+
   const toggleMultivalueVisibility = ($container, isToggleAction = false) => {
     const $inputGroups = $container.find(".multivalue-input-group");
     const visibleLimit = 5;
@@ -2234,23 +2405,19 @@ $(document).ready(() => {
     if (!$toggle.length) {
       const toggleHtml = `
         <div class="multivalue-toggle mt-2 mb-2">
-          <button type="button" class="btn btn-sm btn-outline-secondary multivalue-toggle-btn">
+          <button type="button" class="btn btn-sm btn-outline-secondary multivalue-toggle-btn" aria-expanded="false">
             <i class="bx bx-chevron-down me-1"></i>
-            <span class="toggle-text">Show all (<span class="hidden-count">${
-              $inputGroups.length - visibleLimit
-            }</span> more)</span>
+            <span class="toggle-text"></span>
           </button>
         </div>
       `;
       $container.find(".multivalue-inputs").after(toggleHtml);
       $toggle = $container.find(".multivalue-toggle");
-    } else {
-      // Update count
-      $toggle.find(".hidden-count").text($inputGroups.length - visibleLimit);
     }
 
-    const $toggleBtn = $container.find(".multivalue-toggle-btn");
-    const $toggleText = $container.find(".toggle-text");
+    const $toggleBtn = $toggle.find(".multivalue-toggle-btn");
+    const $toggleText = $toggle.find(".toggle-text");
+    const hiddenCount = Math.max($inputGroups.length - visibleLimit, 0);
     let isExpanded = $toggleBtn.hasClass("expanded");
 
     if (isToggleAction) {
@@ -2260,22 +2427,16 @@ $(document).ready(() => {
 
     if (isExpanded) {
       $inputGroups.show();
-      $toggleText.text("Show less");
-      $toggleBtn
-        .find("i")
-        .removeClass("bx-chevron-down")
-        .addClass("bx-chevron-up");
+      $toggleText.text(showLessLabel);
+      $toggleBtn.attr("aria-expanded", "true");
     } else {
+      $inputGroups.show();
       $inputGroups.slice(visibleLimit).hide();
+      const moreLabel = hiddenCount === 1 ? moreValueLabel : moreValuesLabel;
       $toggleText.html(
-        `Show all (<span class="hidden-count">${
-          $inputGroups.length - visibleLimit
-        }</span> more)`,
+        `${seeMoreLabel} (<span class="hidden-count">${hiddenCount}</span> ${moreLabel})`,
       );
-      $toggleBtn
-        .find("i")
-        .removeClass("bx-chevron-up")
-        .addClass("bx-chevron-down");
+      $toggleBtn.attr("aria-expanded", "false");
     }
   };
 
@@ -2766,14 +2927,14 @@ $(document).ready(() => {
             // Highlight settings after navigation is complete
             setTimeout(() => {
               if (matchedSettings.length > 0) {
-                highlightSettings(matchedSettings, 1000);
+                highlightSettings(matchedSettings, 1500);
               }
             }, 200);
           }, 10);
         } else {
           // If we're already on the correct plugin, just highlight
           if (matchedSettings.length > 0) {
-            highlightSettings(matchedSettings, 1000);
+            highlightSettings(matchedSettings, 1500);
           }
         }
       }

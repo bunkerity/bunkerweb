@@ -24,7 +24,7 @@ Führen Sie die folgenden Schritte aus, um die Auth Basic-Authentifizierung zu a
 | `USE_AUTH_BASIC`      | `no`              | multisite | nein     | **Auth Basic aktivieren:** Auf `yes` setzen, um die Basisauthentifizierung zu aktivieren.                                                                        |
 | `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | nein     | **Schutzumfang:** Auf `sitewide` setzen, um die gesamte Website zu schützen, oder einen URL-Pfad angeben (z.B. `/admin`), um nur bestimmte Bereiche zu schützen. |
 | `AUTH_BASIC_USER`     | `changeme`        | multisite | ja       | **Benutzername:** Der für die Authentifizierung erforderliche Benutzername. Sie können mehrere Paare aus Benutzername und Passwort definieren.                   |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Jedes Passwort korrespondiert mit einem Benutzernamen.                                       |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | ja       | **Passwort:** Das für die Authentifizierung erforderliche Passwort. Passwörter werden mit bcrypt für maximale Sicherheit gehasht.                                |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | nein     | **Aufforderungstext:** Die Nachricht, die in der dem Benutzer angezeigten Authentifizierungsaufforderung erscheint.                                              |
 
 !!! warning "Sicherheitshinweise"

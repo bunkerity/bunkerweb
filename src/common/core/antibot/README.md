@@ -36,14 +36,20 @@ The following settings are shared across all challenge mechanisms:
 
 BunkerWeb allows you to specify certain users, IPs, or requests that should bypass the antibot challenge completely. This is useful for whitelisting trusted services, internal networks, or specific pages that should always be accessible without challenge:
 
-| Setting                     | Default | Context   | Multiple | Description                                                                                                       |
-| --------------------------- | ------- | --------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge.               |
-| `ANTIBOT_IGNORE_IP`         |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.       |
-| `ANTIBOT_IGNORE_RDNS`       |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.      |
-| `ANTIBOT_RDNS_GLOBAL`       | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                     |
-| `ANTIBOT_IGNORE_ASN`        |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                      |
-| `ANTIBOT_IGNORE_USER_AGENT` |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge. |
+| Setting                     | Default | Context   | Multiple | Description                                                                                                                            |
+| --------------------------- | ------- | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTIBOT_IGNORE_URI`        |         | multisite | no       | **Excluded URLs:** List of URI regex patterns separated by spaces that should bypass the challenge.                                    |
+| `ANTIBOT_IGNORE_IP`         |         | multisite | no       | **Excluded IPs:** List of IP addresses or CIDR ranges separated by spaces that should bypass the challenge.                            |
+| `ANTIBOT_IGNORE_RDNS`       |         | multisite | no       | **Excluded Reverse DNS:** List of reverse DNS suffixes separated by spaces that should bypass the challenge.                           |
+| `ANTIBOT_RDNS_GLOBAL`       | `yes`   | multisite | no       | **Global IPs Only:** If set to `yes`, only perform reverse DNS checks on public IP addresses.                                          |
+| `ANTIBOT_IGNORE_ASN`        |         | multisite | no       | **Excluded ASNs:** List of ASN numbers separated by spaces that should bypass the challenge.                                           |
+| `ANTIBOT_IGNORE_USER_AGENT` |         | multisite | no       | **Excluded User Agents:** List of User-Agent regex patterns separated by spaces that should bypass the challenge.                      |
+| `ANTIBOT_IGNORE_COUNTRY`    |         | multisite | no       | **Excluded Countries:** List of ISO 3166-1 alpha-2 country codes separated by spaces that should bypass the challenge.                 |
+| `ANTIBOT_ONLY_COUNTRY`      |         | multisite | no       | **Only Challenge Countries:** List of ISO 3166-1 alpha-2 country codes that must solve the challenge. All other countries are skipped. |
+
+!!! note "Behavior of Country-Based Settings"
+      - When both `ANTIBOT_IGNORE_COUNTRY` and `ANTIBOT_ONLY_COUNTRY` are set, the ignore list takes precedence—countries listed in both will bypass the challenge.
+      - Private or unknown IP addresses bypass the challenge when `ANTIBOT_ONLY_COUNTRY` is set because no country code can be determined.
 
 **Examples:**
 
@@ -61,6 +67,12 @@ BunkerWeb allows you to specify certain users, IPs, or requests that should bypa
 
 - `ANTIBOT_IGNORE_USER_AGENT: "^Mozilla.+Chrome.+Safari"`
   This will exclude requests with User-Agents matching the specified regex pattern from the antibot challenge.
+
+- `ANTIBOT_IGNORE_COUNTRY: "US CA"`
+  This will bypass the antibot challenge for visitors located in the United States or Canada.
+
+- `ANTIBOT_ONLY_COUNTRY: "CN RU"`
+  This will only challenge visitors from China or Russia. Requests from other countries (or private IP ranges) skip the challenge.
 
 ### Supported Challenge Mechanisms
 

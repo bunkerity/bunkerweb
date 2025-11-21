@@ -8,7 +8,6 @@ from pathlib import Path
 from shutil import move, rmtree
 from sys import path as sys_path
 from tarfile import CompressionError, HeaderError, ReadError, TarError, open as tar_open
-from threading import Thread
 from time import time
 from typing import List, Optional, Union
 from uuid import uuid4
@@ -21,7 +20,7 @@ from werkzeug.utils import secure_filename
 
 from common_utils import bytes_hash  # type: ignore
 
-from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
+from app.dependencies import CORE_PLUGINS_PATH, BW_CONFIG, BW_INSTANCES_UTILS, CONFIG_TASKS_EXECUTOR, DATA, DB, EXTERNAL_PLUGINS_PATH, PRO_PLUGINS_PATH
 from app.utils import ALWAYS_USED_PLUGINS, LOGGER, PLUGIN_NAME_RX, PLUGINS_SPECIFICS, TMP_DIR
 
 from app.routes.utils import PLUGIN_KEYS, error_message, handle_error, verify_data_in_form, wait_applying
@@ -74,7 +73,7 @@ def delete_plugin():
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
 
-    Thread(target=update_plugins, args=(plugins,)).start()
+    CONFIG_TASKS_EXECUTOR.submit(update_plugins, plugins)
 
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message=f"Deleting plugins: {', '.join(plugins)}"))
 
@@ -412,7 +411,7 @@ def plugins_refresh():
         DATA["RELOADING"] = False
 
     DATA.update({"RELOADING": True, "LAST_RELOAD": time()})
-    Thread(target=update_plugins).start()
+    CONFIG_TASKS_EXECUTOR.submit(update_plugins)
 
     return redirect(url_for("loading", next=url_for("plugins.plugins_page"), message="Reloading plugins"))
 

@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.5
+                    image: bunkerity/bunkerweb:1.6.6-rc3
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.5
+                    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.5
+                    image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.5
+                    image: bunkerity/bunkerweb-ui:1.6.6-rc3
                     ...
             ```
 
@@ -63,11 +63,11 @@
         ```bash
         LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | jq -r .tag_name)
 
-        # Descargar el script y su suma de verificación
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        # Download the script and its checksum
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
 
-        # Verificar la suma de verificación
+        # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
 
         # Si la verificación es exitosa, ejecuta el script
@@ -114,6 +114,12 @@
         * El modo de actualización evita intencionadamente reinstalar o degradar NGINX fuera de la versión anclada compatible ya presente.
         * Los registros para la solución de problemas permanecen en `/var/log/bunkerweb/`.
 
+    * **Comportamiento según el modo**:
+
+        - El instalador reutiliza la misma lógica de selección durante la actualización: el modo manager mantiene el asistente deshabilitado, vincula la API a `0.0.0.0` y sigue exigiendo una IP para la lista blanca (proporciónala con `--manager-ip` en ejecuciones no interactivas), mientras que el modo worker continúa obligando a indicar las IP del manager.
+        - Las actualizaciones del manager pueden decidir si se inicia el servicio Web UI, y el resumen indica explícitamente el estado del servicio API para que puedas controlarlo con `--api` / `--no-api`.
+        - Las opciones de CrowdSec siguen limitadas a las actualizaciones full stack, y el script continúa validando el sistema operativo y la arquitectura de CPU antes de modificar paquetes; las combinaciones no soportadas siguen requiriendo `--force`.
+
         Resumen de la reversión:
 
         * Usa el directorio de copia de seguridad generado (o tu copia de seguridad manual) + los pasos en la sección de Reversión para restaurar la base de datos, luego reinstala la versión anterior de la imagen/paquete y vuelve a bloquear los paquetes.
@@ -135,20 +141,20 @@
         Ejemplos:
 
         ```bash
-        # Actualizar a 1.6.5 interactivamente (pedirá confirmación para la copia de seguridad)
-        sudo ./install-bunkerweb.sh --version 1.6.5
+        # Actualizar a 1.6.6-rc3 interactivamente (pedirá confirmación para la copia de seguridad)
+        sudo ./install-bunkerweb.sh --version 1.6.6-rc3
 
         # Actualización no interactiva con copia de seguridad automática a un directorio personalizado
-        sudo ./install-bunkerweb.sh -v 1.6.5 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --backup-dir /var/backups/bw-2025-01 -y
 
         # Actualización desatendida silenciosa (salida suprimida) – depende de la copia de seguridad automática predeterminada
-        sudo ./install-bunkerweb.sh -v 1.6.5 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 -y -q
 
         # Realizar una ejecución de prueba (plan) sin aplicar cambios
-        sudo ./install-bunkerweb.sh -v 1.6.5 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --dry-run
 
         # Actualizar omitiendo la copia de seguridad automática (NO recomendado)
-        sudo ./install-bunkerweb.sh -v 1.6.5 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --no-auto-backup -y
         ```
 
         !!! warning "Omitir copias de seguridad"
@@ -228,7 +234,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -254,7 +260,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.6-rc3
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `dnf upgrade`, puedes usar el siguiente comando:
@@ -651,16 +657,16 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.5
+                        image: bunkerity/bunkerweb:1.6.6-rc3
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.5
+                        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.5
+                        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.5
+                        image: bunkerity/bunkerweb-ui:1.6.6-rc3
                         ...
                 ```
 
@@ -695,7 +701,7 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `apt upgrade`, puedes usar el siguiente comando:
@@ -721,7 +727,7 @@ Hemos añadido una característica de **espacio de nombres** a las integraciones
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.6-rc3
                     ```
 
                     Para evitar que el paquete de BunkerWeb se actualice al ejecutar `dnf upgrade`, puedes usar el siguiente comando:

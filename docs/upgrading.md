@@ -25,16 +25,16 @@
             ```yaml
             services:
                 bunkerweb:
-                    image: bunkerity/bunkerweb:1.6.5
+                    image: bunkerity/bunkerweb:1.6.6-rc3
                     ...
                 bw-scheduler:
-                    image: bunkerity/bunkerweb-scheduler:1.6.5
+                    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
                     ...
                 bw-autoconf:
-                    image: bunkerity/bunkerweb-autoconf:1.6.5
+                    image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
                     ...
                 bw-ui:
-                    image: bunkerity/bunkerweb-ui:1.6.5
+                    image: bunkerity/bunkerweb-ui:1.6.6-rc3
                     ...
             ```
 
@@ -64,8 +64,8 @@
         LATEST_VERSION=$(curl -s https://api.github.com/repos/bunkerity/bunkerweb/releases/latest | jq -r .tag_name)
 
         # Download the script and its checksum
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
-        wget https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh
+        curl -fsSL -O https://github.com/bunkerity/bunkerweb/releases/download/${LATEST_VERSION}/install-bunkerweb.sh.sha256
 
         # Verify the checksum
         sha256sum -c install-bunkerweb.sh.sha256
@@ -114,6 +114,12 @@
         * Upgrade mode intentionally avoids reinstalling or downgrading NGINX outside the supported pinned version already present.
         * Logs for troubleshooting remain in `/var/log/bunkerweb/`.
 
+    * **Mode-aware behavior**:
+
+        - The installer reuses the same installation-type logic during upgrades: manager mode keeps the setup wizard disabled, binds the API to `0.0.0.0`, and requires a whitelist IP (pass `--manager-ip` for unattended runs), while worker mode still enforces the manager IP list.
+        - Manager upgrades can opt to start or skip the Web UI service, and the summary explicitly reports the API service state so you can decide whether to enable it via `--api` / `--no-api`.
+        - CrowdSec options remain limited to full-stack upgrades, and the script continues to validate both the operating system and CPU architecture before touching packages, gating unsupported combinations behind `--force`.
+
         Rollback summary:
 
         * Use the generated backup directory (or your manual backup) + the steps in the Rollback section to restore DB, then reinstall the previous image / package version and re‑lock packages.
@@ -135,20 +141,20 @@
         Examples:
 
         ```bash
-        # Upgrade to 1.6.5 interactively (will prompt for backup)
-        sudo ./install-bunkerweb.sh --version 1.6.5
+        # Upgrade to 1.6.6-rc3 interactively (will prompt for backup)
+        sudo ./install-bunkerweb.sh --version 1.6.6-rc3
 
         # Non-interactive upgrade with automatic backup to custom directory
-        sudo ./install-bunkerweb.sh -v 1.6.5 --backup-dir /var/backups/bw-2025-01 -y
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --backup-dir /var/backups/bw-2025-01 -y
 
         # Silent unattended upgrade (logs suppressed) – relies on default auto-backup
-        sudo ./install-bunkerweb.sh -v 1.6.5 -y -q
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 -y -q
 
         # Perform a dry run (plan) without applying changes
-        sudo ./install-bunkerweb.sh -v 1.6.5 --dry-run
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --dry-run
 
         # Upgrade skipping automatic backup (NOT recommended)
-        sudo ./install-bunkerweb.sh -v 1.6.5 --no-auto-backup -y
+        sudo ./install-bunkerweb.sh -v 1.6.6-rc3 --no-auto-backup -y
         ```
 
         !!! warning "Skipping backups"
@@ -228,7 +234,7 @@
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -254,7 +260,7 @@
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.6-rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :
@@ -651,16 +657,16 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
                 ```yaml
                 services:
                     bunkerweb:
-                        image: bunkerity/bunkerweb:1.6.5
+                        image: bunkerity/bunkerweb:1.6.6-rc3
                         ...
                     bw-scheduler:
-                        image: bunkerity/bunkerweb-scheduler:1.6.5
+                        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
                         ...
                     bw-autoconf:
-                        image: bunkerity/bunkerweb-autoconf:1.6.5
+                        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
                         ...
                     bw-ui:
-                        image: bunkerity/bunkerweb-ui:1.6.5
+                        image: bunkerity/bunkerweb-ui:1.6.6-rc3
                         ...
                 ```
 
@@ -695,7 +701,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo apt update && \
-                    sudo apt install -y --allow-downgrades bunkerweb=1.6.5
+                    sudo apt install -y --allow-downgrades bunkerweb=1.6.6-rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `apt upgrade`, you can use the following command :
@@ -721,7 +727,7 @@ We added a **namespace** feature to the autoconf integrations. Namespaces allow 
 
                     ```shell
                     sudo dnf makecache && \
-                    sudo dnf install -y --allowerasing bunkerweb-1.6.5
+                    sudo dnf install -y --allowerasing bunkerweb-1.6.6-rc3
                     ```
 
                     To prevent the BunkerWeb package from upgrading when executing `dnf upgrade`, you can use the following command :

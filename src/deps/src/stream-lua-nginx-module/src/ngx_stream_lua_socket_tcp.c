@@ -28,6 +28,7 @@
 
 
 static int ngx_stream_lua_socket_tcp(lua_State *L);
+static int ngx_stream_lua_socket_tcp_bind(lua_State *L);
 static int ngx_stream_lua_socket_tcp_connect(lua_State *L);
 #if (NGX_STREAM_SSL)
 static int ngx_stream_lua_socket_tcp_sslhandshake(lua_State *L);
@@ -36,9 +37,9 @@ static int ngx_stream_lua_socket_tcp_receive(lua_State *L);
 static int ngx_stream_lua_socket_tcp_receiveany(lua_State *L);
 static int ngx_stream_lua_socket_tcp_send(lua_State *L);
 static int ngx_stream_lua_socket_tcp_close(lua_State *L);
-static int ngx_stream_lua_socket_tcp_setoption(lua_State *L);
 static int ngx_stream_lua_socket_tcp_settimeout(lua_State *L);
 static int ngx_stream_lua_socket_tcp_settimeouts(lua_State *L);
+static int ngx_stream_lua_socket_tcp_settransparent(lua_State *L);
 static void ngx_stream_lua_socket_tcp_handler(ngx_event_t *ev);
 static ngx_int_t ngx_stream_lua_socket_tcp_get_peer(ngx_peer_connection_t *pc,
     void *data);
@@ -185,7 +186,8 @@ static int ngx_stream_lua_ssl_free_session(lua_State *L);
 static void ngx_stream_lua_socket_tcp_close_connection(ngx_connection_t *c);
 
 static int ngx_stream_lua_socket_tcp_peek(lua_State *L);
-static ngx_int_t ngx_stream_lua_socket_tcp_peek_resume(ngx_stream_lua_request_t *r);
+static ngx_int_t ngx_stream_lua_socket_tcp_peek_resume(
+    ngx_stream_lua_request_t *r);
 static int ngx_stream_lua_socket_tcp_shutdown(lua_State *L);
 
 
@@ -195,6 +197,10 @@ enum {
     SOCKET_CONNECT_TIMEOUT_INDEX = 2,
     SOCKET_SEND_TIMEOUT_INDEX = 4,
     SOCKET_READ_TIMEOUT_INDEX = 5,
+    SOCKET_CLIENT_CERT_INDEX  = 6,
+    SOCKET_CLIENT_PKEY_INDEX  = 7,
+    SOCKET_BIND_INDEX = 8,   /* only in upstream cosocket */
+    SOCKET_IP_TRANSPARENT_INDEX = 9
 };
 
 
@@ -203,6 +209,15 @@ enum {
     SOCKET_OP_READ,
     SOCKET_OP_WRITE,
     SOCKET_OP_RESUME_CONN
+};
+
+
+enum {
+    NGX_STREAM_LUA_SOCKOPT_KEEPALIVE = 1,
+    NGX_STREAM_LUA_SOCKOPT_REUSEADDR,
+    NGX_STREAM_LUA_SOCKOPT_TCP_NODELAY,
+    NGX_STREAM_LUA_SOCKOPT_SNDBUF,
+    NGX_STREAM_LUA_SOCKOPT_RCVBUF,
 };
 
 
@@ -247,6 +262,8 @@ static char ngx_stream_lua_pattern_udata_metatable_key;
 #if (NGX_STREAM_SSL)
 static char ngx_stream_lua_ssl_session_metatable_key;
 #endif
+
+#define ngx_stream_lua_tcp_socket_metatable_literal_key  "__tcp_cosocket_mt"
 
 
 void
@@ -319,7 +336,10 @@ ngx_stream_lua_inject_socket_tcp_api(ngx_log_t *log, lua_State *L)
     /* {{{tcp object metatable */
     lua_pushlightuserdata(L, ngx_stream_lua_lightudata_mask(
                           tcp_socket_metatable_key));
-    lua_createtable(L, 0 /* narr */, 14 /* nrec */);
+    lua_createtable(L, 0 /* narr */, 17 /* nrec */);
+
+    lua_pushcfunction(L, ngx_stream_lua_socket_tcp_bind);
+    lua_setfield(L, -2, "bind");
 
     lua_pushcfunction(L, ngx_stream_lua_socket_tcp_connect);
     lua_setfield(L, -2, "connect");
@@ -346,11 +366,11 @@ ngx_stream_lua_inject_socket_tcp_api(ngx_log_t *log, lua_State *L)
     lua_pushcfunction(L, ngx_stream_lua_socket_tcp_close);
     lua_setfield(L, -2, "close");
 
-    lua_pushcfunction(L, ngx_stream_lua_socket_tcp_setoption);
-    lua_setfield(L, -2, "setoption");
-
     lua_pushcfunction(L, ngx_stream_lua_socket_tcp_settimeout);
     lua_setfield(L, -2, "settimeout"); /* ngx socket mt */
+
+    lua_pushcfunction(L, ngx_stream_lua_socket_tcp_settransparent);
+    lua_setfield(L, -2, "settransparent"); /* ngx socket mt */
 
     lua_pushcfunction(L, ngx_stream_lua_socket_tcp_settimeouts);
     lua_setfield(L, -2, "settimeouts"); /* ngx socket mt */
@@ -366,6 +386,12 @@ ngx_stream_lua_inject_socket_tcp_api(ngx_log_t *log, lua_State *L)
 
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
+    lua_rawset(L, LUA_REGISTRYINDEX);
+
+    lua_pushliteral(L, ngx_stream_lua_tcp_socket_metatable_literal_key);
+    lua_pushlightuserdata(L, ngx_stream_lua_lightudata_mask(
+                          tcp_socket_metatable_key));
+    lua_rawget(L, LUA_REGISTRYINDEX);
     lua_rawset(L, LUA_REGISTRYINDEX);
     /* }}} */
 
@@ -457,7 +483,8 @@ ngx_stream_lua_socket_tcp(lua_State *L)
 
 static void
 ngx_stream_lua_socket_tcp_create_socket_pool(lua_State *L,
-    ngx_stream_lua_request_t *r, ngx_str_t key, ngx_int_t pool_size, ngx_int_t backlog,
+    ngx_stream_lua_request_t *r, ngx_str_t key, ngx_int_t pool_size,
+    ngx_int_t backlog,
     ngx_stream_lua_socket_pool_t **spool)
 {
     u_char                              *p;
@@ -855,6 +882,54 @@ no_memory_and_not_resuming:
 
 
 static int
+ngx_stream_lua_socket_tcp_bind(lua_State *L)
+{
+    ngx_stream_lua_ctx_t   *ctx;
+    int                     n;
+    u_char                 *text;
+    size_t                  len;
+    ngx_addr_t             *local;
+
+    ngx_stream_lua_request_t    *r;
+
+    n = lua_gettop(L);
+    if (n != 2) {
+        return luaL_error(L, "expecting 2 arguments, but got %d",
+                          lua_gettop(L));
+    }
+
+    r = ngx_stream_lua_get_req(L);
+    if (r == NULL) {
+        return luaL_error(L, "no request found");
+    }
+
+    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
+    if (ctx == NULL) {
+        return luaL_error(L, "no ctx found");
+    }
+
+    ngx_stream_lua_check_context(L, ctx, NGX_STREAM_LUA_CONTEXT_YIELDABLE);
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    text = (u_char *) luaL_checklstring(L, 2, &len);
+    local = ngx_stream_lua_parse_addr(L, text, len);
+    if (local == NULL) {
+        lua_pushnil(L);
+        lua_pushfstring(L, "bad address");
+        return 2;
+    }
+
+    /* TODO: we may reuse the userdata here */
+    lua_rawseti(L, 1, SOCKET_BIND_INDEX);
+    ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                   "lua tcp socket bind ip: %V", &local->name);
+    lua_pushboolean(L, 1);
+    return 1;
+}
+
+
+static int
 ngx_stream_lua_socket_tcp_connect(lua_State *L)
 {
     ngx_stream_lua_request_t    *r;
@@ -864,6 +939,7 @@ ngx_stream_lua_socket_tcp_connect(lua_State *L)
     u_char                      *p;
     size_t                       len;
     ngx_peer_connection_t       *pc;
+    ngx_addr_t                  *local;
     int                          connect_timeout, send_timeout, read_timeout;
     unsigned                     custom_pool;
     int                          key_index;
@@ -1078,6 +1154,26 @@ ngx_stream_lua_socket_tcp_connect(lua_State *L)
 
     lua_pop(L, 3);
 
+    lua_rawgeti(L, 1, SOCKET_BIND_INDEX);
+    local = lua_touserdata(L, -1);
+    lua_pop(L, 1);
+
+    if (local) {
+        u->peer.local = local;
+    }
+
+#if (NGX_HAVE_TRANSPARENT_PROXY)
+    lua_rawgeti(L, 1, SOCKET_IP_TRANSPARENT_INDEX);
+
+    if (lua_toboolean(L, -1)) {
+        pc->transparent = 1;
+        ngx_log_debug0(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
+                       "stream lua set TCP upstream with IP_TRANSPARENT");
+    }
+
+    lua_pop(L, 1);
+#endif
+
     if (connect_timeout > 0) {
         u->connect_timeout = (ngx_msec_t) connect_timeout;
 
@@ -1205,7 +1301,8 @@ ngx_stream_lua_socket_resolve_handler(ngx_resolver_ctx_t *ctx)
         addr.data = text;
 
         for (i = 0; i < ctx->naddrs; i++) {
-            addr.len = ngx_sock_ntop(ur->addrs[i].sockaddr, ur->addrs[i].socklen,
+            addr.len = ngx_sock_ntop(ur->addrs[i].sockaddr,
+                                     ur->addrs[i].socklen,
                                      text, NGX_SOCKADDR_STRLEN, 0);
 
             ngx_log_debug1(NGX_LOG_DEBUG_STREAM, r->connection->log, 0,
@@ -1696,8 +1793,12 @@ ngx_stream_lua_socket_tcp_sslhandshake(lua_State *L)
                 if (n >= 5) {
                     if (lua_toboolean(L, 5)) {
 #ifdef NGX_STREAM_LUA_USE_OCSP
-                        SSL_set_tlsext_status_type(c->ssl->connection,
-                                                   TLSEXT_STATUSTYPE_ocsp);
+                        if (SSL_set_tlsext_status_type(c->ssl->connection,
+                            TLSEXT_STATUSTYPE_ocsp) != 1)
+                        {
+                            return luaL_error(L,
+                                              "failed to enable OCSP stapling");
+                        }
 #else
                         return luaL_error(L, "no OCSP support");
 #endif
@@ -3256,11 +3357,123 @@ ngx_stream_lua_socket_tcp_shutdown(lua_State *L)
 }
 
 
-static int
-ngx_stream_lua_socket_tcp_setoption(lua_State *L)
+int
+ngx_stream_lua_ffi_socket_tcp_getoption(ngx_stream_lua_socket_tcp_upstream_t *u,
+    int option, int *val, u_char *err, size_t *errlen)
 {
-    /* TODO */
-    return 0;
+    socklen_t len;
+    int       fd, rc;
+
+    if (u == NULL || u->peer.connection == NULL) {
+        *errlen = ngx_snprintf(err, *errlen, "closed") - err;
+        return NGX_ERROR;
+    }
+
+    fd = u->peer.connection->fd;
+
+    if (fd == (int) -1) {
+        *errlen = ngx_snprintf(err, *errlen, "invalid socket fd") - err;
+        return NGX_ERROR;
+    }
+
+    len = sizeof(int);
+
+    switch (option) {
+    case NGX_STREAM_LUA_SOCKOPT_KEEPALIVE:
+        rc = getsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (void *) val, &len);
+        break;
+
+    case NGX_STREAM_LUA_SOCKOPT_REUSEADDR:
+        rc = getsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void *) val, &len);
+        break;
+
+    case NGX_STREAM_LUA_SOCKOPT_TCP_NODELAY:
+        rc = getsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void *) val, &len);
+        break;
+
+    case NGX_STREAM_LUA_SOCKOPT_SNDBUF:
+        rc = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, (void *) val, &len);
+        break;
+
+    case NGX_STREAM_LUA_SOCKOPT_RCVBUF:
+        rc = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, (void *) val, &len);
+        break;
+
+    default:
+        *errlen = ngx_snprintf(err, *errlen, "unsupported option %d", option)
+                  - err;
+        return NGX_ERROR;
+    }
+
+    if (rc == -1) {
+        *errlen = ngx_strerror(ngx_errno, err, NGX_MAX_ERROR_STR) - err;
+        return NGX_ERROR;
+    }
+
+    return NGX_OK;
+}
+
+
+int
+ngx_stream_lua_ffi_socket_tcp_setoption(
+    ngx_stream_lua_socket_tcp_upstream_t *u,
+    int option, int val, u_char *err, size_t *errlen)
+{
+    socklen_t len;
+    int       fd, rc;
+
+    if (u == NULL || u->peer.connection == NULL) {
+        *errlen = ngx_snprintf(err, *errlen, "closed") - err;
+        return NGX_ERROR;
+    }
+
+    fd = u->peer.connection->fd;
+
+    if (fd == (int) -1) {
+        *errlen = ngx_snprintf(err, *errlen, "invalid socket fd") - err;
+        return NGX_ERROR;
+    }
+
+    len = sizeof(int);
+
+    switch (option) {
+    case NGX_STREAM_LUA_SOCKOPT_KEEPALIVE:
+        rc = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE,
+                        (const void *) &val, len);
+        break;
+
+    case NGX_STREAM_LUA_SOCKOPT_REUSEADDR:
+        rc = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+                        (const void *) &val, len);
+        break;
+
+    case NGX_STREAM_LUA_SOCKOPT_TCP_NODELAY:
+        rc = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
+                        (const void *) &val, len);
+        break;
+
+    case NGX_STREAM_LUA_SOCKOPT_SNDBUF:
+        rc = setsockopt(fd, SOL_SOCKET, SO_RCVBUF,
+                        (const void *) &val, len);
+        break;
+
+    case NGX_STREAM_LUA_SOCKOPT_RCVBUF:
+        rc = setsockopt(fd, SOL_SOCKET, SO_SNDBUF,
+                        (const void *) &val, len);
+        break;
+
+    default:
+        *errlen = ngx_snprintf(err, *errlen, "unsupported option: %d", option)
+                  - err;
+        return NGX_ERROR;
+    }
+
+    if (rc == -1) {
+        *errlen = ngx_strerror(ngx_errno, err, NGX_MAX_ERROR_STR) - err;
+        return NGX_ERROR;
+    }
+
+    return NGX_OK;
 }
 
 
@@ -3372,6 +3585,43 @@ ngx_stream_lua_socket_tcp_settimeouts(lua_State *L)
     }
 
     return 0;
+}
+
+
+static int
+ngx_stream_lua_socket_tcp_settransparent(lua_State *L)
+{
+    ngx_stream_lua_ctx_t   *ctx;
+    int                     n;
+
+    ngx_stream_lua_request_t  *r;
+
+    n = lua_gettop(L);
+
+    if (n != 1) {
+        return luaL_error(L, "ngx.socket settransparent: expecting 1"
+                          "argument (including the object) but seen %d",
+                          lua_gettop(L));
+    }
+
+    r = ngx_stream_lua_get_req(L);
+    if (r == NULL) {
+        return luaL_error(L, "no request found");
+    }
+
+    ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
+    if (ctx == NULL) {
+        return luaL_error(L, "no ctx found");
+    }
+
+    ngx_stream_lua_check_context(L, ctx,  NGX_STREAM_LUA_CONTEXT_YIELDABLE);
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    lua_rawseti(L, 1, SOCKET_IP_TRANSPARENT_INDEX);
+    lua_pushboolean(L, 1);
+
+    return 1;
 }
 
 
@@ -4252,7 +4502,8 @@ ngx_stream_lua_socket_tcp_conn_op_resume_handler(ngx_event_t *ev)
 
 
 static int
-ngx_stream_lua_socket_tcp_conn_op_resume_retval_handler(ngx_stream_lua_request_t *r,
+ngx_stream_lua_socket_tcp_conn_op_resume_retval_handler(
+    ngx_stream_lua_request_t *r,
     ngx_stream_lua_socket_tcp_upstream_t *u, lua_State *L)
 {
     int                                              nret;
@@ -5048,7 +5299,9 @@ ngx_stream_lua_req_socket_tcp(lua_State *L)
     raw = 1;
 
     r = ngx_stream_lua_get_req(L);
-
+    if (r == NULL) {
+        return luaL_error(L, "no request found");
+    }
 
     ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
     if (ctx == NULL) {
@@ -5067,8 +5320,6 @@ ngx_stream_lua_req_socket_tcp(lua_State *L)
             lua_pushliteral(L, "pending data to write");
             return 2;
         }
-
-
 
         dd("ctx acquired raw req socket: %d", ctx->acquired_raw_req_socket);
 
@@ -5191,6 +5442,7 @@ ngx_stream_lua_req_socket_rev_handler(ngx_stream_lua_request_t *r)
 
     u->read_event_handler(r, u);
 }
+
 
 static int
 ngx_stream_lua_socket_tcp_getreusedtimes(lua_State *L)

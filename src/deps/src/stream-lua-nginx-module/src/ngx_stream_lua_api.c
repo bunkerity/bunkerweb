@@ -17,6 +17,13 @@
 #endif
 #include "ddebug.h"
 
+#if (NGX_LINUX)
+#include <linux/netfilter_ipv4.h>
+#if (NGX_HAVE_INET6)
+#include <linux/netfilter_ipv6.h>
+#include <linux/netfilter_ipv6/ip6_tables.h>
+#endif
+#endif
 
 #include "ngx_stream_lua_common.h"
 #include "api/ngx_stream_lua_api.h"
@@ -33,8 +40,6 @@ ngx_stream_lua_get_global_state(ngx_conf_t *cf)
 
     return lmcf->lua;
 }
-
-
 
 
 static ngx_int_t ngx_stream_lua_shared_memory_init(ngx_shm_zone_t *shm_zone,
@@ -217,5 +222,85 @@ ngx_stream_lua_shared_memory_init(ngx_shm_zone_t *shm_zone, void *data)
 
     return NGX_OK;
 }
+
+
+#if (NGX_LINUX)
+int
+ngx_stream_lua_ffi_req_dst_addr(ngx_stream_lua_request_t *r, char *buf,
+    int *buf_size, u_char *errbuf, size_t *errbuf_size)
+{
+    int                fd;
+    int                opt_name;
+    int                family;
+    socklen_t          addr_sz;
+    socklen_t          len = sizeof(family);
+
+    struct sockaddr_storage addr;
+
+    addr_sz = sizeof(addr);
+    /* Check if connection exists */
+    if (r->session->connection == NULL) {
+        *errbuf_size = ngx_snprintf(errbuf, *errbuf_size, "no connection")
+                       - errbuf;
+        return NGX_ERROR;
+    }
+
+    fd = r->session->connection->fd;
+
+    /* Validate file descriptor */
+    if (fd < 0) {
+        *errbuf_size = ngx_snprintf(errbuf, *errbuf_size, "invalid fd")
+                       - errbuf;
+        return NGX_ERROR;
+    }
+
+    /* Get socket family using getsockopt */
+    if (getsockopt(fd, SOL_SOCKET, SO_DOMAIN, &family, &len) != 0) {
+        *errbuf_size = ngx_snprintf(errbuf, *errbuf_size,
+                                    "failed to get socket family") - errbuf;
+        return NGX_ERROR;
+    }
+
+    memset(&addr, 0, addr_sz);
+
+    /* Get original destination address based on socket family */
+    if (family == AF_INET) {
+        /* IPv4 */
+        opt_name = SO_ORIGINAL_DST;
+        if (getsockopt(fd, SOL_IP, opt_name, &addr, &addr_sz) != 0) {
+            *errbuf_size
+                = ngx_snprintf(errbuf, *errbuf_size,
+                               "failed to get IPv4 origin addr") - errbuf;
+            return NGX_ERROR;
+        }
+
+#if (NGX_HAVE_INET6)
+
+    } else if (family == AF_INET6) {
+        /* IPv6 */
+        opt_name = IP6T_SO_ORIGINAL_DST;
+        if (getsockopt(fd, SOL_IPV6, opt_name, &addr, &addr_sz) != 0) {
+            *errbuf_size
+                = ngx_snprintf(errbuf, *errbuf_size,
+                               "failed to get IPv6 origin addr") - errbuf;
+            return NGX_ERROR;
+        }
+#endif
+
+    } else {
+        /* Unsupported address family */
+        *errbuf_size
+            = ngx_snprintf(errbuf, *errbuf_size,
+                           "unsupported address family: %d", family) - errbuf;
+        return NGX_ERROR;
+    }
+
+    /* Convert socket address to string representation */
+    *buf_size = ngx_sock_ntop((struct sockaddr *)&addr, addr_sz,
+                              (u_char *) buf, *buf_size, 1);
+
+    return NGX_OK;
+}
+#endif
 
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */

@@ -66,6 +66,12 @@ ngx_stream_lua_ngx_get_phase(lua_State *L)
         lua_pushliteral(L, "content");
         break;
 
+#ifdef HAVE_PROXY_SSL_PATCH
+    case NGX_STREAM_LUA_CONTEXT_PROXY_SSL_VERIFY:
+        lua_pushliteral(L, "proxy_ssl_verify");
+        break;
+#endif
+
     case NGX_STREAM_LUA_CONTEXT_LOG:
         lua_pushliteral(L, "log");
         break;
@@ -92,8 +98,6 @@ ngx_stream_lua_inject_phase_api(lua_State *L)
     lua_pushcfunction(L, ngx_stream_lua_ngx_get_phase);
     lua_setfield(L, -2, "get_phase");
 }
-
-
 
 
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */

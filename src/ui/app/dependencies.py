@@ -1,4 +1,5 @@
 from contextlib import suppress
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from logging import getLogger
 from os import sep
@@ -24,6 +25,10 @@ BW_INSTANCES_UTILS = InstancesUtils(DB)
 CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
+
+# Shared thread pool executor for configuration tasks in routes
+# This prevents spawning new threads for each config operation
+CONFIG_TASKS_EXECUTOR = ThreadPoolExecutor(max_workers=4, thread_name_prefix="bw-ui-route-tasks")
 
 
 def reload_plugins():

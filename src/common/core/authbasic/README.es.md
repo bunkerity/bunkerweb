@@ -24,7 +24,7 @@ Siga estos pasos para habilitar y configurar la autenticación básica:
 | `USE_AUTH_BASIC`      | `no`              | multisite | no       | **Habilitar autenticación básica:** Establezca en `yes` para habilitar la autenticación básica.                                                                        |
 | `AUTH_BASIC_LOCATION` | `sitewide`        | multisite | no       | **Ámbito de protección:** Establezca en `sitewide` para proteger todo el sitio, o especifique una ruta de URL (p. ej., `/admin`) para proteger solo áreas específicas. |
 | `AUTH_BASIC_USER`     | `changeme`        | multisite | yes      | **Nombre de usuario:** El nombre de usuario requerido para la autenticación. Puede definir múltiples pares de nombre de usuario/contraseña.                            |
-| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Cada contraseña corresponde a un nombre de usuario.                                                     |
+| `AUTH_BASIC_PASSWORD` | `changeme`        | multisite | yes      | **Contraseña:** La contraseña requerida para la autenticación. Las contraseñas se hash con bcrypt para máxima seguridad.                                               |
 | `AUTH_BASIC_TEXT`     | `Restricted area` | multisite | no       | **Texto de la solicitud:** El mensaje que se muestra en la solicitud de autenticación mostrada a los usuarios.                                                         |
 
 !!! warning "Consideraciones de seguridad"

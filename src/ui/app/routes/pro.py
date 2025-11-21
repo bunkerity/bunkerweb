@@ -1,10 +1,9 @@
 from datetime import datetime
-from threading import Thread
 from time import time
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from app.dependencies import BW_CONFIG, DATA, DB
+from app.dependencies import BW_CONFIG, CONFIG_TASKS_EXECUTOR, DATA, DB
 from app.routes.utils import get_remain, handle_error, verify_data_in_form, wait_applying
 from app.utils import flash
 
@@ -101,7 +100,7 @@ def pro_key():
         }
     )
     flash("Checking license key.")
-    Thread(target=update_license_key, args=(variables,)).start()
+    CONFIG_TASKS_EXECUTOR.submit(update_license_key, variables)
     return redirect(
         url_for(
             "loading",

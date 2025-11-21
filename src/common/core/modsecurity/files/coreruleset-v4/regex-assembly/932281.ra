@@ -19,7 +19,7 @@
 ##!=>
 ##!> assemble
   ##! a word
-  [^\s,:]*
+  [^\s,:\}]*
   ##!=>
   ##! at least one comma is required
   ,

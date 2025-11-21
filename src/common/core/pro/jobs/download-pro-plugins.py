@@ -38,6 +38,7 @@ STATUS_MESSAGES = {
 }
 LOGGER = setup_logger("Jobs.download-pro-plugins")
 status = 0
+existing_pro_plugin_ids = set()
 
 
 def clean_pro_plugins(db) -> None:
@@ -332,6 +333,8 @@ try:
         with ZipFile(plugin_content) as zf:
             zf.extractall(path=temp_dir)
 
+    existing_pro_plugin_ids = {plugin["id"] for plugin in db.get_plugins(_type="pro")}
+
     plugin_nbr = 0
 
     # Install plugins
@@ -390,6 +393,18 @@ try:
 
     if err:
         LOGGER.error(f"Couldn't update Pro plugins to database: {err}")
+        # Only cleanup newly added plugins if the error suggests a database issue
+        if "max_allowed_packet" in err.lower() or "packet" in err.lower():
+            LOGGER.warning("Database packet size issue detected. Consider increasing max_allowed_packet in MariaDB/MySQL configuration.")
+
+        plugins_to_cleanup = [plugin_id for plugin_id in pro_plugins_ids if plugin_id not in existing_pro_plugin_ids]
+        if plugins_to_cleanup:
+            LOGGER.warning("Cleaning up Pro plugins that were not previously in the database due to the failed update.")
+            for plugin_id in plugins_to_cleanup:
+                plugin_dir = PRO_PLUGINS_DIR.joinpath(plugin_id)
+                if plugin_dir.exists():
+                    LOGGER.debug(f"Removing Pro plugin directory {plugin_dir} after database update failure.")
+                    rmtree(plugin_dir, ignore_errors=True)
         sys_exit(2)
 
     status = 1

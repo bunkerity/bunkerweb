@@ -157,3 +157,28 @@
     ```
 
     此配置允许合法的爬虫索引您的网站，而不会受到可能阻止它们的速率限制或其他安全措施的影响。rDNS 检查有助于验证爬虫是否确实来自其声称的公司。
+
+### 使用本地列表文件
+
+Whitelist、Greylist 和 Blacklist 插件提供的 `*_URLS` 设置共用同一个下载器。当你引用 `file:///` URL 时：
+
+- 路径会在 **scheduler** 容器内解析（Docker 部署通常为 `bunkerweb-scheduler`）。请将文件挂载到该容器，并确保 scheduler 用户拥有读取权限。
+- 每个文件都是 UTF-8 编码的纯文本，每行一个条目。空行会被忽略，注释行必须以 `#` 或 `;` 开头。不支持 `//` 注释。
+- 各类列表的条目要求：
+  - **IP 列表** 接受 IPv4/IPv6 地址或 CIDR 网段（例如 `192.0.2.10` 或 `2001:db8::/48`）。
+  - **rDNS 列表** 需要没有空格的后缀（例如 `.search.msn.com`），并会自动转换为小写。
+  - **ASN 列表** 可以仅包含编号（`32934`），或带 `AS` 前缀的编号（`AS15169`）。
+  - **User-Agent 列表** 视为 PCRE 模式，整行（包括空格）都会保留。请把注释放在独立行，避免被当成模式。
+  - **URI 列表** 必须以 `/` 开头，可以使用 `^`、`$` 等 PCRE 标记。
+
+符合格式的示例文件：
+
+```text
+# /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```

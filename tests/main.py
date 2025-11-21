@@ -56,27 +56,27 @@ if not ret:
 domains = {}
 if test_type in ["docker", "autoconf", "linux"]:
     domains = {
-        r"www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-        r"auth.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-        r"app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
-        r"app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
-        r"app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3"),
+        "www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        "auth.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        "app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
+        "app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        "app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3"),
     }
 elif test_type == "kubernetes":
     domains = {
-        r"www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
-        r"auth.example.com": Test.random_string(1) + "." + getenv("TEST_DOMAIN1_2"),
-        r"app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-        r"app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
-        r"app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
+        "www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        "auth.example.com": Test.random_string(1) + "." + getenv("TEST_DOMAIN1_2"),
+        "app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        "app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
+        "app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
     }
-elif test_type == "swarm":
+else:  # swarm
     domains = {
-        r"www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
-        r"auth.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
-        r"app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-        r"app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
-        r"app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
+        "www.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
+        "auth.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        "app1.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        "app2.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
+        "app3.example.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
     }
 
 for example in glob("./examples/*"):

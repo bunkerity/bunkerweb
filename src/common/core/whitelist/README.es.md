@@ -157,3 +157,28 @@ Siga estos pasos para configurar y usar la función de Lista Blanca:
     ```
 
     Esta configuración permite que los rastreadores legítimos indexen su sitio sin estar sujetos a la limitación de velocidad u otras medidas de seguridad que podrían bloquearlos. Las comprobaciones de DNS inverso ayudan a verificar que los rastreadores provienen realmente de las empresas que dicen ser.
+
+### Trabajar con archivos de listas locales
+
+Las configuraciones `*_URLS` de los plugins de lista blanca, lista gris y lista negra utilizan el mismo descargador. Cuando referencia una URL `file:///`:
+
+- La ruta se resuelve dentro del contenedor del **scheduler** (en despliegues Docker normalmente `bunkerweb-scheduler`). Monte los archivos allí y asegúrese de que el usuario del scheduler tenga permisos de lectura.
+- Cada archivo es texto codificado en UTF-8 con una entrada por línea. Las líneas vacías se ignoran y las líneas de comentario deben comenzar con `#` o `;`. Los comentarios `//` no son compatibles.
+- Valores esperados por tipo de lista:
+  - **Listas IP** aceptan direcciones IPv4/IPv6 o redes CIDR (por ejemplo `192.0.2.10` o `2001:db8::/48`).
+  - **Listas rDNS** esperan un sufijo sin espacios (por ejemplo `.search.msn.com`). Los valores se normalizan automáticamente a minúsculas.
+  - **Listas ASN** pueden contener solo el número (`32934`) o el número con el prefijo `AS` (`AS15169`).
+  - **Listas de User-Agent** se tratan como patrones PCRE y se conserva la línea completa (incluidos los espacios). Mantenga los comentarios en una línea separada para que no se interpreten como parte del patrón.
+  - **Listas URI** deben comenzar con `/` y pueden usar tokens PCRE como `^` o `$`.
+
+Ejemplos de archivos con el formato esperado:
+
+```text
+# /etc/bunkerweb/lists/ip-whitelist.txt
+192.0.2.10
+198.51.100.0/24
+
+# /etc/bunkerweb/lists/ua-whitelist.txt
+(?:^|\s)FriendlyScanner(?:\s|$)
+TrustedMonitor/\d+\.\d+
+```

@@ -105,7 +105,7 @@ Bitte beachten Sie, dass der Multisite-Modus bei Verwendung der Web-Benutzerober
 
 !!! info "Weiterführende Informationen"
 
-    Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele für den Multisite-Modus finden Sie in den [fortgeschrittenen Nutzungen](advanced.md) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples)-Verzeichnis des Repositorys.
 
 ## Benutzerdefinierte Konfigurationen {#custom-configurations}
 
@@ -126,7 +126,7 @@ Die Verwaltung benutzerdefinierter Konfigurationen über die Web-Benutzeroberfl�
 
 !!! info "Weiterführende Informationen"
 
-    Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.5/examples)-Verzeichnis des Repositorys.
+    Konkrete Beispiele für benutzerdefinierte Konfigurationen finden Sie in den [fortgeschrittenen Nutzungen](advanced.md#custom-configurations) der Dokumentation und im [Beispiele](https://github.com/bunkerity/bunkerweb/tree/v1.6.6-rc3/examples)-Verzeichnis des Repositorys.
 
 ## Datenbank
 
@@ -144,6 +144,9 @@ BunkerWeb speichert seine aktuelle Konfiguration sicher in einer Backend-Datenba
 
 Im Hintergrund speichert BunkerWeb bei jeder Bearbeitung einer Einstellung oder Hinzufügung einer neuen Konfiguration die Änderungen automatisch in der Datenbank und gewährleistet so Datenpersistenz und -konsistenz. BunkerWeb unterstützt mehrere Backend-Datenbankoptionen, darunter SQLite, MariaDB, MySQL und PostgreSQL.
 
+!!! tip
+    Wenn Sie die Weboberfläche für die tägliche Administration nutzen, empfehlen wir den Wechsel zu einer externen Datenbank-Engine (PostgreSQL oder MySQL/MariaDB) anstatt bei SQLite zu bleiben. Externe Engines verarbeiten gleichzeitige Anfragen und langfristiges Datenwachstum deutlich robuster, insbesondere in Mehrbenutzer-Umgebungen.
+
 Die Konfiguration der Datenbank ist einfach über die Einstellung `DATABASE_URI` möglich, die den angegebenen Formaten für jede unterstützte Datenbank folgt:
 
 !!! warning
@@ -157,6 +160,27 @@ Die Konfiguration der Datenbank ist einfach über die Einstellung `DATABASE_URI`
 -   **PostgreSQL**: `postgresql://bunkerweb:changeme@bw-db:5432/db`
 
 Durch Angabe des entsprechenden Datenbank-URI in der Konfiguration können Sie BunkerWeb nahtlos in Ihr bevorzugtes Datenbank-Backend integrieren und so eine effiziente und zuverlässige Speicherung Ihrer Konfigurationsdaten gewährleisten.
+
+### Datenbank-Kompatibilitätsmatrix
+
+| Integration      | PostgreSQL                   | MariaDB              | MySQL                | SQLite        |
+| :--------------- | :--------------------------- | :------------------- | :------------------- | :------------ |
+| **Docker**       | ✅ `v17` und früher (❌ `v18`) | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
+| **Kubernetes**   | ✅ `v17` und früher (❌ `v18`) | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
+| **Autoconf**     | ✅ `v17` und früher (❌ `v18`) | ✅ `v11` und früher   | ✅ `v9` und früher    | ✅ Unterstützt |
+| **Linux-Pakete** | Siehe Hinweise unten         | Siehe Hinweise unten | Siehe Hinweise unten | ✅ Unterstützt |
+
+!!! info "Hinweise"
+    - **PostgreSQL**: `v18` wird nicht unterstützt, da die von uns bereitgestellten Alpine-Basis-Images nur die `v17`-Client-Pakete enthalten.
+    - **Linux**: Die Unterstützung hängt von den Paketen Ihrer Distribution ab. Bei Bedarf können Sie Datenbank-Clients manuell aus den Hersteller-Repositorys installieren (dies ist bei RHEL normalerweise erforderlich).
+    - **SQLite**: Wird mit den Paketen ausgeliefert und ist sofort einsatzbereit.
+
+Hilfreiche externe Ressourcen zur Installation von Datenbankclients:
+
+- [PostgreSQL Download- und Repository-Anleitung](https://www.postgresql.org/download/)
+- [MariaDB Repository-Konfiguration](https://mariadb.org/download/?t=repo-config)
+- [MySQL Repository-Setup](https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en/)
+- [SQLite Download-Seite](https://www.sqlite.org/download.html)
 
 <figure markdown>
   ![Übersicht](assets/img/bunkerweb_db.svg){ align=center, width="800" }
