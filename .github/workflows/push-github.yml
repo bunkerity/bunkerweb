@@ -48,7 +48,54 @@ jobs:
         if: inputs.VERSION != 'testing'
         run: |
           # Extract the changelog content
-          content=$(awk -v n=2 '/##/{n--}; n > 0' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
+          VERSION="${{ inputs.VERSION }}"
+
+          # Check if this is a stable release (no -rc or -beta suffix)
+          if [[ ! "$VERSION" =~ -(rc|beta) ]]; then
+            # For stable releases, extract the stable section and all related RC/beta sections
+            # Extract major.minor.patch version (e.g., 1.6.5 from 1.6.5)
+            BASE_VERSION=$(echo "$VERSION" | grep -oP '^\d+\.\d+\.\d+')
+
+            # Find the line number of the current version header
+            start_line=$(grep -n "^## v${BASE_VERSION}" CHANGELOG.md | head -1 | cut -d: -f1)
+
+            # Find the line number of the next different version (not rc/beta of current version)
+            end_line=$(awk -v start="$start_line" -v base="$BASE_VERSION" '
+              NR > start && /^## v/ {
+                # Extract version from header
+                ver = $0
+                sub(/^## v/, "", ver)
+                sub(/ .*$/, "", ver)
+                sub(/-.*$/, "", ver)
+                if (ver != base) {
+                  print NR
+                  exit
+                }
+              }
+            ' CHANGELOG.md)
+
+            # If no next version found, extract to end of file
+            if [ -z "$end_line" ]; then
+              content=$(awk -v start="$start_line" 'NR >= start' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
+            else
+              content=$(awk -v start="$start_line" -v end="$end_line" 'NR >= start && NR < end' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
+            fi
+          else
+            # For RC/beta releases, extract only the specific section
+            # Find the line number of the specific version header
+            start_line=$(grep -n "^## v${VERSION}" CHANGELOG.md | head -1 | cut -d: -f1)
+
+            # Find the line number of the next version header
+            end_line=$(awk -v start="$start_line" 'NR > start && /^## v/ {print NR; exit}' CHANGELOG.md)
+
+            # If no next version found, extract to end of file
+            if [ -z "$end_line" ]; then
+              content=$(awk -v start="$start_line" 'NR >= start' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
+            else
+              content=$(awk -v start="$start_line" -v end="$end_line" 'NR >= start && NR < end' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
+            fi
+          fi
+
           echo "DECODED_CHANGELOG<<EOF" >> $GITHUB_ENV
           echo "$content" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
