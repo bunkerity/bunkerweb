@@ -286,7 +286,7 @@ function initializeDataTable(config) {
               } else if (element.is("[aria-label]")) {
                 element.attr("aria-label", translation);
               } else if (textNode.length) {
-                textNode.replaceWith(translation);
+                textNode.replaceWith(DOMPurify.sanitize(translation));
               } else {
                 element.text(translation);
                 if (element.parent().is("span.dtsp-name[title]")) {
