@@ -3,7 +3,7 @@
 --license agpl3
 --version %VERSION%
 --architecture %ARCH%
---depends bash --depends 'nginx = 2:1.28.0' --depends 'nginx-mod-stream = 2:1.28.0' --depends python3.11 --depends libcurl-devel --depends libxml2 --depends yajl --depends lmdb-libs --depends geoip-devel --depends gd --depends sudo --depends procps --depends lsof --depends pcre --depends libpq --depends libcap --depends openssl --depends logrotate --depends mysql --depends postgresql --depends sqlite3 --depends unzip --depends tar
+--depends bash --depends 'nginx = 2:1.28.0' --depends 'nginx-mod-stream = 2:1.28.0' --depends python3 --depends libcurl-devel --depends libxml2 --depends yajl --depends lmdb-libs --depends geoip-devel --depends gd --depends sudo --depends procps --depends lsof --depends pcre --depends libpq --depends libcap --depends openssl --depends logrotate --depends mysql --depends postgresql --depends sqlite3 --depends unzip --depends tar
 --description "BunkerWeb %VERSION% for Fedora 42"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
