@@ -543,6 +543,8 @@ API 按资源聚焦的路由器组织。使用以下部分作为功能地图；`
 - 存储后端: 内存或当 `USE_REDIS=yes` 且提供了 `REDIS_*` 变量时使用 Redis/Valkey (支持 Sentinel)
 - 标头: `API_RATE_LIMIT_HEADERS_ENABLED` (默认: `yes`)
 
+`POST /auth` 始终执行 `API_RATE_LIMIT_AUTH_TIMES` / `API_RATE_LIMIT_AUTH_SECONDS`（默认 `10` / `60`）的独立限流。将任一值设置为 `0` 或为 `/auth` 添加自定义规则即可覆盖或禁用它。该内置规则复用相同的 SlowAPI 后端（内存或 Redis/Valkey），因此在所有副本之间都能保持一致的限流行为。
+
 示例 YAML (挂载在 `/etc/bunkerweb/api.yml`):
 
 ```yaml

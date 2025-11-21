@@ -363,20 +363,41 @@ def is_enabled() -> bool:
     return _enabled
 
 
-def _match_rule(method: str, path: str) -> Optional[Tuple[int, int]]:
-    if not _rules:
-        return None
-    m = _normalize_method(method)
+def _path_variants(path: str) -> List[str]:
     paths = [path]
     rp = (api_config.API_ROOT_PATH or "").rstrip("/")
     if rp and path.startswith(rp + "/"):
         paths.append(path[len(rp) :])  # noqa: E203
+    return paths
+
+
+def _match_rule(method: str, path: str) -> Optional[Tuple[int, int]]:
+    if not _rules:
+        return None
+    m = _normalize_method(method)
+    paths = _path_variants(path)
     for rule in _rules:
         if rule.methods and m not in rule.methods and "*" not in rule.methods:
             continue
         for p in paths:
             if rule.pattern.match(p):
                 return rule.times, rule.seconds
+    return None
+
+
+def _auth_default_limit(method: str, path: str) -> Optional[Tuple[int, int]]:
+    if _normalize_method(method) != "POST":
+        return None
+    try:
+        times = int(api_config.rate_limit_auth_times)
+        seconds = int(api_config.rate_limit_auth_seconds)
+    except Exception:
+        return None
+    if times <= 0 or seconds <= 0:
+        return None
+    for candidate in _path_variants(path):
+        if candidate.rstrip("/") == "/auth":
+            return times, seconds
     return None
 
 
@@ -394,6 +415,8 @@ def limiter_dep_dynamic():
         method = request.method
         path = request.scope.get("path", "/")
         match = _match_rule(method, path)
+        if match is None:
+            match = _auth_default_limit(method, path)
 
         async def _noop(request: Request, response: Response | None = None):
             return None

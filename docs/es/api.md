@@ -543,6 +543,8 @@ La limitación de velocidad por cliente es manejada por SlowAPI. Habilítala/des
 - Backend de almacenamiento: en memoria o Redis/Valkey cuando `USE_REDIS=yes` y se proporcionan las variables `REDIS_*` (compatible con Sentinel)
 - Cabeceras: `API_RATE_LIMIT_HEADERS_ENABLED` (predeterminado: `yes`)
 
+`POST /auth` siempre aplica su propio límite de `API_RATE_LIMIT_AUTH_TIMES` por `API_RATE_LIMIT_AUTH_SECONDS` (predeterminado `10` por `60`). Establece cualquiera de estos valores en `0` o agrega una regla personalizada para `/auth` para anularlo o desactivarlo. Esta regla integrada pasa por el mismo backend de SlowAPI (memoria o Redis/Valkey), por lo que el límite se aplica de forma coherente en todas las réplicas.
+
 Ejemplo de YAML (montado en `/etc/bunkerweb/api.yml`):
 
 ```yaml

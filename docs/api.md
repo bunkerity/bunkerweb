@@ -543,6 +543,8 @@ Per‑client rate limiting is handled by SlowAPI. Enable/disable it and shape li
 - Storage backend: in‑memory or Redis/Valkey when `USE_REDIS=yes` and `REDIS_*` variables are provided (Sentinel supported)
 - Headers: `API_RATE_LIMIT_HEADERS_ENABLED` (default: `yes`)
 
+`POST /auth` always enforces its own limit of `API_RATE_LIMIT_AUTH_TIMES` per `API_RATE_LIMIT_AUTH_SECONDS` (defaults to `10` per `60`). Set either value to `0` or add a custom `/auth` rule to override or disable it. This built-in rule runs through the same SlowAPI backend (memory or Redis/Valkey) so the limit is enforced consistently across replicas.
+
 Example YAML (mounted at `/etc/bunkerweb/api.yml`):
 
 ```yaml

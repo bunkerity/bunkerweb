@@ -542,6 +542,8 @@ La limitation de débit par client est gérée par SlowAPI. Activez/désactivez 
 -   Stockage : en mémoire ou Redis/Valkey lorsque `USE_REDIS=yes` et les variables `REDIS_*` sont fournies (Sentinel supporté)
 -   En-têtes : `API_RATE_LIMIT_HEADERS_ENABLED` (défaut : `yes`)
 
+`POST /auth` applique toujours sa propre limite de `API_RATE_LIMIT_AUTH_TIMES` par `API_RATE_LIMIT_AUTH_SECONDS` (par défaut `10` par `60`). Définissez l’une de ces valeurs sur `0` ou ajoutez une règle `/auth` personnalisée pour l’ignorer ou la désactiver. Cette règle intégrée utilise le même backend SlowAPI (mémoire ou Redis/Valkey), garantissant un comportement identique sur toutes les réplicas.
+
 Exemple de YAML (monté dans `/etc/bunkerweb/api.yml`) :
 
 ```yaml
