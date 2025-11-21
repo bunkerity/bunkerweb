@@ -1,9 +1,9 @@
-FROM ubuntu:jammy@sha256:09506232a8004baa32c47d68f1e5c307d648fdd59f5e7eaa42aaf87914100db3 AS builder
+FROM ubuntu:jammy@sha256:104ae83764a5119017b8e8d6218fa0832b09df65aae7d5a6de29a85d813da2fb AS builder
 
 # Install Nginx and dependencies
 RUN apt update && \
     apt install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common \
-    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3 python3-dev python3-pip python3-venv -y
+    bash libssl-dev git zlib1g-dev libyajl2 libyajl-dev yajl-tools pkgconf libcurl4-openssl-dev libgeoip-dev apt-utils build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3.11 python3.11-dev python3.11-venv python3-pip -y
 
 ENV OS=ubuntu
 ENV NGINX_VERSION=1.28.0
@@ -41,8 +41,8 @@ WORKDIR /usr/share/bunkerweb
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
     mkdir -p deps/python && \
-    pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-    pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+    python3.11 -m pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
+    python3.11 -m pip install --no-cache-dir --require-hashes --force-reinstall --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 RUN apt-get install -y pigz && \
     tar --use-compress-program="pigz -1 -p$(nproc)" -cf deps.tar.gz deps && \
@@ -128,7 +128,7 @@ RUN if [ "$SKIP_MINIFY" != "yes" ] && [ "$SKIP_MINIFY_HTML" != "yes" ]; then \
     echo "Skipping HTML minification"; \
     fi
 
-FROM ubuntu:jammy@sha256:09506232a8004baa32c47d68f1e5c307d648fdd59f5e7eaa42aaf87914100db3
+FROM ubuntu:jammy@sha256:104ae83764a5119017b8e8d6218fa0832b09df65aae7d5a6de29a85d813da2fb
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
