@@ -2667,3 +2667,65 @@ Das Easy Resolve Plugin ermöglicht es Ihnen, Fehlalarme und wiederkehrende Prob
   <figcaption>Blacklist - URI</figcaption>
 </figure>
 </div>
+
+## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+Das Load Balancer Plugin verwandelt BunkerWeb in einen Traffic-Director mit Schutzvorrichtungen. Deklarieren Sie Upstream-Pools einmal, leiten Sie Ihren Reverse-Proxy darauf und lassen Sie das health-aware Balancing die Benutzer auf reaktionsfähigen Backends halten. Der Sticky-Cookie-Modus gibt automatisch einen `BWLBID`-Cookie aus, damit Sitzungen dort verankert bleiben, wo Sie möchten.
+
+#### Features
+
+- Per-Upstream-Blöcke: Pools benennen und über Reverse-Proxy-Hosts wiederverwenden.
+- Flexibles Balancing: Round-Robin standardmäßig oder Sticky über IP oder signiertem Cookie.
+- Smarte Ziele: Optionale DNS-Auflösung für Hostname-Backends plus Keepalive-Tuning.
+- Eingebaute Gesundheit: HTTP/HTTPS-Probes mit benutzerdefinierten Pfaden, Intervallen, Statuscodes und SSL-Checks.
+- Sitzungskontinuität: Automatischer `BWLBID`-Cookie bei Aktivierung des Sticky-Cookie-Modus.
+
+#### Konfiguration
+
+**Upstream-Definition**
+
+| Einstellung                               | Standard      | Kontext | Mehrfach | Beschreibung                                                                           |
+| ----------------------------------------- | ------------- | ------- | -------- | -------------------------------------------------------------------------------------- |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global  | ja       | Upstream-Bezeichner (referenziert von `REVERSE_PROXY_HOST`).                           |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | ja       | Leerzeichen-getrennte Liste von Backend-Adressen (z.B. `10.0.0.1:8080 10.0.0.2:8080`). |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | ja       | Balancing-Strategie (`round-robin` oder `sticky`).                                     |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | ja       | Sticky-Methode (`ip` oder `cookie`). Cookie-Modus gibt `BWLBID` aus.                   |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | ja       | Upstream-Hostnamen über DNS auflösen.                                                  |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | ja       | Keepalive-Verbindungen pro Worker.                                                     |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | ja       | Idle-Timeout für Keepalive-Verbindungen.                                               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | ja       | Maximale Lebensdauer für Keepalive-Verbindungen.                                       |
+
+**Gesundheitsprüfungen**
+
+| Einstellung                               | Standard  | Kontext | Mehrfach | Beschreibung                                                    |
+| ----------------------------------------- | --------- | ------- | -------- | --------------------------------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`     | global  | nein     | Shared Dictionary-Größe für Gesundheitsprüfungsstatus.          |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status` | global  | ja       | Pfad zum Sondieren auf jedem Backend.                           |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`    | global  | ja       | Intervall zwischen Prüfungen (ms).                              |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`    | global  | ja       | Timeout pro Prüfung (ms).                                       |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`       | global  | ja       | Aufeinanderfolgende Fehler vor dem Markieren als down.          |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`       | global  | ja       | Aufeinanderfolgende Erfolge vor dem Markieren als up.           |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`     | global  | ja       | Leerzeichen-getrennte Liste gültiger HTTP-Statuscodes.          |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`      | global  | ja       | Maximale gleichzeitige Sonden.                                  |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`    | global  | ja       | Protokoll für Gesundheitsprüfungen (`http` oder `https`).       |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global  | ja       | TLS-Zertifikate bei HTTPS-Prüfungen verifizieren.               |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |           | global  | ja       | Host-Header während Prüfungen überschreiben (nützlich für SNI). |
+
+#### Schnellstart
+
+1. Definieren Sie Ihren Pool: Setzen Sie `LOADBALANCER_UPSTREAM_NAME=my-app` und listen Sie Ziele in `LOADBALANCER_UPSTREAM_SERVERS` (z.B. `10.0.0.1:8080 10.0.0.2:8080`).
+2. Leiten Sie Traffic: Setzen Sie `REVERSE_PROXY_HOST=http://my-app`, damit der Reverse-Proxy den benannten Upstream verwendet.
+3. Wählen Sie einen Modus: Behalten Sie das Standard-Round-Robin bei oder setzen Sie `LOADBALANCER_UPSTREAM_MODE=sticky` mit `LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie` oder `ip`.
+4. Fügen Sie Gesundheit hinzu: Behalten Sie `/status` bei oder passen Sie URLs, Intervalle und gültige Statuscodes an, um Ihr App-Verhalten widerzuspiegeln.
+5. Stimmen Sie Verbindungen ab: Konfigurieren Sie Keepalive-Werte, um Backend-Verbindungen wiederzuverwenden und Handshake-Overhead zu reduzieren.
+
+#### Nutzungstipps
+
+- Passen Sie `REVERSE_PROXY_HOST` an `LOADBALANCER_UPSTREAM_NAME` an, wenn Sie Sticky-Cookies verwenden, damit Clients an den richtigen Pool gebunden werden.
+- Halten Sie Gesundheitsprüfungsintervalle und Timeouts ausgewogen, um Flattern auf langsamen Links zu vermeiden.
+- Aktivieren Sie `LOADBALANCER_UPSTREAM_RESOLVE`, wenn Sie auf Hostnamen zeigen, die sich über DNS ändern können.
+- Stimmen Sie Keepalive-Werte ab, um Backend-Kapazität und Ziele für die Wiederverwendung von Verbindungen widerzuspiegeln.

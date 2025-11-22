@@ -2665,3 +2665,65 @@ STREAM 支持 :x:
   <figcaption>黑名单 - URI</figcaption>
 </figure>
 </div>
+
+## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一次声明上游池，将您的反向代理指向它们，并让健康感知平衡将用户保持在响应式后端上。粘性 cookie 模式自动发出 `BWLBID` cookie，以便会话保持在您想要的地方。
+
+#### 功能
+
+- 每个上游块：命名池并在反向代理主机上重用。
+- 灵活平衡：默认 round-robin，或通过 IP 或签名 cookie 粘性。
+- 智能目标：可选 DNS 解析用于主机名后端加上 keepalive 调整。
+- 内置健康：HTTP/HTTPS 探测，具有自定义路径、间隔、状态代码和 SSL 检查。
+- 会话连续性：启用粘性 cookie 模式时自动 `BWLBID` cookie。
+
+#### 配置
+
+**上游定义**
+
+| 设置                                      | 默认          | 上下文 | 多个 | 描述                                                           |
+| ----------------------------------------- | ------------- | ------ | ---- | -------------------------------------------------------------- |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global | 是   | 上游标识符（由 `REVERSE_PROXY_HOST` 引用）。                   |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global | 是   | 后端地址的空格分隔列表（例如 `10.0.0.1:8080 10.0.0.2:8080`）。 |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global | 是   | 平衡策略（`round-robin` 或 `sticky`）。                        |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global | 是   | 粘性方法（`ip` 或 `cookie`）。Cookie 模式发出 `BWLBID`。       |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global | 是   | 通过 DNS 解析上游主机名。                                      |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global | 是   | 每个 worker 的 keepalive 连接。                                |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global | 是   | Keepalive 连接的空闲超时。                                     |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global | 是   | Keepalive 连接的最大寿命。                                     |
+
+**健康检查**
+
+| 设置                                      | 默认      | 上下文 | 多个 | 描述                                  |
+| ----------------------------------------- | --------- | ------ | ---- | ------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`     | global | 否   | 健康检查状态的共享字典大小。          |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status` | global | 是   | 在每个后端上探测的路径。              |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`    | global | 是   | 检查之间的间隔（ms）。                |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`    | global | 是   | 每次检查的超时（ms）。                |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`       | global | 是   | 标记为 down 前的连续失败次数。        |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`       | global | 是   | 标记为 up 前的连续成功次数。          |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`     | global | 是   | 有效 HTTP 状态代码的空格分隔列表。    |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`      | global | 是   | 最大并发探测。                        |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`    | global | 是   | 健康检查协议（`http` 或 `https`）。   |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global | 是   | 使用 HTTPS 检查时验证 TLS 证书。      |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |           | global | 是   | 检查期间覆盖 Host 头（对 SNI 有用）。 |
+
+#### 快速开始
+
+1. 定义您的池：设置 `LOADBALANCER_UPSTREAM_NAME=my-app` 并在 `LOADBALANCER_UPSTREAM_SERVERS` 中列出目标（例如 `10.0.0.1:8080 10.0.0.2:8080`）。
+2. 指向流量：设置 `REVERSE_PROXY_HOST=http://my-app` 以便反向代理使用命名的上游。
+3. 选择模式：保持默认 round-robin 或设置 `LOADBALANCER_UPSTREAM_MODE=sticky` 与 `LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie` 或 `ip`。
+4. 添加健康：保持 `/status` 或调整 URL、间隔和有效状态以反映您的应用行为。
+5. 调整连接：配置 keepalive 值以重用后端连接并减少握手开销。
+
+#### 使用提示
+
+- 使用粘性 cookie 时，将 `REVERSE_PROXY_HOST` 与 `LOADBALANCER_UPSTREAM_NAME` 匹配，以便客户端固定到正确的池。
+- 保持健康检查间隔和超时平衡，以避免在慢速链路上波动。
+- 当指向可能通过 DNS 更改的主机名时启用 `LOADBALANCER_UPSTREAM_RESOLVE`。
+- 调整 keepalive 值以反映后端容量和连接重用目标。
