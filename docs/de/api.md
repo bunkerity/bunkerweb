@@ -30,7 +30,7 @@ x-bw-env: &bw-env
 services:
   bunkerweb:
     # Name, unter dem der Scheduler die Instanz identifiziert
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.6
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -43,7 +43,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "bunkerweb" # Stellen Sie sicher, dass der Instanzname korrekt ist
@@ -64,7 +64,7 @@ services:
       - bw-db
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.6-rc3
+    image: bunkerity/bunkerweb-api:1.6.6
     environment:
       <<: *bw-env
       API_USERNAME: "admin"
@@ -148,7 +148,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -161,7 +161,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb"  # Entspricht dem Dienstnamen der Instanz
@@ -181,7 +181,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6-rc3
+        image: bunkerity/bunkerweb-api:1.6.6
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # Verwenden Sie ein starkes Passwort
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # API-Zulassungsliste
@@ -235,7 +235,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -249,7 +249,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *api-env
           BUNKERWEB_INSTANCES: ""    # Von Autoconf entdeckt
@@ -264,7 +264,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.6
         depends_on:
           - bunkerweb
           - bw-docker
@@ -278,7 +278,7 @@ Dadurch wird die API hinter BunkerWeb isoliert, der Traffic bleibt auf vertrauen
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6-rc3
+        image: bunkerity/bunkerweb-api:1.6.6
         environment:
           <<: *api-env
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
@@ -353,7 +353,7 @@ docker run -d \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 ## Authentifizierung
@@ -542,6 +542,8 @@ Die Ratenbegrenzung pro Client wird von SlowAPI gehandhabt. Aktivieren/deaktivie
 -   `API_RATE_LIMIT_RULES`: inline JSON/CSV oder ein Pfad zu einer YAML/JSON-Datei mit Regeln pro Route
 -   Speicher-Backend: In-Memory oder Redis/Valkey, wenn `USE_REDIS=yes` und `REDIS_*`-Variablen bereitgestellt werden (Sentinel unterstützt)
 -   Header: `API_RATE_LIMIT_HEADERS_ENABLED` (Standard: `yes`)
+
+`POST /auth` erzwingt immer sein eigenes Limit von `API_RATE_LIMIT_AUTH_TIMES` pro `API_RATE_LIMIT_AUTH_SECONDS` (Standard `10` pro `60`). Setzen Sie einen der Werte auf `0` oder fügen Sie eine benutzerdefinierte `/auth`-Regel hinzu, um dies zu überschreiben oder zu deaktivieren. Diese integrierte Regel läuft über dasselbe SlowAPI-Backend (Memory oder Redis/Valkey), sodass das Limit konsistent über alle Replikate hinweg erzwungen wird.
 
 Beispiel YAML (gemountet unter `/etc/bunkerweb/api.yml`):
 

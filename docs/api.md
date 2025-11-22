@@ -30,7 +30,7 @@ x-bw-env: &bw-env
 services:
   bunkerweb:
     # This is the name that will be used to identify the instance in the Scheduler
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.6
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -43,7 +43,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "bunkerweb" # Make sure to set the correct instance name
@@ -64,7 +64,7 @@ services:
       - bw-db
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.6-rc3
+    image: bunkerity/bunkerweb-api:1.6.6
     environment:
       <<: *bw-env
       API_USERNAME: "admin"
@@ -148,7 +148,7 @@ This isolates the API behind BunkerWeb, keeps traffic on trusted networks, and l
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -161,7 +161,7 @@ This isolates the API behind BunkerWeb, keeps traffic on trusted networks, and l
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb"  # Match the instance service name
@@ -181,7 +181,7 @@ This isolates the API behind BunkerWeb, keeps traffic on trusted networks, and l
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6-rc3
+        image: bunkerity/bunkerweb-api:1.6.6
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # Use a strong password
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # API allowlist
@@ -235,7 +235,7 @@ This isolates the API behind BunkerWeb, keeps traffic on trusted networks, and l
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -249,7 +249,7 @@ This isolates the API behind BunkerWeb, keeps traffic on trusted networks, and l
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *api-env
           BUNKERWEB_INSTANCES: ""    # Discovered by Autoconf
@@ -264,7 +264,7 @@ This isolates the API behind BunkerWeb, keeps traffic on trusted networks, and l
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.6
         depends_on:
           - bunkerweb
           - bw-docker
@@ -278,7 +278,7 @@ This isolates the API behind BunkerWeb, keeps traffic on trusted networks, and l
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6-rc3
+        image: bunkerity/bunkerweb-api:1.6.6
         environment:
           <<: *api-env
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
@@ -353,7 +353,7 @@ docker run -d \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 ## Authentication
@@ -542,6 +542,8 @@ Per‑client rate limiting is handled by SlowAPI. Enable/disable it and shape li
 - `API_RATE_LIMIT_RULES`: inline JSON/CSV, or a path to a YAML/JSON file with per‑route rules
 - Storage backend: in‑memory or Redis/Valkey when `USE_REDIS=yes` and `REDIS_*` variables are provided (Sentinel supported)
 - Headers: `API_RATE_LIMIT_HEADERS_ENABLED` (default: `yes`)
+
+`POST /auth` always enforces its own limit of `API_RATE_LIMIT_AUTH_TIMES` per `API_RATE_LIMIT_AUTH_SECONDS` (defaults to `10` per `60`). Set either value to `0` or add a custom `/auth` rule to override or disable it. This built-in rule runs through the same SlowAPI backend (memory or Redis/Valkey) so the limit is enforced consistently across replicas.
 
 Example YAML (mounted at `/etc/bunkerweb/api.yml`):
 

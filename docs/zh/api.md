@@ -30,7 +30,7 @@ x-bw-env: &bw-env
 services:
   bunkerweb:
     # 这是调度器用来识别实例的名称
-    image: bunkerity/bunkerweb:1.6.6-rc3
+    image: bunkerity/bunkerweb:1.6.6
     ports:
       - "80:8080/tcp"
       - "443:8443/tcp"
@@ -43,7 +43,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+    image: bunkerity/bunkerweb-scheduler:1.6.6
     environment:
       <<: *bw-env
       BUNKERWEB_INSTANCES: "bunkerweb" # 请确保实例名称正确
@@ -64,7 +64,7 @@ services:
       - bw-db
 
   bw-api:
-    image: bunkerity/bunkerweb-api:1.6.6-rc3
+    image: bunkerity/bunkerweb-api:1.6.6
     environment:
       <<: *bw-env
       API_USERNAME: "admin"
@@ -148,7 +148,7 @@ networks:
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -161,7 +161,7 @@ networks:
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *bw-env
           BUNKERWEB_INSTANCES: "bunkerweb"  # 匹配实例服务名称
@@ -181,7 +181,7 @@ networks:
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6-rc3
+        image: bunkerity/bunkerweb-api:1.6.6
         environment:
           DATABASE_URI: "mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db"  # 使用强密码
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"                      # API 允许列表
@@ -235,7 +235,7 @@ networks:
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.6.6-rc3
+        image: bunkerity/bunkerweb:1.6.6
         ports:
           - "80:8080/tcp"
           - "443:8443/tcp"
@@ -249,7 +249,7 @@ networks:
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.6.6-rc3
+        image: bunkerity/bunkerweb-scheduler:1.6.6
         environment:
           <<: *api-env
           BUNKERWEB_INSTANCES: ""    # 由 Autoconf 发现
@@ -264,7 +264,7 @@ networks:
           - bw-db
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.6.6-rc3
+        image: bunkerity/bunkerweb-autoconf:1.6.6
         depends_on:
           - bunkerweb
           - bw-docker
@@ -278,7 +278,7 @@ networks:
           - bw-db
 
       bw-api:
-        image: bunkerity/bunkerweb-api:1.6.6-rc3
+        image: bunkerity/bunkerweb-api:1.6.6
         environment:
           <<: *api-env
           API_WHITELIST_IPS: "127.0.0.0/8 10.20.30.0/24"
@@ -353,7 +353,7 @@ docker run -d \
   -e SERVICE_API=yes \
   -e API_WHITELIST_IPS="127.0.0.0/8" \
   -p 80:8080/tcp -p 443:8443/tcp -p 443:8443/udp \
-  bunkerity/bunkerweb-all-in-one:1.6.6-rc3
+  bunkerity/bunkerweb-all-in-one:1.6.6
 ```
 
 ## 身份验证
@@ -542,6 +542,8 @@ API 按资源聚焦的路由器组织。使用以下部分作为功能地图；`
 - `API_RATE_LIMIT_RULES`: 内联 JSON/CSV，或指向包含按路由规则的 YAML/JSON 文件的路径
 - 存储后端: 内存或当 `USE_REDIS=yes` 且提供了 `REDIS_*` 变量时使用 Redis/Valkey (支持 Sentinel)
 - 标头: `API_RATE_LIMIT_HEADERS_ENABLED` (默认: `yes`)
+
+`POST /auth` 始终执行 `API_RATE_LIMIT_AUTH_TIMES` / `API_RATE_LIMIT_AUTH_SECONDS`（默认 `10` / `60`）的独立限流。将任一值设置为 `0` 或为 `/auth` 添加自定义规则即可覆盖或禁用它。该内置规则复用相同的 SlowAPI 后端（内存或 Redis/Valkey），因此在所有副本之间都能保持一致的限流行为。
 
 示例 YAML (挂载在 `/etc/bunkerweb/api.yml`):
 
