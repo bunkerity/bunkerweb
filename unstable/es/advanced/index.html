@@ -1220,6 +1220,57 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#load-balancer-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load Balancer (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load Balancer (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#caracteristicas_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Características
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuracion_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuración
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inicio-rapido" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inicio rápido
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consejos-de-uso" class="md-nav__link">
+    <span class="md-ellipsis">
+      Consejos de uso
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3945,6 +3996,197 @@ USE_IPV6=yes
 <figcaption>Lista negra - URI</figcaption>
 </figure>
 </div>
+<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+<p>El Plugin de Load Balancer convierte BunkerWeb en un director de tráfico con guardarraíles. Declare pools upstream una vez, apunte su proxy inverso a ellos, y deje que el balanceo consciente de salud mantenga a los usuarios en backends responsivos. El modo sticky cookie emite automáticamente una cookie <code>BWLBID</code> para que las sesiones se mantengan ancladas donde quiera.</p>
+<h4 id="caracteristicas_3">Características</h4>
+<ul>
+<li>Bloques por upstream: nombre pools y reutilícelos en hosts de proxy inverso.</li>
+<li>Balanceo flexible: round-robin por defecto, o sticky vía IP o cookie firmado.</li>
+<li>Objetivos inteligentes: resolución DNS opcional para backends de hostname más ajuste de keepalive.</li>
+<li>Salud integrada: sondas HTTP/HTTPS con rutas personalizadas, intervalos, códigos de estado y verificaciones SSL.</li>
+<li>Continuidad de sesión: cookie <code>BWLBID</code> automática cuando se habilita el modo sticky-cookie.</li>
+</ul>
+<h4 id="configuracion_1">Configuración</h4>
+<p><strong>Definición de upstream</strong></p>
+<table>
+<thead>
+<tr>
+<th>Configuración</th>
+<th>Predeterminado</th>
+<th>Contexto</th>
+<th>Múltiple</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
+<td></td>
+<td>global</td>
+<td>sí</td>
+<td>Identificador upstream (referenciado por <code>REVERSE_PROXY_HOST</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_SERVERS</code></td>
+<td></td>
+<td>global</td>
+<td>sí</td>
+<td>Lista separada por espacios de direcciones backend (ej. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_MODE</code></td>
+<td><code>round-robin</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Estrategia de balanceo (<code>round-robin</code> o <code>sticky</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Método sticky (<code>ip</code> o <code>cookie</code>). Modo cookie emite <code>BWLBID</code>.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Resolver hostnames upstream vía DNS.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE</code></td>
+<td></td>
+<td>global</td>
+<td>sí</td>
+<td>Conexiones keepalive por worker.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Timeout inactivo para conexiones keepalive.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
+<td><code>1h</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Vida máxima para conexiones keepalive.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verificaciones de salud</strong></p>
+<table>
+<thead>
+<tr>
+<th>Configuración</th>
+<th>Predeterminado</th>
+<th>Contexto</th>
+<th>Múltiple</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>no</td>
+<td>Tamaño de diccionario compartido para estado de verificación de salud.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
+<td><code>/status</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Ruta para sondear en cada backend.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_INTERVAL</code></td>
+<td><code>2000</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Intervalo entre verificaciones (ms).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Timeout por verificación (ms).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_FALL</code></td>
+<td><code>3</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Fallos consecutivos antes de marcar como down.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_RISE</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Éxitos consecutivos antes de marcar como up.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_VALID_STATUSES</code></td>
+<td><code>200</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Lista separada por espacios de códigos de estado HTTP válidos.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_CONCURRENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Máximo de sondas concurrentes.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
+<td><code>http</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Protocolo para verificaciones de salud (<code>http</code> o <code>https</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>sí</td>
+<td>Verificar certificados TLS al usar verificaciones HTTPS.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
+<td></td>
+<td>global</td>
+<td>sí</td>
+<td>Sobrescribir header Host durante verificaciones (útil para SNI).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="inicio-rapido">Inicio rápido</h4>
+<ol>
+<li>Defina su pool: configure <code>LOADBALANCER_UPSTREAM_NAME=my-app</code> y liste objetivos en <code>LOADBALANCER_UPSTREAM_SERVERS</code> (ej. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</li>
+<li>Dirija tráfico: configure <code>REVERSE_PROXY_HOST=http://my-app</code> para que el proxy inverso use el upstream nombrado.</li>
+<li>Elija un modo: mantenga round-robin por defecto o configure <code>LOADBALANCER_UPSTREAM_MODE=sticky</code> con <code>LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie</code> o <code>ip</code>.</li>
+<li>Agregue salud: mantenga <code>/status</code> o ajuste URLs, intervalos y estados válidos para reflejar el comportamiento de su app.</li>
+<li>Ajuste conexiones: configure valores keepalive para reutilizar conexiones backend y reducir sobrecarga de handshake.</li>
+</ol>
+<h4 id="consejos-de-uso">Consejos de uso</h4>
+<ul>
+<li>Haga coincidir <code>REVERSE_PROXY_HOST</code> con <code>LOADBALANCER_UPSTREAM_NAME</code> al usar cookies sticky para que los clientes se fijen al pool correcto.</li>
+<li>Mantenga intervalos y timeouts de verificación de salud balanceados para evitar fluctuaciones en enlaces lentos.</li>
+<li>Habilite <code>LOADBALANCER_UPSTREAM_RESOLVE</code> cuando apunte a hostnames que puedan cambiar vía DNS.</li>
+<li>Ajuste valores keepalive para reflejar capacidad backend y objetivos de reutilización de conexiones.</li>
+</ul>
 
 
 

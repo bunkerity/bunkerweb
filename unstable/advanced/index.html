@@ -1220,6 +1220,57 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#load-balancer-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load Balancer (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load Balancer (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Tips
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3944,6 +3995,197 @@ USE_IPV6=yes
 <figcaption>Blacklist - URI</figcaption>
 </figure>
 </div>
+<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+<p>The Load Balancer Plugin turns BunkerWeb into a traffic director with guardrails. Declare upstream pools once, point your reverse proxy at them, and let health-aware balancing keep users on responsive backends. Sticky cookie mode issues a <code>BWLBID</code> cookie automatically so sessions stay anchored where you want them.</p>
+<h4 id="features_3">Features</h4>
+<ul>
+<li>Per-upstream blocks: name pools and reuse them across reverse proxy hosts.</li>
+<li>Flexible balancing: round-robin by default, or sticky via IP or signed cookie.</li>
+<li>Smart targets: optional DNS resolution for hostname backends plus keepalive tuning.</li>
+<li>Built-in health: HTTP/HTTPS probes with custom paths, intervals, status codes, and SSL checks.</li>
+<li>Session continuity: automatic <code>BWLBID</code> cookie when sticky-cookie mode is enabled.</li>
+</ul>
+<h4 id="configuration_1">Configuration</h4>
+<p><strong>Upstream definition</strong></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
+<td></td>
+<td>global</td>
+<td>yes</td>
+<td>Upstream identifier (referenced by <code>REVERSE_PROXY_HOST</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_SERVERS</code></td>
+<td></td>
+<td>global</td>
+<td>yes</td>
+<td>Space-separated list of backend addresses (e.g. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_MODE</code></td>
+<td><code>round-robin</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Balancing strategy (<code>round-robin</code> or <code>sticky</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Sticky method (<code>ip</code> or <code>cookie</code>). Cookie mode issues <code>BWLBID</code>.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Resolve upstream hostnames via DNS.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE</code></td>
+<td></td>
+<td>global</td>
+<td>yes</td>
+<td>Keepalive connections per worker.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Idle timeout for keepalive connections.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
+<td><code>1h</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Maximum lifetime for keepalive connections.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Healthchecks</strong></p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Context</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>no</td>
+<td>Shared dictionary size for healthcheck state.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
+<td><code>/status</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Path to probe on each backend.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_INTERVAL</code></td>
+<td><code>2000</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Interval between checks (ms).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Timeout per check (ms).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_FALL</code></td>
+<td><code>3</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Consecutive failures before marking down.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_RISE</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Consecutive successes before marking up.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_VALID_STATUSES</code></td>
+<td><code>200</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Space-separated list of valid HTTP status codes.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_CONCURRENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Maximum concurrent probes.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
+<td><code>http</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Protocol for healthchecks (<code>http</code> or <code>https</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>yes</td>
+<td>Verify TLS certificates when using HTTPS checks.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
+<td></td>
+<td>global</td>
+<td>yes</td>
+<td>Override Host header during checks (useful for SNI).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="quick-start">Quick Start</h4>
+<ol>
+<li>Define your pool: set <code>LOADBALANCER_UPSTREAM_NAME=my-app</code> and list targets in <code>LOADBALANCER_UPSTREAM_SERVERS</code> (e.g. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</li>
+<li>Point traffic: set <code>REVERSE_PROXY_HOST=http://my-app</code> so the reverse proxy uses the named upstream.</li>
+<li>Pick a mode: keep default round-robin or set <code>LOADBALANCER_UPSTREAM_MODE=sticky</code> with <code>LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie</code> or <code>ip</code>.</li>
+<li>Add health: keep <code>/status</code> or adjust URLs, intervals, and valid statuses to mirror your app behavior.</li>
+<li>Tune connections: configure keepalive values to reuse backend connections and reduce handshake overhead.</li>
+</ol>
+<h4 id="usage-tips">Usage Tips</h4>
+<ul>
+<li>Match <code>REVERSE_PROXY_HOST</code> to <code>LOADBALANCER_UPSTREAM_NAME</code> when using sticky cookies so clients pin to the right pool.</li>
+<li>Keep healthcheck intervals and timeouts balanced to avoid flapping on slow links.</li>
+<li>Enable <code>LOADBALANCER_UPSTREAM_RESOLVE</code> when pointing to hostnames that may change via DNS.</li>
+<li>Tune keepalive values to mirror backend capacity and connection reuse goals.</li>
+</ul>
 
 
 

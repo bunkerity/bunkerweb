@@ -1220,6 +1220,57 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#load-balancer-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load Balancer (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load Balancer (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      功能
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      配置
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      快速开始
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      使用提示
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3943,6 +3994,197 @@ USE_IPV6=yes
 <figcaption>黑名单 - URI</figcaption>
 </figure>
 </div>
+<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+<p>Load Balancer 插件将 BunkerWeb 转变为带有护栏的流量导向器。一次声明上游池，将您的反向代理指向它们，并让健康感知平衡将用户保持在响应式后端上。粘性 cookie 模式自动发出 <code>BWLBID</code> cookie，以便会话保持在您想要的地方。</p>
+<h4 id="_15">功能</h4>
+<ul>
+<li>每个上游块：命名池并在反向代理主机上重用。</li>
+<li>灵活平衡：默认 round-robin，或通过 IP 或签名 cookie 粘性。</li>
+<li>智能目标：可选 DNS 解析用于主机名后端加上 keepalive 调整。</li>
+<li>内置健康：HTTP/HTTPS 探测，具有自定义路径、间隔、状态代码和 SSL 检查。</li>
+<li>会话连续性：启用粘性 cookie 模式时自动 <code>BWLBID</code> cookie。</li>
+</ul>
+<h4 id="_16">配置</h4>
+<p><strong>上游定义</strong></p>
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>默认</th>
+<th>上下文</th>
+<th>多个</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>上游标识符（由 <code>REVERSE_PROXY_HOST</code> 引用）。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_SERVERS</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>后端地址的空格分隔列表（例如 <code>10.0.0.1:8080 10.0.0.2:8080</code>）。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_MODE</code></td>
+<td><code>round-robin</code></td>
+<td>global</td>
+<td>是</td>
+<td>平衡策略（<code>round-robin</code> 或 <code>sticky</code>）。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>是</td>
+<td>粘性方法（<code>ip</code> 或 <code>cookie</code>）。Cookie 模式发出 <code>BWLBID</code>。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>是</td>
+<td>通过 DNS 解析上游主机名。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>每个 worker 的 keepalive 连接。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>global</td>
+<td>是</td>
+<td>Keepalive 连接的空闲超时。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
+<td><code>1h</code></td>
+<td>global</td>
+<td>是</td>
+<td>Keepalive 连接的最大寿命。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>健康检查</strong></p>
+<table>
+<thead>
+<tr>
+<th>设置</th>
+<th>默认</th>
+<th>上下文</th>
+<th>多个</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>否</td>
+<td>健康检查状态的共享字典大小。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
+<td><code>/status</code></td>
+<td>global</td>
+<td>是</td>
+<td>在每个后端上探测的路径。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_INTERVAL</code></td>
+<td><code>2000</code></td>
+<td>global</td>
+<td>是</td>
+<td>检查之间的间隔（ms）。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>是</td>
+<td>每次检查的超时（ms）。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_FALL</code></td>
+<td><code>3</code></td>
+<td>global</td>
+<td>是</td>
+<td>标记为 down 前的连续失败次数。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_RISE</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>是</td>
+<td>标记为 up 前的连续成功次数。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_VALID_STATUSES</code></td>
+<td><code>200</code></td>
+<td>global</td>
+<td>是</td>
+<td>有效 HTTP 状态代码的空格分隔列表。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_CONCURRENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>是</td>
+<td>最大并发探测。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
+<td><code>http</code></td>
+<td>global</td>
+<td>是</td>
+<td>健康检查协议（<code>http</code> 或 <code>https</code>）。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>是</td>
+<td>使用 HTTPS 检查时验证 TLS 证书。</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
+<td></td>
+<td>global</td>
+<td>是</td>
+<td>检查期间覆盖 Host 头（对 SNI 有用）。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_17">快速开始</h4>
+<ol>
+<li>定义您的池：设置 <code>LOADBALANCER_UPSTREAM_NAME=my-app</code> 并在 <code>LOADBALANCER_UPSTREAM_SERVERS</code> 中列出目标（例如 <code>10.0.0.1:8080 10.0.0.2:8080</code>）。</li>
+<li>指向流量：设置 <code>REVERSE_PROXY_HOST=http://my-app</code> 以便反向代理使用命名的上游。</li>
+<li>选择模式：保持默认 round-robin 或设置 <code>LOADBALANCER_UPSTREAM_MODE=sticky</code> 与 <code>LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie</code> 或 <code>ip</code>。</li>
+<li>添加健康：保持 <code>/status</code> 或调整 URL、间隔和有效状态以反映您的应用行为。</li>
+<li>调整连接：配置 keepalive 值以重用后端连接并减少握手开销。</li>
+</ol>
+<h4 id="_18">使用提示</h4>
+<ul>
+<li>使用粘性 cookie 时，将 <code>REVERSE_PROXY_HOST</code> 与 <code>LOADBALANCER_UPSTREAM_NAME</code> 匹配，以便客户端固定到正确的池。</li>
+<li>保持健康检查间隔和超时平衡，以避免在慢速链路上波动。</li>
+<li>当指向可能通过 DNS 更改的主机名时启用 <code>LOADBALANCER_UPSTREAM_RESOLVE</code>。</li>
+<li>调整 keepalive 值以反映后端容量和连接重用目标。</li>
+</ul>
 
 
 

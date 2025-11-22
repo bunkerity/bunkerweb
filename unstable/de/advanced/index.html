@@ -1220,6 +1220,57 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#load-balancer-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load Balancer (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load Balancer (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#konfiguration_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Konfiguration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schnellstart" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schnellstart
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nutzungstipps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nutzungstipps
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3945,6 +3996,197 @@ USE_IPV6=yes
 <figcaption>Blacklist - URI</figcaption>
 </figure>
 </div>
+<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+<p>Das Load Balancer Plugin verwandelt BunkerWeb in einen Traffic-Director mit Schutzvorrichtungen. Deklarieren Sie Upstream-Pools einmal, leiten Sie Ihren Reverse-Proxy darauf und lassen Sie das health-aware Balancing die Benutzer auf reaktionsfähigen Backends halten. Der Sticky-Cookie-Modus gibt automatisch einen <code>BWLBID</code>-Cookie aus, damit Sitzungen dort verankert bleiben, wo Sie möchten.</p>
+<h4 id="features">Features</h4>
+<ul>
+<li>Per-Upstream-Blöcke: Pools benennen und über Reverse-Proxy-Hosts wiederverwenden.</li>
+<li>Flexibles Balancing: Round-Robin standardmäßig oder Sticky über IP oder signiertem Cookie.</li>
+<li>Smarte Ziele: Optionale DNS-Auflösung für Hostname-Backends plus Keepalive-Tuning.</li>
+<li>Eingebaute Gesundheit: HTTP/HTTPS-Probes mit benutzerdefinierten Pfaden, Intervallen, Statuscodes und SSL-Checks.</li>
+<li>Sitzungskontinuität: Automatischer <code>BWLBID</code>-Cookie bei Aktivierung des Sticky-Cookie-Modus.</li>
+</ul>
+<h4 id="konfiguration_1">Konfiguration</h4>
+<p><strong>Upstream-Definition</strong></p>
+<table>
+<thead>
+<tr>
+<th>Einstellung</th>
+<th>Standard</th>
+<th>Kontext</th>
+<th>Mehrfach</th>
+<th>Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
+<td></td>
+<td>global</td>
+<td>ja</td>
+<td>Upstream-Bezeichner (referenziert von <code>REVERSE_PROXY_HOST</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_SERVERS</code></td>
+<td></td>
+<td>global</td>
+<td>ja</td>
+<td>Leerzeichen-getrennte Liste von Backend-Adressen (z.B. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_MODE</code></td>
+<td><code>round-robin</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Balancing-Strategie (<code>round-robin</code> oder <code>sticky</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Sticky-Methode (<code>ip</code> oder <code>cookie</code>). Cookie-Modus gibt <code>BWLBID</code> aus.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Upstream-Hostnamen über DNS auflösen.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE</code></td>
+<td></td>
+<td>global</td>
+<td>ja</td>
+<td>Keepalive-Verbindungen pro Worker.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Idle-Timeout für Keepalive-Verbindungen.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
+<td><code>1h</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Maximale Lebensdauer für Keepalive-Verbindungen.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Gesundheitsprüfungen</strong></p>
+<table>
+<thead>
+<tr>
+<th>Einstellung</th>
+<th>Standard</th>
+<th>Kontext</th>
+<th>Mehrfach</th>
+<th>Beschreibung</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>nein</td>
+<td>Shared Dictionary-Größe für Gesundheitsprüfungsstatus.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
+<td><code>/status</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Pfad zum Sondieren auf jedem Backend.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_INTERVAL</code></td>
+<td><code>2000</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Intervall zwischen Prüfungen (ms).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Timeout pro Prüfung (ms).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_FALL</code></td>
+<td><code>3</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Aufeinanderfolgende Fehler vor dem Markieren als down.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_RISE</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Aufeinanderfolgende Erfolge vor dem Markieren als up.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_VALID_STATUSES</code></td>
+<td><code>200</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Leerzeichen-getrennte Liste gültiger HTTP-Statuscodes.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_CONCURRENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Maximale gleichzeitige Sonden.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
+<td><code>http</code></td>
+<td>global</td>
+<td>ja</td>
+<td>Protokoll für Gesundheitsprüfungen (<code>http</code> oder <code>https</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>ja</td>
+<td>TLS-Zertifikate bei HTTPS-Prüfungen verifizieren.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
+<td></td>
+<td>global</td>
+<td>ja</td>
+<td>Host-Header während Prüfungen überschreiben (nützlich für SNI).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="schnellstart">Schnellstart</h4>
+<ol>
+<li>Definieren Sie Ihren Pool: Setzen Sie <code>LOADBALANCER_UPSTREAM_NAME=my-app</code> und listen Sie Ziele in <code>LOADBALANCER_UPSTREAM_SERVERS</code> (z.B. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</li>
+<li>Leiten Sie Traffic: Setzen Sie <code>REVERSE_PROXY_HOST=http://my-app</code>, damit der Reverse-Proxy den benannten Upstream verwendet.</li>
+<li>Wählen Sie einen Modus: Behalten Sie das Standard-Round-Robin bei oder setzen Sie <code>LOADBALANCER_UPSTREAM_MODE=sticky</code> mit <code>LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie</code> oder <code>ip</code>.</li>
+<li>Fügen Sie Gesundheit hinzu: Behalten Sie <code>/status</code> bei oder passen Sie URLs, Intervalle und gültige Statuscodes an, um Ihr App-Verhalten widerzuspiegeln.</li>
+<li>Stimmen Sie Verbindungen ab: Konfigurieren Sie Keepalive-Werte, um Backend-Verbindungen wiederzuverwenden und Handshake-Overhead zu reduzieren.</li>
+</ol>
+<h4 id="nutzungstipps">Nutzungstipps</h4>
+<ul>
+<li>Passen Sie <code>REVERSE_PROXY_HOST</code> an <code>LOADBALANCER_UPSTREAM_NAME</code> an, wenn Sie Sticky-Cookies verwenden, damit Clients an den richtigen Pool gebunden werden.</li>
+<li>Halten Sie Gesundheitsprüfungsintervalle und Timeouts ausgewogen, um Flattern auf langsamen Links zu vermeiden.</li>
+<li>Aktivieren Sie <code>LOADBALANCER_UPSTREAM_RESOLVE</code>, wenn Sie auf Hostnamen zeigen, die sich über DNS ändern können.</li>
+<li>Stimmen Sie Keepalive-Werte ab, um Backend-Kapazität und Ziele für die Wiederverwendung von Verbindungen widerzuspiegeln.</li>
+</ul>
 
 
 

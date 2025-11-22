@@ -1790,6 +1790,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <li>存储后端: 内存或当 <code>USE_REDIS=yes</code> 且提供了 <code>REDIS_*</code> 变量时使用 Redis/Valkey (支持 Sentinel)</li>
 <li>标头: <code>API_RATE_LIMIT_HEADERS_ENABLED</code> (默认: <code>yes</code>)</li>
 </ul>
+<p><code>POST /auth</code> 始终执行 <code>API_RATE_LIMIT_AUTH_TIMES</code> / <code>API_RATE_LIMIT_AUTH_SECONDS</code>（默认 <code>10</code> / <code>60</code>）的独立限流。将任一值设置为 <code>0</code> 或为 <code>/auth</code> 添加自定义规则即可覆盖或禁用它。该内置规则复用相同的 SlowAPI 后端（内存或 Redis/Valkey），因此在所有副本之间都能保持一致的限流行为。</p>
 <p>示例 YAML (挂载在 <code>/etc/bunkerweb/api.yml</code>):</p>
 <p><code>yaml
 API_RATE_LIMIT_ENABLED: yes

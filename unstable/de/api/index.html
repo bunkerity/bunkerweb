@@ -1790,6 +1790,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 <li>Speicher-Backend: In-Memory oder Redis/Valkey, wenn <code>USE_REDIS=yes</code> und <code>REDIS_*</code>-Variablen bereitgestellt werden (Sentinel unterstützt)</li>
 <li>Header: <code>API_RATE_LIMIT_HEADERS_ENABLED</code> (Standard: <code>yes</code>)</li>
 </ul>
+<p><code>POST /auth</code> erzwingt immer sein eigenes Limit von <code>API_RATE_LIMIT_AUTH_TIMES</code> pro <code>API_RATE_LIMIT_AUTH_SECONDS</code> (Standard <code>10</code> pro <code>60</code>). Setzen Sie einen der Werte auf <code>0</code> oder fügen Sie eine benutzerdefinierte <code>/auth</code>-Regel hinzu, um dies zu überschreiben oder zu deaktivieren. Diese integrierte Regel läuft über dasselbe SlowAPI-Backend (Memory oder Redis/Valkey), sodass das Limit konsistent über alle Replikate hinweg erzwungen wird.</p>
 <p>Beispiel YAML (gemountet unter <code>/etc/bunkerweb/api.yml</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">API_RATE_LIMIT_ENABLED</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span>
 <span class="nt">API_RATE_LIMIT_DEFAULTS</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;200/minute&quot;</span><span class="p p-Indicator">]</span>

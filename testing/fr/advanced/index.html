@@ -1220,6 +1220,57 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#load-balancer-pro" class="md-nav__link">
+    <span class="md-ellipsis">
+      Load Balancer (PRO)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Load Balancer (PRO)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fonctionnalites_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fonctionnalités
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demarrage-rapide" class="md-nav__link">
+    <span class="md-ellipsis">
+      Démarrage rapide
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conseils-dutilisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conseils d'utilisation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1422,7 +1473,7 @@
 </div>
 <p>BunkerWeb prend en fait en charge deux méthodes pour récupérer l'adresse IP réelle du client :</p>
 <ul>
-<li>À l'aide de l'icône <code>PROXY protocol</code></li>
+<li>À l'aide du <code>PROXY protocol</code></li>
 <li>À l'aide d'un en-tête HTTP tel que <code>X-Forwarded-For</code></li>
 </ul>
 <p>Les paramètres suivants peuvent être utilisés :</p>
@@ -1438,8 +1489,8 @@
 <div class="tabbed-block">
 <p>Nous supposerons ce qui suit concernant les équilibreurs de charge ou les proxies inverses (vous devrez mettre à jour les paramètres en fonction de votre configuration) :</p>
 <ul>
-<li>Ils utilisent l' <code>X-Forwarded-For</code> en-tête pour définir l'adresse IP réelle</li>
-<li>Ils ont des adresses IP dans les <code>1.2.3.0/24</code> réseaux<code>100.64.0.0/10</code> et</li>
+<li>Ils utilisent l'en-tête <code>X-Forwarded-For</code> pour définir l'adresse IP réelle</li>
+<li>Ils ont des adresses IP dans les réseaux <code>1.2.3.0/24</code> et <code>100.64.0.0/10</code></li>
 </ul>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:7"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><input id="__tabbed_2_6" name="__tabbed_2" type="radio" /><input id="__tabbed_2_7" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Interface utilisateur Web</label><label for="__tabbed_2_2">Linux</label><label for="__tabbed_2_3">Tout-en-un</label><label for="__tabbed_2_4">Docker</label><label for="__tabbed_2_5">Docker autoconf</label><label for="__tabbed_2_6">Kubernetes</label><label for="__tabbed_2_7">Swarm</label></div>
 <div class="tabbed-content">
@@ -3940,6 +3991,197 @@ USE_IPV6=yes
 <figcaption>Blacklist - URI</figcaption>
 </figure>
 </div>
+<h2 id="load-balancer-pro">Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)</h2>
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+<p>Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec garde-fous. Déclarez des pools upstream une fois, pointez votre proxy inverse vers eux, et laissez le équilibrage conscient de la santé garder les utilisateurs sur des backends réactifs. Le mode sticky cookie émet automatiquement un cookie <code>BWLBID</code> pour que les sessions restent ancrées où vous le souhaitez.</p>
+<h4 id="fonctionnalites_3">Fonctionnalités</h4>
+<ul>
+<li>Blocs par upstream : nommez les pools et réutilisez-les sur les hôtes proxy inverse.</li>
+<li>Équilibrage flexible : round-robin par défaut, ou sticky via IP ou cookie signé.</li>
+<li>Cibles intelligentes : résolution DNS optionnelle pour les backends hostname plus réglage keepalive.</li>
+<li>Santé intégrée : sondes HTTP/HTTPS avec chemins personnalisés, intervalles, codes de statut et vérifications SSL.</li>
+<li>Continuité de session : cookie <code>BWLBID</code> automatique lorsque le mode sticky-cookie est activé.</li>
+</ul>
+<h4 id="configuration_1">Configuration</h4>
+<p><strong>Définition upstream</strong></p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Défaut</th>
+<th>Contexte</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_NAME</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>Identifiant upstream (référencé par <code>REVERSE_PROXY_HOST</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_SERVERS</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>Liste séparée par espaces d'adresses backend (ex. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_MODE</code></td>
+<td><code>round-robin</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Stratégie d'équilibrage (<code>round-robin</code> ou <code>sticky</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_STICKY_METHOD</code></td>
+<td><code>ip</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Méthode sticky (<code>ip</code> ou <code>cookie</code>). Mode cookie émet <code>BWLBID</code>.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_RESOLVE</code></td>
+<td><code>no</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Résoudre les hostnames upstream via DNS.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>Connexions keepalive par worker.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT</code></td>
+<td><code>60s</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Timeout inactif pour les connexions keepalive.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_UPSTREAM_KEEPALIVE_TIME</code></td>
+<td><code>1h</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Durée de vie maximale pour les connexions keepalive.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Vérifications de santé</strong></p>
+<table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Défaut</th>
+<th>Contexte</th>
+<th>Multiple</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_DICT_SIZE</code></td>
+<td><code>10m</code></td>
+<td>global</td>
+<td>non</td>
+<td>Taille du dictionnaire partagé pour l'état des vérifications de santé.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_URL</code></td>
+<td><code>/status</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Chemin à sonder sur chaque backend.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_INTERVAL</code></td>
+<td><code>2000</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Intervalle entre vérifications (ms).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TIMEOUT</code></td>
+<td><code>1000</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Timeout par vérification (ms).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_FALL</code></td>
+<td><code>3</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Échecs consécutifs avant de marquer comme down.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_RISE</code></td>
+<td><code>1</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Succès consécutifs avant de marquer comme up.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_VALID_STATUSES</code></td>
+<td><code>200</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Liste séparée par espaces de codes de statut HTTP valides.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_CONCURRENCY</code></td>
+<td><code>10</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Maximum de sondes concurrentes.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_TYPE</code></td>
+<td><code>http</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Protocole pour les vérifications de santé (<code>http</code> ou <code>https</code>).</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_SSL_VERIFY</code></td>
+<td><code>yes</code></td>
+<td>global</td>
+<td>oui</td>
+<td>Vérifier les certificats TLS lors des vérifications HTTPS.</td>
+</tr>
+<tr>
+<td><code>LOADBALANCER_HEALTHCHECK_HOST</code></td>
+<td></td>
+<td>global</td>
+<td>oui</td>
+<td>Remplacer l'en-tête Host pendant les vérifications (utile pour SNI).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="demarrage-rapide">Démarrage rapide</h4>
+<ol>
+<li>Définissez votre pool : définissez <code>LOADBALANCER_UPSTREAM_NAME=my-app</code> et listez les cibles dans <code>LOADBALANCER_UPSTREAM_SERVERS</code> (ex. <code>10.0.0.1:8080 10.0.0.2:8080</code>).</li>
+<li>Dirigez le trafic : définissez <code>REVERSE_PROXY_HOST=http://my-app</code> pour que le proxy inverse utilise l'upstream nommé.</li>
+<li>Choisissez un mode : gardez round-robin par défaut ou définissez <code>LOADBALANCER_UPSTREAM_MODE=sticky</code> avec <code>LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie</code> ou <code>ip</code>.</li>
+<li>Ajoutez de la santé : gardez <code>/status</code> ou ajustez les URLs, intervalles et statuts valides pour refléter le comportement de votre app.</li>
+<li>Réglez les connexions : configurez les valeurs keepalive pour réutiliser les connexions backend et réduire la surcharge de handshake.</li>
+</ol>
+<h4 id="conseils-dutilisation">Conseils d'utilisation</h4>
+<ul>
+<li>Faites correspondre <code>REVERSE_PROXY_HOST</code> à <code>LOADBALANCER_UPSTREAM_NAME</code> lors de l'utilisation de cookies sticky pour que les clients s'épinglent au bon pool.</li>
+<li>Gardez les intervalles et timeouts des vérifications de santé équilibrés pour éviter les oscillations sur les liens lents.</li>
+<li>Activez <code>LOADBALANCER_UPSTREAM_RESOLVE</code> lorsque vous pointez vers des hostnames qui peuvent changer via DNS.</li>
+<li>Réglez les valeurs keepalive pour refléter la capacité backend et les objectifs de réutilisation des connexions.</li>
+</ul>
 
 
 
