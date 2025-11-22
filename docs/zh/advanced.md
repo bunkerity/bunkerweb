@@ -2211,42 +2211,86 @@ Prometheus 导出器插件在您的 BunkerWeb 实例上添加了一个 [Promethe
 STREAM 支持 :x:
 
 !!! warning "需要监控插件"
-    此插件需要安装并启用监控专业版插件，并且 `USE_MONITORING` 设置为 `yes`。
+    只有在启用 Monitoring Pro 插件后（`USE_MONITORING=yes` 且各实例可访问）才能生成报告。
 
-报告插件提供了一个全面的解决方案，用于定期报告 BunkerWeb 的重要数据，包括全局统计、攻击、封禁、请求、原因和 AS 信息。它提供了广泛的功能，包括自动报告创建、自定义选项以及与监控专业版插件的无缝集成。使用报告插件，您可以轻松生成和管理报告，以监控应用程序的性能和安全性。
+报告插件将 Monitoring 数据转换为定期报告。每份报告包含实例/服务计数、攻击与封禁总数及环比变化、请求健康度，以及排名前 3 的 IP、ASN、原因和国家。输出格式：webhook 使用 Markdown（自动兼容 Discord/Slack），邮件使用 HTML。
 
-**功能列表**
+**你将得到什么**
 
-- 定期报告 BunkerWeb 的重要数据，包括全局统计、攻击、封禁、请求、原因和 AS 信息。
-- 与监控专业版插件集成，实现无缝集成和增强的报告功能。
-- 支持 webhooks（经典、Discord 和 Slack）以进行实时通知。
-- 支持 SMTP 以进行电子邮件通知。
-- 用于自定义和灵活性的配置选项。
+- 聚合来自所有响应实例的数据，并在实例无法响应监控 API 时给出警告。
+- 按周期（日/周/月）对比上一期的趋势变化。
+- 最高的 IP/ASN/国家/原因榜单，便于快速处置。
+- 双重投递：webhook 的 Markdown 负载与 SMTP 的富文本邮件。
+
+**前提条件与调度**
+
+- 必须启用且可访问 Monitoring。
+- 至少启用一种投递方式（`USE_REPORTING_WEBHOOK=yes` 和/或 `USE_REPORTING_SMTP=yes`）。
+- 任务每日运行，但每个周期仅发送一次。首次运行只记录时间戳，下一次才会发送第一份报告。
+
+**投递目标**
+
+- Webhook：支持通用 URL，并自动识别 Discord 与 Slack。设置 `USE_REPORTING_WEBHOOK=yes`，并在 `REPORTING_WEBHOOK_URLS` 中以空格列出 URL。负载为 Markdown；Slack 会自动使用 `mrkdwn`。
+- 邮件（SMTP）：设置 `USE_REPORTING_SMTP=yes`，并提供 SMTP 主机/端口、发件人邮箱及收件人列表。支持 SSL（`REPORTING_SMTP_SSL=SSL`）和 TLS（`REPORTING_SMTP_SSL=TLS`）；未提供凭据时将尝试无认证发送。
+
+**常见配置示例**
+
+=== "Linux"
+
+    ```conf
+    USE_MONITORING=yes
+    USE_REPORTING_WEBHOOK=yes
+    REPORTING_WEBHOOK_URLS=https://discord.com/api/webhooks/... https://hooks.slack.com/services/...
+    REPORTING_SCHEDULE=weekly
+    # 可选邮件发送
+    USE_REPORTING_SMTP=yes
+    REPORTING_SMTP_HOST=smtp.example.com
+    REPORTING_SMTP_PORT=587
+    REPORTING_SMTP_FROM_EMAIL=reports@example.com
+    REPORTING_SMTP_FROM_USER=reports@example.com
+    REPORTING_SMTP_FROM_PASSWORD=change-me
+    REPORTING_SMTP_EMAILS=secops@example.com sre@example.com
+    REPORTING_SMTP_SSL=TLS
+    ```
+
+=== "Docker / All-in-one"
+
+    ```yaml
+    environment:
+      USE_MONITORING: "yes"
+      USE_REPORTING_WEBHOOK: "yes"
+      REPORTING_WEBHOOK_URLS: "https://discord.com/api/webhooks/... https://hooks.slack.com/services/..."
+      REPORTING_SCHEDULE: "daily"
+      USE_REPORTING_SMTP: "yes"
+      REPORTING_SMTP_HOST: "smtp.example.com"
+      REPORTING_SMTP_PORT: "465"
+      REPORTING_SMTP_FROM_EMAIL: "reports@example.com"
+      REPORTING_SMTP_FROM_PASSWORD: "change-me"
+      REPORTING_SMTP_EMAILS: "alerts@example.com"
+      REPORTING_SMTP_SSL: "SSL"
+    ```
 
 **设置列表**
 
-| 设置                           | 默认               | 上下文 | 描述                                                                         |
-| ------------------------------ | ------------------ | ------ | ---------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | 全局   | 启用通过电子邮件发送报告。                                                   |
-| `USE_REPORTING_WEBHOOK`        | `no`               | 全局   | 启用通过 webhook 发送报告。                                                  |
-| `REPORTING_SCHEDULE`           | `weekly`           | 全局   | 发送报告的频率。                                                             |
-| `REPORTING_WEBHOOK_URLS`       |                    | 全局   | 用于接收 Markdown 格式报告的 webhook URL 列表（以空格分隔）。                |
-| `REPORTING_SMTP_EMAILS`        |                    | 全局   | 用于接收 HTML 格式报告的电子邮件地址列表（以空格分隔）。                     |
-| `REPORTING_SMTP_HOST`          |                    | 全局   | 用于 SMTP 发送的主机服务器。                                                 |
-| `REPORTING_SMTP_PORT`          | `465`              | 全局   | 用于 SMTP 的端口。请注意，根据连接类型有不同的标准（SSL = 465，TLS = 587）。 |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | 全局   | 用作发件人的电子邮件地址。请注意，此电子邮件地址必须禁用 2FA。               |
-| `REPORTING_SMTP_FROM_USER`     |                    | 全局   | 通过发件人电子邮件地址发送的用户身份验证值。                                 |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | 全局   | 通过发件人电子邮件地址发送的密码身份验证值。                                 |
-| `REPORTING_SMTP_SSL`           | `SSL`              | 全局   | 确定是否为 SMTP 使用安全连接。                                               |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | 全局   | 电子邮件的主题行。                                                           |
+| 设置                           | 默认               | 上下文 | 描述                                                                                 |
+| ------------------------------ | ------------------ | ------ | ------------------------------------------------------------------------------------ |
+| `USE_REPORTING_SMTP`           | `no`               | 全局   | 启用通过邮件发送报告（HTML）。                                                       |
+| `USE_REPORTING_WEBHOOK`        | `no`               | 全局   | 启用通过 webhook 发送报告（Markdown）。                                              |
+| `REPORTING_SCHEDULE`           | `weekly`           | 全局   | 报告周期：`daily`、`weekly` 或 `monthly`。                                           |
+| `REPORTING_WEBHOOK_URLS`       |                    | 全局   | 以空格分隔的 webhook URL；可自动识别 Discord 与 Slack。                              |
+| `REPORTING_SMTP_EMAILS`        |                    | 全局   | 以空格分隔的收件人列表。                                                             |
+| `REPORTING_SMTP_HOST`          |                    | 全局   | SMTP 服务器主机名或 IP。                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | 全局   | SMTP 端口。SSL 用 `465`，TLS 用 `587`。                                              |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | 全局   | 发件人地址（如供应商要求请禁用 2FA）。                                               |
+| `REPORTING_SMTP_FROM_USER`     |                    | 全局   | SMTP 用户名（若只提供密码则回退为发件人地址）。                                      |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | 全局   | SMTP 密码。                                                                          |
+| `REPORTING_SMTP_SSL`           | `SSL`              | 全局   | 连接安全：`no`、`SSL` 或 `TLS`。                                                     |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | 全局   | 邮件主题。                                                                           |
 
 !!! info "信息和行为"
-    - 如果 `USE_REPORTING_SMTP` 设置为 `yes`，则必须设置 `REPORTING_SMTP_EMAILS`。
-    - 如果 `USE_REPORTING_WEBHOOK` 设置为 `yes`，则必须设置 `REPORTING_WEBHOOK_URLS`。
-    - `REPORTING_SCHEDULE` 接受的值为 `daily`、`weekly` 和 `monthly`。
-    - 如果未设置 `REPORTING_SMTP_FROM_USER` 和 `REPORTING_SMTP_FROM_PASSWORD`，插件将尝试在没有身份验证的情况下发送电子邮件。
-    - 如果未设置 `REPORTING_SMTP_FROM_USER` 但设置了 `REPORTING_SMTP_FROM_PASSWORD`，插件将使用 `REPORTING_SMTP_FROM_EMAIL` 作为用户名。
-    - 如果作业失败，插件将在下一次执行中重试发送报告。
+    - 开启 SMTP 时必须填写 `REPORTING_SMTP_EMAILS`；开启 webhook 时必须填写 `REPORTING_WEBHOOK_URLS`。
+    - 若 webhook 和 SMTP 都失败，将在下一个计划任务重试。
+    - HTML 与 Markdown 模板位于 `reporting/files/`，修改时请保留占位符。
 
 ### 备份和恢复
 

@@ -2226,28 +2226,25 @@ Le plugin Reporting fournit une solution complète pour la communication réguli
 
 **Liste des paramètres**
 
-| Réglage                        | Faire défaut       | Contexte | Description                                                                                                                     |
-| ------------------------------ | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_REPORTING_SMTP`           | `no`               | global   | Activez l'envoi du rapport par e-mail.                                                                                          |
-| `USE_REPORTING_WEBHOOK`        | `no`               | global   | Activez l'envoi du rapport via le webhook.                                                                                      |
-| `REPORTING_SCHEDULE`           | `weekly`           | global   | La fréquence à laquelle les rapports sont envoyés.                                                                              |
-| `REPORTING_WEBHOOK_URLS`       |                    | global   | Liste des URL de webhook pour recevoir le rapport en Markdown (séparées par des espaces).                                       |
-| `REPORTING_SMTP_EMAILS`        |                    | global   | Liste des adresses e-mail pour recevoir le rapport au format HTML (séparées par des espaces).                                   |
-| `REPORTING_SMTP_HOST`          |                    | global   | Serveur hôte utilisé pour l'envoi SMTP.                                                                                         |
-| `REPORTING_SMTP_PORT`          | `465`              | global   | Port utilisé pour SMTP. Veuillez noter qu'il existe différentes normes en fonction du type de connexion (SSL = 465, TLS = 587). |
-| `REPORTING_SMTP_FROM_EMAIL`    |                    | global   | L'adresse e-mail utilisée comme expéditeur. Notez que 2FA doit être désactivé pour cette adresse e-mail.                        |
-| `REPORTING_SMTP_FROM_USER`     |                    | global   | Valeur d'authentification de l'utilisateur pour l'envoi via l'adresse e-mail de l'expéditeur.                                   |
-| `REPORTING_SMTP_FROM_PASSWORD` |                    | global   | La valeur d'authentification par mot de passe pour l'envoi via l'adresse e-mail de l'expéditeur.                                |
-| `REPORTING_SMTP_SSL`           | `SSL`              | global   | Déterminez s'il faut ou non utiliser une connexion sécurisée pour SMTP.                                                         |
-| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global   | La ligne d'objet de l'e-mail.                                                                                                   |
+| Réglage                        | Par défaut         | Contexte | Description                                                                                                   |
+| ------------------------------ | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `USE_REPORTING_SMTP`           | `no`               | global   | Activer l'envoi du rapport par e-mail (HTML).                                                                 |
+| `USE_REPORTING_WEBHOOK`        | `no`               | global   | Activer l'envoi du rapport via webhook (Markdown).                                                            |
+| `REPORTING_SCHEDULE`           | `weekly`           | global   | Cadence du rapport : `daily`, `weekly` ou `monthly`.                                                          |
+| `REPORTING_WEBHOOK_URLS`       |                    | global   | URLs de webhook séparées par des espaces ; Discord et Slack sont détectés automatiquement.                    |
+| `REPORTING_SMTP_EMAILS`        |                    | global   | Destinataires e-mail séparés par des espaces.                                                                 |
+| `REPORTING_SMTP_HOST`          |                    | global   | Nom d'hôte ou IP du serveur SMTP.                                                                             |
+| `REPORTING_SMTP_PORT`          | `465`              | global   | Port SMTP. Utilisez `465` pour SSL, `587` pour TLS.                                                           |
+| `REPORTING_SMTP_FROM_EMAIL`    |                    | global   | Adresse de l'expéditeur (désactivez la 2FA si nécessaire).                                                    |
+| `REPORTING_SMTP_FROM_USER`     |                    | global   | Nom d'utilisateur SMTP (utilise l'adresse d'envoi si seul le mot de passe est fourni).                        |
+| `REPORTING_SMTP_FROM_PASSWORD` |                    | global   | Mot de passe SMTP.                                                                                            |
+| `REPORTING_SMTP_SSL`           | `SSL`              | global   | Sécurité de connexion : `no`, `SSL` ou `TLS`.                                                                 |
+| `REPORTING_SMTP_SUBJECT`       | `BunkerWeb Report` | global   | Objet des envois e-mail.                                                                                      |
 
 !!! info "Information et comportement"
-    - cas `USE_REPORTING_SMTP` est défini sur `yes`, le paramètre `REPORTING_SMTP_EMAILS` doit être défini.
-    - cas `USE_REPORTING_WEBHOOK` est défini sur `yes`, le paramètre `REPORTING_WEBHOOK_URLS` doit être défini.
-    - Les valeurs acceptées pour `REPORTING_SCHEDULE` sont `daily`, `weekly` et `monthly`.
-    - cas aucun `REPORTING_SMTP_FROM_USER` et `REPORTING_SMTP_FROM_PASSWORD` ne sont définis, le plugin essaiera d'envoyer l'e-mail sans authentification.
-    - cas `REPORTING_SMTP_FROM_USER` n'est pas défini mais `REPORTING_SMTP_FROM_PASSWORD` est défini, le plugin utilisera le `REPORTING_SMTP_FROM_EMAIL` comme nom d'utilisateur.
-    - En cas d'échec du travail, le plug-in réessaiera d'envoyer le rapport lors de la prochaine exécution.
+    - `REPORTING_SMTP_EMAILS` est requis quand l'envoi SMTP est activé ; `REPORTING_WEBHOOK_URLS` est requis quand les webhooks sont activés.
+    - Si les webhooks et SMTP échouent tous, une nouvelle tentative est effectuée lors de la prochaine exécution planifiée.
+    - Les modèles HTML et Markdown se trouvent dans `reporting/files/` ; personnalisez-les prudemment pour conserver les variables.
 
 ### Sauvegarde et restauration
 
