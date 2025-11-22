@@ -162,7 +162,7 @@ RUN umask 027
 RUN apk add --no-cache bash curl geoip grep libgcc libgd libmagic libpq libstdc++ libxml2 mariadb-client mariadb-connector-c openssl pcre postgresql-client python3 py3-pip sed sqlite tzdata unzip yajl supervisor
 
 # Fix CVEs
-RUN apk add --no-cache "libpq>=17.7-r0" "postgresql17-client>=17.7-r0" # CVE-2025-12817 CVE-2025-12818
+# There are no CVEs for the following packages
 
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 
