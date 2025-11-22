@@ -47,8 +47,8 @@ RUN apk add --no-cache bash unzip libgcc libstdc++ libpq openssl libmagic mariad
   adduser -h /usr/share/bunkerweb/scheduler -g scheduler -s /sbin/nologin -G scheduler -D -H -u 101 --disabled-password scheduler
 
 # Fix CVEs
-RUN apk add --no-cache "pcre2>=10.46-r0" # CVE-2025-58050
 RUN apk add --no-cache "libpq>=17.7-r0" "postgresql17-client>=17.7-r0" # CVE-2025-12817 CVE-2025-12818
+RUN apk add --no-cache "busybox>=1.37.0-r20" "busybox-binsh>=1.37.0-r20" "ssl_client>=1.37.0-r20" # CVE-2024-58251 CVE-2025-46394
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

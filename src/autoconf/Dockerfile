@@ -44,7 +44,7 @@ RUN apk add --no-cache bash tzdata && \
   adduser -h /usr/share/bunkerweb/autoconf -g autoconf -s /sbin/nologin -G autoconf -D -H -u 101 --disabled-password autoconf
 
 # Fix CVEs
-# There are no CVEs for the following packages
+RUN apk add --no-cache "busybox>=1.37.0-r20" "busybox-binsh>=1.37.0-r20" "ssl_client>=1.37.0-r20" # CVE-2024-58251 CVE-2025-46394
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 --chmod=550 /usr/share/bunkerweb /usr/share/bunkerweb

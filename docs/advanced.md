@@ -2666,3 +2666,65 @@ The Easy Resolve Plugin lets you quickly remediate false positives and recurring
   <figcaption>Blacklist - URI</figcaption>
 </figure>
 </div>
+
+## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+The Load Balancer Plugin turns BunkerWeb into a traffic director with guardrails. Declare upstream pools once, point your reverse proxy at them, and let health-aware balancing keep users on responsive backends. Sticky cookie mode issues a `BWLBID` cookie automatically so sessions stay anchored where you want them.
+
+#### Features
+
+- Per-upstream blocks: name pools and reuse them across reverse proxy hosts.
+- Flexible balancing: round-robin by default, or sticky via IP or signed cookie.
+- Smart targets: optional DNS resolution for hostname backends plus keepalive tuning.
+- Built-in health: HTTP/HTTPS probes with custom paths, intervals, status codes, and SSL checks.
+- Session continuity: automatic `BWLBID` cookie when sticky-cookie mode is enabled.
+
+#### Configuration
+
+**Upstream definition**
+
+| Setting                                   | Default       | Context | Multiple | Description                                                                     |
+| ----------------------------------------- | ------------- | ------- | -------- | ------------------------------------------------------------------------------- |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global  | yes      | Upstream identifier (referenced by `REVERSE_PROXY_HOST`).                       |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global  | yes      | Space-separated list of backend addresses (e.g. `10.0.0.1:8080 10.0.0.2:8080`). |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global  | yes      | Balancing strategy (`round-robin` or `sticky`).                                 |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global  | yes      | Sticky method (`ip` or `cookie`). Cookie mode issues `BWLBID`.                  |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global  | yes      | Resolve upstream hostnames via DNS.                                             |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global  | yes      | Keepalive connections per worker.                                               |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global  | yes      | Idle timeout for keepalive connections.                                         |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global  | yes      | Maximum lifetime for keepalive connections.                                     |
+
+**Healthchecks**
+
+| Setting                                   | Default   | Context | Multiple | Description                                          |
+| ----------------------------------------- | --------- | ------- | -------- | ---------------------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`     | global  | no       | Shared dictionary size for healthcheck state.        |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status` | global  | yes      | Path to probe on each backend.                       |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`    | global  | yes      | Interval between checks (ms).                        |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`    | global  | yes      | Timeout per check (ms).                              |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`       | global  | yes      | Consecutive failures before marking down.            |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`       | global  | yes      | Consecutive successes before marking up.             |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`     | global  | yes      | Space-separated list of valid HTTP status codes.     |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`      | global  | yes      | Maximum concurrent probes.                           |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`    | global  | yes      | Protocol for healthchecks (`http` or `https`).       |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global  | yes      | Verify TLS certificates when using HTTPS checks.     |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |           | global  | yes      | Override Host header during checks (useful for SNI). |
+
+#### Quick Start
+
+1. Define your pool: set `LOADBALANCER_UPSTREAM_NAME=my-app` and list targets in `LOADBALANCER_UPSTREAM_SERVERS` (e.g. `10.0.0.1:8080 10.0.0.2:8080`).
+2. Point traffic: set `REVERSE_PROXY_HOST=http://my-app` so the reverse proxy uses the named upstream.
+3. Pick a mode: keep default round-robin or set `LOADBALANCER_UPSTREAM_MODE=sticky` with `LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie` or `ip`.
+4. Add health: keep `/status` or adjust URLs, intervals, and valid statuses to mirror your app behavior.
+5. Tune connections: configure keepalive values to reuse backend connections and reduce handshake overhead.
+
+#### Usage Tips
+
+- Match `REVERSE_PROXY_HOST` to `LOADBALANCER_UPSTREAM_NAME` when using sticky cookies so clients pin to the right pool.
+- Keep healthcheck intervals and timeouts balanced to avoid flapping on slow links.
+- Enable `LOADBALANCER_UPSTREAM_RESOLVE` when pointing to hostnames that may change via DNS.
+- Tune keepalive values to mirror backend capacity and connection reuse goals.

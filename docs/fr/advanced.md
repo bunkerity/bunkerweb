@@ -27,7 +27,7 @@ Cette section se concentre uniquement sur les utilisations avancées et le régl
 
 BunkerWeb prend en fait en charge deux méthodes pour récupérer l'adresse IP réelle du client :
 
-- À l'aide de l'icône `PROXY protocol`
+- À l'aide du `PROXY protocol`
 - À l'aide d'un en-tête HTTP tel que `X-Forwarded-For`
 
 Les paramètres suivants peuvent être utilisés :
@@ -43,8 +43,8 @@ Vous trouverez plus de paramètres sur l'IP réelle dans la [section des fonctio
 
     Nous supposerons ce qui suit concernant les équilibreurs de charge ou les proxies inverses (vous devrez mettre à jour les paramètres en fonction de votre configuration) :
 
-    - Ils utilisent l' `X-Forwarded-For` en-tête pour définir l'adresse IP réelle
-    - Ils ont des adresses IP dans les `1.2.3.0/24` réseaux`100.64.0.0/10` et
+    - Ils utilisent l'en-tête `X-Forwarded-For` pour définir l'adresse IP réelle
+    - Ils ont des adresses IP dans les réseaux `1.2.3.0/24` et `100.64.0.0/10`
 
     === "Interface utilisateur Web"
 
@@ -2666,3 +2666,65 @@ Le plugin Easy Resolve vous permet de remédier rapidement aux faux positifs et 
   <figcaption>Blacklist - URI</figcaption>
 </figure>
 </div>
+
+## Load Balancer <img src='../assets/img/pro-icon.svg' alt='crow pro icon' height='24px' width='24px' style="transform : translateY(3px);"> (PRO)
+
+<p align="center">
+    <iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/cOVp0rAt5nw?si=iVhDio8o8S4F_uag" title="Load Balancer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+Le plugin Load Balancer transforme BunkerWeb en un directeur de trafic avec garde-fous. Déclarez des pools upstream une fois, pointez votre proxy inverse vers eux, et laissez le équilibrage conscient de la santé garder les utilisateurs sur des backends réactifs. Le mode sticky cookie émet automatiquement un cookie `BWLBID` pour que les sessions restent ancrées où vous le souhaitez.
+
+#### Fonctionnalités
+
+- Blocs par upstream : nommez les pools et réutilisez-les sur les hôtes proxy inverse.
+- Équilibrage flexible : round-robin par défaut, ou sticky via IP ou cookie signé.
+- Cibles intelligentes : résolution DNS optionnelle pour les backends hostname plus réglage keepalive.
+- Santé intégrée : sondes HTTP/HTTPS avec chemins personnalisés, intervalles, codes de statut et vérifications SSL.
+- Continuité de session : cookie `BWLBID` automatique lorsque le mode sticky-cookie est activé.
+
+#### Configuration
+
+**Définition upstream**
+
+| Paramètre                                 | Défaut        | Contexte | Multiple | Description                                                                       |
+| ----------------------------------------- | ------------- | -------- | -------- | --------------------------------------------------------------------------------- |
+| `LOADBALANCER_UPSTREAM_NAME`              |               | global   | oui      | Identifiant upstream (référencé par `REVERSE_PROXY_HOST`).                        |
+| `LOADBALANCER_UPSTREAM_SERVERS`           |               | global   | oui      | Liste séparée par espaces d'adresses backend (ex. `10.0.0.1:8080 10.0.0.2:8080`). |
+| `LOADBALANCER_UPSTREAM_MODE`              | `round-robin` | global   | oui      | Stratégie d'équilibrage (`round-robin` ou `sticky`).                              |
+| `LOADBALANCER_UPSTREAM_STICKY_METHOD`     | `ip`          | global   | oui      | Méthode sticky (`ip` ou `cookie`). Mode cookie émet `BWLBID`.                     |
+| `LOADBALANCER_UPSTREAM_RESOLVE`           | `no`          | global   | oui      | Résoudre les hostnames upstream via DNS.                                          |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE`         |               | global   | oui      | Connexions keepalive par worker.                                                  |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIMEOUT` | `60s`         | global   | oui      | Timeout inactif pour les connexions keepalive.                                    |
+| `LOADBALANCER_UPSTREAM_KEEPALIVE_TIME`    | `1h`          | global   | oui      | Durée de vie maximale pour les connexions keepalive.                              |
+
+**Vérifications de santé**
+
+| Paramètre                                 | Défaut    | Contexte | Multiple | Description                                                            |
+| ----------------------------------------- | --------- | -------- | -------- | ---------------------------------------------------------------------- |
+| `LOADBALANCER_HEALTHCHECK_DICT_SIZE`      | `10m`     | global   | non      | Taille du dictionnaire partagé pour l'état des vérifications de santé. |
+| `LOADBALANCER_HEALTHCHECK_URL`            | `/status` | global   | oui      | Chemin à sonder sur chaque backend.                                    |
+| `LOADBALANCER_HEALTHCHECK_INTERVAL`       | `2000`    | global   | oui      | Intervalle entre vérifications (ms).                                   |
+| `LOADBALANCER_HEALTHCHECK_TIMEOUT`        | `1000`    | global   | oui      | Timeout par vérification (ms).                                         |
+| `LOADBALANCER_HEALTHCHECK_FALL`           | `3`       | global   | oui      | Échecs consécutifs avant de marquer comme down.                        |
+| `LOADBALANCER_HEALTHCHECK_RISE`           | `1`       | global   | oui      | Succès consécutifs avant de marquer comme up.                          |
+| `LOADBALANCER_HEALTHCHECK_VALID_STATUSES` | `200`     | global   | oui      | Liste séparée par espaces de codes de statut HTTP valides.             |
+| `LOADBALANCER_HEALTHCHECK_CONCURRENCY`    | `10`      | global   | oui      | Maximum de sondes concurrentes.                                        |
+| `LOADBALANCER_HEALTHCHECK_TYPE`           | `http`    | global   | oui      | Protocole pour les vérifications de santé (`http` ou `https`).         |
+| `LOADBALANCER_HEALTHCHECK_SSL_VERIFY`     | `yes`     | global   | oui      | Vérifier les certificats TLS lors des vérifications HTTPS.             |
+| `LOADBALANCER_HEALTHCHECK_HOST`           |           | global   | oui      | Remplacer l'en-tête Host pendant les vérifications (utile pour SNI).   |
+
+#### Démarrage rapide
+
+1. Définissez votre pool : définissez `LOADBALANCER_UPSTREAM_NAME=my-app` et listez les cibles dans `LOADBALANCER_UPSTREAM_SERVERS` (ex. `10.0.0.1:8080 10.0.0.2:8080`).
+2. Dirigez le trafic : définissez `REVERSE_PROXY_HOST=http://my-app` pour que le proxy inverse utilise l'upstream nommé.
+3. Choisissez un mode : gardez round-robin par défaut ou définissez `LOADBALANCER_UPSTREAM_MODE=sticky` avec `LOADBALANCER_UPSTREAM_STICKY_METHOD=cookie` ou `ip`.
+4. Ajoutez de la santé : gardez `/status` ou ajustez les URLs, intervalles et statuts valides pour refléter le comportement de votre app.
+5. Réglez les connexions : configurez les valeurs keepalive pour réutiliser les connexions backend et réduire la surcharge de handshake.
+
+#### Conseils d'utilisation
+
+- Faites correspondre `REVERSE_PROXY_HOST` à `LOADBALANCER_UPSTREAM_NAME` lors de l'utilisation de cookies sticky pour que les clients s'épinglent au bon pool.
+- Gardez les intervalles et timeouts des vérifications de santé équilibrés pour éviter les oscillations sur les liens lents.
+- Activez `LOADBALANCER_UPSTREAM_RESOLVE` lorsque vous pointez vers des hostnames qui peuvent changer via DNS.
+- Réglez les valeurs keepalive pour refléter la capacité backend et les objectifs de réutilisation des connexions.
