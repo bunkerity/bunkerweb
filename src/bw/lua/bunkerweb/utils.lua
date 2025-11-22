@@ -422,6 +422,100 @@ utils.is_whitelisted = function(ctx)
 	return false
 end
 
+utils.is_ip_whitelisted = function(ip, server_name)
+	if not ip then
+		return nil, "ip is nil"
+	end
+	-- Allow caller to provide service name; otherwise use current server_name
+	if not server_name or server_name == "" then
+		server_name = var.server_name
+	end
+
+	-- Helper to check a specific service whitelist list
+	local function check_service(name)
+		if not name or name == "" then
+			return nil, "no service name"
+		end
+		-- Fast path: check whitelist cache for the service
+		local cache = require("bunkerweb.cachestore"):new(false)
+		local ok_cache, cached = cache:get("plugin_whitelist_" .. name .. "ip" .. ip)
+		if not ok_cache then
+			return nil, "can't check whitelist cache : " .. cached
+		end
+		if cached then
+			if cached ~= "ok" then
+				return true, cached
+			end
+			return false, "ok"
+		end
+
+		local lists, err = internalstore:get("plugin_whitelist_lists_" .. name, true)
+		if not lists then
+			return nil, "can't get whitelist lists : " .. err
+		end
+		if not lists["IP"] or #lists["IP"] == 0 then
+			return false, "ok"
+		end
+		local ipm, ipm_err = ipmatcher_new(lists["IP"])
+		if not ipm then
+			return nil, "can't instantiate ipmatcher : " .. ipm_err
+		end
+		local match, match_err = ipm:match(ip)
+		if match_err then
+			return nil, "can't check ip : " .. match_err
+		end
+		if match then
+			return true, "ip"
+		end
+		return false, "ok"
+	end
+
+	-- First try the current service (except default placeholder "_")
+	if server_name and server_name ~= "" and server_name ~= "_" then
+		local ok, info = check_service(server_name)
+		if ok ~= nil then
+			return ok, info
+		end
+	end
+
+	-- Fallback: iterate all configured services (covers default-server paths)
+	local variables, err = internalstore:get("variables", true)
+	if not variables then
+		return nil, "can't get variables : " .. err
+	end
+	local servers = variables["global"] and variables["global"]["SERVER_NAME"] or ""
+	for srv in servers:gmatch("%S+") do
+		local ok, info = check_service(srv)
+		if ok then
+			return true, info
+		end
+	end
+
+	-- Last resort: check global whitelist IPs directly (useful when no services matched)
+	local global_wl = variables["global"] and variables["global"]["WHITELIST_IP"] or ""
+	if global_wl ~= "" then
+		local networks = {}
+		for n in global_wl:gmatch("%S+") do
+			table.insert(networks, n)
+		end
+		if #networks > 0 then
+			local ipm, ipm_err = ipmatcher_new(networks)
+			if not ipm then
+				return nil, "can't instantiate ipmatcher : " .. (ipm_err or "unknown")
+			end
+			local match, match_err = ipm:match(ip)
+			if match_err then
+				return nil, "can't check ip : " .. match_err
+			end
+			if match then
+				return true, "ip"
+			end
+		end
+	end
+
+	return false, "ok"
+end
+
 utils.get_resolvers = function()
 	-- Get resolvers from internalstore if existing
 	local resolvers, _ = internalstore:get("misc_resolvers", true)
